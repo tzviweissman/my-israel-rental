@@ -29,6 +29,7 @@
  * is shown instead, because a small number on a young counter is not a
  * verdict.
  */
+import VisitBreakdown from './VisitBreakdown';
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
@@ -154,6 +155,9 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
   // Messages have their own badge; the card counts what needs an answer.
   const waitingRows = attention.filter((r) => r.n > 0 && r.key !== 'messages');
   const waiting = waitingRows.reduce((sum, r) => sum + r.n, 0);
+  // Until the counts arrive, say nothing: "0, nothing needs a reply" read as
+  // all clear for the seconds before 16 appeared (6 Nov 2026).
+  const summaryReady = summary.orders_new !== undefined;
   // The denominator. `live_since` is the day the caller's oldest listing
   // went live; `since` is the day of the first recorded event, which is
   // not the same thing - a listing live since June with its first visitor
@@ -203,8 +207,8 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
         <StatCard
           Icon={CalendarCheck}
           label={t('overview.waiting', 'Waiting on you')}
-          value={waiting}
-          sub={waiting === 0 ? t('overview.waitingNone', 'Nothing needs a reply') : t('overview.waitingAcross', { defaultValue: 'across {{n}} places, listed above', n: waitingRows.length })}
+          value={summaryReady ? waiting : '–'}
+          sub={!summaryReady ? '' : waiting === 0 ? t('overview.waitingNone', 'Nothing needs a reply') : t('overview.waitingAcross', { defaultValue: 'across {{n}} places, listed above', n: waitingRows.length })}
           testid="waiting"
           onClick={waitingRows.length ? () => onGoToTab(waitingRows[0].tab) : undefined}
           cta={t('overview.open', 'Open')}
@@ -212,23 +216,23 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
         <StatCard
           Icon={MessageCircle}
           label={t('overview.leads', { defaultValue: 'Leads, last {{n}} days', n: windowDays(leads?.days || 30) })}
-          value={leads ? leads.period : 0}
-          sub={leads ? (leads.since ? t('overview.allTime', { defaultValue: '{{n}} all time · counting since {{date}}', n: leads.total, date: formatDate(leads.since) }) : sinceLine(null)) : t('overview.leadsNa', 'Add a listing to start counting')}
+          value={!loaded ? '–' : leads ? leads.period : 0}
+          sub={!loaded ? '' : leads ? (leads.since ? t('overview.allTime', { defaultValue: '{{n}} all time · counting since {{date}}', n: leads.total, date: formatDate(leads.since) }) : sinceLine(null)) : t('overview.leadsNa', 'Add a listing to start counting')}
           chart={leads?.since ? <div className="max-w-xs"><ScanChart daily={leads.daily} testidPrefix="overview-leads" /></div> : null}
           testid="leads"
         />
         <StatCard
           Icon={Eye}
           label={t('overview.visitorsN', { defaultValue: 'Visitors, last {{n}} days', n: windowDays(30) })}
-          value={visitors ? visitors.period : 0}
-          sub={visitors ? sinceLine(visitors.since) : t('overview.leadsNa', 'Add a listing to start counting')}
+          value={!loaded ? '–' : visitors ? visitors.period : 0}
+          sub={!loaded ? '' : visitors ? sinceLine(visitors.since) : t('overview.leadsNa', 'Add a listing to start counting')}
           chart={visitors?.since ? <div className="max-w-xs"><ScanChart daily={visitors.daily} testidPrefix="overview-visitors" /></div> : null}
           testid="visitors"
         />
         <StatCard
           Icon={QrCode}
           label={t('overview.scans', 'QR & link scans')}
-          value={scans ? scans.total_scans : 0}
+          value={!loaded ? '–' : scans ? scans.total_scans : 0}
           sub={
             !scans ? '' : scans.links.length === 0
               ? t('overview.noLinks', 'No share links yet')
@@ -238,7 +242,7 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
           }
           chart={scans && scans.total_scans > 0 ? <div className="max-w-xs"><ScanChart daily={scans.daily} testidPrefix="overview-scans" /></div> : null}
           testid="scans"
-          onClick={isPropertyLister ? () => onGoToTab('properties') : showGigTabs ? () => onGoToTab('my-businesses') : undefined}
+          onClick={isPropertyLister || showGigTabs ? () => onGoToTab('advertising') : undefined}
           cta={t('overview.share', 'Share')}
         />
       </div>
@@ -251,6 +255,8 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
           <SummaryTab API={API} token={token} embedded />
         </div>
       )}
+
+      <VisitBreakdown API={API} token={token} />
 
       {/* The same for rentals: bookings, nights, how full, visitors (RentalSummary). */}
       {isPropertyLister && <RentalSummary API={API} token={token} />}

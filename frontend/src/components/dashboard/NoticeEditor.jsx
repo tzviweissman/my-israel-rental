@@ -3,19 +3,31 @@
  * backend businesses.py Notice). One line, optional dates; the preview
  * shows it at once, whatever its dates.
  */
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const box = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
 const boxStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 
+// The business card's "Notice on my page" opens the page editor at this box.
+let wanted = false;
+export const askForNotice = () => { wanted = true; };
+export const noticeAsked = () => wanted;
+
 export default function NoticeEditor({ notice, onChange }) {
   const { t } = useTranslation();
+  const box_ = useRef(null);
+  useEffect(() => {
+    if (!wanted) return;
+    wanted = false;
+    box_.current?.scrollIntoView({ block: 'center' });
+    box_.current?.querySelector('input')?.focus({ preventScroll: true });
+  }, []);
   const n = notice || { text: '', starts_on: '', ends_on: '' };
   const set = (k) => (e) => onChange({ ...n, [k]: e.target.value });
   const badDates = n.starts_on && n.ends_on && n.ends_on < n.starts_on;
   return (
-    <section className="pt-5 border-t" style={{ borderColor: 'var(--brand-border)' }} data-testid="notice-editor">
+    <section ref={box_} className="pt-5 border-t" style={{ borderColor: 'var(--brand-border)' }} data-testid="notice-editor">
       <h3 className="text-sm font-bold" style={{ color: 'var(--ink)' }}>{t('notice.title', 'Notice at the top')}</h3>
       <p className="text-xs mt-0.5 mb-2" style={{ color: 'var(--brand-muted)' }}>
         {t('notice.hint', 'One line customers see first, on your page and your order page. For example: Closed for Sukkot, back on 20 October.')}

@@ -46,7 +46,7 @@ import os
 import re
 import secrets
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any, Optional
 from zoneinfo import ZoneInfo
 
@@ -472,7 +472,10 @@ async def set_order_status(order_id: str, payload: StatusIn, user=Depends(verify
     not allow, with the current state in the message so the client can
     refresh rather than retry."""
     order = await _owned_order(order_id, user)
-    return await _transition(order, payload, by=user["user_id"])
+    out = await _transition(order, payload, by=user["user_id"])
+    from .order_texts import customer_told_of_decision
+    await customer_told_of_decision(order, payload.status)
+    return out
 
 
 async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str, contact: bool = True) -> dict[str, Any]:
@@ -656,7 +659,10 @@ async def staff_set_status(token: str, order_id: str, payload: StatusIn, request
     order = await db.store_orders.find_one({"_id": order_id, "business_id": biz["_id"]})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    return await _transition(order, payload, by="staff", contact=False)
+    out = await _transition(order, payload, by="staff", contact=False)
+    from .order_texts import customer_told_of_decision
+    await customer_told_of_decision(order, payload.status)
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -665,7 +671,7 @@ async def staff_set_status(token: str, order_id: str, payload: StatusIn, request
 
 _CSV_COLUMNS = (
     "date", "time", "customer", "phone", "items", "fulfilment", "address",
-    "total", "currency", "status", "notes", "source", "created_at",
+    "total", "currency", "status", "notes", "source", "created_at", "discount_code", "discount",
 )
 
 
@@ -708,7 +714,8 @@ def orders_to_csv(orders: list[dict[str, Any]]) -> str:
             o.get("items") or "", o.get("fulfilment") or "", o.get("address") or "",
             _csv_number(o.get("total")), o.get("currency") or "ILS",
             o.get("status") or "", o.get("notes") or "", o.get("source") or "",
-            o.get("created_at") or "",
+            o.get("created_at") or "", (o.get("discount") or {}).get("code") or "",
+            _csv_number((o.get("discount") or {}).get("amount")),
         )])
     return buf.getvalue()
 
@@ -1806,13 +1813,6 @@ class OrderSettingsIn(BaseModel):
     # type one in.
     max_per_day: Optional[int] = Field(None, ge=1, le=10_000)
     max_per_window: Optional[int] = Field(None, ge=1, le=10_000)
-    # Where new-order texts go when it is not the WhatsApp number (Tzvi, 5 Nov
-    # 2026: many businesses text on one number and WhatsApp on another).
-    # Empty: the WhatsApp number. Not sent at all: left as it was.
-    text_number: Optional[str] = Field(None, max_length=30)
-    # The switch (Tzvi, 6 Nov 2026): on, the business hears by text and its
-    # customers are not also sent to WhatsApp after ordering or booking.
-    text_on: Optional[bool] = None
 
     @field_validator("area_fees")
     @classmethod
@@ -1847,6 +1847,25 @@ def delivery_fee_for(st: dict[str, Any], city: Optional[str], goods: float) -> f
     return float(area if area is not None else (st.get("delivery_fee") or 0))
 
 
+def pause_of(biz: dict[str, Any]) -> Optional[dict[str, Any]]:
+    """Orders paused for a holiday (Tzvi, 6 Nov 2026; PauseOrders.jsx), in force or
+    still to come. None once its last day has passed: orders come back by themselves."""
+    p = (biz.get("order_settings") or {}).get("pause") or {}
+    if not p.get("on"):
+        return None
+    today = datetime.now(_IL_TZ).date().isoformat()
+    until = p.get("until")
+    if until and until < today:
+        return None
+    back_on = (datetime.strptime(until, "%Y-%m-%d").date() + timedelta(days=1)).isoformat() if until else None
+    return {"active": not p.get("from") or p["from"] <= today, "from": p.get("from"), "until": until,
+            "back_on": back_on, "note": p.get("note")}
+
+
+def _paused_on(pause: Optional[dict[str, Any]], day: str) -> bool:
+    return bool(pause) and (not pause["from"] or pause["from"] <= day[:10]) and (not pause["until"] or day[:10] <= pause["until"])
+
+
 def _settings_out(biz: dict[str, Any], store: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     st = biz.get("order_settings") or {}
     return {
@@ -1877,7 +1896,7 @@ async def _owner_settings_out(biz: dict[str, Any]) -> dict[str, Any]:
         {"whatsapp": 1, "provider_user_id": 1},
     )
     from .order_texts import texts_on
-    return {**_settings_out(biz, await _store_of(biz["_id"])), "text_on": texts_on(biz),
+    return {**_settings_out(biz, await _store_of(biz["_id"])), "pause": pause_of(biz), "text_on": texts_on(biz),
             "text_number": (biz.get("order_settings") or {}).get("text_number"),
             "whatsapp_number": (await gig_whatsapp_number(selling)) if selling else ""}
 
@@ -1894,13 +1913,7 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
     cutoffs = [c.model_dump() for c in sorted(payload.cutoffs, key=lambda c: c.for_day)]
     if payload.default_courier_user_id and not await _courier_entry(biz, payload.default_courier_user_id):
         raise HTTPException(status_code=400, detail="That courier has not accepted your invite yet")
-    text_number = (biz.get("order_settings") or {}).get("text_number")
-    if "text_number" in payload.model_fields_set:
-        text_number = (payload.text_number or "").strip() or None
-        if text_number and not normalize_whatsapp_number(text_number):
-            raise HTTPException(status_code=400, detail="Please enter a mobile number with the leading 0 or a country code")
-    from .order_texts import texts_on
-    text_on = payload.text_on if payload.text_on is not None else texts_on(biz)
+    old = biz.get("order_settings") or {}
     settings = {
         "windows": {
             "pickup": [w.model_dump() for w in sorted(payload.pickup_windows, key=lambda w: (w.weekday, w.start))],
@@ -1914,8 +1927,10 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         "free_over": payload.free_over,
         "max_per_day": payload.max_per_day,
         "max_per_window": payload.max_per_window,
-        "text_number": text_number,
-        "text_on": text_on,
+        # Saved by their own section, put_order_texts.
+        "text_number": old.get("text_number"),
+        "text_on": old.get("text_on"),
+        "pause": old.get("pause"),
         # An older client that does not send the switch keeps the old
         # meaning: delivery times set means delivery offered.
         "delivery_on": payload.delivery_on if payload.delivery_on is not None else bool(payload.delivery_windows),
@@ -1925,6 +1940,55 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         await _assign_unassigned(business_id)
     fresh = await db.businesses.find_one({"_id": business_id})
     return await _owner_settings_out(fresh)
+
+
+class PauseIn(BaseModel):
+    on: bool
+    # "from" is a keyword, so the field has another name in Python.
+    starts: Optional[date] = Field(None, alias="from")
+    until: Optional[date] = None
+    note: Optional[str] = Field(None, max_length=140)
+
+
+def _pause_out(biz: dict[str, Any]) -> dict[str, Any]:
+    p = (biz.get("order_settings") or {}).get("pause") or {}
+    return {"on": bool(p.get("on")), "from": p.get("from"), "until": p.get("until"), "note": p.get("note"), "state": pause_of(biz)}
+
+
+@router.get("/businesses/{business_id}/orders/pause")
+async def get_order_pause(business_id: str, user=Depends(verify_token)):
+    return _pause_out(await _owned_business(business_id, user))
+
+
+@router.put("/businesses/{business_id}/orders/pause")
+async def put_order_pause(business_id: str, payload: PauseIn, user=Depends(verify_token)):
+    biz = await _owned_business(business_id, user, None)
+    if payload.starts and payload.until and payload.until < payload.starts:
+        raise HTTPException(status_code=422, detail="The last day is before the first day")
+    pause = {"on": payload.on, "from": payload.starts.isoformat() if payload.starts else None,
+             "until": payload.until.isoformat() if payload.until else None, "note": (payload.note or "").strip() or None}
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"order_settings.pause": pause}})
+    return _pause_out(await db.businesses.find_one({"_id": business_id}))
+
+
+class OrderTextsIn(BaseModel):
+    # The switch (Tzvi, 6 Nov 2026): on, the business hears by text and its
+    # customers are not also sent to WhatsApp after ordering or booking.
+    text_on: bool
+    # Where the texts go when it is not the WhatsApp number (many businesses
+    # text on one number and WhatsApp on another). Empty: the WhatsApp number.
+    text_number: Optional[str] = Field(None, max_length=30)
+
+
+@router.put("/businesses/{business_id}/orders/texts")
+async def put_order_texts(business_id: str, payload: OrderTextsIn, user=Depends(verify_token)):
+    biz = await _owned_business(business_id, user, None)
+    number = (payload.text_number or "").strip() or None
+    if number and not normalize_whatsapp_number(number):
+        raise HTTPException(status_code=400, detail="Please enter a mobile number with the leading 0 or a country code")
+    settings = {**(biz.get("order_settings") or {}), "text_on": payload.text_on, "text_number": number if payload.text_on else None}
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"order_settings": settings}})
+    return await _owner_settings_out({**biz, "order_settings": settings})
 
 
 def past_cutoff(needed_by: str, cutoffs: list[dict[str, Any]], now: datetime) -> Optional[dict[str, Any]]:
@@ -2054,6 +2118,7 @@ async def generate_standing_orders(business_id: str, *, horizon_days: int = 7) -
     and the query is indexed. Returns how many were created."""
     today = datetime.now(_IL_TZ).date()
     created = 0
+    pause = pause_of(await db.businesses.find_one({"_id": business_id}, {"order_settings.pause": 1}) or {})
     async for sd in db.store_standing_orders.find({"business_id": business_id, "active": True}):
         wd = int(sd.get("weekday", 0))
         ahead = (wd - _js_weekday(today)) % 7
@@ -2066,6 +2131,8 @@ async def generate_standing_orders(business_id: str, *, horizon_days: int = 7) -
             ahead += 7
         if ahead > horizon_days:
             continue
+        if _paused_on(pause, occurrence.isoformat()):
+            continue  # Closed that day; next week's comes as usual.
         needed_by = occurrence.isoformat() + (f"T{sd['time']}" if sd.get("time") else "")
         now = _now_iso()
         doc = {
@@ -2270,6 +2337,7 @@ def _areas_out(biz: dict[str, Any]) -> list[dict[str, Any]]:
 @router.get("/order-form/{gig_id}")
 async def order_form(gig_id: str):
     from .order_texts import texts_on
+    from .discounts import has_codes
     gig, biz = await _store_for_ordering(gig_id)
     st = biz.get("order_settings") or {}
     return {
@@ -2291,6 +2359,8 @@ async def order_form(gig_id: str):
             # Closed for Shabbat and holidays (shabbat.py).
             "shabbat_closing": shabbat_public_view(biz),
         },
+        "has_codes": await has_codes(biz),
+        "paused": pause_of(biz),
         "custom_fields": public_fields(biz, "order"),
         "products": _products_for_order(gig),
         "settings": {
@@ -2367,6 +2437,9 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         raise HTTPException(status_code=400, detail="That day has passed")
     if payload.table is None and past_cutoff(payload.date, biz.get("order_cutoffs") or [], now):
         raise HTTPException(status_code=400, detail="Orders for that day have closed")
+    pause = pause_of(biz)
+    if pause and (pause["active"] or _paused_on(pause, payload.date)):
+        raise HTTPException(status_code=409, detail="Orders are paused for that day")
 
     if payload.fulfilment == "delivery" and not offers_delivery(st, biz, gig):
         raise HTTPException(status_code=400, detail="This store does pickup only")
@@ -2467,7 +2540,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     if payload.discount_code and payload.discount_code.strip() and lines:
         from .discounts import CodeRefused, evaluate, redeem
         try:
-            code_doc, off = await evaluate(biz["_id"], payload.discount_code, "orders", subtotal, payload.customer_phone)
+            code_doc, off = await evaluate(biz["_id"], payload.discount_code, "orders", subtotal, payload.customer_phone, currency)
         except CodeRefused as e:
             await _put_back(gig["_id"], stock_taken)
             raise HTTPException(status_code=400, detail=str(e)) from e
@@ -2561,6 +2634,8 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     from utils.bg_tasks import spawn
     spawn(alert_business_on_whatsapp(gig, biz.get("owner_user_id"), payload.customer_name,
                                      items_text, "/dashboard?tab=orders", "order", order_id=doc["_id"]))
+    from .order_texts import text_customer_received
+    spawn(text_customer_received(doc, biz))
     owner = await db.users.find_one({"id": biz["owner_user_id"]}, {"_id": 0, "email": 1})
     await _email(
         (owner or {}).get("email"), f"New order {order_no(doc)} from table {payload.table}" if payload.table else f"New order {order_no(doc)} from {payload.customer_name}",
@@ -2616,7 +2691,8 @@ async def my_orders(user=Depends(verify_token)):
 
 
 async def alert_business_on_whatsapp(gig: dict[str, Any], owner_user_id: Optional[str], customer_name: str,
-                                     summary: str, path: str, kind: str, order_id: Optional[str] = None) -> None:
+                                     summary: str, path: str, kind: str, order_id: Optional[str] = None,
+                                     booking_token: Optional[str] = None) -> None:
     """A new order or booking, to the business's own WhatsApp (the number
     on the listing). Never raises: the order is already saved, and the
     email and the bell have already gone out."""
@@ -2638,8 +2714,8 @@ async def alert_business_on_whatsapp(gig: dict[str, Any], owner_user_id: Optiona
         if not sent and kind == "order" and order_id:
             from .order_texts import text_owner_new_order
             await text_owner_new_order(order_id)
-        elif not sent and kind == "booking":
+        elif not sent and kind == "booking" and booking_token:
             from .order_texts import text_owner_new_booking
-            await text_owner_new_booking(gig, customer_name, summary, path, owner_user_id)
+            await text_owner_new_booking(gig, customer_name, summary, booking_token, owner_user_id)
     except Exception as exc:  # noqa: BLE001
         logger.warning("WhatsApp new-%s alert failed: %s", kind, type(exc).__name__)

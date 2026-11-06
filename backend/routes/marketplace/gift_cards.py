@@ -14,6 +14,10 @@ left stays on the card. At the counter the business deducts by hand.
 
 Valid five years from the day it is paid: Israel's consumer protection
 rules do not allow a gift card to expire sooner.
+
+A business sells its cards in shekels or dollars (Tzvi, 6 Nov 2026). Each card
+keeps the currency it was sold in, and is only spent on a total in that same
+currency: there is no exchange rate here, so $100 never comes off a shekel order.
 """
 from __future__ import annotations
 
@@ -31,18 +35,22 @@ from routes.deps import db, logger, verify_token
 from utils.payment_links import allowed_payment_links
 from utils.rate_limit import check_rate
 
-from .orders import _email, _esc, _frontend_url, _notify, _subject
+from .orders import _CURRENCY_SYMBOL, _email, _esc, _frontend_url, _notify, _subject
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 IL = ZoneInfo("Asia/Jerusalem")
 _CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 VALID_YEARS = 5
-DEFAULTS = {"on": False, "amounts": [100, 200, 300], "custom": True, "note": ""}
+DEFAULTS = {"on": False, "amounts": [100, 200, 300], "custom": True, "note": "", "currency": "ILS"}
 MIN_AMOUNT, MAX_AMOUNT = 20, 5000
 
 
 def settings_of(biz: dict[str, Any]) -> dict[str, Any]:
     return {**DEFAULTS, **(biz.get("gift_card_settings") or {})}
+
+
+def _sym(currency: Optional[str]) -> str:
+    return _CURRENCY_SYMBOL.get(currency or "ILS", "₪")
 
 
 def _now() -> str:
@@ -81,6 +89,7 @@ class SettingsIn(BaseModel):
     amounts: list[int] = Field(default_factory=lambda: [100, 200, 300], max_length=6)
     custom: bool = True
     note: str = Field("", max_length=400)
+    currency: Literal["ILS", "USD"] = "ILS"
 
     @field_validator("amounts")
     @classmethod
@@ -121,7 +130,7 @@ def _biz_out(biz: dict[str, Any]) -> dict[str, Any]:
 async def public_gift_cards(slug_or_id: str):
     biz = await _business(slug_or_id)
     st = settings_of(biz)
-    return {"business": _biz_out(biz), "amounts": st["amounts"], "custom": st["custom"], "note": st["note"],
+    return {"business": _biz_out(biz), "amounts": st["amounts"], "custom": st["custom"], "note": st["note"], "currency": st["currency"],
             "min": MIN_AMOUNT, "max": MAX_AMOUNT, "valid_years": VALID_YEARS,
             "payment_links": allowed_payment_links(biz.get("payment_links"))}
 
@@ -157,9 +166,10 @@ async def buy(slug_or_id: str, body: BuyIn, request: Request):
         raise HTTPException(status_code=400, detail="Please choose one of the amounts")
     if not body.for_self and not (body.to_name or "").strip():
         raise HTTPException(status_code=422, detail="Who is the gift card for?")
+    sym = _sym(st["currency"])
     card = {
         "_id": str(uuid.uuid4()), "business_id": biz["_id"], "owner_user_id": biz.get("owner_user_id"),
-        "amount": float(body.amount), "balance": float(body.amount), "currency": "ILS",
+        "amount": float(body.amount), "balance": float(body.amount), "currency": st["currency"],
         "buyer": {"name": body.buyer_name.strip(), "email": body.buyer_email, "phone": (body.buyer_phone or "").strip() or None},
         "to": None if body.for_self else {"name": (body.to_name or "").strip(), "email": body.to_email},
         "message": (body.message or "").strip() or None, "lang": body.lang,
@@ -169,11 +179,11 @@ async def buy(slug_or_id: str, body: BuyIn, request: Request):
     await db.gift_cards.insert_one(card)
     who = card["to"]["name"] if card["to"] else card["buyer"]["name"]
     await _notify(biz["owner_user_id"], type_="gift_card_bought",
-                  message=f"Gift card ordered: ₪{body.amount} from {card['buyer']['name']} for {who}. Mark it paid when you have the money.",
+                  message=f"Gift card ordered: {sym}{body.amount} from {card['buyer']['name']} for {who}. Mark it paid when you have the money.",
                   action_url="/dashboard?tab=discounts")
     owner = await db.users.find_one({"id": biz.get("owner_user_id")}, {"email": 1}) or {}
-    await _email(owner.get("email"), f"Gift card ordered: ₪{body.amount}",
-                 f"<p><b>{_esc(card['buyer']['name'])}</b> ordered a ₪{body.amount} gift card for <b>{_esc(who)}</b>.</p>"
+    await _email(owner.get("email"), f"Gift card ordered: {sym}{body.amount}",
+                 f"<p><b>{_esc(card['buyer']['name'])}</b> ordered a {sym}{body.amount} gift card for <b>{_esc(who)}</b>.</p>"
                  f"<p>Email {_esc(body.buyer_email)}" + (f", phone {_esc(card['buyer']['phone'])}" if card["buyer"]["phone"] else "") + ".</p>"
                  "<p>Once they have paid you, mark it paid in Discounts and the card goes out with its code.</p>",
                  tag="gift-card-ordered", button=("Open gift cards", "/dashboard?tab=discounts"))
@@ -187,10 +197,10 @@ async def buy(slug_or_id: str, body: BuyIn, request: Request):
     unsubscribed = await db.message_unsubscribes.find_one({"business_id": biz["_id"], "email": body.buyer_email}, {"_id": 1})
     if recent <= 1 and not unsubscribed:
         await _email(body.buyer_email, _subject(f"{name}: " + ("הזמנת כרטיס מתנה" if he else "your gift card order")),
-                     (f"<p>שלום {_esc(card['buyer']['name'])},</p><p>הזמנת כרטיס מתנה על סך ₪{body.amount} מ{_esc(name)}. "
+                     (f"<p>שלום {_esc(card['buyer']['name'])},</p><p>הזמנת כרטיס מתנה על סך {sym}{body.amount} מ{_esc(name)}. "
                       "העסק ייצור איתך קשר לגבי התשלום, ומיד אחריו הכרטיס יישלח עם הקוד.</p>"
                       if he else
-                      f"<p>Hi {_esc(card['buyer']['name'])},</p><p>You ordered a ₪{body.amount} gift card from {_esc(name)}. "
+                      f"<p>Hi {_esc(card['buyer']['name'])},</p><p>You ordered a {sym}{body.amount} gift card from {_esc(name)}. "
                       "Pay the business as shown on the page; as soon as they confirm it, the card is sent with its code.</p>")
                      + (f"<p>{_esc(st['note'])}</p>" if st["note"] else "")
                      + f'<p style="font-size:12px;color:#666;"><a href="{_esc(unsubscribe_url(biz["_id"], body.buyer_email))}" style="color:#666;">'
@@ -225,7 +235,7 @@ async def card_page(token: str, request: Request):
 
 def _card_out(c: dict[str, Any]) -> dict[str, Any]:
     return {"id": c["_id"], "code": c.get("code"), "status": c["status"] if c["status"] != "active" or _valid(c) else "expired",
-            "amount": c["amount"], "balance": c["balance"], "buyer": c["buyer"], "to": c.get("to"), "message": c.get("message"),
+            "amount": c["amount"], "balance": c["balance"], "currency": c.get("currency", "ILS"), "buyer": c["buyer"], "to": c.get("to"), "message": c.get("message"),
             "source": c.get("source"), "created_at": c.get("created_at"), "paid_at": c.get("paid_at"), "expires_on": c.get("expires_on"),
             "uses": c.get("uses", [])[-10:], "token": c.get("token")}
 
@@ -234,7 +244,12 @@ def _card_out(c: dict[str, Any]) -> dict[str, Any]:
 async def list_cards(business_id: str, user=Depends(verify_token)):
     biz = await _access(business_id, user)
     rows = await db.gift_cards.find({"business_id": business_id, "status": {"$ne": "cancelled"}}).sort("created_at", -1).to_list(500)
-    outstanding = round(sum(c["balance"] for c in rows if _valid(c)), 2)
+    # One figure per currency: cards keep what they were sold in, so a business that switched has both.
+    outstanding: dict[str, float] = {}
+    for c in rows:
+        if _valid(c):
+            cur = c.get("currency", "ILS")
+            outstanding[cur] = round(outstanding.get(cur, 0) + c["balance"], 2)
     return {"settings": settings_of(biz), "cards": [_card_out(c) for c in rows], "outstanding": outstanding}
 
 
@@ -257,6 +272,7 @@ async def _send_card(card: dict[str, Any], biz: dict[str, Any]) -> None:
     he = card.get("lang") == "he"
     name = (biz.get("name_he") if he and biz.get("name_he") else biz.get("name")) or ""
     link = f"{_frontend_url()}/gift/{card['token']}"
+    sym = _sym(card.get("currency"))
     to = card.get("to") or {}
     gift_for = to.get("name") or card["buyer"]["name"]
     head = (f"כרטיס מתנה מ{name}" if he else f"A gift card for {name}")
@@ -270,7 +286,7 @@ async def _send_card(card: dict[str, Any], biz: dict[str, Any]) -> None:
     until = date.fromisoformat(card["expires_on"]).strftime("%d.%m.%Y")
     box = (f"<div style='border:1px solid #E3E3E3;border-radius:14px;padding:18px;text-align:center;margin:0 0 16px;'>"
            f"<div style='font-size:13px;color:#666;'>{_esc(name)}</div>"
-           f"<div style='font-size:30px;font-weight:700;color:#111827;margin:6px 0;'>₪{card['balance']:g}</div>"
+           f"<div style='font-size:30px;font-weight:700;color:#111827;margin:6px 0;'>{sym}{card['balance']:g}</div>"
            f"<div style='font-size:18px;letter-spacing:2px;font-weight:700;color:#111827;' dir='ltr'>{_esc(card['code'])}</div>"
            f"<div style='font-size:12px;color:#666;margin-top:6px;'>"
            + (f"בתוקף עד {until}. מקלידים את הקוד בהזמנה או מציגים אותו בעסק." if he else
@@ -285,8 +301,8 @@ async def _send_card(card: dict[str, Any], biz: dict[str, Any]) -> None:
     if to and to.get("email") and card["buyer"].get("email") and card["buyer"]["email"] != to["email"]:
         await _email(card["buyer"]["email"],
                      ("כרטיס המתנה נשלח" if he else f"Your gift card was sent to {gift_for}"),
-                     (f"<p>{_esc(name)} אישר/ה את התשלום, וכרטיס המתנה על סך ₪{card['amount']:g} נשלח ל{_esc(gift_for)}.</p>" if he else
-                      f"<p>{_esc(name)} confirmed your payment, and the ₪{card['amount']:g} gift card is on its way to {_esc(gift_for)}.</p>"),
+                     (f"<p>{_esc(name)} אישר/ה את התשלום, וכרטיס המתנה על סך {sym}{card['amount']:g} נשלח ל{_esc(gift_for)}.</p>" if he else
+                      f"<p>{_esc(name)} confirmed your payment, and the {sym}{card['amount']:g} gift card is on its way to {_esc(gift_for)}.</p>"),
                      tag="gift-card-sent", button=("לכרטיס" if he else "See the card", link))
 
 
@@ -322,7 +338,7 @@ async def sell_at_counter(business_id: str, body: SellIn, user=Depends(verify_to
     biz = await _access(business_id, user)
     email = (body.email or "").strip().lower() or None
     card = {"_id": str(uuid.uuid4()), "business_id": business_id, "owner_user_id": biz.get("owner_user_id"),
-            "amount": float(body.amount), "balance": float(body.amount), "currency": "ILS",
+            "amount": float(body.amount), "balance": float(body.amount), "currency": settings_of(biz)["currency"],
             "buyer": {"name": (body.to_name or "").strip() or None, "email": email, "phone": None},
             "to": None, "message": None, "lang": body.lang, "status": "awaiting_payment", "code": None,
             "token": secrets.token_urlsafe(16), "source": "counter", "created_at": _now(), "paid_at": None,
@@ -343,12 +359,12 @@ async def use_at_counter(business_id: str, card_id: str, body: UseIn, user=Depen
     if not card or not _valid(card):
         raise HTTPException(status_code=400, detail="This gift card cannot be used")
     if not await _take(card, round(body.amount, 2), {"where": "counter", "note": body.note}):
-        raise HTTPException(status_code=400, detail=f"Only ₪{card['balance']:g} left on this card")
+        raise HTTPException(status_code=400, detail=f"Only {_sym(card.get('currency'))}{card['balance']:g} left on this card")
     return _card_out(await db.gift_cards.find_one({"_id": card_id}))
 
 
 async def _take(card: dict[str, Any], amount: float, info: dict[str, Any]) -> bool:
-    """Atomically, so two orders at once cannot both spend the last shekels."""
+    """Atomically, so two orders at once cannot both spend the last of a card."""
     res = await db.gift_cards.find_one_and_update(
         {"_id": card["_id"], "status": "active", "balance": {"$gte": amount}},
         {"$inc": {"balance": -amount}, "$push": {"uses": {"at": _now(), "amount": amount, **info}}},
@@ -376,7 +392,7 @@ async def as_code(business_id: str, code: str) -> Optional[dict[str, Any]]:
         raise CodeRefused("This gift card has expired")
     return {"_id": card["_id"], "code": card["code"], "kind": "amount", "value": float(card["balance"]),
             "applies_to": "both", "once_per_customer": False, "first_order_only": False, "active": True,
-            "gift_card": True, "used_by": []}
+            "gift_card": True, "currency": card.get("currency", "ILS"), "used_by": []}
 
 
 async def redeem(c: dict[str, Any], amount: float) -> bool:

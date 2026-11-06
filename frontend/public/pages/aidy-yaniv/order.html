@@ -8,11 +8,11 @@
 <meta name="description" content="Build your box of 4 or 8 homemade cinnamon buns: classic cinnamon, espresso, Lotus or chocolate. Pareve. Pick-up in Ramat Eshkol, Jerusalem. Send the order on WhatsApp.">
 <meta property="og:title" content="Build your box · Bun Intended">
 <meta property="og:description" content="Build your box of 4 or 8 homemade cinnamon buns and send the order on WhatsApp. Pareve. Ramat Eshkol, Jerusalem.">
-<meta property="og:image" content="/pages/aidy-yaniv/assets/boxes.webp?v=mw4kwsur">
+<meta property="og:image" content="/pages/aidy-yaniv/assets/boxes.webp?v=mw4o1k6v">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Allura&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/aidy-yaniv/site.css?v=mw4kwsur">
+<link rel="stylesheet" href="/pages/aidy-yaniv/site.css?v=mw4o1k6v">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -75,6 +75,7 @@
         </div>
         <p class="note" id="oerr" role="alert" style="color:#9b2c1d"></p>
 
+        <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
         <div class="total">
           <span class="mini" id="mini" aria-hidden="true"></span><span class="sum" id="sum" aria-live="polite">₪55<small data-mir-key="t-f6d5e7cd-0">4 buns</small></span>
           <a class="send" id="order" href="#" target="_blank" rel="noopener">
@@ -114,7 +115,7 @@
   <div class="wrap legal fbase"><span data-mir-key="t-38cd1851-0">© 2026 Bun Intended.</span><span data-mir-key="t-69529cb0-0">Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
 </footer>
 
-<script src="/pages/aidy-yaniv/site.js?v=mw4kwsur"></script>
+<script src="/pages/aidy-yaniv/site.js?v=mw4o1k6v"></script>
 <script>
 (function () {
   // Their price list, as printed on it.
@@ -144,11 +145,11 @@
   // faded at the edges so it sits on the paper with no box. The jug that dips
   // into the top of some clips fades out with the top edge.
   function bun(c) {
-    return '<img class="bunimg" src="/pages/aidy-yaniv/assets/bun-' + c + '.webp?v=mw4kwsur" alt="" width="720" height="720" loading="lazy" decoding="async">';
+    return '<img class="bunimg" src="/pages/aidy-yaniv/assets/bun-' + c + '.webp?v=mw4o1k6v" alt="" width="720" height="720" loading="lazy" decoding="async">';
   }
   function stage(c, anim) {
-    if (!anim) return '<img class="pour" src="/pages/aidy-yaniv/assets/pour-' + c + '-end.webp?v=mw4kwsur" alt="" width="640" height="640" decoding="async">';
-    return '<video class="pour" src="/pages/aidy-yaniv/assets/pour-' + c + '.mp4?v=mw4kwsur" poster="/pages/aidy-yaniv/assets/pour-bare.webp?v=mw4kwsur" width="640" height="640" muted playsinline autoplay preload="auto" aria-hidden="true"></video>';
+    if (!anim) return '<img class="pour" src="/pages/aidy-yaniv/assets/pour-' + c + '-end.webp?v=mw4o1k6v" alt="" width="640" height="640" decoding="async">';
+    return '<video class="pour" src="/pages/aidy-yaniv/assets/pour-' + c + '.mp4?v=mw4o1k6v" poster="/pages/aidy-yaniv/assets/pour-bare.webp?v=mw4o1k6v" width="640" height="640" muted playsinline autoplay preload="auto" aria-hidden="true"></video>';
   }
   // The first time the box comes into view, the chosen flavour is poured on,
   // so the pour is seen without having to pick anything first.
@@ -203,9 +204,10 @@
   }
 
   function paint() {
+    MirCode.refresh();
     document.querySelectorAll('[data-size]').forEach(function (b) { if (b.classList.contains('choice')) b.setAttribute('aria-pressed', String(+b.getAttribute('data-size') === state.size)); });
     renderFlavours();
-    var p = price(), n = names(), q = state.qty, w = was(), save = w > p ? (w - p) * q : 0, tot = p * q, buns = state.size * q;
+    var p = price(), n = names(), q = state.qty, w = was(), save = w > p ? (w - p) * q : 0, tot = MirCode.after(p * q), buns = state.size * q;
     var each = (tot / buns); each = each % 1 ? each.toFixed(2) : String(each);
     var chip = save ? '<span class="chip">' + Math.floor(save * 100 / (w * q)) + '% off</span>' : '';  /* percent off, rounded down (Tzvi, 22 Oct 2026) */
     $('#sum').innerHTML = '<span class="pp">₪' + tot + (save ? '<s>₪' + (w * q) + '</s>' : '') + '</span><small class="u">' + chip + '₪' + each + ' a bun</small><small class="n">' + (save ? chip : buns + ' buns') + '</small>';
@@ -241,7 +243,7 @@
     var when = d ? new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
     var what = q > 1 ? q + ' x ' + state.size + ' piece boxes' : (state.size === 8 ? 'an ' : 'a ') + state.size + ' piece box';
     var text = 'Hi Bun Intended, I\'d like to order ' + what + ': '
-      + (state.mix ? '2 flavour mix, ' + n.join(' and ') : n[0]) + ' (₪' + tot + (q > 1 ? ' for ' + q : '') + ').'
+      + (state.mix ? '2 flavour mix, ' + n.join(' and ') : n[0]) + ' (₪' + tot + (q > 1 ? ' for ' + q : '') + ').' + (MirCode.code() ? ' ' + MirCode.text(p * q) + '.' : '')
       + (when ? ' For ' + when + '.' : '') + (state.ful === 'delivery' ? ' Delivery to ' + ($('#addr').value.trim() || '(address)') + '.' : ' Pick-up in Ramat Eshkol.')
       + ($('#me').value.trim() ? ' Name: ' + $('#me').value.trim() + ', ' + $('#ph').value.trim() + '.' : '');
     waText = text;
@@ -278,6 +280,7 @@
   var today = new Date(); $('#date').min = today.toISOString().slice(0, 10);
 
   // The send button: "Opening WhatsApp", then a tick (21st Interactive Hover Button).
+  MirCode.mount({ api: API, gig: GIG, goods: function () { return price() * state.qty; }, phone: 'ph', onChange: paint });
   $('#order').addEventListener('click', function (e) {
     var a = e.currentTarget;
     if (a.getAttribute('aria-disabled') === 'true') { e.preventDefault(); $('#note').textContent = 'Pick a second flavour for your mix.'; return; }
@@ -294,7 +297,7 @@
     // the WhatsApp tab opens now, inside the tap, so pop-up blockers allow it; it is filled once the order is saved
     var tab = window.open('', '_blank');
     var pid = (state.mix ? PID.mix : PID[state.picks[0]])[state.size];
-    var body = { lines: [{ product_id: pid, qty: state.qty }], fulfilment: state.ful, date: v('date'), customer_name: v('me'), customer_phone: v('ph'), notes: waNotes };
+    var body = { lines: [{ product_id: pid, qty: state.qty }], fulfilment: state.ful, date: v('date'), customer_name: v('me'), customer_phone: v('ph'), notes: waNotes, discount_code: MirCode.code() };
     if (state.ful === 'delivery') { body.city = 'jerusalem'; body.address = v('addr'); }
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('Order not saved', r.status, t); return null; }); })

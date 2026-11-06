@@ -80,7 +80,7 @@ function Item({ item, open, selected, onSelect }) {
       <span className="grid h-full w-12 shrink-0 place-content-center">
         {Icon ? <Icon className="h-4 w-4" aria-hidden="true" /> : <span className="h-4 w-4" />}
       </span>
-      {open && <span className="text-sm truncate pe-8">{item.label}</span>}
+      {open && <span className={cn("text-sm truncate", item.badge > 0 ? "pe-8" : "pe-2")}>{item.label}</span>}
       {item.badge > 0 && (
         <span
           className={cn(

@@ -57,12 +57,12 @@ export default function ReferralSettings({ API, auth, businessId }) {
 
   return (
     <section className="rounded-2xl border bg-white mb-4" style={{ borderColor: 'var(--brand-border)' }} data-testid="referral-settings">
-      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="w-full flex items-center justify-between gap-2 p-4 text-start min-h-[44px]">
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="w-full flex items-center justify-between gap-2 p-3 text-start">
         <span className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--ink)' }}>
           <Gift size={16} aria-hidden="true" /> {t('referrals.settingsTitle', 'Referrals: customers invite friends')}
           {s && s.on && <span className="text-xs font-normal" style={{ color: '#2E7D4F' }}>{t('referrals.isOn', 'On')}</span>}
         </span>
-        {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        {open ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
       </button>
       {open && (
         <div className="px-4 pb-4 space-y-3">

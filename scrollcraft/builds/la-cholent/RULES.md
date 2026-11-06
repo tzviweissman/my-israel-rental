@@ -75,7 +75,7 @@ R3f.2 pass: effect budget: one signature (the dial), accents (the split, the pot
 R3m.1 pass: data-mir-gallery block present and hidden until photos exist
 R3m.3 pass: hours, areas and FAQ stay in fixed hidden blocks until the owner sends them
 R3k.1 pass: split into two pages on 6 Nov 2026 (Tzvi: "split all 4 into separate pages"): Home (the film, sizes, kit, occasions, facts) and Order (the dial and the order form); the sizes and the order were one section and are now the sizes cards on Home with the dial and form on Order; old addresses /business/<slug>#order and #details forward to the Order page by a short script on Home, and index.html#sizes etc. still land on Home. No contact page: the record has one WhatsApp number and no address, email or hours, which the footer already shows on every page
-R3k.2 pass: the bar is the same markup on both pages: the name to Home, Home, Sizes and prices, Occasions, Kosher, and the one Message to order button; on Home it waits for the opening film and phones use the buy bar; on the Order page it is on from the start and, on a phone, keeps the name and Home only (the button is the page itself)
+R3k.2 pass: the bar is the same markup on both pages: the name to Home, Home, Sizes and prices, Occasions, Kosher, and the one Message to order button; on Home it waits for the opening film, on the Order page it is on from the start; under 861px the links fold into a Menu button (Close while open) that opens the same list plus the WhatsApp number, and closes on a second tap, a link tap or Escape (looked at on both pages at 375x812, open and closed); the phone buy bar stays on Home
 R3k.4 pass: shared site.css and site.js; section classes are not reused for shared state
 R8a.1 pass: no 21st components or external script hosts; only the Google Fonts stylesheet
 R3b.4 pass: facts rows carry the page
@@ -222,3 +222,5 @@ R3v.14 pass: the line under Message to order on the opening is now the list clas
 Note, 1 Nov 2026: the arrow after the footer button was removed (its font has no arrow; check-site GLYPH). No rule answer changes.
 
 Note, 6 Nov 2026: split into Home and Order (split-four-sites). The lines for the buttons, menu bar, footer, pages and order were rewritten for it.
+<!-- 6 Nov 2026: the only change is the discount code box on the order form (public/pages/mir-code.js, Tzvi: American Crust's first-time code had nowhere to be typed). Looked at the form with the box and a test order on phone and laptop; the rest of the site is unchanged, so the other rules were not re-read. -->
+Note, 6 Nov 2026: the order form on the Order page carries the discount code box (mir-code.js), and the server adds the phone note, the required email and the texts step (mir-order.js); the phone Menu button was added to both pages. Looked at both pages on phone and laptop; the other rules were not re-read.

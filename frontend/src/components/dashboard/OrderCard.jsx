@@ -14,6 +14,11 @@ import {
 import { buildWhatsAppLink } from '../../utils/whatsappLink';
 import { money } from '../../utils/currency';
 
+// The code used has its own line beside the total, so it comes out of the notes the server wrote it into.
+export const notesWithoutCode = (o) => (o.discount
+  ? (o.notes || '').split('\n').filter((l) => !l.startsWith(`Discount ${o.discount.code}:`)).join('\n')
+  : o.notes);
+
 export const STATUS_ORDER = ['new', 'preparing', 'ready', 'done', 'cancelled', 'failed'];
 export const NEXT = { new: 'preparing', preparing: 'ready', ready: 'done' };
 export const BACK = { preparing: 'new', ready: 'preparing' };
@@ -154,8 +159,11 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
               <MapPin size={12} className="mt-0.5 shrink-0" /> <span dir="auto">{o.address}</span>
             </p>
           )}
-          {o.notes && (
-            <p dir="auto" className="text-xs mt-1 italic" style={{ color: 'var(--brand-muted)' }}>{o.notes}</p>
+          {o.discount && (
+            <p dir="ltr" className="text-xs mt-1 font-semibold text-start" style={{ color: '#2E7D4F' }} data-testid="order-code-used">{t('discounts.orderLine', '{{code}}: -{{v}}', { code: o.discount.code, v: money(o.discount.amount, o.currency) })}</p>
+          )}
+          {notesWithoutCode(o) && (
+            <p dir="auto" className="text-xs mt-1 italic" style={{ color: 'var(--brand-muted)' }}>{notesWithoutCode(o)}</p>
           )}
         </div>
       </div>

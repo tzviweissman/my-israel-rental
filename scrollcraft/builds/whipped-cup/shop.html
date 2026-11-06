@@ -105,6 +105,7 @@
           <h3>Your order</h3>
           <ul id="sum-mini"><li><span>Nothing yet</span></li></ul>
           <p class="sum-where" id="sum-where" hidden></p>
+          <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
           <div class="total"><span>Total</span><span id="total">₪0</span></div>
           <button class="btn" id="send" type="submit"><span>Continue to delivery</span></button>
           <button class="back" id="back" type="button" hidden>Back</button>
@@ -280,9 +281,11 @@
     if (p.mode === 'one') return oneFlav ? '4 ' + JARS[oneFlav][0] : '';
     return 'a mix of all three flavours';
   }
-  function total() { var t = 0; for (var k in q) t += q[k] * JARS[k][1]; if (PACKS[pack]) t += PACKS[pack].price; return t; }
+  function total() { return MirCode.after(goods()); }
+  function goods() { var t = 0; for (var k in q) t += q[k] * JARS[k][1]; if (PACKS[pack]) t += PACKS[pack].price; return t; }
   var send = document.getElementById('send');
   function update() {
+    MirCode.refresh();
     [].forEach.call(plans.querySelectorAll('input'), function (i) { i.checked = i.value === pack; });
     var html = ''; for (var k in q) if (q[k]) html += '<li class="bl"><span>' + JARS[k][0] + '<span class="step sm"><button type="button" data-k="' + k + '" data-d="-1" aria-label="One fewer ' + JARS[k][0] + '">−</button><output>' + q[k] + '</output><button type="button" data-k="' + k + '" data-d="1" aria-label="One more ' + JARS[k][0] + '">+</button></span></span><span class="bl-r">₪' + q[k] * JARS[k][1] + '<button type="button" class="rm" data-rm="' + k + '" aria-label="Remove ' + JARS[k][0] + ' from the basket">' + BIN + '</button></span></li>';
     if (PACKS[pack]) html += '<li class="bl"><span>' + PACKS[pack].name + (packDesc() ? ': ' + packDesc() : '') + '</span><span class="bl-r">₪' + PACKS[pack].price + '<button type="button" class="rm" data-rm="pack" aria-label="Remove the ' + PACKS[pack].name + ' from the basket">' + BIN + '</button></span></li>';
@@ -310,13 +313,13 @@
     var b = { jars: {} }; for (var k2 in q) if (q[k2]) b.jars[k2] = q[k2]; if (pack) b.pack = pack; window.twcBasket.set(b);
     var bar = document.querySelector('#bar .p'), jarsN = 0; for (var k3 in q) jarsN += q[k3];
     var barBtn = document.querySelector('#bar .btn'); if (barBtn) { barBtn.textContent = 'Basket'; barBtn.setAttribute('href', '#order'); }
-    if (bar) bar.innerHTML = total() ? '<b>Basket, ₪' + total() + '</b>' + (jarsN ? jarsN + ' jar' + (jarsN > 1 ? 's' : '') : '') + (pack ? (jarsN ? ' and ' : '') + PACKS[pack].name : '') : '<b>From ₪40 a jar</b>Each jar makes 3 to 4 coffees';
+    if (bar) bar.innerHTML = goods() ? '<b>Basket, ₪' + total() + '</b>' + (jarsN ? jarsN + ' jar' + (jarsN > 1 ? 's' : '') : '') + (pack ? (jarsN ? ' and ' : '') + PACKS[pack].name : '') : '<b>From ₪40 a jar</b>Each jar makes 3 to 4 coffees';
   }
   function v(id) { return document.getElementById(id).value.trim(); }
   function mark(id, msg) { var w = document.getElementById('w-' + id) || document.getElementById('c-' + id); if (w) w.classList.toggle('bad', !!msg); document.getElementById('e-' + id).textContent = msg || ''; }
   function check(show, upto) {
     var ok = true, e, p = PACKS[pack]; upto = upto || 3;
-    e = total() ? '' : 'Add a jar or choose a package';
+    e = goods() ? '' : 'Add a jar or choose a package';
     if (!e && p && p.mode === 'mix' && mixSum() !== p.jars) e = 'Choose ' + (p.jars - mixSum()) + ' more jar' + (p.jars - mixSum() > 1 ? 's' : '') + ' for the ' + p.name;
     if (!e && p && p.mode === 'one' && !oneFlav) e = 'Pick the flavour for One Flavour';
     if (e) ok = false; if (show || !e) mark('items', e);
@@ -336,6 +339,7 @@
   document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k Pre-filled): the first day the page accepts (today), changeable; a day the customer picked is never overwritten
   var w = document.getElementById('when'); if (!w.value) w.value = w.min;
+  MirCode.mount({ api: API, gig: GIG, goods: goods, phone: 'ph', field: 'fld', onChange: function () { update(); drawStep(); } });
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();
     // steps 1 and 2: check this step, then on to the next
@@ -345,6 +349,7 @@
     for (var k in q) if (q[k]) out.push('• ' + q[k] + ' × ' + JARS[k][0] + ' (₪' + q[k] * JARS[k][1] + ')');
     if (PACKS[pack]) { var pk = PACKS[pack], every = /Weekly/.test(pk.meta) ? ', weekly' : /Monthly/.test(pk.meta) ? ', monthly' : ''; out.push('• ' + pk.name + ', ' + pk.jars + ' jars' + every + ' (₪' + pk.price + ')'); out.push('   ' + packDesc()); }
     if (v('note')) out.push('Notes: ' + v('note'));
+    if (MirCode.code()) out.push(MirCode.text(goods()));
     out.push('Total: ₪' + total());
     out.push('Deliver to: ' + v('addr'));
     out.push('First delivery: ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
@@ -358,7 +363,7 @@
     // the WhatsApp tab opens now, inside the tap, so pop-up blockers allow it; it is filled once the order is saved
     var tab = window.open('', '_blank');
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: ls, fulfilment: 'delivery', city: 'jerusalem', address: v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
+      body: JSON.stringify({ lines: ls, fulfilment: 'delivery', city: 'jerusalem', address: v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes, discount_code: MirCode.code() }) })
       .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('Order not saved', r.status, t); return null; }); })
       .catch(function (err) { console.warn('Order not saved', err); return null; });
     Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
@@ -388,7 +393,7 @@
     [].forEach.call(document.querySelectorAll('.ostep'), function (el) { el.hidden = +el.dataset.s !== step; });
     [].forEach.call(document.querySelectorAll('#steps li'), function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
     var day = v('when') ? new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long' }) : '';
-    send.firstElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? (day ? 'Send on WhatsApp for ' + day : 'Send order on WhatsApp') + ', ₪' + total() : 'Send order on WhatsApp');
+    send.firstElementChild.textContent = step < 3 ? STEP_BTN[step] : (goods() ? (day ? 'Send on WhatsApp for ' + day : 'Send order on WhatsApp') + ', ₪' + total() : 'Send order on WhatsApp');
     send.classList.toggle('idle', !check(false, step));
     document.getElementById('send-note').textContent = STEP_NOTE[step];
     document.getElementById('back').hidden = step === 1;

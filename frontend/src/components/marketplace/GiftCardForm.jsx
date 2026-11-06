@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Loader2, Check } from 'lucide-react';
 import { API } from '../../lib/apiBase';
-import { money } from '../../utils/currency';
+import { money, symbolFor } from '../../utils/currency';
 import PayLinks from '../forms/PayLinks';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-base bg-white min-h-[48px]';
@@ -59,7 +59,7 @@ export default function GiftCardForm({ slug, data, onDone }) {
               <button key={a} type="button" onClick={() => setAmount(a)} aria-pressed={on} data-testid={`gift-amount-${a}`}
                       className="relative rounded-2xl border bg-white min-h-[64px] text-lg font-bold tabular-nums"
                       style={{ borderColor: on ? 'var(--ink)' : 'var(--brand-border)', boxShadow: on ? '0 0 0 1px var(--ink)' : 'none', color: 'var(--ink)' }}>
-                {on && <Check size={15} className="absolute top-2 end-2" />}{money(a, 'ILS')}
+                {on && <Check size={15} className="absolute top-2 end-2" />}{money(a, data.currency)}
               </button>
             );
           })}
@@ -73,7 +73,7 @@ export default function GiftCardForm({ slug, data, onDone }) {
         </div>
         {amount === 'other' && (
           <input type="number" inputMode="numeric" min={data.min} max={data.max} value={other} onChange={(e) => setOther(e.target.value)} autoFocus
-                 className={`${field} mt-2`} style={fieldStyle} aria-label={t('gift.other', 'Other amount')} placeholder={t('gift.otherPh', '₪{{a}} to ₪{{b}}', { a: data.min, b: data.max })} data-testid="gift-other" />
+                 className={`${field} mt-2`} style={fieldStyle} aria-label={t('gift.other', 'Other amount')} placeholder={t('gift.otherPh', '{{s}}{{a}} to {{s}}{{b}}', { s: symbolFor(data.currency), a: data.min, b: data.max })} data-testid="gift-other" />
         )}
       </fieldset>
 
@@ -106,7 +106,7 @@ export default function GiftCardForm({ slug, data, onDone }) {
       <button type="submit" disabled={!amountOk || sending} className="w-full inline-flex justify-center items-center gap-2 min-h-[52px] rounded-full text-base font-semibold disabled:opacity-60"
               style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="gift-submit">
         {sending && <Loader2 size={16} className="animate-spin" />}
-        {amountOk ? t('gift.order', 'Order a {{v}} gift card', { v: money(chosen, 'ILS') }) : t('gift.orderPlain', 'Order the gift card')}
+        {amountOk ? t('gift.order', 'Order a {{v}} gift card', { v: money(chosen, data.currency) }) : t('gift.orderPlain', 'Order the gift card')}
       </button>
       <p className="text-xs text-center" style={{ color: 'var(--brand-muted)' }}>{t('members.noChargeNote', 'Nothing is charged on this site. You arrange payment with the business.')}</p>
     </form>

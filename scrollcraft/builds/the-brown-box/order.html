@@ -246,6 +246,7 @@
       <h2 id="sumh">Your order</h2>
       <p class="empty" id="empty">Nothing chosen yet.</p>
       <ul id="lines" aria-live="polite"></ul>
+      <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
       <div class="tot"><span>Before delivery</span><b id="total">₪0</b></div>
       <p class="note">Delivery is added on WhatsApp once we know the neighbourhood. You pay us directly, by cash, Zelle, Israeli bank transfer, or credit card with a 4% charge; nothing is paid on this page.</p>
       <a class="btn" id="send" href="#" aria-disabled="true">
@@ -424,12 +425,15 @@ document.addEventListener('DOMContentLoaded', function () {
       low += n * Number(p.price);
       if (p.price_to != null && Number(p.price_to) > Number(p.price)) ranged = true;
     });
+    low = MirCode.after(low);
     low += extraCost();
     return { text: (ranged ? 'from ' : '') + money(low, cur) + (ask ? ' + price on request' : ''), low: low, cur: cur };
   }
 
   var lines = document.getElementById('lines'), empty = document.getElementById('empty');
+  function goods() { var low = 0; chosen().forEach(function (p) { if (priced(p)) low += q[p._k] * Number(p.price); }); return low; }
   function update() {
+    MirCode.refresh();
     products.forEach(drawCtl);
     lines.textContent = '';
     var c = chosen();
@@ -533,6 +537,7 @@ document.addEventListener('DOMContentLoaded', function () {
       L.push('• ' + q[p._k] + ' × ' + p.name + ' (' + (priced(p) && !ranged ? money(q[p._k] * Number(p.price) + extraFor(p), p.currency) : priceText(p)) + ')');
     });
     choices().forEach(function (c) { L.push('   ' + c); });
+    if (MirCode.code()) L.push(MirCode.text(goods()));
     L.push('Total: ' + totals().text + ', plus delivery');
     L.push('');
     if (v('to')) L.push('For: ' + v('to') + (v('tophone') ? ', ' + v('tophone') : ''));
@@ -552,6 +557,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // takes too long, WhatsApp opens anyway: an order is never lost.
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
   var sending = false;
+  MirCode.mount({ api: API, gig: function () { var c = chosen(); return c.length ? c[0].gig_id : null; }, goods: goods, money: function (n) { return money(n, totals().cur); }, phone: 'myphone', onChange: update });
   function save() {
     var c = chosen();
     var gig = c.length && c.every(function (p) { return p.gig_id && p.id && p.gig_id === c[0].gig_id; }) ? c[0].gig_id : null;
@@ -564,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var body = {
       lines: c.map(function (p) { return { product_id: p.id, qty: q[p._k] }; }),
       fulfilment: 'delivery', date: v('when'), city: v('city').slice(0, 80), address: v('addr'),
-      customer_name: v('me'), customer_phone: v('myphone'), notes: notes.join('\n')
+      customer_name: v('me'), customer_phone: v('myphone'), notes: notes.join('\n'), discount_code: MirCode.code()
     };
     var post = fetch(API + '/marketplace/order-form/' + gig + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });

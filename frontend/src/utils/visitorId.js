@@ -59,10 +59,29 @@ export function getVisitorId() {
   return fresh;
 }
 
+// Where this visit began: ?src= from our QR codes and ads, or the other site's host. Kept for the visit, so a
+// second page still knows they came from Instagram. The server keeps one word (view_tracking.source_of).
+// The designed sites' script in frontend/server.js does the same with the same key.
+export function visitSource() {
+  try {
+    let s = window.sessionStorage.getItem('mir_src');
+    if (!s) {
+      const ref = document.referrer ? new URL(document.referrer).hostname : '';
+      s = new URLSearchParams(window.location.search).get('src') || (ref && ref !== window.location.hostname ? ref : 'direct');
+      window.sessionStorage.setItem('mir_src', s);
+    }
+    return s.slice(0, 100);
+  } catch { return 'direct'; }
+}
+
 /** Headers to merge into a request whose view should be counted once. */
 export function visitorHeaders() {
   const id = getVisitorId();
-  return id ? { 'X-Visitor-Id': id } : {};
+  return {
+    ...(id ? { 'X-Visitor-Id': id } : {}),
+    'X-Visit-Source': visitSource(),
+    'X-Visit-Lang': document.documentElement.lang || '',
+  };
 }
 
 export default getVisitorId;

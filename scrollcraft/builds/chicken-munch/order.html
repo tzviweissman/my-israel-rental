@@ -61,6 +61,7 @@
         <aside class="card sum" aria-live="polite">
           <h3>So far</h3>
           <ul id="sum-list"><li><span>Nothing yet</span></li></ul>
+          <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
           <div class="total"><span>Total</span><span id="total">0</span></div>
           <button class="btn" id="send" type="submit"><span>Send my order on WhatsApp</span></button>
           <p class="note">Opens WhatsApp with your order written out, to send to Chicken Munch.</p>
@@ -163,13 +164,14 @@
     });
   });
   function totals() { var t = { USD: 0, ILS: 0 }; for (var k in q) t[ITEMS[k][2]] += q[k] * ITEMS[k][1]; return t; }
-  function totalText() { var t = totals(), p = []; if (t.USD) p.push(money(t.USD, 'USD')); if (t.ILS) p.push(money(t.ILS, 'ILS')); var s = p.join(' + ') || '0';
+  function totalText() { var t = totals(), p = []; if (MirCode.code() && !(t.USD && t.ILS)) { var c1 = t.USD ? 'USD' : 'ILS'; return money(MirCode.after(t[c1]), c1); } if (t.USD) p.push(money(t.USD, 'USD')); if (t.ILS) p.push(money(t.ILS, 'ILS')); var s = p.join(' + ') || '0';
     if (t.ILS) { var d = 0; for (var k in q) if (q[k]) d += q[k] * (ITEMS[k][6] || (ITEMS[k][2] === 'USD' ? ITEMS[k][1] : 0)); s += ' (or $' + d.toLocaleString('en-US') + ' all in dollars)'; }
     return s; }
   var send = document.getElementById('send'), noRice = false;
   document.getElementById('sug-add').addEventListener('click', function () { q.rice = 1; update(); check(false); });
   document.getElementById('sug-no').addEventListener('click', function () { noRice = true; update(); });
   function update() {
+    MirCode.refresh();
     [].forEach.call(document.querySelectorAll('.line'), function (l) { l.querySelector('output').textContent = q[l.dataset.k]; l.querySelector('.rm').hidden = !q[l.dataset.k]; });
     [].forEach.call(document.querySelectorAll('.opts'), function (o) { o.hidden = !q[o.dataset.k]; });
     var html = ''; for (var k in q) if (q[k]) html += '<li><span>' + q[k] + ' × ' + ITEMS[k][0] + '</span><span>' + priceOf(k, q[k]) + '</span></li>';
@@ -226,10 +228,11 @@
     var t = totals(); if (t.USD && t.ILS) return Promise.resolve(null);
     var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: ITEMS[k][3], qty: q[k] });
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: ls, fulfilment: 'delivery', city: 'jerusalem', address: v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
+      body: JSON.stringify({ lines: ls, fulfilment: 'delivery', city: 'jerusalem', address: v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes, discount_code: MirCode.code() }) })
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
   }
+  MirCode.mount({ api: API, gig: GIG, goods: function () { var t = totals(); return t.USD + t.ILS; }, money: function (n) { var t = totals(); return t.USD && t.ILS ? '' : money(n, t.USD ? 'USD' : 'ILS'); }, phone: 'ph', field: 'fld', onChange: update });
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();
     if (sending) return;
@@ -242,6 +245,7 @@
       if (described(k).length) notesOut.push(ITEMS[k][0] + ': ' + described(k).join('; '));
     }
     if (v('note')) lines.push('Notes: ' + v('note'));
+    if (MirCode.code()) lines.push(MirCode.text(totals().USD + totals().ILS));
     lines.push('Total: ' + totalText() + ' + delivery (₪30 to ₪50, by where)');
     lines.push('Deliver to: ' + v('addr'));
     lines.push('For: ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));

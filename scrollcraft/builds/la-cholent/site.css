@@ -514,9 +514,17 @@
   .topbar.tb-always { transform: none; opacity: 1; }
   .order-page .order-stage { padding-top: clamp(4.5rem, 10svh, 6rem); }
   .order-page #order { padding-bottom: 0; }
+  /* the phone menu (same idea as Bun Intended's and Michal Balloons'): the bar's links fold into a Menu button that opens
+     the list and the WhatsApp number. The home page's bar still waits for the opening film. */
+  .mbtn { display: none; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1.5px solid var(--lt-ink); background: none; color: var(--lt-ink); font: 600 var(--s2)/1 var(--sc-font-text); cursor: pointer; }
+  .mbtn:active { transform: scale(.97); }
+  .mpanel { display: none; position: absolute; inset-inline: 0; top: 100%; background: var(--lt-ground); border-bottom: 1px solid var(--sc-hairline-strong); box-shadow: 0 12px 24px rgb(27 22 18 / .14); }
+  .mpanel a { display: flex; align-items: center; min-height: 52px; padding: 0 var(--sc-gutter); color: var(--lt-ink); text-decoration: none; font: 500 var(--s3)/1.2 var(--sc-font-text); border-top: 1px solid color-mix(in oklab, #1B1612 14%, transparent); white-space: nowrap; }
+  .mpanel a[aria-current="page"] { font-weight: 700; }
+  .topbar.is-open .mpanel { display: block; }
   @media (max-width: 860px) {
-    .topbar.tb-always { display: flex; }
-    .topbar.tb-always .tb-links a:not(:first-child), .topbar.tb-always > .btn, .topbar.tb-always .tb-nav > .btn { display: none; }
+    .topbar { display: flex; }
+    .topbar .tb-links, .topbar .tb-nav > .btn { display: none; }
+    .mbtn { display: inline-flex; align-items: center; }
     .order-page .order-stage { padding-top: 4.5rem; }
   }
-  @media (max-width: 860px) { .topbar.tb-always .tb-links a { display: inline-flex; align-items: center; min-height: 44px; padding-inline: .4rem; } }

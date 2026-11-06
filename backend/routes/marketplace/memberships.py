@@ -241,7 +241,7 @@ async def join(plan_id: str, body: JoinIn, request: Request, viewer=Depends(opti
     if body.discount_code and body.discount_code.strip():
         from .discounts import CodeRefused, evaluate, redeem
         try:
-            code_doc, off = await evaluate(biz["_id"], body.discount_code, "memberships", float(plan.get("price") or 0), phone)
+            code_doc, off = await evaluate(biz["_id"], body.discount_code, "memberships", float(plan.get("price") or 0), phone, plan.get("currency") or "ILS")
         except CodeRefused as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
         if not await redeem(code_doc, off, phone):

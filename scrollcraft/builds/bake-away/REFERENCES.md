@@ -21,3 +21,5 @@ paid for. Tzvi: "did you look through all our inspo sources". Second pass below,
 - videos-2026-11-01: (read 2 Nov 2026, after the site was made) real-looking food film needs a real cause on screen, one event that stays, opaque sauce and back light (rules 3w); her drizzle film already has the chocolate stream as its cause and the doughnut keeps the drizzle, so nothing changes.
 - pinterest-ads-2026-11-02: (read 2 Nov 2026) the cafe folder's 50 ads lead with visual puns, texture close-ups and type locked with the photo (the doughnut as a padlock loop, cookies as a bouquet); they are for her ads (ad rules 9d), the site itself is unchanged.
 - bar-breaking-2026-11-02: (read 2 Nov 2026) bars broken by hand and AI chocolate adverts, made for Krysp; nothing in a doughnut shop breaks, so nothing is taken.
+- videos-2026-11-04: (noted 6 Nov 2026) newer than this site, and the only change since is the discount code box, so nothing here was taken from it
+- ad-videos-2026-11-04: (noted 6 Nov 2026) about ads, newer than this site; the only change since is the discount code box, so nothing here was taken from it

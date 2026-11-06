@@ -75,6 +75,7 @@
         </div>
         <p class="note" id="oerr" role="alert" style="color:#9b2c1d"></p>
 
+        <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
         <div class="total">
           <span class="mini" id="mini" aria-hidden="true"></span><span class="sum" id="sum" aria-live="polite">₪55<small>4 buns</small></span>
           <a class="send" id="order" href="#" target="_blank" rel="noopener">
@@ -203,9 +204,10 @@
   }
 
   function paint() {
+    MirCode.refresh();
     document.querySelectorAll('[data-size]').forEach(function (b) { if (b.classList.contains('choice')) b.setAttribute('aria-pressed', String(+b.getAttribute('data-size') === state.size)); });
     renderFlavours();
-    var p = price(), n = names(), q = state.qty, w = was(), save = w > p ? (w - p) * q : 0, tot = p * q, buns = state.size * q;
+    var p = price(), n = names(), q = state.qty, w = was(), save = w > p ? (w - p) * q : 0, tot = MirCode.after(p * q), buns = state.size * q;
     var each = (tot / buns); each = each % 1 ? each.toFixed(2) : String(each);
     var chip = save ? '<span class="chip">' + Math.floor(save * 100 / (w * q)) + '% off</span>' : '';  /* percent off, rounded down (Tzvi, 22 Oct 2026) */
     $('#sum').innerHTML = '<span class="pp">₪' + tot + (save ? '<s>₪' + (w * q) + '</s>' : '') + '</span><small class="u">' + chip + '₪' + each + ' a bun</small><small class="n">' + (save ? chip : buns + ' buns') + '</small>';
@@ -241,7 +243,7 @@
     var when = d ? new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
     var what = q > 1 ? q + ' x ' + state.size + ' piece boxes' : (state.size === 8 ? 'an ' : 'a ') + state.size + ' piece box';
     var text = 'Hi Bun Intended, I\'d like to order ' + what + ': '
-      + (state.mix ? '2 flavour mix, ' + n.join(' and ') : n[0]) + ' (₪' + tot + (q > 1 ? ' for ' + q : '') + ').'
+      + (state.mix ? '2 flavour mix, ' + n.join(' and ') : n[0]) + ' (₪' + tot + (q > 1 ? ' for ' + q : '') + ').' + (MirCode.code() ? ' ' + MirCode.text(p * q) + '.' : '')
       + (when ? ' For ' + when + '.' : '') + (state.ful === 'delivery' ? ' Delivery to ' + ($('#addr').value.trim() || '(address)') + '.' : ' Pick-up in Ramat Eshkol.')
       + ($('#me').value.trim() ? ' Name: ' + $('#me').value.trim() + ', ' + $('#ph').value.trim() + '.' : '');
     waText = text;
@@ -278,6 +280,7 @@
   var today = new Date(); $('#date').min = today.toISOString().slice(0, 10);
 
   // The send button: "Opening WhatsApp", then a tick (21st Interactive Hover Button).
+  MirCode.mount({ api: API, gig: GIG, goods: function () { return price() * state.qty; }, phone: 'ph', onChange: paint });
   $('#order').addEventListener('click', function (e) {
     var a = e.currentTarget;
     if (a.getAttribute('aria-disabled') === 'true') { e.preventDefault(); $('#note').textContent = 'Pick a second flavour for your mix.'; return; }
@@ -294,7 +297,7 @@
     // the WhatsApp tab opens now, inside the tap, so pop-up blockers allow it; it is filled once the order is saved
     var tab = window.open('', '_blank');
     var pid = (state.mix ? PID.mix : PID[state.picks[0]])[state.size];
-    var body = { lines: [{ product_id: pid, qty: state.qty }], fulfilment: state.ful, date: v('date'), customer_name: v('me'), customer_phone: v('ph'), notes: waNotes };
+    var body = { lines: [{ product_id: pid, qty: state.qty }], fulfilment: state.ful, date: v('date'), customer_name: v('me'), customer_phone: v('ph'), notes: waNotes, discount_code: MirCode.code() };
     if (state.ful === 'delivery') { body.city = 'jerusalem'; body.address = v('addr'); }
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('Order not saved', r.status, t); return null; }); })

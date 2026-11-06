@@ -224,7 +224,10 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
   <a class="tb-brand" href="#top"><img src="assets/seal.webp" width="40" height="40" alt=""><span>L.A. Cholent</span></a>
   <div class="tb-links"><a href="#top" aria-current="page" tabindex="-1">Home</a><a href="#sizes" tabindex="-1">Sizes and prices</a><a href="#occasions" tabindex="-1">Occasions</a><a href="#proof" tabindex="-1">Kosher</a></div>
   <a class="btn" href="order.html" tabindex="-1">Message to order</a>
-</nav></header>
+</nav>
+  <button type="button" class="mbtn" id="mbtn" aria-expanded="false" aria-controls="mpanel" data-mir-skip tabindex="-1"><span>Menu</span></button>
+  <div class="mpanel" id="mpanel"><a href="#top" aria-current="page" tabindex="-1" data-mir-key="t-mpnl1-0">Home</a><a href="#sizes" tabindex="-1" data-mir-key="t-mpnl2-0">Sizes and prices</a><a href="#occasions" tabindex="-1" data-mir-key="t-mpnl3-0">Occasions</a><a href="#proof" tabindex="-1" data-mir-key="t-mpnl4-0">Kosher</a><a href="order.html" tabindex="-1" data-mir-key="t-mpnl5-0">Message to order</a><a href="https://wa.me/972553311442" target="_blank" rel="noopener" tabindex="-1" data-mir-key="t-mpnl6-0">WhatsApp +972 55-331-1442</a></div>
+</header>
 
 <!-- Phones only: the order, pinned to the bottom with the price, once the
      opening screen's button is gone and until the footer is on screen. -->
@@ -389,10 +392,11 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
       buybar.setAttribute('aria-hidden', barOn ? 'false' : 'true');
       buybar.querySelector('a').tabIndex = barOn ? 0 : -1;
     }
-    var tOn = !phone.matches && p > 0.56;
+    var tOn = p > 0.56;
     if (tOn !== topbar.classList.contains('is-on')) {
       topbar.classList.toggle('is-on', tOn);
-      topbar.querySelectorAll('a').forEach(function (a) { a.tabIndex = tOn ? 0 : -1; });
+      topbar.querySelectorAll('a, button').forEach(function (a) { a.tabIndex = tOn ? 0 : -1; });
+      if (!tOn && window.siteMenu) window.siteMenu(false);
     }
     requestAnimationFrame(frame);
   }

@@ -19,8 +19,10 @@ frontend/public/badge. Cached for an hour; a new review shows within that.
 """
 from __future__ import annotations
 
+import base64
 import html
 import math
+from pathlib import Path
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Response
@@ -39,12 +41,15 @@ THEMES = {
 }
 
 
+# The real logo (brand/logo-mark.png, small) on the navy tile the site's menu
+# uses. Inside the file because a picture shown on someone else's site cannot
+# load anything else. Three drawn bars stood in for it until 6 Nov 2026.
+_MARK_PNG = base64.b64encode((Path(__file__).parent / "badge_mark.png").read_bytes()).decode()
+
+
 def _mark(x: int) -> str:
-    return (f'<g transform="translate({x} 12) scale(0.3333333333333333)">'
-            '<rect x="4" y="4" width="112" height="112" rx="30" fill="#143C5A"/>'
-            '<rect x="33" y="60" width="14" height="30" rx="6" fill="#7CA8C8"/>'
-            '<rect x="53" y="44" width="14" height="46" rx="6" fill="#FFFFFF"/>'
-            '<rect x="73" y="30" width="14" height="60" rx="6" fill="#C9A227"/></g>')
+    return (f'<rect x="{x}" y="12" width="40" height="40" rx="10" fill="#143C5A"/>'
+            f'<image x="{x + 3}" y="22.34" width="34" height="19.32" href="data:image/png;base64,{_MARK_PNG}"/>')
 
 
 def _star(cx: float, cy: float, r: float = 6.5) -> str:

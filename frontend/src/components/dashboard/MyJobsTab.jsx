@@ -53,17 +53,17 @@ const StatusPill = ({ status }) => {
   );
 };
 
-const timeAgo = (iso) => {
+const timeAgo = (iso, lang) => {
   if (!iso) return '';
+  const ago = new Intl.RelativeTimeFormat(lang, { numeric: 'auto', style: 'short' });
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60) return ago.format(-mins, 'minute');
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24) return ago.format(-hrs, 'hour');
   const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  if (days < 7) return ago.format(-days, 'day');
+  return new Date(iso).toLocaleDateString(lang, { month: 'short', day: 'numeric' });
 };
 
 // Response bucket comes straight off the provider profile — same source
@@ -79,6 +79,7 @@ const ResponseBadge = ({ bucket }) => {
 };
 
 const ApplicationRow = ({ app, jobId, onMessage }) => {
+  const { t, i18n } = useTranslation();
   const sym = app.quoted_currency === 'USD' ? '$' : '₪';
   const price =
     app.quoted_price != null
@@ -89,16 +90,16 @@ const ApplicationRow = ({ app, jobId, onMessage }) => {
       <div className="flex items-start justify-between gap-3 mb-1.5">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-gray-900 truncate" data-testid={`applicant-name-${app.id}`}>
-            {app.provider?.display_name || 'Provider'}
+            {app.provider?.display_name || t('myJobs.provider', 'Provider')}
           </p>
           <div className="flex items-center gap-2 mt-0.5">
             <ResponseBadge bucket={app.provider?.response_bucket} />
-            <span className="text-[10px] text-gray-400">{timeAgo(app.created_at)}</span>
+            <span className="text-[10px] text-gray-400">{timeAgo(app.created_at, i18n.language)}</span>
           </div>
         </div>
         {price && (
           <div className="text-right shrink-0">
-            <p className="text-xs text-gray-500">Quoted</p>
+            <p className="text-xs text-gray-500">{t('myJobs.quoted', 'Quoted')}</p>
             <p className="text-sm font-bold text-[var(--brand-primary)]" data-testid={`applicant-quote-${app.id}`}>{price}</p>
           </div>
         )}
@@ -112,14 +113,14 @@ const ApplicationRow = ({ app, jobId, onMessage }) => {
         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/25 text-[var(--brand-primary)] bg-white hover:bg-[var(--brand-primary)] hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[var(--brand-primary)]"
         data-testid={`applicant-message-btn-${app.id}`}
       >
-        <MessageCircle size={11} /> Message
+        <MessageCircle size={11} /> {t('myJobs.message', 'Message')}
       </button>
     </div>
   );
 };
 
 const JobCard = ({ job, API, token, onStatusChange, onJobUpdated }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [applications, setApplications] = useState(null);
@@ -131,7 +132,7 @@ const JobCard = ({ job, API, token, onStatusChange, onJobUpdated }) => {
   const budget =
     job.budget_type === 'fixed' && job.budget_amount
       ? `${sym}${Number(job.budget_amount).toLocaleString()}`
-      : 'Open to offers';
+      : t('myJobs.openToOffers', 'Open to offers');
 
   const loadApplications = useCallback(async () => {
     if (applications) return;
@@ -142,7 +143,7 @@ const JobCard = ({ job, API, token, onStatusChange, onJobUpdated }) => {
       });
       setApplications(data);
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Could not load applicants');
+      toast.error(err.response?.data?.detail || t('myJobs.loadFailed', 'Could not load applicants'));
       setApplications([]);
     } finally {
       setLoadingApps(false);
@@ -200,7 +201,7 @@ const JobCard = ({ job, API, token, onStatusChange, onJobUpdated }) => {
               {job.preferred_date && (
                 <span className="inline-flex items-center gap-1"><Calendar size={12} /> {job.preferred_date}</span>
               )}
-              <span className="text-gray-400">· posted {timeAgo(job.created_at)}</span>
+              <span className="text-gray-400">· {t('myJobs.posted', 'posted')} {timeAgo(job.created_at, i18n.language)}</span>
             </div>
           </div>
           <div className="flex flex-col items-end gap-1 shrink-0">
@@ -228,7 +229,7 @@ const JobCard = ({ job, API, token, onStatusChange, onJobUpdated }) => {
         <div className="border-t border-gray-100 bg-gray-50/50 px-4 sm:px-5 py-4" data-testid={`my-job-body-${job.id}`}>
           {/* Full description + actions */}
           <div className="bg-white rounded-xl border border-gray-100 p-3 mb-3">
-            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Full description</p>
+            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">{t('myJobs.fullDescription', 'Full description')}</p>
             <p className="text-sm text-gray-800 whitespace-pre-line leading-relaxed">{job.description}</p>
           </div>
 
@@ -238,14 +239,14 @@ const JobCard = ({ job, API, token, onStatusChange, onJobUpdated }) => {
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
               data-testid={`my-job-edit-${job.id}`}
             >
-              <Pencil size={12} /> Edit job
+              <Pencil size={12} /> {t('myJobs.editJob', 'Edit job')}
             </button>
             <button
               onClick={() => navigate(`/businesses/jobs/${job.id}`)}
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
               data-testid={`my-job-view-${job.id}`}
             >
-              <ExternalLink size={12} /> View public page
+              <ExternalLink size={12} /> {t('myJobs.viewPublic', 'View public page')}
             </button>
             {job.status === 'open' && (
               <>
@@ -295,15 +296,15 @@ const JobCard = ({ job, API, token, onStatusChange, onJobUpdated }) => {
 
           {/* Applications list */}
           <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-            {job.applications_count} application{job.applications_count === 1 ? '' : 's'}
+            {job.applications_count === 1 ? t('myJobs.oneApplication', 'One application') : t('myJobs.applications', '{{n}} applications', { n: job.applications_count })}
           </p>
           {loadingApps ? (
             <div className="flex items-center gap-2 text-sm text-gray-500 py-4">
-              <Loader2 className="animate-spin" size={14} /> Loading applicants…
+              <Loader2 className="animate-spin" size={14} /> {t('myJobs.loading', 'Loading applicants…')}
             </div>
           ) : job.applications_count === 0 ? (
             <div className="text-sm text-gray-500 bg-white rounded-xl border border-dashed border-gray-200 px-4 py-6 text-center" data-testid={`my-job-no-apps-${job.id}`}>
-              No applications yet. Matching providers were notified by email — usually the first replies come in within a few hours.
+              {t('myJobs.noApplications', 'No applications yet. Matching businesses were told by email, and the first replies usually come within a few hours.')}
             </div>
           ) : (
             <div className="bg-white rounded-xl border border-gray-100 divide-y divide-gray-100 px-3">
@@ -324,6 +325,7 @@ const JobCard = ({ job, API, token, onStatusChange, onJobUpdated }) => {
 };
 
 const MyJobsTab = ({ API, token }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -363,9 +365,9 @@ const MyJobsTab = ({ API, token }) => {
     <div className="space-y-4" data-testid="my-jobs-tab">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">My posted jobs</h2>
+          <h2 className="text-lg font-bold text-gray-900">{t('myJobs.title', 'My posted jobs')}</h2>
           <p className="text-sm text-gray-500 mt-0.5">
-            Track every job you&apos;ve posted and review who&apos;s applied.
+            {t('myJobs.subtitle', 'Every job you have posted, and who has applied.')}
           </p>
         </div>
         <button
@@ -373,7 +375,7 @@ const MyJobsTab = ({ API, token }) => {
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold hover:bg-[#0F3A3A]"
           data-testid="my-jobs-post-cta"
         >
-          <Plus size={14} /> Post a job
+          <Plus size={14} /> {t('myJobs.post', 'Post a job')}
         </button>
       </div>
 
@@ -383,16 +385,16 @@ const MyJobsTab = ({ API, token }) => {
           data-testid="my-jobs-empty"
         >
           <Users size={32} className="mx-auto text-gray-300 mb-3" />
-          <p className="text-gray-800 font-semibold mb-1">You haven&apos;t posted any jobs yet.</p>
+          <p className="text-gray-800 font-semibold mb-1">{t('myJobs.empty', 'You have not posted any jobs yet.')}</p>
           <p className="text-sm text-gray-500 mb-5">
-            Tell us what you need — matching providers will apply directly.
+            {t('myJobs.emptyBody', 'Tell us what you need, and matching businesses will apply directly.')}
           </p>
           <button
             onClick={() => { saveReturnPath(); navigate('/businesses/post-job'); }}
             className="inline-flex items-center gap-1 px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A]"
             data-testid="my-jobs-empty-cta"
           >
-            Post your first job <ArrowRight size={14} />
+            {t('myJobs.postFirst', 'Post your first job')} <ArrowRight size={14} className="rtl:rotate-180" />
           </button>
         </div>
       ) : (

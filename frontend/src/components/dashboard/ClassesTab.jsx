@@ -19,6 +19,9 @@ export const dayNames = (lang) => (lang === 'he'
   ? ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
   : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
 
+// Out here, not inside the form: made during render, it rebuilt each box after every letter (6 Nov 2026).
+const L = ({ label, children }) => <label className="block text-sm" style={{ color: 'var(--ink)' }}>{label}<span className="block mt-1">{children}</span></label>;
+
 function TemplateForm({ initial, plans, onSave, onCancel, saving, lang }) {
   const { t } = useTranslation();
   const [c, setC] = useState(initial);
@@ -28,7 +31,6 @@ function TemplateForm({ initial, plans, onSave, onCancel, saving, lang }) {
     onSave({ ...c, weekday: Number(c.weekday), duration_min: Number(c.duration_min), capacity: Number(c.capacity),
              instructor: c.instructor?.trim() || null, location: c.location?.trim() || null });
   };
-  const L = ({ label, children }) => <label className="block text-sm" style={{ color: 'var(--ink)' }}>{label}<span className="block mt-1">{children}</span></label>;
   return (
     <form onSubmit={submit} className="rounded-2xl border bg-white p-4 space-y-3 mb-4" style={{ borderColor: 'var(--brand-border)' }} data-testid="class-form">
       <div className="grid gap-3 sm:grid-cols-3">

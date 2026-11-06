@@ -83,6 +83,7 @@
           <h3>Your order</h3>
           <ul id="sum-mini"><li><span>Nothing yet</span></li></ul>
           <p class="sum-where" id="sum-where" hidden></p>
+          <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
           <div class="total"><span>Total</span><span id="total">₪0</span></div>
           <button class="btn" id="send" type="submit"><span>Continue to delivery</span></button>
           <button class="back" id="back" type="button" hidden>Back</button>
@@ -193,9 +194,11 @@
   });
   // delivery is in Jerusalem and more and its fee is not known, so it is confirmed on WhatsApp and never added to the total
   function pickup() { return document.querySelector('input[name=ful]:checked').value === 'pickup'; }
-  function total() { var t = 0; for (var k in q) t += q[k] * BA.unit(k); return t; }
+  function total() { return MirCode.after(goods()); }
+  function goods() { var t = 0; for (var k in q) t += q[k] * BA.unit(k); return t; }
   var send = document.getElementById('send');
   function update() {
+    MirCode.refresh();
     var html = '', mini = '';
     for (var k in q) if (q[k]) {
       var nm = BA.label(k);
@@ -203,7 +206,7 @@
       mini += '<li><span>' + q[k] + ' × ' + nm + '</span><span>' + money(q[k] * BA.unit(k)) + '</span></li>';
     }
     document.getElementById('sum-list').innerHTML = html || '<li><span>Your basket is empty. Pick a bake above.</span></li>';
-    if (total() && !pickup()) mini += '<li><span>Delivery</span><span>fee confirmed on WhatsApp</span></li>';
+    if (goods() && !pickup()) mini += '<li><span>Delivery</span><span>fee confirmed on WhatsApp</span></li>';
     document.getElementById('sum-mini').innerHTML = mini || '<li><span>Nothing yet</span></li>';
     document.getElementById('total').textContent = money(total());
     var s = {}; for (var k2 in q) if (q[k2]) s[k2] = q[k2]; window.siteBasket.set(s);
@@ -244,7 +247,7 @@
   prefill();
   function check(show, upto) {
     var ok = true, e; upto = upto || 3;
-    e = total() ? '' : 'Add a bake to your basket'; if (e) ok = false; if (show || !e) mark('items', e);
+    e = goods() ? '' : 'Add a bake to your basket'; if (e) ok = false; if (show || !e) mark('items', e);
     if (upto < 2) return ok;
     e = pickup() || v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
     e = !v('when') ? 'Choose the day' : v('when') < minDay ? 'We bake to order, so we need 24 hours.' + sayNext(nextOpen(addDay(minDay, -1))) : closedDay(v('when')) ? 'We are closed for Shabbat and holidays.' + sayNext(nextOpen(v('when'))) : ''; if (e) ok = false; if (show || !e || closedDay(v('when')) || (v('when') && v('when') < minDay)) mark('when', e);
@@ -264,10 +267,11 @@
   function save(notes) {
     var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: PID[k.split('~')[0]], qty: q[k] });
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: ls, fulfilment: pickup() ? 'pickup' : 'delivery', city: pickup() ? undefined : 'jerusalem', address: pickup() ? undefined : v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
+      body: JSON.stringify({ lines: ls, fulfilment: pickup() ? 'pickup' : 'delivery', city: pickup() ? undefined : 'jerusalem', address: pickup() ? undefined : v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes, discount_code: MirCode.code() }) })
       .then(function (r) { return r.json().then(function (j) { return r.ok ? j : null; }, function () { return null; }); }).catch(function () { return null; });
     return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
   }
+  MirCode.mount({ api: API, gig: GIG, goods: goods, phone: 'ph', field: 'fld', onChange: function () { update(); drawStep(); } });
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();
     if (sending) return;
@@ -275,6 +279,7 @@
     if (!check(true)) { for (var s1 = 1; s1 <= 3; s1++) if (!check(false, s1)) { check(true, s1); go(s1, true); break; } var bad = document.querySelector('.ostep:not([hidden]) .bad .fld'); if (bad) bad.focus(); return; }
     var out = ['Hi Bake away, I would like to order:'].concat(itemised());
     if (v('note')) out.push('Notes: ' + v('note'));
+    if (MirCode.code()) out.push(MirCode.text(goods()));
     out.push('Total: ' + money(total()) + (pickup() ? '' : ' (delivery fee to be confirmed)'));
     if (pickup()) { out.push('Pickup (please send me the address)'); out.push('Pickup day: ' + dayName({ weekday: 'long', day: 'numeric', month: 'long' })); }
     else { out.push('Delivery to: ' + v('addr')); out.push('Delivery day: ' + dayName({ weekday: 'long', day: 'numeric', month: 'long' })); }
@@ -302,7 +307,7 @@
     [].forEach.call(document.querySelectorAll('#steps li'), function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
     var pk = pickup(); document.getElementById('w-addr').hidden = pk; document.getElementById('h-pick').hidden = !pk; document.getElementById('when-l').textContent = pk ? 'Pickup day' : 'Delivery day';
     var day = v('when') ? dayName({ weekday: 'long' }) : '';
-    send.lastElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? (day ? 'Send on WhatsApp for ' + day : 'Send order on WhatsApp') + ', ' + money(total()) : 'Send order on WhatsApp');
+    send.lastElementChild.textContent = step < 3 ? STEP_BTN[step] : (goods() ? (day ? 'Send on WhatsApp for ' + day : 'Send order on WhatsApp') + ', ' + money(total()) : 'Send order on WhatsApp');
     send.classList.toggle('idle', !check(false, step));
     document.getElementById('send-note').textContent = STEP_NOTE[step];
     document.getElementById('back').hidden = step === 1;

@@ -221,3 +221,4 @@ R3v.1 pass: full footer on index and order (who we are with a quiet Order a gift
 R3v.2 pass: the site is Home plus its order page, so the menu bar keeps its jumps (What we make, Prices, How to order)
 R3v.14 pass: Gifts from $25, Delivery across Israel, Bit/bank transfer/PayPal/Revolut (the page's own price line, delivery and payment lines; the lone price line became one of the three)
 <!-- 1 Nov 2026: footer checked again after a last fix (phone footer columns, duplicate page list, contact link); check-footer, check-menu and check-facts pass -->
+<!-- 6 Nov 2026: the only change is the discount code box on the order form (public/pages/mir-code.js, Tzvi: American Crust's first-time code had nowhere to be typed). Looked at the form with the box and a test order on phone and laptop; the rest of the site is unchanged, so the other rules were not re-read. -->

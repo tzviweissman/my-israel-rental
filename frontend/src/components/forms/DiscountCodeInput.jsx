@@ -16,7 +16,7 @@ export const discountOn = (applied, amount) => {
   return Math.round(Math.max(0, Math.min(off, amount)) * 100) / 100;
 };
 
-export default function DiscountCodeInput({ businessId, form, amount, phone, applied, onApplied, initialCode }) {
+export default function DiscountCodeInput({ businessId, form, amount, phone, currency, applied, onApplied, initialCode }) {
   const { t } = useTranslation();
   // A friend's link (?ref=CODE, backend referrals.py) opens the box with
   // the code in it and checks it once.
@@ -31,7 +31,7 @@ export default function DiscountCodeInput({ businessId, form, amount, phone, app
     setBusy(true); setError('');
     try {
       const { data } = await axios.post(`${API}/marketplace/businesses/${businessId}/discount-codes/check`,
-        { code: code.trim(), form, amount: amount || 0, phone: phone || null });
+        { code: code.trim(), form, amount: amount || 0, phone: phone || null, currency: currency || null });
       if (data.ok) { onApplied({ code: data.code, kind: data.kind, value: data.value }); setOpen(false); }
       else setError(data.reason);
     } catch { setError(t('discounts.checkFailed', 'Could not check the code. Try again.')); } finally { setBusy(false); }
@@ -52,7 +52,7 @@ export default function DiscountCodeInput({ businessId, form, amount, phone, app
   }
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center gap-1.5 text-sm underline min-h-[44px]" style={{ color: 'var(--ink)' }} data-testid="discount-open">
+      <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center gap-1.5 text-base font-semibold underline min-h-[44px]" style={{ color: 'var(--ink)' }} data-testid="discount-open">
         <Tag size={14} /> {t('discounts.haveCode', 'Have a discount code?')}
       </button>
     );

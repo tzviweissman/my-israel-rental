@@ -6,7 +6,7 @@
  *
  * Writes frontend/public/badge/find-us-{en,he}-{dark,light}.svg (for websites)
  * and the same as .png at 3x (for flyers and Instagram). The icon is
- * brand/logo-icon.svg, drawn inline. Re-run after changing the wording.
+ * the real logo, embedded. Re-run after changing the wording.
  *
  *   node scripts/make-badges.mjs
  */
@@ -27,14 +27,13 @@ const THEMES = {
 };
 const WORDS = { en: 'Find us on', he: 'מצאו אותנו ב-' };
 
+// The real logo on the navy tile the site's menu uses (brand/logo-mark.png,
+// small copy kept beside the live rating badge). Embedded, because an SVG
+// shown as a picture cannot load another file.
+const MARK = fs.readFileSync(path.join(ROOT, 'backend', 'routes', 'marketplace', 'badge_mark.png')).toString('base64');
 function icon(x, y) {
-  // brand/logo-icon.svg at 40px.
-  return `<g transform="translate(${x} ${y}) scale(${40 / 120})">
-    <rect x="4" y="4" width="112" height="112" rx="30" fill="#143C5A"/>
-    <rect x="33" y="60" width="14" height="30" rx="6" fill="#7CA8C8"/>
-    <rect x="53" y="44" width="14" height="46" rx="6" fill="#FFFFFF"/>
-    <rect x="73" y="30" width="14" height="60" rx="6" fill="#C9A227"/>
-  </g>`;
+  return `<rect x="${x}" y="${y}" width="40" height="40" rx="10" fill="#143C5A"/>
+  <image x="${x + 3}" y="${y + 10.34}" width="34" height="19.32" href="data:image/png;base64,${MARK}"/>`;
 }
 
 function svg(lang, theme) {

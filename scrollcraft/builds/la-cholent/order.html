@@ -88,6 +88,7 @@
         <div class="of" id="w-ph"><label for="o-ph">Your phone</label><input id="o-ph" type="tel" autocomplete="tel" maxlength="30"><p class="err" id="e-ph"></p></div>
       </div>
       <div class="of"><label for="o-note">Anything else</label><input id="o-note" maxlength="300" placeholder="Own meat or parve? Extra meat or marrow bones by the pound?"></div>
+        <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
         <div class="act">
           <button class="btn" id="order-send" type="submit"><span id="order-send-label">Send my order on WhatsApp</span></button>
           <a class="btn-line" href="#order">Change the size</a>
@@ -116,7 +117,10 @@
   <a class="tb-brand" href="index.html"><img src="assets/seal.webp" width="40" height="40" alt=""><span>L.A. Cholent</span></a>
   <div class="tb-links"><a href="index.html">Home</a><a href="index.html#sizes">Sizes and prices</a><a href="index.html#occasions">Occasions</a><a href="index.html#proof">Kosher</a></div>
   <a class="btn" href="order.html" aria-current="page" data-mir-key="t-5308a873-6">Message to order</a>
-</nav></header>
+</nav>
+  <button type="button" class="mbtn" id="mbtn" aria-expanded="false" aria-controls="mpanel" data-mir-skip><span>Menu</span></button>
+  <div class="mpanel" id="mpanel"><a href="index.html" data-mir-key="t-mpnl1-0">Home</a><a href="index.html#sizes" data-mir-key="t-mpnl2-0">Sizes and prices</a><a href="index.html#occasions" data-mir-key="t-mpnl3-0">Occasions</a><a href="index.html#proof" data-mir-key="t-mpnl4-0">Kosher</a><a href="order.html" aria-current="page" data-mir-key="t-mpnl5-0">Message to order</a><a href="https://wa.me/972553311442" target="_blank" rel="noopener" data-mir-key="t-mpnl6-0">WhatsApp +972 55-331-1442</a></div>
+</header>
 
 <script src="site.js"></script>
 <script src="scrollcraft.js"></script>
@@ -201,17 +205,19 @@
   function save(notes) {
     var d = $('o-how').value === 'delivery';
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: [{ product_id: PIDS[cur], qty: qty }], fulfilment: d ? 'delivery' : 'pickup', address: d ? v('o-addr') : undefined, date: v('o-when'), customer_name: v('o-me'), customer_phone: v('o-ph'), notes: notes }) })
+      body: JSON.stringify({ lines: [{ product_id: PIDS[cur], qty: qty }], fulfilment: d ? 'delivery' : 'pickup', address: d ? v('o-addr') : undefined, date: v('o-when'), customer_name: v('o-me'), customer_phone: v('o-ph'), notes: notes, discount_code: MirCode.code() }) })
       .then(function (r) { if (!r.ok) throw new Error('order not saved: ' + r.status); return r.json(); }).catch(function (err) { console.error(err); return null; });
     return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
   }
+  MirCode.mount({ api: API, gig: GIG, goods: function () { return qty * sizes[cur].price; }, phone: 'o-ph', onChange: function () { window.labelOrder(); } });
   $('oform').addEventListener('submit', function (e) {
     e.preventDefault();
     if (sending) return;
     if (!check(true)) { var bad = document.querySelector('#oform .bad input'); if (bad) bad.focus(); return; }
     var s = sizes[cur], d = $('o-how').value === 'delivery', out = ['Hi L.A. Cholent, I would like to order:', '\u2022 ' + qty + ' \u00d7 ' + NAMES[cur] + ' (\u20aa' + qty * s.price + ')'];
     if (v('o-note')) out.push('Notes: ' + v('o-note'));
-    out.push('Total: \u20aa' + qty * s.price);
+    if (MirCode.code()) out.push(MirCode.text(qty * s.price));
+    out.push('Total: \u20aa' + MirCode.after(qty * s.price));
     out.push(d ? 'Deliver to: ' + v('o-addr') : 'Pick-up');
     out.push('For: ' + new Date(v('o-when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
     out.push('Name: ' + v('o-me') + ', ' + v('o-ph'));
@@ -227,7 +233,7 @@
       sending = false; btn.removeAttribute('aria-busy'); $('order-send-label').textContent = lab; 
     });
   });
-  function summary() { var s = sizes[cur]; $('osum').textContent = qty + ' \u00d7 ' + NAMES[cur] + ', \u20aa' + qty * s.price; $('order-send-label').textContent = 'Send my order on WhatsApp, \u20aa' + qty * s.price; }
+  function summary() { MirCode.refresh(); var s = sizes[cur], to = MirCode.after(qty * s.price); $('osum').textContent = qty + ' \u00d7 ' + NAMES[cur] + ', \u20aa' + to; $('order-send-label').textContent = 'Send my order on WhatsApp, \u20aa' + to; }
   window.labelOrder = function () { label(); summary(); };
   pick(1);
   // a size picked on the home page or in the footer arrives as ?size=0|1|2

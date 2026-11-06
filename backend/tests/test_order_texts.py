@@ -42,9 +42,9 @@ def world(monkeypatch):
              "track_token": "t" * 22, "owner_token": TOKEN, "lang": "en"}
     db = type("DB", (), {})()
     db.store_orders = Coll([order])
-    db.businesses = Coll([{"_id": "b1", "name": "Blazin Boards", "owner_user_id": "u1"}])
+    db.businesses = Coll([{"_id": "b1", "name": "Blazin Boards", "owner_user_id": "u1", "order_settings": {"text_on": True}}])
     db.users = Coll([{"id": "u1", "preferred_language": "en"}])
-    db.marketplace_gigs = Coll([{"_id": "g1"}])
+    db.marketplace_gigs = Coll([{"_id": "g1", "business_id": "b1"}])
     monkeypatch.setattr(ot, "db", db)
     monkeypatch.setattr(ot, "check_rate", lambda *a, **k: None)
     monkeypatch.setattr(orders, "_frontend_url", lambda: "https://myisraelrental.com")
@@ -204,18 +204,81 @@ def test_chosen_text_number_beats_whatsapp(world):
 def test_switch_and_booking_text(world):
     order, sent = world
     biz = ot.db.businesses.docs[0]
+    biz["order_settings"] = {}
     assert ot.texts_on(biz) is False
     gig = {"_id": "g1", "business_id": "b1"}
-    assert run(ot.text_owner_new_booking(gig, "Dani", "Haircut", "/dashboard", "u1")) is False
+    assert run(ot.text_owner_new_booking(gig, "Dani", "Haircut", "tok", "u1")) is False
     assert sent.await_count == 0
 
     # On with no number of its own: the WhatsApp number.
     biz["order_settings"] = {"text_on": True}
     assert ot.texts_on(biz) is True
-    run(ot.text_owner_new_booking(gig, "Dani", "Haircut", "/dashboard", "u1"))
+    run(ot.text_owner_new_booking(gig, "Dani", "Haircut", "tok", "u1"))
     assert sent.await_args.kwargs["to"] == "+972501234567" and "Haircut" in sent.await_args.kwargs["body"]
+    assert "/bookings/owner/tok" in sent.await_args.kwargs["body"]
     # A number chosen before the switch existed counts as on.
     assert ot.texts_on({"order_settings": {"text_number": "055-337-8799"}}) is True
+
+
+def test_guest_booking_answer_goes_by_text(world):
+    _, sent = world
+    b = {"contact_phone": "052-111-2222", "track_token": "t" * 22, "lang": "en", "gig_id": "g1"}
+    run(ot.text_customer_booking(b, "accepted", "Haircut"))
+    assert sent.await_args.kwargs["to"] == "052-111-2222"
+    assert "confirmed" in sent.await_args.kwargs["body"] and "/bookings/track/" in sent.await_args.kwargs["body"]
+    run(ot.text_customer_booking({**b, "lang": "he"}, "declined", "Haircut"))
+    assert "מצטערים" in sent.await_args.kwargs["body"]
+    sent.reset_mock()
+    run(ot.text_customer_booking({"track_token": "t" * 22}, "accepted", "Haircut"))
+    assert sent.await_count == 0
+
+
+def test_owner_token_answers_a_booking_only_while_waiting(world, monkeypatch):
+    b = {"_id": "bk1", "owner_token": "k" * 22, "status": "pending", "provider_user_id": "u1", "gig_id": "g1"}
+    ot.db.marketplace_bookings = Coll([b])
+
+    async def move(bid, patch, user):
+        assert user == {"user_id": "u1"}
+        b["status"] = patch.status
+    from routes.marketplace import gigs
+    monkeypatch.setattr(gigs, "update_booking", AsyncMock(side_effect=move))
+    out = run(ot.owner_booking_confirm("k" * 22, None))
+    assert out["status"] == "accepted" and out["already"] is False
+    again = run(ot.owner_booking_decline("k" * 22, None))
+    assert again["status"] == "accepted" and again["already"] is True
+    assert gigs.update_booking.await_count == 1
+    with pytest.raises(HTTPException):
+        run(ot.owner_booking("short", None))
+
+
+def test_dashboard_decision_tells_the_customer_only(world):
+    order, sent = world
+    order["source"] = "website"
+    run(ot.customer_told_of_decision(order, "preparing"))
+    assert [c.kwargs["to"] for c in sent.await_args_list] == ["972521112222"]
+    assert "confirmed" in sent.await_args.kwargs["body"]
+
+    sent.reset_mock()
+    run(ot.customer_told_of_decision(order, "cancelled"))
+    assert "can't take" in sent.await_args.kwargs["body"]
+
+    # Not a first decision, or an order the business typed in: nothing.
+    sent.reset_mock()
+    run(ot.customer_told_of_decision({**order, "status": "preparing"}, "ready"))
+    run(ot.customer_told_of_decision({**order, "source": "manual"}, "preparing"))
+    assert sent.await_count == 0
+
+
+def test_customer_told_order_arrived(world):
+    order, sent = world
+    biz = {"name": "Blazin Boards", "order_settings": {"text_on": True}}
+    run(ot.text_customer_received(order, biz))
+    body = sent.await_args.kwargs["body"]
+    assert sent.await_args.kwargs["to"] == "972521112222"
+    assert "#1042" in body and "confirm" in body and "/orders/track/" in body
+    sent.reset_mock()
+    run(ot.text_customer_received({**order, "table": 4}, biz))
+    assert sent.await_count == 0
 
 
 def test_app_link_opens_the_app():
@@ -282,3 +345,36 @@ def test_numbers_never_repeat_even_if_the_counter_was_reset(monkeypatch):
     assert other["order_no"] == 1001  # each store counts its own
     nums = [d["order_no"] for d in db.store_orders.docs if d["business_id"] == "b1"]
     assert len(nums) == len(set(nums))
+
+
+def test_price_request_texts_both_only_with_texts_on(world, monkeypatch):
+    _, sent = world
+    monkeypatch.setattr(ot, "_business_text_number", AsyncMock(return_value="+972501234567"))
+    gig = {"_id": "g1", "business_id": "b1", "provider_user_id": "u1"}
+    q = {"name": "Dani", "description": "Balloons for a party"}
+    ot.db.businesses.docs[0]["order_settings"] = {}
+    run(ot.text_owner_new_quote(gig, q))
+    run(ot.text_customer_request(gig, "0521112222", "/quotes/abc", False))
+    assert sent.await_count == 0
+    ot.db.businesses.docs[0]["order_settings"] = {"text_on": True}
+    run(ot.text_owner_new_quote(gig, q))
+    run(ot.text_customer_request(gig, "0521112222", "/quotes/abc", False))
+    assert sent.await_count == 2
+    assert "Balloons for a party" in sent.await_args_list[0].kwargs["body"]
+    assert "/quotes/abc" in sent.await_args_list[1].kwargs["body"]
+
+
+def test_switch_off_sends_no_text_at_all(world):
+    """Texts go only to a business that turned them on (Tzvi, 6 Nov 2026)."""
+    order, sent = world
+    biz = ot.db.businesses.docs[0]
+    biz["order_settings"] = {"text_on": False}
+    run(ot.text_owner_new_order(order["_id"]))
+    run(ot.text_customer_received(order, biz))
+    run(ot._texts_after(order, biz, True))
+    run(ot.text_customer_booking({"contact_phone": "0521112222", "track_token": "t" * 22, "gig_id": "g1"}, "accepted", "Board"))
+    assert sent.await_count == 0
+    biz["order_settings"] = {"text_on": True}
+    run(ot.text_customer_received(order, biz))
+    run(ot.text_customer_booking({"contact_phone": "0521112222", "track_token": "t" * 22, "gig_id": "g1"}, "accepted", "Board"))
+    assert sent.await_count == 2

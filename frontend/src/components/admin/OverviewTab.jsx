@@ -1,3 +1,4 @@
+import VisitBreakdown from '../dashboard/VisitBreakdown';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Home, Eye, Users, Calendar, Briefcase, Store, Inbox, MessageCircle, QrCode, Globe, MousePointerClick } from 'lucide-react';
@@ -175,6 +176,7 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
         </p>
       )}
 
+      <VisitBreakdown API={API} token={token} everyone className="mb-8" />
       <DemandByPerson token={token} range={range} />
 
       {/* --- stock: true right now, whatever the range says --- */}

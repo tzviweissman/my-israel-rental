@@ -56,6 +56,8 @@ async def _owned(business_id: str, user: dict[str, Any]) -> dict[str, Any]:
 class CodeIn(BaseModel):
     code: str = Field(..., min_length=3, max_length=24)
     kind: Literal["percent", "amount"] = "percent"
+    # An amount off is money in one currency (Tzvi, 6 Nov 2026); a percentage fits any total.
+    currency: Literal["ILS", "USD"] = "ILS"
     value: float = Field(..., gt=0, le=100000)
     applies_to: Literal["orders", "memberships", "both"] = "both"
     starts_on: Optional[date] = None
@@ -79,7 +81,7 @@ def _check_in(b: CodeIn) -> str:
 
 
 def _out(d: dict[str, Any]) -> dict[str, Any]:
-    return {"id": d["_id"], "code": d["code"], "kind": d["kind"], "value": d["value"], "applies_to": d.get("applies_to", "both"),
+    return {"id": d["_id"], "code": d["code"], "kind": d["kind"], "currency": d.get("currency", "ILS"), "value": d["value"], "applies_to": d.get("applies_to", "both"),
             "starts_on": d.get("starts_on"), "ends_on": d.get("ends_on"), "min_order": d.get("min_order"),
             "max_uses": d.get("max_uses"), "once_per_customer": d.get("once_per_customer", True),
             "first_order_only": d.get("first_order_only", False), "active": d.get("active", True),
@@ -163,9 +165,9 @@ async def _is_returning(business_id: str, phone_e164: Optional[str]) -> bool:
 
 
 async def evaluate(business_id: str, code: str, form: Literal["orders", "memberships"], amount: float,
-                   phone: Optional[str]) -> tuple[dict[str, Any], float]:
-    """(code document, discount in shekels), or CodeRefused(reason) with a
-    sentence the customer can read."""
+                   phone: Optional[str], currency: Optional[str] = None) -> tuple[dict[str, Any], float]:
+    """(code document, discount in the total's currency), or CodeRefused(reason)
+    with a sentence the customer can read."""
     c = await db.discount_codes.find_one({"business_id": business_id, "code": norm_code(code), "deleted": {"$ne": True}})
     if not c:
         # Someone's personal referral code (referrals.py).
@@ -177,6 +179,12 @@ async def evaluate(business_id: str, code: str, form: Literal["orders", "members
         c = await gift_cards.as_code(business_id, norm_code(code))
     if not c or not c.get("active", True):
         raise CodeRefused("This code is not valid")
+    # A gift card or an amount off is money in one currency, and there is no exchange rate here. Only codes
+    # that say their currency: older ones and referral or birthday codes carry none, and work as they did.
+    if c["kind"] == "amount" and c.get("currency") and currency and c["currency"] != currency.upper():
+        raise CodeRefused(("This gift card is in " if c.get("gift_card") else "This code is in ")
+                          + ("dollars" if c["currency"] == "USD" else "shekels")
+                          + " and this total is not, so it cannot be used here")
     if c.get("applies_to", "both") not in (form, "both"):
         raise CodeRefused("This code is for " + ("orders" if form == "memberships" else "memberships") + " only")
     today = datetime.now(IL).date().isoformat()
@@ -187,7 +195,7 @@ async def evaluate(business_id: str, code: str, form: Literal["orders", "members
     if c.get("max_uses") and c.get("uses", 0) >= c["max_uses"]:
         raise CodeRefused("This code has been used up")
     if form == "orders" and c.get("min_order") and amount < c["min_order"]:
-        raise CodeRefused(f"This code needs an order of at least ₪{c['min_order']:g}")
+        raise CodeRefused(f"This code needs an order of at least {'$' if (currency or c.get('currency')) == 'USD' else '₪'}{c['min_order']:g}")
     e164 = normalize_whatsapp_number(phone) if phone else None
     if c.get("referral_of") and e164 == c["referral_of"]:
         raise CodeRefused("This is your own code: send it to a friend")
@@ -218,11 +226,25 @@ async def redeem(c: dict[str, Any], discount: float, phone: Optional[str]) -> bo
     return (await db.discount_codes.update_one(q, upd)).modified_count == 1
 
 
+async def has_codes(biz: dict[str, Any]) -> bool:
+    """Whether a customer could be holding a code here, so a designed site's
+    order form knows to offer the box (public/pages/mir-code.js). A code past
+    its end date or kept for memberships does not count."""
+    from . import referrals
+    today = datetime.now(IL).date().isoformat()
+    if await db.discount_codes.count_documents(
+        {"business_id": biz["_id"], "active": True, "deleted": {"$ne": True}, "applies_to": {"$ne": "memberships"},
+         "$or": [{"ends_on": None}, {"ends_on": {"$gte": today}}]}, limit=1):
+        return True
+    return bool(referrals.settings_of(biz)["on"]) or bool(await db.gift_cards.count_documents({"business_id": biz["_id"]}, limit=1))
+
+
 class CheckIn(BaseModel):
     code: str = Field(..., min_length=1, max_length=40)
     form: Literal["orders", "memberships"] = "orders"
     amount: float = Field(0, ge=0, le=1_000_000)
     phone: Optional[str] = Field(None, max_length=40)
+    currency: Optional[str] = Field(None, max_length=3)
 
 
 @router.post("/businesses/{business_id}/discount-codes/check")
@@ -231,7 +253,7 @@ async def check_code(business_id: str, body: CheckIn, request: Request):
     it must not become a way to guess a business's codes."""
     check_rate(request, bucket="discount_check", limit=30, window_seconds=600)
     try:
-        c, off = await evaluate(business_id, body.code, body.form, body.amount, body.phone)
+        c, off = await evaluate(business_id, body.code, body.form, body.amount, body.phone, body.currency)
     except CodeRefused as e:
         return {"ok": False, "reason": str(e)}
     return {"ok": True, "code": c["code"], "kind": c["kind"], "value": c["value"], "discount": off}

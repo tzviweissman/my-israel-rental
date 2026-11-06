@@ -15,3 +15,17 @@ function buildKnob(svg, marks) {
     '<g class="rot"><circle class="grip" cx="100" cy="100" r="46"/><rect class="grip" x="91" y="44" width="18" height="112" rx="9"/>' +
     '<line class="pointer" x1="100" y1="96" x2="100" y2="54"/></g>');
 }
+
+/* the phone menu: a button that opens a panel; closes on Escape, a tap on a link, or the button again */
+(function () {
+  var bar = document.getElementById('topbar'), mb = document.getElementById('mbtn');
+  if (!bar || !mb) return;
+  window.siteMenu = function (o) {
+    bar.classList.toggle('is-open', o); mb.setAttribute('aria-expanded', String(o));
+    mb.firstElementChild.textContent = o ? 'Close' : 'Menu';
+    mb.setAttribute('aria-label', o ? 'Close the menu' : 'Menu');
+  };
+  mb.addEventListener('click', function () { window.siteMenu(!bar.classList.contains('is-open')); });
+  bar.querySelectorAll('.mpanel a').forEach(function (a) { a.addEventListener('click', function () { window.siteMenu(false); }); });
+  addEventListener('keydown', function (e) { if (e.key === 'Escape') window.siteMenu(false); });
+}());

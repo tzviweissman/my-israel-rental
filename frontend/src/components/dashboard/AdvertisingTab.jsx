@@ -7,12 +7,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { useSearchParams } from 'react-router-dom';
+import ShareListingsPanel from './ShareListingsPanel';
 import AdMaker from './AdMaker';
 import QrShareCard from '../common/QrShareCard';
 import ShareLinkButtons from '../common/ShareLinkButtons';
 
 // A person's own businesses and rentals, as targets.
-export function AdvertisingSection({ API, token, properties }) {
+export function AdvertisingSection({ API, token, properties, ownerId }) {
   const [businesses, setBusinesses] = useState(null);
   useEffect(() => {
     axios.get(`${API}/marketplace/businesses`, { headers: { Authorization: `Bearer ${token}` } })
@@ -23,12 +25,25 @@ export function AdvertisingSection({ API, token, properties }) {
     ...businesses.map((b) => ({ ...b, type: 'business', id: b.id, name: b.name })),
     ...(properties || []).map((p) => ({ ...p, type: 'property', name: p.title })),
   ];
-  return <AdvertisingTab API={API} token={token} targets={targets} />;
+  return (
+    <>
+      <AdvertisingTab API={API} token={token} targets={targets} />
+      {(properties || []).length > 0 && (
+        <div className="mt-4" data-testid="advertising-all-rentals">
+          <ShareListingsPanel userId={ownerId} propertyCount={properties.length} API={API} token={token} />
+        </div>
+      )}
+    </>
+  );
 }
 
 export default function AdvertisingTab({ API, token, targets }) {
   const { t } = useTranslation();
-  const [idx, setIdx] = useState(0);
+  // The business card, a listing or an "ad is ready" line sends people here with what to open.
+  const [params] = useSearchParams();
+  const wanted = targets.findIndex((x) => String(x.id) === params.get('target'));
+  const [idx, setIdx] = useState(wanted >= 0 ? wanted : 0);
+  const [start] = useState(() => (params.get('look') || params.get('item') ? { look: params.get('look') || undefined, item: params.get('item') || undefined } : null));
   const [link, setLink] = useState(null);
   const target = targets[Math.min(idx, targets.length - 1)];
   const type = target?.type;
@@ -61,7 +76,7 @@ export default function AdvertisingTab({ API, token, targets }) {
 
       <section className={card} style={border} data-testid="advertising-ads">
         <h2 className="text-lg font-semibold mb-3" style={heading}>{t('advertising.adsTitle', 'Your ads')}</h2>
-        <AdMaker key={`${type}-${id}`} inline API={API} token={token} targetType={type} target={target} />
+        <AdMaker key={`${type}-${id}`} inline API={API} token={token} targetType={type} target={target} start={idx === wanted ? start : null} />
       </section>
 
       <section className={card} style={border} data-testid="advertising-link">

@@ -111,8 +111,7 @@ const drawOf = async (fn) => {
 };
 
 // --- the owners' ad maker
-await p.goto(`${SITE}/dashboard?tab=my-businesses&as=owner`, { timeout: 180000 });
-await p.locator('[data-testid^="business-make-ad-"]').first().click();
+await p.goto(`${SITE}/dashboard?tab=advertising&as=owner`, { timeout: 180000 });
 await p.locator('[data-testid="ad-gallery"]').waitFor();
 let count = 0;
 for (const l of ['en', 'he']) {

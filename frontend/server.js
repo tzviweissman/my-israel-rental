@@ -506,6 +506,12 @@ async function sendHandBuilt(req, res, slug, file) {
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
   const live = data && { hours: data.hours, prices: data.prices, soldOut: Object.fromEntries((data.products || []).filter((p) => !p.in_stock).map((p) => [p.name, true])) };
   let html = applyPrices(applyEdits(raw, data && data.edits, editor, live), slug, data && data.prices);
+  // An order form's code box (public/pages/mir-code.js), ahead of the page's own script that uses it.
+  html = html.replace('<div id="mir-code"></div>', `<div id="mir-code"></div><script>window.MIR_PAUSED=${JSON.stringify(data && data.paused && data.paused.active ? data.paused : null).replace(/</g, '\\u003c')};</script><script src="/pages/mir-code.js?v=${EDITOR_STAMP}"></script>`);
+  // A form of the page's own gets what the standard order page has (public/pages/mir-order.js).
+  if (!editor && /type="tel"|window\.open\(''/.test(html)) {
+    html = html.replace(/<\/body>/i, `<script src="/pages/mir-order.js?v=${EDITOR_STAMP}"${data && data.texts_on ? ' data-texts="1"' : ''}></script></body>`);
+  }
   // The business's notice (dashboard, "Notice at the top"; the API sends it only between its dates), on every page of
   // the site, in a corner where no design's own bar sits; closed for the visit with its button.
   if (data && data.notice && data.notice.text && !/id="mir-notice"/.test(html)) {
@@ -532,7 +538,8 @@ async function sendHandBuilt(req, res, slug, file) {
   // A visit, counted for the owner's sales summary (backend page_edits.py designed_site_visit): the browser's
   // visitor id, so one visitor counts once a day; never in the editor or the owner's "View live" (?fresh).
   if (!editor && !/[?&]fresh(?:=|&|$)/.test(req.url || '')) {
-    html = html.replace(/<\/body>/i, `<script>(function(){try{var k='mir_vid',v=localStorage.getItem(k);if(!v){v=window.crypto&&crypto.randomUUID?crypto.randomUUID():'r'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,v)}fetch('/api/marketplace/business/${slug}/visit',{method:'POST',headers:{'X-Visitor-Id':v},keepalive:true}).catch(function(){})}catch(e){}})()</script></body>`);
+    const page = file.replace(/\.html$/, '');
+    html = html.replace(/<\/body>/i, `<script>(function(){try{var k='mir_vid',v=localStorage.getItem(k);if(!v){v=window.crypto&&crypto.randomUUID?crypto.randomUUID():'r'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,v)}var s=sessionStorage.getItem('mir_src');if(!s){var r=document.referrer?new URL(document.referrer).hostname:'';s=new URLSearchParams(location.search).get('src')||(r&&r!==location.hostname?r:'direct');sessionStorage.setItem('mir_src',s)}var l=document.documentElement.lang||'';fetch('/api/marketplace/business/${slug}/visit',{method:'POST',headers:{'X-Visitor-Id':v,'X-Visit-Source':s,'X-Visit-Lang':l,'X-Visit-Page':'${page}'},keepalive:true}).catch(function(){});document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href]');if(!a)return;var u=a.href,m=/wa\\.me|whatsapp/.test(u)?'whatsapp':/^tel:/.test(u)?'phone':/^mailto:/.test(u)?'email':/waze|maps\\.|\\/maps/.test(u)?'directions':/instagram/.test(u)?'instagram':/facebook|fb\\.com/.test(u)?'facebook':/tiktok/.test(u)?'tiktok':'';if(m)fetch('/api/marketplace/business/${slug}/tap',{method:'POST',headers:{'content-type':'application/json','X-Visit-Source':s,'X-Visit-Lang':l},body:JSON.stringify({kind:m,page:'${page}'}),keepalive:true}).catch(function(){})},true)}catch(e){}})()</script></body>`);
   }
   // A page with a gallery ([data-mir-gallery]) shows the photos its owner
   // added in the dashboard, laid out in the page's own style

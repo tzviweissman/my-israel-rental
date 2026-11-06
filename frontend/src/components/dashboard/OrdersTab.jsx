@@ -34,7 +34,7 @@ import {
 import { phoneError } from '../../utils/phoneValidation';
 import { money } from '../../utils/currency';
 import { pastCutoff } from '../../utils/orderCutoffs';
-import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle } from './OrderCard';
+import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle, notesWithoutCode } from './OrderCard';
 import SendToSupplierDialog from './SendToSupplierDialog';
 import MoreMenu from './MoreMenu';
 import CustomFieldsEditor from './CustomFieldsEditor';
@@ -43,6 +43,7 @@ import CounterSale from './CounterSale';
 // The kitchen's prep list and the delivery route (backend prep_route.py).
 import { DeliveryRoute, PrepList } from './PrepAndRoute';
 import BasketReminderSwitch from './BasketReminderSwitch';
+import PauseOrders from './PauseOrders';
 import RestockWaiting from './RestockWaiting';
 import TableOrdering from './TableOrdering';
 
@@ -118,7 +119,7 @@ const fromOrder = (o) => ({
   source: o.source || 'manual',
 });
 
-export default function OrdersTab({ API, token }) {
+export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = null }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const auth = useMemo(() => ({ headers: { Authorization: `Bearer ${token}` } }), [token]);
@@ -135,6 +136,11 @@ export default function OrdersTab({ API, token }) {
   const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
   const loadSeq = useRef(0);
+  // New orders wait for an answer whatever day they are for, so with any
+  // waiting the page opens on All open, on the business that has the most:
+  // "Today" showed nothing while the Overview said 15 (6 Nov 2026). Only on
+  // arrival; once someone picks a view or a business it stays theirs.
+  const landed = useRef(false);
   useEffect(() => {
     const id = setTimeout(() => setQuery(search.trim()), 300);
     return () => clearTimeout(id);
@@ -182,6 +188,18 @@ export default function OrdersTab({ API, token }) {
   useEffect(() => {
     try { localStorage.setItem('orders.view', view); } catch { /* private mode */ }
   }, [view]);
+
+  useEffect(() => {
+    if (landed.current || !businesses || !newOrders) return;
+    landed.current = true;
+    setRange('open');
+    const counts = newByBusiness || {};
+    if (!counts[bizId]) {
+      const most = [...businesses].sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0))[0];
+      if (most && counts[most.id]) setBizId(most.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businesses, newOrders]);
 
   // ---- businesses -------------------------------------------------------
   useEffect(() => {
@@ -400,13 +418,13 @@ export default function OrdersTab({ API, token }) {
           {businesses.length > 1 && (
             <select
               value={biz.id}
-              onChange={(e) => setBizId(e.target.value)}
+              onChange={(e) => { landed.current = true; setBizId(e.target.value); }}
               className="w-full sm:w-auto px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]"
               style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
               aria-label={t('orders.pickBusiness', 'Business')}
               data-testid="orders-business-select"
             >
-              {businesses.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+              {businesses.map((b) => <option key={b.id} value={b.id}>{b.name}{newByBusiness?.[b.id] ? ` (${t('orders.newCount', '{{n}} new', { n: newByBusiness[b.id] })})` : ''}</option>)}
             </select>
           )}
           {!entryOpen && !editing && !counterOpen && (
@@ -492,15 +510,21 @@ export default function OrdersTab({ API, token }) {
             ['prep', ClipboardList, t('prep.title', 'Prep list'), () => setPanel('prep')],
             ['route', Bike, t('route.title', 'Delivery route'), () => setPanel('route')],
             ['standing', Repeat, t('orders.standingMenu', 'Weekly orders'), () => setPanel('standing')],
+            ['pause', Pause, t('pauseOrders.title', 'Pause orders'), () => setPanel(panel === 'pause' ? null : 'pause')],
             ['couriers', Bike, t('orders.couriers', 'Couriers'), () => setPanel('couriers')],
             ['staff', Link2, t('orders.staffLink', 'Staff link'), () => setPanel('staff')],
             ['questions', ListPlus, t('fields.ordersMenu', 'Questions on the order form'), () => setPanel('questions')],
             ['export', Download, t('orders.export', 'Export CSV'), exportCsv],
-          ].filter(([key]) => biz.role !== 'staff' || !['staff', 'couriers'].includes(key))
+          ].filter(([key]) => biz.role !== 'staff' || !['staff', 'couriers', 'pause'].includes(key))
             .map(([key, Icon, label, onClick]) => ({ key, Icon, label, onClick, active: panel === key }))}
         />
       </div>
 
+      {settings.pause?.active && panel !== 'pause' && (
+        <button type="button" onClick={() => setPanel('pause')} className="w-full text-start rounded-xl px-4 py-3 mb-3 text-sm font-semibold" style={{ background: 'var(--ink)', color: 'var(--action-ink)' }} data-testid="orders-paused-strip">
+          {t('pauseOrders.strip', 'Orders are paused: customers cannot order. Tap to change.')}
+        </button>
+      )}
       <RestockWaiting API={API} auth={auth} businessId={biz.id} />
 
       {panel === 'questions' && (
@@ -514,6 +538,7 @@ export default function OrdersTab({ API, token }) {
       {panel === 'prep' && <PrepList API={API} auth={auth} businessId={biz.id} businessName={biz.name} onClose={() => setPanel(null)} />}
       {panel === 'route' && <DeliveryRoute API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'staff' && <StaffLinkPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
+      {panel === 'pause' && <PauseOrders API={API} auth={auth} businessId={biz.id} onChanged={loadSettings} />}
       {panel === 'couriers' && <CouriersPanel API={API} auth={auth} businessId={biz.id} couriers={couriers} settings={settings} onChanged={() => Promise.all([loadCouriers(), loadSettings(), load()])} onClose={() => setPanel(null)} />}
       {panel === 'standing' && <StandingPanel API={API} auth={auth} standing={standing} onChanged={() => Promise.all([loadSettings(), load()])} onClose={() => setPanel(null)} />}
 
@@ -545,7 +570,7 @@ export default function OrdersTab({ API, token }) {
             key={key}
             type="button"
             aria-pressed={range === key}
-            onClick={() => { setRange(key); setStatusFilter(''); }}
+            onClick={() => { landed.current = true; setRange(key); setStatusFilter(''); }}
             className="px-3 min-h-[40px] rounded-lg text-sm font-semibold whitespace-nowrap"
             style={range === key
               ? { background: 'var(--ink)', color: 'var(--action-ink)' }
@@ -1048,13 +1073,15 @@ function OrdersTable({ orders, busyId, onStatus, onEdit, t }) {
                 </td>
                 <td className="py-2 px-2 whitespace-pre-line" dir="auto" style={{ color: 'var(--ink)' }}>
                   {o.items}
-                  {o.notes && <div className="text-[11px] italic" style={{ color: 'var(--brand-muted)' }}>{o.notes}</div>}
+                  {notesWithoutCode(o) && <div className="text-[11px] italic" style={{ color: 'var(--brand-muted)' }}>{notesWithoutCode(o)}</div>}
                 </td>
                 <td className="py-2 px-2" style={{ color: 'var(--ink)' }}>
                   {o.table ? t('tableOrder.table', 'Table {{n}}', { n: o.table }) : o.fulfilment === 'delivery' ? t('orders.delivery', 'Delivery') : t('orders.pickup', 'Pickup')}
                   {o.address && <div className="text-[11px]" dir="auto" style={{ color: 'var(--brand-muted)' }}>{o.address}</div>}
                 </td>
-                <td className="py-2 px-2 text-end tabular-nums whitespace-nowrap" style={{ color: 'var(--ink)' }}>{o.total != null ? `\u20aa${Number(o.total).toLocaleString()}` : ''}</td>
+                <td className="py-2 px-2 text-end tabular-nums whitespace-nowrap" style={{ color: 'var(--ink)' }}>{o.total != null ? money(o.total, o.currency) : ''}
+                  {o.discount && <div className="text-[11px] font-semibold" dir="ltr" style={{ color: '#2E7D4F' }} data-testid="order-code-used">{t('discounts.orderLine', '{{code}}: -{{v}}', { code: o.discount.code, v: money(o.discount.amount, o.currency) })}</div>}
+                </td>
                 <td className="py-2 px-2 whitespace-nowrap">
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border" style={pillStyle(o.status, false)}>{t(`orders.status.${o.status}`, o.status)}</span>
                 </td>
@@ -1439,24 +1466,14 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
   const [areasOpen, setAreasOpen] = useState(Object.keys(settings.area_fees || {}).length > 0);
   const areas = settings.serves_nationwide ? [] : (settings.areas || []);
   const [courier, setCourier] = useState(settings.default_courier_user_id || '');
-  // New-order texts go to the WhatsApp number unless the business gives another.
-  const [textOn, setTextOn] = useState(!!settings.text_on);
-  const [textDifferent, setTextDifferent] = useState(!!settings.text_number);
-  const [textNumber, setTextNumber] = useState(settings.text_number || '');
   const [busy, setBusy] = useState(false);
   const dayName = (d) => t(`weekday.${d}`, String(d));
   const active = (couriers || []).filter((c) => c.status === 'active');
 
   const save = async () => {
-    if (textOn && textDifferent && textNumber.replace(/\D/g, '').length < 9) {
-      toast.error(t('orderTexts.enterNumber', 'Please enter a mobile number with the leading 0 or a country code'));
-      return;
-    }
     setBusy(true);
     try {
       await axios.put(`${API}/marketplace/businesses/${businessId}/orders/settings`, {
-        text_on: textOn,
-        text_number: textOn && textDifferent ? textNumber.trim() : null,
         delivery_on: deliveryOn, cutoffs: rows, pickup_windows: pickup, delivery_windows: delivery,
         delivery_fee: fee === '' ? null : Number(fee), min_order: minOrder === '' ? null : Number(minOrder),
         free_over: freeOver === '' ? null : Number(freeOver),
@@ -1507,52 +1524,8 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
         <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}><X size={18} /></button>
       </div>
 
-      <BasketReminderSwitch API={API} auth={auth} businessId={businessId} />
-      <TableOrdering API={API} auth={auth} businessId={businessId} />
 
-      {h(t('orderTexts.title', 'Text notifications'))}
-      <div className="flex items-start gap-3">
-        <div className="flex-1 min-w-0">
-          <p id="settings-text-on-label" className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('orderTexts.on', 'Text me new orders and bookings')}</p>
-          <p className="text-[11px] mt-0.5" style={{ color: 'var(--brand-muted)' }}>{textOn
-            ? t('orderTexts.onHint', 'On: customers stay on the site after they order or book, and are not sent to WhatsApp.')
-            : t('orderTexts.offHint', 'Off: after they order or book, customers are sent to your WhatsApp.')}</p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={textOn}
-          aria-labelledby="settings-text-on-label"
-          onClick={() => setTextOn((v) => !v)}
-          className="shrink-0 -my-2.5 inline-flex min-h-[44px] min-w-[52px] items-center justify-center"
-          data-testid="settings-text-on"
-        >
-          <span className={`inline-flex h-6 w-11 items-center rounded-full px-1 ${textOn ? 'justify-end' : 'justify-start'}`}
-            style={{ background: textOn ? 'var(--brand-primary)' : 'var(--brand-muted)' }}>
-            <span className="h-4 w-4 rounded-full bg-white shadow-sm" />
-          </span>
-        </button>
-      </div>
-      {textOn && (
-      <fieldset className="mt-2" data-testid="settings-text-number">
-        <legend className="text-[12px] mb-1" style={{ color: 'var(--brand-muted)' }}>{t('orderTexts.body', 'Each new order is texted to this number, with a link to confirm or decline it.')}</legend>
-        <label className="flex items-center gap-2 min-h-[44px] text-sm" style={{ color: 'var(--ink)' }}>
-          <input type="radio" name="settings-text-number" checked={!textDifferent} onChange={() => setTextDifferent(false)} data-testid="settings-text-same" />
-          <span>{t('orderTexts.same', 'Same as my WhatsApp number')}{settings.whatsapp_number && <span dir="ltr" className="ms-1" style={{ color: 'var(--brand-muted)' }}>{settings.whatsapp_number}</span>}</span>
-        </label>
-        {!textDifferent && !settings.whatsapp_number && (
-          <p className="text-[12px] mb-1" role="status" style={{ color: 'var(--ink)' }} data-testid="settings-text-no-whatsapp">{t('orderTexts.noWhatsapp', 'This business has no WhatsApp number yet, so no texts can go out. Add one to your listing, or choose a different number.')}</p>
-        )}
-        <label className="flex items-center gap-2 min-h-[44px] text-sm" style={{ color: 'var(--ink)' }}>
-          <input type="radio" name="settings-text-number" checked={textDifferent} onChange={() => setTextDifferent(true)} data-testid="settings-text-different" />
-          {t('orderTexts.different', 'A different number')}
-        </label>
-        {textDifferent && (
-          <input type="tel" dir="ltr" inputMode="tel" maxLength={30} value={textNumber} onChange={(e) => setTextNumber(e.target.value)} className={`${sel} w-full sm:w-64`} style={selStyle}
-                 placeholder="05X-XXX-XXXX" aria-label={t('orderTexts.numberLabel', 'Number for texts')} data-testid="settings-text-input" />
-        )}
-      </fieldset>
-      )}
+      <PauseOrders API={API} auth={auth} businessId={businessId} />
 
       {h(t('orders.defaultCourier', 'Default courier'))}
       <select value={courier} onChange={(e) => setCourier(e.target.value)} className={sel} style={selStyle} data-testid="settings-courier">
@@ -1669,6 +1642,9 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
           {busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} {t('orders.saveSettings', 'Save')}
         </button>
       </div>
+
+      <BasketReminderSwitch API={API} auth={auth} businessId={businessId} />
+      <TableOrdering API={API} auth={auth} businessId={businessId} />
     </div>
   );
 }
