@@ -4,7 +4,7 @@
 
 **Booking.** One page in three steps: day and time from her listing's hours (taken times crossed out), occasion and where (both optional), your details. The request is written out beside the form as you fill it, saved to MyIsraelRental, then sent on WhatsApp with a tracking link.
 
-**Spent.** Two generated pictures through the Higgsfield API: the room and the brush beside the price. The price check for the nearest model listed 2 credits an image; the API does not report the charge per call, so about 4 credits at most, plus a failed attempt to reach a fill model, which the API refused before charging.
+**Spent.** Three generated images through the Higgsfield API: the room in wide (used), the room in tall (a different mirror, not used, so the phone picture is made from the wide one), and the brush beside the price (used). The API does not report the charge per call. The price check for the nearest model it lists said 2 credits an image, so about 6 credits at most. A try at the fill model was refused before any charge.
 
 ## Not done yet
 - No real photos of her or her work: question 2 asks for them first. A gallery place is ready and stays hidden until then.
