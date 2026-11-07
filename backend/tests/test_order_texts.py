@@ -148,6 +148,7 @@ def test_israel_goes_through_cellact_when_set(monkeypatch):
     monkeypatch.setenv("CELLACT_API_KEY", "k")
     monkeypatch.setenv("CELLACT_SENDER", "MyIsraelRnt")
     monkeypatch.delenv("SMS_DRY_RUN", raising=False)
+    monkeypatch.delenv("FRONTEND_URL", raising=False)  # no report address in this request
     assert sms._request_for("972521112222", "hi")["url"] == sms.CELLACT_URL
     assert "twilio" in sms._request_for("12125551234", "hi")["url"]
 
@@ -155,7 +156,7 @@ def test_israel_goes_through_cellact_when_set(monkeypatch):
         return AsyncMock(return_value=httpx.Response(200, json=body, request=httpx.Request("POST", sms.CELLACT_URL)))
 
     with patch.object(httpx.AsyncClient, "post", answer({"result": True, "id": "x"})) as post:
-        assert run(sms.send_sms(to="052-111-2222", body="hi")) is True
+        assert run(sms.send_sms(to="052-111-2222", body="hi")) == "x"  # Cellact's id, for its delivery reports
     assert post.call_args.kwargs["json"] == {"to_s": ["+972521112222"], "text": "hi", "sender": "MyIsraelRnt"}
     assert post.call_args.kwargs["headers"] == {"Authorization": "Bearer k"}
     # Cellact refuses with a 200 and result false.

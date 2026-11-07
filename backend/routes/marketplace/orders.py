@@ -530,6 +530,11 @@ async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str, cont
                 "Refresh to see where it is now."
             ),
         )
+    if payload.status == "done":
+        # One text asking for a review (order_texts.text_review_order), whoever marked it done.
+        from utils.bg_tasks import spawn
+        from .order_texts import text_review_order
+        spawn(text_review_order(fresh))
     # Hand the order on to partners whose automations are waiting for this
     # status (routes/marketplace/automations.py). In the background, so a
     # shop marking an order ready gets its answer at once, and inside the
@@ -1898,6 +1903,7 @@ async def _owner_settings_out(biz: dict[str, Any]) -> dict[str, Any]:
     from .order_texts import texts_on
     return {**_settings_out(biz, await _store_of(biz["_id"])), "pause": pause_of(biz), "text_on": texts_on(biz),
             "text_number": (biz.get("order_settings") or {}).get("text_number"),
+            "text_note": (biz.get("order_settings") or {}).get("text_note") or "",
             "whatsapp_number": (await gig_whatsapp_number(selling)) if selling else ""}
 
 
@@ -1978,6 +1984,17 @@ class OrderTextsIn(BaseModel):
     # Where the texts go when it is not the WhatsApp number (many businesses
     # text on one number and WhatsApp on another). Empty: the WhatsApp number.
     text_number: Optional[str] = Field(None, max_length=30)
+    # A line of the business's own on its customers' texts (Tzvi, 7 Nov 2026).
+    text_note: Optional[str] = Field(None, max_length=80)
+
+
+@router.get("/businesses/{business_id}/orders/texts/recent")
+async def get_recent_texts(business_id: str, user=Depends(verify_token)):
+    """The last texts and replies, with whether each one arrived."""
+    await _owned_business(business_id, user)
+    from .order_texts import recent_texts
+    texts, replies = await recent_texts(business_id)
+    return {"texts": texts, "replies": replies}
 
 
 @router.put("/businesses/{business_id}/orders/texts")
@@ -1986,7 +2003,9 @@ async def put_order_texts(business_id: str, payload: OrderTextsIn, user=Depends(
     number = (payload.text_number or "").strip() or None
     if number and not normalize_whatsapp_number(number):
         raise HTTPException(status_code=400, detail="Please enter a mobile number with the leading 0 or a country code")
-    settings = {**(biz.get("order_settings") or {}), "text_on": payload.text_on, "text_number": number if payload.text_on else None}
+    note = " ".join((payload.text_note or "").split()) or None
+    settings = {**(biz.get("order_settings") or {}), "text_on": payload.text_on, "text_number": number if payload.text_on else None,
+                "text_note": note}
     await db.businesses.update_one({"_id": business_id}, {"$set": {"order_settings": settings}})
     return await _owner_settings_out({**biz, "order_settings": settings})
 

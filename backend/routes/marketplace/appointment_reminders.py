@@ -9,6 +9,8 @@ customers the day before, with a link to cancel or move it").
     never between 22:00 and 08:00 Israel time, and only where the customer
     gave an email. The business can switch it off or change the hours in
     the Appointments tab.
+  * By text as well, when the business has texts on (Tzvi, 7 Nov 2026): one
+    at the same time as the email, and one two hours before.
   * Cancel: the customer's own status link (the track token, no account)
     can now cancel a pending or accepted appointment before it starts. The
     slot frees at once and the business is told.
@@ -157,7 +159,7 @@ async def run_once(now: Optional[datetime] = None) -> int:
     gigs: dict[str, dict] = {}
     bizes: dict[str, dict] = {}
     async for b in db.marketplace_bookings.find({"status": "accepted", "preferred_date": {"$in": dates},
-                                                 "contact_email": {"$nin": [None, ""]}}):
+                                                 "$or": [{"contact_email": {"$nin": [None, ""]}}, {"contact_phone": {"$nin": [None, ""]}}]}):
         start = _start(b)
         if not start or start <= local:
             continue
@@ -174,7 +176,34 @@ async def run_once(now: Optional[datetime] = None) -> int:
             continue
         if await send_reminder(b, gig, biz, now):
             sent += 1
+        left = start - local
+        # The early text with the email, unless the appointment is so near that the late one is about to go.
+        stage = "soon" if left <= timedelta(hours=2) else ("day" if left > timedelta(hours=3) else None)
+        if stage and await send_reminder_text(b, gig, biz, now, stage):
+            sent += 1
     return sent
+
+
+async def send_reminder_text(b: dict[str, Any], gig: dict[str, Any], biz: dict[str, Any], now: datetime, stage: str) -> bool:
+    """One reminder text per stage ("day", "soon"), once (the same claim as the email's)."""
+    from .order_texts import text_booking_reminder, texts_on
+    start = _start(b)
+    if not start or not b.get("contact_phone") or not texts_on(biz):
+        return False
+    claim = f"{b['_id']}:{stage}"
+    try:
+        await db.appointment_reminder_text_log.insert_one({"_id": claim, "at": now.isoformat()})
+    except DuplicateKeyError:
+        return False
+    lang = "he" if b.get("lang") == "he" else "en"
+    tx = TEXT[lang]
+    service = (gig.get("title_he") if lang == "he" and gig.get("title_he") else gig.get("title")) or ""
+    today = now.astimezone(IL).date()
+    when = tx["today"] if start.date() == today else (tx["tomorrow"] if start.date() == today + timedelta(days=1) else _date_label(start, lang))
+    ok = await text_booking_reminder(b, biz, service, when, start.strftime("%H:%M"))
+    if not ok:
+        await db.appointment_reminder_text_log.delete_one({"_id": claim})
+    return ok
 
 
 async def appointment_reminders_loop() -> None:

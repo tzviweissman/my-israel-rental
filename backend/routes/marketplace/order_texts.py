@@ -18,6 +18,8 @@ confirm twice.
 """
 from __future__ import annotations
 
+import uuid
+from datetime import UTC, datetime
 from typing import Any, Optional
 
 from fastapi import APIRouter, HTTPException, Request
@@ -148,6 +150,29 @@ async def _owner_he(o: dict[str, Any]) -> bool:
     return owner.get("preferred_language") == "he"
 
 
+def _note(biz: dict[str, Any]) -> str:
+    """The business's own line on texts to its customers (Tzvi, 7 Nov 2026)."""
+    n = " ".join(((biz.get("order_settings") or {}).get("text_note") or "").split())
+    return f"\n{n}" if n else ""
+
+
+async def _text(to: str, body: str, *, biz_id: Optional[str], who: str, kind: str, ref_id: Optional[str] = None, label: str = "") -> bool:
+    """One text, kept so its delivery report and any reply can be matched to
+    it (sms_status, sms_in). `who`: "customer" or "business"."""
+    sid = await send_sms(to=to, body=body, reply=who == "customer")
+    if sid:
+        from utils.whatsapp_link import normalize_whatsapp_number
+        try:
+            await db.sms_log.insert_one({
+                "_id": sid if isinstance(sid, str) else str(uuid.uuid4()), "to": normalize_whatsapp_number(to),
+                "business_id": biz_id, "who": who, "kind": kind, "ref_id": ref_id, "label": label,
+                "status": "sent", "reports": isinstance(sid, str), "at": datetime.now(UTC).isoformat(),
+            })
+        except Exception as exc:  # noqa: BLE001 - the text went; only its record failed
+            logger.warning("sms log write failed: %s", type(exc).__name__)
+    return bool(sid)
+
+
 async def text_owner_new_order(order_id: str) -> bool:
     """The new-order text. Never raises."""
     try:
@@ -157,7 +182,8 @@ async def text_owner_new_order(order_id: str) -> bool:
         number = await _business_text_number(o)
         if not number:
             return False
-        return await send_sms(to=number, body=owner_text(o, owner_link(o), await _owner_he(o)))
+        return await _text(number, owner_text(o, owner_link(o), await _owner_he(o)), biz_id=o.get("business_id"),
+                           who="business", kind="order_new", ref_id=o["_id"], label=order_no(o))
     except Exception as exc:  # noqa: BLE001
         logger.warning("order text to the business failed: %s", type(exc).__name__)
         return False
@@ -178,7 +204,7 @@ async def text_owner_new_booking(gig: dict[str, Any], customer_name: str, summar
         who = customer_name or ""
         he = await _owner_he({"owner_user_id": owner_user_id})
         body = f"בקשת תור חדשה מ{who}: {summary}\nאישור או דחייה: {link}" if he else f"New booking from {who}: {summary}\nConfirm or decline: {link}"
-        return await send_sms(to=number, body=body)
+        return await _text(number, body, biz_id=gig.get("business_id"), who="business", kind="booking_new", label=who)
     except Exception as exc:  # noqa: BLE001
         logger.warning("booking text to the business failed: %s", type(exc).__name__)
         return False
@@ -192,7 +218,8 @@ async def text_customer_booking(b: dict[str, Any], status: str, title: str) -> N
         if not phone or not b.get("track_token"):
             return
         gig = await db.marketplace_gigs.find_one({"_id": b.get("gig_id")}, {"business_id": 1}) or {}
-        if not texts_on(await db.businesses.find_one({"_id": gig.get("business_id")}) or {}):
+        biz = await db.businesses.find_one({"_id": gig.get("business_id")}) or {}
+        if not texts_on(biz):
             return
         link = f"{_frontend()}/bookings/track/{b['track_token']}"
         he = (b.get("lang") or "").startswith("he")
@@ -200,7 +227,8 @@ async def text_customer_booking(b: dict[str, Any], status: str, title: str) -> N
             body = f"התור שלך ל{title} אושר. פרטים ומעקב: {link}" if he else f"Your booking for {title} is confirmed. See the details: {link}"
         else:
             body = f"מצטערים, לא ניתן לאשר את התור שלך ל{title} הפעם. פרטים: {link}" if he else f"Sorry, your booking for {title} could not be accepted this time. Details: {link}"
-        await send_sms(to=phone, body=body)
+        await _text(phone, body + (_note(biz) if status == "accepted" else ""), biz_id=gig.get("business_id"), who="customer",
+                    kind="booking_" + status, ref_id=b.get("_id"), label=title)
     except Exception as exc:  # noqa: BLE001
         logger.warning("booking text to the customer failed: %s", type(exc).__name__)
 
@@ -217,7 +245,7 @@ async def text_customer_received(o: dict[str, Any], biz: dict[str, Any]) -> None
         no = order_no(o)
         body = (f"קיבלנו את הזמנה {no} מ{name}. נעדכן בהודעה כשהעסק יאשר אותה. מעקב: {track_link(o)}" if he
                 else f"We got your order {no} from {name}. We will text you when they confirm it. Track it: {track_link(o)}")
-        await send_sms(to=phone, body=body)
+        await _text(phone, body, biz_id=o.get("business_id"), who="customer", kind="order_received", ref_id=o.get("_id"), label=no)
     except Exception as exc:  # noqa: BLE001
         logger.warning("order received text failed: %s", type(exc).__name__)
 
@@ -231,8 +259,9 @@ async def text_customer_request(gig: dict[str, Any], phone: Optional[str], path:
             return
         name = biz.get("name_he") if he and biz.get("name_he") else biz.get("name") or ""
         link = f"{_frontend()}{path}"
-        await send_sms(to=phone, body=f"הבקשה שלך נשלחה ל{name}. נעדכן כשיענו. מעקב: {link}" if he
-                       else f"Your request went to {name}. We will let you know when they answer. Track it: {link}")
+        await _text(phone, f"הבקשה שלך נשלחה ל{name}. נעדכן כשיענו. מעקב: {link}" if he
+                    else f"Your request went to {name}. We will let you know when they answer. Track it: {link}",
+                    biz_id=gig.get("business_id"), who="customer", kind="request_received", label=gig.get("title") or "")
     except Exception as exc:  # noqa: BLE001
         logger.warning("request received text failed: %s", type(exc).__name__)
 
@@ -248,8 +277,9 @@ async def text_owner_new_quote(gig: dict[str, Any], q: dict[str, Any]) -> None:
             return
         link = f"{_frontend()}/dashboard?tab=appointments"
         he = await _owner_he({"owner_user_id": gig.get("provider_user_id")})
-        await send_sms(to=number, body=f"בקשת מחיר חדשה מ{q['name']}: {q['description'][:120]}\nלתשובה: {link}" if he
-                       else f"New price request from {q['name']}: {q['description'][:120]}\nAnswer it: {link}")
+        await _text(number, f"בקשת מחיר חדשה מ{q['name']}: {q['description'][:120]}\nלתשובה: {link}" if he
+                    else f"New price request from {q['name']}: {q['description'][:120]}\nAnswer it: {link}",
+                    biz_id=gig.get("business_id"), who="business", kind="quote_new", ref_id=q.get("_id"), label=q["name"])
     except Exception as exc:  # noqa: BLE001
         logger.warning("quote text failed: %s", type(exc).__name__)
 
@@ -333,7 +363,8 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool, te
             else:
                 body = (f"Your order {no} from {name} is confirmed. Your tracking link: {track_link(o)}" if confirm
                         else f"Sorry, {name} can't take your order {no} this time.")
-            await send_sms(to=customer, body=body)
+            await _text(customer, body + (_note(biz) if confirm else ""), biz_id=o.get("business_id"), who="customer",
+                        kind="order_confirmed" if confirm else "order_declined", ref_id=o.get("_id"), label=no)
         await _email_customer(o, name, no, confirm)
         if confirm and tell_business:
             # The phone that tapped is the business's: the alert went to it.
@@ -342,7 +373,7 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool, te
                 he = await _owner_he(o)
                 body = (f"אישרת את הזמנה {no} של {o.get('customer_name') or ''}. הקישור של העסק למעקב: {owner_link(o)}" if he
                         else f"You confirmed order {no} for {o.get('customer_name') or ''}. Your store's link to follow it: {owner_link(o)}")
-                await send_sms(to=number, body=body)
+                await _text(number, body, biz_id=o.get("business_id"), who="business", kind="order_confirmed", ref_id=o.get("_id"), label=no)
     except Exception as exc:  # noqa: BLE001
         logger.warning("order texts after %s failed: %s", "confirm" if confirm else "decline", type(exc).__name__)
 
@@ -439,3 +470,190 @@ async def owner_booking_confirm(token: str, request: Request):
 @router.post("/bookings/owner/{token}/decline")
 async def owner_booking_decline(token: str, request: Request):
     return await _decide_booking(token, request, False)
+
+
+# ---------------------------------------------------------------------------
+# a review request when the order or booking is done (Tzvi, 7 Nov 2026)
+# ---------------------------------------------------------------------------
+
+async def _review_text(coll: str, doc: dict[str, Any], biz: dict[str, Any], phone: Optional[str], link: str, kind: str) -> None:
+    """Once per order or booking, only with texts on and reviews open. The
+    link is the customer's own status page, which asks for the review with
+    no sign-in."""
+    from utils.reviews import native_enabled
+    if not phone or not texts_on(biz) or not native_enabled():
+        return
+    claimed = await db[coll].update_one({"_id": doc["_id"], "review_text_at": {"$exists": False}},
+                                        {"$set": {"review_text_at": datetime.now(UTC).isoformat()}})
+    if not claimed.modified_count:
+        return
+    he = (doc.get("lang") or "").startswith("he")
+    name = biz.get("name_he") if he and biz.get("name_he") else biz.get("name") or ""
+    body = (f"תודה שבחרת ב{name}! איך היה? אפשר להשאיר ביקורת קצרה כאן: {link}" if he
+            else f"Thanks for choosing {name}! How was it? Leave a quick review here: {link}")
+    await _text(phone, body, biz_id=biz.get("_id"), who="customer", kind=kind, ref_id=doc["_id"],
+                label=order_no(doc) if coll == "store_orders" else "")
+
+
+async def text_review_order(o: dict[str, Any]) -> None:
+    """The order just reached "done". Never raises."""
+    try:
+        if o.get("source") != "website" or o.get("table"):
+            return
+        biz = await db.businesses.find_one({"_id": o.get("business_id")}) or {}
+        await _review_text("store_orders", o, biz, o.get("customer_phone_e164") or o.get("customer_phone"), track_link(o), "order_review")
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("order review text failed: %s", type(exc).__name__)
+
+
+async def text_review_booking(b: dict[str, Any]) -> None:
+    """The booking was just marked complete. Never raises."""
+    try:
+        if not b.get("track_token"):
+            return
+        gig = await db.marketplace_gigs.find_one({"_id": b.get("gig_id")}, {"business_id": 1}) or {}
+        biz = await db.businesses.find_one({"_id": gig.get("business_id")}) or {}
+        await _review_text("marketplace_bookings", b, biz, b.get("contact_phone"),
+                           f"{_frontend()}/bookings/track/{b['track_token']}", "booking_review")
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("booking review text failed: %s", type(exc).__name__)
+
+
+async def text_booking_reminder(b: dict[str, Any], biz: dict[str, Any], service: str, when: str, time_s: str) -> bool:
+    """A reminder before an appointment, with the link to change or cancel it
+    (appointment_reminders.py decides when). Only with texts on."""
+    phone = b.get("contact_phone")
+    if not phone or not b.get("track_token") or not texts_on(biz):
+        return False
+    he = b.get("lang") == "he"
+    name = biz.get("name_he") if he and biz.get("name_he") else biz.get("name") or ""
+    link = f"{_frontend()}/bookings/track/{b['track_token']}"
+    body = (f"תזכורת: {service} אצל {name} {when} בשעה {time_s}. לשינוי או ביטול: {link}" if he
+            else f"Reminder: {service} with {name} {when} at {time_s}. To change or cancel: {link}")
+    return await _text(phone, body + _note(biz), biz_id=biz.get("_id"), who="customer", kind="booking_reminder",
+                       ref_id=b.get("_id"), label=service)
+
+
+# ---------------------------------------------------------------------------
+# what Cellact tells us back: delivery reports and replies (Tzvi, 7 Nov 2026)
+# ---------------------------------------------------------------------------
+
+# Cellact's reasons, as the dashboard says them (docs: JSON API guide 1.3.5, section 8).
+PROBLEMS = {"2050": "blocked", "7001": "unreachable", "2055": "kosher", "4002": "service", "2035": "service"}
+
+
+def _key_ok(key: str) -> None:
+    import hmac
+    from utils.sms import hook_key
+    expected = hook_key()
+    if not expected or not hmac.compare_digest(str(key), expected):
+        raise HTTPException(status_code=404, detail="Not found")
+
+
+@router.post("/sms/status/{key}")
+async def sms_status(key: str, request: Request):
+    """mt_ok, then mt_del (delivered) or mt_nok / mt_rej (not). Up to two per
+    text, the second sometimes hours later; the same id on both."""
+    _key_ok(key)
+    try:
+        ev = await request.json()
+    except Exception:  # noqa: BLE001
+        return {"ok": True}
+    sid, event, err = str(ev.get("id") or ""), ev.get("event"), str(ev.get("errorId") or "")
+    if not sid or event not in ("mt_ok", "mt_del", "mt_nok", "mt_rej"):
+        return {"ok": True}
+    if event == "mt_ok":
+        return {"ok": True}
+    status = "delivered" if event == "mt_del" else "failed"
+    row = await db.sms_log.find_one_and_update(
+        {"_id": sid, "status": "sent"},
+        {"$set": {"status": status, "error": err or None, "problem": None if status == "delivered" else PROBLEMS.get(err, "other"),
+                  "reported_at": datetime.now(UTC).isoformat()}},
+        return_document=ReturnDocument.AFTER)
+    if row and status == "failed":
+        logger.warning("SMS not delivered id=%s error=%s who=%s", sid, err, row.get("who"))
+        if row.get("who") == "business" and row.get("business_id"):
+            await _tell_owner_texts_fail(row)
+    return {"ok": True}
+
+
+async def _tell_owner_texts_fail(row: dict[str, Any]) -> None:
+    """Their own number does not get our texts (a typo, like 0553778799 on 6
+    Nov 2026): one email a day per number, and the bell."""
+    day = datetime.now(UTC).date().isoformat()
+    try:
+        await db.sms_alerts.insert_one({"_id": f"{row['business_id']}:{row['to']}:{day}"})
+    except DuplicateKeyError:
+        return
+    biz = await db.businesses.find_one({"_id": row["business_id"]}) or {}
+    owner_id = biz.get("owner_user_id")
+    shown = "0" + row["to"][3:] if row["to"].startswith("972") else "+" + row["to"]
+    from .orders import _email, _notify
+    msg = f"Your order texts are not reaching {shown}. Check the number in Text notifications."
+    await _notify(owner_id, type_="texts_failed", message=msg, action_url="/dashboard?tab=text-notifications")
+    owner = await db.users.find_one({"id": owner_id}, {"email": 1}) or {}
+    await _email(owner.get("email"), "Your order texts are not arriving",
+                 f"<p>We could not deliver the texts about new orders to <b>{shown}</b>. If the number is wrong, fix it in "
+                 "Text notifications so you hear about your next order.</p>",
+                 tag="texts-failed", button=("Open Text notifications", f"{_frontend()}/dashboard?tab=text-notifications"))
+
+
+@router.post("/sms/in/{key}")
+async def sms_in(key: str, request: Request):
+    """A customer answered one of our texts (only possible from the virtual
+    number, CELLACT_REPLY_NUMBER). The business gets it by text when its
+    texts are on, and always in the bell and by email."""
+    _key_ok(key)
+    try:
+        ev = await request.json()
+    except Exception:  # noqa: BLE001
+        return {"ok": True}
+    from utils.whatsapp_link import normalize_whatsapp_number
+    sender = normalize_whatsapp_number(str(ev.get("sender") or ""))
+    content = " ".join(str(ev.get("content") or "").split())[:600]
+    if ev.get("event") != "mo" or not sender or not content:
+        return {"ok": True}
+    last = await db.sms_log.find_one({"to": sender, "who": "customer", "business_id": {"$ne": None}}, sort=[("at", -1)])
+    if not last:
+        logger.info("SMS reply from %s*** matched no text", sender[:6])
+        return {"ok": True}
+    try:
+        await db.sms_replies.insert_one({"_id": str(ev.get("id") or uuid.uuid4()), "from": sender, "content": content,
+                                         "business_id": last["business_id"], "kind": last.get("kind"), "ref_id": last.get("ref_id"),
+                                         "label": last.get("label"), "at": datetime.now(UTC).isoformat()})
+    except DuplicateKeyError:
+        return {"ok": True}  # Cellact sent the same reply twice
+    biz = await db.businesses.find_one({"_id": last["business_id"]}) or {}
+    shown = "0" + sender[3:] if sender.startswith("972") else "+" + sender
+    about = f" about {last['label']}" if last.get("label") else ""
+    tab = "orders" if (last.get("kind") or "").startswith("order") else "appointments"
+    from .orders import _email, _esc, _notify
+    await _notify(biz.get("owner_user_id"), type_="text_reply", message=f"Reply from {shown}{about}: {content[:140]}",
+                  action_url=f"/dashboard?tab={tab}")
+    owner = await db.users.find_one({"id": biz.get("owner_user_id")}, {"email": 1}) or {}
+    await _email(owner.get("email"), f"A customer replied{about}",
+                 f"<p><b>{_esc(shown)}</b> answered your text{_esc(about)}:</p><p>{_esc(content)}</p>",
+                 tag="text-reply", button=("Open the dashboard", f"{_frontend()}/dashboard?tab={tab}"))
+    number = await _business_text_number({"business_id": last["business_id"]})
+    if number:
+        await _text(number, f"Reply from {shown}{about}: {content[:300]}", biz_id=last["business_id"], who="business",
+                    kind="reply", ref_id=last.get("ref_id"), label=last.get("label") or "")
+    return {"ok": True}
+
+
+async def recent_texts(business_id: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """The last texts about this business, for its own dashboard."""
+    out = []
+    async for r in db.sms_log.find({"business_id": business_id}).sort("at", -1).limit(15):
+        out.append({"at": r.get("at"), "who": r.get("who"), "kind": r.get("kind"), "label": r.get("label") or "",
+                    "status": r.get("status"), "problem": r.get("problem"), "reports": r.get("reports", True),
+                    "to_end": (r.get("to") or "")[-4:]})
+    replies = [{"at": r.get("at"), "from_end": (r.get("from") or "")[-4:], "label": r.get("label") or "", "content": r.get("content")}
+               async for r in db.sms_replies.find({"business_id": business_id}).sort("at", -1).limit(10)]
+    return out, replies
+
+
+async def ensure_sms_indexes() -> None:
+    await db.sms_log.create_index([("business_id", 1), ("at", -1)])
+    await db.sms_log.create_index([("to", 1), ("at", -1)])
+    await db.sms_replies.create_index([("business_id", 1), ("at", -1)])

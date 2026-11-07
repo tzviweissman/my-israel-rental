@@ -632,6 +632,8 @@ async def startup_tasks() -> None:
         await ensure_domain_indexes()
         from routes.marketplace.appointment_reminders import ensure_appointment_reminder_indexes
         await ensure_appointment_reminder_indexes()
+        from routes.marketplace.order_texts import ensure_sms_indexes
+        await ensure_sms_indexes()
         from routes.marketplace.appointment_extras import ensure_waitlist_indexes
         await ensure_waitlist_indexes()
         from routes.marketplace.quotes import ensure_quote_indexes

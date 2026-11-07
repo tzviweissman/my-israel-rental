@@ -1666,6 +1666,9 @@ async def update_booking(booking_id: str, payload: BookingPatch, user=Depends(ve
         await _email_guest_status(booking, payload.status, gt.get("title"))
         from .order_texts import text_customer_booking
         await text_customer_booking(booking, payload.status, gt.get("title") or "")
+    if payload.status == "completed" and booking.get("status") != "completed":
+        from .order_texts import text_review_booking
+        await text_review_booking(booking)
 
     fresh = await db.marketplace_bookings.find_one({"_id": booking_id})
     fresh["id"] = fresh.pop("_id")

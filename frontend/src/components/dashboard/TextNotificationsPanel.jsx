@@ -17,6 +17,8 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
   const [on, setOn] = useState(false);
   const [different, setDifferent] = useState(false);
   const [number, setNumber] = useState('');
+  const [note, setNote] = useState('');
+  const [recent, setRecent] = useState(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -24,8 +26,12 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
       setOn(!!data.text_on);
       setDifferent(!!data.text_number);
       setNumber(data.text_number || '');
+      setNote(data.text_note || '');
       setLoaded(data);
     }).catch(() => setLoaded(false));
+    // Whether each text arrived (Cellact's delivery reports, 7 Nov 2026), and customers' replies.
+    axios.get(`${API}/marketplace/businesses/${businessId}/orders/texts/recent`, auth)
+      .then(({ data }) => setRecent(data)).catch(() => setRecent(null));
   }, [API, auth, businessId]);
 
   if (loaded === false) return null;
@@ -39,7 +45,7 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
     setBusy(true);
     try {
       const { data } = await axios.put(`${API}/marketplace/businesses/${businessId}/orders/texts`, {
-        text_on: on, text_number: on && different ? number.trim() : null,
+        text_on: on, text_number: on && different ? number.trim() : null, text_note: note.trim() || null,
       }, auth);
       setLoaded(data);
       toast.success(t('orderTexts.saved', 'Saved'));
@@ -105,11 +111,96 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
         </fieldset>
       )}
 
+      {on && (
+        <div className="mt-3" data-testid="settings-text-note">
+          <label htmlFor="settings-text-note-input" className="block text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('orderTexts.noteLabel', 'Your own line on texts to customers')}</label>
+          <p className="text-[12px] mt-0.5 mb-1" style={{ color: 'var(--brand-muted)' }}>{t('orderTexts.noteHint', 'Added when an order or booking is confirmed, and to reminders. Optional.')}</p>
+          <input id="settings-text-note-input" maxLength={80} value={note} onChange={(e) => setNote(e.target.value)}
+                 className="px-2 min-h-[40px] rounded-lg border text-sm bg-white w-full" style={fieldStyle} dir="auto"
+                 placeholder={t('orderTexts.notePlaceholder', 'For example: Pickup at Farn 5, ring the bell')} data-testid="settings-text-note-input" />
+          <p className="text-[11px] mt-1 text-end" style={{ color: 'var(--brand-muted)' }}>{note.length}/80</p>
+          {note.trim() && (
+            <div className="mt-1 rounded-xl px-3 py-2 text-[13px] whitespace-pre-line" style={{ background: 'var(--surface-alt, #F9FAFB)', color: 'var(--ink)' }} dir="auto" data-testid="settings-text-preview">
+              <span className="block text-[11px] font-semibold mb-0.5" style={{ color: 'var(--brand-muted)' }}>{t('orderTexts.preview', 'What your customer gets')}</span>
+              {t('orderTexts.previewText', 'Your order #1042 is confirmed. Your tracking link: myisraelrental.com/…')}{'\n'}{note.trim()}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="mt-4">
         <button type="button" disabled={busy} onClick={save} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-50" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="settings-text-save">
           {busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} {t('orders.saveSettings', 'Save')}
         </button>
       </div>
+
+      {recent && (recent.texts.length > 0 || recent.replies.length > 0) && <RecentTexts recent={recent} />}
+    </div>
+  );
+}
+
+const STATUS_STYLE = {
+  delivered: { background: '#E6F4EA', color: '#2E7D4F' },
+  failed: { background: '#FDECEA', color: '#B42318' },
+  sent: { background: '#F3F4F6', color: 'var(--brand-muted)' },
+};
+
+function when(at, lang) {
+  try {
+    return new Date(at).toLocaleString(lang === 'he' ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  } catch (e) { return ''; }
+}
+
+/** The last texts, each with whether it reached the phone, and what customers replied. */
+function RecentTexts({ recent }) {
+  const { t, i18n } = useTranslation();
+  const status = (r) => {
+    if (r.status === 'delivered') return t('orderTexts.delivered', 'Delivered');
+    if (r.status === 'failed') {
+      return {
+        unreachable: t('orderTexts.failUnreachable', 'Not delivered: the phone was off or the number is wrong'),
+        blocked: t('orderTexts.failBlocked', 'Not delivered: this number does not take texts'),
+        kosher: t('orderTexts.failKosher', 'Not delivered: a kosher phone that cannot get texts'),
+        service: t('orderTexts.failService', 'Not delivered: a problem on our side, we are on it'),
+      }[r.problem] || t('orderTexts.failed', 'Not delivered');
+    }
+    return r.reports ? t('orderTexts.waiting', 'Sent, waiting for the phone company') : t('orderTexts.sent', 'Sent');
+  };
+  return (
+    <div className="mt-5 pt-4 border-t" style={{ borderColor: 'var(--brand-border)' }} data-testid="recent-texts">
+      {recent.replies.length > 0 && (
+        <>
+          <h4 className="text-sm font-bold mb-2" style={{ color: 'var(--ink)' }}>{t('orderTexts.replies', 'Customer replies')}</h4>
+          <ul className="space-y-2 mb-4">
+            {recent.replies.map((r, i) => (
+              <li key={i} className="rounded-xl px-3 py-2 text-[13px]" style={{ background: 'rgba(36,175,235,.12)', color: 'var(--ink)' }} dir="auto">
+                <span className="block text-[11px]" style={{ color: 'var(--brand-muted)' }}>
+                  <span dir="ltr">…{r.from_end}</span>{r.label ? ` · ${r.label}` : ''} · {when(r.at, i18n.language)}
+                </span>
+                <span className="block" dir="auto">{r.content}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {recent.texts.length > 0 && (
+        <>
+          <h4 className="text-sm font-bold mb-2" style={{ color: 'var(--ink)' }}>{t('orderTexts.recent', 'Recent texts')}</h4>
+          <ul className="divide-y" style={{ borderColor: 'var(--brand-border)' }}>
+            {recent.texts.map((r, i) => (
+              <li key={i} className="py-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[13px]" data-testid="recent-text">
+                <span style={{ color: 'var(--ink)' }}>
+                  {r.who === 'business' ? t('orderTexts.toYou', 'To you') : t('orderTexts.toCustomer', 'To a customer')}{' '}
+                  <span dir="ltr" style={{ color: 'var(--brand-muted)' }}>…{r.to_end}</span>
+                  {r.label ? <span style={{ color: 'var(--brand-muted)' }}> · {r.label}</span> : null}
+                  <span style={{ color: 'var(--brand-muted)' }}> · {when(r.at, i18n.language)}</span>
+                </span>
+                <span className="rounded-full px-2 py-0.5 text-[12px] font-semibold" style={STATUS_STYLE[r.status] || STATUS_STYLE.sent}>{status(r)}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }
