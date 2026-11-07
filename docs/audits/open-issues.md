@@ -286,3 +286,11 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 ## UI audit of 2 Nov 2026
 - [Low] Chicken Munch home scrolls 7px sideways at 375 (closing block `.go-order`, `site.css:312`). First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
 - [Low] Footer and menu links on the 17 business sites are 19 to 24px tall on phones, under 44px. First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
+
+## Merged from audit branches, 7 Nov 2026
+- [Fixed 2 Nov, 26b56084] Orders: the no-login Confirm page looked orders up by an unindexed key (full scan per request).
+- [Fixed 5 Nov, 512b5b0] Visit counters used {{count}} with no plural forms; test-i18n-parity failed (2026-11-05-site-audit.md).
+- [Low] Ad maker i18n: `ads.weekVisits` and `ads.nudgeVisits` use `{count}` with no plural forms, so the parity check fails. First seen 2026-11-05 (2026-11-05-ui-audit.md). Open. [Fixed 7 Nov, b2985da5]
+- [Low] Bookings: the price used for a code's minimum order comes from the browser (`gigs.py:1357`, `payload.amount`); unconfirmed, needs the API. First seen 6 Nov (2026-11-06-site-audit.md).
+- [Low] i18n: three counts without plural forms (`ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits`); test-i18n-parity fails. First seen 6 Nov (2026-11-06-site-audit.md). [Fixed 7 Nov, b2985da5]
+- [Medium] Audit setup hung over 40 minutes at the dev-server step on 5 Nov, so no build or full suite ran (2026-11-05-site-audit.md).
