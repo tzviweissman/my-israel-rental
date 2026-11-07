@@ -7,6 +7,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { PageLoading, LoadFailed } from '../common/LoadState';
 import { useSearchParams } from 'react-router-dom';
 import ShareListingsPanel from './ShareListingsPanel';
 import AdMaker from './AdMaker';
@@ -20,7 +21,7 @@ export function AdvertisingSection({ API, token, properties, ownerId }) {
     axios.get(`${API}/marketplace/businesses`, { headers: { Authorization: `Bearer ${token}` } })
       .then(({ data }) => setBusinesses(data)).catch(() => setBusinesses([]));
   }, [API, token]);
-  if (!businesses) return null;
+  if (!businesses) return <PageLoading className="py-10" />;
   const targets = [
     ...businesses.map((b) => ({ ...b, type: 'business', id: b.id, name: b.name })),
     ...(properties || []).map((p) => ({ ...p, type: 'property', name: p.title })),
@@ -52,12 +53,12 @@ export default function AdvertisingTab({ API, token, targets }) {
   const load = useCallback(async () => {
     if (!id) return;
     const auth = { headers: { Authorization: `Bearer ${token}` } };
-    setLink(await axios.post(`${API}/short-links`, { target_type: type, target_id: id }, auth).then((r) => r.data).catch(() => null));
+    setLink(await axios.post(`${API}/short-links`, { target_type: type, target_id: id }, auth).then((r) => r.data).catch(() => 'error'));
   }, [API, token, type, id]);
   useEffect(() => { setLink(null); load(); }, [load]);
 
   if (!target) return null;
-  const url = link ? `${window.location.origin}${link.path}` : '';
+  const url = link && link !== 'error' ? `${window.location.origin}${link.path}` : '';
   const card = 'rounded-xl border bg-white p-4 sm:p-5';
   const border = { borderColor: 'var(--brand-border)' };
   const heading = { fontFamily: 'var(--font-head)', color: 'var(--ink)' };
@@ -84,7 +85,7 @@ export default function AdvertisingTab({ API, token, targets }) {
         <p className="text-sm mb-3" style={{ color: 'var(--brand-muted)' }}>
           {t('advertising.linkBody', 'Both go to the same place and stay the same forever, so they are safe to print.')}
         </p>
-        {link ? (
+        {url ? (
           <div className="grid sm:grid-cols-2 gap-5 items-start">
             <div className="min-w-0 space-y-3">
               <p className="text-sm font-semibold break-all" dir="ltr" style={{ color: 'var(--ink)' }} data-testid="advertising-url">{url}</p>
@@ -96,7 +97,7 @@ export default function AdvertisingTab({ API, token, targets }) {
             <QrShareCard url={url} filename={`myisraelrental-${link.slug}-qr`} testidPrefix="advertising-qr" />
           </div>
         ) : (
-          <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>{t('common.loading', 'Loading...')}</p>
+          link === 'error' ? <LoadFailed className="py-4" onRetry={() => { setLink(null); load(); }} /> : <PageLoading className="py-4" />
         )}
       </section>
 

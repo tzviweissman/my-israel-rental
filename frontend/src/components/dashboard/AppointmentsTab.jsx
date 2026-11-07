@@ -28,6 +28,8 @@ import QuotesAndDates from './QuotesAndDates';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { PageLoading, LoadFailed } from '../common/LoadState';
+import { apiErrorMessage } from '../../utils/apiError';
 import { toast } from 'sonner';
 import { money } from '../../utils/currency';
 import {
@@ -79,7 +81,7 @@ const DepositLine = ({ booking, API, token, onChanged }) => {
     try {
       await axios.post(`${API}/marketplace/bookings/${booking.id}/deposit`, { status }, { headers: { Authorization: `Bearer ${token}` } });
       onChanged?.();
-    } catch (err) { toast.error(err.response?.data?.detail || t('appointments.updateFailed', 'Could not update that booking')); } finally { setBusy(false); }
+    } catch (err) { toast.error(apiErrorMessage(err, t('appointments.updateFailed', 'Could not update that booking'), t)); } finally { setBusy(false); }
   };
   const amount = money(dep.amount, 'ILS');
   const label = {
@@ -127,7 +129,7 @@ const BookingCard = ({ booking, side, API, token, onChanged, highlighted }) => {
       }[status] || t('appointments.toastUpdated', 'Updated'));
       onChanged?.();
     } catch (err) {
-      toast.error(err.response?.data?.detail || t('appointments.updateFailed', 'Could not update that booking'));
+      toast.error(apiErrorMessage(err, t('appointments.updateFailed', 'Could not update that booking'), t));
     } finally {
       setBusy(false);
     }
@@ -290,7 +292,7 @@ const BookingCard = ({ booking, side, API, token, onChanged, highlighted }) => {
                   className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white hover:border-red-300 hover:text-red-600 disabled:opacity-60"
                   data-testid={`appointment-cancel-${booking.id}`}
                 >
-                  <X size={12} aria-hidden="true" /> {t('appointments.cancelBooking', 'Cancel')}
+                  <X size={12} aria-hidden="true" /> {t('loadState.cancelBooking', 'Cancel booking')}
                 </button>
               </>
             )}
@@ -307,14 +309,16 @@ const AppointmentsTab = ({ API, token }) => {
   const highlightId = searchParams.get('highlight');
   const [incoming, setIncoming] = useState([]);
   const [mine, setMine] = useState([]);
+  const [failed, setFailed] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     const h = { headers: { Authorization: `Bearer ${token}` } };
     const [p, c] = await Promise.all([
-      axios.get(`${API}/marketplace/bookings?role=provider`, h).then((r) => r.data).catch(() => []),
-      axios.get(`${API}/marketplace/bookings?role=client`, h).then((r) => r.data).catch(() => []),
+      axios.get(`${API}/marketplace/bookings?role=provider`, h).then((r) => r.data).catch(() => null),
+      axios.get(`${API}/marketplace/bookings?role=client`, h).then((r) => r.data).catch(() => null),
     ]);
+    setFailed(p === null);
     setIncoming(Array.isArray(p) ? p : []);
     setMine(Array.isArray(c) ? c : []);
     setLoading(false);
@@ -330,13 +334,8 @@ const AppointmentsTab = ({ API, token }) => {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [loading, highlightId, incoming, mine]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-16">
-        <Loader2 className="animate-spin text-[var(--brand-primary)]" />
-      </div>
-    );
-  }
+  if (loading) return <PageLoading className="py-16" />;
+  if (failed) return <LoadFailed onRetry={() => { setLoading(true); load(); }} />;
 
   if (!incoming.length && !mine.length) {
     return (
@@ -348,6 +347,7 @@ const AppointmentsTab = ({ API, token }) => {
         <p className="text-sm text-gray-500">
           {t('appointments.emptyHint', 'When someone books one of your services on the site - or you book one - it shows up here.')}
         </p>
+        <a href="/dashboard?tab=advertising" className="inline-block mt-3 text-sm font-semibold underline" style={{ color: 'var(--ink)' }} data-testid="appointments-empty-share">{t('loadState.shareYourPage', 'Share your page to get bookings')}</a>
       </div>
       </>
     );

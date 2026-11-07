@@ -39,6 +39,8 @@ function basketId(gigId, fresh = false) {
 const EMAIL_OK = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { PageLoading, LoadFailed, FormConsent } from '../components/common/LoadState';
+import { apiErrorMessage } from '../utils/apiError';
 import { toast } from 'sonner';
 import { Loader2, Minus, Plus, Store as StoreIcon, Bike, Check, ExternalLink, ArrowLeft } from 'lucide-react';
 import { API, AuthContext } from '../App';
@@ -63,6 +65,8 @@ export default function OrderPage() {
   const [params] = useSearchParams();
   const { t, i18n } = useTranslation();
   const { user, token } = useContext(AuthContext);
+  const [retry, setRetry] = useState(0);
+  const [loadErr, setLoadErr] = useState(false);
   const lang = String(i18n.language || 'en').split('-')[0];
 
   const [data, setData] = useState(null);       // null loading, false not available
@@ -104,9 +108,9 @@ export default function OrderPage() {
         if (Object.keys(fromBasket).length) setQty(fromBasket);
         if (d.business.areas.length === 1) setCity(d.business.areas[0].slug);
       })
-      .catch(() => setData(false));
+      .catch((err) => { if (err?.response?.status === 404) setData(false); else setLoadErr(true); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gigId]);
+  }, [gigId, retry]);
 
   useEffect(() => {
     if (user) {
@@ -168,7 +172,8 @@ export default function OrderPage() {
     if (!windowsForDay.some((w) => `${w.start}-${w.end}` === windowKey)) setWindowKey(windowsForDay[0] ? `${windowsForDay[0].start}-${windowsForDay[0].end}` : '');
   }, [windowsForDay, windowKey]);
 
-  if (data === null) return <div className="py-24 text-center" style={{ color: 'var(--brand-muted)' }}><Loader2 className="animate-spin inline" size={20} /></div>;
+  if (loadErr) return <LoadFailed className="py-24" onRetry={() => { setLoadErr(false); setRetry((n) => n + 1); }} />;
+  if (data === null) return <PageLoading words={t('loadState.loadingOrder', 'Loading the order form…')} />;
   if (data === false) {
     return (
       <div className="max-w-md mx-auto px-4 py-24 text-center" data-testid="order-unavailable">
@@ -234,6 +239,15 @@ export default function OrderPage() {
   const closedDay = (d) => { const k = toISODate(d); return !!pastCutoff(k, data.settings.cutoffs) || full.days.includes(k) || shutDay(k); };
   const lastDay = (() => { const d = new Date(`${data.today}T00:00`); d.setDate(d.getDate() + ORDER_AHEAD_DAYS); return toISODate(d); })();
   const chosenFull = !!date && windowsForDay.some((w) => `${w.start}-${w.end}` === windowKey && windowFull(date, w));
+  // The first thing still needed, said under the greyed button rather than left to guess.
+  const missing = (!lines.length && !extra.trim()) ? t('loadState.needItem', 'Choose something to order.')
+    : table ? ''
+    : !date ? t('loadState.needDay', 'Choose a day to send your order.')
+    : (windowsForDay.length > 0 && !windowKey) ? t('loadState.needTime', 'Choose a time to send your order.')
+    : !name.trim() ? t('loadState.needName', 'Add your name to send your order.')
+    : !phone.trim() ? t('loadState.needPhone', 'Add a phone number to send your order.')
+    : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()) ? t('loadState.needEmail', 'Add your email to send your order.')
+    : '';
   const canSubmit = !closedNow && !chosenFull && (lines.length > 0 || extra.trim())
     && (table || (date && !pastCutoff(date, data.settings.cutoffs) && (windowsForDay.length === 0 || windowKey) && name.trim() && phone.trim()))
     && !(phone.trim() && phoneErr)
@@ -290,8 +304,7 @@ export default function OrderPage() {
       basketId(gigId, true);
     } catch (err) {
       if (handoff) handoff.close();
-      const d = err?.response?.data?.detail;
-      toast.error(typeof d === 'string' ? d : t('orders.saveFailed', 'Could not save'));
+      toast.error(apiErrorMessage(err, t('loadState.orderNotSent', 'Your order was not sent. Check your connection and try again.'), t));
     } finally {
       setBusy(false);
     }
@@ -566,7 +579,8 @@ export default function OrderPage() {
           )}
           <div>
             <label className={label} style={labelStyle} htmlFor="order-notes">{t('orders.notes', 'Notes')} · {t('orders.optional', 'optional')}</label>
-            <input id="order-notes" value={notes} onChange={(e) => setNotes(e.target.value)} dir="auto" className={input} style={inputStyle} placeholder={t('orders.notesPh', '"No nuts", "leave with the neighbour"')} data-testid="order-notes" />
+            <input id="order-notes" value={notes} onChange={(e) => setNotes(e.target.value)} dir="auto" className={input} style={inputStyle} placeholder={t('orders.notesPh', '"No nuts", "leave with the neighbour"')} aria-describedby="order-notes-hint" data-testid="order-notes" />
+            <p id="order-notes-hint" className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('loadState.storeSees', 'The store reads this with your order.')}</p>
           </div>
           <CustomFieldInputs fields={data.custom_fields} values={answers} onChange={setAnswers} testid="order-custom-fields" />
           {!user && (
@@ -594,7 +608,9 @@ export default function OrderPage() {
           <button type="submit" disabled={!canSubmit || busy} className="w-full inline-flex items-center justify-center gap-2 min-h-[52px] rounded-full text-base font-semibold disabled:opacity-50" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="order-submit">
             {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {t('order.submit', 'Send my order')}
           </button>
+          {!canSubmit && !busy && missing && <p className="text-xs text-center mt-2" style={{ color: 'var(--ink)' }} data-testid="order-missing">{missing}</p>}
           <p className="text-[11px] text-center mt-2" style={{ color: 'var(--brand-muted)' }}>{t('order.payNote', 'Payment goes to the store directly, not through MyIsraelRental.')}</p>
+          <FormConsent className="text-[11px] text-center mt-1" />
         </div>
       </form>
     </div>

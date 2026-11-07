@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { apiErrorMessage } from '../../utils/apiError';
 import { toast } from 'sonner';
 import { Copy, Loader2, MessageCircle, Plus, Trash2, Banknote } from 'lucide-react';
 import { money } from '../../utils/currency';
@@ -97,7 +98,7 @@ export function PayFromQuote({ API, auth, q }) {
   return (
     <button type="button" onClick={go} disabled={busy} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full border text-sm font-semibold disabled:opacity-50"
             style={boxStyle} data-testid={`quote-pay-${q.id}`}>
-      {busy ? <Loader2 size={14} className="animate-spin" /> : <Banknote size={14} />} {t('quoteSend.requestPayment', 'Request payment for {{amount}}', { amount: money(q.quote.price, 'ILS') })}
+      {busy ? <Loader2 size={14} className="animate-spin" /> : <Banknote size={14} />} {t('quoteSend.requestPayment', 'Request payment for {{amount}}', { amount: money(q.quote.price - (q.discount?.amount || 0), 'ILS') })}
     </button>
   );
 }
@@ -124,7 +125,7 @@ export function NewQuoteForm({ API, auth, businessId, onDone, onClose }) {
       setMade(data);
       onDone();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('quoteSend.failed', 'Something went wrong. Try again.'));
+      toast.error(apiErrorMessage(err, t('quoteSend.failed', 'Something went wrong. Try again.'), t));
     } finally { setBusy(false); }
   };
   const label = 'text-sm';

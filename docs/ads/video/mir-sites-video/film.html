@@ -1,0 +1,146 @@
+<!doctype html>
+<!-- Big-brand websites, small local businesses. Vertical, for WhatsApp Status. See docs/code-video.md and
+     docs/ads/blueprints/mir-sites-video.md. Query: lang=en|he, clips=<folder of recorded stills>.
+     One idea: one phone never leaves the screen, and each business's colours pour out of it over the whole frame. -->
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Manrope:wght@500;700&family=Frank+Ruhl+Libre:wght@700&family=Assistant:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:#0F1B2D}
+  body{font-family:Manrope,sans-serif}
+  body.he{font-family:Assistant,sans-serif}
+  .serif{font-family:'Playfair Display',serif;font-weight:700}
+  .he .serif{font-family:'Frank Ruhl Libre',serif}
+  .layer{position:absolute;inset:0;overflow:hidden}
+  .phone{position:absolute;left:50%;top:0;width:560px;height:1212px;margin-left:-280px;border-radius:64px;background:#000;padding:13px;
+    box-shadow:0 50px 110px rgb(0 0 0/.42),0 8px 24px rgb(0 0 0/.3)}
+  .phone img{display:block;width:100%;height:100%;object-fit:cover;object-position:top;border-radius:52px;background:#111}
+  .name{position:absolute;left:60px;right:60px;top:1528px;text-align:center;font-size:62px;line-height:1.1}
+  .what{position:absolute;left:60px;right:60px;top:1610px;text-align:center;font-size:38px;font-weight:500;opacity:.86}
+  #head{position:absolute;left:50px;right:50px;text-align:center;line-height:1.08;color:#fff;transform-origin:50% 0}
+  #head b{display:block;font-weight:700}
+  #head .w{display:inline-block}
+  #head .gold{color:#FFD60A}
+  #end{position:absolute;inset:0;background:#fff;color:#111827;text-align:center}
+  #end h2{position:absolute;left:70px;right:70px;top:760px;font-size:88px;line-height:1.1}
+  #end p{position:absolute;left:70px;right:70px;top:1090px;font-size:46px;color:#444}
+  #end a{position:absolute;left:0;right:0;top:1210px;font-size:58px;font-weight:700;color:#167AB8}
+  #tile{position:absolute;left:50%;top:400px;width:280px;height:280px;margin-left:-140px;border-radius:64px;background:#123B57;display:flex;align-items:center;justify-content:center}
+  #tile img{width:74%}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const q = new URLSearchParams(location.search), HE = q.get('lang') === 'he', CLIPS = q.get('clips') || 'clips';
+if (HE) { document.body.classList.add('he'); document.documentElement.dir = 'rtl'; }
+const WORDS = HE
+  ? { a: 'אתרים של מותגים גדולים.', b: 'לעסקים קטנים ומקומיים.', c: 'אנחנו מעצבים אותם <span style="white-space:nowrap">ב‑MyIsraelRental</span>‏.', d: 'שאלו אותנו על אתר לעסק שלכם.' }
+  : { a: 'Big-brand websites.', b: 'Small local businesses.', c: 'We design them on MyIsraelRental.', d: 'Ask about one for your business.' };
+// Each business's own colours, read from its real page.
+const SITES = [
+  { slug: 'chicken-munch', name: 'Chicken Munch', what: HE ? 'עוף מטוגן אמריקאי כשר' : 'Kosher American fried chicken', g: '#C8102E', ink: '#fff' },
+  { slug: 'the-gift-boutique', name: 'The Gift Boutique', what: HE ? 'מתנות ארוזות ביד' : 'Hand-wrapped gifts', g: '#F4EEDF', ink: '#1A1712' },
+  { slug: 'the-brown-box', name: 'The Brown Box', what: HE ? 'קערות אסאי וארוחות בראנץ׳' : 'Acai bowls and brunch boxes', g: '#3A2418', ink: '#FFF6EA' },
+  { slug: 'elisheva-brandeis', name: 'Nails by Elisheva', what: HE ? 'ציפורני ג׳ל ונייל ארט' : 'Gel nails and nail art', g: '#FFE9E4', ink: '#4A1F22' },
+  { slug: 'kashermybnb-kashering-services', name: 'KasherMyBnb', what: HE ? 'הכשרת מטבחים' : 'Kitchen kashering', g: '#1E5F8C', ink: '#fff' },
+];
+const FRAMES = 90, START = 3, SCENE = 3, TURN = 0.7, ENDS = START + SCENE * SITES.length, DUR = ENDS + 4.5;
+const CX = 540, CY = 1020, FULL = 1500;
+const ease = (t) => t * t * (3 - 2 * t), clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const out3 = (t) => 1 - Math.pow(1 - t, 3);
+const pad = (n) => String(n).padStart(4, '0');
+const stage = document.getElementById('stage');
+const preload = [];
+function clipUrl(slug, i) { return `${CLIPS}/${slug}/${pad(i)}.jpg`; }
+
+const layers = SITES.map((s) => {
+  const el = document.createElement('div');
+  el.className = 'layer';
+  el.style.background = s.g;
+  el.style.color = s.ink;
+  el.innerHTML = `<div class="phone"><img></div><div class="name serif" dir="ltr">${s.name}</div><div class="what">${s.what}</div>`;
+  stage.appendChild(el);
+  for (let i = 0; i < FRAMES; i += 1) { const im = new Image(); im.src = clipUrl(s.slug, i); preload.push(im.decode().catch(() => {})); }
+  return { el, s, phone: el.querySelector('.phone'), img: el.querySelector('img'), name: el.querySelector('.name'), what: el.querySelector('.what') };
+});
+
+const head = document.createElement('div');
+head.id = 'head';
+head.className = 'serif';
+const split = (t, cls) => `<b class="${cls}">${t.split(' ').map((w) => `<span class="w">${w}</span>`).join(' ')}</b>`;
+head.innerHTML = split(WORDS.a, '') + split(WORDS.b, 'gold');
+stage.appendChild(head);
+const heads = [...head.querySelectorAll('.w')];
+
+const end = document.createElement('div');
+end.id = 'end';
+end.innerHTML = `<div id="tile"><img src="../../../../brand/logo-mark.png"></div><h2 class="serif">${WORDS.c}</h2><p>${WORDS.d}</p><a dir="ltr">myisraelrental.com</a>`;
+stage.appendChild(end);
+preload.push(end.querySelector('#tile img').decode().catch(() => {}));
+const tile = end.querySelector('#tile'), endBits = [end.querySelector('h2'), end.querySelector('p'), end.querySelector('a')];
+
+// The phone drifts the whole film so nothing sits frozen.
+function phoneAt(t) {
+  const rise = out3(clamp((t - 2.1) / 1.0));
+  const top = 1920 + (290 - 1920) * rise;
+  const drift = (t - START) / (ENDS - START);
+  return { top, scale: 0.98 + 0.05 * drift, tilt: 3.5 - 7 * drift };
+}
+
+window.seek = async (t) => {
+  await Promise.all(preload);
+  // Opening: the headline arrives word by word, then rises to make room for the phone.
+  const up = ease(clamp((t - 1.3) / 0.9));
+  head.style.top = `${760 + (150 - 760) * up}px`;
+  head.style.fontSize = `${118 + (66 - 118) * up}px`;
+  heads.forEach((w, i) => { const p = out3(clamp((t - 0.15 - i * 0.16) / 0.5)); w.style.opacity = p; w.style.transform = `translateY(${(1 - p) * 40}px)`; });
+  const ph = phoneAt(t);
+  const firstReveal = clamp((t - (START - TURN)) / TURN);
+  layers.forEach((l, i) => {
+    const from = START + SCENE * i - TURN;
+    const open = clamp((t - from) / TURN);
+    l.el.style.display = open > 0 ? 'block' : 'none';
+    l.el.style.clipPath = open >= 1 ? 'none' : `circle(${ease(open) * FULL}px at ${CX}px ${CY}px)`;
+    const local = clamp((t - from) / (SCENE + TURN));
+    l.img.src = clipUrl(l.s.slug, Math.min(FRAMES - 1, Math.floor(local * FRAMES)));
+    l.phone.style.top = `${ph.top + (t < START ? 0 : 0)}px`;
+    l.phone.style.transform = `perspective(2600px) rotateY(${ph.tilt}deg) scale(${ph.scale})`;
+    const label = out3(clamp((t - from - 0.35) / 0.5));
+    l.name.style.opacity = l.what.style.opacity = label;
+    l.name.style.transform = l.what.style.transform = `translateY(${(1 - label) * 24}px)`;
+  });
+  // A phone waits on the navy ground for the first colour to pour out of it.
+  stage.style.background = '#0F1B2D';
+  if (!document.getElementById('first')) {
+    const f = document.createElement('div'); f.id = 'first'; f.className = 'phone';
+    f.innerHTML = `<img src="${clipUrl(SITES[0].slug, 0)}">`;
+    stage.insertBefore(f, stage.firstChild);
+  }
+  const first = document.getElementById('first');
+  first.style.top = `${ph.top}px`;
+  first.style.display = firstReveal >= 1 ? 'none' : 'block';
+  // The headline's words sit in each ground's ink once the colours start.
+  const scene = layers.filter((l, i) => t >= START + SCENE * i - TURN / 2).pop();
+  const ink = scene ? scene.s.ink : '#fff';
+  head.style.color = ink;
+  head.querySelector('.gold').style.color = ink === '#fff' ? '#FFD60A' : ink;
+  head.style.opacity = 1 - clamp((t - ENDS + 0.5) / 0.4);
+  // Ending: white pours out of the last phone, which shrinks into our logo tile.
+  const closing = clamp((t - (ENDS - TURN)) / TURN);
+  end.style.display = closing > 0 ? 'block' : 'none';
+  end.style.clipPath = closing >= 1 ? 'none' : `circle(${ease(closing) * FULL}px at ${CX}px ${CY}px)`;
+  const pop = out3(clamp((t - ENDS + 0.3) / 0.7));
+  const drift = 1 + 0.035 * clamp((t - ENDS) / (DUR - ENDS));
+  tile.style.transform = `scale(${(0.4 + 0.6 * pop) * drift})`;
+  end.querySelector('h2').style.scale = String(drift);
+  tile.style.opacity = pop;
+  endBits.forEach((b, i) => { const p = out3(clamp((t - ENDS - 0.1 - i * 0.28) / 0.55)); b.style.opacity = p; b.style.transform = `translateY(${(1 - p) * 30}px)`; });
+  await Promise.all(layers.map((l) => (l.el.style.display === 'none' ? null : l.img.decode().catch(() => {}))));
+};
+window.DUR = DUR;
+</script>
+</body>
+</html>

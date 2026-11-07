@@ -2019,6 +2019,32 @@ power-design web rulebook, notes in the same folder):
 buttons and pictures do, Unsection for single sections, Commerce Cream for shops on a phone, and the rest)
 are searched for each build; the build's REFERENCES.md line for `videos-2026-11-04` names the ones used.
 
+
+## 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+
+Notes and frames are in `docs/inspo/videos-2026-11-06/`. These three are ways of working, not checks on a finished
+page, so no site made before them has to change.
+
+1. **Nothing leaves the customer unsure** (Wyatt Feaster). A load that fails says so and offers "Try again"; it
+   never reads as "nothing here" or "this link no longer works" (only a real 404 does). A page that loads says what
+   it is loading. An empty state offers the next thing to do. A greyed send button says what is still missing.
+   A field whose reader is unclear says who reads it. Every form that takes a name, phone or email carries the
+   terms and privacy line under its button. Errors give the server's own reason (`apiErrorMessage`), never
+   "Something went wrong". The pieces are `components/common/LoadState.jsx` (PageLoading, LoadFailed,
+   FormConsent); designed sites get the terms line from `mir-order.js` with no rebuild.
+2. **A video can be made in code** (Tyler Mommsen). A film is an HTML page drawn frame by frame
+   (`scripts/code-video.mjs`, method in `docs/code-video.md`): no paid generation, exact timing, real pages
+   recorded live. Generation stays for what code cannot draw (food in motion, real places, 3h). The brief names
+   the product, one idea that runs through the whole film, the format, the look, the motion and the sound,
+   then the check: render, look at a frame every half second, critique as a senior motion designer, fix, at
+   least four rounds.
+3. **Fix motion from a recording, not a longer description** (AyzZ). Describe each section's motion in plain
+   words and build it once. Whatever still moves wrong is fixed from a screen recording of how it should move
+   (a reference site or a quick mock), passed through `docs/inspo` like any reference and named in REFERENCES.md.
+   For a hover or a change of state, draw both states and say which is which. A piece that will not come out
+   right in code (a glow, a fill) is drawn first and given as a picture. A cut-out's edge that shows while
+   scrolling is pinned to the bottom of the screen until the next piece covers it.
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews

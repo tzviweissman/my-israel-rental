@@ -4,6 +4,7 @@
  * has to be rebuilt and a new site has it from the start. If it never arrives, the page works as its own code says.
  *
  *   - a small line under the phone: use a number that gets texts
+ *   - under the email: the terms and privacy line
  *   - an email box, required, under the phone (found by input[type=tel][autocomplete=tel]; a page's own email box is used
  *     when it has one). The address is added to what the page sends, on a later page too (KasherMyBnB).
  *   - texts on (data-texts on this script, from the business's switch): no WhatsApp. The order is saved, then the customer
@@ -26,8 +27,8 @@
   var he = function () { return (document.documentElement.lang || '').indexOf('he') === 0; };
   var T = function () {
     return he()
-      ? { hint: 'כדאי מספר שמקבל הודעות טקסט, כדי לקבל עדכונים על ההזמנה', email: 'אימייל', bad: 'צריך אימייל תקין, כדי לקבל עדכונים על ההזמנה' }
-      : { hint: 'Use a number that gets texts, so you hear about your order', email: 'Your email', bad: 'Add your email, so you hear about your order' };
+      ? { hint: 'כדאי מספר שמקבל הודעות טקסט, כדי לקבל עדכונים על ההזמנה', consent: ['בשליחה אתם מסכימים ל', 'תנאי השימוש', ' ול', 'מדיניות הפרטיות', '.'], email: 'אימייל', bad: 'צריך אימייל תקין, כדי לקבל עדכונים על ההזמנה' }
+      : { hint: 'Use a number that gets texts, so you hear about your order', consent: ['By sending, you agree to the ', 'Terms', ' and the ', 'Privacy policy', '.'], email: 'Your email', bad: 'Add your email, so you hear about your order' };
   };
   var stored = function () { try { return sessionStorage.getItem(KEY) || ''; } catch (e) { return ''; } };
   var input = null;
@@ -72,6 +73,14 @@
     // its own row, so a phone beside the name does not push the two out of line
     w.parentNode.insertBefore(line('mir-hint', 'opacity:.75;font-weight:400;grid-column:1/-1;flex-basis:100%;width:100%', T().hint), w.nextSibling);
     input.required = true;
+    // the terms line every form that takes someone's details carries (LoadState.jsx FormConsent, 7 Nov 2026)
+    var c = T().consent, agree = line('mir-consent', 'opacity:.75;font-weight:400;grid-column:1/-1;flex-basis:100%;width:100%', c[0]);
+    [[c[1], '/terms'], [c[2]], [c[3], '/privacy'], [c[4]]].forEach(function (x) {
+      if (!x[1]) { agree.appendChild(document.createTextNode(x[0])); return; }
+      var a = document.createElement('a'); a.href = x[1]; a.target = '_blank'; a.textContent = x[0]; a.style.cssText = 'color:inherit;text-decoration:underline'; agree.appendChild(a);
+    });
+    var iw = shell(input);
+    iw.parentNode.insertBefore(agree, iw.nextSibling);
     var own = input.closest('label, .field'), opt = own && own.querySelector('.hint');
     if (opt) opt.remove();
     if (!input.value) input.value = stored();

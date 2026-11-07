@@ -8,6 +8,8 @@ import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FormConsent } from '../common/LoadState';
+import { apiErrorMessage } from '../../utils/apiError';
 import { toast } from 'sonner';
 import { Loader2, ImagePlus, X, Calculator } from 'lucide-react';
 import { API, AuthContext } from '../../App';
@@ -25,7 +27,7 @@ export default function QuoteRequest({ gig }) {
   const { user } = useContext(AuthContext) || {};
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [f, setF] = useState({ description: '', preferred_date: '', area: '', name: user?.name || '', phone: user?.phone || '', email: user?.email || '' });
+  const [f, setF] = useState({ description: '', preferred_date: '', area: '', name: user?.name || '', phone: user?.whatsapp_number || user?.phone || '', email: user?.email || '' });
   const [photos, setPhotos] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -51,7 +53,7 @@ export default function QuoteRequest({ gig }) {
         if (data?.url) setPhotos((p) => [...p, data.url].slice(0, MAX));
       }
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('quote.photoFailed', 'Could not add that photo. Try another.'));
+      toast.error(apiErrorMessage(err, t('quote.photoFailed', 'Could not add that photo. Try another.'), t));
     } finally { setUploading(false); }
   };
 
@@ -68,7 +70,7 @@ export default function QuoteRequest({ gig }) {
       toast.success(t('quote.sent', 'Sent. The business will reply with a price.'));
       navigate(data.track_path);
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('quote.failed', 'Could not send. Try again.'));
+      toast.error(apiErrorMessage(err, t('quote.failed', 'Could not send. Try again.'), t));
     } finally { setBusy(false); }
   };
 
@@ -134,6 +136,7 @@ export default function QuoteRequest({ gig }) {
               style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="quote-send">
         {busy && <Loader2 size={15} className="animate-spin" />} {t('quote.send', 'Ask for a price')}
       </button>
+      <FormConsent className="text-[11px] text-center" />
     </form>
   );
 }

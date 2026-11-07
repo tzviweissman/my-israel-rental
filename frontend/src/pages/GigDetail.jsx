@@ -21,6 +21,8 @@ import { useTranslation } from 'react-i18next';
 import DateField from '../components/common/DateField';
 import FitImage from '../components/common/FitImage';
 import axios from 'axios';
+import { FormConsent } from '../components/common/LoadState';
+import { apiErrorMessage } from '../utils/apiError';
 import { toast } from 'sonner';
 import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera, ChevronLeft, ChevronRight, X, ShoppingBag } from 'lucide-react';
 // The shared calendar handles its own language, direction and
@@ -110,7 +112,7 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
       toast.success(t('gigDetail.reviewPosted', 'Review posted'));
       load();
     } catch (err) {
-      toast.error(err.response?.data?.detail || t('gigDetail.reviewFailed', 'Failed to post review'));
+      toast.error(apiErrorMessage(err, t('gigDetail.reviewFailed', 'Failed to post review'), t));
     } finally {
       setSaving(false);
     }
@@ -127,7 +129,7 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
       toast.success(t('gigDetail.reviewWithdrawn', 'Review withdrawn'));
       load();
     } catch (err) {
-      toast.error(err.response?.data?.detail || t('gigDetail.deleteFailed', 'Failed to delete'));
+      toast.error(apiErrorMessage(err, t('gigDetail.deleteFailed', 'Failed to delete'), t));
     }
   };
 
@@ -213,10 +215,11 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
 export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot = null, initialDate = '', staffId = null }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext) || {};
   const [message, setMessage] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.whatsapp_number || user?.phone || '');
   const [birthday, setBirthday] = useState('');
   const [date, setDate] = useState(initialDate || '');
   const [saving, setSaving] = useState(false);
@@ -270,8 +273,7 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
       if (guest && data?.track_path) navigate(data.track_path);
     } catch (err) {
       if (handoff) handoff.close();
-      const d = err.response?.data?.detail;
-      toast.error(typeof d === 'string' ? d : t('gigDetail.requestFailed', 'Failed to send request'));
+      toast.error(apiErrorMessage(err, t('loadState.requestNotSent', 'Your request was not sent. Check your connection and try again.'), t));
     } finally {
       setSaving(false);
     }
@@ -306,7 +308,12 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
           placeholder={guest ? t('gigDetail.emailOrPhone', 'Email (or a phone below)') : t('sweep.yourEmail', 'Your email')} className={field} data-testid="gig-booking-email" />
         <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel"
           placeholder={guest ? t('gigDetail.phone', 'Phone') : t('gigDetail.phoneOptional', 'Phone (optional)')} className={field} data-testid="gig-booking-phone" />
-        {!slot && <DateField value={date} onChange={setDate} className={`${field} bg-white`} testid="gig-booking-date" />}
+        {!slot && (
+          <div>
+            <p className="text-xs font-semibold mb-1" style={{ color: 'var(--ink)' }}>{t('loadState.preferredDay', 'Preferred day (optional)')}</p>
+            <DateField value={date} onChange={setDate} className={`${field} bg-white`} testid="gig-booking-date" />
+          </div>
+        )}
         {gig.birthday_on && <BirthdayInput value={birthday} onChange={setBirthday} businessName={gig.provider?.name || ''} testid="gig-booking-birthday" />}
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t('gigDetail.messagePh', 'Tell the provider what you need…')} rows={3} className={field} />
         {codeBox?.has_codes && (
@@ -333,6 +340,7 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
             {saving ? <Loader2 className="animate-spin" size={14} /> : t('gigDetail.sendRequest', 'Send request')}
           </button>
         </div>
+        <FormConsent className="text-[11px] text-end" />
       </form>
     </div>
   );

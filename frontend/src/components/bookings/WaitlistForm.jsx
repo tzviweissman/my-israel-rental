@@ -4,9 +4,12 @@
  * email for one day; when a time frees up that day the customer is emailed.
  * No account.
  */
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { FormConsent } from '../common/LoadState';
+import { AuthContext } from '../../App';
+import { apiErrorMessage } from '../../utils/apiError';
 import { toast } from 'sonner';
 import { Loader2, BellPlus } from 'lucide-react';
 import { API } from '../../lib/apiBase';
@@ -15,8 +18,9 @@ export default function WaitlistForm({ gigId, days, defaultDay, staffId }) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [day, setDay] = useState(defaultDay || (days[0] && days[0].iso) || '');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const { user } = useContext(AuthContext) || {};
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   if (!days.length) return null;
@@ -32,7 +36,7 @@ export default function WaitlistForm({ gigId, days, defaultDay, staffId }) {
       });
       setDone(true);
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('waitlist.failed', 'Could not add you. Try again.'));
+      toast.error(apiErrorMessage(err, t('waitlist.failed', 'Could not add you. Try again.'), t));
     } finally { setBusy(false); }
   };
 
@@ -61,6 +65,7 @@ export default function WaitlistForm({ gigId, days, defaultDay, staffId }) {
               style={{ borderColor: 'var(--ink)', color: 'var(--ink)' }} data-testid="waitlist-submit">
         {busy && <Loader2 size={13} className="animate-spin" />} {t('waitlist.join', 'Tell me if a time opens')}
       </button>
+      <FormConsent className="text-[11px] text-center" />
     </form>
   );
 }

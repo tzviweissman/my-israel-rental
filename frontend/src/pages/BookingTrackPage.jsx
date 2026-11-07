@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { PageLoading, LoadFailed } from '../components/common/LoadState';
 import { StarInput } from '../components/reviews/ReviewsSection';
 import { Loader2, CalendarCheck } from 'lucide-react';
 import { API } from '../lib/apiBase';
@@ -29,12 +30,15 @@ export default function BookingTrackPage() {
   const [reviewsOn, setReviewsOn] = useState(false);
   const [reviewMsg, setReviewMsg] = useState('');
 
+  const [loadErr, setLoadErr] = useState(false);
   const load = useCallback(async () => {
     try {
       const { data: d } = await axios.get(`${API}/marketplace/bookings/track/${encodeURIComponent(token)}`);
       setData(d);
+      setLoadErr(false);
     } catch (err) {
       if (err?.response?.status === 404) setData(false);
+      else setLoadErr(true);
     }
   }, [token]);
 
@@ -66,11 +70,13 @@ export default function BookingTrackPage() {
   };
 
   const lang = String(i18n.language || 'en').split('-')[0];
-  if (data === null) return <div className="py-24 text-center" style={{ color: 'var(--brand-muted)' }}><Loader2 className="animate-spin inline" size={20} /></div>;
+  if (loadErr && !data) return <LoadFailed className="py-24" onRetry={() => { setLoadErr(false); load(); }} />;
+  if (data === null) return <PageLoading words={t('loadState.loadingYours', 'Loading your page…')} />;
   if (data === false) {
     return (
       <div className="max-w-md mx-auto px-4 py-24 text-center" data-testid="booking-track-bad-link">
         <h1 className="text-lg font-bold" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>{t('bookingTrack.badLink', 'This link no longer works')}</h1>
+        <p className="text-sm mt-2" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.badLinkBody', 'Ask the store to send it again.')}</p>
       </div>
     );
   }

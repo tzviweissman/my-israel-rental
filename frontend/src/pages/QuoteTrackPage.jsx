@@ -7,6 +7,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { PageLoading, LoadFailed } from '../components/common/LoadState';
+import { apiErrorMessage } from '../utils/apiError';
 import { toast } from 'sonner';
 import { Loader2, Calculator } from 'lucide-react';
 import { API } from '../lib/apiBase';
@@ -28,8 +30,9 @@ export default function QuoteTrackPage() {
     if (!d) return;
     i18n.loadLanguages(lang).then(() => setLangReady(true), () => setLangReady(true));
   }, [d && lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [loadErr, setLoadErr] = useState(false);
   const load = useCallback(() => axios.get(`${API}/marketplace/quotes/track/${encodeURIComponent(token)}`)
-    .then(({ data }) => setD(data)).catch(() => setD(false)), [token]);
+    .then(({ data }) => setD(data)).then(() => setLoadErr(false)).catch((err) => { if (err?.response?.status === 404) setD(false); else setLoadErr(true); }), [token]);
   useEffect(() => { document.body.classList.add('orders-bare'); return () => document.body.classList.remove('orders-bare'); }, []);
   useEffect(() => { load(); const id = setInterval(() => { if (!document.hidden) load(); }, 30000); return () => clearInterval(id); }, [load]);
 
@@ -39,10 +42,11 @@ export default function QuoteTrackPage() {
       await axios.post(`${API}/marketplace/quotes/track/${encodeURIComponent(token)}/answer`, { answer: a, discount_code: a === 'accept' && code ? code.code : undefined });
       toast.success(a === 'accept' ? t('quote.acceptedToast', 'Accepted. The business will contact you to arrange it.') : t('quote.declinedToast', 'Declined.'));
       load();
-    } catch (err) { toast.error(err?.response?.data?.detail || t('quote.failed', 'Could not send. Try again.')); } finally { setBusy(''); }
+    } catch (err) { toast.error(apiErrorMessage(err, t('quote.failed', 'Could not send. Try again.'), t)); } finally { setBusy(''); }
   };
 
-  if (d === null || (d && !langReady)) return <div className="py-24 text-center"><Loader2 className="animate-spin inline" size={20} /></div>;
+  if (loadErr && !d) return <LoadFailed className="py-24" onRetry={() => { setLoadErr(false); load(); }} />;
+  if (d === null || (d && !langReady)) return <PageLoading words={t('loadState.loadingYours', 'Loading your page…')} />;
   if (d === false) return <div className="max-w-md mx-auto px-4 py-24 text-center"><h1 className="text-lg font-bold" style={{ color: 'var(--ink)' }}>{t('bookingTrack.badLink', 'This link no longer works')}</h1></div>;
   const biz = (lang === 'he' && d.business.name_he) || d.business.name;
   const title = (lang === 'he' && d.gig_title_he) || d.gig_title;

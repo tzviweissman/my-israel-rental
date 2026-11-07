@@ -4,10 +4,13 @@
  * business to confirm payment; the page says so plainly, and hands the
  * member the link to their pass.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { PageLoading, FormConsent } from '../components/common/LoadState';
+import { AuthContext } from '../App';
+import { apiErrorMessage } from '../utils/apiError';
 import { Loader2, Check, Users } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import { planPrice, planVisits } from '../components/members/memberText';
@@ -28,7 +31,8 @@ export default function MembershipSignupPage() {
   const lang = String(i18n.language || 'en').split('-')[0];
   const [data, setData] = useState(null);
   const [pick, setPick] = useState('');
-  const [form, setForm] = useState({ name: '', phone: '', email: '', note: '' });
+  const { user } = useContext(AuthContext) || {};
+  const [form, setForm] = useState({ name: user?.name || '', phone: user?.whatsapp_number || user?.phone || '', email: user?.email || '', note: '' });
   const [answers, setAnswers] = useState({});
   const [code, setCode] = useState(null);
   const [birthday, setBirthday] = useState('');
@@ -44,12 +48,13 @@ export default function MembershipSignupPage() {
     axios.get(`${API}/marketplace/memberships/${encodeURIComponent(slug)}/timetable`).then(({ data: d }) => setTimetable(d || [])).catch(() => {});
   }, [slug]);
 
-  if (data === null) return <div className="py-24 text-center" style={{ color: 'var(--brand-muted)' }}><Loader2 className="animate-spin inline" size={20} /></div>;
+  if (data === null) return <PageLoading />;
   if (data === false || data.plans.length === 0) {
     return (
       <div className="max-w-md mx-auto px-4 pb-24 text-center" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 48px)' }} data-testid="memberships-none">
         <Users size={26} className="inline mb-3" style={{ color: 'var(--brand-muted)' }} />
         <h1 className="text-lg font-bold" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>{t('members.noSignup', 'Memberships are not open here right now')}</h1>
+        <Link to={`/business/${slug}`} className="inline-block mt-4 text-sm font-semibold underline" style={{ color: 'var(--ink)' }}>{t('loadState.backToBusiness', 'Back to the business page')}</Link>
       </div>
     );
   }
@@ -68,8 +73,7 @@ export default function MembershipSignupPage() {
       });
       navigate(`/members/${r.manage_token}?joined=1`);
     } catch (err) {
-      const d = err?.response?.data?.detail;
-      setError(typeof d === 'string' ? d : t('members.joinFailed', 'Could not send. Check your details and try again.'));
+      setError(apiErrorMessage(err, t('members.joinFailed', 'Could not send. Check your details and try again.'), t));
     } finally { setSending(false); }
   };
 
@@ -151,6 +155,7 @@ export default function MembershipSignupPage() {
                   style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="signup-submit">
             {sending && <Loader2 size={16} className="animate-spin" />} {t('members.signUp', 'Sign up')}
           </button>
+          <FormConsent className="text-[11px] text-center" />
           <p className="text-xs text-center" style={{ color: 'var(--brand-muted)' }}>{t('members.noChargeNote', 'Nothing is charged on this site. You arrange payment with the business.')}</p>
         </form>
       </main>

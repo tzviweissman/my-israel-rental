@@ -12,6 +12,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { apiErrorMessage } from '../utils/apiError';
+import { PageLoading, LoadFailed } from '../components/common/LoadState';
 import { Check, Copy, ExternalLink, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { API } from '../lib/apiBase';
@@ -26,11 +28,13 @@ export default function PaymentRequestPage() {
   // The request's language may not be the site's, and Hebrew is loaded on
   // demand (i18n.js): without this a Hebrew request showed English text.
   const [langReady, setLangReady] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const [loadErr, setLoadErr] = useState(false);
 
   useEffect(() => {
     axios.get(`${API}/marketplace/pay/${encodeURIComponent(token)}`)
-      .then(({ data: d }) => setData(d)).catch(() => setData(false));
-  }, [token]);
+      .then(({ data: d }) => setData(d)).catch((err) => { if (err?.response?.status === 404) setData(false); else setLoadErr(true); });
+  }, [token, retry]);
 
   const lang = data?.lang || (String(i18n.language || '').startsWith('he') ? 'he' : 'en');
   useEffect(() => {
@@ -46,7 +50,8 @@ export default function PaymentRequestPage() {
       <div className="w-full max-w-md mx-auto rounded-2xl border bg-white p-6" style={{ borderColor: 'var(--brand-border)' }} data-testid="pay-page">{children}</div>
     </main>
   );
-  if (data === null || (data && !langReady)) return shell(<div className="py-10 text-center"><Loader2 className="animate-spin inline" size={20} /></div>);
+  if (loadErr) return shell(<LoadFailed className="py-6" onRetry={() => { setLoadErr(false); setRetry((n) => n + 1); }} />);
+  if (data === null || (data && !langReady)) return shell(<PageLoading className="py-10" />);
   if (data === false) return shell(<p className="text-center text-sm" style={{ color: 'var(--ink)' }}>{t('payReq.invalid', 'This payment link is not valid. Ask the business to send it again.')}</p>);
 
   const biz = data.business;
@@ -56,7 +61,7 @@ export default function PaymentRequestPage() {
     try {
       const { data: d } = await axios.post(`${API}/marketplace/pay/${encodeURIComponent(token)}/paid`);
       setData({ ...data, status: d.status });
-    } catch { toast.error(t('payReq.failed', 'Something went wrong. Try again.')); } finally { setBusy(false); }
+    } catch (err) { toast.error(apiErrorMessage(err, t('payReq.failed', 'Something went wrong. Try again.'), t)); } finally { setBusy(false); }
   };
   const copyAmount = async () => {
     try { await navigator.clipboard.writeText(String(data.amount)); toast.success(t('payReq.amountCopied', 'Amount copied')); } catch { /* the amount is on screen */ }

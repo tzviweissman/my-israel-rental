@@ -6,6 +6,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { apiErrorMessage } from '../../utils/apiError';
 import { toast } from 'sonner';
 import { Loader2, Calculator, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
 import { money } from '../../utils/currency';
@@ -30,7 +31,7 @@ function QuoteCard({ q, API, auth, onChanged }) {
       await axios.post(`${API}/marketplace/quote-requests/${q.id}/reply`, { action, price: action === 'quote' && !lines.length ? Number(price) : null, lines: action === 'quote' ? cleanLines(lines) : [], note, valid_days: Number(days) }, auth);
       toast.success(action === 'quote' ? t('quotes.sentPrice', 'Price sent. The customer can accept it with one tap.') : t('quotes.declinedOk', 'Declined. The customer is told.'));
       onChanged();
-    } catch (err) { toast.error(err?.response?.data?.detail || t('auto.failed', 'Could not save. Try again.')); } finally { setBusy(''); }
+    } catch (err) { toast.error(apiErrorMessage(err, t('auto.failed', 'Could not save. Try again.'), t)); } finally { setBusy(''); }
   };
   const STATUS = {
     new: t('quotes.st.new', 'Waiting for your price'), quoted: t('quotes.st.quoted', 'Price sent, waiting for the customer'),

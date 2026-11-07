@@ -11,6 +11,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { apiErrorMessage } from '../../utils/apiError';
 import { toast } from 'sonner';
 import { Loader2, CalendarClock, XCircle } from 'lucide-react';
 import { API } from '../../lib/apiBase';
@@ -83,7 +84,7 @@ export default function ChangeBooking({ token, data, onChanged }) {
       setMode(null);
       onChanged();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('bookingTrack.changeFailed', 'Could not change it. Try again.'));
+      toast.error(apiErrorMessage(err, t('bookingTrack.changeFailed', 'Could not change it. Try again.'), t));
       if (err?.response?.status === 409) axios.get(`${API}/marketplace/gigs/${data.gig_id}/taken-slots`).then(({ data: d }) => setTaken(d || {})).catch(() => {});
     } finally { setBusy(false); }
   };

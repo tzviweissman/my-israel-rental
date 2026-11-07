@@ -15,6 +15,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import { PageLoading, LoadFailed } from '../common/LoadState';
+import { apiErrorMessage } from '../../utils/apiError';
 import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList, Timer, Megaphone, MessageSquare, Info, BellRing, PauseCircle } from 'lucide-react';
 import TextNotificationsPanel from './TextNotificationsPanel';
 import { askForNotice } from './NoticeEditor';
@@ -69,12 +71,13 @@ export default function MyBusinessesTab({ API, token }) {
 
   const auth = { headers: { Authorization: `Bearer ${token}` } };
 
+  const [loadErr, setLoadErr] = useState(false);
   const load = useCallback(async () => {
     try {
       const { data } = await axios.get(`${API}/marketplace/businesses`, auth);
       setItems(data);
     } catch {
-      setItems([]);
+      setLoadErr(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [API, token]);
@@ -160,7 +163,7 @@ export default function MyBusinessesTab({ API, token }) {
       await load();
       toast.success(t('businesses.added', 'Business added'));
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('businesses.addFailed', 'Could not add that business'));
+      toast.error(apiErrorMessage(err, t('businesses.addFailed', 'Could not add that business'), t));
     } finally {
       setBusy(false);
     }
@@ -175,7 +178,7 @@ export default function MyBusinessesTab({ API, token }) {
       setEditingId(null);
       await load();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('businesses.saveFailed', 'Could not save'));
+      toast.error(apiErrorMessage(err, t('businesses.saveFailed', 'Could not save'), t));
     } finally {
       setBusy(false);
     }
@@ -204,7 +207,7 @@ export default function MyBusinessesTab({ API, token }) {
       await axios.patch(`${API}/marketplace/businesses/${biz.id}`, { active: !biz.active }, auth);
       await load();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('businesses.saveFailed', 'Could not save'));
+      toast.error(apiErrorMessage(err, t('businesses.saveFailed', 'Could not save'), t));
     } finally {
       setBusy(false);
     }
@@ -244,13 +247,8 @@ export default function MyBusinessesTab({ API, token }) {
     );
   }
 
-  if (items === null) {
-    return (
-      <div className="py-16 text-center" style={{ color: 'var(--brand-muted)' }}>
-        <Loader2 className="animate-spin inline" size={18} />
-      </div>
-    );
-  }
+  if (items === null && loadErr) return <LoadFailed onRetry={() => { setLoadErr(false); load(); }} />;
+  if (items === null) return <PageLoading className="py-16" />;
 
   const activeCount = items.filter((b) => b.active).length;
   const atCap = activeCount >= MAX_ACTIVE;

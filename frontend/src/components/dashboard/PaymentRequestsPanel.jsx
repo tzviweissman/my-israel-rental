@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { apiErrorMessage } from '../../utils/apiError';
 import { toast } from 'sonner';
 import { Check, Copy, Loader2, MessageCircle, X } from 'lucide-react';
 
@@ -38,7 +39,7 @@ export default function PaymentRequestsPanel({ API, auth, businessId, onClose })
       setForm({ ...form, amount: '', description: '', customer_name: '', customer_phone: '', customer_email: '' });
       load();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('payReq.failed', 'Something went wrong. Try again.'));
+      toast.error(apiErrorMessage(err, t('payReq.failed', 'Something went wrong. Try again.'), t));
     } finally { setBusy(false); }
   };
   const setStatus = async (r, status) => {

@@ -380,6 +380,8 @@ const Services = () => {
       min_rating: '', min_price: '', max_price: '',
       response_time: '', languages: [], booking_mode: '',
       max_distance_km: '',
+      // "Clear all" means all: the words searched and the day too (cheap-feel sweep, 7 Nov 2026).
+      q: '', available_on: '', subcategory: '',
     });
   };
 

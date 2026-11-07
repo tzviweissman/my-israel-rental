@@ -16,6 +16,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { PageLoading, LoadFailed } from '../components/common/LoadState';
 import { StarInput } from '../components/reviews/ReviewsSection';
 import { Loader2, ClipboardList, Bike, Store as StoreIcon, Clock, MapPin, Truck, RotateCcw } from 'lucide-react';
 import { API } from '../lib/apiBase';
@@ -56,12 +57,15 @@ export default function OrderTrackPage() {
     return () => document.body.classList.remove('orders-bare');
   }, []);
 
+  const [loadErr, setLoadErr] = useState(false);
   const load = useCallback(async () => {
     try {
       const { data: d } = await axios.get(`${API}/marketplace/orders/track/${encodeURIComponent(token)}`);
       setData(d);
+      setLoadErr(false);
     } catch (err) {
       if (err?.response?.status === 404) setData(false);
+      else setLoadErr(true);
     }
   }, [token]);
 
@@ -73,7 +77,8 @@ export default function OrderTrackPage() {
 
   const lang = String(i18n.language || 'en').split('-')[0];
 
-  if (data === null) return <div className="py-24 text-center" style={{ color: 'var(--brand-muted)' }}><Loader2 className="animate-spin inline" size={20} /></div>;
+  if (loadErr && !data) return <LoadFailed className="py-24" onRetry={() => { setLoadErr(false); load(); }} />;
+  if (data === null) return <PageLoading words={t('loadState.loadingYours', 'Loading your page…')} />;
   if (data === false) {
     return (
       <div className="max-w-md mx-auto px-4 py-24 text-center" data-testid="track-bad-link">

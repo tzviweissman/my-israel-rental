@@ -26,6 +26,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { PageLoading, LoadFailed } from '../common/LoadState';
+import { apiErrorMessage } from '../../utils/apiError';
 import { toast } from 'sonner';
 import {
   Plus, Loader2, ClipboardPaste, Store as StoreIcon, Bike, X, Sparkles, ClipboardList,
@@ -131,6 +133,9 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
   });
   const [range, setRange] = useState('today');        // today | week | open | done
   const [statusFilter, setStatusFilter] = useState('');
+  const [bizRetry, setBizRetry] = useState(0);
+  const [bizFailed, setBizFailed] = useState(false);
+  const [ordersFailed, setOrdersFailed] = useState(false);
   // Search every order the store has (number, name, phone, email), any
   // date: replaces the range while there is something typed.
   const [search, setSearch] = useState('');
@@ -211,10 +216,10 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
         setBusinesses(active);
         if (!active.find((b) => b.id === bizId) && active[0]) setBizId(active[0].id);
       })
-      .catch(() => alive && setBusinesses([]));
+      .catch(() => alive && setBizFailed(true));
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [API, token]);
+  }, [API, token, bizRetry]);
 
   useEffect(() => {
     try { if (bizId) localStorage.setItem('orders.business', bizId); } catch { /* private mode */ }
@@ -226,7 +231,7 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
     // belong to whoever was signed in last on this browser, and asking
     // for their orders is a 403 (and a wrong "could not load" toast)
     // until the list arrives and the id is corrected.
-    if (!bizId || !businesses || !businesses.some((b) => b.id === bizId)) return;
+    if (!bizId || !Array.isArray(businesses) || !businesses.some((b) => b.id === bizId)) return;
     setLoading(true);
     // A slow answer for what was on screen before must not replace the
     // answer for what is typed now.
@@ -237,8 +242,10 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
       if (seq !== loadSeq.current) return;
       setOrders(data.orders || []);
       setCounts(data.status_counts || {});
+      setOrdersFailed(false);
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.loadFailed', 'Could not load orders'));
+      if (seq === loadSeq.current) setOrdersFailed(true);
+      toast.error(apiErrorMessage(err, t('orders.loadFailed', 'Could not load orders'), t));
     } finally {
       setLoading(false);
     }
@@ -269,7 +276,7 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
       setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
       setCounts((c) => ({ ...c, [order.status]: Math.max(0, (c[order.status] || 0) - 1), [status]: (c[status] || 0) + 1 }));
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+      toast.error(apiErrorMessage(err, t('orders.saveFailed', 'Could not save'), t));
       if (err?.response?.status === 409) load();
     } finally {
       setBusyId(null);
@@ -283,7 +290,7 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
       setOrders((prev) => prev.map((o) => (o.id === data.order.id ? data.order : o)));
       if (courierUserId) toast.success(t('orders.assigned', 'Assigned - it is on their Deliveries tab'));
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+      toast.error(apiErrorMessage(err, t('orders.saveFailed', 'Could not save'), t));
     } finally {
       setBusyId(null);
     }
@@ -295,7 +302,7 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
       const { data } = await axios.patch(`${API}/marketplace/orders/${order.id}/payment`, { method, amount: method ? order.total : null }, auth);
       setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+      toast.error(apiErrorMessage(err, t('orders.saveFailed', 'Could not save'), t));
     } finally {
       setBusyId(null);
     }
@@ -309,7 +316,7 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
       const { data } = await axios.post(`${API}/marketplace/orders/${order.id}/cancel-sale`, null, auth);
       setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+      toast.error(apiErrorMessage(err, t('orders.saveFailed', 'Could not save'), t));
     } finally {
       setBusyId(null);
     }
@@ -322,7 +329,7 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
       toast.success(t('orders.repeatDone', 'Set to repeat every week - next week\'s is on the board'));
       await Promise.all([load(), loadSettings()]);
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+      toast.error(apiErrorMessage(err, t('orders.saveFailed', 'Could not save'), t));
     } finally {
       setBusyId(null);
     }
@@ -358,7 +365,7 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.exportFailed', 'Could not export'));
+      toast.error(apiErrorMessage(err, t('orders.exportFailed', 'Could not export'), t));
     }
   };
 
@@ -386,6 +393,7 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
     return new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'short' }).format(d);
   };
 
+  if (bizFailed && businesses === null) return <LoadFailed onRetry={() => { setBizFailed(false); setBizRetry((n) => n + 1); }} />;
   if (businesses === null) {
     return (
       <div className="py-16 text-center" style={{ color: 'var(--brand-muted)' }}>
@@ -399,6 +407,7 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
       <div className="rounded-2xl border p-8 text-center" style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }} data-testid="orders-no-business">
         <ClipboardList size={22} className="inline mb-2" />
         <p className="text-sm">{t('orders.needBusiness', 'Add a business first. Orders belong to a business.')}</p>
+        <a href="/dashboard?tab=my-businesses" className="inline-block mt-3 text-sm font-semibold underline" style={{ color: 'var(--ink)' }}>{t('loadState.addBusiness', 'Add a business')}</a>
       </div>
     );
   }
@@ -608,7 +617,9 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
       {!query && range === 'today' && <MoneyStrip orders={orders} t={t} />}
 
       {loading && orders.length === 0 ? (
-        <div className="py-10 text-center" style={{ color: 'var(--brand-muted)' }}><Loader2 className="animate-spin inline" size={18} /></div>
+        <PageLoading className="py-10" />
+      ) : ordersFailed && orders.length === 0 ? (
+        <LoadFailed onRetry={load} />
       ) : groups.length === 0 ? (
         <div className="rounded-2xl border p-8 text-center" style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }} data-testid="orders-empty">
           <ClipboardList size={22} className="inline mb-2" />
@@ -619,6 +630,11 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
               ? t('orders.emptyToday', 'Nothing due today.')
               : t('orders.empty', 'No orders here yet.')}
           </p>
+          {statusFilter && (
+            <button type="button" onClick={() => setStatusFilter('')} className="mt-3 me-4 text-sm font-semibold underline" style={{ color: 'var(--ink)' }} data-testid="orders-show-all">
+              {t('loadState.showAll', 'Show all orders')}
+            </button>
+          )}
           {!entryOpen && !query && (
             <button type="button" onClick={() => setEntryOpen(true)} className="mt-3 text-sm font-semibold underline" style={{ color: 'var(--ink)' }}>
               {t('orders.enterFirst', 'Enter the first one')}
@@ -738,7 +754,7 @@ function OrderForm({ API, auth, businessId, initial, orderId, cutoffs, onCancel,
       toast.success(t('orders.extracted', 'Filled in. Check it, then save'));
       nameRef.current?.focus();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.extractFailed', 'Could not read that message. Fill the form by hand'));
+      toast.error(apiErrorMessage(err, t('orders.extractFailed', 'Could not read that message. Fill the form by hand'), t));
     } finally {
       setExtracting(false);
     }
@@ -1138,7 +1154,7 @@ function StaffLinkPanel({ API, auth, businessId, onClose }) {
       setToken(data.token);
       setCopied(false);
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+      toast.error(apiErrorMessage(err, t('orders.saveFailed', 'Could not save'), t));
     } finally {
       setBusy(false);
     }
@@ -1152,7 +1168,7 @@ function StaffLinkPanel({ API, auth, businessId, onClose }) {
       await axios.delete(`${API}/marketplace/businesses/${businessId}/orders/staff-link`, auth);
       setToken(null);
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+      toast.error(apiErrorMessage(err, t('orders.saveFailed', 'Could not save'), t));
     } finally {
       setBusy(false);
     }
@@ -1253,7 +1269,7 @@ export function ImportCustomersPanel({ API, auth, businessId, onClose, onDone })
       onDone && onDone();
       toast.success(t('orders.importDone', '{{n}} customers imported', { n: data.imported }));
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.importFailed', 'Could not import'));
+      toast.error(apiErrorMessage(err, t('orders.importFailed', 'Could not import'), t));
     } finally {
       setBusy(false);
     }
@@ -1356,7 +1372,7 @@ function CouriersPanel({ API, auth, businessId, couriers, settings, onChanged, o
       toast.success(t('orders.invited', 'Invite sent'));
       await onChanged();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+      toast.error(apiErrorMessage(err, t('orders.saveFailed', 'Could not save'), t));
     } finally {
       setBusy(false);
     }
@@ -1370,7 +1386,7 @@ function CouriersPanel({ API, auth, businessId, couriers, settings, onChanged, o
       await axios.delete(`${API}/marketplace/businesses/${businessId}/couriers/${encodeURIComponent(c.user_id || c.email)}`, auth);
       await onChanged();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+      toast.error(apiErrorMessage(err, t('orders.saveFailed', 'Could not save'), t));
     } finally {
       setBusy(false);
     }
@@ -1443,7 +1459,7 @@ export function BusinessHoursPanel({ API, token, businessId, onClose }) {
     setLoaded({ settings, couriers });
   }, [API, auth, businessId]);
   useEffect(() => { load().catch(() => setLoaded(false)); }, [load]);
-  if (loaded === false) return null;
+  if (loaded === false) return <LoadFailed className="py-6" onRetry={() => { setLoaded(null); load().catch(() => setLoaded(false)); }} />;
   if (!loaded) return <div className="py-4 text-center" style={{ color: 'var(--brand-muted)' }}><Loader2 size={16} className="animate-spin inline" /></div>;
   return <SettingsPanel API={API} auth={auth} businessId={businessId} settings={loaded.settings} couriers={loaded.couriers} onSaved={load} onClose={onClose} />;
 }
@@ -1664,7 +1680,7 @@ function StandingPanel({ API, auth, standing, onChanged, onClose }) {
     try {
       await axios.patch(`${API}/marketplace/standing-orders/${sd.id}`, { active: !sd.active }, auth);
       await onChanged();
-    } catch (err) { toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save')); } finally { setBusy(null); }
+    } catch (err) { toast.error(apiErrorMessage(err, t('orders.saveFailed', 'Could not save'), t)); } finally { setBusy(null); }
   };
   const remove = async (sd) => {
     // eslint-disable-next-line no-alert
@@ -1673,7 +1689,7 @@ function StandingPanel({ API, auth, standing, onChanged, onClose }) {
     try {
       await axios.delete(`${API}/marketplace/standing-orders/${sd.id}`, auth);
       await onChanged();
-    } catch (err) { toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save')); } finally { setBusy(null); }
+    } catch (err) { toast.error(apiErrorMessage(err, t('orders.saveFailed', 'Could not save'), t)); } finally { setBusy(null); }
   };
 
   return (
