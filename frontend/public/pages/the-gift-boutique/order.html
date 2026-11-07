@@ -15,7 +15,7 @@
 <title>Order a gift · The Gift Boutique</title>
 <meta name="site-category" content="fashion-shop">
 <meta name="description" content="Choose your gifts, say who they are for and where they are going, and send the order to The Gift Boutique on WhatsApp. Delivered across Israel.">
-<link rel="icon" href="/pages/the-gift-boutique/assets/logo-192.png?v=mw4hekfj">
+<link rel="icon" href="/pages/the-gift-boutique/assets/logo-192.png?v=mw6wryg1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
@@ -258,7 +258,7 @@
 
 <header class="bar">
   <div class="wrap">
-    <a class="brand" href="/business/the-gift-boutique" aria-label="The Gift Boutique, home"><img src="/pages/the-gift-boutique/assets/logo.webp?v=mw4hekfj" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-e8c39563-0">THE GIFT BOUTIQUE</span></a>
+    <a class="brand" href="/business/the-gift-boutique" aria-label="The Gift Boutique, home"><img src="/pages/the-gift-boutique/assets/logo.webp?v=mw6wryg1" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-e8c39563-0">THE GIFT BOUTIQUE</span></a>
     <nav class="nav" aria-label="Pages">
       <a class="link" href="/business/the-gift-boutique#make" data-mir-key="t-4dac8cb1-0">What we make</a>
       <a class="link" href="/business/the-gift-boutique#prices" data-mir-key="t-53b2fbd0-0">Prices</a>
@@ -355,11 +355,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var SYM = { USD: '$', ILS: '₪', EUR: '€', GBP: '£' };
   function money(n, cur) { var v = Number(n); return (SYM[cur] || '') + (Number.isInteger(v) ? v : v.toFixed(2)); }
-  function priced(p) { return Number(p.price) > 0; }
+  // How the business prices each product (dashboard, 7 Nov 2026): fixed, from a price, or on request.
+  function priced(p) { return p.price_kind !== 'quote' && Number(p.price) > 0; }
   function priceText(p) {
     if (!priced(p)) return 'Price on request';
     var t = money(p.price, p.currency);
     if (p.price_to != null && Number(p.price_to) > Number(p.price)) t += ' to ' + money(p.price_to, p.currency);
+    else if (p.price_kind === 'from') t = 'from ' + t;
     return t;
   }
 
@@ -421,6 +423,15 @@ document.addEventListener('DOMContentLoaded', function () {
   function drawCtl(p) {
     var ctl = p._ctl; ctl.textContent = '';
     if (!p.in_stock) return;
+    if (p.price_kind === 'quote') {
+      // priced on request: asked for on the business page, never added to this order
+      q[p._k] = 0;
+      var ask = document.createElement('a'); ask.className = 'add'; ask.textContent = 'Ask for a price';
+      ask.href = '/services/gig/' + p.gig_id + '?ask=' + encodeURIComponent(p.id);
+      ask.setAttribute('aria-label', 'Ask for a price, ' + p.name);
+      ctl.appendChild(ask);
+      return;
+    }
     var n = q[p._k] || 0;
     p._li.classList.toggle('has', n > 0);
     if (!n) {
@@ -446,7 +457,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var n = q[p._k]; cur = p.currency || cur;
       if (!priced(p)) { ask = true; return; }
       low += n * Number(p.price);
-      if (p.price_to != null && Number(p.price_to) > Number(p.price)) ranged = true;
+      if ((p.price_kind === 'from' || p.price_to != null && Number(p.price_to) > Number(p.price))) ranged = true;
     });
     low = MirCode.after(low);
     return { text: (ranged ? 'from ' : '') + money(low, cur) + (ask ? ' + price on request' : ''), low: low, cur: cur };
@@ -460,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function () {
     lines.textContent = '';
     var c = chosen();
     empty.hidden = c.length > 0;
-    var rg = c.filter(function (p) { return p.price_to != null && Number(p.price_to) > Number(p.price); });
+    var rg = c.filter(function (p) { return (p.price_kind === 'from' || p.price_to != null && Number(p.price_to) > Number(p.price)); });
     document.getElementById('which').hidden = !rg.length;
     if (rg.length) document.getElementById('whichl').textContent = 'Which one? ' + rg.map(function (p) { return p.name + ' is ' + priceText(p); }).join('; ') + '. Write which one you want.';
     c.forEach(function (p) {
@@ -471,7 +482,7 @@ document.addEventListener('DOMContentLoaded', function () {
       rmb.onclick = function () { delete q[p._k]; update(); };
       var at = document.createElement('span'); at.textContent = q[p._k] + ' × ' + p.name; a.appendChild(rmb); a.appendChild(at);
       var b = document.createElement('span');
-      b.textContent = priced(p) ? (p.price_to != null && Number(p.price_to) > Number(p.price) ? 'from ' : '') + money(q[p._k] * Number(p.price), p.currency) : 'on request';
+      b.textContent = priced(p) ? ((p.price_kind === 'from' || p.price_to != null && Number(p.price_to) > Number(p.price)) ? 'from ' : '') + money(q[p._k] * Number(p.price), p.currency) : 'on request';
       li.appendChild(a); li.appendChild(b); lines.appendChild(li);
     });
     var t = totals().text;

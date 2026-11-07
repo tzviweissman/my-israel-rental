@@ -285,11 +285,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var SYM = { USD: '$', ILS: '₪', EUR: '€', GBP: '£' };
   function money(n, cur) { var v = Number(n); return (SYM[cur] || '') + (Number.isInteger(v) ? v : v.toFixed(2)); }
-  function priced(p) { return Number(p.price) > 0; }
+  // How the business prices each product (dashboard, 7 Nov 2026): fixed, from a price, or on request.
+  function priced(p) { return p.price_kind !== 'quote' && Number(p.price) > 0; }
   function priceText(p) {
     if (!priced(p)) return 'Price on request';
     var t = money(p.price, p.currency);
     if (p.price_to != null && Number(p.price_to) > Number(p.price)) t += ' to ' + money(p.price_to, p.currency);
+    else if (p.price_kind === 'from') t = 'from ' + t;
     return t;
   }
 
@@ -397,6 +399,15 @@ document.addEventListener('DOMContentLoaded', function () {
     sync(p); drawCfg(p);
     var ctl = p._ctl; ctl.textContent = '';
     if (!p.in_stock) return;
+    if (p.price_kind === 'quote') {
+      // priced on request: asked for on the business page, never added to this order
+      q[p._k] = 0;
+      var ask = document.createElement('a'); ask.className = 'add'; ask.textContent = 'Ask for a price';
+      ask.href = '/services/gig/' + p.gig_id + '?ask=' + encodeURIComponent(p.id);
+      ask.setAttribute('aria-label', 'Ask for a price, ' + p.name);
+      ctl.appendChild(ask);
+      return;
+    }
     var n = q[p._k] || 0;
     p._li.classList.toggle('has', n > 0);
     if (!n) {
@@ -423,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var n = q[p._k]; cur = p.currency || cur;
       if (!priced(p)) { ask = true; return; }
       low += n * Number(p.price);
-      if (p.price_to != null && Number(p.price_to) > Number(p.price)) ranged = true;
+      if ((p.price_kind === 'from' || p.price_to != null && Number(p.price_to) > Number(p.price))) ranged = true;
     });
     low = MirCode.after(low);
     low += extraCost();
@@ -443,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var l = document.createElement('div'); l.className = 'l';
       var a = document.createElement('span'); a.textContent = q[p._k] + ' × ' + p.name;
       var b = document.createElement('span');
-      b.textContent = priced(p) ? (p.price_to != null && Number(p.price_to) > Number(p.price) ? 'from ' : '') + money(q[p._k] * Number(p.price), p.currency) : 'on request';
+      b.textContent = priced(p) ? ((p.price_kind === 'from' || p.price_to != null && Number(p.price_to) > Number(p.price)) ? 'from ' : '') + money(q[p._k] * Number(p.price), p.currency) : 'on request';
       l.appendChild(a); l.appendChild(b); li.appendChild(l);
       var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.setAttribute('aria-label', 'Remove ' + p.name + ' from the order');
       rm.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
@@ -533,7 +544,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var L = ['Hi, I would like to order:'];
     chosen().forEach(function (p) {
       // the line price carries the bowl extras (+6, +5), so the lines add up to the total
-      var ranged = p.price_to != null && Number(p.price_to) > Number(p.price);
+      var ranged = (p.price_kind === 'from' || p.price_to != null && Number(p.price_to) > Number(p.price));
       L.push('• ' + q[p._k] + ' × ' + p.name + ' (' + (priced(p) && !ranged ? money(q[p._k] * Number(p.price) + extraFor(p), p.currency) : priceText(p)) + ')');
     });
     choices().forEach(function (c) { L.push('   ' + c); });
