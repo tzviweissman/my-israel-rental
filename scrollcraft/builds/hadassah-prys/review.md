@@ -31,3 +31,8 @@ Fourth look: "When and where" now has 32px top and bottom padding (measured, sec
 
 FAILs: 0
 Verdict: PASS
+
+Fifth look (7 Nov 2026, her logo made large in the opening):
+Laptop 1440x900: the logo is about three times the header one, clear and readable in pink on the pink wall, sitting above the small label and "Get ready to glow". It does not touch the headline, the Book button, the mirror or the Lights on switch. Phone 390x844: the logo is large above the label, under the mirror picture, with no overlap; headline, Book button and prices are all in view. Short phone 375x667: the big logo is hidden as planned, the header logo stays, and the first screen is clear with the mirror, headline and Book button. Nothing looks broken at any size.
+FAILs: 0
+Verdict: PASS

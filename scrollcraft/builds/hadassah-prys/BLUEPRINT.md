@@ -112,7 +112,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 ## Stage 3. Opening
 
 - [x] R3g.13 The first screen holds a picture, a headline of 2 to 5 words that says what the customer gets, at most one short line (where the business is: the line or the small label, not both; trust goes there or right under the button) and one button; the header does not count
-  plan: the picture, Get ready to glow (four words), one short line with where she is, one button; check-says-offer
+  plan: the picture, her logo large above the words (her ask, 7 Nov 2026; hidden on short phones), Get ready to glow (four words), one short line with where she is, one button; check-says-offer
 - [x] R3b.1 The first screen answers: what it is, where, why trust it, what to do next
   plan: what: makeup; where: Jerusalem; trust: price and lashes under the button; next: Book
 - [x] R3b.2 Proof (price, credential or rating) touches the main button; for food a kosher band sits just after the opening, not crowding the button, and the certificate is stated at most twice as a sentence or band (a small identical kosher tag on items does not count)

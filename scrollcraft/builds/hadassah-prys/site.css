@@ -191,6 +191,11 @@ html.arrive-go [data-arrive="1"] { --n: 1; } html.arrive-go [data-arrive="4"] { 
 .open-in { position: relative; height: 100%; display: flex; align-items: center; padding-top: var(--top-h); }
 .open-words { max-width: 34rem; }
 .label { margin: 0 0 var(--s3); font-size: var(--t0); font-weight: 600; color: var(--ink); }
+/* her logo, large (Hadassah, 7 Nov 2026: "her logo in bigger somewhere on the page"); a soft pale halo lifts it off the pink wall */
+.open-logo { display: block; width: min(440px, 100%); height: auto; margin: 0 0 var(--s4) -8px; filter: drop-shadow(0 0 14px rgba(255, 249, 248, .85)); }
+@media (max-width: 760px) { .open-logo { width: min(230px, 62vw); margin: 0 0 var(--s2) -4px; } }
+/* a short phone has no room under the mirror: the header logo stays */
+@media (max-width: 760px) and (max-height: 700px) { .open-logo { display: none; } }
 .open h1 { font-size: var(--t5); line-height: 1.02; }
 .open-act { margin-top: var(--s6); }
 .btn-facts { list-style: none; display: flex; flex-wrap: wrap; gap: var(--s1) var(--s4); margin: var(--s4) 0 0; padding: 0; font-size: var(--t-1); font-weight: 600; color: var(--ink); }

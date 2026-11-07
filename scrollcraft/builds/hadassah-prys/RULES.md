@@ -27,7 +27,7 @@ R3e.22 pass: built to the blueprint: named everywhere, direct WhatsApp on every 
 R3s.19 pass: built to the blueprint: same promise and the same room picture on the link preview and home; each page has its own title and description
 R6.1 pass: built to the blueprint: personal care playbook: the service with price and duration first, hours, then how to book
 R4.1 pass: built to the blueprint: what is missing (photos, FAQ, reviews, guarantee, travel fee) is listed in OWNER-QUESTIONS.md and left off
-R3g.13 pass: built to the blueprint: the picture, Get ready to glow (four words), one short line with where she is, one button; check-says-offer
+R3g.13 pass: built to the blueprint: the picture, her logo large above the words (her ask, 7 Nov 2026; hidden on short phones), Get ready to glow (four words), one short line with where she is, one button; check-says-offer
 R3b.1 pass: built to the blueprint: what: makeup; where: Jerusalem; trust: price and lashes under the button; next: Book
 R3b.2 n/a: no certificate in the record, so nothing on the page says kosher
 R3b.3 pass: built to the blueprint: one solid button in the opening; the bar's Book is outline; the phone bar repeats it
