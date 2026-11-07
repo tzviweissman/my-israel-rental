@@ -286,3 +286,6 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 ## UI audit of 2 Nov 2026
 - [Low] Chicken Munch home scrolls 7px sideways at 375 (closing block `.go-order`, `site.css:312`). First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
 - [Low] Footer and menu links on the 17 business sites are 19 to 24px tall on phones, under 44px. First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
+## Code review of 7 Nov 2026
+- [Low] Counters `ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits` have no plural forms ("1 visits"); test-i18n-parity fails. First seen 7 Nov (2026-11-07-site-audit.md), introduced 4 Nov a27f0168.
+- [Medium] Audit setup, 7 Nov: no MongoDB (403), no Chromium, full backend suite cannot run; `pytest_asyncio` and `mongomock_motor` missing from the venv. Still open since 15 Oct.
