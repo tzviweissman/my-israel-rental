@@ -191,7 +191,7 @@ h1, h2, h3 { font-weight: 400; letter-spacing: -.005em; }
 .film .room { z-index: 1; opacity: 0; transition: opacity 600ms var(--out); }
 .film.c3 .room, .no-js .film .room { opacity: 1; }
 /* the words: a small card on the soap at the start, away while the film runs, back once the camera has stopped, so the room stays in view (rules 3h.25) */
-.film .hero { z-index: 3; position: absolute; left: var(--gutter); top: calc(var(--top-h) + var(--s4)); height: auto; width: min(30rem, calc(100% - 2 * var(--gutter))); margin: 0; padding: var(--s5) var(--s6); background: rgba(255,255,255,.95); border-radius: 16px; box-shadow: 0 12px 36px rgba(0,0,0,.14); transition: opacity 400ms var(--out), visibility 400ms; }
+.film .hero { z-index: 3; position: absolute; left: var(--gutter); top: calc(var(--top-h) + var(--s4)); height: auto; width: min(30rem, calc(100% - 2 * var(--gutter))); margin: 0; padding: var(--s5) var(--s6); background: #fff; border-radius: 16px; box-shadow: 0 12px 36px rgba(0,0,0,.14); transition: opacity 400ms var(--out), visibility 400ms; }
 .film .hero h1 { font-size: clamp(2rem, 3.4vw, 3.1rem); }
 .film .hero .sub { margin: var(--s3) 0 var(--s4); }
 .film .hero .btn-facts { margin-top: var(--s3); }

@@ -15,7 +15,7 @@
     toName: 'השם שלו או שלה', toEmail: 'המייל שלו או שלה (לא חובה)', toEmailNote: 'בלי מייל, הכרטיס יגיע אליכם כדי שתעבירו אותו.', message: 'הקדשה על הכרטיס (לא חובה)',
     name: 'השם שלכם', email: 'המייל שלכם', phone: 'טלפון, כדי לתאם תשלום (לא חובה)',
     send: function (v) { return 'הזמנת כרטיס מתנה על סך ' + v; }, sendPlain: 'הזמנת כרטיס המתנה', noCharge: 'לא מחויבים באתר. את התשלום מתאמים איתנו.',
-    range: function (a, b) { return 'בין ₪' + a + ' ל־₪' + b; }, failed: 'לא נשלח. בדקו את הפרטים ונסו שוב.',
+    range: function (a, b, s) { return 'בין ' + s + a + ' ל־' + s + b; }, failed: 'לא נשלח. בדקו את הפרטים ונסו שוב.',
     doneTitle: 'הזמנת כרטיס המתנה התקבלה', doneBody: 'משלמים לנו ישירות. מיד אחרי שאנחנו מאשרים, הכרטיס נשלח במייל עם הקוד.', see: 'לכרטיס המתנה שלכם'
   } : {
     body: function (y) { return 'Choose an amount and who it is for. You pay us directly; once we confirm, the card is emailed with its code. Valid for ' + y + ' years.'; },
@@ -23,7 +23,7 @@
     toName: 'Their name', toEmail: 'Their email (optional)', toEmailNote: 'Without their email, the card comes to you to pass on.', message: 'A message on the card (optional)',
     name: 'Your name', email: 'Your email', phone: 'Phone, so we can arrange payment (optional)',
     send: function (v) { return 'Order a ' + v + ' gift card'; }, sendPlain: 'Order the gift card', noCharge: 'Nothing is charged on this site. You arrange payment with us.',
-    range: function (a, b) { return '₪' + a + ' to ₪' + b; }, failed: 'Could not send. Check your details and try again.',
+    range: function (a, b, s) { return s + a + ' to ' + s + b; }, failed: 'Could not send. Check your details and try again.',
     doneTitle: 'Your gift card is ordered', doneBody: 'Pay us directly. As soon as we confirm, the card is emailed with its code.', see: 'See your gift card'
   };
   function el(tag, attrs, text) {
@@ -43,6 +43,7 @@
   fetch(API + '/marketplace/gift-cards/' + slug).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
     if (!d || !d.amounts || !d.amounts.length) return;
     var box = sec.querySelector('[data-mir-gift-box]');
+    var sym = d.currency === 'USD' ? '$' : '₪';
     box.appendChild(el('p', { 'class': 'lede' }, T.body(d.valid_years)));
     var form = el('form', { 'class': 'gift-form' });
     box.appendChild(form);
@@ -50,12 +51,12 @@
     // amount: tiles, the second one ready chosen, as the /gift-cards page does (rules 3k.10)
     var fs = el('fieldset'); fs.appendChild(el('legend', null, T.amount));
     var tiles = el('div', { 'class': 'gift-tiles' }); fs.appendChild(tiles); form.appendChild(fs);
-    var chosen = d.amounts[Math.min(1, d.amounts.length - 1)], otherWrap = field('gift-other', T.other, { type: 'number', inputmode: 'numeric', min: d.min, max: d.max, placeholder: T.range(d.min, d.max) });
+    var chosen = d.amounts[Math.min(1, d.amounts.length - 1)], otherWrap = field('gift-other', T.other, { type: 'number', inputmode: 'numeric', min: d.min, max: d.max, placeholder: T.range(d.min, d.max, sym) });
     otherWrap.hidden = true; fs.appendChild(otherWrap);
     var other = otherWrap.querySelector('input'), send;
     function value() { return chosen === 'other' ? Number(other.value) : chosen; }
     function valid() { var v = value(); return v >= d.min && v <= d.max; }
-    function label() { send.textContent = valid() ? T.send('₪' + Math.round(value())) : T.sendPlain; }
+    function label() { send.textContent = valid() ? T.send(sym + Math.round(value())) : T.sendPlain; }
     function tile(v, text) {
       var b = el('button', { type: 'button', 'class': 'gift-tile', 'aria-pressed': String(v === chosen) }, text);
       b.addEventListener('click', function () {
@@ -66,7 +67,7 @@
       });
       tiles.appendChild(b);
     }
-    d.amounts.forEach(function (a) { tile(a, '₪' + a); });
+    d.amounts.forEach(function (a) { tile(a, sym + a); });
     if (d.custom) tile('other', T.other);
     other.addEventListener('input', function () { label(); });
 

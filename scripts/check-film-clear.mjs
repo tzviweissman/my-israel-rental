@@ -45,6 +45,13 @@ for (const url of urls) {
         const f = document.querySelector('.film');
         scrollTo({ top: f.offsetTop + (f.offsetHeight - innerHeight) * at, behavior: 'instant' });
         await new Promise((r) => setTimeout(r, 900));
+        // a video film eases to the new spot: wait until it has stopped (up to 5 s more), or a busy machine photographs
+        // it still moving and the motion counts as cover (RBS Cleaning, 7 Nov 2026: 6% and 25% "covered", no card shown)
+        const v = f.querySelector('video');
+        for (let i = 0, last = -1, still = 0; v && i < 50 && still < 3; i++) {
+          await new Promise((r) => setTimeout(r, 100));
+          still = !v.seeking && v.currentTime === last ? still + 1 : 0; last = v.currentTime;
+        }
         const pics = [...f.querySelectorAll('video, canvas')].filter((e) => getComputedStyle(e).visibility !== 'hidden' && +getComputedStyle(e).opacity > 0.5);
         const el = pics.pop(); if (!el) return null;
         document.querySelectorAll('[data-film-clear]').forEach((e) => e.removeAttribute('data-film-clear')); el.setAttribute('data-film-clear', '');
