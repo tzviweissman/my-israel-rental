@@ -238,3 +238,40 @@ def test_reminder_texts_the_day_before_and_two_hours_before(world, monkeypatch):
     assert world.sent.await_count == 1
     run(ar.run_once(start.astimezone(UTC) - timedelta(minutes=90)))
     assert world.sent.await_count == 2 and "today at 14:00" in world.sent.await_args.kwargs["body"]
+
+
+def test_business_wording_with_pieces_and_the_link_kept(world):
+    world.biz["order_settings"]["text_templates"] = {"order_confirmed": {"en": "Hi {customer}! {business} has your order {order} ready soon."}}
+    world.order["customer_name"] = "Dani"
+    run(ot._texts_after(world.order, world.biz, True, tell_business=False))
+    body = world.sent.await_args.kwargs["body"]
+    assert body.startswith("Hi Dani! Blazin Boards has your order #1042 ready soon. https://myisraelrental.com/orders/track/")
+    assert body.endswith("Pickup at Farn 5")
+    world.order["lang"] = "he"  # no Hebrew wording of its own: ours
+    run(ot._texts_after(world.order, world.biz, True, tell_business=False))
+    assert "אושרה" in world.sent.await_args.kwargs["body"]
+
+
+def test_clean_templates_keeps_only_real_changes():
+    same = ot.TEMPLATES["review"]["en"]
+    out = ot.clean_templates({"review": {"en": same, "he": "  תודה   רבה  "}, "nope": {"en": "x"}, "reminder": {"en": "x" * 400}})
+    assert out == {"review": {"he": "תודה רבה"}, "reminder": {"en": "x" * 300}}
+
+
+def test_auto_reply_once_a_day_only_when_written(world):
+    run(ot._texts_after(world.order, world.biz, True, tell_business=False))
+    req = lambda i: SimpleNamespace(json=AsyncMock(return_value={"id": i, "event": "mo", "sender": "+972521112222", "content": "Hello?"}))
+    run(ot.sms_in(sms.hook_key(), req("a")))
+    assert all("Thanks for writing" not in c.kwargs["body"] for c in world.sent.await_args_list)
+    world.biz["order_settings"]["text_templates"] = {"auto_reply": {"he": "תודה, נחזור אליך תוך שעה. {business}"}}
+    run(ot.sms_in(sms.hook_key(), req("b")))
+    run(ot.sms_in(sms.hook_key(), req("c")))
+    autos = [c for c in world.sent.await_args_list if "נחזור אליך" in c.kwargs["body"]]
+    assert len(autos) == 1 and autos[0].kwargs["to"] == "972521112222" and autos[0].kwargs["body"].endswith("Blazin Boards")
+
+
+def test_owner_text_for_an_order_taken_automatically(world):
+    world.order["status"] = "preparing"
+    assert "Accepted automatically. Follow it: https://myisraelrental.com/orders/owner/" in ot.owner_text(world.order, ot.owner_link(world.order), False)
+    world.order["status"] = "new"
+    assert "Confirm or decline:" in ot.owner_text(world.order, ot.owner_link(world.order), False)

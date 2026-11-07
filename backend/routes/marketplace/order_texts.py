@@ -18,6 +18,7 @@ confirm twice.
 """
 from __future__ import annotations
 
+import re
 import uuid
 from datetime import UTC, datetime
 from typing import Any, Optional
@@ -123,12 +124,12 @@ def owner_text(o: dict[str, Any], link: str, he: bool) -> str:
         how = "משלוח ל" + (o.get("address") or "") if o.get("fulfilment") == "delivery" else (f"שולחן {o['table']}" if o.get("table") else "איסוף")
         parts = [f"הזמנה חדשה {order_no(o)} מ{o.get('customer_name') or ''}" + (f", {phone}" if phone else ""),
                  (o.get("items") or "").replace("\n", ", "), " · ".join(x for x in (how, _when(o), _money(o, True)) if x),
-                 f"אישור או דחייה: {link}"]
+                 f"התקבלה אוטומטית. מעקב: {link}" if o.get("status") != "new" else f"אישור או דחייה: {link}"]
     else:
         how = "Delivery to " + (o.get("address") or "") if o.get("fulfilment") == "delivery" else (f"Table {o['table']}" if o.get("table") else "Pickup")
         parts = [f"New order {order_no(o)} from {o.get('customer_name') or ''}" + (f", {phone}" if phone else ""),
                  (o.get("items") or "").replace("\n", ", ").replace("×", "x"), ", ".join(x for x in (how, _when(o), _money(o, False)) if x),
-                 f"Confirm or decline: {link}"]
+                 f"Accepted automatically. Follow it: {link}" if o.get("status") != "new" else f"Confirm or decline: {link}"]
     return "\n".join(p for p in parts if p)
 
 
@@ -150,10 +151,69 @@ async def _owner_he(o: dict[str, Any]) -> bool:
     return owner.get("preferred_language") == "he"
 
 
+# The texts a customer gets, in our words; each business can rewrite any of
+# them in its own (Tzvi, 7 Nov 2026, "like we can with WhatsApp"). The link is
+# never part of the wording: it is added after, so no edit can lose it.
+TEMPLATES: dict[str, dict[str, str]] = {
+    "order_received": {"en": "We got your order {order} from {business}. We will text you when they confirm it. Track it:",
+                       "he": "קיבלנו את הזמנה {order} מ{business}. נעדכן בהודעה כשהעסק יאשר אותה. מעקב:"},
+    "order_confirmed": {"en": "Your order {order} from {business} is confirmed. Your tracking link:",
+                        "he": "ההזמנה שלך {order} מ{business} אושרה. הקישור שלך למעקב:"},
+    "order_declined": {"en": "Sorry, {business} can't take your order {order} this time.",
+                       "he": "מצטערים, {business} לא יכולים לקבל את ההזמנה שלך {order} הפעם."},
+    "booking_confirmed": {"en": "Your booking for {service} is confirmed. See the details:",
+                          "he": "התור שלך ל{service} אושר. פרטים ומעקב:"},
+    "booking_declined": {"en": "Sorry, your booking for {service} could not be accepted this time. Details:",
+                         "he": "מצטערים, לא ניתן לאשר את התור שלך ל{service} הפעם. פרטים:"},
+    "request_received": {"en": "Your request went to {business}. We will let you know when they answer. Track it:",
+                         "he": "הבקשה שלך נשלחה ל{business}. נעדכן כשיענו. מעקב:"},
+    "reminder": {"en": "Reminder: {service} with {business} {when} at {time}. To change or cancel:",
+                 "he": "תזכורת: {service} אצל {business} {when} בשעה {time}. לשינוי או ביטול:"},
+    "review": {"en": "Thanks for choosing {business}! How was it? Leave a quick review here:",
+               "he": "תודה שבחרת ב{business}! איך היה? אפשר להשאיר ביקורת קצרה כאן:"},
+    # Off until the business writes one: the answer to a customer's reply (needs the reply number).
+    "auto_reply": {"en": "", "he": ""},
+}
+PLACEHOLDERS = ("customer", "business", "order", "service", "when", "time")
+
+
+def compose(biz: dict[str, Any], key: str, lang: str, vals: dict[str, Any], link: Optional[str] = None) -> str:
+    """The business's own wording for this text if it wrote one, else ours,
+    with the pieces filled in and the link after it."""
+    lang = "he" if lang == "he" else "en"
+    own = (((biz.get("order_settings") or {}).get("text_templates") or {}).get(key) or {}).get(lang)
+    t = own or TEMPLATES[key][lang]
+    for k in PLACEHOLDERS:
+        t = t.replace("{" + k + "}", str(vals.get(k) or ""))
+    t = re.sub(r"[ \t]{2,}", " ", t).strip()
+    return f"{t} {link}" if link else t
+
+
+def clean_templates(raw: Optional[dict[str, Any]]) -> dict[str, dict[str, str]]:
+    """What the dashboard sent, kept only where it differs from ours."""
+    out: dict[str, dict[str, str]] = {}
+    for key, langs in (raw or {}).items():
+        if key not in TEMPLATES or not isinstance(langs, dict):
+            continue
+        for lang in ("en", "he"):
+            v = " ".join(str(langs.get(lang) or "").split())[:300]
+            if v and v != TEMPLATES[key][lang]:
+                out.setdefault(key, {})[lang] = v
+    return out
+
+
 def _note(biz: dict[str, Any]) -> str:
     """The business's own line on texts to its customers (Tzvi, 7 Nov 2026)."""
     n = " ".join(((biz.get("order_settings") or {}).get("text_note") or "").split())
     return f"\n{n}" if n else ""
+
+
+def _biz_name(biz: dict[str, Any], lang: str) -> str:
+    return (biz.get("name_he") if lang == "he" and biz.get("name_he") else biz.get("name")) or ""
+
+
+def _order_vals(o: dict[str, Any], biz: dict[str, Any], lang: str) -> dict[str, Any]:
+    return {"order": order_no(o), "business": _biz_name(biz, lang), "customer": o.get("customer_name") or ""}
 
 
 async def _text(to: str, body: str, *, biz_id: Optional[str], who: str, kind: str, ref_id: Optional[str] = None, label: str = "") -> bool:
@@ -222,11 +282,9 @@ async def text_customer_booking(b: dict[str, Any], status: str, title: str) -> N
         if not texts_on(biz):
             return
         link = f"{_frontend()}/bookings/track/{b['track_token']}"
-        he = (b.get("lang") or "").startswith("he")
-        if status == "accepted":
-            body = f"התור שלך ל{title} אושר. פרטים ומעקב: {link}" if he else f"Your booking for {title} is confirmed. See the details: {link}"
-        else:
-            body = f"מצטערים, לא ניתן לאשר את התור שלך ל{title} הפעם. פרטים: {link}" if he else f"Sorry, your booking for {title} could not be accepted this time. Details: {link}"
+        lang = "he" if (b.get("lang") or "").startswith("he") else "en"
+        vals = {"service": title, "customer": b.get("guest_name") or "", "business": _biz_name(biz, lang)}
+        body = compose(biz, "booking_confirmed" if status == "accepted" else "booking_declined", lang, vals, link)
         await _text(phone, body + (_note(biz) if status == "accepted" else ""), biz_id=gig.get("business_id"), who="customer",
                     kind="booking_" + status, ref_id=b.get("_id"), label=title)
     except Exception as exc:  # noqa: BLE001
@@ -240,11 +298,9 @@ async def text_customer_received(o: dict[str, Any], biz: dict[str, Any]) -> None
         phone = o.get("customer_phone_e164") or o.get("customer_phone")
         if not phone or o.get("table") or not texts_on(biz):
             return
-        he = o.get("lang") == "he"
-        name = biz.get("name_he") if he and biz.get("name_he") else biz.get("name") or ""
+        lang = "he" if o.get("lang") == "he" else "en"
         no = order_no(o)
-        body = (f"קיבלנו את הזמנה {no} מ{name}. נעדכן בהודעה כשהעסק יאשר אותה. מעקב: {track_link(o)}" if he
-                else f"We got your order {no} from {name}. We will text you when they confirm it. Track it: {track_link(o)}")
+        body = compose(biz, "order_received", lang, _order_vals(o, biz, lang), track_link(o))
         await _text(phone, body, biz_id=o.get("business_id"), who="customer", kind="order_received", ref_id=o.get("_id"), label=no)
     except Exception as exc:  # noqa: BLE001
         logger.warning("order received text failed: %s", type(exc).__name__)
@@ -257,10 +313,9 @@ async def text_customer_request(gig: dict[str, Any], phone: Optional[str], path:
         biz = await db.businesses.find_one({"_id": gig.get("business_id")}) or {}
         if not phone or not texts_on(biz):
             return
-        name = biz.get("name_he") if he and biz.get("name_he") else biz.get("name") or ""
-        link = f"{_frontend()}{path}"
-        await _text(phone, f"הבקשה שלך נשלחה ל{name}. נעדכן כשיענו. מעקב: {link}" if he
-                    else f"Your request went to {name}. We will let you know when they answer. Track it: {link}",
+        lang = "he" if he else "en"
+        body = compose(biz, "request_received", lang, {"business": _biz_name(biz, lang), "service": gig.get("title") or ""}, f"{_frontend()}{path}")
+        await _text(phone, body,
                     biz_id=gig.get("business_id"), who="customer", kind="request_received", label=gig.get("title") or "")
     except Exception as exc:  # noqa: BLE001
         logger.warning("request received text failed: %s", type(exc).__name__)
@@ -357,12 +412,9 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool, te
         no = order_no(o)
         customer = o.get("customer_phone_e164") or o.get("customer_phone")
         if customer and texts_on(biz):
-            if o.get("lang") == "he":
-                body = (f"ההזמנה שלך {no} מ{name} אושרה. הקישור שלך למעקב: {track_link(o)}" if confirm
-                        else f"מצטערים, {name} לא יכולים לקבל את ההזמנה שלך {no} הפעם.")
-            else:
-                body = (f"Your order {no} from {name} is confirmed. Your tracking link: {track_link(o)}" if confirm
-                        else f"Sorry, {name} can't take your order {no} this time.")
+            lang = "he" if o.get("lang") == "he" else "en"
+            body = (compose(biz, "order_confirmed", lang, _order_vals(o, biz, lang), track_link(o)) if confirm
+                    else compose(biz, "order_declined", lang, _order_vals(o, biz, lang)))
             await _text(customer, body + (_note(biz) if confirm else ""), biz_id=o.get("business_id"), who="customer",
                         kind="order_confirmed" if confirm else "order_declined", ref_id=o.get("_id"), label=no)
         await _email_customer(o, name, no, confirm)
@@ -487,10 +539,10 @@ async def _review_text(coll: str, doc: dict[str, Any], biz: dict[str, Any], phon
                                         {"$set": {"review_text_at": datetime.now(UTC).isoformat()}})
     if not claimed.modified_count:
         return
-    he = (doc.get("lang") or "").startswith("he")
-    name = biz.get("name_he") if he and biz.get("name_he") else biz.get("name") or ""
-    body = (f"תודה שבחרת ב{name}! איך היה? אפשר להשאיר ביקורת קצרה כאן: {link}" if he
-            else f"Thanks for choosing {name}! How was it? Leave a quick review here: {link}")
+    lang = "he" if (doc.get("lang") or "").startswith("he") else "en"
+    vals = {"business": _biz_name(biz, lang), "customer": doc.get("customer_name") or doc.get("guest_name") or "",
+            "order": order_no(doc) if coll == "store_orders" else ""}
+    body = compose(biz, "review", lang, vals, link)
     await _text(phone, body, biz_id=biz.get("_id"), who="customer", kind=kind, ref_id=doc["_id"],
                 label=order_no(doc) if coll == "store_orders" else "")
 
@@ -525,11 +577,10 @@ async def text_booking_reminder(b: dict[str, Any], biz: dict[str, Any], service:
     phone = b.get("contact_phone")
     if not phone or not b.get("track_token") or not texts_on(biz):
         return False
-    he = b.get("lang") == "he"
-    name = biz.get("name_he") if he and biz.get("name_he") else biz.get("name") or ""
+    lang = "he" if b.get("lang") == "he" else "en"
     link = f"{_frontend()}/bookings/track/{b['track_token']}"
-    body = (f"תזכורת: {service} אצל {name} {when} בשעה {time_s}. לשינוי או ביטול: {link}" if he
-            else f"Reminder: {service} with {name} {when} at {time_s}. To change or cancel: {link}")
+    vals = {"service": service, "business": _biz_name(biz, lang), "when": when, "time": time_s, "customer": b.get("guest_name") or ""}
+    body = compose(biz, "reminder", lang, vals, link)
     return await _text(phone, body + _note(biz), biz_id=biz.get("_id"), who="customer", kind="booking_reminder",
                        ref_id=b.get("_id"), label=service)
 
@@ -638,7 +689,24 @@ async def sms_in(key: str, request: Request):
     if number:
         await _text(number, f"Reply from {shown}{about}: {content[:300]}", biz_id=last["business_id"], who="business",
                     kind="reply", ref_id=last.get("ref_id"), label=last.get("label") or "")
+    await _auto_reply(biz, sender, last)
     return {"ok": True}
+
+
+async def _auto_reply(biz: dict[str, Any], sender: str, last: dict[str, Any]) -> None:
+    """The business's own answer to a customer who replied, like WhatsApp's
+    away message: only if it wrote one, with texts on, once a day per customer."""
+    own = ((biz.get("order_settings") or {}).get("text_templates") or {}).get("auto_reply") or {}
+    if not own or not texts_on(biz):
+        return
+    lang = "he" if own.get("he") and (sender.startswith("972") or not own.get("en")) else "en"
+    try:
+        await db.sms_auto_replies.insert_one({"_id": f"{biz['_id']}:{sender}:{datetime.now(UTC).date().isoformat()}"})
+    except DuplicateKeyError:
+        return
+    body = compose(biz, "auto_reply", lang, {"business": _biz_name(biz, lang)})
+    if body:
+        await _text(sender, body, biz_id=biz["_id"], who="customer", kind="auto_reply", ref_id=last.get("ref_id"), label=last.get("label") or "")
 
 
 async def recent_texts(business_id: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:

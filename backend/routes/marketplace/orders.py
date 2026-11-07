@@ -1904,6 +1904,10 @@ async def _owner_settings_out(biz: dict[str, Any]) -> dict[str, Any]:
     return {**_settings_out(biz, await _store_of(biz["_id"])), "pause": pause_of(biz), "text_on": texts_on(biz),
             "text_number": (biz.get("order_settings") or {}).get("text_number"),
             "text_note": (biz.get("order_settings") or {}).get("text_note") or "",
+            "text_templates": (biz.get("order_settings") or {}).get("text_templates") or {},
+            "auto_confirm": bool((biz.get("order_settings") or {}).get("auto_confirm")),
+            "business_name": biz.get("name") or "", "business_name_he": biz.get("name_he") or "",
+            "text_defaults": TEXT_DEFAULTS,
             "whatsapp_number": (await gig_whatsapp_number(selling)) if selling else ""}
 
 
@@ -1936,6 +1940,9 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         # Saved by their own section, put_order_texts.
         "text_number": old.get("text_number"),
         "text_on": old.get("text_on"),
+        "text_note": old.get("text_note"),
+        "text_templates": old.get("text_templates"),
+        "auto_confirm": old.get("auto_confirm"),
         "pause": old.get("pause"),
         # An older client that does not send the switch keeps the old
         # meaning: delivery times set means delivery offered.
@@ -1986,6 +1993,18 @@ class OrderTextsIn(BaseModel):
     text_number: Optional[str] = Field(None, max_length=30)
     # A line of the business's own on its customers' texts (Tzvi, 7 Nov 2026).
     text_note: Optional[str] = Field(None, max_length=80)
+    # The business's own wording for each customer text, {key: {"en": ..., "he": ...}} (order_texts.TEMPLATES).
+    text_templates: Optional[dict[str, dict[str, str]]] = None
+    # New website orders are confirmed the moment they arrive, no tap needed (Tzvi, 7 Nov 2026).
+    auto_confirm: Optional[bool] = None
+
+
+def _text_defaults() -> dict[str, dict[str, str]]:
+    from .order_texts import TEMPLATES
+    return TEMPLATES
+
+
+TEXT_DEFAULTS = _text_defaults()
 
 
 @router.get("/businesses/{business_id}/orders/texts/recent")
@@ -2004,8 +2023,13 @@ async def put_order_texts(business_id: str, payload: OrderTextsIn, user=Depends(
     if number and not normalize_whatsapp_number(number):
         raise HTTPException(status_code=400, detail="Please enter a mobile number with the leading 0 or a country code")
     note = " ".join((payload.text_note or "").split()) or None
+    from .order_texts import clean_templates
     settings = {**(biz.get("order_settings") or {}), "text_on": payload.text_on, "text_number": number if payload.text_on else None,
                 "text_note": note}
+    if payload.text_templates is not None:
+        settings["text_templates"] = clean_templates(payload.text_templates)
+    if payload.auto_confirm is not None:
+        settings["auto_confirm"] = payload.auto_confirm
     await db.businesses.update_one({"_id": business_id}, {"$set": {"order_settings": settings}})
     return await _owner_settings_out({**biz, "order_settings": settings})
 
@@ -2642,6 +2666,16 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     # (dropship.py). Never raises: the customer's order is already placed.
     from routes.marketplace.dropship import route_order
     await route_order(doc)
+    # The business chose to take every order without a tap: it is confirmed now,
+    # and the customer is told so at once. A table order is served as it stands.
+    auto = bool((biz.get("order_settings") or {}).get("auto_confirm")) and not payload.table
+    if auto:
+        from .order_texts import CONFIRMED_STATUS
+        try:
+            await _transition(doc, StatusIn(status=CONFIRMED_STATUS, note="Accepted automatically"), by="auto")
+            doc = await db.store_orders.find_one({"_id": doc["_id"]}) or doc
+        except HTTPException:
+            auto = False
     track = f"{_frontend_url()}/orders/track/{doc['track_token']}"
 
     # Tell the store: badge, bell, email.
@@ -2653,8 +2687,8 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     from utils.bg_tasks import spawn
     spawn(alert_business_on_whatsapp(gig, biz.get("owner_user_id"), payload.customer_name,
                                      items_text, "/dashboard?tab=orders", "order", order_id=doc["_id"]))
-    from .order_texts import text_customer_received
-    spawn(text_customer_received(doc, biz))
+    from .order_texts import _texts_after, text_customer_received
+    spawn(_texts_after(doc, biz, True, tell_business=False) if auto else text_customer_received(doc, biz))
     owner = await db.users.find_one({"id": biz["owner_user_id"]}, {"_id": 0, "email": 1})
     await _email(
         (owner or {}).get("email"), f"New order {order_no(doc)} from table {payload.table}" if payload.table else f"New order {order_no(doc)} from {payload.customer_name}",

@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Check, Loader2, X } from 'lucide-react';
+import TextTemplatesEditor from './TextTemplatesEditor';
 
 export default function TextNotificationsPanel({ API, token, businessId, onClose }) {
   const { t } = useTranslation();
@@ -18,6 +19,8 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
   const [different, setDifferent] = useState(false);
   const [number, setNumber] = useState('');
   const [note, setNote] = useState('');
+  const [templates, setTemplates] = useState({});
+  const [autoConfirm, setAutoConfirm] = useState(false);
   const [recent, setRecent] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -27,6 +30,8 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
       setDifferent(!!data.text_number);
       setNumber(data.text_number || '');
       setNote(data.text_note || '');
+      setTemplates(data.text_templates || {});
+      setAutoConfirm(!!data.auto_confirm);
       setLoaded(data);
     }).catch(() => setLoaded(false));
     // Whether each text arrived (Cellact's delivery reports, 7 Nov 2026), and customers' replies.
@@ -45,8 +50,9 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
     setBusy(true);
     try {
       const { data } = await axios.put(`${API}/marketplace/businesses/${businessId}/orders/texts`, {
-        text_on: on, text_number: on && different ? number.trim() : null, text_note: note.trim() || null,
+        text_on: on, text_number: on && different ? number.trim() : null, text_note: note.trim() || null, text_templates: templates, auto_confirm: autoConfirm,
       }, auth);
+      setTemplates(data.text_templates || {});
       setLoaded(data);
       toast.success(t('orderTexts.saved', 'Saved'));
     } catch (err) {
@@ -66,7 +72,24 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
         {onClose && <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -mt-2 rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}><X size={18} /></button>}
       </div>
 
-      <div className="flex items-start gap-3 mt-2">
+      {/* Confirm each order, or take every one automatically (Tzvi, 7 Nov 2026). */}
+      <div className="flex items-start gap-3 mt-2 pb-3 mb-1 border-b" style={{ borderColor: 'var(--brand-border)' }}>
+        <div className="flex-1 min-w-0">
+          <p id="auto-confirm-label" className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('orderTexts.auto', 'Accept orders automatically')}</p>
+          <p className="text-[12px] mt-0.5" style={{ color: 'var(--brand-muted)' }}>{autoConfirm
+            ? t('orderTexts.autoOnHint', 'On: every new order is confirmed the moment it arrives. The customer is told right away, and you get a heads-up to follow it.')
+            : t('orderTexts.autoOffHint', 'Off: you confirm or decline each new order yourself.')}</p>
+        </div>
+        <button type="button" role="switch" aria-checked={autoConfirm} aria-labelledby="auto-confirm-label" onClick={() => setAutoConfirm((v) => !v)}
+                className="shrink-0 -my-2.5 inline-flex min-h-[44px] min-w-[52px] items-center justify-center" data-testid="settings-auto-confirm">
+          <span className={`inline-flex h-6 w-11 items-center rounded-full px-1 ${autoConfirm ? 'justify-end' : 'justify-start'}`}
+            style={{ background: autoConfirm ? 'var(--brand-primary)' : 'var(--brand-muted)' }}>
+            <span className="h-4 w-4 rounded-full bg-white shadow-sm" />
+          </span>
+        </button>
+      </div>
+
+      <div className="flex items-start gap-3 mt-3">
         <div className="flex-1 min-w-0">
           <p id="text-on-label" className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('orderTexts.on', 'Text me new orders and bookings')}</p>
           <p className="text-[12px] mt-0.5" style={{ color: 'var(--brand-muted)' }}>{on
@@ -125,6 +148,8 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
               {t('orderTexts.previewText', 'Your order #1042 is confirmed. Your tracking link: myisraelrental.com/…')}{'\n'}{note.trim()}
             </div>
           )}
+          <TextTemplatesEditor defaults={loaded.text_defaults} templates={templates} setTemplates={setTemplates}
+                               businessName={loaded.business_name} businessNameHe={loaded.business_name_he} />
         </div>
       )}
 
