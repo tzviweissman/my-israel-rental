@@ -1,26 +1,40 @@
-// Rough film sketch sheet for Tzvi's yes (rule 3h.22): two concepts, three panels each, plain line drawings.
+// Storyboard for Tzvi's pick (rule 3h.22): rough black lines on white, one row per concept.
 // From the repo root: node scrollcraft/builds/finest-cut/gen/sketch.mjs
 import { createRequire } from 'node:module';
 const { chromium } = createRequire(process.cwd() + '/')('playwright');
-const strip = 'M10 30 q40 -22 90 -6 q30 10 20 26 q-50 16 -100 2 q-16 -8 -10 -22z';
-const crumbs = [[30, -14], [62, -22], [96, -12], [120, -4]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3"/>`).join('');
-const fork = '<path d="M60 -110 v70 M50 -110 v30 M70 -110 v30 M50 -80 q10 12 20 0"/>';
-const panel = (t, inner) => `<g><rect width="300" height="180" rx="6" fill="#fff" stroke="#333"/><g transform="translate(90 110)" fill="none" stroke="#222" stroke-width="2">${inner}</g><text x="10" y="172" font-size="13" fill="#222">${t}</text></g>`;
-const board = '<rect x="-60" y="-70" width="240" height="120" rx="4"/><path d="M60 -70 v120 M-60 -10 h240"/><circle cx="60" cy="-10" r="20"/>';
-const cup = '<ellipse cx="60" cy="-10" rx="44" ry="14"/><path d="M16 -10 v44 q44 18 88 0 v-44"/>';
+const W = 300, H = 190;
+const strip = (x, y, fill = 'none') => `<path transform="translate(${x} ${y})" fill="${fill}" d="M0 14 q40 -20 90 -6 q24 8 16 22 q-50 14 -96 2 q-16 -8 -10 -18z"/>`;
+const tongs = (x, y) => `<path d="M${x} ${y} L${x + 70} ${y - 70} M${x + 14} ${y + 6} L${x + 86} ${y - 62}"/>`;
+const oil = '<path d="M0 118 q25 -8 50 0 t50 0 t50 0 t50 0 t50 0 t50 0"/>';
+const bubbles = [[70, 104], [96, 96], [150, 92], [196, 98], [226, 106], [120, 108], [176, 110]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6"/>`).join('');
+const steam = (x) => `<path d="M${x} 50 q-10 -12 0 -22 t0 -22"/><path d="M${x + 22} 54 q10 -12 0 -22 t0 -22"/>`;
+const cup = (x, y, r = 18) => `<circle cx="${x}" cy="${y}" r="${r}"/><circle cx="${x}" cy="${y}" r="${r * 0.55}"/>`;
+const board = (x = 70, y = 28, w = 160, h = 104) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/><path d="M${x + w / 2} ${y} v${h} M${x} ${y + h / 2} h${w}"/>${cup(x + w / 2, y + h / 2, 11)}`;
+const ridges = '<path d="M0 130 l40 -50 l30 28 l50 -74 l44 60 l36 -34 l50 56 l50 -30 v44 h-300z"/><path d="M0 150 l60 -24 l60 16 l70 -30 l110 34"/>';
+const knife = '<path d="M60 70 L230 34 L238 50 L84 88z"/>';
+const cutlet = '<path d="M50 118 q100 -50 200 0 q-100 44 -200 0z"/>';
+const panel = (t, inner) => `<g><rect width="${W}" height="${H}" fill="#fff" stroke="#333"/><g fill="none" stroke="#111" stroke-width="2">${inner}</g><text x="8" y="${H - 10}" font-size="12.5" fill="#111">${t}</text></g>`;
 const rows = [
-  ['C. The crunch: a fork presses one strip, the crust cracks, then the camera pulls back', [
-    panel('1 one strip, close, lit from behind', `<path d="${strip}"/>`),
-    panel('2 a fork presses, the crust cracks, crumbs settle', `${fork}<path d="${strip}"/><path d="M40 12 l14 -18 l10 16 l14 -14"/><g fill="#222">${crumbs}</g>`),
-    panel('3 pull back to the whole board and the button', board)]],
-  ['D. The dip: one strip goes into their sauce cup and comes out coated', [
-    panel('1 their cup with its logo lid, a hand lifts the lid', `${cup}<path d="M20 -40 h80"/>`),
-    panel('2 a strip is lowered in', `${cup}<g transform="rotate(70 60 -40) translate(0 -70)"><path d="${strip}"/></g>`),
-    panel('3 it lifts out coated, a slow thick drip', `${cup}<g transform="rotate(70 60 -60) translate(0 -100)"><path d="${strip}"/></g><path d="M60 -44 v24"/>`)]],
+  ['E. Your scroll fries it (the visitor cooks it, then it lands on the real board)', [
+    panel('1 tongs hold a pale breaded strip over oil', tongs(150, 80) + strip(70, 72) + oil),
+    panel('2 it goes in and foams, scrolling turns it gold', oil + strip(100, 92) + bubbles),
+    panel('3 lifted out gold, oil runs off, thin steam', tongs(170, 66) + strip(80, 56, '#bbb') + steam(120) + oil + '<path d="M130 92 v18 M150 94 v12"/>'),
+    panel('4 set on the board, pull back: price, button', board() + '<rect x="96" y="140" width="108" height="18" rx="9"/>')]],
+  ['F. Golden mountains (a tiny camera flies over the board as if it were a landscape)', [
+    panel('1 skimming ridges of crust, steam like cloud', ridges + steam(190)),
+    panel('2 sauce cups pass under like lakes', ridges + cup(140, 120, 20) + cup(214, 136, 14)),
+    panel('3 climbing, the mountains get smaller', board(40, 20, 220, 120)),
+    panel('4 one board on black: price, button', board(92, 30, 116, 76) + '<rect x="96" y="124" width="108" height="18" rx="9"/>')]],
+  ['G. The slice (a knife, a crack, steam, white inside)', [
+    panel('1 one whole cutlet, a knife on the crust', knife + cutlet),
+    panel('2 the crust cracks along the blade, steam', cutlet + '<path d="M150 96 l-8 10 l10 8 l-6 12"/>' + knife + steam(240)),
+    panel('3 the slice falls open, white inside', '<path d="M40 122 q50 -40 96 -4 q-46 34 -96 4z"/><path d="M168 118 q50 -36 96 4 q-50 30 -96 -4z"/><path d="M136 118 l32 0"/>' + steam(140)),
+    panel('4 pull back to the board: button', board() + '<rect x="96" y="140" width="108" height="18" rx="9"/>')]],
 ];
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="980" height="${rows.length * 230 + 10}" style="background:#eee;font-family:sans-serif">${rows.map(([t, ps], r) => `<g transform="translate(10 ${r * 230 + 10})"><text y="18" font-size="16" font-weight="700">${t}</text>${ps.map((p, i) => `<g transform="translate(${i * 320} 30)">${p}</g>`).join('')}</g>`).join('')}</svg>`;
+const rowH = H + 46, width = 4 * (W + 12) + 16, height = rows.length * rowH + 8;
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" style="background:#fff;font-family:sans-serif">${rows.map(([t, ps], r) => `<g transform="translate(10 ${r * rowH + 8})"><text y="18" font-size="16" font-weight="700">${t}</text>${ps.map((p, i) => `<g transform="translate(${i * (W + 12)} 30)">${p}</g>`).join('')}</g>`).join('')}</svg>`;
 const b = await chromium.launch();
-const p = await b.newPage({ viewport: { width: 980, height: rows.length * 230 + 10 } });
+const p = await b.newPage({ viewport: { width, height } });
 await p.setContent(`<body style="margin:0">${svg}</body>`);
-await p.screenshot({ path: 'scrollcraft/builds/finest-cut/gen/film-sketch.png' });
+await p.screenshot({ path: 'scrollcraft/builds/finest-cut/gen/storyboard.png' });
 await b.close();

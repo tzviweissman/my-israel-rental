@@ -27,22 +27,20 @@ P = kit.price
 def write(page, title, desc, body, tail=''):
     SITE.write(page, title, desc, OG, body, tail)
     f = f'{page}.html'
-    s = open(f, encoding='utf8').read().replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta name="site-category" content="food-shop">', 1)
+    s = open(f, encoding='utf8').read().replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta name="site-category" content="food-shop">\n<link rel="icon" href="assets/logo.webp" type="image/webp">', 1)
     s = s.replace(' <span class="arw" aria-hidden="true">→</span>', '')   # no arrows: the button's own hover is the light
     open(f, 'w', encoding='utf8').write(s)
 
 
-CHAPTERS = [(1, '1 of 4 types of chicken'), (2, '2 of 4 types of chicken'), (3, '3 of 4 types of chicken'), (4, '4 of 4 types of chicken'), (5, '3 sauces')]
-HOME = f'''  <section class="open" id="board" aria-labelledby="h-open">
+CHAPTERS = [(1, '4 types of chicken'), (2, '3 sauces')]
+HOME = f'''  <section class="open film" id="board" aria-labelledby="h-open" data-frames="218" data-src="assets/film" data-video="assets/film/opening-{{k}}.mp4" data-marks="0.03,0.08,0.26,0.30,0.52,0.96">
     <div class="stage" id="stage">
-      <div class="scene" id="scene">
-        <picture>
-          <source media="(max-aspect-ratio: 1/1)" srcset="assets/board-tall.webp" width="1400" height="3111">
-          <img id="board-img" src="assets/board-wide.webp" width="3200" height="1800" fetchpriority="high" alt="The Finest Cuts XL chicken board from above on black stone: 4 types of chicken around 3 cups of sauce">
-        </picture>
-        {''.join(f'<i class="dim" data-i="{i}" aria-hidden="true"></i>' for i, _ in CHAPTERS)}
+      <div class="screen" role="img" aria-label="A tiny camera flies low over the Finest Cuts chicken board as if it were golden mountains, past the 3 cups of sauce, then climbs until the whole XL board is seen on black stone">
+        <canvas aria-hidden="true"></canvas>
+        <noscript><img src="assets/board-wide.webp" width="3200" height="1800" alt=""></noscript>
       </div>
-      <div class="words w0 on" id="w0">
+      <i class="shade" aria-hidden="true"></i>
+      <div class="words w0" id="w0">
         <h1 id="h-open">The crunch you crave</h1>
         <p class="ln">Gourmet American schnitzel boards, delivered throughout Jerusalem.</p>
         <a class="btn" href="{SITE.cta[0]}">{SITE.cta[1]}</a>
@@ -151,7 +149,9 @@ HOME = f'''  <section class="open" id="board" aria-labelledby="h-open">
   </section>
 ''' + kit.gallery('From our kitchen')
 
-HOME_TAIL = '<script src="open.js"></script>\n'
+HOME_TAIL = """<script src="film.js"></script>
+<script src="open.js"></script>
+"""
 write('index', 'Finest Cuts · Chicken boards delivered in Jerusalem',
       'The crunch you crave, delivered. Gourmet American schnitzel boards in Jerusalem: an XL board with 4 types of chicken and 3 sauces, $215.',
       HOME, HOME_TAIL)

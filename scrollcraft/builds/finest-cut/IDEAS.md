@@ -20,5 +20,21 @@
 - sources: docs/inspo/awwwards-food-2026-10-18/morpho-water-3-ring-pull-closeup.webp, docs/inspo/videos-2026-11-01/lighting-plan.jpg
 - steps: 1 their cup with its logo lid, the lid lifted away by a hand. 2 a strip goes in. 3 it comes out with thick, opaque sauce and a slow drip. Second choice to C: a sauce pour is close to other sites.
 
-## Chosen: A
+## E. Your scroll fries it (a generated film, waits for Tzvi)
+- motion: fry, a pale breaded strip goes into hot oil and the visitor's own scroll turns it from pale to gold
+- sources: docs/inspo/videos-2026-11-01/real-hands-one-event.jpg, docs/inspo/product-films-2026-10-21/can-8.2.jpg
+- steps: 1 tongs hold one pale breaded strip over dark oil, words "The crunch you crave". 2 it goes in and foams; as you scroll, the crust turns slowly from pale to deep gold. 3 tongs lift it out gold, oil runs off, thin steam. 4 it is set down on their board and the camera pulls back to the whole board, the price and the button.
+
+## F. Golden mountains (a generated film, waits for Tzvi)
+- motion: flyover, a tiny camera flies low over the board as if it were a mountain range, then climbs until the whole board is seen
+- sources: docs/inspo/awwwards-2026-10-18/united-5-from-above-clouds.webp, docs/inspo/moto-card-2026-10-21/hero-2500.webp
+- steps: 1 the camera skims ridges of crust like mountains, thin steam drifting past like cloud. 2 it passes their three sauce cups like lakes, their logo going by underneath. 3 it climbs and climbs until the mountains are one board on black, with the price and the button.
+
+## G. The slice (a generated film, waits for Tzvi)
+- motion: slice, a knife goes down through one hot cutlet, the crust cracks, steam escapes and it falls open white inside
+- sources: docs/inspo/bar-breaking-2026-11-02/hands-break-soft-bar.jpg, docs/inspo/product-films-2026-10-21/can-8.2.jpg
+- steps: 1 one whole cutlet, close, a knife resting on the crust. 2 the knife presses, the crust cracks along the blade, thin steam comes out. 3 the slice falls open, white and tender inside. 4 the camera pulls back to the whole board and the button.
+
+## Chosen: F
 It uses only what they gave: their own photo, their own numbers. It is built in code on the sharp original, so it costs nothing and it looks like their real food. A film, if Tzvi wants one, goes in later (C).
+Tzvi, 6 Nov 2026: "it just focuses on different chicken, its not wow". E, F and G are the new film ideas on gen/storyboard.png; Tzvi picked F the same day.

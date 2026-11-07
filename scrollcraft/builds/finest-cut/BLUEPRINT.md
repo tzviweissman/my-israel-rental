@@ -10,7 +10,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R0b.1 Published under the business's real slug from the live record, not a made-up one
   plan: slug finest-cut, read from the live public API (src/public.json); folder finest-cut
 - [x] R0b.3 Prices and currency on the page match the owner's own menu or flyer; the real menu is loaded in their shop with fixed product ids
-  plan: one product, Ultimate Feast, $215 USD as in the listing, live product id idx:0 from the live order form; the listing spells it "Ulimate", Tzvi is told so it can be corrected before publishing
+  plan: one product, Ultimate Feast, $215 USD as in the listing, live product id idx:0 from the live order form; the listing spelled it "Ulimate" and Tzvi had it corrected on 6 Nov 2026; Tzvi was told so it can be corrected before publishing
 - [x] R2.1 Only facts the owner or record gave: no invented number, "since", "fresh daily", "trusted by", guest counts
   plan: every fact comes from src/record.json or the flyer src/owner/p01.jpg; no since line, no counts, no reviews
 - [x] R2.2 The owner is asked only about their own business, never how we build (no tools, credits, vendors), and never what the record already answers
@@ -136,13 +136,13 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3n.1 The owner's strongest real photo fills at least half the first screen on a laptop and on a phone, not a small card or cut-out shape
   plan: their board photo on its extended stone fills the first screen on laptop and phone
 - [x] R3n.2 One signature moment only this business could have, driven by the visitor (scroll scene or a choice)
-  plan: the scroll takes the camera and light round 4 types and 3 sauces of their own board
+  plan: the scroll flies a tiny camera low over their board as if it were golden mountains, past the 3 sauce cups, then up to the whole board
 - [x] R3n.3 The visitor's choice changes the page (colour, hero, order), not just one picture (check: motion)
   plan: whose table changes the picture, words, section ground and carries into the order form; check-motion
 - [x] R3n.4 Side by side with the closest reference in docs/inspo for this kind of business, ours is not plainly weaker
   plan: beside docs/inspo/moto-card-2026-10-21/hero-2500.webp: one lit object on black; ours has real food, larger, that moves with the scroll
 - [x] R3n.5 The one-sentence test, told to someone else and run on the first five seconds and the first full scroll: "you land and ___ happens" is about the business, not a decoration ("nothing", "the camera moves", "it fades in" fail)
-  plan: you land on a whole chicken board on black, and every scroll the camera and light take you to the next of its 4 types and 3 sauces, ending on the price
+  plan: you land inside a landscape of golden crust, and your scroll flies you over it, past the sauce cups like lakes, then up until it is one board with the price
 - [x] R3g.15 The opening is made for this business at full quality: never a flyer crop or low-resolution photo, and a generated setting is never presented as their real premises (check: fits)
   plan: the opening uses their 2250 px board photo at full quality, never the flyer; no generated setting
 - [x] R3h.2 A film opening goes from where the product comes from to their real product and the button, every step true
@@ -401,7 +401,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3s.8 Buttons over a photo sit in a soft container, checked on a light and a dark photo
   plan: no button sits over a photo: the words are on plain stone
 - [x] R3s.10 The picture appears the moment a thing is named
-  plan: the camera arrives at each part as its chapter line shows
+  plan: each chapter line shows while that part of the board is passing
 - [x] R3s.27 Same thing, same place: a repeated kind of thing (each size, step, card, slide, scroll state) is written in the same place and style every time, and a growing block hangs from a fixed top so its heading never moves
   plan: chapter cards always in one place; the three order steps in one place; check-same-place
 - [x] R3s.28 No blank screen anywhere in the scroll: at every stop something is there to look at (words, a picture, the film), never a screen of plain ground (check: check-blank)
