@@ -4,7 +4,7 @@
  * Super Admin, who advertises the site itself: `targets` is all that differs.
  * A target is { type, id, name, ...the record itself }.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { PageLoading, LoadFailed } from '../common/LoadState';
@@ -50,10 +50,15 @@ export default function AdvertisingTab({ API, token, targets }) {
   const type = target?.type;
   const id = target?.id;
 
+  const shown = useRef('');
+  shown.current = `${type}-${id}`;
   const load = useCallback(async () => {
     if (!id) return;
     const auth = { headers: { Authorization: `Bearer ${token}` } };
-    setLink(await axios.post(`${API}/short-links`, { target_type: type, target_id: id }, auth).then((r) => r.data).catch(() => 'error'));
+    const asked = `${type}-${id}`;
+    const got = await axios.post(`${API}/short-links`, { target_type: type, target_id: id }, auth).then((r) => r.data).catch(() => 'error');
+    // A late reply for the business picked before must not show its link under this one.
+    if (shown.current === asked) setLink(got);
   }, [API, token, type, id]);
   useEffect(() => { setLink(null); load(); }, [load]);
 

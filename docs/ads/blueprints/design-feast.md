@@ -103,7 +103,7 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
   plan: measured by check-ad-designs (story-safe)
 - [x] A8.5 Words over a photo cover at most 40% of it, and never the subject.
   plan: Three of the owner's own cut-outs, whole; offered only with three or more.
-- [x] A8.6 The QR is at least 150px at 1080 wide, dark on white, with the short link printed on the ad, beside it unless the owner moved them. No drag can shrink it below 150px, cut it off or put it where a story covers it.
+- [x] A8.6 The QR is at least 150px at 1080 wide, dark on white, with the short link printed whole on the ad (the business's name in it when it has a Latin one), beside it unless the owner moved them. No drag can shrink it below 150px, cut it off or put it where a story covers it.
   plan: measured by check-ad-designs (qr)
 - [x] A8.7 Works in Hebrew and English: right-aligned, the QR moves to the left, letters in a font that has them.
   plan: measured by check-ad-designs (languages)
@@ -122,3 +122,14 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
   plan: Words editable and draggable; the price comes from the item.
 - [x] A9.4 Cost read from the API before any generation, and the spend reported.
   plan: n/a: nothing generated.
+
+## 8. Moving ads
+
+- [x] A10.1 A moving ad ends on the same picture as the still: same words, one price, the link and QR code whole.
+  plan: measured by check-ad-designs (moving)
+- [x] A10.2 The first frame is already an ad, because a chat shows it before anyone plays it: the headline's key word large on the ad's colour, the product, or the first words; never an empty ground.
+  plan: measured by check-ad-designs (moving)
+- [x] A10.3 It opens on one big word, moves, then holds still at least 1.5 seconds, with the QR code still for over 3 seconds so it can be scanned.
+  plan: measured by check-ad-designs (moving)
+- [x] A10.4 An MP4 video (H.264) at the shape's full 1080-wide size, about 6 seconds, no sound needed to follow it.
+  plan: measured by check-ad-designs (moving)

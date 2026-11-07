@@ -1,0 +1,340 @@
+I spent weeks analyzing 10,000 ads for
+products and services with GPT-6 [music]
+Astra and finally figured out what the
+highest converting ones have in common.
+So, put those patterns to the test,
+[music]
+created my own ads, got my first three
+leads, and today I'm sharing the whole
+experiment with you. Stick around
+because I'm also showing you how to land
+clients who will gladly buy these ads
+from [music] you. Hi, I'm a deal. Quick
+heads-up, this is my last marketing
+video on this channel. [music]
+Everything new is going to live on Hixle
+Marketing now. Subscribe to stay in
+touch. Let's not waste any time. We're
+starting with eCom. Every winning
+template from this video is in the
+description along with my custom ad
+skill
+&gt;&gt; [music]
+&gt;&gt; ready to adapt to your business. So,
+you're testing proven ads instead of
+burning budget on guesses. [music] Okay,
+so for this experiment, I generated the
+product photos with AI and now I'll walk
+you through the whole thing. How I made
+the ads, [music] how I figured out what
+to write on them, and how I got the
+first leads. And what to write is where
+most people get stuck, [music] so that's
+where we're starting today. After
+studying those 10,000 ads, I distilled
+the winning copy structure into a
+five-part framework. I call it proof.
+You'll see proof in all three eCom ad
+formats we're about to cover, whether
+they're static or video. And the first
+winning format is the callout diagram.
+You've definitely seen these. Clean
+product shot with thin lines pointing
+out specific features.
+&gt;&gt; [music]
+&gt;&gt; A callout diagram explains how each
+feature helps in everyday life. That
+matters in eCom because
+&gt;&gt; [music]
+&gt;&gt; people need to picture themselves using
+what you're selling and understand what
+they're getting out of it without
+digging through product description. To
+make one, connect Hixle to ChatGPT,
+attach my custom skill,
+&gt;&gt; [music]
+&gt;&gt; and add your product photo with a short
+description about what you're selling.
+That's the entire prompt on the screen.
+And [music] look, Astra handles the
+research and copy while Hixle MCP
+generates the visuals. Both of these
+tools do all the heavy lifting. On the
+Hixle side, my skill [music] picks a
+model for each task. GPT image 2.5 for
+static ads, C dance for video, and C
+dream for characters.
+&gt;&gt; [music]
+&gt;&gt; You don't need to spend hours comparing
+tools or figuring out which ones to use.
+That's already built into the workflow.
+And on the Astro side, the skill
+analyzes the [music] ads already running
+in your niche, finds what they have in
+common, and uses those patterns to
+create new creatives for your business.
+[music] And here's the secret behind the
+skill. Meta's ad library lets you see
+how many reach an [music] ad has, how
+long it's been running. That's useful
+information because the longer an ad
+runs and the more reach it gets, the
+more likely it is to convert and bring
+in leads. One ad might run for a month
+and reach just 200 people. Another could
+reach a hundred times as [music] many
+over the same period with the same
+budget. And that's exactly what my skill
+is built on because the research part is
+the half people skip, and here's why it
+matters. If you've ever watched a cost
+per lead climb while they keep making
+[music] new ads, you know how
+frustrating that is. The problem is that
+you and your competitors have the same
+basic understanding of the customer. So,
+everyone ends up making similar
+promises. That's where you lose customer
+attention and your lead costs stay
+[music] high and your ads burn out fast.
+To get past that, you need a deeper
+understanding of why someone [music]
+would buy your product. Different
+reasons to buy give you different angles
+to test. Now, I know what you're
+thinking. There are a million ways to
+make an ad. [music]
+What if the AI generates something bad?
+I burn my budget and get zero clients.
+[music]
+How do Astro and Keap Social even know
+what works? The answer is pretty simple.
+Meta has a public ad library where you
+can see every active campaign in your
+niche. [music]
+And if you scroll through, you'll notice
+that the highest converting ads are
+usually the simplest ones. So, don't
+overcomplicate your visuals. Now, let's
+look at what Keap Social generated for
+the back.
+&gt;&gt; [music]
+&gt;&gt; Okay, so that was type one, the color
+diagram. Type two is the review card, a
+real customer quote with a name and a
+rating. And type three is the offer
+card. All three run on the proof method,
+but if you're selling services, the
+formula is completely different, which
+I'll share in a second. Once you've
+approved the ads, you can ask Astro to
+adapt them for stories or [music] reels,
+so resizing is no longer a headache. You
+can turn one creative into multiple
+formats
+&gt;&gt; [music]
+&gt;&gt; without doing the work all over again.
+I'm going to leave all these prompts and
+ready-to-use templates in the
+description, so you can steal these
+formats and adapt them for your own
+business or a client. [music] And I know
+what you're wondering, what if I need a
+video ad? Here, the exact same three
+frameworks work, just one level deeper.
+&gt;&gt; [music]
+&gt;&gt; Instead of a static diagram, you show
+the product actually working. Instead of
+a review card, you run it as a UGC style
+video. Let's ask Astra to turn these
+three formats into video ads and see the
+result.
+&gt;&gt; Okay, girls, look what finally showed
+up. My work laptop,
+makeup bag,
+gym clothes,
+water bottle,
+and oh, it still zips. Perfect.
+&gt;&gt; Nice. These came out in a more of a
+[music] UGC style and I can see why.
+This type of content doesn't look like a
+typical ad. So, when people watch it,
+the algorithm reads it [music] as
+interesting content and shows it to more
+people. More of them click and your CPA
+will drop. Here's what that matters to
+your budget.
+&gt;&gt; [music]
+&gt;&gt; For this example, the bag is priced at
+$80. You could spend $10, get one lead
+and make no sales. Or you could spend
+the same $10, get 10 leads [music] and
+have three of them buy. That's 240 in
+revenue. And by the end of this video,
+I'll count exactly what this whole
+campaign cost me. [music] And the whole
+thing takes about 10 minutes, not a
+week. Anyone who's run campaigns before
+knows how risky traditional production
+is. Ideating, filming, editing,
+&gt;&gt; [music]
+&gt;&gt; and testing only to realize the creative
+flop. Burned budget, wasted weeks. Here,
+that risk is just gone. And if you're
+not ready to spend your own money on
+paid traffic, here's the easy way to
+find clients instead. The Meta Ad
+Library holds thousands of businesses
+already running ads. Open any of their
+ads, click through the advertiser's
+card, and you'll see how to reach them
+through their official website. Almost
+nobody uses this method, which is kind
+of strange because these clients are
+already spending money on ads. When you
+reach out and show them how to upgrade
+their ad performance,
+they usually pay attention. And here's
+the real reason why they'll pay you.
+You're taking the worst loop in their
+business off their plate, the endless
+"What ad do we run next?" To get
+started, grab my free client brief
+template from the description, send it
+to your lead, and feed their [music]
+answers straight into Astra. For
+example, you could offer five videos at
+50 bucks each, that's a $250 package.
+&gt;&gt; [music]
+&gt;&gt; Your price will depend on the work and
+what's included. And if the client likes
+the work and needs more variations, that
+can turn into repeat business. The ads
+are ready. Now, let me show you a trick
+to find out which ones get the strongest
+response without spending a single cent
+on paid traffic. Post them as organic
+[music] reels first. Especially if
+you're working with a small budget, this
+gives you a way to try different ideas
+and see which ones get people interested
+enough [music] to ask about the product.
+That's exactly how I tested our ad
+scale. I posted a few of the videos we
+created, some got more views than
+others, but people started reaching out
+about the [music] bag. Once you find
+those stronger ideas, you can make more
+versions of them with one prompt. Astra
+can compare those results [music] with
+your audience research, spot patterns in
+what people respond to, and suggest new
+variations to test. [music] The next
+step is turning those inquiries into
+sales, and that's where your funnel
+comes in. If you want a full tutorial on
+building [music] one, let me know in the
+comments. Now, let's get to something
+you've been asking for, ads for
+services. [music]
+For services, we're using the quest
+framework. Here are the three formats
+you can build around it, a quiz, a case
+study told as a story, a direct offer
+backed by [music] a guarantee. In any
+niche, there's one lever that raises
+your price, niching down. The more
+precisely you can target your customer,
+the more you [music] can charge. For
+example, a general Spanish course might
+cost $100, while a business Spanish
+program could sell for a thousand
+[music] bucks. Both teach the same
+language, but they solve different
+problems. The only [music] thing that
+changed is who it's for. People are
+willing to pay for exclusivity, speed,
+and results. [music]
+When your ad speaks directly to a
+problem they need to solve, you give
+them a compelling reason to buy. So,
+here's my advice. Pick one segment and
+aim every ad at it. That alone raises
+your average check. Now, let's see what
+[music] Astra made for a marketing
+agency.
+&gt;&gt; I helped my client bring in an extra
+$10,000 in 1 month by changing one thing
+in his ads. This is John. He owns a
+house cleaning company. Bookings were
+slow and almost every conversation
+started with, "Can I get a discount?" I
+reviewed his business and changed the
+offer. Instead of discounted one-time
+cleanings, we offered busy families
+recurring cleaning so they could have
+their weekends back.
+&gt;&gt; Okay, it went with storytelling and I
+think this one's strong. Run it through
+Quest and every letter is [music] there.
+I also created an example for an
+educational course and here's a static
+example where the Quest [music] format
+does the job. Take a look at the video
+and use it as a template for your own
+offer.
+&gt;&gt; Answer in 3 seconds. What's 8% of 25?
+Stuck? Just swap the numbers and the
+answer is simple. If your kid freezes on
+problems like this, they're not bad at
+math.
+&gt;&gt; Okay, when it comes to services, the
+formula shifts. You hook them with a
+pain point, show the end result, and
+close with a high-value lead magnet.
+Something genuinely valuable you give
+away for free. This free offer is
+crucial because it automatically filters
+for qualified [music] leads who
+genuinely need your service. For a
+doctor, that's a free diagnostic. For
+education, a trial lesson. For a
+designer, a rebranding consultation. And
+here's a golden [music] rule to protect
+your budget. If you already have an ad
+that's working, never rebuild it from
+scratch. Just run an AB test. Export
+your ad performance report from Ads
+Manager and upload it to Astra. Ask it
+to identify your best-performing
+creatives, then create variations based
+on the audience research it did with my
+skill. [music] Try a new hook, a
+different visual, or another bonus.
+Changing one element at a time. And once
+you start paying for traffic, how do you
+know which ad to keep running? When you
+test, watch for three numbers: [music]
+hook rate, CTR, and cost per lead. Okay,
+the moment of truth. What did all of
+this cost? Every [music] static and
+every video you saw, about 100 bucks.
+And yes, it took me a few tries to get
+these examples where I [music] wanted
+them. My 100 bucks went into iterations.
+Yours doesn't have to. Grab the final
+prompts in the description, but think
+about that number. In traditional
+production, $100 buys [music] you one
+video. A typical UGC creator charges 100
+to $200 for a single [music] ad. I'll
+leave the best performing templates from
+this test in the description along with
+my custom skill, client brief, prompts,
+and [music] the setup instructions, of
+course, all for free. And as always, if
+you found this video helpful, hit the
+like button, [music]
+subscribe, and I'll see you guys in the
+next one.
+&gt;&gt; [music]

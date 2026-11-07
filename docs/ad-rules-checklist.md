@@ -81,7 +81,7 @@ A8.2 | No text under 30px at 1080 wide. | 8 | auto:text-size
 A8.3 | Nothing cut off: every line inside the picture. | 8 | auto:text-inside
 A8.4 | A story keeps the top 220px and bottom 230px clear. | 8 | auto:story-safe
 A8.5 | Words over a photo cover at most 40% of it, and never the subject. | 8 | decide
-A8.6 | The QR is at least 150px at 1080 wide, dark on white, with the short link printed on the ad, beside it unless the owner moved them. No drag can shrink it below 150px, cut it off or put it where a story covers it. | 8, Tzvi 5 Nov | auto:qr
+A8.6 | The QR is at least 150px at 1080 wide, dark on white, with the short link printed whole on the ad (the business's name in it when it has a Latin one), beside it unless the owner moved them. No drag can shrink it below 150px, cut it off or put it where a story covers it. | 8, Tzvi 5 Nov | auto:qr
 A8.7 | Works in Hebrew and English: right-aligned, the QR moves to the left, letters in a font that has them. | 8 | auto:languages
 A8.8 | Words readable on their background: 3:1 for large text; the price circle stays visible. | ad maker 4 Nov | decide
 A8.9 | The picture that leaves the site is drawn at double size (2160 wide) from the best copy of the photo, never the preview. | Tzvi 5 Nov | auto:sharp
@@ -92,3 +92,10 @@ A9.1 | Drawn and looked at on the real business, at phone size, beside the refer
 A9.2 | Would it stop you? Say what is surprising about it in one sentence; if nothing is, it goes back to stage 1. | 9d, ads-need-an-idea | decide
 A9.3 | The owner can change every word and the price stays right. | intro, 6 | decide
 A9.4 | Cost read from the API before any generation, and the spend reported. | CLAUDE.md | decide
+
+## 8. Moving ads
+
+A10.1 | A moving ad ends on the same picture as the still: same words, one price, the link and QR code whole. | Tzvi 6 Nov | auto:moving
+A10.2 | The first frame is already an ad, because a chat shows it before anyone plays it: the headline's key word large on the ad's colour, the product, or the first words; never an empty ground. | Tzvi 6 Nov, 7 Nov | auto:moving
+A10.3 | It opens on one big word, moves, then holds still at least 1.5 seconds, with the QR code still for over 3 seconds so it can be scanned. | Tzvi 6 Nov | auto:moving
+A10.4 | An MP4 video (H.264) at the shape's full 1080-wide size, about 6 seconds, no sound needed to follow it. | Tzvi 6 Nov | auto:moving

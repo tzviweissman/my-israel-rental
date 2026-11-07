@@ -243,5 +243,21 @@
    "photo": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1787595769/myisraelrental/nzsua2h4xco6wwlyutb7.jpg",
    "cutout": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793649745/myisraelrental/cutouts/f1a517f35078438d8f033d9d7c50975f.png"
   }
- ]
+ ],
+ "ideas": [
+  {
+   "text": "ארוחה מסודרת לפני שהאורחים מגיעים",
+   "key": "מסודרת"
+  },
+  {
+   "text": "שולחן שישי בלי לעמוד על הגריל",
+   "key": "שישי",
+   "item": "Jerky Board"
+  },
+  {
+   "text": "הלוח שכולם שואלים עליו",
+   "key": "הלוח"
+  }
+ ],
+ "headline_key": "בשר"
 }

@@ -594,6 +594,7 @@ async def startup_tasks() -> None:
         # are two operations — two simultaneous mints could pass both. This
         # makes the database refuse the second one outright.
         await db.short_links.create_index("slug", unique=True, background=True)
+        await db.short_links.create_index("aliases", unique=True, sparse=True, background=True)
         await db.short_links.create_index(
             [("target_type", 1), ("target_id", 1)], background=True,
         )

@@ -38,7 +38,7 @@ const CANVAS_CANNOT_DECODE = /^image\/(heic|heif|avif)/i;
  *  The user saw "Upload failed" with no reason, and retrying could never
  *  work because nothing about it was transient.
  */
-async function compressImage(file) {
+export async function compressImage(file) {
   try {
     if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
     if (CANVAS_CANNOT_DECODE.test(file.type)) return file;

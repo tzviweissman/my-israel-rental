@@ -70,7 +70,9 @@ const RECORD = () => {
 };
 await freshPage();
 let lang = 'en';
-await p.route('**/api/ads/make', (r) => r.fulfill({ json: fixture(lang) }));
+// The longest name a link can carry, so a design that cuts it fails here.
+const LONG_NAME = 'the-very-long-business-name';
+await p.route('**/api/ads/make', (r) => { const f = fixture(lang); r.fulfill({ json: { ...f, link: { ...f.link, path: `/p/${LONG_NAME}` } } }); });
 await p.route('**/api/ads/cutouts', (r) => r.fulfill({ json: { items: fixture('en').cutouts } }));
 await p.route('**/api/ads/saved**', (r) => (r.request().method() === 'GET' ? r.fulfill({ json: { ads: [] } }) : r.fulfill({ json: { id: 'x' } })));
 
@@ -92,6 +94,7 @@ function measure(where, all0, H, wanted) {
   const prices = new Set((all.match(MONEY) || []).map((x) => x.replace(/\s/g, '')));
   if (wanted.price && prices.size > 1) out.push(`price: ${[...prices].join(' and ')} on one ad`);
   if (wanted.link && !/myisraelrental\.com/.test(all)) out.push('link: no short link printed');
+  if (wanted.path && !all.replace(/\s/g, '').includes(`myisraelrental.com/p/${wanted.path}`)) out.push(`link: /p/${wanted.path} not printed whole`);
   const qr = drawn.filter((d) => d.qr).map((d) => d.qr);
   if (wanted.link && qr.length && Math.max(...qr) < 149.5) out.push(`qr: ${Math.round(Math.max(...qr))}px`);
   for (const m of [...new Set(out)]) fails.push(`${where}: ${m}`);
@@ -128,13 +131,93 @@ for (const l of ['en', 'he']) {
         await p.locator(`[data-testid="ad-${f}"]`).click();
         await p.locator(`[data-testid="ad-g-${k}"]`).click();
       });
-      measure(`maker ${k} ${f} ${l}`, drawn, { square: 1080, feed: 1350, story: 1920 }[f], { price: k !== 'items', link: true }); // Side by side: each item above its own price (rules 9b.3)
+      measure(`maker ${k} ${f} ${l}`, drawn, { square: 1080, feed: 1350, story: 1920 }[f], { price: k !== 'items', link: true, path: LONG_NAME }); // Side by side: each item above its own price (rules 9b.3)
       count += 1;
       if (pictures) {
         const d = await p.locator('[data-testid="ad-preview"]').evaluate((c) => c.toDataURL('image/jpeg', 0.8));
         fs.writeFileSync(path.join(pictures, `maker-${k}-${f}-${l}.jpg`), Buffer.from(d.split(',')[1], 'base64'));
       }
     }
+  }
+}
+
+// A headline about one product brings that product's picture with it.
+{
+  await p.click('[data-testid="ad-g-clean"]');
+  await p.click('[data-testid="ad-idea-1"]');
+  await p.waitForTimeout(600);
+  const shown = await p.locator('[data-testid^="ad-product-"][aria-pressed="true"]').first().innerText();
+  if (!/Jerky/.test(shown)) fails.push(`headline item: tapping a headline about the Jerky Board left "${shown}" in the picture`);
+  await p.click('[data-testid="ad-idea-0"]');
+}
+
+// The pros' touches (docs/inspo/ad-videos-2026-11-07): a deal shows only with its end date, the headline can sit on strips.
+{
+  await p.click('[data-testid="ad-g-clean"]');
+  await p.fill('[data-testid="ad-deal"]', 'Buy 2, get 1 free');
+  await p.waitForTimeout(800);
+  let seen = await p.evaluate(() => window.__drawn.some((d) => /Buy 2, get 1 free/.test(d.t || '')));
+  if (seen) fails.push('deal: shown without an end date');
+  const end = new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10);
+  await p.fill('[data-testid="ad-deal-until"]', end);
+  await p.waitForTimeout(800);
+  seen = await p.evaluate(() => window.__drawn.some((d) => /Buy 2, get 1 free/.test(d.t || '')));
+  if (!seen) fails.push('deal: not on the ad with an end date');
+  await p.fill('[data-testid="ad-deal"]', '');
+  if (!(await p.locator('[data-testid="ad-strips"]').count())) fails.push('strips: no choice on the plain design');
+  else {
+    const before = await p.locator('[data-testid="ad-preview"]').evaluate((c) => c.toDataURL());
+    await p.check('[data-testid="ad-strips"]');
+    await p.waitForTimeout(800);
+    if (before === await p.locator('[data-testid="ad-preview"]').evaluate((c) => c.toDataURL())) fails.push('strips: the headline did not change');
+    await p.uncheck('[data-testid="ad-strips"]');
+  }
+}
+
+// A dragged piece snaps to the middle of the ad, with a line to show it.
+{
+  await p.locator('[data-testid="ad-feed"]').click();
+  await p.locator('[data-testid="ad-g-behind"]').click();
+  await p.waitForTimeout(700);
+  const piece = p.locator('[data-testid="ad-piece-qr"]');
+  await piece.scrollIntoViewIfNeeded();
+  const c = await p.locator('[data-testid="ad-preview"]').boundingBox();
+  const r = await piece.boundingBox();
+  await p.mouse.move(r.x + r.width / 2, r.y + r.height / 2);
+  await p.mouse.down();
+  await p.mouse.move(c.x + c.width / 2 + 4, c.y + c.height / 2 + 4, { steps: 4 });
+  await p.waitForTimeout(300);
+  const guide = await p.locator('[data-testid="ad-guide-x"]').count();
+  await p.mouse.up();
+  await p.waitForTimeout(300);
+  const after = await piece.boundingBox();
+  const off = Math.abs(after.x + after.width / 2 - (c.x + c.width / 2));
+  if (!guide || off > 1) fails.push(`snap: ${off.toFixed(1)}px off the middle, guide line ${guide ? 'shown' : 'missing'}`);
+  if (await p.locator('[data-testid="ad-guide-x"]').count()) fails.push('snap: the guide line stayed after letting go');
+  await p.locator('[data-testid="ad-reset-moves"]').click();
+}
+
+// The colour typed is the colour on the ad, dark or light (Tzvi, 6 Nov 2026), with words that still read.
+{
+  await p.locator('[data-testid="ad-story"]').click();
+  const pickable = await p.locator('[data-testid="ad-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-g-', '')));
+  for (const k of pickable) {
+    await p.locator(`[data-testid="ad-g-${k}"]`).click();
+    await p.waitForTimeout(350);
+    if (!(await p.locator('[data-testid="ad-colour-custom-hex"]').count())) continue;
+    for (const [hex, rgb] of [['#FFE9A8', [255, 233, 168]], ['#7A1FA2', [122, 31, 162]]]) {
+      const drawn = await drawOf(async () => { await p.locator('[data-testid="ad-colour-custom-hex"]').fill(hex); });
+      const seen = await p.locator('[data-testid="ad-preview"]').evaluate((c) => {
+        const x = c.getContext('2d');
+        const n = {};
+        const d = x.getImageData(0, 0, c.width, c.height).data;
+        for (let i = 0; i < d.length; i += 4 * 97) { const q = `${d[i]},${d[i + 1]},${d[i + 2]}`; n[q] = (n[q] || 0) + 1; }
+        return n[Object.keys(n).sort((a, b) => n[b] - n[a])[0]] / (d.length / (4 * 97)) >= 0 ? Object.keys(n).sort((a, b) => n[b] - n[a]).slice(0, 12) : [];
+      });
+      if (!seen.includes(rgb.join())) fails.push(`colour ${k}: ${hex} is not on the ad (commonest: ${seen.slice(0, 3).join(' | ')})`);
+      measure(`colour ${k} ${hex}`, drawn, 1920, { price: false, link: false });
+    }
+    await p.locator('[data-testid="ad-colour-own"]').click().catch(() => {});
   }
 }
 
@@ -200,6 +283,96 @@ let at = 2;
 while (at < jpg.length && !(jpg[at + 1] >= 0xC0 && jpg[at + 1] <= 0xC2)) at += 2 + jpg.readUInt16BE(at + 2);
 const sharpW = jpg.readUInt16BE(at + 7);
 if (sharpW !== 2160) fails.push(`sharp: the downloaded picture is ${sharpW} wide, not 2160`);
+
+// Moving ads (A10): the real button makes a real file, on every design. Looked at frame by frame against the still.
+const MOVING = async (qrBox) => {
+  const v = document.querySelector('[data-testid="ad-video-preview"]');
+  const still = document.querySelector('[data-testid="ad-preview"]');
+  v.pause();
+  const c = document.createElement('canvas');
+  c.width = 64;
+  c.height = 64;
+  const x = c.getContext('2d', { willReadFrequently: true });
+  const read = (src) => { x.drawImage(src, 0, 0, 64, 64); return x.getImageData(0, 0, 64, 64).data; };
+  const at = async (t) => {
+    await new Promise((r) => { v.onseeked = r; v.currentTime = t; });
+    return read(v);
+  };
+  // The biggest difference in one 1/64 square matters as well as the mean: a small QR code moving barely shifts the mean.
+  const diff = (a, b) => { let n = 0; for (let i = 0; i < a.length; i += 4) n += Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]); return n / (a.length / 4) / 3; };
+  const region = (a, b) => {
+    let n = 0; let m = 0;
+    const X0 = Math.floor(qrBox[0] * 64); const X1 = Math.ceil(qrBox[2] * 64); const Y0 = Math.floor(qrBox[1] * 64); const Y1 = Math.ceil(qrBox[3] * 64);
+    for (let y = Y0; y < Y1; y += 1) for (let i = X0; i < X1; i += 1) { const o = (y * 64 + i) * 4; n += Math.abs(a[o] - b[o]) + Math.abs(a[o + 1] - b[o + 1]) + Math.abs(a[o + 2] - b[o + 2]); m += 3; }
+    return n / Math.max(m, 1);
+  };
+  const dur = v.duration;
+  const last = await at(dur - 0.05);
+  const first = await at(0);
+  const middle = await at(0.5);
+  const settled = await at(4.75);
+  const qrEarly = await at(3.1);
+  // the first frame shows more than a flat ground: squares that differ from the corner's colour
+  let busy = 0;
+  for (let i = 0; i < first.length; i += 4) if (Math.abs(first[i] - first[0]) + Math.abs(first[i + 1] - first[1]) + Math.abs(first[i + 2] - first[2]) > 30) busy += 1;
+  return { dur, w: v.videoWidth, h: v.videoHeight, end: diff(last, read(still)), busy: busy / 4096, moved: diff(middle, last), hold: diff(settled, last), qr: region(qrEarly, last), canvasW: still.width, canvasH: still.height };
+};
+// In real Chrome, its own window: the moving ads need H.264, which the test browser does not have.
+{
+  const chrome = await chromium.launch({ channel: 'chrome' });
+  const main = p;
+  const movingPage = await (await chrome.newContext({ viewport: { width: 1440, height: 1000 } })).newPage();
+  p = movingPage;
+  p.setDefaultTimeout(120000);
+  p.on('pageerror', (e) => errors.push(String(e)));
+  lang = 'en';
+  await p.route('**/api/ads/make', (r) => { const f = fixture('en'); r.fulfill({ json: { ...f, link: { ...f.link, path: `/p/${LONG_NAME}` } } }); });
+  await p.route('**/api/ads/cutouts', (r) => r.fulfill({ json: { items: fixture('en').cutouts } }));
+  await p.route('**/api/ads/saved**', (r) => (r.request().method() === 'GET' ? r.fulfill({ json: { ads: [] } }) : r.fulfill({ json: { id: 'x' } })));
+  await p.goto(`${SITE}/dashboard?tab=my-businesses&as=owner`, { timeout: 180000 });
+  await p.locator('[data-testid^="business-make-ad-"]').first().click();
+  await p.locator('[data-testid="ad-gallery"]').waitFor();
+  await p.locator('[data-testid="ad-en"]').click();
+  await p.waitForFunction(() => document.querySelector('[data-testid="ad-g-behind"] img'));
+  await p.waitForTimeout(2500);
+  await p.evaluate(() => { navigator.canShare = () => false; });
+  const allKeys = await p.locator('[data-testid="ad-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-g-', '')));
+  const clips = allKeys.filter((k) => !only || only.has(k)).map((k) => [k, k === 'native' ? 'story' : 'square']);
+  // Every shape on the first design; the rest in one shape, because each clip takes seconds.
+  clips.push(['behind', 'feed'], ['behind', 'story']);
+  for (const [k, f] of clips) {
+    if (f !== 'story' || k === 'native') await p.locator(`[data-testid="ad-${f}"]`).click();
+    else await p.locator('[data-testid="ad-story"]').click();
+    await p.locator(`[data-testid="ad-g-${k}"]`).click();
+    await p.waitForTimeout(900);
+    await p.locator('[data-testid="ad-video"]').click();
+    await p.locator('[data-testid="ad-video-preview"]').waitFor();
+    await p.waitForFunction(() => document.querySelector('[data-testid="ad-video-preview"]').readyState >= 2);
+    const qrBox = await p.evaluate(() => {
+      const c = document.querySelector('[data-testid="ad-preview"]').getBoundingClientRect();
+      const q = document.querySelector('[data-testid="ad-piece-qr"]').getBoundingClientRect();
+      return [(q.left - c.left) / c.width, (q.top - c.top) / c.height, (q.right - c.left) / c.width, (q.bottom - c.top) / c.height];
+    });
+    const m = await p.evaluate(MOVING, qrBox);
+    const where = `moving ${k} ${f}`;
+    if (m.w !== m.canvasW || m.h !== m.canvasH) fails.push(`${where}: ${m.w}x${m.h}, the still is ${m.canvasW}x${m.canvasH}`);
+    if (m.dur < 6 || m.dur > 7) fails.push(`${where}: ${m.dur.toFixed(1)} seconds`);
+    if (m.end > 3) fails.push(`${where}: the last frame is not the still (off by ${m.end.toFixed(1)})`);
+    if (m.busy < 0.04) fails.push(`${where}: the first frame is an empty ground (${(m.busy * 100).toFixed(0)}% has anything on it)`);
+    if (m.moved < 0.4) fails.push(`${where}: it hardly moves (${m.moved.toFixed(2)})`);
+    if (m.hold > 3) fails.push(`${where}: still moving after 4.75 seconds (${m.hold.toFixed(1)})`);
+    if (m.qr > 6) fails.push(`${where}: the QR code is not still from 3.1 seconds (${m.qr.toFixed(1)})`);
+    if (process.env.AD_VIDEO_LOG) console.log(where, JSON.stringify(m));
+    if (pictures) {
+      const [got] = await Promise.all([p.waitForEvent('download'), p.locator('[data-testid="ad-video"]').click()]);
+      fs.copyFileSync(await got.path(), path.join(pictures, `${k}-${f}.mp4`));
+    }
+    await p.locator('[data-testid="ad-video-close"]').click();
+  }
+  console.log(`moving ads: ${clips.length} videos made and looked at`);
+  await chrome.close();
+  p = main;
+}
 
 // The Advertising page has the whole maker on it, with nothing to click first.
 await p.keyboard.press('Escape');

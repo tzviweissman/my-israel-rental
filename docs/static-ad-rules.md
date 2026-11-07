@@ -508,6 +508,12 @@ Jordan's system generates every picture through a paid image service,
 which our free ads do not (9d). The podcast carries two sponsor reads
 (Social Snowball) and one host is an investor in Tribe, which it praises.
 
+## 9h. What makes it look designed (Tzvi, 6 Nov 2026: "can we make the ads better")
+
+1. The maker offers three headlines with an idea (a twisted known phrase, the moment in the day, the want behind it), the plain one a tap away. Each still only states what the listing states.
+2. One word of the headline is in the accent colour. The owner's own word colour turns this off.
+3. A cut-out sits somewhere: light behind it, a dark soft patch where it touches, a slight turn on the layouts where that suits it. Fine grain over the ad, never when the owner typed an exact colour.
+
 ## 9g. Three more videos: why an ad catches the eye (4 Nov 2026)
 
 Janson Smith "How I Use AI to Copy Winning Ads", Fraser Cottrell "The Ultimate
@@ -606,3 +612,11 @@ agency. The third is Higgsfield promoting Higgsfield, its numbers its own.
 | [What I Learned Running $50M+ in Static Ads](https://youtu.be/h5dn_PTURjc) | Evan Seech | one idea, squint test, cut words |
 | [I Made 150+ Static Ads](https://youtu.be/9hr1uEEap2o) | Nik Pakhrin | who it is for within half a second |
 | [Static Ads Masterclass 2026](https://youtu.be/2BrGawWj1aI) | Fraser Cottrell | skimmable, objection, proof |
+
+## Moving ads (Tzvi, 6 Nov 2026)
+
+"Moving ads for WhatsApp, statuses, Instagram and Facebook, so it's not just a static ad." The pieces of the
+same design move, drawn in the browser for free: the product arrives, the words land one at a time, the price
+pops, the link and QR slide in, and it holds on the finished ad. A short MP4 rather than a GIF: it is sharper,
+smaller, and what statuses and feeds expect. Every still rule still applies, because the last frame is the
+still. Steps A10.1 to A10.4 in `docs/ad-rules-checklist.md`.

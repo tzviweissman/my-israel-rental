@@ -92,6 +92,55 @@ def _is_preview_bot(request: Request) -> bool:
     return any(bot in ua for bot in _PREVIEW_BOTS)
 
 
+# A link can also go by a name people can read (Tzvi, 6 Nov 2026: "the link
+# should be their business ... instead of a random string"): /p/blazin-boards
+# reaches the same row as /p/Xmtwqth, and both keep working for good, so no
+# printed code breaks. Names are only ever added: a business that renames gets
+# a new one and the old one still answers. The random slug stays the row's key
+# and what a QR encodes, because a shorter code scans better.
+_LINK_NAME_MAX = 28  # what prints whole at the smallest room on any ad design
+_NO_NAME = re.compile(r"business-[0-9a-f]{8}")  # a Hebrew name's stand-in slug (slugify): no better than random
+
+
+def _link_name(raw: str | None) -> str | None:
+    name = (raw or "").strip().lower()
+    # "mine" would hide behind GET /short-links/mine.
+    if not name or name == "mine" or _NO_NAME.fullmatch(name):
+        return None
+    if len(name) > _LINK_NAME_MAX:
+        name = name[:_LINK_NAME_MAX].rsplit("-", 1)[0]
+    return name or None
+
+
+def _by_slug(slug: str) -> dict[str, Any]:
+    return {"$or": [{"slug": slug}, {"aliases": slug.lower()}]}
+
+
+async def _link_filter(slug: str) -> dict[str, Any]:
+    """The row a link means. A random slug wins outright: a business named like
+    the lower-case form of someone's slug must never take over their printed code."""
+    if await db.short_links.find_one({"slug": slug}, {"_id": 1}):
+        return {"slug": slug}
+    return {"aliases": slug.lower()}
+
+
+async def _with_name(doc: dict[str, Any]) -> dict[str, Any]:
+    """Give the link its readable name, when there is one and it is free."""
+    from pymongo.errors import DuplicateKeyError
+    raw = doc["target_id"] if doc["target_type"] == "site" else None
+    if doc["target_type"] == "business":
+        raw = (await db.businesses.find_one({"_id": doc["target_id"]}, {"slug": 1}) or {}).get("slug")
+    name = _link_name(raw)
+    names = doc.get("aliases") or []
+    if not name or name in names or await db.short_links.find_one(_by_slug(name), {"_id": 1}):
+        return doc
+    try:
+        await db.short_links.update_one({"_id": doc["_id"]}, {"$push": {"aliases": name}})
+    except DuplicateKeyError:  # another request took it this instant: the random slug still works
+        return doc
+    return {**doc, "aliases": [*names, name]}
+
+
 class ShortLinkIn(BaseModel):
     target_type: str
     target_id: str
@@ -107,7 +156,7 @@ async def _new_slug() -> str:
     owner's printed code to another owner's page."""
     for _ in range(12):
         slug = "".join(secrets.choice(_ALPHABET) for _ in range(_SLUG_LEN))
-        if not await db.short_links.find_one({"slug": slug}, {"_id": 1}):
+        if not await db.short_links.find_one(_by_slug(slug), {"_id": 1}):
             return slug
     raise HTTPException(status_code=500, detail="Could not allocate a short link")
 
@@ -156,7 +205,7 @@ async def ensure_short_link(target_type: str, target_id: str, owner_user_id: str
 
     existing = await db.short_links.find_one({"target_type": target_type, "target_id": target_id})
     if existing:
-        return existing
+        return await _with_name(existing)
 
     slug = await _new_slug()
     doc = {
@@ -169,14 +218,23 @@ async def ensure_short_link(target_type: str, target_id: str, owner_user_id: str
         "scan_count": 0,
         "last_scanned_at": None,
     }
-    await db.short_links.insert_one(doc)
-    return doc
+    # Atomic on the target: the Advertising page asks twice at once on a first visit,
+    # and two rows would split the visit counts between two links.
+    from pymongo import ReturnDocument
+    saved = await db.short_links.find_one_and_update(
+        {"target_type": target_type, "target_id": target_id},
+        {"$setOnInsert": doc},
+        upsert=True,
+        return_document=ReturnDocument.AFTER,
+    )
+    return await _with_name(saved)
 
 
 def _public(doc: dict[str, Any]) -> dict[str, Any]:
     return {
         "slug": doc["slug"],
-        "path": f"/p/{doc['slug']}",
+        # The newest readable name when it has one; `slug` is still the row's key.
+        "path": f"/p/{(doc.get('aliases') or [doc['slug']])[-1]}",
         "target_type": doc["target_type"],
         "target_id": doc["target_id"],
         "canonical_path": _canonical_path(doc["target_type"], doc["target_id"]),
@@ -272,7 +330,7 @@ def _sum_daily(series: list[list[dict]]) -> list[dict]:
 @router.get("/short-links/{slug}")
 async def get_short_link(slug: str, user=Depends(verify_token)):
     """Read one back, for the dashboard's scan count."""
-    doc = await db.short_links.find_one({"slug": slug})
+    doc = await db.short_links.find_one(await _link_filter(slug))
     if not doc:
         raise HTTPException(status_code=404, detail="Unknown short link")
     if doc.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
@@ -328,7 +386,7 @@ async def _counted_lookup(slug: str, request: Request, ad: str | None = None):
     history rather than inventing any (real numbers only).
     """
     if _is_preview_bot(request):
-        return await db.short_links.find_one({"slug": slug})
+        return await db.short_links.find_one(await _link_filter(slug))
     inc = {"scan_count": 1, f"daily.{_today_bucket()}": 1}
     if ad and _AD_NAME.match(ad):
         inc[f"ads.{ad}"] = 1
@@ -336,7 +394,7 @@ async def _counted_lookup(slug: str, request: Request, ad: str | None = None):
         # this week", not only a total since the start.
         inc[f"ad_days.{_today_bucket()}.{ad}"] = 1
     return await db.short_links.find_one_and_update(
-        {"slug": slug},
+        await _link_filter(slug),
         {
             "$inc": inc,
             "$set": {"last_scanned_at": datetime.now(UTC).isoformat()},
@@ -584,10 +642,24 @@ How good ads are written (docs/static-ad-rules.md 9c):
 
 Return ONE JSON object:
   headline  <= 38 characters, as above.
+  headline_key  the ONE word of the headline, copied exactly, that matters most.
+  headline_item  when the headline is about one of the listed items and not the
+            others, that item's name copied exactly; otherwise "".
+  ideas     exactly 3 other headlines as [{{"text": ..., "key": ..., "item": ...}}], each <= 38
+            characters, each with a real idea, each from a different angle: a
+            twist on a phrase the reader already knows; the moment in the
+            reader's day when this is the answer; the want behind the product,
+            not the product. Short, in the reader's own words, the way a person
+            would say it. With the picture beside it, a stranger must still know
+            what is offered. Only facts the listing states; no praise words, no
+            exclamation marks, no invented customers or numbers. "key" is the
+            ONE word of that text, copied exactly, that carries the idea. "item" is
+            as for headline_item: the ad will show that item's picture.
   points    exactly 3 short selling points, each <= 30 characters: each one
             fact from the listing, as a short noun phrase.
   caption   the post text to paste under the picture: 2-4 short sentences.
-            The first names the place or who it suits; then what it is and
+            The first names the place, or who it suits only if the listing
+            says so; then what it is and
             one or two facts; it ends with one plain invitation to look,
             book or message. No hashtags, no emoji, no link (it is added
             after), no signature.
@@ -736,12 +808,14 @@ async def _ad_facts(target_type: str, target_id: str, lang: str = "en") -> tuple
         for row in (g.get("products") or []) + (g.get("tiers") or []):
             row_photos = _ad_photos((row.get("images") or []) + ([row["image"]] if row.get("image") else []), 1)
             photos += row_photos
-            if isinstance(row.get("price"), (int, float)) and row["price"] > 0:
+            priced = isinstance(row.get("price"), (int, float)) and row["price"] > 0
+            if priced:
                 prices.append((float(row["price"]), row.get("currency") or "ILS"))
-                # Tiers are often all called "Standard": one column each.
-                if row_photos and row.get("name") and all(i["name"] != str(row["name"])[:40] for i in items):
-                    items.append({"name": str(row["name"])[:40], "price": float(row["price"]),
-                                  "currency": row.get("currency") or "ILS", "photo": row_photos[0]})
+            # Tiers are often all called "Standard": one column each. No price is
+            # still a product: its ad simply shows none.
+            if row_photos and row.get("name") and all(i["name"] != str(row["name"])[:40] for i in items):
+                items.append({"name": str(row["name"])[:40], "price": float(row["price"]) if priced else 0,
+                              "currency": row.get("currency") or "ILS", "photo": row_photos[0]})
         for f in g.get("faqs") or []:
             q, a = " ".join(str(f.get("q") or "").split()), " ".join(str(f.get("a") or "").split())
             if q and a and len(q) <= 90 and len(a) <= 220 and len(faqs) < 5:
@@ -753,7 +827,7 @@ async def _ad_facts(target_type: str, target_id: str, lang: str = "en") -> tuple
         })
     # Cheapest first: the made-for-you ads show the first item, and its own
     # price is then the lowest price, so "from" is true (ad rules 9e.8).
-    items = sorted(items, key=lambda i: i["price"])[:6]
+    items = sorted(items, key=lambda i: (i["price"] == 0, i["price"]))[:6]
     facts = {
         "business_name": biz.get("name"),
         "description": (biz.get("description") or biz.get("description_he") or "")[:1200],
@@ -836,7 +910,7 @@ async def ad_cutouts(body: CutoutsIn, request: Request, user=Depends(verify_toke
     if body.target_type != "business":
         return {"items": []}
     await _assert_owns_target(body.target_type, body.target_id, user)
-    check_rate(request, bucket=f"ad_cutouts:{user['user_id']}", limit=30, window_seconds=86400)
+    check_rate(request, bucket=f"ad_cutouts:{user['user_id']}", limit=150, window_seconds=86400)
     from utils.cutout import cutouts_for
     _, extra = await _ad_facts(body.target_type, body.target_id)
     items = extra["items"]
@@ -859,6 +933,8 @@ class SavedAdIn(BaseModel):
     settings: dict[str, Any] = {}
     words: dict[str, Any] = {}
     thumb: str = ""
+    # Kept by the page so opening it again does not pay for new words, not saved by the owner: not in "Your saved ads".
+    kept: bool = False
 
 
 @router.get("/ads/saved")
@@ -884,7 +960,7 @@ async def save_ad(body: SavedAdIn, user=Depends(verify_token)):
     now = datetime.now(UTC).isoformat()
     key = {"owner_user_id": user["user_id"], "target_type": body.target_type, "target_id": body.target_id}
     row = {"lang": "he" if body.lang == "he" else "en", "design": body.design, "item": body.item[:60],
-           "settings": body.settings, "words": body.words, "thumb": body.thumb, "updated_at": now}
+           "settings": body.settings, "words": body.words, "thumb": body.thumb, "updated_at": now, "kept": body.kept}
     if body.id and await db.saved_ads.find_one({**key, "id": body.id}):
         await db.saved_ads.update_one({**key, "id": body.id}, {"$set": row})
         return {"id": body.id}
@@ -1061,14 +1137,28 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
     source = json.dumps({k: v for k, v in facts.items() if k != "customer_reviews"}, ensure_ascii=False, default=str)
     for k in ("situations", "mirror", "post", "versus", "reasons", "honest", "moment"):
         extra_words[k] = "\n".join(line for line in extra_words[k].split("\n") if not _unclaimed(line, source))
+    # Headlines with an idea to pick from (Tzvi, 6 Nov 2026: "make the ads better"; rules 9c, A2.5).
+    # An item only counts if it has a picture to show, so a headline never sits over another product's.
+    item_names = {i["name"] for i in extra.get("items") or []}
+    item_of = lambda raw: (lambda n: n if n in item_names else "")(str(raw or "").strip()[:40])
+    ideas = []
+    for row in data.get("ideas") or []:
+        text = clean((row or {}).get("text") if isinstance(row, dict) else row, 60).rstrip("!")
+        key = clean(row.get("key"), 30) if isinstance(row, dict) else ""
+        if text and not _unclaimed(text, source):
+            ideas.append({"text": text, "key": key if key and key in text else "", "item": item_of(row.get("item")) if isinstance(row, dict) else ""})
     words = _strip_praise({
         "headline": clean(data.get("headline"), 60),
         "points": [clean(p, 40) for p in (data.get("points") or []) if str(p).strip()][:3],
         "caption": clean(data.get("caption"), 800),
     }, source, str(facts.get("title") or facts.get("business_name") or ""))
+    headline_key = clean(data.get("headline_key"), 30)
     return {
         **words,
         **extra_words,
+        "ideas": ideas[:3],
+        "headline_key": headline_key if headline_key in words["headline"] else "",
+        "headline_item": item_of(data.get("headline_item")),
         "link": link,
         "reviews": reviews,
         **extra,

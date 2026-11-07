@@ -27,7 +27,7 @@ MODEL_PATH = os.path.join(os.environ.get("CUTOUT_MODEL_DIR", "/tmp/models"), "is
 _session = None
 _lock = asyncio.Lock()
 # Raised when cuts improve: older rows are ignored, so each photo is cut again once, the next time an ad needs it.
-CUT_VERSION = 2
+CUT_VERSION = 3
 
 
 def prefetch_model() -> None:
@@ -90,6 +90,31 @@ def largest_part(mask):
     return np.where(keep > 0, mask, 0).astype(np.uint8)
 
 
+def shredded(alpha) -> bool:
+    """A flyer or a see-through tub comes back in tatters (American Crust's pizza
+    dough, 6 Nov 2026); a boxed photo is better than that. Measured on our 8 real
+    cuts: the good ones have under 2% holes and edge score under 12, the two bad
+    ones 22% holes, and edge scores of 30 and 36."""
+    import numpy as np
+    from PIL import Image
+    s = np.array(Image.fromarray(alpha).resize((256, 256), Image.NEAREST)) >= 128
+    outside = np.zeros_like(s)
+    stack = [(y, x) for y in range(256) for x in (0, 255)] + [(y, x) for x in range(256) for y in (0, 255)]
+    stack = [(y, x) for y, x in stack if not s[y, x]]
+    for y, x in stack:
+        outside[y, x] = True
+    while stack:
+        y, x = stack.pop()
+        for ny, nx in ((y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)):
+            if 0 <= ny < 256 and 0 <= nx < 256 and not s[ny, nx] and not outside[ny, nx]:
+                outside[ny, nx] = True
+                stack.append((ny, nx))
+    area = max(int(s.sum()), 1)
+    holes = int((~s & ~outside).sum()) / area
+    edge = int((s[1:, :] != s[:-1, :]).sum() + (s[:, 1:] != s[:, :-1]).sum()) / area ** 0.5
+    return holes > 0.1 or edge > 20
+
+
 def cut(content: bytes) -> bytes | None:
     """A PNG of the product alone, cropped to it; None when the photo has no
     clear subject (the mask covers almost nothing or almost everything)."""
@@ -111,6 +136,8 @@ def cut(content: bytes) -> bytes | None:
     out = im.convert("RGBA")
     out.putalpha(alpha)
     out = out.crop(out.getbbox())
+    if shredded(np.asarray(out.getchannel("A"))):
+        return None
     buf = io.BytesIO()
     out.save(buf, "PNG", optimize=True)
     return buf.getvalue()

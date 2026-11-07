@@ -243,5 +243,21 @@
    "photo": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1787595769/myisraelrental/nzsua2h4xco6wwlyutb7.jpg",
    "cutout": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793649745/myisraelrental/cutouts/f1a517f35078438d8f033d9d7c50975f.png"
   }
- ]
+ ],
+ "ideas": [
+  {
+   "text": "Dinner, sorted before they arrive",
+   "key": "sorted"
+  },
+  {
+   "text": "Friday table, no grill needed",
+   "key": "Friday",
+   "item": "Jerky Board"
+  },
+  {
+   "text": "The board everyone asks about",
+   "key": "board"
+  }
+ ],
+ "headline_key": "Meat"
 }

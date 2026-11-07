@@ -20,7 +20,7 @@ from routes.deps import db, verify_token
 router = APIRouter()
 
 # The same list as DESIGNS in AdStudio.jsx.
-DESIGNS = ("chat", "showcase", "photo", "call", "notify", "search", "toggle", "checklist", "beforeafter")
+DESIGNS = ("bgphoto", "chat", "showcase", "photo", "call", "notify", "search", "toggle", "checklist", "beforeafter")
 
 
 def _admin(payload: dict) -> None:

@@ -31,8 +31,9 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Loader2, Plus, Trash2, ArrowLeft, ArrowRight, X,
-  Store, Package, CalendarClock, ImagePlus, Copy, Sparkles,
+  Store, Package, CalendarClock, ImagePlus, Copy, Sparkles, Camera,
 } from 'lucide-react';
+import { compressImage as shrinkPhoto } from '../utils/fastUpload';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import CategoryPicker from '../components/marketplace/CategoryPicker';
@@ -139,6 +140,8 @@ const CreateGig = () => {
      back to the person's name, exactly as before, and a business without a
      logo keeps showing its first letter. */
   const [existing, setExisting] = useState(null);
+  const existingRef = useRef(null);
+  existingRef.current = existing;
   const [bizName, setBizName] = useState('');
   const [bizLogo, setBizLogo] = useState('');
   const [logoUploading, setLogoUploading] = useState(false);
@@ -157,6 +160,32 @@ const CreateGig = () => {
   const firstBusiness = existing !== null && existing.length === 0;
   const destination = existing && (existing.find((b) => b.id === targetBusinessId) || existing[0]);
   const askLogo = existing !== null && (firstBusiness || (destination && !destination.logo_url));
+
+  const logoFromFlyer = async (file, [l, tp, r, b]) => {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+      const W = img.naturalWidth;
+      const H = img.naturalHeight;
+      const pad = 0.08 * Math.max((r - l) * W, (b - tp) * H);
+      const x0 = Math.max(0, l * W - pad);
+      const y0 = Math.max(0, tp * H - pad);
+      const w = Math.min(W, r * W + pad) - x0;
+      const h = Math.min(H, b * H + pad) - y0;
+      const side = Math.round(Math.max(w, h));
+      const c = document.createElement('canvas');
+      c.width = side;
+      c.height = side;
+      const ctx = c.getContext('2d');
+      // The ground just outside the logo, so the square reads as one piece.
+      ctx.drawImage(img, x0, y0, 1, 1, 0, 0, side, side);
+      ctx.drawImage(img, x0, y0, w, h, (side - w) / 2, (side - h) / 2, w, h);
+      const blob = await new Promise((res) => { c.toBlob(res, 'image/png'); });
+      return blob ? new File([blob], 'logo.png', { type: 'image/png' }) : null;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  };
 
   const pickLogo = async (e) => {
     const file = e.target.files?.[0];
@@ -429,11 +458,16 @@ const CreateGig = () => {
 
   // The ad the business already runs -> the whole form, which the owner
   // then checks. Nothing is saved (29 Oct 2026).
-  const fillFromAd = async () => {
-    if (!adText.trim()) { toast.error(t('wizard.pasteAdEmpty', 'Paste your ad first')); return; }
+  // A photo of their flyer works too (Tzvi, 7 Nov 2026), shrunk first: a phone photo is often too big to send.
+  const fillFromAd = async (flyer = null) => {
+    if (!flyer && !adText.trim()) { toast.error(t('wizard.pasteAdEmpty', 'Paste your ad first')); return; }
     setAdReading(true);
     try {
-      const { data } = await axios.post(`${API}/marketplace/ad/extract`, { text: adText }, {
+      const body = new FormData();
+      if (adText.trim()) body.append('text', adText);
+      const sent = flyer ? await shrinkPhoto(flyer) : null;
+      if (sent) body.append('file', sent, 'flyer.jpg');
+      const { data } = await axios.post(`${API}/marketplace/ad/extract`, body, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const type = data.gig_type || form.gig_type;
@@ -467,7 +501,19 @@ const CreateGig = () => {
         }
         return next;
       });
-      if (data.business_name && firstBusiness && !bizName.trim()) setBizName(data.business_name);
+      // Read now, not when the button was pressed: the businesses may have loaded while the flyer was read.
+      const ex = existingRef.current;
+      const first = ex !== null && ex.length === 0;
+      const dest = ex && (ex.find((x) => x.id === targetBusinessId) || ex[0]);
+      if (data.business_name && first) setBizName((n) => (n.trim() ? n : data.business_name));
+      // The logo on the flyer goes in the logo spot: cut out with a margin, on a square of the flyer's own colour.
+      if (sent && data.logo_box && ex !== null && (first || (dest && !dest.logo_url))) {
+        setLogoUploading(true);
+        logoFromFlyer(sent, data.logo_box)
+          .then((logo) => (logo ? uploadOneFile(logo, API, token).then((url) => setBizLogo((cur) => cur || url)) : null))
+          .catch(() => {})
+          .finally(() => setLogoUploading(false));
+      }
       setAdText('');
       toast.success(t('wizard.pasteAdDone', 'Filled in. Check each step and add your photos.'));
     } catch (err) {
@@ -538,7 +584,9 @@ const CreateGig = () => {
 
   const canNext = () => {
     // screen 1: type, title, category
-    if (step === 1) return !!form.gig_type && !!form.title.trim() && !!form.category;
+    // A first business needs its name: left blank it used to be named after the person (Tzvi, 7 Nov 2026,
+    // M and N Jewelry's address read "mordechai-weissman").
+    if (step === 1) return !!form.gig_type && !!form.title.trim() && !!form.category && !(firstBusiness && bizName.trim().length < 2);
     // screen 2: description, then the primary list (products or tiers)
     if (step === 2) {
       if (form.description.trim().length <= 10) return false;
@@ -586,6 +634,7 @@ const CreateGig = () => {
       if (!form.gig_type) return t('wizard.reasonType', 'Pick a listing type to continue.');
       if (!form.title.trim()) return t('wizard.reasonTitle', 'Add a title above.');
       if (!form.category) return t('wizard.reasonCategory', 'Pick a category above.');
+      if (firstBusiness && bizName.trim().length < 2) return t('wizard.reasonBizName', 'Add your business name above.');
     }
     if (step === 2) {
       if (form.description.trim().length <= 10) return t('wizard.reasonDescription', 'Write at least 10 characters describing what you offer.');
@@ -798,7 +847,7 @@ const CreateGig = () => {
               <div>
                 <h2 className="text-base font-semibold">{t('wizard.pasteAdTitle', 'Already advertised somewhere?')}</h2>
                 <p className="text-sm text-gray-600">
-                  {t('wizard.pasteAdBody', "Paste your post from Facebook, Instagram, WhatsApp or your website and we'll fill in the form for you. Check it, add photos, and you're done.")}
+                  {t('wizard.pasteAdBody', "Paste your post from Facebook, Instagram, WhatsApp or your website, or add a photo of your flyer, and we'll fill in the form for you. Check it, add photos, and you're done.")}
                 </p>
               </div>
             </div>
@@ -812,10 +861,16 @@ const CreateGig = () => {
               className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-[var(--brand-primary)]"
               data-testid="wizard-paste-ad-input"
             />
-            <div className="flex justify-end mt-2">
+            <div className="flex flex-wrap items-center justify-end gap-2 mt-2">
+              <label className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold border border-[var(--brand-border)] bg-white cursor-pointer ${adReading ? 'opacity-50 pointer-events-none' : ''}`} data-testid="wizard-flyer-btn">
+                <Camera size={14} />
+                {t('wizard.pasteAdFlyer', 'Add a photo of your flyer')}
+                <input type="file" accept="image/*" className="sr-only" data-testid="wizard-flyer-input"
+                  onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) fillFromAd(f); }} />
+              </label>
               <button
                 type="button"
-                onClick={fillFromAd}
+                onClick={() => fillFromAd()}
                 disabled={adReading || !adText.trim()}
                 className="btn-primary px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
                 data-testid="wizard-paste-ad-btn"
