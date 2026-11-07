@@ -72,7 +72,7 @@ async def admin_gigs(
         prices = [t.get("price") for t in tiers if t.get("price") is not None]
         products = g.get("products") or []
         if not prices and products:
-            prices = [p.get("price") for p in products if p.get("price") is not None]
+            prices = [p.get("price") for p in products if p.get("price") is not None and p.get("price_kind") != "quote"]
         biz = businesses.get(g.get("business_id")) or {}
         out.append({
             "id": g["_id"],

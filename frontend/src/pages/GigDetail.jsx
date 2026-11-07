@@ -16,6 +16,7 @@ import DiscountCodeInput, { discountOn } from '../components/forms/DiscountCodeI
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import WaitlistForm from '../components/bookings/WaitlistForm';
 import QuoteRequest from '../components/bookings/QuoteRequest';
+import { priceText, kindOf } from '../components/forms/PriceKind';
 import SessionDates from '../components/bookings/SessionDates';
 import { useTranslation } from 'react-i18next';
 import DateField from '../components/common/DateField';
@@ -24,7 +25,7 @@ import axios from 'axios';
 import { FormConsent } from '../components/common/LoadState';
 import { apiErrorMessage } from '../utils/apiError';
 import { toast } from 'sonner';
-import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera, ChevronLeft, ChevronRight, X, ShoppingBag } from 'lucide-react';
+import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera, ChevronLeft, ChevronRight, X, ShoppingBag, Calculator } from 'lucide-react';
 // The shared calendar handles its own language, direction and
 // screen-reader labels — see components/ui/calendar.jsx.
 import { visitorHeaders } from '../utils/visitorId';
@@ -363,6 +364,13 @@ const GigDetail = () => {
   const [gig, setGig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tier, setTier] = useState(null);
+  // A product priced on request whose "Ask for a price" was tapped, here or on the order form (?ask=).
+  const [askProduct, setAskProduct] = useState(null);
+  useEffect(() => {
+    const want = new URLSearchParams(window.location.search).get('ask');
+    const hit = want && (gig?.products || []).find((x) => x.id === want);
+    if (hit) { setAskProduct(hit); setTimeout(() => document.getElementById('ask-price')?.scrollIntoView({ block: 'center' }), 400); }
+  }, [gig]);
   const [showBook, setShowBook] = useState(false);
   // Lightbox — full-screen carousel. `lightboxIndex` is null when closed;
   // an integer when open (index into `activeGallery`).
@@ -789,7 +797,7 @@ const GigDetail = () => {
           // anchors the rest; UI audit 24 Sep).
           const offers = cheapestFirst(items, (it) => it.price).map((it) => ({
             name: it.name,
-            price: Number(it.price) > 0 ? money(it.price, it.currency || 'ILS') : null,
+            price: Number(it.price) > 0 ? (isStore ? priceText(t, it) : money(it.price, it.currency || 'ILS')) : null,
           }));
           const toBooking = () => document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           const primary = view.action === 'order' && isStore
@@ -1050,7 +1058,7 @@ const GigDetail = () => {
                       // product the shopper picked in the sidebar.
                       if (useWhatsApp) {
                         const link = `${window.location.origin}/businesses/${gig.id}`;
-                        const msg = `Hi! I'm interested in "${p.name}" (${psym}${Number(p.price).toLocaleString()}) from your ${displayTitle} store on MyIsraelRental.\n${link}`;
+                        const msg = `Hi! I'm interested in "${p.name}" (${priceText(t, p)}) from your ${displayTitle} store on MyIsraelRental.\n${link}`;
                         if (openWhatsApp(msg)) return;
                       }
                       // Select the product, then the site chat - NOT the
@@ -1095,7 +1103,7 @@ const GigDetail = () => {
                         <div className="p-2.5 space-y-1.5">
                           <p className="text-sm font-semibold text-gray-900 line-clamp-1">{p.name}</p>
                           <div className="flex items-baseline justify-between gap-2">
-                            <p className="text-sm text-[var(--brand-primary)] font-bold">{psym}{Number(p.price).toLocaleString()}</p>
+                            <p className="text-sm text-[var(--brand-primary)] font-bold" data-testid={`gig-product-price-${i}`}>{priceText(t, p)}</p>
                             {!p.in_stock && <p className="text-[10px] text-red-500 font-semibold">{t("sweep.outOfStock", "Out of stock")}</p>}
                           </div>
                           <button
@@ -1106,9 +1114,15 @@ const GigDetail = () => {
                           >
                             <MessageCircle size={11} /> {t('gigDetail.askAbout', 'Ask about this')} →
                           </button>
+                          {kindOf(p) === 'quote' ? (
+                            <button type="button" onClick={(e) => { e.stopPropagation(); setAskProduct(p); setTimeout(() => document.getElementById('ask-price')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50); }} className="w-full mt-1 inline-flex items-center justify-center gap-1 py-1.5 rounded-md text-[11px] font-semibold" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid={`gig-product-ask-price-${i}`}>
+                              <Calculator size={11} /> {t('priceKind.ask', 'Ask for a price')}
+                            </button>
+                          ) : (
                           <Link to={`/order/${gig.id}?add=${encodeURIComponent(p.id || `idx:${i}`)}`} onClick={(e) => e.stopPropagation()} className="w-full mt-1 inline-flex items-center justify-center gap-1 py-1.5 rounded-md text-[11px] font-semibold" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid={`gig-product-order-${i}`}>
                             <ShoppingBag size={11} /> {t('gigDetail.orderThis', 'Order')}
                           </Link>
+                          )}
                         </div>
                       </div>
                     );
@@ -1279,6 +1293,8 @@ const GigDetail = () => {
               )}
               {/* A job a fixed price cannot cover: ask for a quote (quotes.py). */}
               {!isStore && <QuoteRequest gig={gig} />}
+              {/* A product priced on request (components/forms/PriceKind.jsx): its own price request. */}
+              {isStore && askProduct && <div id="ask-price"><QuoteRequest key={askProduct.id} gig={gig} product={askProduct} onClose={() => setAskProduct(null)} /></div>}
               {/* Present tense on purpose: "never" was a forever-promise
                   the business has not made (Tzvi, 2026-08-18 — a commission
                   may exist one day). Say what is true today, and say it in
@@ -1455,7 +1471,7 @@ const StoreProductList = ({ products, selected, onSelect, testidPrefix = 'gig-pr
         />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-gray-900 truncate">{p.name}</p>
-          <p className="text-sm text-[var(--brand-primary)] font-bold">{sym}{Number(p.price).toLocaleString()}</p>
+          <p className="text-sm text-[var(--brand-primary)] font-bold">{priceText(t, p)}</p>
         </div>
       </button>
     );

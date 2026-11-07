@@ -212,7 +212,8 @@ def _offers(listing: dict) -> list[tuple[str, str, str]]:
         name = str(item.get("name") or "").strip()
         if not name:
             continue
-        rows.append((name, _money(item.get("price"), item.get("currency")), str(item.get("description") or "").strip()))
+        shown = "" if item.get("price_kind") == "quote" else _money(item.get("price"), item.get("currency"))
+        rows.append((name, shown, str(item.get("description") or "").strip()))
     return rows
 
 
@@ -263,7 +264,7 @@ def business_jsonld(data: dict, url: str, reviews: list[dict], lang: str = "en")
             if desc:
                 item["itemOffered"]["description"] = desc[:300]
             for src in (listing.get("tiers") or []) + (listing.get("products") or []):
-                if src.get("name") == offer_name and src.get("price") is not None:
+                if src.get("name") == offer_name and src.get("price") is not None and src.get("price_kind") != "quote":
                     item["price"] = src.get("price")
                     item["priceCurrency"] = (src.get("currency") or "ILS").upper()
                     break

@@ -50,6 +50,7 @@ import PhotoMatch from './PhotoMatch';
 import ProductSuppliers from './ProductSuppliers';
 import WholesaleOffers from './WholesaleOffers';
 import { useTranslation } from 'react-i18next';
+import { PriceKindPicker } from '../forms/PriceKind';
 import { uploadFilesFast, reportUploadFailure } from '../../utils/fastUpload';
 import { productPhotos } from '../../utils/productPhotos';
 import SizeFields, { withSize } from '../marketplace/SizeFields';
@@ -326,7 +327,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       toast.error(t('editListing.needName', 'Every option needs a name.'));
       return;
     }
-    const noPrice = options.find((o) => !(parseFloat(o.price) >= 0));
+    const noPrice = options.find((o) => o.price_kind !== 'quote' && !(parseFloat(o.price) >= 0));
     if (noPrice) {
       toast.error(t('editListing.needPrice', {
         defaultValue: 'Add a price to "{{name}}".',
@@ -405,8 +406,9 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       const rebuilt = options.map((o) => {
         let base = { ...o };
         base.name = String(o.name || '').trim();
-        base.price = parseFloat(o.price);
+        base.price = o.price_kind === 'quote' ? 0 : parseFloat(o.price);
         if (isStore) {
+          if (o.price_kind && o.price_kind !== 'fixed') base.price_kind = o.price_kind; else if ('price_kind' in o) base.price_kind = 'fixed';
           base.images = o.photos || [];
           base.image = null;
           base = withSize(base, o);
@@ -421,7 +423,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
           const group = String(o.group || '').trim();
           base.group = group || null;
           const to = parseFloat(o.price_to);
-          base.price_to = Number.isFinite(to) && to > base.price ? to : null;
+          base.price_to = o.price_kind !== 'quote' && Number.isFinite(to) && to > base.price ? to : null;
         } else {
           base.images = o.photos || [];
         }
@@ -862,17 +864,25 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                     aria-label={t('editListing.optionName', 'Option name')}
                     data-testid={`edit-listing-name-${i}`}
                   />
+                  {o.price_kind !== 'quote' && (
                   <input
                     type="number"
                     min="0"
                     value={o.price ?? ''}
                     onChange={(e) => setOption(i, { price: e.target.value })}
+                    placeholder={o.price_kind === 'from' ? t('priceKind.startsAt', 'Starts at') : undefined}
                     className="w-28 px-3 py-2 rounded-lg border bg-white text-sm"
                     style={{ borderColor: 'var(--brand-border)' }}
                     aria-label={t('editListing.optionPrice', 'Price')}
                     data-testid={`edit-listing-price-${i}`}
                   />
+                  )}
                 </div>
+                {isStore && (
+                  <div className="mt-2">
+                    <PriceKindPicker value={o.price_kind} onChange={(k) => setOption(i, { price_kind: k })} testid={`edit-listing-kind-${i}`} />
+                  </div>
+                )}
 
                 <div className="flex flex-wrap gap-2">
                   {(o.photos || []).map((url, k) => (
@@ -977,7 +987,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                       aria-label={t('editListing.sectionLabel', 'Section on your page')}
                       data-testid={`edit-listing-group-${i}`}
                     />
-                    <input
+                    {o.price_kind !== 'quote' && <input
                       type="number"
                       min="0"
                       value={o.price_to ?? ''}
@@ -987,7 +997,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                       style={{ borderColor: 'var(--brand-border)' }}
                       aria-label={t('editListing.priceToLabel', 'Highest price, for a price range')}
                       data-testid={`edit-listing-price-to-${i}`}
-                    />
+                    />}
                     <button
                       type="button"
                       onClick={() => duplicateProduct(i)}

@@ -46,6 +46,7 @@ import SizeFields, { sizeValue } from '../components/marketplace/SizeFields';
 import PhoneInput from '../components/common/PhoneInput';
 import { apiErrorMessage } from '../utils/apiError';
 import { useTranslation } from 'react-i18next';
+import { PriceKindPicker } from '../components/forms/PriceKind';
 
 // ---- Gig type registry ------------------------------------------------------
 // Central definition of every gig-type-aware behaviour so the wizard, the
@@ -88,8 +89,10 @@ const emptyTierFor = (type, prevCurrency = 'ILS') => ({
 });
 
 const emptyProduct = (prevCurrency = 'ILS') => ({
-  name: '', price: '', currency: prevCurrency, description: '', image: '', images: [], in_stock: true,
+  name: '', price: '', price_kind: 'fixed', price_to: '', currency: prevCurrency, description: '', image: '', images: [], in_stock: true,
 });
+// A product priced on request has no price to check (components/forms/PriceKind.jsx).
+const hasPrice = (p) => p.price_kind === 'quote' || parseFloat(p.price) > 0;
 
 // The screen layout a saved draft's step number refers to (see `step` below).
 const DRAFT_LAYOUT = 2;
@@ -546,7 +549,7 @@ const CreateGig = () => {
       if (form.gig_type === 'store') {
         return form.products.length > 0
           && form.products.every((p) => (
-            p.name.trim() && parseFloat(p.price) > 0
+            p.name.trim() && hasPrice(p)
             && (p.image || (p.images || []).length > 0)
           ));
       }
@@ -587,9 +590,9 @@ const CreateGig = () => {
     if (step === 2) {
       if (form.description.trim().length <= 10) return t('wizard.reasonDescription', 'Write at least 10 characters describing what you offer.');
       if (form.gig_type === 'store') {
-        const bad = form.products.find((p) => !p.name.trim() || !(parseFloat(p.price) > 0));
+        const bad = form.products.find((p) => !p.name.trim() || !hasPrice(p));
         if (bad && !bad.name.trim()) return t('wizard.reasonProductName', 'Give every product a name.');
-        if (bad) return t('wizard.reasonProductPrice', 'Every product needs a price greater than 0.');
+        if (bad) return t('priceKind.needPrice', 'Every product needs a price greater than 0, or choose Price on request.');
       } else {
         const bad = form.tiers.find((t) => !t.name.trim() || !(parseFloat(t.price) > 0));
         if (bad && !bad.name.trim()) return t('wizard.reasonTierName', 'Give every service a name (see the highlighted field).');
@@ -675,7 +678,9 @@ const CreateGig = () => {
         })),
         products: form.gig_type === 'store' ? form.products.map((p) => ({
           name: p.name.trim(),
-          price: parseFloat(p.price),
+          price_kind: p.price_kind || 'fixed',
+          price: p.price_kind === 'quote' ? 0 : parseFloat(p.price),
+          price_to: p.price_kind === 'from' && parseFloat(p.price_to) > parseFloat(p.price) ? parseFloat(p.price_to) : null,
           currency: p.currency,
           description: p.description,
           // BOTH fields. The uploader writes the gallery to `images` and
@@ -1227,7 +1232,9 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, onDuplicate, o
               placeholder={t('wizard.productNamePh', 'Product name (e.g. Oak dining table)')}
               className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 text-sm font-semibold focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 placeholder:text-gray-400 placeholder:font-normal"
               data-testid={`wizard-product-name-${i}`} />
+            <PriceKindPicker value={p.price_kind} onChange={(k) => onUpdate(i, { price_kind: k })} testid={`wizard-product-kind-${i}`} />
             <div className="flex gap-2 items-stretch">
+              {p.price_kind !== 'quote' && (<>
               <div className="relative">
                 <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-semibold text-sm">
                   {p.currency === 'USD' ? '$' : '₪'}
@@ -1241,8 +1248,15 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, onDuplicate, o
                 <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400 text-xs">▾</span>
               </div>
               <input type="number" value={p.price} onChange={(e) => onUpdate(i, { price: e.target.value })}
-                placeholder={t("sweep.price", "Price")} className="flex-1 min-w-0 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
+                placeholder={p.price_kind === 'from' ? t('priceKind.startsAt', 'Starts at') : t("sweep.price", "Price")} className="flex-1 min-w-0 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
                 data-testid={`wizard-product-price-${i}`} />
+              {p.price_kind === 'from' && (
+                <input type="number" value={p.price_to || ''} onChange={(e) => onUpdate(i, { price_to: e.target.value })}
+                  placeholder={t('priceKind.upTo', 'Up to (optional)')} aria-label={t('priceKind.upTo', 'Up to (optional)')}
+                  className="w-28 min-w-0 px-3 py-2 rounded-lg border bg-white border-gray-300 text-sm" data-testid={`wizard-product-price-to-${i}`} />
+              )}
+              </>)}
+              {p.price_kind === 'quote' && <span className="flex-1" />}
               {/* Ten of these differ by two fields. */}
               <button type="button" onClick={() => onDuplicate(i)} className="px-2 text-gray-400 hover:text-[var(--brand-primary)]"
                 title={t('wizard.duplicate', 'Make a copy of this one')}

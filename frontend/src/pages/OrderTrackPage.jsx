@@ -153,7 +153,11 @@ export default function OrderTrackPage() {
           ))}
           {data.total != null && (
             <p style={{ color: 'var(--ink)' }}>
-              {t('orders.track.total', 'Total: {{n}}', { n: money(data.total, data.currency) })}
+              {data.price_to_confirm && !data.price_confirmed
+                ? t('priceKind.trackFrom', 'Total, starting at {{n}}. The store will confirm the final price here.', { n: money(data.total, data.currency) })
+                : data.price_to_confirm
+                  ? t('priceKind.trackFinal', 'Final price, confirmed by the store: {{n}}', { n: money(data.total, data.currency) })
+                  : t('orders.track.total', 'Total: {{n}}', { n: money(data.total, data.currency) })}
               {data.paid && <span className="ms-2" style={{ color: 'var(--status-open)' }}>· {t('orders.paidShort', 'paid')}</span>}
             </p>
           )}

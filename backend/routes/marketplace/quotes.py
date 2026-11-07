@@ -40,7 +40,10 @@ MAX_PHOTOS = 6
 
 def quotes_open(gig: dict[str, Any]) -> bool:
     """Whether a listing takes quote requests: its own switch, else on for
-    a service listing (not an appointment calendar or a shop)."""
+    a service listing (not an appointment calendar or a shop). A product
+    priced on request always opens it: asking is the only way to buy it."""
+    if any((p or {}).get("price_kind") == "quote" for p in gig.get("products") or []):
+        return True
     if "quotes_on" in gig and gig["quotes_on"] is not None:
         return bool(gig["quotes_on"])
     return (gig.get("gig_type") or "deliverable") == "deliverable"
@@ -74,6 +77,8 @@ class QuoteIn(BaseModel):
     # questions as stored, so a required one cannot be skipped and an
     # answer to a question that no longer exists is dropped.
     answers: dict[str, Any] = Field(default_factory=dict)
+    # The product priced on request this is about, from its "Ask for a price".
+    product_id: Optional[str] = Field(None, max_length=40)
 
 
 def _public(q: dict[str, Any], gig: dict[str, Any], biz: dict[str, Any]) -> dict[str, Any]:
@@ -81,6 +86,7 @@ def _public(q: dict[str, Any], gig: dict[str, Any], biz: dict[str, Any]) -> dict
         "business": {"name": biz.get("name") or "", "name_he": biz.get("name_he"), "slug": biz.get("slug"), "logo_url": biz.get("logo_url")},
         "gig_title": gig.get("title") or "", "gig_title_he": gig.get("title_he"),
         "description": q["description"], "photos": q.get("photos") or [], "preferred_date": q.get("preferred_date"),
+        "product_name": (q.get("product") or {}).get("name"),
         "area": q.get("area"), "status": q["status"], "quote": q.get("quote"), "created_at": q.get("created_at"),
         # A price the business sent first: the page says "A price from",
         # not "Your quote request to".
@@ -114,6 +120,7 @@ async def request_quote(gig_id: str, body: QuoteIn, request: Request, viewer=Dep
         "_id": str(uuid.uuid4()), "gig_id": gig_id, "business_id": gig.get("business_id"),
         "provider_user_id": gig.get("provider_user_id"), "customer_user_id": (viewer or {}).get("user_id"),
         "description": body.description.strip(), "photos": body.photos, "preferred_date": body.preferred_date,
+        "product": next(({"id": p.get("id"), "name": p.get("name")} for p in gig.get("products") or [] if body.product_id and p.get("id") == body.product_id), None),
         "area": (body.area or "").strip() or None, "name": body.name.strip(), "phone": phone, "email": email,
         "lang": body.lang or "en", "status": "new", "quote": None,
         # Stored WITH a copy of each question, so renaming or removing one
@@ -255,6 +262,7 @@ async def answer_quote(token: str, body: Answer, request: Request):
 
 def _row(q: dict[str, Any], titles: dict[str, str]) -> dict[str, Any]:
     return {"id": q["_id"], "gig_id": q["gig_id"], "gig_title": titles.get(q["gig_id"], ""), "description": q["description"],
+            "product_name": (q.get("product") or {}).get("name"),
             "photos": q.get("photos") or [], "preferred_date": q.get("preferred_date"), "area": q.get("area"),
             "name": q["name"], "phone": q.get("phone"), "email": q.get("email"), "status": q["status"],
             "answers": q.get("answers") or [],

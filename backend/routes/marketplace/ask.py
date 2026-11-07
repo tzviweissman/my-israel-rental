@@ -65,7 +65,7 @@ async def facts_for(biz: dict[str, Any]) -> str:
         if g.get("tiers"):
             s["prices"] = [_pick(t, ("name", "price", "description")) for t in g["tiers"][:10]]
         if g.get("products"):
-            s["products"] = [_pick(p, ("name", "price", "currency", "description", "in_stock")) for p in g["products"][:60]]
+            s["products"] = [_pick(p, ("name", "price", "price_kind", "price_to", "currency", "description", "in_stock")) for p in g["products"][:60]]
         if g.get("faqs"):
             s["faqs"] = g["faqs"][:20]
         services.append(s)

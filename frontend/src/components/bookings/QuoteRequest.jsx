@@ -19,14 +19,16 @@ const MAX = 6;
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 
-export const quotesOpen = (gig) => (gig?.quotes_on === true || gig?.quotes_on === false
-  ? gig.quotes_on : (gig?.gig_type || 'deliverable') === 'deliverable');
+// A product priced on request always opens it (backend quotes.py quotes_open).
+export const quotesOpen = (gig) => ((gig?.products || []).some((p) => p?.price_kind === 'quote') || (gig?.quotes_on === true || gig?.quotes_on === false
+  ? gig.quotes_on : (gig?.gig_type || 'deliverable') === 'deliverable'));
 
-export default function QuoteRequest({ gig }) {
+/** `product`: a product priced on request; the form opens for it, says which, and sends its id. */
+export default function QuoteRequest({ gig, product = null, onClose = null }) {
   const { t, i18n } = useTranslation();
   const { user } = useContext(AuthContext) || {};
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!!product);
   const [f, setF] = useState({ description: '', preferred_date: '', area: '', name: user?.name || '', phone: user?.whatsapp_number || user?.phone || '', email: user?.email || '' });
   const [photos, setPhotos] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -66,6 +68,7 @@ export default function QuoteRequest({ gig }) {
         name: f.name.trim(), phone: f.phone.trim() || null, email: f.email.trim() || null,
         lang: String(i18n.language || 'en').startsWith('he') ? 'he' : 'en',
         answers,
+        product_id: product ? product.id : undefined,
       });
       toast.success(t('quote.sent', 'Sent. The business will reply with a price.'));
       navigate(data.track_path);
@@ -85,8 +88,8 @@ export default function QuoteRequest({ gig }) {
   return (
     <form onSubmit={send} className="mt-3 rounded-xl border p-3 space-y-3 text-start" style={{ borderColor: 'var(--brand-border)' }} data-testid="quote-form">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-bold" style={{ color: 'var(--ink)' }}>{t('quote.title', 'Get a quote')}</p>
-        <button type="button" onClick={() => setOpen(false)} className="grid place-content-center w-9 h-9" aria-label={t('orders.close', 'Close')}><X size={16} /></button>
+        <p className="text-sm font-bold" style={{ color: 'var(--ink)' }} dir="auto">{product ? t('priceKind.askFor', 'Ask for a price: {{name}}', { name: product.name }) : t('quote.title', 'Get a quote')}</p>
+        <button type="button" onClick={() => { setOpen(false); if (onClose) onClose(); }} className="grid place-content-center w-9 h-9" aria-label={t('orders.close', 'Close')}><X size={16} /></button>
       </div>
       <label className="block text-xs font-semibold" style={{ color: 'var(--brand-muted)' }}>
         {t('quote.what', 'What needs doing?')}

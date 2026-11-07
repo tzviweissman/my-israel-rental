@@ -39,6 +39,7 @@ function basketId(gigId, fresh = false) {
 const EMAIL_OK = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { priceText, kindOf } from '../components/forms/PriceKind';
 import { PageLoading, LoadFailed, FormConsent } from '../components/common/LoadState';
 import { apiErrorMessage } from '../utils/apiError';
 import { toast } from 'sonner';
@@ -201,6 +202,7 @@ export default function OrderPage() {
     }))
     : [{ key: p.id, product: p, option: null, name: p.name, price: p.price }]);
   const lines = products.flatMap(rowsOf).filter((r) => (qty[r.key] || 0) > 0).map((r) => ({ ...r, qty: qty[r.key] }));
+  const fromLines = lines.filter((l) => kindOf(l.product) === 'from');
   const subtotal = lines.reduce((s, l) => s + Number(l.price || 0) * l.qty, 0);
   // A counted product (backend stock.py) caps the quantity across its options.
   const maxFor = (p, key) => (p.stock === null || p.stock === undefined ? 99
@@ -417,19 +419,21 @@ export default function OrderPage() {
                     <div className="min-w-0 flex-1">
                       <div className="text-sm font-semibold" dir="auto" style={{ color: 'var(--ink)' }}>{p.name}</div>
                       <div className="text-xs" style={{ color: 'var(--brand-muted)' }}>
-                        {rows[0].option ? '' : money(p.price, p.currency || currency)}{p.description ? `${rows[0].option ? '' : ' · '}${p.description}` : ''}
+                        {rows[0].option ? '' : priceText(t, p, p.currency || currency)}{p.description ? `${rows[0].option ? '' : ' · '}${p.description}` : ''}
                         {few && <span data-testid={`order-left-${p.id}`}> · {t('order.left', '{{count}} left', { count: p.stock })}</span>}
                         {p.available_until && <span data-testid={`order-until-${p.id}`}> · {t('season.until', 'Order by {{d}}', { d: new Date(`${p.available_until}T12:00:00`).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' }) })}</span>}
                       </div>
                     </div>
-                    {!rows[0].option && stepper(rows[0])}
+                    {kindOf(p) === 'quote' ? (
+                      <Link to={`/services/gig/${gigId}?ask=${encodeURIComponent(p.id)}`} className="shrink-0 px-3 min-h-[44px] inline-flex items-center rounded-full border text-xs font-semibold" style={{ borderColor: 'var(--ink)', color: 'var(--ink)' }} data-testid={`order-ask-${p.id}`}>{t('priceKind.ask', 'Ask for a price')}</Link>
+                    ) : !rows[0].option && stepper(rows[0])}
                   </div>
-                  {rows[0].option && (
+                  {rows[0].option && kindOf(p) !== 'quote' && (
                     <ul className="mt-1 ps-3 space-y-1">
                       {rows.map((r) => (
                         <li key={r.key} className="flex items-center gap-3" data-testid={`order-option-${r.key}`}>
                           <span className="flex-1 min-w-0 text-sm" dir="auto" style={{ color: 'var(--ink)' }}>{r.option.name}</span>
-                          <span className="text-xs tabular-nums" style={{ color: 'var(--brand-muted)' }}>{money(r.price, p.currency || currency)}</span>
+                          <span className="text-xs tabular-nums" style={{ color: 'var(--brand-muted)' }}>{kindOf(p) === 'from' ? t('priceKind.fromPrice', 'from {{price}}', { price: money(r.price, p.currency || currency) }) : money(r.price, p.currency || currency)}</span>
                           {stepper(r)}
                         </li>
                       ))}
@@ -602,12 +606,13 @@ export default function OrderPage() {
               {lines.map((l) => <li key={l.key} className="flex justify-between"><span dir="auto">{l.qty} × {l.name}</span><span className="tabular-nums">{money(Number(l.price) * l.qty, currency)}</span></li>)}
               {discount > 0 && <li className="flex justify-between" style={{ color: '#1F5F3A' }} data-testid="order-discount"><span>{t('discounts.line', 'Discount {{code}}', { code: code.code })}</span><span className="tabular-nums">−{money(discount, currency)}</span></li>}
               {fee > 0 && <li className="flex justify-between"><span>{t('order.deliveryFee', 'Delivery')}</span><span className="tabular-nums">{money(fee, currency)}</span></li>}
-              <li className="flex justify-between font-bold border-t mt-1 pt-1" style={{ borderColor: 'var(--brand-border)' }}><span>{t('order.total', 'Total')}</span><span className="tabular-nums" data-testid="order-total">{money(total, currency)}</span></li>
+              <li className="flex justify-between font-bold border-t mt-1 pt-1" style={{ borderColor: 'var(--brand-border)' }}><span>{fromLines.length ? t('priceKind.totalFrom', 'Total, starting at') : t('order.total', 'Total')}</span><span className="tabular-nums" data-testid="order-total">{money(total, currency)}</span></li>
             </ul>
           )}
           <button type="submit" disabled={!canSubmit || busy} className="w-full inline-flex items-center justify-center gap-2 min-h-[52px] rounded-full text-base font-semibold disabled:opacity-50" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="order-submit">
             {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} {t('order.submit', 'Send my order')}
           </button>
+          {fromLines.length > 0 && <p className="text-xs text-center mt-2" style={{ color: 'var(--ink)' }} data-testid="order-from-note">{t('priceKind.confirmNote', 'The store confirms the final price of {{names}} before making it. You will see it on your order page.', { names: fromLines.map((l) => l.product.name).join(', ') })}</p>}
           {!canSubmit && !busy && missing && <p className="text-xs text-center mt-2" style={{ color: 'var(--ink)' }} data-testid="order-missing">{missing}</p>}
           <p className="text-[11px] text-center mt-2" style={{ color: 'var(--brand-muted)' }}>{t('order.payNote', 'Payment goes to the store directly, not through MyIsraelRental.')}</p>
           <FormConsent className="text-[11px] text-center mt-1" />

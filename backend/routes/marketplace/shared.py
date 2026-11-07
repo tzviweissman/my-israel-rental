@@ -9,7 +9,7 @@ import os
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from fastapi import HTTPException
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -585,7 +585,14 @@ class ProductItem(BaseModel):
     # their listing is next saved.
     id: str = Field(default_factory=lambda: uuid.uuid4().hex[:12])
     name: str
-    price: float
+    # How the business prices it (Tzvi, 7 Nov 2026, custom products):
+    #   fixed  the price is the price (every product before this).
+    #   from   `price` is where it starts; the order is taken at it and the
+    #          business confirms the final price on the order (orders.py).
+    #   quote  no price: the customer asks for one (quotes.py), and the
+    #          order form does not take it. `price` is kept at 0.
+    price_kind: Literal["fixed", "from", "quote"] = "fixed"
+    price: float = 0
     # Optional top of a price range ("$45 to $80"), set by the business;
     # `price` stays the lowest, which is what an order is charged from.
     price_to: Optional[float] = Field(None, ge=0)
@@ -632,6 +639,10 @@ class ProductItem(BaseModel):
     def _counted_stock(self):
         if self.stock == 0:
             self.in_stock = False
+        # ponytail: a fixed price of 0 is not refused here; listings saved before this
+        # may hold a free add-on, and refusing would block every later save of them.
+        if self.price_kind == "quote":
+            self.price, self.price_to = 0, None
         return self
 
 
@@ -993,7 +1004,7 @@ def _cheapest_tier_price(gig: dict[str, Any]) -> Optional[float]:
     prices: list[float] = []
     for t in rows:
         p = t.get("price") if isinstance(t, dict) else None
-        if p is None or p == "":
+        if p is None or p == "" or t.get("price_kind") == "quote":
             continue
         try:
             value = float(p)

@@ -46,6 +46,8 @@ const hasPrice = (r) => {
   // "call for a price" item sitting beside priced ones - counted as free and
   // won every cheapest-option comparison. Rejected before the coercion.
   if (r?.price === null || r?.price === undefined || r?.price === '') return false;
+  // Priced on request (components/forms/PriceKind.jsx): its 0 is not a price.
+  if (r?.price_kind === 'quote') return false;
   return Number.isFinite(Number(r.price));
 };
 
@@ -87,7 +89,7 @@ export const gigPriceParts = (gig, rate = FX_USD_TO_ILS) => {
   }
   return {
     quote: false,
-    from: optionCount > 1,
+    from: optionCount > 1 || row?.price_kind === 'from',
     text: `${sym}${Number(amount).toLocaleString()}`,
     sym,
     currency,

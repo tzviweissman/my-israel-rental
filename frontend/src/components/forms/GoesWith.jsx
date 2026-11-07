@@ -22,7 +22,8 @@ export default function GoesWith({ gigId, products, qty, onAdd, currency }) {
   const picks = useMemo(() => {
     const chosen = new Set(Object.entries(qty).filter(([, n]) => n > 0).map(([k]) => k.split('::')[0]));
     if (!chosen.size) return [];
-    const byId = Object.fromEntries(products.map((p) => [p.id, p]));
+    // Priced on request: asked for, not added to an order.
+    const byId = Object.fromEntries(products.filter((p) => p.price_kind !== 'quote').map((p) => [p.id, p]));
     const out = [];
     for (const id of chosen) {
       const wanted = [...((byId[id] || {}).goes_with || []), ...(map[id] || [])];

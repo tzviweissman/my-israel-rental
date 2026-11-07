@@ -446,6 +446,8 @@ async def update_order(order_id: str, payload: OrderPatch, user=Depends(verify_t
         update["total"] = None
     elif payload.total is not None:
         update["total"] = payload.total
+        if order.get("price_to_confirm"):
+            update["price_confirmed"] = True
     if payload.address is not None:
         update["address"] = payload.address or None
 
@@ -1665,6 +1667,9 @@ async def track_order(token: str, request: Request):
         "address": o.get("address"),
         "total": o.get("total"),
         "currency": o.get("currency") or "ILS",
+        # A "from" product: the total is a starting price until the store confirms it.
+        "price_to_confirm": bool(o.get("price_to_confirm")),
+        "price_confirmed": bool(o.get("price_confirmed")),
         "status": o.get("status"),
         "status_changed_at": o.get("status_changed_at"),
         # Only the fact of it, never the courier's own details.
@@ -2334,6 +2339,8 @@ def _products_for_order(gig: dict[str, Any]) -> list[dict[str, Any]]:
             "id": p.get("id") or f"idx:{i}",
             "name": p.get("name"),
             "price": p.get("price"),
+            "price_kind": p.get("price_kind") or "fixed",
+            "price_to": p.get("price_to"),
             "currency": p.get("currency") or "ILS",
             "description": p.get("description") or "",
             "image": (p.get("images") or [None])[0] or p.get("image"),
@@ -2526,11 +2533,17 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     # in the store's currency. One currency per order: a total is one number.
     products = {p["id"]: p for p in _products_for_order(gig)}
     lines, subtotal = [], 0.0
+    to_confirm = False
     currencies: set[str] = set()
     for ln in payload.lines:
         prod = products.get(ln.product_id)
         if not prod or not prod.get("in_stock", True):
             raise HTTPException(status_code=400, detail="One of those items is no longer available")
+        if prod.get("price_kind") == "quote":
+            he = (payload.lang or "").startswith("he")
+            raise HTTPException(status_code=400, detail=f"ל{prod['name']} צריך לבקש הצעת מחיר" if he else f"Ask for a price for {prod['name']}")
+        if prod.get("price_kind") == "from":
+            to_confirm = True
         price, name, opt = float(prod.get("price") or 0), prod["name"], None
         if prod.get("options"):
             opt = next((o for o in prod["options"] if o["id"] == ln.option_id), None)
@@ -2611,6 +2624,8 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     total = round(subtotal - (discount["amount"] if discount else 0) + fee, 2) if lines else None
     if discount:
         notes = (notes + "\n" if notes else "") + f"Discount {discount['code']}: -{sym}{discount['amount']:g}"
+    if to_confirm:
+        notes = (notes + "\n" if notes else "") + "Priced from: confirm the final price on this order"
 
     stamp = _now_iso()
     doc = {
@@ -2633,6 +2648,10 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         "pay_by": payload.pay_by or None,
         "answers": answers,
         "discount": discount,
+        # A "from" product: the total is where it starts until the business
+        # sets the final one (update_order), which the customer then sees.
+        "price_to_confirm": to_confirm,
+        "price_confirmed": False,
         "stock_taken": stock_taken,
         "needed_by": needed_by,
         "window": payload.window.model_dump() if payload.window else None,

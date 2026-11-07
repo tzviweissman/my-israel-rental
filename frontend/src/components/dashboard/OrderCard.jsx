@@ -115,8 +115,13 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
                 <Repeat size={11} /> {t('orders.weekly', 'weekly')}
               </span>
             )}
+            {o.price_to_confirm && !o.price_confirmed && (
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: '#FFF4E5', color: '#8A4B00' }} title={t('priceKind.confirmHint', 'Edit the order and set the total to the final price')} data-testid="order-confirm-price">
+                {t('priceKind.confirmBadge', 'Confirm the final price')}
+              </span>
+            )}
             {o.total != null && (
-              <span className="text-[12px] font-semibold ms-auto" style={{ color: 'var(--ink)' }}>{money(o.total, o.currency)}</span>
+              <span className="text-[12px] font-semibold ms-auto" style={{ color: 'var(--ink)' }}>{o.price_to_confirm && !o.price_confirmed ? t('priceKind.fromPrice', 'from {{price}}', { price: money(o.total, o.currency) }) : money(o.total, o.currency)}</span>
             )}
           </div>
           {(o.courier || o.payment?.method || o.delivery?.delivered_at || o.delivery?.failed_at) && (

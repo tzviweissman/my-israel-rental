@@ -42,11 +42,13 @@
     var sym = SYM[cur] || '';
     return sym ? sym + s : s + ' ' + (cur || '');
   }
+  var HE = (document.documentElement.lang || '').indexOf('he') === 0;
   function priceText(p, ask) {
-    // a price of 0 means the business has not set one: ask, never "$0"
-    if (!(Number(p.price) > 0)) return ask;
+    // a price of 0, or a product priced on request (price_kind quote): ask, never "$0"
+    if (p.price_kind === 'quote' || !(Number(p.price) > 0)) return ask;
     var t = money(p.price, p.currency);
-    if (p.price_to != null && Number(p.price_to) > Number(p.price)) t += ' to ' + money(p.price_to, p.currency);
+    if (p.price_to != null && Number(p.price_to) > Number(p.price)) t += (HE ? ' עד ' : ' to ') + money(p.price_to, p.currency);
+    else if (p.price_kind === 'from') t = (HE ? 'החל מ-' : 'from ') + t;
     return t;
   }
 
@@ -89,7 +91,7 @@
         if (img) { if (p.image) { img.src = p.image; img.alt = p.name; } else img.remove(); }
         var a = it.querySelector('[data-f="link"]');
         if (a) {
-          if (p.in_stock && href) {
+          if (p.in_stock && href && p.price_kind !== 'quote') {
             // the page's own order page, with this item added
             a.href = href.replace('{name}', encodeURIComponent(p.name));
             a.setAttribute('aria-label', p.name + ', ' + price + '. Add it to your order');

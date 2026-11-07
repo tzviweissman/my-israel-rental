@@ -294,12 +294,15 @@ async def get_page_edits(slug_or_id: str):
                     "name": name,
                     "price": price,
                     "price_to": p.get("price_to"),
+                    "price_kind": p.get("price_kind") or "fixed",
                     "currency": (p.get("currency") or "ILS").upper(),
                     "image": (p.get("images") or [None])[0] or p.get("image"),
                     "group": (p.get("group") or "").strip() or None,
                     "in_stock": bool(p.get("in_stock", True)),
                 })
         for row in (g.get("products") or []) + (g.get("tiers") or []):
+            if row.get("price_kind") == "quote":
+                continue
             name = (row.get("name") or row.get("title") or "").strip()
             try:
                 price = float(row.get("price"))

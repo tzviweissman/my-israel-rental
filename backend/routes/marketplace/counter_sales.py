@@ -63,7 +63,7 @@ async def counter_catalogue(business_id: str, user=Depends(verify_token)):
     """The store's list for the counter screen, with stock left."""
     await _owned_business(business_id, user)
     return {"stores": [{"id": g["_id"], "title": g.get("title"), "title_he": g.get("title_he"),
-                        "products": _products_for_order(g)} for g in await _stores(business_id)]}
+                        "products": [p for p in _products_for_order(g) if p.get("price_kind") != "quote"]} for g in await _stores(business_id)]}
 
 
 @router.post("/businesses/{business_id}/counter-sales")
@@ -83,6 +83,8 @@ async def record_sale(business_id: str, payload: CounterSaleIn, user=Depends(ver
             prod = products.get(ln.product_id)
             if not prod:
                 raise HTTPException(status_code=400, detail="One of those items is not in the shop's list any more")
+            if prod.get("price_kind") == "quote":
+                raise HTTPException(status_code=400, detail=f"{prod['name']} has no price: it is priced on request")
             price, name, opt = float(prod.get("price") or 0), prod["name"], None
             if prod.get("options"):
                 opt = next((o for o in prod["options"] if o["id"] == ln.option_id), None)

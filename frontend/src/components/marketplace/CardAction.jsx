@@ -20,6 +20,7 @@ import { AuthContext } from '../../App';
 import { BookingForm, AppointmentPicker, TierList } from '../../pages/GigDetail';
 import FitImage from '../common/FitImage';
 import { money } from '../../utils/currency';
+import { priceText as kindPrice, kindOf } from '../forms/PriceKind';
 import { orderHref } from '../../utils/storeBasket';
 
 /** What the card's button does for this item. */
@@ -53,7 +54,7 @@ const pid = (p, i) => p.id || `idx:${i}`;
 const withIds = (gig) => (gig.products || []).map((p, i) => ({ ...p, id: pid(p, i) }));
 
 const priceText = (p, t) => (p.price === null || p.price === undefined || p.price === ''
-  ? t('services.askForQuote', 'Ask for a quote') : money(p.price, p.currency));
+  ? t('services.askForQuote', 'Ask for a quote') : kindPrice(t, p));
 
 function Sheet({ title, onClose, children, testid }) {
   return (
@@ -92,8 +93,12 @@ function ProductSheet({ gig, basket, title, onClose, t }) {
                 <p className="text-sm font-semibold truncate" dir="auto" style={{ color: 'var(--ink)' }}>{p.name}</p>
                 <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{out ? t('basket.outOfStock', 'Out of stock') : priceText(p, t)}</p>
               </div>
+              {kindOf(p) === 'quote' ? (
+                <a href={`/services/gig/${gig.id}?ask=${encodeURIComponent(p.id)}`} className="shrink-0 px-3 min-h-[40px] inline-flex items-center rounded-full border text-xs font-semibold" style={{ borderColor: 'var(--ink)', color: 'var(--ink)' }} data-testid={`product-ask-${p.id}`}>{t('priceKind.ask', 'Ask for a price')}</a>
+              ) : (
               <QtyStepper value={qty[p.id] || 0} disabled={out} t={t} testid={`product-qty-${p.id}`}
                 onChange={(n) => setQty((q) => ({ ...q, [p.id]: Math.max(0, Math.min(99, n)) }))} />
+              )}
             </li>
           );
         })}
@@ -151,6 +156,13 @@ export default function CardAction({ gig, basket, t, title, onMessage }) {
     const p = withIds(gig)[0];
     const inBasket = (basket.items[gig.id] || {})[p.id] || 0;
     const out = p.in_stock === false;
+    if (kindOf(p) === 'quote') {
+      return (
+        <a href={`/services/gig/${gig.id}?ask=${encodeURIComponent(p.id)}`} className={`${btn} w-full`} style={solid} data-testid={`card-ask-${gig.id}`} data-kind="ask">
+          <MessageCircle size={14} aria-hidden="true" /> {t('priceKind.ask', 'Ask for a price')}
+        </a>
+      );
+    }
     return (
       <div className="flex items-center justify-between gap-2" data-testid={`card-action-${gig.id}`} data-kind="product">
         <QtyStepper value={inBasket} disabled={out} t={t} testid={`card-qty-${gig.id}`} onChange={(n) => basket.setQty(gig.id, p.id, n)} />
