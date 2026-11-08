@@ -291,6 +291,7 @@ R3w.3 | Generated food is lit from the side and behind with the camera side dark
 R3w.4 | The film's start and end pictures were right before any clip was made; each clip was made once at full quality (a draft only where get_cost showed it under a third of the price); simple motion (a growing crack, push-in, drift, holds) is done in code; every clip judged at 4+ fps | 3w.10 | LOOK: gen/ report or the generation log; n/a with no generated film
 R3w.5 | No bite, chew or tear is shown in motion unless Tzvi approved that take; otherwise the film cuts to the result | 3w.12 | LOOK; n/a if the film has none
 R3w.6 | A scroll film's scrub ends where the clip's motion ends (check-clip's figure), the last hold is short, and its last frame is the picture the next section shows | 3w.13, 3w.14 | LOOK: scroll the film's end on a laptop; n/a with no scroll film
+R3w.7 | Generated places and materials look photographed: no dune-smooth hills, model villages, stones in tidy equal rows or flat soft light, checked at full size beside a real photograph of that place or material before any clip | 3w.15 | LOOK: full-size crop beside the real photograph named in the brief's Looks real section; n/a with no generated place or material
 
 ## 8c. From the ten design videos and five real sites (1 Nov 2026)
 

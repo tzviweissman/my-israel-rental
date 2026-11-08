@@ -86,5 +86,11 @@
       "aaron-kaluszyner"
     ]
   },
-  "bulbs": {"what": "the bulbs of a mirror or lamp come on one by one and light the scene; the visitor can switch them", "used_by": ["hadassah-prys"]}
+  "bulbs": {"what": "the bulbs of a mirror or lamp come on one by one and light the scene; the visitor can switch them", "used_by": ["hadassah-prys"]},
+  "wipe": {
+    "what": "a squeegee, cloth or blade wipes a misted or dirty surface clear in strokes to show the scene behind",
+    "used_by": [
+      "rbs-cleaning"
+    ]
+  }
 }

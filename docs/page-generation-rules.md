@@ -1978,6 +1978,20 @@ before paying, frosted or shaded text over film, the phone loop) is not repeated
 14. **The film's last frame is the next section's picture**, so nothing jumps where the film hands over to
     the page. (3 videos.)
 
+**Places and materials that look photographed** (Tzvi, 5 Nov 2026, RBS Cleaning: "the scene and the stone look kind of fake make a more realsitic scene and make sure the rules make this happen in the future"; before and after in `docs/rule-pictures/real-scene-2026-11-05/`)
+
+15. **A generated place or material is checked like a photograph before any clip is made.** Landscapes, views
+    through windows, stone, walls, wood and rooms give themselves away in the same ways: hills smooth as sand
+    dunes, villages like models on a ridge, stones the same size in tidy rows with no gaps or dirt, flat even
+    light, everything soft. Look for those in the still, at full size, in a crop of the most detailed part,
+    beside a real photograph of that same place or material (the brief names it). Any of them means a new still.
+    Words that worked: an ordinary unretouched snapshot from a named real place, deep focus, what is really
+    there (lichen, dirt, dark gaps, weeds, broken terraces, plain apartment blocks), messy and irregular. Words
+    that made it worse: documentary, f/8, fine detail, which came out painted. A still costs about a credit and
+    a clip sixteen, and a fake view fixed after the clips means making the clips again. The brief's "## Looks
+    real" section says which real photograph it was compared with and what was looked at; film-gate refuses a
+    paid clip without it.
+
 ## 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
 
 Four videos: a list of 38 inspiration galleries, a flashlight hero, a 3D product site and brand kits. Notes,
