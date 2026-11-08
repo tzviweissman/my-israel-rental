@@ -3573,7 +3573,9 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
 
   const chip = (on) => `px-3 py-1.5 rounded-full text-xs font-semibold border ${on ? 'text-white border-transparent' : ''}`;
   const chipStyle = (on) => (on ? { background: '#000' } : { borderColor: 'var(--brand-border)', color: 'var(--ink)' });
-  const Chips = ({ value, set, options }) => (
+  // Called as a function, not used as <Chips />: a component defined inside this one is a new type on every
+  // render, so React threw the buttons away and made new ones each time, and a click could land on none.
+  const chips = (value, set, options) => (
     <div className="flex flex-wrap gap-1.5">
       {options.map(([k, label, disabled]) => (
         <button key={k} type="button" disabled={disabled} onClick={() => set(k)} aria-pressed={value === k}
@@ -3631,8 +3633,8 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
         })()}
         <div className="space-y-1.5 mb-4" data-testid="ad-holidays">
           <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.holidayTitle', 'Holiday')}</p>
-          <Chips value={holidayNow || 'noholiday'} set={pickHoliday} options={[
-            ['noholiday', t('ads.noHoliday', 'No holiday')], ...holidays.map((h) => [h, t(`ads.look.${h}`)])]} />
+          {chips(holidayNow || 'noholiday', pickHoliday, [
+            ['noholiday', t('ads.noHoliday', 'No holiday')], ...holidays.map((h) => [h, t(`ads.look.${h}`)])])}
         </div>
         {/* The gallery: every design, already made from this business. */}
         <p className="text-xs font-semibold mb-2" style={{ color: 'var(--ink)' }}>{t('ads.galleryTitle', 'Pick a look. Every ad is made from your own product, name and price.')}</p>
@@ -3804,8 +3806,8 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
             </div>
             <div className="space-y-1.5">
               <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.shape', 'Where will you post it?')}</p>
-              <Chips value={format} set={pickFormat} options={[
-                ['square', t('ads.square', 'Square post')], ['feed', t('ads.feed', 'Facebook / Instagram')], ['story', t('ads.story', 'WhatsApp status / story')]]} />
+              {chips(format, pickFormat, [
+                ['square', t('ads.square', 'Square post')], ['feed', t('ads.feed', 'Facebook / Instagram')], ['story', t('ads.story', 'WhatsApp status / story')]])}
             </div>
             <div className="space-y-1.5">
               {design === 'question' && faqs.length > 0 && (
@@ -3831,7 +3833,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
             </div>
             <div className="space-y-1.5">
               <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.language', 'Language of the ad')}</p>
-              <Chips value={lang} set={setLang} options={[['en', 'English'], ['he', 'עברית']]} />
+              {chips(lang, setLang, [['en', 'English'], ['he', 'עברית']])}
             </div>
             {lineList(words?.people).length > 0 && (
               <div className="space-y-1.5" data-testid="ad-who">

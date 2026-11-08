@@ -329,8 +329,7 @@ const MOVING = async (qrBox) => {
   await p.route('**/api/ads/make', (r) => { const f = fixture('en'); r.fulfill({ json: { ...f, link: { ...f.link, path: `/p/${LONG_NAME}` } } }); });
   await p.route('**/api/ads/cutouts', (r) => r.fulfill({ json: { items: fixture('en').cutouts } }));
   await p.route('**/api/ads/saved**', (r) => (r.request().method() === 'GET' ? r.fulfill({ json: { ads: [] } }) : r.fulfill({ json: { id: 'x' } })));
-  await p.goto(`${SITE}/dashboard?tab=my-businesses&as=owner`, { timeout: 180000 });
-  await p.locator('[data-testid^="business-make-ad-"]').first().click();
+  await p.goto(`${SITE}/dashboard?tab=advertising&as=owner`, { timeout: 180000 });
   await p.locator('[data-testid="ad-gallery"]').waitFor();
   await p.locator('[data-testid="ad-en"]').click();
   await p.waitForFunction(() => document.querySelector('[data-testid="ad-g-behind"] img'));
@@ -346,7 +345,7 @@ const MOVING = async (qrBox) => {
     await p.locator(`[data-testid="ad-g-${k}"]`).click();
     await p.waitForTimeout(900);
     await p.locator('[data-testid="ad-video"]').click();
-    await p.locator('[data-testid="ad-video-preview"]').waitFor();
+    await p.locator('[data-testid="ad-video-preview"]').waitFor({ timeout: 300000 }); // made in the browser: over two minutes on a busy machine
     await p.waitForFunction(() => document.querySelector('[data-testid="ad-video-preview"]').readyState >= 2);
     const qrBox = await p.evaluate(() => {
       const c = document.querySelector('[data-testid="ad-preview"]').getBoundingClientRect();
@@ -387,8 +386,8 @@ await p.evaluate(async () => {
   window.scrollBy(0, c.getBoundingClientRect().top + 300);
   await new Promise((r) => { setTimeout(r, 200); });
 });
-const held = await p.locator('[data-testid="ad-preview"]').evaluate((c) => { const r = c.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; });
-if (!held) fails.push('advertising page: the preview left the screen while scrolling the options');
+const held = await p.locator('[data-testid="ad-preview"]').evaluate((c) => { const r = c.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight ? '' : `top ${Math.round(r.top)}, bottom ${Math.round(r.bottom)} of ${innerHeight}, scrolled ${Math.round(scrollY)}`; });
+if (held) fails.push(`advertising page: the preview left the screen while scrolling the options (${held})`);
 
 // --- the Super Admin Ads area (its own words, in the dashboard's language)
 await freshPage();
