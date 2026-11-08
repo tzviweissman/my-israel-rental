@@ -56,7 +56,7 @@ const b = await chromium.launch();
 // the owner sees; without it, hover-only styles showed outline buttons that
 // no phone ever draws (Michal Yodaiken, 7 Oct 2026).
 const phone = w < 600;
-const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: phone ? 2 : 1, isMobile: phone, hasTouch: phone });
+const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 2, isMobile: phone, hasTouch: phone });
 // Media plays only when we say so: play() is noted, not started, and each
 // frame moves a "playing" video on by exactly one frame. A video the page
 // scrubs itself (setting currentTime from the scroll) is left to the page.
@@ -146,7 +146,11 @@ const shot = async (y = curY) => {
   if (partial && existsSync(f) && !inZone(y)) { pend += dt; return; }
   if (y !== atY) { await p.evaluate((y) => scrollTo(0, y), y); atY = y; }
   await step(dt + pend); pend = 0; redrawn++;
-  writeFileSync(f, Buffer.from((await cdp.send('Page.captureScreenshot', { format: 'jpeg', quality: 92, optimizeForSpeed: true })).data, 'base64'));
+  // Chrome's capture ignores the pixel density unless given a clip with a
+  // scale: without it every video was drawn at half sharpness and the words
+  // looked soft on a phone or a sharp laptop (Tzvi, 7 Nov 2026).
+  const sy = await p.evaluate(() => scrollY);
+  writeFileSync(f, Buffer.from((await cdp.send('Page.captureScreenshot', { format: 'jpeg', quality: 92, optimizeForSpeed: true, clip: { x: 0, y: sy, width: w, height: h, scale: 2 } })).data, 'base64'));
 };
 for (let i = 0; i < holdN; i++) await shot();
 const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
@@ -172,7 +176,7 @@ await ctx.close(); await b.close();
 writeFileSync(planFile, plan);
 
 execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-framerate', String(fps), '-i', join(dir, '%05d.jpg'),
-  '-vf', `setpts=PTS/${SPEED},fps=${fps},scale=trunc(iw/2)*2:trunc(ih/2)*2`, '-c:v', 'libx264', '-crf', '21', '-preset', 'medium',
+  '-vf', `setpts=PTS/${SPEED},fps=${fps},scale=trunc(iw/2)*2:trunc(ih/2)*2`, '-c:v', 'libx264', '-crf', '18', '-preset', 'medium',
   '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', out]);
 const every = Math.max(1, Math.floor(n / 12));
 execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', out, '-vf', `select=not(mod(n\\,${every})),scale=-2:540,tile=6x2`,
