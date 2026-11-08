@@ -718,7 +718,7 @@ make their sites so beautiful: the imagery first, and almost nothing else.
    and grey. **Prices are in the main text colour, bold and large**, never in
    the accent. A word that matters (the thing they sell) may be set apart by
    weight or style in the text colour, at most one per screen. This is the
-   single home of the accent rule. The cream ground + serif + italic word
+   single home of the accent rule. **For a shop, the accent is the product's own colour (3g.19).** The cream ground + serif + italic word
    combination stays banned unless it is their brand (3c.2).
 4. **Every motion has one job**: guide the eye, confirm an action, or reveal
    the next thing. A loop starts and ends on the same frame (no visible
@@ -770,6 +770,7 @@ make their sites so beautiful: the imagery first, and almost nothing else.
       headline.
     - **Trust proof** (a hechsher, "delivered across Israel") is the one short
       line or sits right under the button.
+    - **What it must say or show:** 3g.18.
     - Everything else moves down the page.
 14. **One colour grade across every image.** Every photo and clip on a page
     shares one light and colour mood (warm candlelight, cool morning, soft
@@ -812,6 +813,54 @@ make their sites so beautiful: the imagery first, and almost nothing else.
     effect still needs its reason (3c.9): one that says what a control does
     passes, one that only decorates does not. This is the single home of the
     fresh-search rule; 3c.1, 3e.24, 0b.4 and 8a point here.
+18. **The opening shows what the business offers, before any scroll** (Tzvi, 5 Nov
+    2026, on Aaron Dovid's kumzits headline: "people may think theyre on the wrong
+    site before they even scroll down"). The wow never replaces this: a stranger
+    knows in five seconds what they can get here.
+    - **One kind of offer:** the picture or the words may show it (a doughnut, a
+      pot of bagels). A slogan over a picture that shows something else does not.
+    - **Two or more different kinds, the ones different customers come for**
+      (kumzitzes and guitar lessons, not five flavours of one bun): the headline
+      or other big words name each. It may take 3g.13's 2 to 5 words for each
+      offer; there is still one button, and it opens a page where they choose.
+    - The home page lists the kinds in `<meta name="offers" content="kumzits|guitar lesson">`.
+      `scripts/check-says-offer.mjs` (R3g.18) fails when it is missing, and when a
+      site with two or more kinds does not have each in the big words on the first
+      screen, at a laptop and a phone size.
+    - Worked example: `scrollcraft/builds/aaron-kaluszyner`, Tzvi's headline "Book
+      a kumzits for your (occasion) or your guitar lesson" over the strings. Tried and
+      rejected there: the second offer only in the small facts line (it already was,
+      and it did not help), and a plain "Kumzitzes and guitar lessons" (Tzvi preferred
+      keeping the rotating word). A rotating word may change the occasion, never
+      the offer: the offer you came for may not be showing when you land.
+
+19. **The main button is in the product's own colour** (Tzvi, 8 Nov 2026: "buttons in the products own colors
+    should be a rule", after Bramble, whose bottle label, cap, buttons and ticker are one lime; notes and
+    pictures in `docs/inspo/videos-2026-11-08`). For shops (site-category `food-shop` or `fashion-shop`) the
+    accent of 3g.3 is not chosen, it is taken from the product: the food itself, its jar, label, box or
+    ribbon, in the business's own photo. A lighter or deeper shade of that colour that is in the same photo
+    counts. Other categories (services, trainers, beauty) choose their accent as before.
+    **How:**
+    1. Pick the product photo the page sells with (the hero product, a jar, a bowl). Run
+       `node scripts/check-button-colour.mjs --suggest <photo url>`: it prints the photo's strongest colours
+       (a plain backdrop is left out) and whether white or ink text reads on each.
+    2. Choose one that is the product, not the table or the wall, and write it in BRAND.md (3x.7) and on the
+       home page: `<meta name="product-colour" content="#b67534" data-from="assets/bottles.webp">`.
+    3. Every filled button whose words say order, book or shop uses it (or a shade of it within 16), with
+       text reading 4.5:1 on it.
+    4. **The button must stand out from what is right behind it, 3:1.** A colour that is the product can
+       still vanish: on The Brown Box an acai-purple button sank into the dark acai photo (1.4:1) and a granola
+       gold one into the yellow palm leaves (1.7:1). Then use a lighter or deeper shade from the photo, or
+       move the button onto a plain part of the screen.
+    **Worked example:** The Whipped Cup (rena-lipschitz), caramel #b67534 from its own coffee in
+    `assets/bottles.webp` with ink text: passes on phone and laptop. The paler caramel #cf9a6a from the same
+    photo failed on the light pink menu bar (2.2:1), so the deeper one was used everywhere. Pictures:
+    `docs/inspo/videos-2026-11-08/button-colour-*-before-after.jpg`.
+    **Check:** `check-button-colour.mjs` (rule R3g.19), run by publish-page. It fails with no meta, a colour
+    that is under 1% of the named photo (an invented colour), a main button more than 16 away, text under
+    4.5:1, or a button under 3:1 against what is behind it. Sites published before 8 Nov 2026 are not held to
+    it. Tried on the 17 live sites: American Crust, Bake Away and The Gift Boutique already use a product
+    colour; The Brown Box, The Whipped Cup and LS Fruit Platter's main button do not. None was changed.
 
 ## 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
 
@@ -1957,7 +2006,8 @@ picks from by what the business has. Items 5 and 6 are occasional touches. Item 
 6. **One sentence that lights up as you read**, word by word from grey to ink as it scrolls past: at most
    one per site, and not on the site built just before. It is common on AI-built sites. (Video 4.)
 7. **A brand kit before the first picture.** Every paid build keeps `BRAND.md` in its folder, written
-   and shown to Tzvi before any picture is generated: the colours (each with its use), the two fonts,
+   and shown to Tzvi before any picture is generated: the colours (each with its use; for a shop the button
+   colour is the product's own, with the photo it came from, 3g.19), the two fonts,
    the logo versions (on light and on dark), and the textures or backgrounds, generated in the brand's
    colours from the owner's own photos if needed, and a **Design bans** list: looks this site must not
    use, starting from the bans in 3c and grown with every look Tzvi turns down on it. Every picture and
