@@ -1,0 +1,13 @@
+[
+ {
+  "name": "Gifted Israel",
+  "price": 1.0,
+  "currency": "ILS",
+  "description": "For all your gifting needs!\nGiftedIsrael.com",
+  "image": null,
+  "images": [
+   "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1787911558/myisraelrental/iq6t8mgwptotx0n9vhau.jpg"
+  ],
+  "in_stock": true
+ }
+]

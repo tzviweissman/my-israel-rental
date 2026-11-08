@@ -14,6 +14,9 @@
  * fails:
  *   JUMP   more than 55% of a switch's change happens between two frames
  *          (an instant swap; a crossfade or spread is spread over many)
+ *   (A choice inside [data-motion-flow] is not judged for FLASH: there the switch IS objects travelling across the
+ *   screen, so every frame in flight looks like neither end. Tzvi allowed it for Gifted Israel's opening, 5 Nov 2026,
+ *   "yes allow it for this opening"; each new use needs his own yes. JUMP still applies.)
  *   FLASH  a frame in the middle of a switch looks like neither the start nor
  *          the end (a blank, or the old picture coming back)
  *   COLOUR the choice recolours the page (its colour is in --c or its own
@@ -73,7 +76,7 @@ for (const url of urls) {
     const at = Date.now() - t0;
     await page.evaluate((i) => document.querySelector(`[data-motion-i="${i}"]`).click(), i);
     await page.waitForTimeout(1900);
-    taps.push({ i, at, colour, label: await page.evaluate((i) => { const b = document.querySelector(`[data-motion-i="${i}"]`); return b.getAttribute('aria-label') || b.textContent.trim().slice(0, 30); }, i) });
+    taps.push({ i, at, colour, flow: await page.evaluate((i) => !!document.querySelector(`[data-motion-i="${i}"]`).closest('[data-motion-flow]'), i), label: await page.evaluate((i) => { const b = document.querySelector(`[data-motion-i="${i}"]`); return b.getAttribute('aria-label') || b.textContent.trim().slice(0, 30); }, i) });
   }
   // two taps in quick succession
   let rapid = null;
@@ -91,17 +94,17 @@ for (const url of urls) {
   const video = fs.readdirSync(dir).filter((f) => f.endsWith('.webm')).map((f) => path.join(dir, f))[0];
   const fr = frames(video);
   const fi = (ms) => Math.max(0, Math.min(fr.length - 1, Math.round(ms / 1000 * FPS)));
-  const judge = (from, to, label) => {
+  const judge = (from, to, label, flow) => {
     const a = fi(from - 120), z = fi(to);
     const total = diff(fr[a], fr[z]); if (total < 1.5) return [];
     let steps = 0, maxStep = 0, out = [];
     for (let k = a + 1; k <= z; k++) { const s = diff(fr[k - 1], fr[k]); steps += s; maxStep = Math.max(maxStep, s); }
     if (steps && maxStep / steps > 0.55 && maxStep > 3) out.push(`JUMP ${label}: ${Math.round(maxStep / steps * 100)}% of the change in one frame (make it a crossfade or a spread)`);
-    for (let k = a + 1; k < z; k++) { const d = diff(fr[k], fr[a]) + diff(fr[k], fr[z]); if (d > total * 1.6 + 4) { out.push(`FLASH ${label}: a frame ${Math.round((k - a) / FPS * 1000)} ms in looks like neither the start nor the end`); break; } }
+    if (!flow) for (let k = a + 1; k < z; k++) { const d = diff(fr[k], fr[a]) + diff(fr[k], fr[z]); if (d > total * 1.6 + 4) { out.push(`FLASH ${label}: a frame ${Math.round((k - a) / FPS * 1000)} ms in looks like neither the start nor the end`); break; } }
     return out;
   };
   for (const t of taps) {
-    const found = judge(t.at, t.at + 1800, `tapping "${t.label}"`);
+    const found = judge(t.at, t.at + 1800, `tapping "${t.label}"`, t.flow);
     // the page ground after the switch: a strip at the left edge, a third down (behind the content)
     const f = fr[fi(t.at + 1800)], px = (x, y) => { const o = (y * SW + x) * 3; return [f[o], f[o + 1], f[o + 2]]; };
     const m = (t.colour.match(/\d+(\.\d+)?/g) || []).map(Number), hex = t.colour.match(/#([0-9a-f]{6})/i);
@@ -123,8 +126,8 @@ for (const url of urls) {
     const near = (f, x, y) => diff(f, x) + diff(f, y) <= diff(x, y) * 1.6 + 4;
     // the same 1.5 floor as a single tap: when neither choice changes the page (Blazin's boards with no
     // listings server on this computer), what moves is the video's own noise on a dark grainy ground, not a flash
-    const still = diff(A, C) < 1.5 && (!B || diff(A, B) < 1.5);
-    if (still) console.log(`note: the two quick taps changed nothing on screen here, so there is no switch to judge  (${url})`);
+    const still = (diff(A, C) < 1.5 && (!B || diff(A, B) < 1.5)) || (first && first.flow);
+    if (still && !(first && first.flow)) console.log(`note: the two quick taps changed nothing on screen here, so there is no switch to judge  (${url})`);
     for (let k = fi(rapid.at) + 1; !still && k < fi(rapid.at + 2100); k++) {
       const f = fr[k];
       if (!near(f, A, C) && !(B && (near(f, A, B) || near(f, B, C)))) { bad += 1; console.log(`FLASH two choices tapped 250 ms apart: a frame ${Math.round((k - fi(rapid.at)) / FPS * 1000)} ms in is between none of the states  (${url})`); break; }

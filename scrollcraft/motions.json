@@ -86,7 +86,12 @@
       "aaron-kaluszyner"
     ]
   },
-  "bulbs": {"what": "the bulbs of a mirror or lamp come on one by one and light the scene; the visitor can switch them", "used_by": ["hadassah-prys"]},
+  "bulbs": {
+    "what": "the bulbs of a mirror or lamp come on one by one and light the scene; the visitor can switch them",
+    "used_by": [
+      "hadassah-prys"
+    ]
+  },
   "wipe": {
     "what": "a squeegee, cloth or blade wipes a misted or dirty surface clear in strokes to show the scene behind",
     "used_by": [
@@ -97,6 +102,18 @@
     "what": "a tiny camera flies low over the product as if it were a landscape, then climbs until the whole product is seen",
     "used_by": [
       "finest-cut"
+    ]
+  },
+  "engrave": {
+    "what": "words are cut into the product, letter by letter, and the visitor can type their own",
+    "used_by": [
+      "gifted-israel"
+    ]
+  },
+  "finder": {
+    "what": "products lie in a pile on the floor; the visitor picks an occasion and those for it rise out and flow into a line",
+    "used_by": [
+      "gifted-israel"
     ]
   }
 }
