@@ -4,6 +4,8 @@ Read 6 Nov 2026 before any idea, for one makeup artist in Jerusalem: one service
 included), a pink script logo and one flyer (a brush and powder, "Now in Jerusalem", "get ready to glow"). I went through
 the README tables and opened the pictures named below myself, on one contact sheet and then singly where cited.
 
+- ad-videos-2026-11-07: pros' static ads against ours (docs/inspo/ad-videos-2026-11-07/pros-sheet.jpg); about ads, not sites, read after the site was built; kept for her ads later (headline as the biggest thing, a button that names the service), nothing changes on the site.
+- videos-2026-11-06: read after the site was built; Feaster's cheap-feel checklist checked on her booking page: the send button says what it does next, field errors are specific, there is a saving line and a sent line, and the privacy link is in the footer; the motion-in-code notes change nothing here.
 - videos-2026-11-04: docs/inspo/videos-2026-11-04/turn-it-light-modes.jpg (buttons named for a kind of light change the whole opening) gave the mirror's light switch; docs/inspo/videos-2026-11-04/brief-form-live-summary.jpg and docs/inspo/videos-2026-11-04/prices-beside-booking.jpg shape the booking page, the request written beside the form with the price in view; flashlight-hero.jpg is a dark world and is not used.
 - pinterest-ads-2026-11-02: ads, not sites; useful later for her ads, and nothing for the opening of a one-person service, so nothing is taken from it here.
 - videos-2026-11-01: docs/inspo/videos-2026-11-01/lighting-plan.jpg (side and back light, camera side darker) is the lighting brief for the still; the rest is about food films and is not used.
