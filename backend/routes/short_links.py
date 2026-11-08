@@ -121,7 +121,28 @@ async def _link_filter(slug: str) -> dict[str, Any]:
     the lower-case form of someone's slug must never take over their printed code."""
     if await db.short_links.find_one({"slug": slug}, {"_id": 1}):
         return {"slug": slug}
-    return {"aliases": slug.lower()}
+    name = slug.lower()
+    if not await db.short_links.find_one({"aliases": name}, {"_id": 1}):
+        await _name_from_business(name)
+    return {"aliases": name}
+
+
+async def _name_from_business(name: str) -> None:
+    """A business's own name works as its link before anyone has opened it.
+
+    Names used to be given only when the owner opened their link on the Advertising page, so
+    myisraelrental.com/p/american-crust led to the home page until then, while ads already printed it
+    (8 Nov 2026). Now the first visit to a business's name makes its link and gives it the name. The name is
+    the business's live slug, or its start when the slug was cut to print whole (_link_name)."""
+    if not _link_name(name) or _link_name(name) != name:
+        return
+    biz = await db.businesses.find_one({"slug": name, "active": True}, {"_id": 1, "owner_user_id": 1})
+    if not biz and len(name) >= _LINK_NAME_MAX - 8:
+        rows = await db.businesses.find({"slug": {"$regex": f"^{re.escape(name)}-"}, "active": True},
+                                        {"_id": 1, "owner_user_id": 1, "slug": 1}).to_list(2)
+        biz = rows[0] if len(rows) == 1 and _link_name(rows[0]["slug"]) == name else None
+    if biz:
+        await ensure_short_link("business", biz["_id"], biz.get("owner_user_id") or "")
 
 
 async def _with_name(doc: dict[str, Any]) -> dict[str, Any]:
@@ -624,6 +645,9 @@ async def business_link_preview(slug_or_id: str):
 # One model call, about a cent, capped per person per day.
 # ---------------------------------------------------------------------------
 
+_AD_SCENES = {"bakery", "kitchen", "grill", "cafe", "gift", "beauty", "studio"}
+
+
 _AD_SYSTEM = """You write the words for a small advert that will be posted in Facebook groups,
 WhatsApp statuses and Instagram. You are given the facts of one listing.
 
@@ -645,6 +669,13 @@ Return ONE JSON object:
   headline_key  the ONE word of the headline, copied exactly, that matters most.
   headline_item  when the headline is about one of the listed items and not the
             others, that item's name copied exactly; otherwise "".
+  scene     the photographed set the product would sit on, from this list,
+            the one that fits what the listing sells: "bakery" (bread, cakes,
+            dough, baked goods), "kitchen" (salads, dairy, home cooking, fresh
+            food), "grill" (meat, grilled food, boards, savoury platters),
+            "cafe" (coffee, drinks, sweets shop), "gift" (gifts, flowers,
+            parties, children), "beauty" (wigs, hair, nails, makeup, skin),
+            "studio" (anything else, every service and every rental).
   ideas     exactly 3 other headlines as [{{"text": ..., "key": ..., "item": ...}}], each <= 38
             characters, each with a real idea, each from a different angle: a
             twist on a phrase the reader already knows; the moment in the
@@ -1159,6 +1190,8 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
         "ideas": ideas[:3],
         "headline_key": headline_key if headline_key in words["headline"] else "",
         "headline_item": item_of(data.get("headline_item")),
+        # The set behind the product on the photographed designs (Tzvi, 8 Nov 2026: "guess from the listing").
+        "scene": scene if (scene := str(data.get("scene") or "").strip().lower()) in _AD_SCENES else "studio",
         "link": link,
         "reviews": reviews,
         **extra,

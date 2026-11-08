@@ -620,3 +620,19 @@ same design move, drawn in the browser for free: the product arrives, the words 
 pops, the link and QR slide in, and it holds on the finished ad. A short MP4 rather than a GIF: it is sharper,
 smaller, and what statuses and feeds expect. Every still rule still applies, because the last frame is the
 still. Steps A10.1 to A10.4 in `docs/ad-rules-checklist.md`.
+
+## Never bland (Tzvi, 8 Nov 2026)
+
+"This seems a bit bland... make sure we dont make it bland in the future." Our first product-photo ad had six
+small bagels under an empty wall, flat daylight, nothing happening and a small headline: correct, and forgettable
+beside the pro ads. So every ad is put beside the pro references before it is shown (scripts/ad_vs_pros.py) and
+must pass five checks: product as hero, strong light or colour, something happening, the headline as design, holds
+its own beside the pros. Step A9.5 in docs/ad-rules-checklist.md.
+
+## The pro look, for every ad (Tzvi, 8 Nov 2026)
+
+"Use the new things you learnt for the ad and make it a rule for all future ad builds." What the pro ads share
+(docs/inspo/pro-references/README.md) is now stage 9 of docs/ad-rules-checklist.md (A11.1 to A11.8): one idea you
+get in a second; words and picture interlocked; one colour world; a frozen moment; light that shapes; three things
+carry the ad; a short headline in two voices; the product as the hero, standing on its set. Planned in the
+blueprint before building, checked on the ad-vs-pros sheet (A9.5) before anyone sees it.

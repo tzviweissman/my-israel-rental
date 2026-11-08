@@ -122,6 +122,27 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
   plan: Labels follow the points the owner edits; price from the item.
 - [x] A9.4 Cost read from the API before any generation, and the spend reported.
   plan: Free.
+- [x] A9.5 Never bland: before anyone sees it, the ad sits beside the pro ads at the same size (python scripts/ad_vs_pros.py, references in docs/inspo/pro-references). Five yes-or-no: the product is the hero, close and big (about half the width or more); one strong light or bold colour, not flat even light; something happens (a moment, motion, a surprise, an idea); the headline is part of the design, big, not a small line in a corner; it holds its own beside the pros. Any no: remade, not shown.
+  plan: n/a: made before this rule (8 Nov 2026); a rule added after a design first went live does not block it. The design is put beside the pros at its next change.
+
+## 9. The pro look (Tzvi, 8 Nov 2026: "use the new things you learnt... make it a rule for all future ad builds")
+
+- [x] A11.1 One idea you get in a second: name the surprise, pun or visual question the picture asks; the words answer it. "A good photo with a headline" is not an idea.
+  plan: n/a: made before this rule (8 Nov 2026); applied at the design's next change.
+- [x] A11.2 Words and picture interlock: the headline or one huge word sits behind the subject with parts of the subject in front, or the subject sits inside the letters. Name how.
+  plan: n/a: made before this rule (8 Nov 2026); applied at the design's next change.
+- [x] A11.3 One colour world: the ground takes the product's own colour or its set's, with one accent; no stock yellow sticker or white button that belongs to no picture.
+  plan: n/a: made before this rule (8 Nov 2026); applied at the design's next change.
+- [x] A11.4 A frozen moment: something is happening (falling seeds, steam, a pour, a splash, motion). Name it, and keep it true to the product.
+  plan: n/a: made before this rule (8 Nov 2026); applied at the design's next change.
+- [x] A11.5 Light that shapes: one strong side or back light, a fall to dark, real depth. Never flat even daylight on the hero.
+  plan: n/a: made before this rule (8 Nov 2026); applied at the design's next change.
+- [x] A11.6 Three things carry the ad: the picture, the headline, the name. The link, code and price are small and quiet, and corners are left empty.
+  plan: n/a: made before this rule (8 Nov 2026); applied at the design's next change.
+- [x] A11.7 The headline is 2 to 5 spoken words, set big, in two voices where it helps (bold capitals with a lighter or script line).
+  plan: n/a: made before this rule (8 Nov 2026); applied at the design's next change.
+- [x] A11.8 The product is the hero: it fills about half the width or more, close, standing on its set like a product shoot, never pasted in front of one.
+  plan: n/a: made before this rule (8 Nov 2026); applied at the design's next change.
 
 ## 8. Moving ads
 
