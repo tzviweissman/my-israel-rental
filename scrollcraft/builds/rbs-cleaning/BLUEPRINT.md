@@ -364,7 +364,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3x.10 The prices or running total stay in view beside the order or booking form on a laptop, and a total line sits above the send button on a phone
   plan: the price line stays beside the form on a laptop and above the send button on a phone
 - [x] R3x.14 The order page has the gift card section (SITE.gift_section, gift.js): hidden until the owner switches gift cards on, bought in place with no sign-in, and it shows only the owner's amounts, note and payment links (check: check-web-basics)
-  plan: SITE.gift_section() and gift.js on the Get a free quote page; hidden until the owner switches gift cards on
+  plan: SITE.gift_section() and gift.js on the Get a free quote page; hidden until the owner switches gift cards on; amounts in the owner's currency (shekels or dollars, gift.js from main, 7 Nov)
 
 ## Stage 8. Motion
 

@@ -161,7 +161,7 @@ R3s.18 pass: built to the blueprint: "Something else", "Somewhere else" and "I a
 R3s.25 pass: built to the blueprint: empty send shows what is missing; filled, the WhatsApp text carries the sentence and the ₪400 where chosen
 R3x.9 pass: built to the blueprint: the request sentence builds beside the form and is what is sent; no price but ₪400, no promise
 R3x.10 pass: built to the blueprint: the price line stays beside the form on a laptop and above the send button on a phone
-R3x.14 pass: built to the blueprint: SITE.gift_section() and gift.js on the Get a free quote page; hidden until the owner switches gift cards on
+R3x.14 pass: built to the blueprint: SITE.gift_section() and gift.js on the Get a free quote page; hidden until the owner switches gift cards on; amounts in the owner's currency (shekels or dollars, gift.js from main, 7 Nov)
 R3f.1 pass: built to the blueprint: the film plays on a pinned full-screen stage, whole at every size
 R3f.8 n/a: no scroll-tied effect but the pinned opening
 R3f.9 n/a: no list that lights up
