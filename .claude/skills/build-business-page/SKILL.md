@@ -453,7 +453,7 @@ Full text, timestamps and frames: `reference/full-rules.md` §3g, `docs/ui-video
    exactly three identical cards, frosted glass everywhere, a headline a
    competitor could use.
 3. **The accent colour is for the main button only** (Tzvi, 22 Oct 2026; the
-   single home of the accent rule). The rest is ink and grey. **Prices are in
+   single home of the accent rule). For a shop the accent is the product's own colour, from its photo, and the button stands out 3:1 from what is behind it (3g.19, check-button-colour). The rest is ink and grey. **Prices are in
    the main text colour, bold and large.** A word that matters may be set apart
    by weight or style in the text colour, at most one per screen; cream +
    serif + italic word together stays banned unless it is their brand.
