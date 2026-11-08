@@ -92,6 +92,21 @@ A9.1 | Drawn and looked at on the real business, at phone size, beside the refer
 A9.2 | Would it stop you? Say what is surprising about it in one sentence; if nothing is, it goes back to stage 1. | 9d, ads-need-an-idea | decide
 A9.3 | The owner can change every word and the price stays right. | intro, 6 | decide
 A9.4 | Cost read from the API before any generation, and the spend reported. | CLAUDE.md | decide
+A9.5 | Never bland: before anyone sees it, the ad sits beside the pro ads at the same size (python scripts/ad_vs_pros.py, references in docs/inspo/pro-references). Five yes-or-no: the product is the hero, close and big (about half the width or more); one strong light or bold colour, not flat even light; something happens (a moment, motion, a surprise, an idea); the headline is part of the design, big, not a small line in a corner; it holds its own beside the pros. Any no: remade, not shown. | Tzvi 8 Nov | decide
+
+## 9. The pro look (Tzvi, 8 Nov 2026: "use the new things you learnt... make it a rule for all future ad builds")
+
+From docs/inspo/pro-references/README.md, what every pro ad had and ours lacked. Planned before building, checked on
+the ad-vs-pros sheet (A9.5) after.
+
+A11.1 | One idea you get in a second: name the surprise, pun or visual question the picture asks; the words answer it. "A good photo with a headline" is not an idea. | pro-references 1 | decide
+A11.2 | Words and picture interlock: the headline or one huge word sits behind the subject with parts of the subject in front, or the subject sits inside the letters. Name how. | pro-references 2 | decide
+A11.3 | One colour world: the ground takes the product's own colour or its set's, with one accent; no stock yellow sticker or white button that belongs to no picture. | pro-references 4 | decide
+A11.4 | A frozen moment: something is happening (falling seeds, steam, a pour, a splash, motion). Name it, and keep it true to the product. | pro-references 5 | decide
+A11.5 | Light that shapes: one strong side or back light, a fall to dark, real depth. Never flat even daylight on the hero. | pro-references 6 | decide
+A11.6 | Three things carry the ad: the picture, the headline, the name. The link, code and price are small and quiet, and corners are left empty. | pro-references 7 | decide
+A11.7 | The headline is 2 to 5 spoken words, set big, in two voices where it helps (bold capitals with a lighter or script line). | pro-references 8 | decide
+A11.8 | The product is the hero: it fills about half the width or more, close, standing on its set like a product shoot, never pasted in front of one. | Tzvi 8 Nov | decide
 
 ## 8. Moving ads
 
