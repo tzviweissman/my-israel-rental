@@ -11,6 +11,7 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 
 Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged), each line re-checked against main.
 
+- [Low] Ads: ads.weekVisits, ads.nudgeVisits, advertising.visits have no plural forms; test-i18n-parity fails. First seen 8 Nov (2026-11-08-ui-audit).
 - [Low] Page editor link filter accepts "/%2F/evil.com"; stays a path on this site, probably harmless. First seen 12 Oct.
 - [To check] The Brown Box and Blazin' Boards: pinned opening reported 64 to 96px taller than the room under the header at 360 to 768 wide (23 Oct UI audit; screenshots show nothing hidden); check on a real phone.
 - [To fix] Audit setup: most runs since 15 Oct could not download Playwright or MongoDB in the sandbox, so pages behind sign-in, Hebrew renders and order flows were not checked.
