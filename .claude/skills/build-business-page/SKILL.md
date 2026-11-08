@@ -290,7 +290,7 @@ tick lines as built; RULES.md is written from it at check-build and publish. Ful
 Every page passes all six before anyone sees it:
 
 1. **The first screen answers four questions:** what it is, where, why trust
-   it, what to do next. What it may hold is 3g.13, the single home.
+   it, what to do next. What it may hold is 3g.13, the single home; it shows what the business offers, each different kind named (3g.18, check-says-offer).
 2. **Proof touches the main button:** price, credential or rating right beside it.
 3. **One solid ACTION per screen.** The header button and the phone bar repeat
    the same action; over a hero that already shows a solid button the header

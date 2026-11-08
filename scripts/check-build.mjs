@@ -48,7 +48,7 @@ for (const p of pages) {
 }
 // the site-wide checks of rules 3v take every page at once (the same footer and menu on each)
 const all = pages.map((p) => `${base}/${folder}/${p}`);
-for (const s of ['check-footer', 'check-menu', 'check-facts', 'check-heights', 'check-film-video', 'check-film-clear', 'check-web-basics']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), ...all]]);
+for (const s of ['check-footer', 'check-menu', 'check-facts', 'check-heights', 'check-film-video', 'check-film-clear', 'check-web-basics', 'check-says-offer']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), ...all]]);
 // a site built from a blueprint has RULES.md written from it first (scripts/blueprint.mjs)
 if (fs.existsSync(path.join(dir, 'BLUEPRINT.md'))) spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'blueprint.mjs'), '--rules', dir], { encoding: 'utf8' });
 for (const s of ['check-concept', 'check-fingerprints', 'check-rules']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), dir]]);

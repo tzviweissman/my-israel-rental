@@ -139,6 +139,8 @@ const CHECK_ONLY = process.argv.includes('--check');
     ['check-film-clear.mjs', 'covers its film with words while it plays', 'R3h.25'],
     // the web basics: skip link, headings, focus, labelled fields, live regions, images, share layer (Tzvi, 4 Nov 2026, rules 3x.8)
     ['check-web-basics.mjs', 'misses web basics', 'R3x.8'],
+    // the opening says every kind of thing the business offers (Tzvi, 5 Nov 2026, rules 3g.18)
+    ['check-says-offer.mjs', 'does not say what it offers on the first screen', 'R3g.18'],
     // a shop's main button is in the product's own colour and stands out from what is behind it (Tzvi, 8 Nov 2026, rules 3g.19)
     ['check-button-colour.mjs', 'has a main button not in the colour of its product', 'R3g.19']]) {
     if (rule && newer.has(rule)) { console.log(`${script}: not run, rule ${rule} was added after this site was made`); continue; }

@@ -79,5 +79,11 @@
     "used_by": [
       "krysp"
     ]
+  },
+  "strum": {
+    "what": "strings drawn across the screen are strummed and ring; the visitor plucks them",
+    "used_by": [
+      "aaron-kaluszyner"
+    ]
   }
 }
