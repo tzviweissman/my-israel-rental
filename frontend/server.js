@@ -648,6 +648,13 @@ function proxyApi(req, res) {
   headers['x-forwarded-host'] = req.headers['x-forwarded-host'] || req.headers.host || '';
 
   const transport = target.protocol === 'http:' ? http : https;
+  // A read that dies on a dropped connection is sent once more (8 Nov 2026). Node keeps connections to the
+  // API open for reuse, and the far end sometimes closes one just as it is reused: the request fails with
+  // "socket hang up" before the API ever sees it. The log showed these all day, not only during deploys,
+  // and one emptied the marketplace ("Failed to load marketplace" after clearing a search). Only GET and
+  // HEAD are retried, which carry no body and change nothing, and only before any reply has started.
+  const retryable = req.method === 'GET' || req.method === 'HEAD';
+  const send = (attempt) => {
   const upstream = transport.request(
     {
       protocol: target.protocol,
@@ -666,6 +673,12 @@ function proxyApi(req, res) {
   upstream.setTimeout(PROXY_TIMEOUT_MS, () => upstream.destroy(new Error('upstream timeout')));
 
   upstream.on('error', (err) => {
+    const dropped = err.code === 'ECONNRESET' || /socket hang up/i.test(err.message);
+    if (retryable && attempt === 1 && dropped && !res.headersSent && !clientGone) {
+      console.warn(`[server] api proxy ${req.method} ${req.url}: ${err.message}, sent once more`);
+      send(2);
+      return;
+    }
     console.warn(`[server] api proxy ${req.method} ${req.url}: ${err.message}`);
     if (res.headersSent) { res.destroy(); return; }
     res.writeHead(502, { 'Content-Type': 'application/json' });
@@ -677,9 +690,15 @@ function proxyApi(req, res) {
     res.end(JSON.stringify({ detail: 'The site is updating. Please try again in a minute.' }));
   });
 
+  current = upstream;
+  // The first try streams the body through; a retried GET or HEAD has none, and the request stream is spent.
+  if (attempt === 1) req.pipe(upstream); else upstream.end();
+  };
+
   // If the client hangs up mid-request, stop talking to the upstream.
-  req.on('aborted', () => upstream.destroy());
-  req.pipe(upstream);
+  let current = null, clientGone = false;
+  req.on('aborted', () => { clientGone = true; if (current) current.destroy(); });
+  send(1);
 }
 
 // The same four headers `public/serve.json` declares, kept here as well
