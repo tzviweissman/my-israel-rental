@@ -39,6 +39,10 @@ const argv = process.argv.slice(2), STOPS = [];
 for (let i = argv.indexOf('--stop'); i >= 0; i = argv.indexOf('--stop')) { STOPS.push(argv[i + 1].split('|')); argv.splice(i, 2); }
 const REDO = [];
 for (let i = argv.indexOf('--redo'); i >= 0; i = argv.indexOf('--redo')) { REDO.push(argv[i + 1]); argv.splice(i, 2); }
+// Videos for Tzvi play at 1.5x (Tzvi, 6 Nov 2026: "its always slow"). A script that names its own fps (the
+// showcase tiles, which cut at exact seconds) keeps real time. --speed <n> overrides either.
+let SPEED = argv[5] ? 1 : 1.5;
+{ const i = argv.indexOf('--speed'); if (i >= 0) { SPEED = Number(argv[i + 1]); argv.splice(i, 2); } }
 const [url, w, h, out] = [argv[0], Number(argv[1] || 390), Number(argv[2] || 844), argv[3] || 'preview.mp4'];
 const secs = Number(argv[4] || 40);
 // The old 7th argument was a speed-up (1.8); anything under 10 is that.
@@ -168,7 +172,7 @@ await ctx.close(); await b.close();
 writeFileSync(planFile, plan);
 
 execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-framerate', String(fps), '-i', join(dir, '%05d.jpg'),
-  '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', '-c:v', 'libx264', '-crf', '21', '-preset', 'medium',
+  '-vf', `setpts=PTS/${SPEED},fps=${fps},scale=trunc(iw/2)*2:trunc(ih/2)*2`, '-c:v', 'libx264', '-crf', '21', '-preset', 'medium',
   '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', out]);
 const every = Math.max(1, Math.floor(n / 12));
 execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', out, '-vf', `select=not(mod(n\\,${every})),scale=-2:540,tile=6x2`,

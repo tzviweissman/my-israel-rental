@@ -328,10 +328,11 @@ for (const url of urls) {
         // choices made with checkboxes (Chicken Munch's kinds of chicken): tick the first visible one of each group none of which is ticked
         const boxes = {}; for (const c of document.querySelectorAll('form input[type=checkbox]')) { if (c.offsetParent === null) continue; const g = c.name || (c.closest('fieldset, [role=group]') || {}).id || 'x'; (boxes[g] = boxes[g] || []).push(c); }
         for (const g of Object.values(boxes)) if (!g.some((c) => c.checked)) g[0].click();
+        // local date, not toISOString: just after midnight in Israel the UTC date is the day before, a Saturday on Sunday 00:08 (8 Nov 2026)
         const d = new Date(Date.now() + 5 * 864e5); while (d.getDay() === 6 || d.getDay() === 5) d.setDate(d.getDate() + 1);
         for (const i of document.querySelectorAll('form input, form textarea')) {
           if (i.type === 'radio' || i.type === 'checkbox' || i.offsetParent === null) continue;
-          const v = i.type === 'tel' ? '0501234567' : i.type === 'date' ? d.toISOString().slice(0, 10) : i.type === 'email' ? 'test@example.com' : i.tagName === 'TEXTAREA' ? '' : 'Test 1';
+          const v = i.type === 'tel' ? '0501234567' : i.type === 'date' ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : i.type === 'email' ? 'test@example.com' : i.tagName === 'TEXTAREA' ? '' : 'Test 1';
           i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); i.dispatchEvent(new Event('change', { bubbles: true }));
         }
       }, stepN === 0);

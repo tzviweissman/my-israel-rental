@@ -1112,6 +1112,11 @@ that policy).*
       (almost nothing on screen), VANISH and APPEAR (on a plain light ground, a crumb that is there and then gone in the
       open, or turns up from nowhere). Then each numbered step of the brief is ticked off against the clip at 8 fps:
       seen, or not seen. It caught all three faults of Krysp's first film and passed every other clip we have.
+   4. **Places and materials look photographed** (3w.15; Tzvi, 5 Nov 2026, RBS Cleaning: "the scene and the stone look kind of fake"). Before any
+      clip, the generated still is looked at full size beside a real photograph of that place or material. Hills smooth as dunes,
+      model villages, stones in tidy equal rows, flat soft light: a new still. Prompt it as an ordinary unretouched snapshot from a
+      named real place, saying what is really there. The brief's "## Looks real" section names the photograph (link or docs/inspo
+      path); film-gate refuses a paid video without it.
 
 22. **A scroll film is real video, tied exactly to the scroll** (Tzvi, 3 and 4 Nov 2026, Krysp: "the motions dont look
     smooth", "it still doesnt look so smooth like the video i sent you", "it keeps freezing", "its not playing in sync
