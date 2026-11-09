@@ -28,23 +28,27 @@ export const LAST_LOGIN_HINT_KEY = 'last_login_hint';
  *   Validated here, so callers pass the raw value.
  */
 export default async function completeGoogleSignIn(accessToken, login, navigate, redirectTo = null) {
-  const res = await axios.post(`${API}/auth/google/session`, { access_token: accessToken });
-  let { token, user } = res.data || {};
-  if (!token || !user) throw new Error('Invalid response from auth server');
-
-  // ── Role intent promotion ──────────────────────────────────────────────
-  // If the visitor picked "Host" or "Provider" on /signup before hitting the
-  // Google button, the desired role was stashed in sessionStorage. Google
-  // doesn't know about our roles, so the account is created as `renter` —
-  // promote it before AuthContext sees the user, otherwise the dashboard
-  // briefly renders in the wrong shape.
+  // ── Role intent ────────────────────────────────────────────────────────
+  // If the visitor picked "Host" or "Provider" before hitting the Google
+  // button, the desired role was stashed in sessionStorage. A NEW account is
+  // created with it by the server (9 Nov 2026); the promotion below is only
+  // for an existing traveller account, which the server leaves as it is.
   let intentRole = '';
   try {
     intentRole = sessionStorage.getItem(SIGNUP_INTENT_ROLE_KEY) || '';
     sessionStorage.removeItem(SIGNUP_INTENT_ROLE_KEY);
   } catch { /* private mode etc */ }
 
-  if (intentRole && ['owner', 'provider'].includes(intentRole) && user.role !== intentRole) {
+  const res = await axios.post(`${API}/auth/google/session`, {
+    access_token: accessToken,
+    ...(['owner', 'provider'].includes(intentRole) ? { role: intentRole } : {}),
+  });
+  let { token, user } = res.data || {};
+  if (!token || !user) throw new Error('Invalid response from auth server');
+
+  // Only a traveller is promoted: a host who signs in from the business
+  // wizard stays a host (9 Nov 2026).
+  if (intentRole && ['owner', 'provider'].includes(intentRole) && user.role === 'renter') {
     try {
       const r = await axios.put(
         `${API}/auth/role`,

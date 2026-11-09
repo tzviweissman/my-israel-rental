@@ -129,11 +129,15 @@ const SignupJoin = () => {
   // far smaller cost than the rest of the form. Same for the
   // confirmation field.
   const savedSignup = readDraft(SIGNUP_DRAFT);
-  const [step, setStep] = useState(() => savedSignup?.step || 1);
-  const [selectedRole, setSelectedRole] = useState(() => savedSignup?.selectedRole || null); // "traveler" | "host" | "provider"
+  // From the business wizard's "Use my email instead": the role and the
+  // address are already known, so the account form opens straight away.
+  const fromWizard = searchParams.get('role') === 'provider' && !!redirectParam;
+  const [step, setStep] = useState(() => (fromWizard ? 2 : savedSignup?.step || 1));
+  const [selectedRole, setSelectedRole] = useState(() => (fromWizard ? 'provider' : savedSignup?.selectedRole || null)); // "traveler" | "host" | "provider"
   const [form, setForm] = useState(() => ({
     name: '', email: '', phone: '',
     ...(savedSignup?.form || {}),
+    ...(searchParams.get('email') ? { email: searchParams.get('email') } : {}),
     // Last, and unconditional: a password must never come back from a
     // draft even if an older build once wrote one.
     password: '',
@@ -159,8 +163,11 @@ const SignupJoin = () => {
 
   const activeCard = ROLE_CARDS.find((r) => r.key === selectedRole);
 
-  const handleContinue = () => {
-    if (!selectedRole) return;
+  // A business builds its page first and makes the account at the end,
+  // inside the wizard (Tzvi, 9 Nov 2026: the new sign-up funnel).
+  const handleContinue = (role = selectedRole) => {
+    if (!role) return;
+    if (role === 'provider' && !redirectParam) { navigate('/businesses/add?welcome=1'); return; }
     setStep(2);
   };
   // Each step opens at its top: Continue sits below the role list, and
@@ -301,7 +308,7 @@ const SignupJoin = () => {
                       role="radio"
                       aria-checked={active}
                       onClick={() => setSelectedRole(key)}
-                      onDoubleClick={() => { setSelectedRole(key); setStep(2); }}
+                      onDoubleClick={() => { setSelectedRole(key); handleContinue(key); }}
                       className="w-full flex items-start gap-3 sm:gap-3.5 p-3 sm:p-3.5 text-start rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 active:scale-[0.995] transition-transform"
                       data-testid={`signup-role-${key}`}
                     >
@@ -364,7 +371,7 @@ const SignupJoin = () => {
               </p>
               <button
                 type="button"
-                onClick={handleContinue}
+                onClick={() => handleContinue()}
                 disabled={!selectedRole}
                 className="w-full sm:w-auto justify-center inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-bold shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
                 // The theme's black action with a white label. This read `--gold` on

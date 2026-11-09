@@ -22,6 +22,18 @@
  * ends at Contact.
  *
  * All state is local; we POST once on the final "Publish" click.
+ *
+ * NO ACCOUNT NEEDED TO START (Tzvi, 9 Nov 2026, the new sign-up funnel).
+ * A visitor builds the page first. The account is asked for only when
+ * something has to be stored for them (a photo, reading their ad, Publish),
+ * in a sheet on this page; after signing in the same action carries on.
+ * "Find your business" fills the form from Google before any of that.
+ *
+ * SAVED ON OUR SERVER TOO. The email asked on the first screen is required
+ * for a visitor: their progress is saved under a random draft id
+ * (routes/marketplace/signup_drafts.py), so a crashed tab, a new phone or
+ * stopping halfway loses nothing, and one "finish your page" email with a
+ * link back (?draft=<id>) goes out if they stop.
  */
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import QuickProductAdd from '../components/marketplace/QuickProductAdd';
@@ -31,8 +43,9 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Loader2, Plus, Trash2, ArrowLeft, ArrowRight, X,
-  Store, Package, CalendarClock, ImagePlus, Copy, Sparkles, Camera,
+  Store, Package, CalendarClock, ImagePlus, Copy, Sparkles, Camera, Search, MapPin,
 } from 'lucide-react';
+import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { compressImage as shrinkPhoto } from '../utils/fastUpload';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -142,8 +155,11 @@ const CreateGig = () => {
   const [existing, setExisting] = useState(null);
   const existingRef = useRef(null);
   existingRef.current = existing;
-  const [bizName, setBizName] = useState('');
-  const [bizLogo, setBizLogo] = useState('');
+  // Kept in the draft too: signing up by email leaves this page and comes
+  // back, and the name typed before it was lost, so the business was named
+  // after the person (click-through test, 9 Nov 2026).
+  const [bizName, setBizName] = useState(() => readDraft('create-gig')?.bizName || '');
+  const [bizLogo, setBizLogo] = useState(() => readDraft('create-gig')?.bizLogo || '');
   const [logoUploading, setLogoUploading] = useState(false);
   // The two slow-path spinners in the products step.
   const [bulkPhotos, setBulkPhotos] = useState(false);
@@ -152,6 +168,7 @@ const CreateGig = () => {
   const [adReading, setAdReading] = useState(false);
   useEffect(() => {
     let alive = true;
+    if (!token) { setExisting([]); return undefined; }
     axios.get(`${API}/marketplace/businesses`, { headers: { Authorization: `Bearer ${token}` } })
       .then(({ data }) => { if (alive) setExisting((data || []).filter((b) => b.active)); })
       .catch(() => { if (alive) setExisting([]); });
@@ -187,10 +204,13 @@ const CreateGig = () => {
     }
   };
 
-  const pickLogo = async (e) => {
+  const pickLogo = (e) => {
     const file = e.target.files?.[0];
     e.target.value = '';
-    if (!file) return;
+    if (file) uploadLogo(file);
+  };
+  const uploadLogo = async (file) => {
+    if (needAccount('uploadLogo', file)) return;
     setLogoUploading(true);
     try {
       setBizLogo(await uploadOneFile(file, API, token));
@@ -238,9 +258,66 @@ const CreateGig = () => {
     area: '',
   });
 
-  useFormDraft('create-gig', { form, step, layout: DRAFT_LAYOUT }, !submitted);
+  useFormDraft('create-gig', { form, step, layout: DRAFT_LAYOUT, bizName, bizLogo }, !submitted);
+
+  const [email, setEmail] = useState(() => readDraft('create-gig-email') || '');
+  useFormDraft('create-gig-email', email, !submitted);
+  const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim());
+  const saveTo = token ? (email.trim() || user?.email || '') : email.trim();
+  const draftId = useRef(null);
+  if (draftId.current === null) {
+    try {
+      draftId.current = localStorage.getItem('signup-draft-id') || '';
+      if (!draftId.current && window.crypto?.randomUUID) {
+        draftId.current = window.crypto.randomUUID();
+        localStorage.setItem('signup-draft-id', draftId.current);
+      }
+    } catch { draftId.current = ''; }
+  }
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
+
+  // ?draft=<id> from the "finish your page" email: the saved answers come back on any device.
+  useEffect(() => {
+    const id = searchParams.get('draft');
+    if (!id) return;
+    axios.get(`${API}/marketplace/signup-draft/${id}`).then(({ data }) => {
+      const d = data.data || {};
+      if (d.form) setForm(d.form);
+      if (d.layout === DRAFT_LAYOUT && d.step) setStep(d.step);
+      if (d.bizName) setBizName(d.bizName);
+      if (d.bizLogo) setBizLogo(d.bizLogo);
+      setEmail(data.email || '');
+      draftId.current = id;
+      try { localStorage.setItem('signup-draft-id', id); } catch { /* private mode */ }
+      toast.success(t('wizard.draftBack', 'Welcome back. Everything you filled in is here.'));
+    }).catch((err) => toast.error(apiErrorMessage(err, t('wizard.draftGone', 'That link has expired. Start again, it only takes a minute.'), t)));
+    // Once, on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    const id = draftId.current;
+    if (submitted || !id || !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(saveTo)) return undefined;
+    const timer = setTimeout(() => {
+      axios.put(`${API}/marketplace/signup-draft/${id}`, {
+        email: saveTo, lang: (document.documentElement.lang || '').startsWith('he') ? 'he' : 'en',
+        data: { form, step, layout: DRAFT_LAYOUT, bizName, bizLogo },
+      }).catch(() => { /* the copy on this device still has it */ });
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [form, step, bizName, bizLogo, saveTo, submitted]);
+
+  /* The account, asked for only when it is needed. The action waiting on it
+     is kept by NAME and re-run from the render that has the new token, so it
+     is not a stale copy still holding no token. */
+  const [askAccount, setAskAccount] = useState(false);
+  const pending = useRef(null);
+  const needAccount = (name, ...args) => {
+    if (token) return false;
+    pending.current = [name, args];
+    setAskAccount(true);
+    return true;
+  };
 
   // Reset the per-type primary list when the user changes their gig type
   // mid-wizard so we never publish stale rows (e.g. a "haircut" row on a
@@ -281,6 +358,7 @@ const CreateGig = () => {
   // Upload one or more images to a specific tier's local `images` array.
   // Reuses the same Cloudinary fast-upload path as the gig-wide gallery.
   const uploadTierImages = async (i, files) => {
+    if (needAccount('uploadTierImages', i, files)) return;
     const arr = Array.from(files || []).filter((f) => f.type.startsWith('image/'));
     if (!arr.length) return;
     const current = form.tiers[i]?.images || [];
@@ -333,6 +411,7 @@ const CreateGig = () => {
   // item twice just to show a second photo of it.
   const MAX_PRODUCT_PHOTOS = 6;
   const uploadProductImage = async (i, files) => {
+    if (needAccount('uploadProductImage', i, files)) return;
     const chosen = Array.from(files || []).filter(Boolean);
     if (!chosen.length) return;
     const existing = productPhotos(form.products[i]);
@@ -376,6 +455,7 @@ const CreateGig = () => {
   // business already has these pictures in one album; this takes the lot
   // and gives back a row per picture, with the photo already on it.
   const addProductsFromPhotos = async (files) => {
+    if (needAccount('addProductsFromPhotos', files)) return;
     const chosen = Array.from(files || []).filter(Boolean);
     if (!chosen.length) return;
     const blanks = form.products.filter(productIsBlank).length;
@@ -426,6 +506,7 @@ const CreateGig = () => {
   // Pasted list or a photographed price list -> rows the owner then checks.
   // Nothing is saved: these land in the form exactly as a typed row would.
   const extractProducts = async ({ text, file }) => {
+    if (needAccount('extractProducts', { text, file })) return false;
     setExtracting(true);
     try {
       const body = new FormData();
@@ -461,6 +542,7 @@ const CreateGig = () => {
   // A photo of their flyer works too (Tzvi, 7 Nov 2026), shrunk first: a phone photo is often too big to send.
   const fillFromAd = async (flyer = null) => {
     if (!flyer && !adText.trim()) { toast.error(t('wizard.pasteAdEmpty', 'Paste your ad first')); return; }
+    if (needAccount('fillFromAd', flyer)) return;
     setAdReading(true);
     try {
       const body = new FormData();
@@ -479,7 +561,7 @@ const CreateGig = () => {
           gig_type: type,
           title: data.title || f.title,
           category: data.category || f.category,
-          subcategory: data.category ? '' : f.subcategory,
+          subcategory: data.category ? (data.subcategory || '') : f.subcategory,
           description: data.description || f.description,
           area: data.area || f.area,
           whatsapp: data.whatsapp || f.whatsapp,
@@ -521,6 +603,51 @@ const CreateGig = () => {
     } finally { setAdReading(false); }
   };
 
+  // ---- Find your business on Google ------------------------------------------
+  // Typed name -> up to five matches -> the chosen one fills the form. Works
+  // before any account. Fills only what is still empty, so it never undoes
+  // what the owner typed; Google's photos are not ours to keep, so none come.
+  const [findText, setFindText] = useState('');
+  const [found, setFound] = useState([]);
+  const [finding, setFinding] = useState(false);
+  const lang = (document.documentElement.lang || '').startsWith('he') ? 'he' : 'en';
+  useEffect(() => {
+    const q = findText.trim();
+    if (q.length < 3) { setFound([]); return undefined; }
+    const id = setTimeout(() => {
+      axios.get(`${API}/marketplace/find-business`, { params: { q, lang } })
+        .then(({ data }) => setFound(data.results || []))
+        .catch(() => setFound([]));
+    }, 450);
+    return () => clearTimeout(id);
+  }, [findText, lang]);
+  const pickFound = async (place) => {
+    setFinding(true);
+    try {
+      const { data: g } = await axios.get(`${API}/marketplace/find-business/${place.id}`, { params: { lang } });
+      const known = categories.some((c) => c.slug === g.category);
+      if (known && g.category === 'shops-products') setGigType('store');
+      else if (g.weekly_availability && ['personal-care', 'health-fitness'].includes(g.category)) setGigType('appointment');
+      setForm((f) => ({
+        ...f,
+        title: f.title.trim() ? f.title : g.name,
+        category: f.category || (known ? g.category : ''),
+        subcategory: f.category ? f.subcategory : (known ? (g.subcategory || '') : ''),
+        description: f.description.trim() ? f.description : (g.description || ''),
+        area: (f.area || '').trim() ? f.area : (g.area || ''),
+        whatsapp: f.whatsapp || g.whatsapp || '',
+        ...(g.weekly_availability && !DAYS.some((d) => (f.weekly_availability[d.k] || []).length)
+          ? { weekly_availability: g.weekly_availability } : {}),
+      }));
+      if (firstBusiness) setBizName((n) => (n.trim() ? n : g.name));
+      setFindText('');
+      setFound([]);
+      toast.success(t('wizard.findDone', 'Filled in from Google. Check it and add a few photos.'));
+    } catch (err) {
+      toast.error(apiErrorMessage(err, t('wizard.findFailed', 'Could not load that business. Fill in the form yourself.'), t));
+    } finally { setFinding(false); }
+  };
+
   // ---- Availability helpers (appointment) -----------------------------------
   const toggleDayOpen = (d) => {
     const wins = form.weekly_availability[d];
@@ -541,10 +668,9 @@ const CreateGig = () => {
   // array so the payload shape is unchanged.
 
   useEffect(() => {
-    if (!token) { navigate(`/auth/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
     axios.get(`${API}/marketplace/categories`).then((r) => setCategories(r.data));
     axios.get(`${API}/marketplace/locations`).then((r) => setLocations(r.data)).catch(() => {});
-  }, [token, navigate]);
+  }, []);
 
   // The appointment type inserts one extra step for weekly hours.
   const isAppointment = form.gig_type === 'appointment';
@@ -586,25 +712,22 @@ const CreateGig = () => {
     // screen 1: type, title, category
     // A first business needs its name: left blank it used to be named after the person (Tzvi, 7 Nov 2026,
     // M and N Jewelry's address read "mordechai-weissman").
-    if (step === 1) return !!form.gig_type && !!form.title.trim() && !!form.category && !(firstBusiness && bizName.trim().length < 2);
+    if (step === 1) return (!!token || emailOk) && !!form.gig_type && !!form.title.trim() && !!form.category && !(firstBusiness && bizName.trim().length < 2);
     // screen 2: description, then the primary list (products or tiers)
     if (step === 2) {
       if (form.description.trim().length <= 10) return false;
-      // A photo is required here, not only at submit. It was checked once,
-      // at the very end (see hasAnyPhoto), which meant someone could fill in
-      // four more screens before being told to go back — and "at least one
-      // photo anywhere" let most options ship with none.
+      // One photo per item is no longer required to go on (Tzvi, 9 Nov 2026:
+      // a store with twenty items stopped at the first one without a
+      // picture). The listing still needs one photo somewhere, checked
+      // here and again at Publish (hasAnyPhoto) and on the server.
       if (form.gig_type === 'store') {
         return form.products.length > 0
-          && form.products.every((p) => (
-            p.name.trim() && hasPrice(p)
-            && (p.image || (p.images || []).length > 0)
-          ));
+          && form.products.every((p) => p.name.trim() && hasPrice(p))
+          && hasAnyPhoto();
       }
       return form.tiers.length > 0
-        && form.tiers.every((t) => (
-          t.name.trim() && parseFloat(t.price) > 0 && (t.images || []).length > 0
-        ));
+        && form.tiers.every((t) => t.name.trim() && parseFloat(t.price) > 0)
+        && hasAnyPhoto();
     }
     // Appointment inserts hours as screen 3
     if (isAppointment && step === 3) {
@@ -631,6 +754,7 @@ const CreateGig = () => {
   const nextBlockReason = () => {
     if (canNext()) return '';
     if (step === 1) {
+      if (!token && !emailOk) return t('wizard.reasonEmail', 'Add your email at the top, so your progress is saved.');
       if (!form.gig_type) return t('wizard.reasonType', 'Pick a listing type to continue.');
       if (!form.title.trim()) return t('wizard.reasonTitle', 'Add a title above.');
       if (!form.category) return t('wizard.reasonCategory', 'Pick a category above.');
@@ -650,14 +774,8 @@ const CreateGig = () => {
       // Named last so the earlier, cheaper problems are reported first —
       // being sent to find a photo while the price is still empty would
       // mean two trips.
-      const noPhoto = form.gig_type === 'store'
-        ? form.products.find((p) => !p.image && !(p.images || []).length)
-        : form.tiers.find((t) => !(t.images || []).length);
-      if (noPhoto) {
-        return t('sweep.needPhotoEach', {
-          defaultValue: 'Add at least one photo to "{{name}}" - listings with a photo get far more enquiries.',
-          name: (noPhoto.name || '').trim() || t('sweep.thisOne', 'this one'),
-        });
+      if (!hasAnyPhoto()) {
+        return t('wizard.reasonOnePhoto', 'Add at least one photo. You can add the rest later.');
       }
     }
     if (isAppointment && step === 3) return t('wizard.reasonHours', 'Turn on at least one open day so customers can book you.');
@@ -681,6 +799,7 @@ const CreateGig = () => {
     || (form.tiers || []).some((tr) => (tr.images || []).length);
 
   const submit = async () => {
+    if (needAccount('submit')) return;
     if (!hasAnyPhoto()) {
       // Stopped here as well as on the server so the reason arrives
       // before the save, not as a failure after it.
@@ -784,6 +903,9 @@ const CreateGig = () => {
       // reappear the next time they open the wizard.
       setSubmitted(true);
       clearDraft('create-gig');
+      clearDraft('create-gig-email');
+      if (draftId.current) axios.delete(`${API}/marketplace/signup-draft/${draftId.current}`).catch(() => {});
+      try { localStorage.removeItem('signup-draft-id'); } catch { /* private mode */ }
       // Someone who just added their FIRST business goes straight into the
       // walk (components/tour), which starts on their page. `tour=first`
       // starts it only if this account has never taken it, on any device.
@@ -798,6 +920,19 @@ const CreateGig = () => {
 
   // Which real step index maps to contact given the optional hours step.
   const contactStep = isAppointment ? 4 : 3;
+
+  const waiting = {
+    uploadLogo, uploadTierImages, uploadProductImage, addProductsFromPhotos, extractProducts, fillFromAd, submit,
+  };
+  useEffect(() => {
+    if (!token) return;
+    setAskAccount(false);
+    const p = pending.current;
+    pending.current = null;
+    if (p && waiting[p[0]]) waiting[p[0]](...p[1]);
+    // Only when the token arrives; `waiting` is this render's copy on purpose.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="create-gig-page">
@@ -839,7 +974,67 @@ const CreateGig = () => {
           {stepLabels[step]}
         </h1>
 
-        {/* First, because most businesses already run an ad somewhere. */}
+        {step === 1 && !token && (
+          <div className="mb-4 p-4 rounded-xl bg-white border border-[var(--brand-border)]" data-testid="wizard-email">
+            <label htmlFor="wizard-email-input" className="block text-base font-semibold">{t('wizard.emailTitle', 'Your email')}</label>
+            <p className="text-sm text-gray-600 mb-2">{t('wizard.emailBody', 'We save your progress as you go, so nothing is lost if you stop. We never show it on your page.')}</p>
+            <input
+              id="wizard-email-input"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              dir="ltr"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-[var(--brand-primary)]"
+              data-testid="wizard-email-input"
+            />
+          </div>
+        )}
+
+        {/* First of all: most businesses are already on Google. */}
+        {step === 1 && (
+          <div className="mb-4 p-4 rounded-xl bg-white border border-[var(--brand-border)]" data-testid="wizard-find-business">
+            <div className="flex items-start gap-2 mb-2">
+              <Search size={18} className="text-[var(--gold)] mt-0.5 shrink-0" />
+              <div>
+                <h2 className="text-base font-semibold">{t('wizard.findTitle', 'Find your business on Google')}</h2>
+                <p className="text-sm text-gray-600">{t('wizard.findBody', 'Type its name and pick it. We fill in your details, so you only check them.')}</p>
+              </div>
+            </div>
+            <input
+              type="search"
+              value={findText}
+              onChange={(e) => setFindText(e.target.value)}
+              placeholder={t('wizard.findPlaceholder', 'e.g. Cohen Cleaning Jerusalem')}
+              dir="auto"
+              aria-label={t('wizard.findTitle', 'Find your business on Google')}
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-[var(--brand-primary)]"
+              data-testid="wizard-find-input"
+            />
+            {found.length > 0 && (
+              <ul className="mt-2 divide-y divide-gray-100 rounded-lg border border-gray-200" data-testid="wizard-find-results">
+                {found.map((p) => (
+                  <li key={p.id}>
+                    <button type="button" disabled={finding} onClick={() => pickFound(p)}
+                      className="w-full text-start px-3 py-2.5 hover:bg-[var(--surface-muted)] flex items-start gap-2 disabled:opacity-50">
+                      <MapPin size={15} className="text-[var(--gold)] mt-0.5 shrink-0" />
+                      <span>
+                        <span className="block text-sm font-semibold" dir="auto">{p.name}</span>
+                        <span className="block text-xs text-gray-600" dir="auto">{p.address}</span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {finding && <p className="mt-2 text-sm text-gray-600 inline-flex items-center gap-1.5"><Loader2 size={14} className="animate-spin" />{t('wizard.findLoading', 'Filling in your details…')}</p>}
+          </div>
+        )}
+
+        {/* Then, because most businesses already run an ad somewhere. */}
         {step === 1 && (
           <div className="mb-6 p-4 rounded-xl bg-[var(--surface-muted)] border border-[var(--brand-border)]" data-testid="wizard-paste-ad">
             <div className="flex items-start gap-2 mb-2">
@@ -877,6 +1072,30 @@ const CreateGig = () => {
               >
                 {adReading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                 {adReading ? t('wizard.pasteAdReading', 'Reading your ad…') : t('wizard.pasteAdFill', 'Fill in the form')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {askAccount && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-4"
+            role="dialog" aria-modal="true" aria-labelledby="wizard-account-title" data-testid="wizard-account-sheet"
+            onClick={(e) => { if (e.target === e.currentTarget) { setAskAccount(false); pending.current = null; } }}>
+            <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+              <h2 id="wizard-account-title" className="text-xl font-semibold mb-1" style={{ fontFamily: 'var(--font-head)' }}>
+                {t('wizard.accountTitle', 'Save your page')}
+              </h2>
+              <p className="text-sm text-gray-600 mb-4">
+                {t('wizard.accountBody', 'Make a free account so we can keep your photos and publish your page. Everything you filled in stays.')}
+              </p>
+              <GoogleSignInButton intentRole="provider" />
+              <a href={`/signup?role=provider&redirect=${encodeURIComponent('/businesses/add')}${emailOk ? `&email=${encodeURIComponent(email.trim())}` : ''}`}
+                className="block mt-3 text-center text-sm font-semibold text-[var(--gold)] underline" data-testid="wizard-account-email">
+                {t('wizard.accountEmail', 'Use my email instead')}
+              </a>
+              <button type="button" onClick={() => { setAskAccount(false); pending.current = null; }}
+                className="block w-full mt-3 text-center text-sm text-gray-600" data-testid="wizard-account-later">
+                {t('wizard.accountLater', 'Not now, keep filling in')}
               </button>
             </div>
           </div>

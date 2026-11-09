@@ -100,3 +100,16 @@ test('signs the visitor in before navigating', async () => {
   expect(login).toHaveBeenCalledWith('t1', expect.objectContaining({ role: 'renter' }));
   expect(login.mock.invocationCallOrder[0]).toBeLessThan(navigate.mock.invocationCallOrder[0]);
 });
+
+describe('the role chosen before Google (new sign-up funnel, 9 Nov 2026)', () => {
+  test('is sent with the sign-in, so a new account is made with it', async () => {
+    await signIn({ role: 'provider', intent: 'provider' });
+    expect(axios.post).toHaveBeenCalledWith('/api/auth/google/session', { access_token: 'google-access-token', role: 'provider' });
+    expect(axios.put).not.toHaveBeenCalled();
+  });
+
+  test('never turns an existing host into a business', async () => {
+    await signIn({ role: 'owner', intent: 'provider' });
+    expect(axios.put).not.toHaveBeenCalled();
+  });
+});

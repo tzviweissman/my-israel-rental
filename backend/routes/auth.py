@@ -368,13 +368,17 @@ async def google_session_exchange(
         user_doc = existing
     else:
         # Fresh Google-first user. Default role is `renter` — the least
-        # privileged option; they can upgrade in the dashboard.
+        # privileged option. A business or host who chose their role before
+        # pressing Google is created with it here: promoting afterwards was a
+        # second call that could fail and leave them a traveller (9 Nov 2026).
+        intent = str((payload or {}).get("role") or "").strip().lower()
+        new_role = intent if intent in {"owner", "provider"} else "renter"
         user_doc = {
             "id": str(uuid.uuid4()),
             "email": email,
             "name": name,
             "picture": picture,
-            "role": "renter",
+            "role": new_role,
             "email_verified": True,
             "google_linked": True,
             "created_at": datetime.now(UTC).isoformat(),
@@ -382,7 +386,7 @@ async def google_session_exchange(
         await db.users.insert_one(user_doc)
         # Fire-and-forget welcome email (best-effort — errors are logged).
         try:
-            _schedule_bg_email(send_welcome_email(email, name, "renter"))
+            _schedule_bg_email(send_welcome_email(email, name, new_role))
         except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to queue welcome email for {email}: {e}")
 

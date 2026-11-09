@@ -555,14 +555,14 @@ function App() {
             <Route path="/services/jobs/:id" element={<JobDetail />} />
             <Route path="/services/post-job" element={user ? <PostJob /> : <ToAuth to="/signup" />} />
             <Route path="/services/gig/:id" element={<GigDetail />} />
-            <Route path="/services/create-gig" element={user ? <CreateGig /> : <ToAuth to="/signup" />} />
+            <Route path="/services/create-gig" element={<CreateGig />} />
 
             {/* The names people see and share from now on. */}
             <Route path="/businesses/jobs" element={<JobsBoard />} />
             <Route path="/businesses/jobs/:id" element={<JobDetail />} />
             <Route path="/businesses/post-job" element={user ? <PostJob /> : <ToAuth to="/signup" />} />
             <Route path="/businesses/:id" element={<GigDetail />} />
-            <Route path="/businesses/add" element={user ? <CreateGig /> : <ToAuth to="/signup" />} />
+            <Route path="/businesses/add" element={<CreateGig />} />
             {/* M4 — the public page for ONE business, by slug or by id.
                 Both resolve: the spec allows either as canonical and the
                 short-link table already points at /business/{id}. */}
