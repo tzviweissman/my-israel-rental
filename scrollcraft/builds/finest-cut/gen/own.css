@@ -21,9 +21,9 @@
 .lnk:active { opacity: .75; }
 
 /* sections come into focus */
-.rev { opacity: 0; filter: blur(8px); transition: opacity 500ms var(--out), filter 500ms var(--out); }
-.rev.in { opacity: 1; filter: none; }
-.no-js .rev { filter: none; }
+.rev { opacity: 0; transform: scale(.94); transform-origin: 50% 70%; transition: opacity 600ms var(--out), transform 700ms var(--out); }
+.rev.in { opacity: 1; transform: none; }
+.no-js .rev { transform: none; }
 
 /* the price and its unit, side by side */
 .pr-row { display: flex; align-items: baseline; gap: var(--s3); flex-wrap: wrap; margin: var(--s3) 0 0; }
@@ -74,7 +74,7 @@
   .chaps, .w6 { display: none; }
   .open .w0 { opacity: 1; visibility: visible; }
   .open .shade { opacity: 1; }
-  .rev { filter: none; }
+  .rev { transform: none; }
 }
 
 /* kosher band */

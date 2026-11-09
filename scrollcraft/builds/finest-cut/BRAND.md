@@ -8,7 +8,7 @@ Logo: their round mark, black with an amber flame and rooster, script "Finest Cu
 - Ink #FBF4E8: main text and prices
 - Soft #CDBFAC: quieter text
 - Line #3F352B: thin rules, field edges
-- Amber #F6A313: the main button only, with #14110E words; and the one statement band as a ground, where the button turns black
+- Crust gold #CE8D09, the golden crust of their chicken in assets/board.webp (rule 3g.19; was amber #F6A313 before 8 Nov 2026): the main button only, with #14110E words; and the one statement band as a ground, where the button turns black
 
 ## Fonts
 - Secular One: headings (one weight, from the approved list, heavy like their flyer's headline)

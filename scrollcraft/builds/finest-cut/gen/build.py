@@ -28,6 +28,8 @@ def write(page, title, desc, body, tail=''):
     SITE.write(page, title, desc, OG, body, tail)
     f = f'{page}.html'
     s = open(f, encoding='utf8').read().replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta name="site-category" content="food-shop">\n<link rel="icon" href="assets/logo.webp" type="image/webp">', 1)
+    if page == 'index':   # what we offer (3g.18) and the button's colour from the product (3g.19)
+        s = s.replace('<meta name="site-category" content="food-shop">', '<meta name="site-category" content="food-shop">\n<meta name="offers" content="chicken board">\n<meta name="product-colour" content="#CE8D09" data-from="assets/board.webp">', 1)
     s = s.replace(' <span class="arw" aria-hidden="true">→</span>', '')   # no arrows: the button's own hover is the light
     open(f, 'w', encoding='utf8').write(s)
 

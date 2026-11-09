@@ -6,7 +6,7 @@
    Never start a look from another site's tokens. */
 :root {
   /* CHANGE: the brand. Ground, surface, ink, soft text, the accent, the line. */
-  --ground: #14110E; --surface: #211B16; --ink: #FBF4E8; --soft: #CDBFAC; --accent: #F6A313; --accent-ink: #14110E; --line: #3F352B;
+  --ground: #14110E; --surface: #211B16; --ink: #FBF4E8; --soft: #CDBFAC; --accent: #CE8D09; --accent-ink: #14110E; --line: #3F352B;
   /* CHANGE: three faces at most, none the same as another site's heading face. */
   --font-head: 'Secular One', sans-serif; --font-body: 'Rubik', sans-serif;
   /* CHANGE: one radius for images and buttons. */
@@ -183,9 +183,9 @@ textarea.fld { min-height: 88px; resize: vertical; }
 .lnk:active { opacity: .75; }
 
 /* sections come into focus */
-.rev { opacity: 0; filter: blur(8px); transition: opacity 500ms var(--out), filter 500ms var(--out); }
-.rev.in { opacity: 1; filter: none; }
-.no-js .rev { filter: none; }
+.rev { opacity: 0; transform: scale(.94); transform-origin: 50% 70%; transition: opacity 600ms var(--out), transform 700ms var(--out); }
+.rev.in { opacity: 1; transform: none; }
+.no-js .rev { transform: none; }
 
 /* the price and its unit, side by side */
 .pr-row { display: flex; align-items: baseline; gap: var(--s3); flex-wrap: wrap; margin: var(--s3) 0 0; }
@@ -236,7 +236,7 @@ textarea.fld { min-height: 88px; resize: vertical; }
   .chaps, .w6 { display: none; }
   .open .w0 { opacity: 1; visibility: visible; }
   .open .shade { opacity: 1; }
-  .rev { filter: none; }
+  .rev { transform: none; }
 }
 
 /* kosher band */

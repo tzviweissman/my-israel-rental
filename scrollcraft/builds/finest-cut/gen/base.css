@@ -6,7 +6,7 @@
    Never start a look from another site's tokens. */
 :root {
   /* CHANGE: the brand. Ground, surface, ink, soft text, the accent, the line. */
-  --ground: #14110E; --surface: #211B16; --ink: #FBF4E8; --soft: #CDBFAC; --accent: #F6A313; --accent-ink: #14110E; --line: #3F352B;
+  --ground: #14110E; --surface: #211B16; --ink: #FBF4E8; --soft: #CDBFAC; --accent: #CE8D09; --accent-ink: #14110E; --line: #3F352B;
   /* CHANGE: three faces at most, none the same as another site's heading face. */
   --font-head: 'Secular One', sans-serif; --font-body: 'Rubik', sans-serif;
   /* CHANGE: one radius for images and buttons. */

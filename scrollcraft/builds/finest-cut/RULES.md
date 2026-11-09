@@ -28,6 +28,7 @@ R3s.19 pass: built to the blueprint: the same board picture and promise on the l
 R6.1 pass: built to the blueprint: the food shop lead block, product and price, comes first and is on the first screen and the next ones
 R4.1 pass: built to the blueprint: servings, fee, lead time, hours and the type names are left out and listed in OWNER-QUESTIONS.md and gen/report.md
 R3g.13 pass: built to the blueprint: the first screen: their board, 4 words "The crunch you crave", one line with where, one button; proof right under the button
+R3g.18 pass: built to the blueprint: one kind of offer, their chicken board: the film and the end photo show the board, <meta name="offers" content="chicken board">
 R3b.1 pass: built to the blueprint: what: schnitzel boards. where: Jerusalem. trust: the hashgacha. next: Order the feast
 R3b.2 pass: built to the blueprint: $215 and the hashgacha sit right under the button; the kosher band follows the opening; the band and the facts line are the two statements, with shop and contact facts in their own sections
 R3b.3 pass: built to the blueprint: one solid button per screen: the header one is outline, the phone bar is hidden when the opening end shows its own
@@ -59,6 +60,7 @@ R3x.5 n/a: the light follows the scroll, not the pointer
 R3.12 pass: built to the blueprint: hero, the feast with price and what is included, the closing band with its button and contacts
 R3c.1 pass: built to the blueprint: kept references with links in CONCEPT.md, one direction chosen with its reason
 R3g.17 pass: built to the blueprint: fresh Mobbin, 21st and Inspo searches named in REFERENCES.md and CONCEPT.md Effects; check-concept
+R3g.19 pass: built to the blueprint: crust gold #CE8D09 from the chicken in assets/board.webp (check-button-colour --suggest), ink words, in BRAND.md and <meta name="product-colour">
 R3c.2 pass: built to the blueprint: dark ground and amber from the logo, Secular One and Rubik; no gradients or glass; an amber section for contrast
 R3g.1 pass: built to the blueprint: style sheet in CONCEPT.md before building; site.css tokens follow it
 R3g.3 pass: built to the blueprint: amber is the button, and the one statement band as a ground as the owner flyer uses it; prices in the text colour, bold and large
@@ -215,6 +217,7 @@ R3w.3 n/a: nothing generated
 R3w.4 n/a: no film
 R3w.5 n/a: no film
 R3w.6 n/a: no scroll film
+R3w.7 pass: built to the blueprint: no generated place: the landscape is their own chicken board, every still made from their photo (src/owner/p02.jpg) and compared with it at full size, crust, colour, cups and logo, before the clip (gen/mountains-brief.md, Looks real; film/compare-*.jpg)
 R3v.1 pass: built to the blueprint: who: Finest Cuts and one line of theirs; Pages; Ordering; Reach us; base line with © and MyIsraelRental and Privacy; no since line
 R3v.2 pass: built to the blueprint: Home, Shop, Contact in the bar on every page; check-menu
 R3v.6 pass: built to the blueprint: band, opening, feast and how sections differ in height; check-heights

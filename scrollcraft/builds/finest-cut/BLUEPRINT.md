@@ -113,6 +113,8 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 
 - [x] R3g.13 The first screen holds a picture, a headline of 2 to 5 words that says what the customer gets, at most one short line (where the business is: the line or the small label, not both; trust goes there or right under the button) and one button; the header does not count
   plan: the first screen: their board, 4 words "The crunch you crave", one line with where, one button; proof right under the button
+- [x] R3g.18 The first screen shows what the business offers before any scroll: one kind may be shown by the picture or the words; two or more different kinds are each named in the headline or big words; the home page lists them in <meta name="offers"> (check: check-says-offer)
+  plan: one kind of offer, their chicken board: the film and the end photo show the board, <meta name="offers" content="chicken board">
 - [x] R3b.1 The first screen answers: what it is, where, why trust it, what to do next
   plan: what: schnitzel boards. where: Jerusalem. trust: the hashgacha. next: Order the feast
 - [x] R3b.2 Proof (price, credential or rating) touches the main button; for food a kosher band sits just after the opening, not crowding the button, and the certificate is stated at most twice as a sentence or band (a small identical kosher tag on items does not count)
@@ -178,6 +180,8 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: kept references with links in CONCEPT.md, one direction chosen with its reason
 - [x] R3g.17 Every piece (button, arrow, each card or list effect, each section) came from a fresh Mobbin, 21st and Inspo search for this business, with the source named; nothing reused from the last two pages; each effect has a reason (says what a control does) (check: concept)
   plan: fresh Mobbin, 21st and Inspo searches named in REFERENCES.md and CONCEPT.md Effects; check-concept
+- [x] R3g.19 Shops (food-shop, fashion-shop): the main buttons are in the product's own colour, taken from its photo (meta product-colour with data-from, in BRAND.md), text 4.5:1 on it, and each button stands out 3:1 from what is behind it; n/a for other categories (check: check-button-colour)
+  plan: crust gold #CE8D09 from the chicken in assets/board.webp (check-button-colour --suggest), ink words, in BRAND.md and <meta name="product-colour">
 - [x] R3c.2 No AI default look: not cream + serif + one italic word (unless their brand), no default font, purple or two-colour gradient, exactly three identical cards, frosted glass used everywhere, default "premium" palette; at least one section on a contrasting ground
   plan: dark ground and amber from the logo, Secular One and Rubik; no gradients or glass; an amber section for contrast
 - [x] R3g.1 A style sheet exists in CONCEPT.md before building (accent, ink, ground, two faces plus at most a third for one label style, one radius, motion limits) and every section follows it
@@ -480,6 +484,8 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: no film
 - [x] R3w.6 A scroll film's scrub ends where the clip's motion ends (check-clip's figure), the last hold is short, and its last frame is the picture the next section shows
   plan: n/a: no scroll film
+- [x] R3w.7 Generated places and materials look photographed: no dune-smooth hills, model villages, stones in tidy equal rows or flat soft light, checked at full size beside a real photograph of that place or material before any clip
+  plan: no generated place: the landscape is their own chicken board, every still made from their photo (src/owner/p02.jpg) and compared with it at full size, crust, colour, cups and logo, before the clip (gen/mountains-brief.md, Looks real; film/compare-*.jpg)
 
 ## Stage 11. Finish
 

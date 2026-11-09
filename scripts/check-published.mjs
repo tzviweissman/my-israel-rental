@@ -36,7 +36,7 @@ for (const f of files) {
       const rest = u.slice(BASE.length);
       // the folder glued straight onto a script piece (src="' + url + '") breaks; "assets/bun-' + c + '.webp" is fine
       if (/^\s*(?:'|\$\{)/.test(rest)) { problems.push(`${f}: a script-built address was prefixed with ${BASE}: ${u.slice(0, 90)}`); continue; }
-      if (/'\s*\+|\$\{/.test(rest)) continue;  // a path the page's script completes at run time
+      if (/'\s*\+|\$\{|\{\w+\}/.test(rest)) continue;  // a path the page's script completes at run time (film.js fills data-video's {k} with d or m)
       const file = decodeURIComponent(rest.split(/[?#]/)[0]);
       if (file && !/\/$/.test(file) && !fs.existsSync(path.join(OUT, file))) problems.push(`${f}: ${u.split('?')[0]} is not in the published folder`);
     } else if (/\.css$/i.test(f) && /^(?:\.\/)?assets\//.test(u)) {
