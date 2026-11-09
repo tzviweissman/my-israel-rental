@@ -3606,7 +3606,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                     <img src={r.thumb} alt={designName(r.settings?.adName || r.design)} className="w-full block" />
                   </button>
                   <span className="block mt-1 text-[10px] leading-tight text-center" style={{ color: 'var(--brand-muted)' }}>
-                    {t('ads.weekVisits', 'Visits this week: {{count}}', { count: weekCounts[r.settings?.adName] || 0 })}
+                    {t('ads.weekVisits', 'Visits this week: {{n}}', { n: weekCounts[r.settings?.adName] || 0 })}
                   </span>
                   <button type="button" onClick={() => removeSaved(r.id)} aria-label={t('ads.deleteSaved', 'Delete this ad')}
                     className="absolute top-1 end-1 rounded-full bg-white/90 p-1" data-testid={`ad-saved-delete-${r.id}`}>
