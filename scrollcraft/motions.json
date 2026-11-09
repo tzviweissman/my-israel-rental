@@ -112,6 +112,10 @@
   },
   "finder": {
     "what": "products lie in a pile on the floor; the visitor picks an occasion and those for it rise out and flow into a line",
+    "used_by": []
+  },
+  "rooms": {
+    "what": "the scroll walks through one coloured room per category, a real piece in each, each room wiping in over the last",
     "used_by": [
       "gifted-israel"
     ]

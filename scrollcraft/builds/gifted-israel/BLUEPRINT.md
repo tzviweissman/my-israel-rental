@@ -75,7 +75,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3p.7 Similar items are shown the same way: if one flavour's thumbnail is one jar, every flavour's is one jar; a list where pointing at an item changes a big photo does so for every item
   plan: Every item is shown the same way: one square photo on white
 - [x] R3h.12 One look per product everywhere: film frame, close-up, picker, tile, card and order form show the same object, cut or edited from one master; a name with unknown look gets no picture
-  plan: Each piece is one cut-out from its one master photo in the pile and line; the same master on its card and sheet
+  plan: Each piece is one cut-out from its one master photo, set in its room and on its card and sheet the same way (gen/backdrops.py, gen/rooms_layers.py)
 - [x] R3h.10 Choosing an option changes its picture, words and button; one photo per option, from one shoot, sharp at the size shown (check: motion)
   plan: Finish and nusach chips change the words and order line; their photos show one finish, so the picture stays and the piece says so (question 5)
 - [x] R3g.14 One colour grade across every image and clip on the page
@@ -97,7 +97,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3c.14 A cut-out is one subject: no stray garnish, specks or pale fringe, looked at on a dark and a light ground (check: cutout)
   plan: n/a: no cut-outs; pieces stay on their own white, the logo mark checked on light and dark
 - [x] R5b.3 Text over imagery: words sit on the picture with a soft edge shade (or a small solid card), never big dark pools, full-frame darkening or frosted glass, and meet contrast at the brightest frame; on a phone they cover at most 40% of the opening picture's detail; a plain strip under the photo only where the picture is too busy (check: readable)
-  plan: No words over pictures; only the price sits under each piece in the line, clear of the pile; its name shows on pointing, and tapping opens it in the shop (Tzvi, 5 Nov 2026: the names looked cluttered)
+  plan: Words sit on a stone card or along the floor line, never over a piece; the big room name is behind the piece, and the piece is laid over it
 - [x] R3e.8 Every word is at least 12 px (14 px for a sentence on a phone) and 4.5:1 contrast (3:1 large), button text 4.5:1 on its fill (check: readable)
   plan: readable script passes; smallest text is the scale's --t-1 at 13 px in labels only
 - [x] R3s.24 Media is light and sized: no photo over 600 KB, every `<img>` has width and height, every video has a poster, nothing stays hidden with motion off (check: site)
@@ -114,7 +114,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3g.13 The first screen holds a picture, a headline of 2 to 5 words that says what the customer gets, at most one short line (where the business is: the line or the small label, not both; trust goes there or right under the button) and one button; the header does not count
   plan: Picture, five-word headline, one line, one button; the small label says where; trust facts under the button
 - [x] R3g.18 The first screen shows what the business offers before any scroll: one kind may be shown by the picture or the words; two or more different kinds are each named in the headline or big words; the home page lists them in <meta name="offers"> (check: check-says-offer)
-  plan: One kind of offer, gifts: the headline says "For all your gifting needs" over the heap of their real pieces on both first screens; <meta name="offers" content="gifts"> on the home page; check-says-offer passes
+  plan: One kind of offer, gifts: the headline says "For all your gifting needs" on the first screen over their piece in its room, and each room names its kind of gift huge; <meta name="offers" content="gifts"> on the home page; check-says-offer passes
 - [x] R3b.1 The first screen answers: what it is, where, why trust it, what to do next
   plan: What and where in the label and line, trust as prices and the count, next step the button
 - [x] R3b.2 Proof (price, credential or rating) touches the main button; for food a kosher band sits just after the opening, not crowding the button, and the certificate is stated at most twice as a sentence or band (a small identical kosher tag on items does not count)
@@ -126,49 +126,49 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3h.21 Effects, never too much: the opening film may hold the page for its length; any other section that holds the page while the scroll changes it is at most a screen and a half, at most three in all; longer turning becomes a tap; nothing stands between a phone visitor and the products or the order (check: check-one-scroll)
   plan: Nothing holds the scroll anywhere on the site
 - [x] R3h.22 A film starts as one storyboard sheet of rough line drawings (one row per concept, 3 to 4 panels), approved by Tzvi before any photoreal still; only the chosen concept is made as stills
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.23 Every film clip passes check-clip (no JUMP, RUSH, BLANK, VANISH or APPEAR), its brief has "How it really happens" from a real reference and a "Key moment" with its own clip, and each numbered step was ticked off against the clip at 8 fps (check: check-clip)
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.24 A scroll film is real video tied exactly to the scroll (data-video, every frame a keyframe, starter/film.js): within 0.4 s of the scroll and never still over 400 ms or on over 15% of frames while scrolling, laptop and phone, in real Chrome (check: check-film-video)
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.25 Nothing covers a scroll film while it plays: at 20, 40 and 60% of the film, on a laptop and a phone, words, cards and names cover at most 3% of it (the site's menu bar aside); the words wait for its end or sit beside or under it (check: check-film-clear)
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.1 The home page opens on a full-screen picture or film (at least 70% picture) and it is an event from their own thing (a film, or an event built in code), proposed with the first build, never after (check: site)
-  plan: A real event from what they are: 112 of their own pieces fall into a heap with depth on the floor, and an occasion raises its pieces into a line (Tzvi chose it, a code event counts)
+  plan: A real event from what they are: the scroll walks through seven rooms, one per category, each wiping into the next with their own piece on its stone and the name behind it (Tzvi, 9 Nov 2026: "yes 1"); built in code, the rooms are the generated sets of the shop pictures made at the screen shapes
 - [x] R3n.1 The owner's strongest real photo fills at least half the first screen on a laptop and on a phone, not a small card or cut-out shape
   plan: Their photo fills the first screen on its own white, the menorah about half of a laptop and the top half of a phone
 - [x] R3n.2 One signature moment only this business could have, driven by the visitor (scroll scene or a choice)
-  plan: The occasion chips: chosen by the visitor, deciding which of their real pieces rise
+  plan: The visitor leads: the scroll walks the rooms, and the room list on a laptop jumps to any of them
 - [x] R3n.3 The visitor's choice changes the page (colour, hero, order), not just one picture (check: motion)
   plan: What is typed changes the piece, the button words, the basket line and the WhatsApp order
 - [x] R3n.4 Side by side with the closest reference in docs/inspo for this kind of business, ours is not plainly weaker
   plan: Beside Moto's product on a plinth and Kalstore's personalisation in CONCEPT.md: ours shows it on the real piece
 - [x] R3n.5 The one-sentence test, told to someone else and run on the first five seconds and the first full scroll: "you land and ___ happens" is about the business, not a decoration ("nothing", "the camera moves", "it fades in" fail)
-  plan: You land and their gifts tumble into a heap on the floor, then you tap Birthday and six birthday gifts rise out of it and flow into a line with their prices
+  plan: You land in a honey room where their Mayim Achronim settles on an onyx block with SHABBOS behind it, then scrolling wipes in Havdalah, Home, Judaica, Rosh Hashana, Chanukah and Games, one coloured room each
 - [x] R3g.15 The opening is made for this business at full quality: never a flyer crop or low-resolution photo, and a generated setting is never presented as their real premises (check: fits)
   plan: Their full-size studio photo, never a flyer crop; no setting made up
 - [x] R3h.2 A film opening goes from where the product comes from to their real product and the button, every step true
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.3 A film is full screen, crisp, drawn as sharp frames or near-lossless video at screen size, never shrunk, masked or in a column
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.5 A film's chapter lines are 2 to 6 words, small, at an edge, at most a third of the screen's height, on a soft edge shade only, never over the action (check: readable)
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.7 A film's seams are checked: each join compared, a jumping clip regenerated
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.8 The section after a lit film changes the mood boldly
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.11 Every film and generated still set is bright: middle third at least 33, whole frame at least 22, average at least 30; the subject is the brightest thing; viewed on a phone in daylight (check: brightness)
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.13 One cause, one motion: the cause and its result are one clip, code pieces start on the cause frame and match the film's material, and the effect passes a 4 fps watch (no fall-then-fly, no pause, no blocks for flakes, no heap from nowhere, nothing wrong played backwards)
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.14 The product stays recognisable through the whole effect; a moving camera never loses it; on a phone the frame widens if pieces travel past the crop
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.18 The film is physically possible: every object on screen is listed with where it comes from and where it goes (in frame, enters or leaves past an edge, cut from something seen); nothing appears, turns into something else or vanishes in a way that looks off at normal speed (something filling in naturally is fine: Tzvi, 26 Oct); list shown with the steps before generating
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.19 Generate once, by choosing a physically possible story before generating (a better prompt only helps a little; a failed clip changes the story, not just the prompt): each clip's start and end frames hold the same objects (or they enter or leave past an edge), one kind of action per clip, clips chained by stills made and checked before any video, frame 1 / middle / last written in the brief first, at most two tries per clip
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3h.17 Words and film take turns: a giant name sits on plain ground, the film appears as letters part, the film moves aside before the headline arrives (check: readable)
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3x.5 A following light is used only for a dark-world business, has an off button, sweeps once by itself on a phone and with reduced motion, and never dims the words or main button
   plan: n/a: no following light; not a dark-world business
 
@@ -199,11 +199,11 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3q.1 CONCEPT.md is complete: 3 or more ideas each citing a saved effect picture, an "Own:" idea, which was chosen, the five wow answers, an Effects line per kind, the "Not alike" line (check: concept)
   plan: CONCEPT.md complete, check-concept passes
 - [x] R5a.7 One signature idea and one peak per page; at most one signature scroll section; the ending resolves on the action; not carried over from another business
-  plan: One signature, the pile and the rising line; the page ends on the shop button
+  plan: One signature, the seven rooms; the page ends on the shop button
 - [x] R9.1 The page's signature section is used only when their own photos or items support it; a page without the right material stays still
   plan: Engraving is on 11 of their pieces and the base is a flat face in their own photo
 - [x] R3f.2 The effect budget is filled and ticked on captured frames: one signature moment (held where it fits 1280x650, otherwise playing as the page scrolls), at least three accents (arriving opening, a scroll-tied detail mid-page, a closing payoff), quiet touches
-  plan: Signature the pile; accents: typed engraving, occasion cards opening, closing band; quiet: button press, arrows, reflection on cards
+  plan: Signature the rooms; accents: typed engraving, occasion cards opening, closing band; quiet: button press, arrows, reflection on cards
 - [x] R3m.1 A gallery place on every designed page (`data-mir-gallery` with template), and priced products inside `data-mir-catalog` with `data-mir-list`, group and item templates
   plan: Gallery place on the home page; the shop's products are in data-mir-catalog with list, group and item templates
 - [x] R3m.3 Details the owner changes (hours, areas and fees, guarantee, FAQ, reviews) sit in fixed places with length limits, never free text boxes
@@ -373,7 +373,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 ## Stage 8. Motion
 
 - [x] R3f.1 A scroll effect plays while its subject is wholly on screen (held on a stage that fits, or started only when all in view); captured at 0, 25, 50, 75 and 100 percent on laptop, short laptop and phone, the whole subject is visible and the effect is mid-way where it should be
-  plan: Effects play when in view; the pile falls and the line rises on the first screen, whole subject on screen; pieces in mid-air are allowed in the smoothness check, Tzvi on 5 Nov 2026
+  plan: The rooms follow the scroll; the first piece settles and its name slides in on load, whole subject on screen; transforms and clip only
 - [x] R3f.8 A scroll-tied effect finishes while its subject is mid-screen (top on screen, centre no higher than 40%) at six sizes (check: scroll-finish)
   plan: n/a: no scroll-tied effect
 - [x] R3f.9 A list that stacks on a phone runs item by item (each item lights at about 80% down)
@@ -397,7 +397,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3a.4 A held (pinned) section is designed to fit its content at 1280x650; if it truly cannot, it plays as the page scrolls without holding the screen and is still the signature; the order section is never held (check: cutoff)
   plan: n/a: nothing is pinned
 - [x] R3a.5 Pinning and scrubbing yes, taking the scroll's speed or direction no, no parallax on phones, reduced motion shows a still
-  plan: No scroll-speed tricks; reduced motion shows the pile and the first line at once, and so does scrolling away before it finishes; the opening cannot slide sideways when a chip is reached by keyboard
+  plan: No scroll-speed tricks: the scroll leads the wipe; reduced motion switches rooms without the slide; without the script the rooms stand one under another
 - [x] R3s.2 Nothing jumps: late photos fade in over 200 to 400 ms into space kept for them; choosing something never moves the layout (check: site)
   plan: Images have width and height; the sheet opens over the page; check-site passes
 - [x] R3s.1 Everything pressable answers within 100 ms with a hover and a pressed state (check: site)
@@ -467,7 +467,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3u.11 The page passed its checks with a still where the film goes before the film went in
   plan: n/a: no film went in
 - [x] R3u.12 Every moving piece not in the kit was tried on a test page with buttons for each state before it went in
-  plan: The pile and line were tried and shot on the page before the checks, states in gen/look/
+  plan: The rooms were sketched (gen/look/new-openings.jpg) and shot on the page before the checks
 - [x] R3u.13 gen/report.md ends with "Not done yet" and "For your call" (at most two)
   plan: gen/report.md ends with Not done yet and For your call
 - [x] R3u.14 gen/copy-pass.md holds a shorter version of every line over 20 words and paragraph over three lines; the shorter is used unless it drops a fact
@@ -479,11 +479,11 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3w.3 Generated food is lit from the side and behind with the camera side darker, never flat from the front; a pour or fall stays sharp when paused
   plan: n/a: no film, no food
 - [x] R3w.4 The film's start and end pictures were right before any clip was made; each clip was made once at full quality (a draft only where get_cost showed it under a third of the price); simple motion (a growing crack, push-in, drift, holds) is done in code; every clip judged at 4+ fps
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3w.5 No bite, chew or tear is shown in motion unless Tzvi approved that take; otherwise the film cuts to the result
   plan: n/a: no film, no food
 - [x] R3w.6 A scroll film's scrub ends where the clip's motion ends (check-clip's figure), the last hold is short, and its last frame is the picture the next section shows
-  plan: n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+  plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3w.7 Generated places and materials look photographed: no dune-smooth hills, model villages, stones in tidy equal rows or flat soft light, checked at full size beside a real photograph of that place or material before any clip
   plan: No place is generated. The 14 generated sets behind the shop pictures (stone blocks, plaster walls, a branch, linen) were looked at full size before use: veined, pitted stone, hard window light with soft-edged leaf shadows, no smooth hills, tidy rows or flat light. The six surface sets with stray table edges or walls were cropped (gen/scene.py CROP). No clip is made from them
 

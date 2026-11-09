@@ -16,7 +16,7 @@ on every card. All references: REFERENCES.md. Ideas in full: IDEAS.md. Brand: BR
   (docs/inspo/awwwards-categories-2026-10-18/halcyon-lighting-1-lights-off-toggle.webp). Waits: no photo of theirs has lit candles.
 
 ## Chosen
-H, Tzvi's pick on 5 Nov 2026 with his own change: their real pieces fall into a pile on the floor, and choosing an occasion makes that occasion's pieces rise out of the pile and flow into a line with names and prices. It says what the shop is all year: gifts for any occasion. Nothing generated: their own photos cut off their white in gen/gifts.py. A stays as the engraving section lower on the page, B as the category row.
+I, Tzvi's pick on 9 Nov 2026 ("yes 1") after "try a new wow moment this isnt good", replacing H. Before: H, Tzvi's pick on 5 Nov 2026 with his own change: their real pieces fall into a pile on the floor, and choosing an occasion makes that occasion's pieces rise out of the pile and flow into a line with names and prices. It says what the shop is all year: gifts for any occasion. Nothing generated: their own photos cut off their white in gen/gifts.py. A stays as the engraving section lower on the page, B as the category row.
 
 ## Style sheet (3g.1)
 - Ground: white #FFFFFF, the white their photos stand on; one stone room #F5F1EC; one red band #6F0D0C to close.
@@ -27,16 +27,16 @@ H, Tzvi's pick on 5 Nov 2026 with his own change: their real pieces fall into a 
 - Motion: under 0.5 s, eased, never linear; the engraving is the one loud moment; nothing holds the scroll.
 
 ## Effect budget (3f.2)
-- Signature: the pile and the rising line (GI-F1), arriving on load and then driven by the visitor.
+- Signature: the seven rooms (GI-F2), one per category, wiped in by the scroll.
 - Accents: the engraving typed by the visitor (GI-X1); the occasion cards open when pointed at; the closing red band answers the opening with "For all your gifting needs" under the name.
 - Quiet touches: GI-B1 press on buttons, L3 links, GI-R1 blocks settle in, the piece's own reflection grows on cards.
 
 ## Wow gate
-1. Their strongest thing, big: 112 of their own pieces (66 on a phone), their real photos cut off their white, in a heap with real depth across the floor: further back is smaller and dimmer, each tilted the way it landed, throwing a shadow on what lies under it. Each is whole when it rises.
-2. The signature only they could have: the range itself. Nobody else's pile holds these pieces, and the pieces in the line are the ones on sale with their prices.
+1. Their strongest thing, big: one of their own pieces per category, on its stone in a room of that category's colour, the category's name huge behind it.
+2. The signature only they could have: the range itself, room by room, each with its real piece and its price line.
 3. The visitor's choice changes the page: the occasion chosen decides which six rise, and each goes straight to that piece in the shop.
 4. Side by side with a reference: Delta Cafes' quiz (docs/inspo/awwwards-food-2026-10-18/delta-cafes-3-floating-packs-quiz.webp) only floats packs round a question; ours answers on the spot. Itsua's intent picker (docs/inspo/awwwards-categories-2026-10-18/itsua-1-intent-picker.webp) is the "pick the one that sounds like you" model; Mobbin Kalstore (https://mobbin.com/sites/sections/1616aa46-b42b-44f0-b46c-6bdb800bb145) sells gifts with a plain grid.
-5. One sentence: you land and their gifts tumble down into a heap on the floor, then you tap Birthday and six birthday gifts rise out of the heap and flow into a line with their prices.
+5. One sentence: you land in a honey room where their Mayim Achronim settles on its stone with SHABBOS behind it, and each scroll wipes in the next coloured room with its own piece.
 
 ## Effects
 - button: GI-B1, new, from 21st "Engraved Client Plates" (https://21st.dev/@cipriantitire/components/engraved-client-plates): on press the label sinks in like letters cut into metal
@@ -53,3 +53,5 @@ H, Tzvi's pick on 5 Nov 2026 with his own change: their real pieces fall into a 
 gifted-israel: different from all 19 other pages
 
 (pasted from scripts/check-fingerprints.mjs once the pages exist)
+
+- other: GI-F2, new, from docs/inspo/videos-2026-11-08/bramble-chain.jpg and docs/inspo/pro-references/shop-type-and-photo.jpg: a room of the product's own colour per chapter, the word huge behind the piece.

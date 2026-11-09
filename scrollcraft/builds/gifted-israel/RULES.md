@@ -28,34 +28,34 @@ R3s.19 pass: built to the blueprint: Same line in the share text, home and shop;
 R6.1 pass: built to the blueprint: Shops playbook: product grid just below the first screen, then occasions and how ordering works
 R4.1 pass: built to the blueprint: Delivery fee reads "we confirm the fee on WhatsApp"; engraving price the same; gaps listed in OWNER-QUESTIONS.md
 R3g.13 pass: built to the blueprint: Picture, five-word headline, one line, one button; the small label says where; trust facts under the button
-R3g.18 pass: built to the blueprint: One kind of offer, gifts: the headline says "For all your gifting needs" over the heap of their real pieces on both first screens; <meta name="offers" content="gifts"> on the home page; check-says-offer passes
+R3g.18 pass: built to the blueprint: One kind of offer, gifts: the headline says "For all your gifting needs" on the first screen over their piece in its room, and each room names its kind of gift huge; <meta name="offers" content="gifts"> on the home page; check-says-offer passes
 R3b.1 pass: built to the blueprint: What and where in the label and line, trust as prices and the count, next step the button
 R3b.2 n/a: not a food business, nothing on the site says kosher
 R3b.3 pass: built to the blueprint: One red button per screen; header outline; everything else link, tile or chip
 R3h.20 n/a: no scroll-driven opening; the first screen plays on arrival and on each tap
 R3h.21 pass: built to the blueprint: Nothing holds the scroll anywhere on the site
-R3h.22 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.23 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.24 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.25 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.1 pass: built to the blueprint: A real event from what they are: 112 of their own pieces fall into a heap with depth on the floor, and an occasion raises its pieces into a line (Tzvi chose it, a code event counts)
+R3h.22 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.23 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.24 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.25 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.1 pass: built to the blueprint: A real event from what they are: the scroll walks through seven rooms, one per category, each wiping into the next with their own piece on its stone and the name behind it (Tzvi, 9 Nov 2026: "yes 1"); built in code, the rooms are the generated sets of the shop pictures made at the screen shapes
 R3n.1 pass: built to the blueprint: Their photo fills the first screen on its own white, the menorah about half of a laptop and the top half of a phone
-R3n.2 pass: built to the blueprint: The occasion chips: chosen by the visitor, deciding which of their real pieces rise
+R3n.2 pass: built to the blueprint: The visitor leads: the scroll walks the rooms, and the room list on a laptop jumps to any of them
 R3n.3 pass: built to the blueprint: What is typed changes the piece, the button words, the basket line and the WhatsApp order
 R3n.4 pass: built to the blueprint: Beside Moto's product on a plinth and Kalstore's personalisation in CONCEPT.md: ours shows it on the real piece
-R3n.5 pass: built to the blueprint: You land and their gifts tumble into a heap on the floor, then you tap Birthday and six birthday gifts rise out of it and flow into a line with their prices
+R3n.5 pass: built to the blueprint: You land in a honey room where their Mayim Achronim settles on an onyx block with SHABBOS behind it, then scrolling wipes in Havdalah, Home, Judaica, Rosh Hashana, Chanukah and Games, one coloured room each
 R3g.15 pass: built to the blueprint: Their full-size studio photo, never a flyer crop; no setting made up
-R3h.2 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.3 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.5 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.7 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.8 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.11 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.13 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.14 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.18 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.19 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
-R3h.17 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+R3h.2 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.3 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.5 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.7 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.8 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.11 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.13 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.14 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.18 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.19 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
+R3h.17 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 R3x.5 n/a: no following light; not a dark-world business
 R3.12 pass: built to the blueprint: Hero with the event, product grid with prices, closing band with the button and contacts
 R3c.1 pass: built to the blueprint: REFERENCES.md and CONCEPT.md with links; one line in Chosen
@@ -69,9 +69,9 @@ R3g.11 pass: built to the blueprint: David Libre and Alef from the approved list
 R3p.3 pass: built to the blueprint: check-fingerprints passes; new faces, their own red
 R3p.5 pass: built to the blueprint: The basket count sits in a small gift box like their logo
 R3q.1 pass: built to the blueprint: CONCEPT.md complete, check-concept passes
-R5a.7 pass: built to the blueprint: One signature, the pile and the rising line; the page ends on the shop button
+R5a.7 pass: built to the blueprint: One signature, the seven rooms; the page ends on the shop button
 R9.1 pass: built to the blueprint: Engraving is on 11 of their pieces and the base is a flat face in their own photo
-R3f.2 pass: built to the blueprint: Signature the pile; accents: typed engraving, occasion cards opening, closing band; quiet: button press, arrows, reflection on cards
+R3f.2 pass: built to the blueprint: Signature the rooms; accents: typed engraving, occasion cards opening, closing band; quiet: button press, arrows, reflection on cards
 R3m.1 pass: built to the blueprint: Gallery place on the home page; the shop's products are in data-mir-catalog with list, group and item templates
 R3m.3 pass: built to the blueprint: Delivery, FAQ and gallery sit in fixed places; product details come from the catalogue
 R3k.1 pass: built to the blueprint: Home, Shop (menu and order on one page), Contact
@@ -108,7 +108,7 @@ R8.6 pass: built to the blueprint: Their own studio shots: one product large and
 R8.7 pass: built to the blueprint: Fourteen empty sets generated (gen/backdrops-brief.md), no item in them: every piece on the site is their own photo laid over one, nothing of theirs redrawn
 R8.2 pass: built to the blueprint: The set is their own matching photos; where the main photo was off-ground another of the same piece on white is used (gen/assets.py ALT)
 R3p.7 pass: built to the blueprint: Every item is shown the same way: one square photo on white
-R3h.12 pass: built to the blueprint: Each piece is one cut-out from its one master photo in the pile and line; the same master on its card and sheet
+R3h.12 pass: built to the blueprint: Each piece is one cut-out from its one master photo, set in its room and on its card and sheet the same way (gen/backdrops.py, gen/rooms_layers.py)
 R3h.10 pass: built to the blueprint: Finish and nusach chips change the words and order line; their photos show one finish, so the picture stays and the piece says so (question 5)
 R3g.14 pass: built to the blueprint: One studio white across the product photos; the one clip is their own warm-white footage
 R3o.1 n/a: not food
@@ -119,7 +119,7 @@ R8.3 pass: built to the blueprint: Fourteen empty sets generated (gen/backdrops-
 R8.4 n/a: no moving real material; the only clip is their own video
 R3c.13 pass: built to the blueprint: clipped and fits scripts pass on all pages
 R3c.14 n/a: no cut-outs; pieces stay on their own white, the logo mark checked on light and dark
-R5b.3 pass: built to the blueprint: No words over pictures; only the price sits under each piece in the line, clear of the pile; its name shows on pointing, and tapping opens it in the shop (Tzvi, 5 Nov 2026: the names looked cluttered)
+R5b.3 pass: built to the blueprint: Words sit on a stone card or along the floor line, never over a piece; the big room name is behind the piece, and the piece is laid over it
 R3e.8 pass: built to the blueprint: readable script passes; smallest text is the scale's --t-1 at 13 px in labels only
 R3s.24 pass: built to the blueprint: Product photos 800 px webp around 30 KB, width and height on every img, video has a poster
 R3p.6 pass: built to the blueprint: fits script passes at the six sizes; the pieces are their photos cut off their white, the floor is made in code; item pictures are their photos over a generated empty set (gen/backdrops.py), never cropped
@@ -164,7 +164,7 @@ R3s.25 pass: built to the blueprint: check-site FLOW: empty shows what is missin
 R3x.9 n/a: a shop with a basket, not a request form
 R3x.10 pass: built to the blueprint: The total stays in the sticky summary beside the steps on a laptop, and above the send button on a phone
 R3x.14 pass: built to the blueprint: SITE.gift_section and gift.js on the shop page, hidden until they switch gift cards on; question 10 asks their amounts
-R3f.1 pass: built to the blueprint: Effects play when in view; the pile falls and the line rises on the first screen, whole subject on screen; pieces in mid-air are allowed in the smoothness check, Tzvi on 5 Nov 2026
+R3f.1 pass: built to the blueprint: The rooms follow the scroll; the first piece settles and its name slides in on load, whole subject on screen; transforms and clip only
 R3f.8 n/a: no scroll-tied effect
 R3f.9 n/a: no list that lights item by item
 R3f.5 pass: built to the blueprint: Widths in rem and %, font in cqw; no background-clip
@@ -176,7 +176,7 @@ R3e.18 pass: built to the blueprint: Six seconds of their own clip, only on scre
 R3a.2 pass: built to the blueprint: Text never moves or re-wraps with the pieces: names are placed once, then fade in
 R3a.3 pass: built to the blueprint: Engraving placed by measurement inside the photo's figure, gen/look/base-crop.png
 R3a.4 n/a: nothing is pinned
-R3a.5 pass: built to the blueprint: No scroll-speed tricks; reduced motion shows the pile and the first line at once, and so does scrolling away before it finishes; the opening cannot slide sideways when a chip is reached by keyboard
+R3a.5 pass: built to the blueprint: No scroll-speed tricks: the scroll leads the wipe; reduced motion switches rooms without the slide; without the script the rooms stand one under another
 R3s.2 pass: built to the blueprint: Images have width and height; the sheet opens over the page; check-site passes
 R3s.1 pass: built to the blueprint: Hover and press on all controls under 100 ms to start
 R3s.8 n/a: no buttons over photos
@@ -208,15 +208,15 @@ R3u.8 n/a: no tilted label
 R3u.9 pass: built to the blueprint: kit.faq place is the starter's; restyled if the owner fills it
 R3u.10 n/a: no places listed
 R3u.11 n/a: no film went in
-R3u.12 pass: built to the blueprint: The pile and line were tried and shot on the page before the checks, states in gen/look/
+R3u.12 pass: built to the blueprint: The rooms were sketched (gen/look/new-openings.jpg) and shot on the page before the checks
 R3u.13 pass: built to the blueprint: gen/report.md ends with Not done yet and For your call
 R3u.14 pass: built to the blueprint: gen/copy-pass.md
 R3w.1 n/a: no film, no food
 R3w.2 n/a: no film, no food
 R3w.3 n/a: no film, no food
-R3w.4 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+R3w.4 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 R3w.5 n/a: no film, no food
-R3w.6 n/a: no film on this site; the opening is an event built in code from their own photos (GI-F1), nothing generated
+R3w.6 n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 R3w.7 pass: built to the blueprint: No place is generated. The 14 generated sets behind the shop pictures (stone blocks, plaster walls, a branch, linen) were looked at full size before use: veined, pitted stone, hard window light with soft-edged leaf shadows, no smooth hills, tidy rows or flat light. The six surface sets with stray table edges or walls were cropped (gen/scene.py CROP). No clip is made from them
 R3v.1 pass: built to the blueprint: Footer from sitekit: name and their line, pages, ordering from their words, reach us, base line; no founding year so no since
 R3v.2 pass: built to the blueprint: Bar lists Home, Shop, Contact on every page

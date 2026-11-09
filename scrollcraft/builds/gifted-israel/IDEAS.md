@@ -40,5 +40,23 @@
 - sources: docs/inspo/awwwards-food-2026-10-18/delta-cafes-3-floating-packs-quiz.webp, docs/inspo/awwwards-categories-2026-10-18/itsua-1-intent-picker.webp
 - steps: 1 their pieces float around "Who is the gift for?". 2 the visitor taps Host, New home, Wedding, Thank you or Me. 3 most pieces drift away and five for that answer come forward with their prices. 4 the button takes those five to the shop.
 
-## Chosen: H
+## I. A room for every occasion
+- motion: rooms, the scroll walks through one coloured room per category, a real piece on its stone in each and the category's name huge behind it
+- sources: docs/inspo/videos-2026-11-08/bramble-chain.jpg, docs/inspo/pro-references/shop-type-and-photo.jpg
+- steps: 1 the first screen is the terracotta room: their Mod Floral Diffuser on its stone block, HOME in giant letters behind it, the headline and button in front. 2 scrolling, the wall colour sweeps across to honey and the piece changes to their Rotating Mayim Achronim, SHABBOS behind it. 3 then Havdalah plum, Chanukah blue, Rosh Hashana pomegranate, Judaica olive, Games teal, one screen each. 4 the last room opens out into the shop button with the seven rooms as small tiles. The rooms are the sets already behind the shop pictures, so nothing new is generated.
+
+## J. Own: Light through the Lucite
+- motion: cast, a light moves round their clear piece in a dark room and throws the piece's own Hebrew words as a huge shadow on the wall
+- sources: docs/inspo/videos-2026-11-04/flashlight-hero.jpg, docs/inspo/awwwards-categories-2026-10-18/forum-cases-1-dark-film-hero.webp
+- steps: 1 a dark room, their clear Painted Kosel Tzedakah Box lit from one side. 2 the scroll (or the pointer) moves the light round the box, and the shadow of its word "tzedakah" swings huge across the wall behind. 3 the light settles in front, the room brightens, and the shadow becomes the headline. 4 the shop button and the other clear pieces appear on the lit shelf. Their pieces are clear Lucite with printed Hebrew, so this is their own world; the shadow is drawn in code from their photo.
+
+## K. The group chat
+- motion: chat, the opening is a phone chat where a friend asks what to bring and the replies are their real pieces with prices
+- sources: docs/inspo/ad-videos-2026-11-07/1FpqxqbHxVQ/frame-shayblue-group-chat-ad.jpg, docs/inspo/ad-videos-2026-11-04/simon-one-message-shoe.jpg
+- steps: 1 a phone fills the middle of the screen with a chat: "What do I bring for a new home?". 2 replies come in one by one as photo bubbles of their pieces, each with its price. 3 the visitor taps an occasion chip above the chat and the question and the replies change. 4 a bubble says "Order on WhatsApp" and opens the shop. They take every order on WhatsApp, so the chat is how buying there really looks.
+
+## Chosen: I
+Tzvi, 9 Nov 2026: "try a new wow moment this isnt good" about H, then "yes 1" for I from three sketches (gen/look/new-openings.jpg).
+
+Before that, H was chosen:
 Tzvi, 5 Nov 2026: "yes 3", with his change: a bunch of different gifts lying on the floor, and those for the chosen category rise out of the pile and flow into a line, from a site he saw with emojis. A (engraving) stays lower on the home page as the engraving section; B stays as the category row. The opening is about giving, not one holiday (he rejected D: "its a gift store").

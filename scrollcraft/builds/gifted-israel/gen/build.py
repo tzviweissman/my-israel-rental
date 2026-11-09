@@ -2,6 +2,7 @@
 Words are theirs: their flyer, listing and GiftedIsrael.com. Nothing about delivery, payment, engraving price or
 lead time is stated beyond what those say; those wait for OWNER-QUESTIONS.md."""
 import json
+from urllib.parse import quote
 import re
 import sys
 from html import escape
@@ -60,21 +61,36 @@ def piece(cls='', attrs='', size=900, eager=False):
             '<span class="engr" aria-hidden="true"></span><span class="spark" aria-hidden="true"></span></figure>')
 
 
-GIFTS = json.loads(open('assets/gifts.js', encoding='utf8').read().replace('window.GIFTS = ', '', 1).rstrip().rstrip(';'))
-OCC_CHIPS = ''.join(f'<button class="chip" type="button" aria-pressed="{"true" if i == 0 else "false"}">{escape(k)}</button>' for i, k in enumerate(GIFTS['occ']))
-PILE_NOJS = ''.join(f'<img src="assets/g/{g["id"]}.webp" alt="" width="{g["w"]}" height="{g["h"]}">' for g in GIFTS['pool'][:12])
-OPENING = f'''  <section class="gifts" id="gifts" aria-labelledby="h-open">
-    <div class="g-words" id="g-words">
-      <div class="g-head">
-        <h1 id="h-open" data-arrive style="--d:100">For all your gifting needs</h1>
-        <a class="btn" href="shop.html" data-arrive style="--d:250">Shop the collection <span class="arw" aria-hidden="true"></span></a>
+# the opening (IDEAS.md idea I, Tzvi 9 Nov 2026 "yes 1"): one coloured room per category, their own piece on its stone, the
+# category's name huge behind it (gen/rooms_layers.py writes the pictures); rooms.js wipes each into the next as you scroll
+ROOMS = [('Shabbos', 'SHABBOS'), ('Havdalah', 'HAVDALAH'), ('Home & Decor', 'HOME'), ('Judaica', 'JUDAICA'),
+         ('Rosh Hashana', 'ROSH HASHANA'), ('Chanukah', 'CHANUKAH'), ('Games & Gifts', 'GAMES')]
+ROOM_SLUG = lambda c: re.sub(r'[^a-z]+', '-', c.lower()).strip('-')
+
+
+def room(i, cat, word):
+    n = sum(1 for x in ITEMS if x['cat'] == cat)
+    low = min(x['price'] for x in ITEMS if x['cat'] == cat)
+    f = ROOM_SLUG(cat)
+    lazy = '' if i == 0 else ' fetchpriority="low"'   # never lazy: a room wiped in before its picture loaded showed the last room under its words
+    pic = lambda part: (f'<picture><source media="(max-aspect-ratio: 1/1)" srcset="assets/rooms/{f}-tall{part}.webp" width="1152" height="2048">'
+                        f'<img class="r-{"front" if part else "bg"}" src="assets/rooms/{f}-wide{part}.webp" alt="" width="2048" height="1152"{lazy} decoding="async"></picture>')
+    return (f'<div class="r-room" id="room-{f}" style="--i:{i}">{pic("")}<span class="r-word" aria-hidden="true" style="--len:{len(word)}">{escape(word)}</span>{pic("-front")}'
+            f'<p class="r-cap"><b>{escape(cat)}</b> {n} pieces, from {money(low)} <a class="lnk" href="shop.html?c={quote(cat)}">Shop {escape(cat)} <span class="arw" aria-hidden="true"></span></a></p></div>')
+
+
+OPENING = f'''  <section class="rooms" id="gifts" aria-labelledby="h-open" style="--n:{len(ROOMS)}">
+    <div class="r-stage">
+      {''.join(room(i, c, w) for i, (c, w) in enumerate(ROOMS))}
+      <div class="r-words">
+        <div class="r-card" data-arrive style="--d:100">
+          <h1 id="h-open">For all your gifting needs</h1>
+          <ul class="btn-facts"><li>From <b>{money(CHEAPEST)}</b></li><li><b>{COUNT}</b> pieces</li><li>We deliver</li></ul>
+          <a class="btn" href="shop.html">Shop the collection <span class="arw" aria-hidden="true"></span></a>
+        </div>
       </div>
-      <ul class="btn-facts" data-arrive style="--d:300"><li>From <b>{money(CHEAPEST)}</b></li><li><b>{COUNT}</b> pieces</li><li>We deliver</li></ul>
-      <div class="g-q-row" data-arrive style="--d:350"><h2 class="g-q" id="g-q">What is the occasion?</h2><a class="lnk g-all" href="shop.html">Shop all <span class="arw" aria-hidden="true"></span></a></div>
-      <div class="g-occ" id="g-occ" data-motion-flow role="group" aria-labelledby="g-q" data-arrive style="--d:400">{OCC_CHIPS}</div>
+      <nav class="r-dots" aria-label="Rooms">{''.join(f'<a href="#room-{ROOM_SLUG(c)}" aria-current="{"true" if i == 0 else "false"}">{escape(c)}</a>' for i, (c, w) in enumerate(ROOMS))}</nav>
     </div>
-    <div class="g-caps" id="g-caps" aria-live="polite"></div>
-    <div class="g-pile" id="g-pile" aria-hidden="true"><noscript>{PILE_NOJS}</noscript></div>
   </section>
 '''
 
@@ -153,8 +169,7 @@ HOW = '''  <section class="sec how" id="how" aria-labelledby="h-how">
 
 SCRIPTS_HOME = '''<script src="assets/catalog.js"></script>
 <script src="gifted.js"></script>
-<script src="assets/gifts.js"></script>
-<script src="gifts-open.js"></script>
+<script src="rooms.js"></script>
 <script>
 (function () {
   var GI = window.GI, s = document.getElementById('s-piece'), inp = document.getElementById('engr-in'), add = document.getElementById('engr-add');

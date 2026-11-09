@@ -249,6 +249,8 @@ def compose(pid, g, scene, flat, clear, panel=False, rot=0, trim=0, strip=False,
     # a thin line of light on the side the light comes from
     rim = ndimage.gaussian_filter(np.clip(a - np.roll(a, 3 * int(side), axis=1), 0, 1) * a, 1.1) * .12
     out = out + rim[..., None] * (1 - out)
+    global LAST_K
+    LAST_K = k   # the piece's own shape, for a layer laid over words (gen/rooms_layers.py)
     return Image.fromarray((out.clip(0, 1) * 255).astype('uint8'))
 
 
