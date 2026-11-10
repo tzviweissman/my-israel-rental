@@ -10,7 +10,7 @@ flat boxes and given to the reference-image model (marketing-studio/image/sunbur
 Exact parts (a phone's screen, a label) are still laid on afterwards in code.
 
 layout.json:
-    {"shape": "story" | "feed" | "square",
+    {"shape": "story" | "feed" | "square" | "portrait" (3:4, the model's nearest to a tall frame with room above),
      "ground": "#2b2b2b",                                 optional: the main tone of the scene
      "boxes": [{"what": "phone", "x": 0.4, "y": 0.34, "w": 0.2, "h": 0.32, "colour": "#9aa0a6", "angle": 0}],
      "keep_empty": [{"what": "headline", "x": 0.05, "y": 0.11, "w": 0.9, "h": 0.17},
@@ -23,7 +23,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-SIZES = {"story": (1080, 1920), "feed": (1080, 1350), "square": (1080, 1080)}
+SIZES = {"story": (1080, 1920), "feed": (1080, 1350), "square": (1080, 1080), "portrait": (1080, 1440)}
 
 
 def main(spec_path: str, out_path: str) -> None:

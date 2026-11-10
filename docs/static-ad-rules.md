@@ -690,3 +690,15 @@ without it, and the ad's gen script must use it.
 "Making it look professional is in the details, like if the phone showed our website in the dashboard." A screen in
 an ad shows the real product, captured at the screen's own shape from the local test account, its sample data only,
 never a real business or customer. Step A3.12.
+
+## 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
+
+"Can we make a rule to prevent bad headlines?" Two headlines in one day were wrong, and both had passed the
+stranger test (A2.10), because I wrote one line and graded it myself. "Set it to LOW." was a pun only someone who
+knew the kit would get. "Ready to ask? THE RING." named the object without a reason, guessed the reader was about to
+propose, and sounded like a film title. Tzvi's own "Pour. Water. Low. YUMMMMM." and "FOREVER" were better
+because they said the offer or the feeling in the fewest words. So every ad now writes at least five headlines
+and strikes each that fails a named test: says the object without the why; guesses the reader's situation; an
+insider's pun; sounds like something else; claims what the listing does not; over six words or leaning on its
+small line. The blueprint names the one chosen and why, and when Tzvi is in the conversation he sees the best three
+before anything is built. Step A2.11; ad-blueprint refuses an answer without five numbered lines and a "Chosen:".

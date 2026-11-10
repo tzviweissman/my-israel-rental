@@ -1,0 +1,7 @@
+{"shape":"portrait","ground":"#1b1e2e",
+ "boxes":[{"what":"marble","x":0,"y":0.58,"w":1,"h":0.42,"colour":"#e9e6e0"},
+  {"what":"silk","x":0,"y":0.48,"w":0.25,"h":0.3,"colour":"#d8c7a6","angle":-8},
+  {"what":"velvet box","x":0.29,"y":0.34,"w":0.42,"h":0.38,"colour":"#232637"},
+  {"what":"open lid","x":0.31,"y":0.24,"w":0.38,"h":0.12,"colour":"#2b2f4a"},
+  {"what":"ring","x":0.4,"y":0.43,"w":0.2,"h":0.13,"colour":"#dfe3ea"}],
+ "keep_empty":[{"what":"top","x":0.04,"y":0.0,"w":0.92,"h":0.2},{"what":"foot","x":0.04,"y":0.8,"w":0.92,"h":0.17,"over":["marble"]}]}

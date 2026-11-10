@@ -46,6 +46,7 @@ function read(file) {
 const SHEET_RULES = new Set(['A9.6']);
 const FIT_RULES = new Set(['A3.9']);
 const STRANGER_RULES = new Set(['A2.10']);
+const HEADLINE_RULES = new Set(['A2.11']);
 const LAYOUT_RULES = new Set(['A3.11']);
 const blank = (plan) => !plan || /^(\.\.\.|todo|tbd)$/i.test(plan);
 
@@ -65,6 +66,11 @@ function problems(name, upTo, finished) {
       // A sheet rule's answer is a picture someone looked at, not a sentence: the file it names must exist.
       // A fit rule's answer says the picture was laid with the tool that refuses to shrink it (A3.9, 10 Nov 2026).
       // The headline test is written as what a stranger takes from it, not as "clear" (A2.10, 10 Nov 2026).
+      // Five numbered headlines and the chosen one, never a single line graded by its writer (A2.11, 10 Nov 2026).
+      if (HEADLINE_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
+        const n = new Set([...g.plan.matchAll(/(?:^|\s)([1-9])\)/g)].map((x) => x[1])).size;
+        if (n < 5 || !/chosen:\s*\d/i.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: write five numbered headlines 1) to 5), strike each failing one with its reason, and "Chosen: N" (found ${n} numbered)`);
+      }
       if (STRANGER_RULES.has(it.id) && !/^n\/a:/i.test(g.plan) && !/a stranger reads:/i.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: write "A stranger reads:" and what someone who never heard of the business takes from the headline alone`);
       // The layout picture exists before the picture is paid for, and the gen script uses it (A3.11, 10 Nov 2026).
       if (LAYOUT_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
