@@ -286,3 +286,30 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 ## UI audit of 2 Nov 2026
 - [Low] Chicken Munch home scrolls 7px sideways at 375 (closing block `.go-order`, `site.css:312`). First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
 - [Low] Footer and menu links on the 17 business sites are 19 to 24px tall on phones, under 44px. First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
+
+## Audit merge of 10 Nov 2026 (lines from the audit branches not yet on main, every line kept)
+
+- [Fixed 2 Nov, 26b56084] Orders: the no-login Confirm page looked orders up by an unindexed key (full scan per request).
+- [Fixed 5 Nov, 512b5b07] Ad maker i18n: `ads.weekVisits` and `ads.nudgeVisits` use `{count}` with no plural forms, so the parity check fails. First seen 2026-11-05 (2026-11-05-ui-audit.md). Open. Fixed 8 Nov, 60f3d4aa (names changed to {{n}}). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Fixed 5 Nov, 512b5b0] Visit counters used {{count}} with no plural forms; test-i18n-parity failed (2026-11-05-site-audit.md). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] Ad maker i18n: `ads.weekVisits` and `ads.nudgeVisits` use `{count}` with no plural forms, so the parity check fails. First seen 2026-11-05 (2026-11-05-ui-audit.md). Open. [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] Ads: ads.weekVisits, ads.nudgeVisits, advertising.visits have no plural forms; test-i18n-parity fails. First seen 8 Nov (2026-11-08-ui-audit). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] Ads: ads.weekVisits, ads.nudgeVisits, advertising.visits have no plural forms; test-i18n-parity fails. First seen 8 Nov (2026-11-08-ui-audit). Fixed 8 Nov, 60f3d4aa (names changed to {{n}}). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] Audit sandbox again had no MongoDB or Chromium for the repo's Playwright, so the new business sign-up wizard beyond its first screen and the Finest Cuts clipped/readable checks were not run. First seen 15 Oct, still open (2026-11-10-ui-audit.md).
+- [Low] Backend tests: `test_dropship.py`, `test_jobs_end_to_end.py`, `test_page_products.py` fail to collect in the audit sandbox (pytest_asyncio not installed by audit-setup). First seen 9 Nov 2026 (2026-11-09-site-audit.md).
+- [Low] Bookings: the price used for a code's minimum order comes from the browser (`gigs.py:1357`, `payload.amount`); unconfirmed, needs the API. First seen 6 Nov (2026-11-06-site-audit.md).
+- [Low] Counters `ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits` have no plural forms ("1 visits"); test-i18n-parity fails. First seen 7 Nov (2026-11-07-site-audit.md), introduced 4 Nov a27f0168. [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] Counters `ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits` have no plural forms ("1 visits"); test-i18n-parity fails. First seen 7 Nov (2026-11-07-site-audit.md), introduced 4 Nov a27f0168. Fixed 8 Nov, 60f3d4aa (names changed to {{n}}). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] Find your business on Google: an overnight opening period (Mon 20:00 to Tue 02:00) becomes start 20:00, end 02:00 on Monday (`product_extract.py` `_hours`). First seen 9 Nov 2026 (2026-11-09-site-audit.md).
+- [Low] i18n: three counts without plural forms (`ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits`); test-i18n-parity fails. First seen 6 Nov (2026-11-06-site-audit.md). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] i18n: three counts without plural forms (`ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits`); test-i18n-parity fails. First seen 6 Nov (2026-11-06-site-audit.md). Fixed 8 Nov, 60f3d4aa (names changed to {{n}}). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Medium] Audit setup hung over 40 minutes at the dev-server step on 5 Nov, so no build or full suite ran (2026-11-05-site-audit.md).
+- [Medium] Audit setup, 7 Nov: no MongoDB (403), no Chromium, full backend suite cannot run; `pytest_asyncio` and `mongomock_motor` missing from the venv. Still open since 15 Oct.
+- [Medium] Sign-up draft reminder email goes to any address a visitor types (no verification), up to 10 new drafts per day per IP (`signup_drafts.py` save_draft). First seen 9 Nov 2026 (2026-11-09-site-audit.md).
+- [To fix] Audit setup hung over 10 minutes without a database on 8 Nov (dead-ends audit), so no signed-in clicking. First seen 23 Oct (2026-11-08-dead-ends.md).
+
+## Code review of 10 Nov 2026
+- [Low] Weekly "your ad is ready" email: "Stop these emails" has no switch to turn them back on (`ad_emails_off` missing from `EMAIL_SWITCHES` and `EmailSwitches.jsx`). First seen 10 Nov 2026 (2026-11-10-site-audit.md). Open.
+- [Medium] Catalog and ad picture cutting blocked the server for every visitor (~0.4 s a picture, up to 30). First seen 10 Nov 2026 (2026-11-10-site-audit.md). [Fixed 10 Nov, 879d76dc]
+- [Low] `dashboard.adPicsDone` without plural forms ("with 1 photos"); test-i18n-parity failed. First seen 10 Nov 2026 (2026-11-10-site-audit.md). [Fixed 10 Nov, d10948a5]
+- [Decision] Weekly ad email will reach every existing business with a product photo and no saved ad on the first weekday morning after deploy. First seen 10 Nov 2026 (2026-11-10-site-audit.md).
