@@ -16,7 +16,7 @@ R3.3 pass: searched for generic lines: none
 R3.4 pass: the facts script found two exclamation marks, both in his own quoted lines; I changed them to full stops; no long dashes; capitals are display type
 R3.5 pass: the first screen names cholent, the crock pot kit and the price from ₪100
 R3.6 n/a: the site is English only, there is no Hebrew version
-R3.7 pass: no FAQ or gallery is shown until the owner sends content; the "What customers wrote to us" section (six WhatsApp messages, 1 Nov 2026) is built but hidden until Rabbi Samuels confirms each customer agreed (message-to-owner.md); remove "hidden" from section#said when he does
+R3.7 pass: no FAQ or gallery is shown until the owner sends content; "What customers wrote to us" shows ten WhatsApp messages quoted as written from the screenshots Tzvi sent on 10 Nov 2026 (a friend's name the customer blacked out is left out): all ten on reviews.html, three of them on Home with a link to the rest; not star reviews
 R3.8 pass: searched visible text and markup: no logo wall, laurels, stars, counts, "popular" badges or intro prices
 R3.9 n/a: no ad or flyer message brings visitors here; the first screen carries the flyer words anyway
 R3.10 pass: the only strength on the page is the hechsher, with its rabbi named
@@ -24,9 +24,9 @@ R5.1 pass: read aloud as Rabbi Samuels
 R5.2 pass: calm voice, no jokes
 R5.3 pass: "Kosher, hechsher from Rabbi Weiner", "Made in Jerusalem, delivered across Israel"
 R5.4 pass: facts script found no they, them or their in visible text
-R5b.2 pass: the one main button reads "Message to order" on every page and goes to the order page (order.html): the bar, the opening, the three size cards (order.html?size=N preselects the size), the footer button and link, the phone bar; on the order page itself the button under the dial says the same words with the size ("Message to order Large, ₪180"), and the form button sends the order on WhatsApp
+R5b.2 pass: the one main button reads "Order now" on every page and goes to the order page (order.html), because it opens the order page, not a message (Tzvi, 10 Nov 2026: "it says message to order but it takes to the shop page"): the bar, the opening, the three size cards (order.html?size=N preselects the size), the footer button and link, the phone bar, the next-step rows on How it works and Reviews; on the order page the button under the dial says "Order Large, ₪180", and the form button says what it does, "Send my order on WhatsApp"
 R5b.8 pass: the closing line is "A higher standard of flavor." then the button
-R3.11 pass: home: the pitch, the film, then sizes with prices, how it works, occasions, the facts; then the order page: the dial, then the order form
+R3.11 pass: Home: the pitch, the film, the sizes with prices, three customer messages; How it works: the kit and its steps, the occasions; Reviews: all ten messages; Kosher and delivery: the facts and Rabbi Samuels' line; Order: the dial, then the order form
 R3o.4 n/a: the page shows no phone or email by the owner choice (chat only)
 R3e.22 n/a: owner must send a photo of Rabbi Samuels; the seal and his quoted line are shown
 R3s.19 pass: single page; title, description, og:title, og:description and og:image (the tubs) now all present
@@ -50,7 +50,7 @@ R3h.3 pass: the pot film and the kitchen clip fill the screen at 1440x900 and 12
 R3h.5 pass: the chapter lines (Lid on. Low. Go light the candles.) sit at the left edge on the dark ground, small beside the pot, not over the action
 R3h.7 pass: looked at the frames either side of the kitchen-to-pot join (40 to 55 percent): the scratch side dims to a dark kitchen (never plain black), then the pot appears; no jump
 R3h.8 pass: the section after the film changes boldly: a bright cream shop of three colour rooms
-R3h.11 pass (Tzvi's decision): brightness.py re-run 25 Oct: pot.mp4 and pot-m.mp4 whole 9 middle 14, scratch.mp4 and scratch-m.mp4 whole 30 middle 29, table.mp4 whole 17 middle 32, under the rule's 22 and 33; Tzvi chose to keep the candlelit films dark (22 Oct, docs/site-reviews/2026-10-22/decisions.md point 2, confirmed again 25 Oct, decision 4); a gamma of 2 had made the pot film milky grey
+R3h.11 pass (Tzvi's decision): brightness.py re-run 25 Oct: pot.mp4 and pot-m.mp4 whole 9 middle 14, scratch.mp4 and scratch-m.mp4 whole 30 middle 29, under the rule's 22 and 33; Tzvi chose to keep the candlelit films dark (22 Oct, docs/site-reviews/2026-10-22/decisions.md point 2, confirmed again 25 Oct, decision 4); a gamma of 2 had made the pot film milky grey; the table film and its stills were brightened on 10 Nov 2026 (Tzvi: "this picture looks too dark and dreary"; ffmpeg gamma 1.75 with a warm shift, no new generation), brightness.py now 37, bright enough; the pot and kitchen films stay as he chose
 R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 7.0 screens on both, 60 fps (median 16.7 ms, 0.7% of frames over 50 ms on a laptop); their own ingredients and slow cooker on their own dark kitchen, never on another cholent photo; tubs, pot and words whole; the first screen's tubs and pot load first (the dark films are Tzvi's decision, R3h.11)
 R3h.13 pass: the pot film is one clip showing the lid, steam and the dial together; frames viewed at 20 hours show no heap or vanish
 R3h.14 pass: the pot stays in frame through the whole film at 1440x900, 1280x650 and 390x844
@@ -67,15 +67,15 @@ R3g.3 pass: prices in the card text colour; the gold is the main button and the 
 R3g.7 pass: one closing signature, the script line in the footer
 R3g.11 pass: Oswald, Figtree, Pinyon Script and Heebo are from the approved list; unchanged
 R3p.3 pass: node scripts/check-fingerprints.mjs run 25 Oct prints "l-a-cholent-by-rabbi-samuels: different from all 11 other pages"
-R3p.5 pass: CONCEPT.md touch line: the crock-pot dial that turns to the size; it works (seen at the end)
+R3p.5 pass: CONCEPT.md touch line: the crock-pot dial that turns to the size; it works (seen at the end); since 10 Nov 2026 the dial is on every order button, the size cards' and the menu bar's too (R3p.8)
 R3q.1 pass: node scripts/check-concept.mjs reports ready (25 Oct), every part including Not alike
 R5a.7 pass: one signature (the dial), one peak (the pot clicks to Low); the ending resolves on the order
 R9.1 pass: the signature uses their own tubs and a closed slow cooker
 R3f.2 pass: effect budget: one signature (the dial), accents (the split, the pot film, the facts rows); frames captured at three sizes
 R3m.1 pass: data-mir-gallery block present and hidden until photos exist
 R3m.3 pass: hours, areas and FAQ stay in fixed hidden blocks until the owner sends them
-R3k.1 pass: split into two pages on 6 Nov 2026 (Tzvi: "split all 4 into separate pages"): Home (the film, sizes, kit, occasions, facts) and Order (the dial and the order form); the sizes and the order were one section and are now the sizes cards on Home with the dial and form on Order; old addresses /business/<slug>#order and #details forward to the Order page by a short script on Home, and index.html#sizes etc. still land on Home. No contact page: the record has one WhatsApp number and no address, email or hours, which the footer already shows on every page
-R3k.2 pass: the bar is the same markup on both pages: the name to Home, Home, Sizes and prices, Occasions, Kosher, and the one Message to order button; on Home it waits for the opening film, on the Order page it is on from the start; under 861px the links fold into a Menu button (Close while open) that opens the same list plus the WhatsApp number, and closes on a second tap, a link tap or Escape (looked at on both pages at 375x812, open and closed); the phone buy bar stays on Home
+R3k.1 pass: five pages (Tzvi, 6 Nov 2026: "split all 4 into separate pages", and 10 Nov 2026: the menu items are pages, not scrolls): Home (the film, sizes, three messages), How it works (kit, occasions), Reviews, Kosher and delivery, and Order (the dial and the order form); old addresses /business/<slug>#order and #details forward to the Order page by a short script on Home, and index.html#sizes still lands on the sizes. No contact page: the record has one WhatsApp number and no address, email or hours, which the footer shows on every page
+R3k.2 pass: the bar is the same markup on every page: the name to Home, Home, How it works, Reviews, Kosher and delivery, each its own page (Tzvi, 10 Nov 2026: the menu only scrolled down), and the one Order now button with the dial; on Home it waits for the opening film, on the other pages it is on from the start; under 861px the links fold into a Menu button that opens the same list plus Order now and the WhatsApp number
 R3k.4 pass: shared site.css and site.js; section classes are not reused for shared state
 R8a.1 pass: no 21st components or external script hosts; only the Google Fonts stylesheet
 R3b.4 pass: facts rows carry the page
@@ -123,7 +123,7 @@ R3o.5 pass: check-site GLYPH found no unrendered character
 
 ## 5. Prices and savings
 R3c.5 pass: no <select> on any page; sizes and kinds are tiles or chips; no "most popular" badge
-R3c.6 pass: the order button says "Message to order Large, ₪180" with the real figure
+R3c.6 pass: the order button says "Order Large, ₪180" with the real figure
 R3c.7 pass: the 10% off on the Large is a standing saving with the separate price struck through; no offer with an end date
 R3j.1 pass: no guarantee is shown because none is offered
 R3j.2 pass: the add-ons (extra meat, marrow bones) are listed with prices; no pre-ticked add-on
@@ -143,7 +143,7 @@ R3.14 pass: loud prices only because prices exist (boxes, pans, sizes), none inv
 R3k.7 n/a: single page with a dial and a link to his chat, no basket steps exist
 R3k.8 n/a: no basket exists
 R3k.6 n/a: no basket exists
-R3k.9 pass: the Order page keeps the dial and the Your order form exactly: Message to order Large leads to the form (how many, pick-up or delivery, address, day, name, phone, note) whose submit POSTs to /api/marketplace/order-form/<his listing>/orders with the dial's size as the product and only then opens WhatsApp to his listing's number with the order and the tracking link; if saving fails WhatsApp still opens; own-meat, parve and per-pound extras are notes, not products; check-site SAVE and FLOW pass
+R3k.9 pass: the Order page keeps the dial and the Your order form exactly: Order Large leads to the form (how many, pick-up or delivery, address, day, name, phone, note) whose submit POSTs to /api/marketplace/order-form/<his listing>/orders with the dial's size as the product and only then opens WhatsApp to his listing's number with the order and the tracking link; if saving fails WhatsApp still opens; own-meat, parve and per-pound extras are notes, not products; check-site SAVE and FLOW pass
 R3.15 pass: ordering is the Order page, one button everywhere
 R7.1 pass: CONCEPT.md names the pick and the reason; no options page
 R8.5 pass: every main button goes to the Order page, which saves the order to his shop and opens WhatsApp to him, the way to order he has
@@ -188,7 +188,7 @@ R3a.6 pass: the phone bar steps aside while any price or button is in the strip 
 R3s.22 pass: check-site TAP passed
 R3s.23 pass: no sideways scroll at 390x844 or 360x640 (scrollWidth equals the screen at every 100px stop; overflow-x is clipped on html and body); the three size buttons by the dial fit at 360 with "Feeds 8 to 12" on one line and the 10% tag inside the Large button
 R3t.1 pass: site-category food-shop on every page and in CONCEPT.md; home and shop compared with docs/inspo/awwwards-anatomy-2026-10-22/food (Best Bean Best Cup, Theobroma, La Joya)
-R3t.2 pass: BUY: price and "Message to order" are on the first screen; every size card has photo, name, feeds, price and Message to order
+R3t.2 pass: BUY: price and "Order now" are on the first screen; every size card has photo, name, feeds, price and Order now
 R3t.3 n/a: not a trainer site
 R3t.4 pass: footer on both pages has a last big line, the order button, link columns and contact
 R3a.7 pass: phone checks used a touch-emulated mobile context (hasTouch, isMobile), not a narrow desktop window
@@ -215,12 +215,14 @@ R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
 <!-- 29 Oct: all rules re-read against the current index.html; the kitchen clip now dims by fading on the dark ground instead of a filter (same look, frames compared at 0.1 to 0.7 of the split) so the opening scrolls smoothly (R3h.20) -->
-R3v.1 pass: the same closing footer on both pages in parts: who we are (name, Rabbi Samuels' own line from the page, a link to Message to order), Pages (Home, Sizes and prices, The kit, Occasions, Kosher and delivery, Order), Ordering (three sizes with prices, free local delivery on a first order), Reach us (WhatsApp, made in Jerusalem, kosher by Vaad HaKashrus), then "© 2026 L.A. Cholent by Rabbi Samuels." with the MyIsraelRental and Privacy line; no founding year in the record so no Since line; check-footer clean; looked at it at 1366 and 390
+R3v.1 pass: the same closing footer on every page in parts: who we are (name, Rabbi Samuels' own line from the page, a link to Order now), Pages (Home, Sizes and prices, How it works, Reviews, Kosher and delivery, Order), Ordering (three sizes with prices, free local delivery on a first order), Reach us (WhatsApp, made in Jerusalem, kosher by Vaad HaKashrus), then "© 2026 L.A. Cholent by Rabbi Samuels." with the MyIsraelRental and Privacy line; no founding year in the record so no Since line; check-footer clean; looked at it at 1366 and 390
 R3v.2 pass: the site is Home and its order page, so the bar keeps its jumps on Home (Sizes and prices, Occasions, Kosher) and shows the same links on the Order page, pointing back at Home
-R3v.14 pass: the line under Message to order on the opening is now the list class btn-facts: From ₪100 / Kosher, hechsher from Rabbi Weiner / Made in Jerusalem, delivered across Israel (all three were already on the page, from their flyer and listing); check-facts clean at 390 and 1366
+R3v.14 pass: the line under Order now on the opening is now the list class btn-facts: From ₪100 / Kosher, hechsher from Rabbi Weiner / Made in Jerusalem, delivered across Israel (all three were already on the page, from their flyer and listing); check-facts clean at 390 and 1366
 
 Note, 1 Nov 2026: the arrow after the footer button was removed (its font has no arrow; check-site GLYPH). No rule answer changes.
 
 Note, 6 Nov 2026: split into Home and Order (split-four-sites). The lines for the buttons, menu bar, footer, pages and order were rewritten for it.
 <!-- 6 Nov 2026: the only change is the discount code box on the order form (public/pages/mir-code.js, Tzvi: American Crust's first-time code had nowhere to be typed). Looked at the form with the box and a test order on phone and laptop; the rest of the site is unchanged, so the other rules were not re-read. -->
 Note, 6 Nov 2026: the order form on the Order page carries the discount code box (mir-code.js), and the server adds the phone note, the required email and the texts step (mir-order.js); the phone Menu button was added to both pages. Looked at both pages on phone and laptop; the other rules were not re-read.
+R3s.29 pass: no button breaks onto two lines: the Large card's button did between 1000 and 1350px wide (Tzvi, 10 Nov 2026), buttons are now nowrap and the price beside them gives way; the order page's Kiddush card said "Sized to your guests" on two lines on a phone and now says "Any guest count" on one; check-same-button clean on all five pages at the eight sizes
+R3p.8 pass: the crock-pot dial chip is on every order button: the opening, the three size cards (chip in the card's ink, pointer in its colour), the menu bar, the phone bar, the footer and the next-step rows; it turns OFF to LOW only when pointed at or pressed, no turn under reduced motion; looked at on a phone and a laptop

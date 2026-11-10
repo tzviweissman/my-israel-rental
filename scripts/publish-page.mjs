@@ -142,7 +142,9 @@ const CHECK_ONLY = process.argv.includes('--check');
     // the opening says every kind of thing the business offers (Tzvi, 5 Nov 2026, rules 3g.18)
     ['check-says-offer.mjs', 'does not say what it offers on the first screen', 'R3g.18'],
     // a shop's main button is in the product's own colour and stands out from what is behind it (Tzvi, 8 Nov 2026, rules 3g.19)
-    ['check-button-colour.mjs', 'has a main button not in the colour of its product', 'R3g.19']]) {
+    ['check-button-colour.mjs', 'has a main button not in the colour of its product', 'R3g.19'],
+    // a button's words stay on one line and repeats match (Tzvi, 10 Nov 2026, rules 3s.29)
+    ['check-same-button.mjs', 'has a button that breaks onto two lines', 'R3s.29']]) {
     if (rule && newer.has(rule)) { console.log(`${script}: not run, rule ${rule} was added after this site was made`); continue; }
     let r = await run(script);
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }

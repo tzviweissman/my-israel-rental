@@ -30,7 +30,7 @@ The shop rooms straight after the opening, with the dial as the one control at t
 - steps: three numbered steps from their flyer, plain rows with no scroll light-up
 - price: Oswald light numerals in the card's text colour, the struck price above the new one, from their flyer
 - heading: Oswald light capitals with a Pinyon script line, from their flyer
-- touch: from their own flyer, the crock-pot dial that turns to the size
+- touch: from their own flyer, the crock-pot dial that turns to the size, and on every order button the same dial turning OFF to LOW
 
 ## Not alike
 l-a-cholent-by-rabbi-samuels: different from all 11 other pages

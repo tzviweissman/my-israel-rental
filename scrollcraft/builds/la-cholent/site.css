@@ -334,7 +334,7 @@
     --sc-hairline: color-mix(in oklab, #1B1612 14%, transparent); --sc-hairline-strong: color-mix(in oklab, #1B1612 28%, transparent);
     background: #F3EFE7; color: var(--sc-ink); padding-block: clamp(3rem, 9svh, 8rem); }
   .rest-grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(2.5rem, 7vw, 8rem); align-items: start; }
-  .rest h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--s5); line-height: 0.96; color: var(--sc-ink); max-width: 14ch; }
+  .rest h2, .rest h1 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--s5); line-height: 0.96; color: var(--sc-ink); max-width: 14ch; }
   .rest .quote { margin: clamp(1.5rem, 4svh, 3rem) 0 0; display: grid; grid-template-columns: 4.5rem 1fr; gap: var(--sc-5); align-items: start; max-width: 34rem; }
   .rest .quote img { width: 4.5rem; height: 4.5rem; border-radius: 50%; box-shadow: 0 2px 10px rgb(27 22 18 / 0.2); }
   .rest .quote p { margin: 0; font-size: var(--sc-t-base); line-height: 1.55; color: var(--sc-ink); }
@@ -395,7 +395,7 @@
   .topbar .tb-links a:hover { border-color: var(--lt-ink); }
 
   .shop-head { padding-block: clamp(1.6rem, 4svh, 3rem) clamp(.8rem, 2svh, 1.4rem); }
-  .shop h2, .how h2, .occ h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; letter-spacing: .01em;
+  .shop h2, .how h2, .occ h2, .how h1 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; letter-spacing: .01em;
     font-size: var(--s5); line-height: .98; color: var(--lt-ink); }
   .shop-head p { margin: .6rem 0 0; color: var(--lt-soft); font-size: var(--sc-t-base); max-width: 40rem; }
   .rooms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -497,7 +497,7 @@
 
   /* Customers' own words (1 Nov 2026): message bubbles on the light ground; a row to swipe on a phone */
   .said { padding-block: clamp(2.4rem, 7svh, 5rem); }
-  .said h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--s5); line-height: 0.96; color: var(--sc-ink); }
+  .said h2, .said h1 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--s5); line-height: 0.96; color: var(--sc-ink); }
   .said-note { margin: var(--sc-3) 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
   .said-list { list-style: none; margin: clamp(1.5rem, 4svh, 2.5rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
   .said-list li { background: #fff; border-radius: 18px 18px 18px 4px; padding: 1.1rem 1.25rem 1rem; box-shadow: 0 3px 30px rgb(122 83 15 / 0.10); }
@@ -528,3 +528,37 @@
     .mbtn { display: inline-flex; align-items: center; }
     .order-page .order-stage { padding-top: 4.5rem; }
   }
+
+  /* ---------- separate pages, honest buttons, 10 Nov 2026 ---------- */
+  /* the other pages open under the bar, which is on from the start */
+  .sub-page main > section:first-child { padding-top: clamp(5.5rem, 13svh, 7.5rem); }
+  .sub-page .rest.next { padding-block: clamp(1.6rem, 5svh, 3rem); border-top: 1px solid var(--sc-hairline-strong); }
+  .next-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; }
+  .next-row p { margin: 0; font-size: var(--sc-t-lg, 1.15rem); color: var(--sc-ink); }
+  .said-more { margin: clamp(1.2rem, 3svh, 2rem) 0 0; }
+  .said-more .btn-line { color: var(--sc-ink); }
+  .said-more .btn-line:hover { background: var(--sc-ink); color: var(--lt-ground); }
+  /* all ten messages flow in columns like a chat wall, so a short last row never leaves one card alone */
+  .said-all { display: block; columns: 3 18rem; column-gap: 14px; }
+  .said-all li { break-inside: avoid; margin-bottom: 14px; }
+  @media (max-width: 860px) { .said-all { columns: 1; overflow: visible; } }
+  /* Same button, same shape (Tzvi, 10 Nov 2026: the Large card's button broke onto two lines beside the struck-out
+     price while the other two stayed on one): a button's words never wrap, and the price beside it gives way instead. */
+  .btn-line { white-space: nowrap; flex: none; }
+  .room .rf .price { min-width: 0; }
+  /* The dial on every order button, not only the big ones (Tzvi liked it, 10 Nov 2026): on the size cards the chip
+     takes the card's own ink, its pointer the card's colour, and turns OFF to LOW the same way. */
+  .btn-line { gap: .55rem; }
+  .room .btn-line { padding-right: .3rem; }
+  .btn-line .btn-dial { width: 30px; height: 30px; background: currentColor; transition: background 160ms ease-out; }
+  .btn-line .btn-dial svg { width: 20px; height: 20px; stroke: var(--c, var(--lt-ground)); }
+  .room .btn-line:hover .btn-dial { background: var(--c); }
+  .room .btn-line:hover .btn-dial svg { stroke: var(--t); }
+  .btn-line:active .ptr, .btn-line:focus-visible .ptr { transform: rotate(-30deg); }
+  @media (hover: hover) and (pointer: fine) { .btn-line:hover .ptr { transform: rotate(-30deg); } }
+  .topbar .btn { padding-right: .35rem; }
+  .topbar .btn .btn-dial { width: 30px; height: 30px; }
+  /* the size cards' second lines stay on one line each, as the size cards on Home do (3s.29) */
+  .size-pick button span { white-space: nowrap; }
+  .said-cont { padding-top: 0; }
+  .said-all li { box-shadow: 0 2px 10px rgb(122 83 15 / 0.10); }
