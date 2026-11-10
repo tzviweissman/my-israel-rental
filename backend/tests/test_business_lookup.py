@@ -33,3 +33,14 @@ def test_finish_your_page_email_names_the_business_and_links_back():
     assert subject == "Your page for Cohen & Sons is almost ready"
     assert "Cohen &amp; Sons" in page and "draft=abc" in page
     assert _email_html(True, "", "l")[0] == "הדף של העסק שלכם כמעט מוכן"
+
+
+def test_weekly_ad_email_and_optout_token():
+    from routes.marketplace.weekly_ads import OPT_OUT_PURPOSE, email_html, optout_token
+    from utils.notification_tokens import verify_notification_token
+    subject, page = email_html(False, "Dani <Movers>", "Box set", "https://x/dashboard?item=Box+set", "https://x/off?t=1")
+    assert subject == "Your ad for Box set is ready"
+    assert "Dani &lt;Movers&gt;" in page and "https://x/dashboard?item=Box+set" in page and "https://x/off?t=1" in page
+    he_subject, he_page = email_html(True, "דני", "קופסה", "https://x", "https://x/off")
+    assert "קופסה" in he_subject and 'dir="rtl"' in he_page
+    assert verify_notification_token(optout_token("u1"), OPT_OUT_PURPOSE)["user_id"] == "u1"

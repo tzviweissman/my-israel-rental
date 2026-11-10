@@ -364,6 +364,9 @@ async def startup_tasks() -> None:
     # One "finish your page" email to a business that stopped signing up (signup_drafts.py).
     from routes.marketplace.signup_drafts import signup_draft_loop
     asyncio.create_task(signup_draft_loop())
+    # "Your ad for X is ready", once a week per business (weekly_ads.py).
+    from routes.marketplace.weekly_ads import weekly_ad_loop
+    asyncio.create_task(weekly_ad_loop())
     # "We got your message" when a business has not answered (away_reply.py).
     from routes.marketplace.away_reply import away_reply_loop
     asyncio.create_task(away_reply_loop())

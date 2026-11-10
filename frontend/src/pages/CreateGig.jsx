@@ -43,13 +43,15 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Loader2, Plus, Trash2, ArrowLeft, ArrowRight, X,
-  Store, Package, CalendarClock, ImagePlus, Copy, Sparkles, Camera, Search, MapPin,
+  Store, Package, CalendarClock, ImagePlus, Copy, Sparkles, Camera, Search, MapPin, Check, PartyPopper, Megaphone,
 } from 'lucide-react';
+import QrShareCard from '../components/common/QrShareCard';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { compressImage as shrinkPhoto } from '../utils/fastUpload';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import CategoryPicker from '../components/marketplace/CategoryPicker';
+import ServiceCard from '../components/marketplace/ServiceCard';
 import AvailabilityStep, { DAYS } from '../components/marketplace/AvailabilityStep';
 import { SUBCATEGORIES, subcategoryLabel } from '../lib/categories';
 import { uploadFilesFast, reportUploadFailure, uploadOneFile } from '../utils/fastUpload';
@@ -112,7 +114,7 @@ const hasPrice = (p) => p.price_kind === 'quote' || parseFloat(p.price) > 0;
 const DRAFT_LAYOUT = 2;
 
 const CreateGig = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { token, user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -134,6 +136,8 @@ const CreateGig = () => {
   const [locations, setLocations] = useState([]);
   const [saving, setSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  // Set on publish: the "your page is live" screen shows before the dashboard.
+  const [published, setPublished] = useState(null);
   const productImageInputRef = useRef({});
   // Which business this listing is being added to, from ?business= on the
   // URL. Absent when someone starts from a generic "list your service"
@@ -909,7 +913,12 @@ const CreateGig = () => {
       // Someone who just added their FIRST business goes straight into the
       // walk (components/tour), which starts on their page. `tour=first`
       // starts it only if this account has never taken it, on any device.
-      navigate(firstBusiness ? '/dashboard?tour=first' : `/businesses/${data.id}`);
+      setPublished({
+        id: data.id,
+        bizId: data.business_id || payload.business_id || '',
+        name: bizName.trim() || form.title,
+        next: firstBusiness ? '/dashboard?tour=first' : `/businesses/${data.id}`,
+      });
     } catch (err) {
       // apiErrorMessage: a refused field comes back as a list, which a toast cannot show (salon, 25 Oct 2026).
       toast.error(apiErrorMessage(err, t('wizard.publishFailed', 'Could not publish. Please try again.'), t), { duration: 10000 });
@@ -920,6 +929,24 @@ const CreateGig = () => {
 
   // Which real step index maps to contact given the optional hours step.
   const contactStep = isAppointment ? 4 : 3;
+
+  // "Your page is 60% ready" (Tzvi, 10 Nov 2026: make the sign-up feel like
+  // progress). Only things customers really see on the page count.
+  const priced = form.gig_type === 'store'
+    ? (form.products || []).some((x) => x.price_kind === 'quote' || parseFloat(x.price) > 0)
+    : (form.tiers || []).some((x) => parseFloat(x.price) > 0);
+  const readiness = [
+    { k: 'name', ok: !!form.title.trim(), step: 1, label: t('wizard.todoName', 'Name what you offer') },
+    { k: 'category', ok: !!form.category, step: 1, label: t('wizard.todoCategory', 'Pick a category') },
+    { k: 'description', ok: (form.description || '').trim().length >= 20, step: 2, label: t('wizard.todoDescription', 'Describe what you offer') },
+    { k: 'price', ok: priced, step: 2, label: t('wizard.todoPrice', 'Add a price') },
+    { k: 'photo', ok: hasAnyPhoto(), step: 2, label: t('wizard.todoPhoto', 'Add a photo') },
+    { k: 'area', ok: !!(form.area || '').trim(), step: contactStep, label: t('wizard.todoArea', 'Add your area') },
+    { k: 'contact', ok: form.booking_mode !== 'whatsapp' || hasValidWhatsApp(form.whatsapp), step: contactStep, label: t('wizard.todoContact', 'Add your WhatsApp') },
+  ];
+  const missing = readiness.filter((x) => !x.ok);
+  const readyPct = Math.round(((readiness.length - missing.length) / readiness.length) * 100);
+
 
   const waiting = {
     uploadLogo, uploadTierImages, uploadProductImage, addProductsFromPhotos, extractProducts, fillFromAd, submit,
@@ -933,6 +960,70 @@ const CreateGig = () => {
     // Only when the token arrives; `waiting` is this render's copy on purpose.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  if (published) {
+    const pageUrl = `${window.location.origin}/businesses/${published.id}`;
+    const adUrl = `/dashboard?tab=advertising${published.bizId ? `&target=${encodeURIComponent(published.bizId)}` : ''}`;
+    return (
+      <div className="min-h-screen bg-white relative overflow-hidden" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="wizard-published">
+        <style>{`
+          @keyframes wz-fall { from { transform: translateY(-10vh) rotate(0deg); opacity: 1; } to { transform: translateY(105vh) rotate(540deg); opacity: .9; } }
+          .wz-bit { position: absolute; top: 0; width: 8px; height: 14px; border-radius: 2px; animation: wz-fall 2.6s ease-in forwards; pointer-events: none; }
+          @media (prefers-reduced-motion: reduce) { .wz-bit { display: none; } }
+        `}</style>
+        {Array.from({ length: 28 }, (_, i) => (
+          <span
+            key={i}
+            aria-hidden="true"
+            className="wz-bit"
+            style={{
+              insetInlineStart: `${(i * 37) % 100}%`,
+              background: ['var(--gold)', '#111827', 'rgba(36,175,235,.55)'][i % 3],
+              animationDelay: `${(i % 7) * 0.12}s`,
+            }}
+          />
+        ))}
+        <div className="max-w-md mx-auto px-4 py-10 text-center relative">
+          <div className="mx-auto mb-4 w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'rgba(36,175,235,.33)' }}>
+            <PartyPopper size={28} style={{ color: '#111827' }} aria-hidden="true" />
+          </div>
+          <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: 'var(--font-head)' }}>
+            {t('wizard.liveTitle', 'Your page is live!')}
+          </h1>
+          <p className="text-base text-gray-600 mb-6">
+            {t('wizard.liveBody', { name: published.name, defaultValue: 'Customers can find {{name}} now. Share it today to get your first customers.' })}
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate(adUrl)}
+            className="w-full mb-3 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-black text-white font-semibold"
+            data-testid="wizard-live-ad"
+          >
+            <Megaphone size={18} aria-hidden="true" /> {t('wizard.liveAd', 'Make your first ad')}
+          </button>
+          <button
+            type="button"
+            onClick={() => { navigator.clipboard?.writeText(pageUrl).then(() => toast.success(t('wizard.liveCopied', 'Link copied'))).catch(() => {}); }}
+            className="w-full mb-6 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full border border-gray-300 font-semibold"
+            data-testid="wizard-live-copy"
+          >
+            <Copy size={18} aria-hidden="true" /> {t('wizard.liveCopy', 'Copy your page link')}
+          </button>
+          <div className="text-start mb-6">
+            <QrShareCard url={pageUrl} filename="my-page-qr" testidPrefix="wizard-live-qr" />
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate(published.next)}
+            className="text-sm font-semibold underline"
+            data-testid="wizard-live-continue"
+          >
+            {t('wizard.liveContinue', 'Continue to your dashboard')}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="create-gig-page">
@@ -965,14 +1056,66 @@ const CreateGig = () => {
             </div>
           </div>
         )}
-        <div className="flex items-center gap-2 mb-6">
-          {Array.from({ length: totalSteps }, (_, i) => i + 1).map((n) => (
-            <div key={n} className={`flex-1 h-1 rounded-full ${n <= step ? 'bg-[var(--brand-primary)]' : 'bg-gray-200'}`} />
-          ))}
+        <div className="mb-6" data-testid="wizard-progress">
+          <div className="flex items-baseline justify-between gap-3 mb-2 text-sm">
+            <span className="font-semibold" data-testid="wizard-progress-pct">
+              {missing.length
+                ? t('wizard.progressPct', { pct: readyPct, defaultValue: 'Your page is {{pct}}% ready' })
+                : t('wizard.progressDone', 'Your page is ready to publish')}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {Array.from({ length: totalSteps }, (_, i) => i + 1).map((n) => (
+              <div key={n} className={`flex-1 h-1 rounded-full ${n <= step ? 'bg-[var(--brand-primary)]' : 'bg-gray-200'}`} />
+            ))}
+          </div>
+          {missing.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-3">
+              {readiness.map((x) => (x.ok ? (
+                <span key={x.k} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-500 line-through">
+                  <Check size={12} aria-hidden="true" /> {x.label}
+                </span>
+              ) : (
+                <button
+                  key={x.k}
+                  type="button"
+                  disabled={x.step > step}
+                  onClick={() => setStep(x.step)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border border-[var(--brand-border)] bg-white enabled:hover:border-[var(--gold)] disabled:cursor-default"
+                  data-testid={`wizard-todo-${x.k}`}
+                >
+                  + {x.label}
+                </button>
+              )))}
+            </div>
+          )}
         </div>
         <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-head)' }}>
           {stepLabels[step]}
         </h1>
+
+        {/* Their listing as customers will see it, filling in as they type
+            (Tzvi, 10 Nov 2026: show the result straight away, not only at the end). */}
+        {form.title.trim() && (
+          <div className="mb-5" data-testid="wizard-live-preview">
+            <div className="text-xs font-semibold mb-1.5" style={{ color: 'var(--brand-muted)' }}>
+              {t('wizard.previewLabel', 'How customers will see you')}
+            </div>
+            <ServiceCard
+              variant="list"
+              i18n={i18n}
+              t={t}
+              onClick={() => {}}
+              gig={{
+                id: 'preview', gig_type: form.gig_type, title: form.title, category: form.category,
+                description: form.description, area: form.area, gallery: form.gallery,
+                provider: { name: bizName || form.title },
+                tiers: form.gig_type === 'store' ? [] : form.tiers.filter((x) => x.price !== '').map((x) => ({ ...x, price: parseFloat(x.price) })),
+                products: form.gig_type === 'store' ? form.products.filter((x) => x.price !== '' || x.price_kind === 'quote').map((x) => ({ ...x, price: parseFloat(x.price) || 0 })) : [],
+              }}
+            />
+          </div>
+        )}
 
         {step === 1 && !token && (
           <div className="mb-4 p-4 rounded-xl bg-white border border-[var(--brand-border)]" data-testid="wizard-email">

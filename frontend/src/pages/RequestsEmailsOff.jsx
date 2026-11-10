@@ -17,11 +17,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { CheckCircle2, XCircle, Loader2, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { API } from '../App';
 
 const RequestsEmailsOff = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  // ?kind=ads: the same page for the weekly "your ad is ready" email (weekly_ads.py).
+  const ads = params.get('kind') === 'ads';
   const [status, setStatus] = useState('loading');
   const [error, setError] = useState(null);
   // React 18 StrictMode double-invokes effects in dev; without this the
@@ -40,13 +44,13 @@ const RequestsEmailsOff = () => {
     }
 
     axios
-      .post(`${API}/marketplace/requests/emails/opt-out`, { token })
+      .post(`${API}/marketplace/${ads ? 'ad-emails' : 'requests/emails'}/opt-out`, { token })
       .then(() => setStatus('success'))
       .catch((err) => {
         setError(err.response?.data?.detail || 'This link is no longer valid.');
         setStatus('error');
       });
-  }, [params]);
+  }, [params, ads]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg)' }}>
@@ -62,7 +66,23 @@ const RequestsEmailsOff = () => {
           </>
         )}
 
-        {status === 'success' && (
+        {status === 'success' && ads && (
+          <>
+            <CheckCircle2 size={40} className="mx-auto mb-4" style={{ color: 'var(--brand-primary)' }} />
+            <h1 className="text-xl font-bold mb-2" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+              {t('adEmailsOff.title', 'Done, no more of these emails')}
+            </h1>
+            <p className="text-sm mb-6" style={{ color: 'var(--brand-muted)' }}>
+              {t('adEmailsOff.body', 'We will not email you when an ad is ready. Your ads are still waiting in your dashboard under Advertising.')}
+            </p>
+            <button onClick={() => navigate('/dashboard?tab=advertising')} className="btn-blue-solid inline-flex items-center gap-2">
+              {t('adEmailsOff.button', 'Open Advertising')}
+              <ArrowRight size={16} className="rtl:rotate-180" />
+            </button>
+          </>
+        )}
+
+        {status === 'success' && !ads && (
           <>
             <CheckCircle2 size={40} className="mx-auto mb-4" style={{ color: 'var(--brand-primary)' }} />
             <h1 className="text-xl font-bold mb-2" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
