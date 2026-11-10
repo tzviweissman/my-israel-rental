@@ -46,6 +46,7 @@ function read(file) {
 const SHEET_RULES = new Set(['A9.6']);
 const FIT_RULES = new Set(['A3.9']);
 const STRANGER_RULES = new Set(['A2.10']);
+const LAYOUT_RULES = new Set(['A3.11']);
 const blank = (plan) => !plan || /^(\.\.\.|todo|tbd)$/i.test(plan);
 
 function problems(name, upTo, finished) {
@@ -65,6 +66,13 @@ function problems(name, upTo, finished) {
       // A fit rule's answer says the picture was laid with the tool that refuses to shrink it (A3.9, 10 Nov 2026).
       // The headline test is written as what a stranger takes from it, not as "clear" (A2.10, 10 Nov 2026).
       if (STRANGER_RULES.has(it.id) && !/^n\/a:/i.test(g.plan) && !/a stranger reads:/i.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: write "A stranger reads:" and what someone who never heard of the business takes from the headline alone`);
+      // The layout picture exists before the picture is paid for, and the gen script uses it (A3.11, 10 Nov 2026).
+      if (LAYOUT_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
+        const pics = [...g.plan.matchAll(/([\w./-]*layout[\w.-]*\.png)/gi)].map((x) => x[1]);
+        if (!pics.some((f) => fs.existsSync(path.resolve(ROOT, f)))) out.push(`stage ${s.n}, ${it.id}: draw the layout with scripts/ad-layout-sketch.py and name the picture (docs/ads/gen/${name}/layout.png)`);
+        const gen = path.join(ROOT, 'docs', 'ads', 'gen', name, 'gen.py');
+        if (finished && fs.existsSync(gen) && !/layout/.test(fs.readFileSync(gen, 'utf8'))) out.push(`stage ${s.n}, ${it.id}: docs/ads/gen/${name}/gen.py does not give the model the layout picture`);
+      }
       if (FIT_RULES.has(it.id) && !/^n\/a:/i.test(g.plan) && !/ad-fit-picture/.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: name scripts/ad-fit-picture.py, the way the picture was laid on the ad, or n/a`);
       if (SHEET_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
         const files = [...g.plan.matchAll(/([\w./-]+\.(?:jpg|jpeg|png|webp))/gi)].map((x) => x[1]);

@@ -674,3 +674,19 @@ it: the product or service named, or unmistakable in the picture, plus what it d
 Just add water."). Wordplay is welcome on top of that, never instead of it. Step A2.10 in docs/ad-rules-checklist.md:
 the blueprint answer writes "A stranger reads:" and what that stranger would take from the headline alone, and the
 blueprint refuses an answer without it.
+
+## Layout first, and real screens (Tzvi, 10 Nov 2026)
+
+"Why didnt it listen to you?" Told in words where things go, the text-only model centred the phone it was told to
+put at the side and drew eight notes for the thirty asked. Image models copy the arrangement of a picture they are
+given far better than they follow numbers; it is why the cholent tubs came out right, built on the owner's photo.
+So every generated picture starts from a rough layout drawn with scripts/ad-layout-sketch.py: flat boxes where the
+product, props and moment go, the headline and foot left empty (the tool refuses a box over them). That picture
+goes to the reference-image model with "photograph this layout for real", beside the real product photo when there
+is one. Exact parts, a phone screen or a label, are still laid on afterwards in code. Step A3.11: the blueprint
+answer names the layout picture, which must exist before stage 3 counts as answered, so no paid picture can be made
+without it, and the ad's gen script must use it.
+
+"Making it look professional is in the details, like if the phone showed our website in the dashboard." A screen in
+an ad shows the real product, captured at the screen's own shape from the local test account, its sample data only,
+never a real business or customer. Step A3.12.
