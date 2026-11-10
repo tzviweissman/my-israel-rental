@@ -64,7 +64,9 @@ def piece(cls='', attrs='', size=900, eager=False):
 # the opening (IDEAS.md idea I, Tzvi 9 Nov 2026 "yes 1"): one coloured room per category, their own piece on its stone, the
 # category's name huge behind it (gen/rooms_layers.py writes the pictures); rooms.js wipes each into the next as you scroll
 ROOMS = [('Shabbos', 'SHABBOS'), ('Havdalah', 'HAVDALAH'), ('Home & Decor', 'HOME'), ('Judaica', 'JUDAICA'),
-         ('Rosh Hashana', 'ROSH HASHANA'), ('Chanukah', 'CHANUKAH'), ('Games & Gifts', 'GAMES')]
+         ('Rosh Hashana', 'ROSH HASHANA'), ('Chanukah', 'CHANUKAH'), ('Games & Gifts', 'GIFTS')]
+# the room shows the Gedolim book, which is no game (Tzvi 10 Nov 2026): it is named Gifts, and still opens the Games & Gifts shop
+LABEL = {'Games & Gifts': 'Gifts'}
 ROOM_SLUG = lambda c: re.sub(r'[^a-z]+', '-', c.lower()).strip('-')
 
 
@@ -76,7 +78,7 @@ def room(i, cat, word):
     pic = lambda part: (f'<picture><source media="(max-aspect-ratio: 1/1)" srcset="assets/rooms/{f}-tall{part}.webp" width="1152" height="2048">'
                         f'<img class="r-{"front" if part else "bg"}" src="assets/rooms/{f}-wide{part}.webp" alt="" width="2048" height="1152"{lazy} decoding="async"></picture>')
     return (f'<div class="r-room" id="room-{f}" style="--i:{i}">{pic("")}<span class="r-word" aria-hidden="true" style="--len:{len(word)}">{escape(word)}</span>{pic("-front")}'
-            f'<p class="r-cap"><b>{escape(cat)}</b> {n} pieces, from {money(low)} <a class="lnk" href="shop.html?c={quote(cat)}">Shop {escape(cat)} <span class="arw" aria-hidden="true"></span></a></p></div>')
+            f'<p class="r-cap"><b>{escape(LABEL.get(cat, cat))}</b> {n} pieces, from {money(low)} <a class="lnk" href="shop.html?c={quote(cat)}">Shop {escape(LABEL.get(cat, cat))} <span class="arw" aria-hidden="true"></span></a></p></div>')
 
 
 OPENING = f'''  <section class="rooms" id="gifts" aria-labelledby="h-open" style="--n:{len(ROOMS)}">
@@ -89,7 +91,7 @@ OPENING = f'''  <section class="rooms" id="gifts" aria-labelledby="h-open" style
           <a class="btn" href="shop.html">Shop the collection <span class="arw" aria-hidden="true"></span></a>
         </div>
       </div>
-      <nav class="r-dots" aria-label="Rooms">{''.join(f'<a href="#room-{ROOM_SLUG(c)}" aria-current="{"true" if i == 0 else "false"}">{escape(c)}</a>' for i, (c, w) in enumerate(ROOMS))}</nav>
+      <nav class="r-dots" aria-label="Rooms">{''.join(f'<a href="#room-{ROOM_SLUG(c)}" aria-current="{"true" if i == 0 else "false"}">{escape(LABEL.get(c, c))}</a>' for i, (c, w) in enumerate(ROOMS))}</nav>
     </div>
   </section>
 '''
