@@ -747,7 +747,7 @@ async def extract_from_pictures(
             n = int(ph.get("page") or 1) - 1
         except (AttributeError, TypeError, ValueError):
             continue
-        jpg = crop(images[n][1], ph.get("box")) if 0 <= n < len(images) else None
+        jpg = await asyncio.to_thread(crop, images[n][1], ph.get("box")) if 0 <= n < len(images) else None
         if jpg:
             try:
                 urls.append((await upload_bytes_to_cloudinary(jpg, is_video=False, folder="myisraelrental/catalog-crops"))["url"])
