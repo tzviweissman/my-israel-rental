@@ -57,13 +57,15 @@ def main(gen: str, real: str, out: str) -> None:
         ref = ref.crop((xs.min(), ys.min(), xs.max() + 1, ys.max() + 1))
     scale = st[parts[0], 2] / ref.width
     ref = ref.resize((max(1, round(ref.width * scale)), max(1, round(ref.height * scale))))
-    row_h = max([c.height for c in crops[1:]] or [crops[0].height])
-    row = crops[1:] or crops[:1]
+    row_h = max(c.height for c in crops)
+    # The main product first, then every separate piece: a prop the model split off (a pot behind the product)
+    # shows here too, and is judged by eye, never counted as a copy by name alone.
+    row = crops
     W = max(sum(c.width for c in row) + pad * (len(row) + 1), ref.width + 2 * pad)
     H = 60 + row_h + 60 + ref.height + pad
     sheet = Image.new("RGB", (W, H), "white")
     d = ImageDraw.Draw(sheet)
-    d.text((pad, 18), "GENERATED COPIES (full size)", fill="black")
+    d.text((pad, 18), "GENERATED: MAIN PRODUCT, THEN EACH SEPARATE PIECE (full size)", fill="black")
     x = pad
     for c in row:
         sheet.paste(c, (x, 50))

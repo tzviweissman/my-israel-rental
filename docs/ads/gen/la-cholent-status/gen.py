@@ -22,17 +22,21 @@ BUILD = ROOT / "scrollcraft" / "builds" / "la-cholent"
 TUBS = BUILD / "src" / "medium.jpg"
 POT = BUILD / "assets" / "pot.webp"
 PROMPT = (
-    "Professional food advertising photograph, vertical. Image 1 is the real product: keep it exactly, the four clear "
-    "plastic sealed tubs with the brown raw cholent kit inside and the dark label on each lid, the same four tubs, the "
-    "same labels. Image 2 shows the kind of slow cooker: a brushed stainless steel slow cooker with a black glass lid "
-    "and black handles. Composition, strictly: the TOP THIRD of the picture is empty warm dark background, a softly "
-    "lit dark kitchen wall, nothing in it. The slow cooker stands on a white marble counter in the middle of the "
-    "picture, centred, lid on, filling about 60 percent of the width, its lid top at about 40 percent of the picture's "
-    "height. The four tubs from image 1 stand in front of it on the marble, in two rows of two, slightly angled so "
-    "their labels face the camera, their front edge at about 78 percent of the picture's height. Below that, only "
-    "marble. Moment: a thin, soft wisp of steam rises from the lid's vent. Light: warm low candle-coloured light from "
-    "the left, a gold glow on the steel, a gentle fall to dark at the edges, real depth. No text, no letters and no "
-    "logos anywhere except the tubs' own labels; no hands, no people, no other props, no food outside the tubs."
+    "Premium food advertising photograph, a styled product shoot, portrait 3:4, filling the whole frame. Image 1 is the "
+    "real product: keep it exactly, the four clear plastic sealed tubs with the brown raw cholent kit inside and the "
+    "dark label on each lid, the same four tubs, the same labels, sharp and clearly readable. Image 2 shows the kind of "
+    "slow cooker: brushed stainless steel with a black glass lid. Set: a dark walnut wood table in warm candlelight. "
+    "The four tubs stand at the front centre in two rows of two, big, filling about 70 percent of the width, slightly "
+    "angled so the labels face the camera, their front edge at about 84 percent of the picture's height. The slow "
+    "cooker stands behind them, lid on, a soft wisp of steam rising from its vent, its lid top at about 30 percent of "
+    "the height. Styled around them, near the left and right edges only, never in front of the tubs: on the left a "
+    "golden braided challah on a wooden board with a linen napkin; on the right a small wooden board with two raw "
+    "beef marrow bones and a few cubes of raw diced beef, a sprig of thyme. Behind, far out of focus, two lit "
+    "Shabbat candles in silver candlesticks, warm glowing points. The top 22 percent of the picture is plain dark warm "
+    "background, the candle glows below that line; below the tubs the walnut table falls into shadow. Light: warm "
+    "golden key light from the left, gentle fill from the front so the tubs and labels are bright and clear, rich "
+    "shadows, real depth, appetising and premium. No cooked food, no plates of cholent, no text, no letters and no "
+    "logos anywhere except the tubs' own labels; no hands, no people."
 )
 
 
@@ -50,7 +54,7 @@ def main(take: str) -> None:
     r = higgsfield_client.subscribe(
         "marketing-studio/image/sunburst",
         arguments={"prompt": PROMPT, "image_urls": [higgsfield_client.upload_file(jpg(TUBS)), higgsfield_client.upload_file(jpg(POT))],
-                   "aspect_ratio": "9:16", "resolution": "2k", "quality": "medium", "enhance_prompt": False},
+                   "aspect_ratio": sys.argv[2] if len(sys.argv) > 2 else "9:16", "resolution": "2k", "quality": "medium", "enhance_prompt": False},
         on_queue_update=lambda s: final.update(s=s),
     )
     if not isinstance(final.get("s"), higgsfield_client.Completed):

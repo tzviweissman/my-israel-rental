@@ -652,3 +652,15 @@ them from the front like the real photo's. Step A9.6 in docs/ad-rules-checklist.
 
 Ad picture prompts start from the closest proven one in `docs/prompts/README.md` (Tzvi, 10 Nov 2026: right the
 first time); a prompt whose picture is used goes in there with its number of takes.
+
+## Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
+
+"The la cholent ad is whiteish on the sides; show his product clearly and make it look premium and delicious like
+with product photos with other things on the side to make it less plain." The first L.A. Cholent picture was made
+too tall for the words, so it was shrunk and its sides filled with its own edge colours: pale bands that read as
+unfinished. Two rules came of it. A3.9: the picture runs edge to edge as it was made, laid with
+scripts/ad-fit-picture.py, which only carries on the plain wall above and the table below and refuses to shrink;
+a picture that does not fit is made again in a shorter shape. A3.10: a product shot is styled like a pro shoot, on a
+rich surface in warm light, with two or three things from the business's own world at the sides (for L.A. Cholent:
+a challah, the marrow bones and beef they sell as add-ons, Shabbos candles), never in front of the product and never
+passed off as it.

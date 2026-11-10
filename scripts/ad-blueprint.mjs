@@ -44,6 +44,7 @@ function read(file) {
 }
 // Rules answered by a sheet that must exist (A9.6: every added copy of the product beside the real photo, 9 Nov 2026).
 const SHEET_RULES = new Set(['A9.6']);
+const FIT_RULES = new Set(['A3.9']);
 const blank = (plan) => !plan || /^(\.\.\.|todo|tbd)$/i.test(plan);
 
 function problems(name, upTo, finished) {
@@ -60,6 +61,8 @@ function problems(name, upTo, finished) {
       if (!g) { out.push(`${it.id}: missing (rule added since? re-run node scripts/ad-blueprint.mjs ${name})`); continue; }
       if (blank(g.plan)) { out.push(`stage ${s.n}, ${it.id}: no answer. ${it.rule}`); continue; }
       // A sheet rule's answer is a picture someone looked at, not a sentence: the file it names must exist.
+      // A fit rule's answer says the picture was laid with the tool that refuses to shrink it (A3.9, 10 Nov 2026).
+      if (FIT_RULES.has(it.id) && !/^n\/a:/i.test(g.plan) && !/ad-fit-picture/.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: name scripts/ad-fit-picture.py, the way the picture was laid on the ad, or n/a`);
       if (SHEET_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
         const files = [...g.plan.matchAll(/([\w./-]+\.(?:jpg|jpeg|png|webp))/gi)].map((x) => x[1]);
         if (!files.some((f) => fs.existsSync(path.resolve(ROOT, f)))) out.push(`stage ${s.n}, ${it.id}: name the sheet file it was checked on (none of ${files.length ? files.join(', ') : 'no file'} exists)`);

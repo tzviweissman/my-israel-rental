@@ -19,7 +19,9 @@ from typing import Any
 SETS = Path(__file__).resolve().parent.parent / "assets" / "ad-sets"
 SHOTS_PER_DAY = 5
 MODEL = "marketing-studio/image/sunburst"
-ASPECT = {"square": "1:1", "feed": "4:5", "story": "9:16"}
+# The model takes 1:1, 3:4 and 9:16 but not 4:5 (refused, 10 Nov 2026): the feed photo is made 3:4 and the ad
+# maker lays it over the 4:5 feed, losing a strip of the plain wall above and table below, never the product.
+ASPECT = {"square": "1:1", "feed": "3:4", "story": "9:16"}
 
 # One look per kind of business, so two businesses' ads do not come out the same picture (Tzvi, 8 Nov 2026:
 # "make each design visually distinct"). The set is the empty picture the product is put on; the light, the

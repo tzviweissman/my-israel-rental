@@ -45,13 +45,13 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
 ## 3. The picture
 
 - [x] A3.1 One huge subject on one quiet ground: it fills half the frame or more, two or three colours in all.
-  plan: one steel slow cooker filling about 60 percent of the width, their tubs in front, on marble, a dark warm ground; three colours: steel, gold, the cholent's brown.
+  plan: one styled product shoot filling the whole frame: their four tubs big at the front, the slow cooker behind, a braided challah on the left, marrow bones and diced beef (their add-ons) on a board on the right, candles out of focus behind; walnut, steel, gold and the kit's brown.
 - [x] A3.2 A rental or a place: only the owner's real photos. A generated room does not exist. Say where each picture comes from.
-  plan: a food product, not a place. The tubs are their own photo (scrollcraft/builds/la-cholent/src/medium.jpg); the slow cooker is a prop (their own site uses the same kind, assets/pot.webp).
+  plan: a food product, not a place. The tubs are their own photo (scrollcraft/builds/la-cholent/src/medium.jpg); the slow cooker, challah, candles, bones and beef are props. No cooked cholent is shown as theirs.
 - [x] A3.3 A generated picture of a product keeps the real product: rebuilt around its real photo, its traits unchanged, compared beside that photo. Describe the reference scene in full, never "swap the product".
   plan: rebuilt around medium.jpg: the same clear sealed tubs with the dark L.A. CHOLENT label and the brown raw kit inside, the same count of four; only the camera, light and the pot behind change. Label compared beside medium.jpg at full size.
 - [x] A3.4 Another shape than the screen: the background is extended, never cropped or zoomed.
-  plan: the model draws the whole 9:16 frame; nothing cropped or zoomed; any gap filled from the picture's own colours.
+  plan: made in the story shape and used whole: nothing shrunk, cropped or filled at the edges (Tzvi, 10 Nov 2026: the first version was 'whiteish on the sides').
 - [x] A3.5 Sharp and bright; one colour that stands out on a white and a dark feed, from our palette or the owner's own photo and logo.
   plan: warm gold and steel on a dark ground: stands out on white and dark feeds; gold from their logo seal.
 - [x] A3.6 A hand holding, offering or reaching in, where it helps. Real or native beats polished.
@@ -60,6 +60,10 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
   plan: the prompt forbids new letters; only their own tub label stays. Every ad word is typed on top.
 - [x] A3.8 Another brand's idea and composition only, never its marks, wording or product.
   plan: only the pun idea from the reference.
+- [x] A3.9 The picture fills the ad edge to edge as it was made: made in the ad's own shape or the nearest shorter one the model takes, laid at full width with scripts/ad-fit-picture.py, which carries on only the plain wall above and table below in the picture's own colours and refuses to shrink. Never shrunk with filled or pale sides. The answer names ad-fit-picture, or n/a when no picture is generated.
+  plan: made 3:4 (the story shape left no room for the words), laid at full width from row 300 with scripts/ad-fit-picture.py --cut; the wall above and the table below carried on in its own colours, nothing shrunk.
+- [x] A3.10 A product shot is styled like a pro shoot: the product big and sharp on a rich surface (wood, stone, linen, never a bare white table), in warm shaped light, with two or three things from the business's own world at the sides (what it is served with, made from or sold beside). Props never in front of the product, never presented as the product, no cooked food passed off as theirs. Name each prop and why it belongs.
+  plan: their four tubs big at the front on dark walnut in warm candlelight; at the sides a braided challah (what cholent is eaten with on Shabbos), raw marrow bones and diced beef (their own add-ons, ₪40 and ₪50 a pound), Shabbos candles out of focus (when it is eaten); the slow cooker behind (how it is cooked). None in front of the tubs; no cooked cholent shown.
 
 ## 4. Body and proof
 
@@ -121,11 +125,11 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
 - [x] A9.3 The owner can change every word and the price stays right.
   plan: n/a: a hand-made status ad sent as a picture, not a maker design.
 - [x] A9.4 Cost read from the API before any generation, and the spend reported.
-  plan: the API has no price lookup; the last measured price for this model was about 2 credits a picture. One picture made, about 2 credits. Reported to Tzvi.
+  plan: the API has no price lookup; the last measured price for this model was about 2 credits a picture. Three pictures made (the first had pale empty sides, Tzvi 10 Nov 2026; the second left no room for the words; a 4:5 request was refused and cost nothing), about 6 credits. Reported to Tzvi.
 - [x] A9.5 Never bland: before anyone sees it, the ad sits beside the pro ads at the same size (python scripts/ad_vs_pros.py, references in docs/inspo/pro-references). Five yes-or-no: the product is the hero, close and big (about half the width or more); one strong light or bold colour, not flat even light; something happens (a moment, motion, a surprise, an idea); the headline is part of the design, big, not a small line in a corner; it holds its own beside the pros. Any no: remade, not shown.
-  plan: docs/ads/la-cholent-and-site-vs-pros.jpg: pot and tubs fill most of the width; warm candle light on steel; steam rising; LOW. is the design; holds its own. All five yes.
+  plan: docs/ads/la-cholent-vs-pros.jpg: the tubs fill most of the width, styled with challah, bones and candles, edge to edge; warm candle light on steel; steam rising; LOW. is the design; holds its own. All five yes.
 - [x] A9.6 Every copy of the product the picture adds (pieces in the air, a second item, a stack, a pour) matches the real photo in shape, size, colour and coating, with nothing round it the real product would not make (crumbs, drops, glow). The prompt names those traits; the sheet from backend/.venv/Scripts/python scripts/product-match-sheet.py <picture> <real photo> <sheet.jpg> is looked at piece by piece. The answer names the sheet file, or n/a when no copies are added.
-  plan: docs/ads/la-cholent-tubs-vs-real.jpg: no copies added, the four tubs of their photo, labels and kit compared beside medium.jpg and the same.
+  plan: docs/ads/la-cholent-tubs-vs-real.jpg: no copies added, the four tubs of their photo, labels and kit compared beside medium.jpg; the props are not their product.
 
 ## 9. The pro look (Tzvi, 8 Nov 2026: "use the new things you learnt... make it a rule for all future ad builds")
 

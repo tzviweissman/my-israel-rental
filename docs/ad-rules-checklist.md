@@ -56,6 +56,8 @@ A3.5 | Sharp and bright; one colour that stands out on a white and a dark feed, 
 A3.6 | A hand holding, offering or reaching in, where it helps. Real or native beats polished. | 3, 9e.6, 9g.4 | decide
 A3.7 | No words drawn into a generated picture. The picture is one layer, the words typed on top and editable. | 6, 9g.8 | decide
 A3.8 | Another brand's idea and composition only, never its marks, wording or product. | 9g.2 | decide
+A3.9 | The picture fills the ad edge to edge as it was made: made in the ad's own shape or the nearest shorter one the model takes, laid at full width with scripts/ad-fit-picture.py, which carries on only the plain wall above and table below in the picture's own colours and refuses to shrink. Never shrunk with filled or pale sides. The answer names ad-fit-picture, or n/a when no picture is generated. | Tzvi 10 Nov | decide since:2026-11-10
+A3.10 | A product shot is styled like a pro shoot: the product big and sharp on a rich surface (wood, stone, linen, never a bare white table), in warm shaped light, with two or three things from the business's own world at the sides (what it is served with, made from or sold beside). Props never in front of the product, never presented as the product, no cooked food passed off as theirs. Name each prop and why it belongs. | Tzvi 10 Nov | decide since:2026-11-10
 
 ## 4. Body and proof
 
