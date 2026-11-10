@@ -7,8 +7,10 @@
  * that already existed adding its 28th product one row at a time (The
  * Gift Boutique, 22 Oct 2026). The parent owns the products: this only
  * hands back the chosen photo files (`onPhotos`) and asks the parent to
- * read a list (`onExtract({ text } | { file })`, resolving true when rows
- * came back).
+ * read a list (`onExtract({ text } | { files })`, resolving true when rows
+ * came back). Up to 6 pages of a catalog at once; each item's picture is cut
+ * out of the page when it is big enough (10 Nov 2026). `onPhotos` is
+ * optional: a service's list has no "one photo each" button.
  */
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,14 +34,18 @@ export default function QuickProductAdd({ onPhotos, onExtract, bulkPhotos, extra
         {t('wizard.quickTitle', 'Have a lot to add?')}
       </p>
       <div className="flex flex-wrap gap-2">
-        <button type="button" disabled={busy} onClick={() => bulkRef.current?.click()}
-          className={btn} data-testid={`${testid}-from-photos`}>
-          {bulkPhotos ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
-          {t('wizard.photosAsProducts', 'Add photos, one product each')}
-        </button>
-        <input ref={bulkRef} type="file" accept="image/*" multiple className="hidden"
-          onChange={(e) => { onPhotos(e.target.files); e.target.value = ''; }}
-          data-testid={`${testid}-photos-input`} />
+        {onPhotos && (
+          <>
+            <button type="button" disabled={busy} onClick={() => bulkRef.current?.click()}
+              className={btn} data-testid={`${testid}-from-photos`}>
+              {bulkPhotos ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
+              {t('wizard.photosAsProducts', 'Add photos, one product each')}
+            </button>
+            <input ref={bulkRef} type="file" accept="image/*" multiple className="hidden"
+              onChange={(e) => { onPhotos(e.target.files); e.target.value = ''; }}
+              data-testid={`${testid}-photos-input`} />
+          </>
+        )}
 
         <button type="button" disabled={busy} onClick={() => setPasteOpen(!pasteOpen)}
           className={btn} aria-expanded={pasteOpen} data-testid={`${testid}-paste-toggle`}>
@@ -50,10 +56,10 @@ export default function QuickProductAdd({ onPhotos, onExtract, bulkPhotos, extra
         <button type="button" disabled={busy} onClick={() => listShotRef.current?.click()}
           className={btn} data-testid={`${testid}-from-shot`}>
           {extracting ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
-          {t('wizard.shotOfList', 'Photo of your menu or price list')}
+          {t('wizard.shotOfCatalog', 'Photos of your catalog, menu or price list')}
         </button>
-        <input ref={listShotRef} type="file" accept="image/*" className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onExtract({ file: f }); }}
+        <input ref={listShotRef} type="file" accept="image/*" multiple className="hidden"
+          onChange={(e) => { const f = Array.from(e.target.files || []).slice(0, 6); e.target.value = ''; if (f.length) onExtract({ files: f }); }}
           data-testid={`${testid}-shot-input`} />
       </div>
 
@@ -74,7 +80,7 @@ export default function QuickProductAdd({ onPhotos, onExtract, bulkPhotos, extra
       )}
 
       <p className="text-[11px] text-gray-500">
-        {t('wizard.quickNote', 'Reading a list gives you the names and prices. Photos still come from you, so the quickest order is photos first, then the list.')}
+        {t('wizard.quickNoteCatalog', 'Up to 6 pages at once. We read the names and prices, and cut out each picture that is big and sharp enough. Check them, then add any photo that is missing.')}
       </p>
     </div>
   );

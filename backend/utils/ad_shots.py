@@ -98,6 +98,21 @@ def prompt_for(what: str, kind: str, occasion: str, shape: str) -> str:
     )
 
 
+def prompt_for_scene(what: str, shape: str) -> str:
+    """A service's own photo (a cleaner at work, a van, a haircut) photographed again as an advert, not put on a
+    product set: the same people, place and work, only the photography better (Tzvi, 10 Nov 2026)."""
+    tall = shape == "story"
+    return (
+        f"Professional advertising photograph. Image 1 is a real photo from {what}. Photograph the same scene again "
+        "as a top advertising photographer would: the same place, the same people, the same objects and the same work "
+        "being done, the same number of each. Do not add, remove or replace anything or anyone, and do not change any "
+        "face. Only the photography improves: flattering soft light with a warm glow, crisp focus, rich true colours, "
+        "a clean composition with the main subject large in the lower part of the picture. "
+        f"The top {'40' if tall else '35'} percent of the picture is calm, darker background for words. "
+        "No text, no letters, no logos."
+    )
+
+
 def recent_count(rows: list[dict[str, Any]], now: datetime) -> int:
     since = (now - timedelta(days=1)).isoformat()
     return sum(1 for r in rows if r.get("created_at", "") >= since and r.get("status") != "failed")
@@ -108,7 +123,7 @@ def _fetchable(src: str) -> str:
     return src.replace("/upload/f_auto,q_auto/", "/upload/f_jpg,q_85,w_1400/")
 
 
-def make_picture(product_url: str, prompt: str, shape: str, set_name: str) -> bytes:
+def make_picture(product_url: str, prompt: str, shape: str, set_name: str | None) -> bytes:
     """One billable call. Blocking: run it in a thread. HF_KEY is read by the client from the environment."""
     import os
 
@@ -122,7 +137,8 @@ def make_picture(product_url: str, prompt: str, shape: str, set_name: str) -> by
     final: dict[str, Any] = {}
     r = higgsfield_client.subscribe(
         MODEL,
-        arguments={"prompt": prompt, "image_urls": [_fetchable(product_url), higgsfield_client.upload_file(SETS / f"{set_name}.jpg")],
+        arguments={"prompt": prompt, "image_urls": [_fetchable(product_url)]
+                   + ([higgsfield_client.upload_file(SETS / f"{set_name}.jpg")] if set_name else []),
                    "aspect_ratio": ASPECT[shape], "resolution": "2k", "quality": "medium", "enhance_prompt": False},
         on_queue_update=lambda s: final.update(s=s),
     )
@@ -165,7 +181,7 @@ def front_cut(content: bytes) -> bytes | None:
     return buf.getvalue()
 
 
-async def run_shot(shot_id: str, product_url: str, prompt: str, shape: str, set_name: str) -> None:
+async def run_shot(shot_id: str, product_url: str, prompt: str, shape: str, set_name: str | None) -> None:
     """Makes the picture and its cut-out and keeps both; the row says how it went. Never raises."""
     from routes.deps import db, logger
     from utils.cloud_storage import upload_bytes_to_cloudinary

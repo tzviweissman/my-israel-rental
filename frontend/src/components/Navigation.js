@@ -341,6 +341,25 @@ const Navigation = () => {
   // Non-home pages always compact; home page depends on scroll
   const scrolled = isHome ? homeScrolled : true;
 
+  // The sign-up has no site menu (Tzvi, 10 Nov 2026, from the HelpScout
+  // funnel video): a menu is a way out halfway. Logo and language only.
+  if (location.pathname === '/businesses/add' || location.pathname === '/services/create-gig') {
+    return (
+      <nav ref={navRef} data-testid="global-nav" data-bare="true" className="fixed top-0 left-0 right-0 z-50 bg-white border-b" style={{ borderColor: '#E3E3E3' }}>
+        <div className="max-w-7xl mx-auto flex items-center justify-between" style={{ padding: '10px clamp(16px,3vw,36px)' }}>
+          <Link to="/" className="flex items-center gap-[11px]" data-testid="nav-logo">
+            <img src={logoMark} alt="" aria-hidden="true" className="h-9 w-auto block" />
+            <span className="font-bold tracking-tight text-[17px]" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>MyIsraelRental</span>
+          </Link>
+          <button onClick={toggleLanguage} className="px-3 py-1.5 rounded-full border text-sm font-semibold" style={{ borderColor: '#E3E3E3', color: 'var(--ink)' }}
+            data-testid="language-toggle" aria-label={t('nav.toggleLanguage')}>
+            עברית / EN
+          </button>
+        </div>
+      </nav>
+    );
+  }
+
   return (
     <nav
       ref={navRef}

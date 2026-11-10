@@ -37,15 +37,16 @@
  */
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import QuickProductAdd from '../components/marketplace/QuickProductAdd';
-import FaqEditor, { cleanFaqs } from '../components/marketplace/FaqEditor';
+import { cleanFaqs } from '../components/marketplace/FaqEditor';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Loader2, Plus, Trash2, ArrowLeft, ArrowRight, X,
-  Store, Package, CalendarClock, ImagePlus, Copy, Sparkles, Camera, Search, MapPin, Check, PartyPopper, Megaphone,
+  Store, Package, CalendarClock, ImagePlus, Copy, Sparkles, Camera, Search, MapPin, Check, PartyPopper, ChevronDown,
 } from 'lucide-react';
 import QrShareCard from '../components/common/QrShareCard';
+import AdMaker from '../components/dashboard/AdMaker';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { compressImage as shrinkPhoto } from '../utils/fastUpload';
 import { API, AuthContext } from '../App';
@@ -138,6 +139,10 @@ const CreateGig = () => {
   const [submitted, setSubmitted] = useState(false);
   // Set on publish: the "your page is live" screen shows before the dashboard.
   const [published, setPublished] = useState(null);
+  const [liveBiz, setLiveBiz] = useState(null);
+  // The first ad's AI product photo: null (not asked), 'making', 'ready' or 'none'.
+  const [shot, setShot] = useState(null);
+  const [showPaste, setShowPaste] = useState(false);
   const productImageInputRef = useRef({});
   // Which business this listing is being added to, from ?business= on the
   // URL. Absent when someone starts from a generic "list your service"
@@ -509,16 +514,35 @@ const CreateGig = () => {
 
   // Pasted list or a photographed price list -> rows the owner then checks.
   // Nothing is saved: these land in the form exactly as a typed row would.
-  const extractProducts = async ({ text, file }) => {
-    if (needAccount('extractProducts', { text, file })) return false;
+  const extractProducts = async ({ text, files = [] }) => {
+    if (needAccount('extractProducts', { text, files })) return false;
     setExtracting(true);
     try {
       const body = new FormData();
       if (text) body.append('text', text);
-      if (file) body.append('file', file);
+      files.forEach((f) => body.append('files', f));
       const { data } = await axios.post(`${API}/marketplace/products/extract`, body, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      // A service's price list becomes its services (tiers), with the same cut-out pictures.
+      if (form.gig_type !== 'store') {
+        const kept = form.tiers.filter((x) => x.name.trim() || String(x.price).trim() || (x.images || []).length);
+        const rowsT = (data.products || []).slice(0, Math.max(0, 20 - kept.length));
+        if (!rowsT.length) {
+          toast.error(t('wizard.extractNone', 'Nothing came back. Try a clearer picture, or type the list.'));
+          return false;
+        }
+        const cur = form.tiers[form.tiers.length - 1]?.currency || 'ILS';
+        const madeT = rowsT.map((r) => ({
+          ...emptyTierFor(form.gig_type, r.currency || cur),
+          name: r.name || '', price: r.price == null ? '' : String(r.price), description: r.description || '',
+          images: r.image ? [r.image] : [],
+        }));
+        set({ tiers: [...kept, ...madeT] });
+        const withPhotoT = madeT.filter((m) => m.images.length).length;
+        toast.success(t('wizard.extractDoneServices', { count: madeT.length, photos: withPhotoT, defaultValue: '{{count}} services read, {{photos}} with their picture. Check them.' }));
+        return true;
+      }
       const rows = (data.products || []).slice(0, MAX_PRODUCTS - form.products.filter((p) => !productIsBlank(p)).length);
       if (!rows.length) {
         toast.error(t('wizard.extractNone', 'Nothing came back. Try a clearer picture, or type the list.'));
@@ -530,10 +554,14 @@ const CreateGig = () => {
         name: r.name || '',
         price: r.price == null ? '' : String(r.price),
         description: r.description || '',
+        images: r.image ? [r.image] : [],
       }));
       // Replaces the untouched rows, keeps everything already filled in.
       set({ products: [...form.products.filter((p) => !productIsBlank(p)), ...made] });
-      toast.success(t('wizard.extractDone', { count: made.length, defaultValue: '{{count}} products read. Check them, then add a photo to each.' }));
+      const withPhoto = made.filter((m) => m.images.length).length;
+      toast.success(withPhoto
+        ? t('wizard.extractDonePhotos', { count: made.length, photos: withPhoto, defaultValue: '{{count}} products read, {{photos}} with their picture. Check them, then add any photo that is missing.' })
+        : t('wizard.extractDone', { count: made.length, defaultValue: '{{count}} products read. Check them, then add a photo to each.' }));
       return true;
     } catch (err) {
       toast.error(apiErrorMessage(err, t('wizard.extractFailed', 'Could not read that.'), t), { duration: 8000 });
@@ -913,6 +941,9 @@ const CreateGig = () => {
       // Someone who just added their FIRST business goes straight into the
       // walk (components/tour), which starts on their page. `tour=first`
       // starts it only if this account has never taken it, on any device.
+      if ((form.goals || []).length) {
+        axios.post(`${API}/onboarding/goals`, { goals: form.goals }, auth).catch(() => {});
+      }
       setPublished({
         id: data.id,
         bizId: data.business_id || payload.business_id || '',
@@ -926,6 +957,42 @@ const CreateGig = () => {
       setSaving(false);
     }
   };
+
+  useEffect(() => {
+    if (!published?.bizId || !token) return;
+    axios.get(`${API}/marketplace/businesses`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(({ data }) => {
+        const b = (data || []).find((x) => String(x.id) === String(published.bizId));
+        if (b) setLiveBiz({ ...b, type: 'business', name: b.name });
+      }).catch(() => {});
+  }, [published, token]);
+
+  // Their first ad is a professional AI photo of their own product (Tzvi, 10 Nov 2026),
+  // made while they watch. Any failure falls back to the ad maker's own layouts.
+  useEffect(() => {
+    if (!liveBiz) return undefined;
+    const auth = { headers: { Authorization: `Bearer ${token}` } };
+    let alive = true;
+    let timer;
+    const started = Date.now();
+    const poll = (id, item) => {
+      axios.get(`${API}/ads/shots`, { params: { target_type: 'business', target_id: liveBiz.id }, ...auth }).then(({ data }) => {
+        if (!alive) return;
+        const row = (data.shots || []).find((x) => x.id === id);
+        if (!row) setShot({ status: 'none' });
+        else if (row.status === 'ready') setShot({ status: 'ready', item });
+        else if (Date.now() - started > 4 * 60 * 1000) setShot({ status: 'none' });
+        else timer = setTimeout(() => poll(id, item), 5000);
+      }).catch(() => alive && setShot({ status: 'none' }));
+    };
+    axios.post(`${API}/marketplace/first-ad-shot`, { business_id: liveBiz.id }, auth).then(({ data }) => {
+      if (!alive) return;
+      if (data.status === 'ready') setShot({ status: 'ready', item: data.item });
+      else if (data.status === 'making') { setShot({ status: 'making', item: data.item }); poll(data.id, data.item); }
+      else setShot({ status: 'none' });
+    }).catch(() => alive && setShot({ status: 'none' }));
+    return () => { alive = false; clearTimeout(timer); };
+  }, [liveBiz, token]);
 
   // Which real step index maps to contact given the optional hours step.
   const contactStep = isAppointment ? 4 : 3;
@@ -963,7 +1030,6 @@ const CreateGig = () => {
 
   if (published) {
     const pageUrl = `${window.location.origin}/businesses/${published.id}`;
-    const adUrl = `/dashboard?tab=advertising${published.bizId ? `&target=${encodeURIComponent(published.bizId)}` : ''}`;
     return (
       <div className="min-h-screen bg-white relative overflow-hidden" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="wizard-published">
         <style>{`
@@ -993,14 +1059,44 @@ const CreateGig = () => {
           <p className="text-base text-gray-600 mb-6">
             {t('wizard.liveBody', { name: published.name, defaultValue: 'Customers can find {{name}} now. Share it today to get your first customers.' })}
           </p>
-          <button
-            type="button"
-            onClick={() => navigate(adUrl)}
-            className="w-full mb-3 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-black text-white font-semibold"
-            data-testid="wizard-live-ad"
-          >
-            <Megaphone size={18} aria-hidden="true" /> {t('wizard.liveAd', 'Make your first ad')}
-          </button>
+        </div>
+        {/* Their first ad, already made from what they just filled in
+            (Tzvi, 10 Nov 2026: show the finished ad, not a button to one). */}
+        {liveBiz && (
+          <div className="max-w-4xl mx-auto px-4 pb-6 relative" data-testid="wizard-live-first-ad">
+            <h2 className="text-xl font-bold mb-1 text-center" style={{ fontFamily: 'var(--font-head)' }}>
+              {t('wizard.liveAdTitle', 'Your first ad is ready')}
+            </h2>
+            <p className="text-sm text-gray-600 mb-4 text-center">
+              {t('wizard.liveAdBody', 'A professional photo of your own product, with your price. Change anything you like, then share it on WhatsApp or your status.')}
+            </p>
+            {(!shot || shot.status === 'making') ? (
+              <div className="rounded-2xl border bg-white px-5 py-10 text-center" style={{ borderColor: 'var(--brand-border)' }} data-testid="wizard-live-shooting">
+                <style>{`
+                  @keyframes wz-flash { 0%, 86%, 100% { opacity: 0; } 90% { opacity: .9; } }
+                  @keyframes wz-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+                  .wz-cam { animation: wz-bob 2.4s ease-in-out infinite; }
+                  .wz-flash { animation: wz-flash 2.4s linear infinite; }
+                  @media (prefers-reduced-motion: reduce) { .wz-cam, .wz-flash { animation: none; } }
+                `}</style>
+                <div className="relative mx-auto mb-4 w-20 h-20 rounded-full flex items-center justify-center" style={{ background: 'rgba(36,175,235,.33)' }}>
+                  <span className="wz-flash absolute inset-0 rounded-full bg-white" aria-hidden="true" />
+                  <Camera size={34} className="wz-cam relative" style={{ color: '#111827' }} aria-hidden="true" />
+                </div>
+                <p className="text-base font-semibold" role="status">
+                  {t('wizard.shooting', 'Our AI photographer is turning your photo into a professional shot.')}
+                </p>
+                <p className="text-sm text-gray-600 mt-1">{t('wizard.shootingTime', 'About a minute. Your ad opens here when it is done.')}</p>
+              </div>
+            ) : (
+              <div className="rounded-2xl border bg-white p-3 sm:p-5 text-start" style={{ borderColor: 'var(--brand-border)' }}>
+                <AdMaker inline API={API} token={token} targetType="business" target={liveBiz}
+                  start={shot.status === 'ready' ? { design: 'shoot', item: shot.item } : null} />
+              </div>
+            )}
+          </div>
+        )}
+        <div className="max-w-md mx-auto px-4 pb-10 text-center relative">
           <button
             type="button"
             onClick={() => { navigator.clipboard?.writeText(pageUrl).then(() => toast.success(t('wizard.liveCopied', 'Link copied'))).catch(() => {}); }}
@@ -1063,6 +1159,24 @@ const CreateGig = () => {
                 ? t('wizard.progressPct', { pct: readyPct, defaultValue: 'Your page is {{pct}}% ready' })
                 : t('wizard.progressDone', 'Your page is ready to publish')}
             </span>
+            {/* Everything is kept as they go, even across devices; this is the way back to a blank form
+                (Tzvi, 10 Nov 2026: a deleted test account still opened halfway through). */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!window.confirm(t('wizard.startOverAsk', 'Start over? Everything you filled in here is cleared.'))) return;
+                setSubmitted(true); // stops the saving while it is cleared
+                clearDraft('create-gig');
+                clearDraft('create-gig-email');
+                if (draftId.current) axios.delete(`${API}/marketplace/signup-draft/${draftId.current}`).catch(() => {});
+                try { localStorage.removeItem('signup-draft-id'); } catch { /* private mode */ }
+                window.location.assign(window.location.pathname);
+              }}
+              className="text-xs text-gray-600 underline"
+              data-testid="wizard-start-over"
+            >
+              {t('wizard.startOver', 'Start over')}
+            </button>
           </div>
           <div className="flex items-center gap-2">
             {Array.from({ length: totalSteps }, (_, i) => i + 1).map((n) => (
@@ -1094,6 +1208,44 @@ const CreateGig = () => {
           {stepLabels[step]}
         </h1>
 
+        <p className="text-sm text-gray-600 -mt-4 mb-5" data-testid="wizard-reassure">
+          {step === 1
+            ? t('wizard.reassure1', 'Free to list, no commission, no card needed. You can stop anytime, we save it as you go.')
+            : step === contactStep
+              ? t('wizard.reassureLast', 'Last screen. Then your page goes live.')
+              : t('wizard.reassureMid', 'Nice, you are halfway there. Photos and prices are what customers look at first.')}
+        </p>
+
+        {step === 1 && (
+          <div className="mb-5" data-testid="wizard-goals">
+            <div className="text-base font-semibold mb-2">{t('wizard.goalsTitle', 'What do you want most? Pick any.')}</div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                ['customers', t('wizard.goalCustomers', 'More customers')],
+                ['orders', t('wizard.goalOrders', 'Orders on WhatsApp')],
+                ['bookings', t('wizard.goalBookings', 'Bookings')],
+                ['page', t('wizard.goalPage', 'A nicer page')],
+              ].map(([id, label]) => {
+                const on = (form.goals || []).includes(id);
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => set({ goals: on ? (form.goals || []).filter((g) => g !== id) : [...(form.goals || []), id] })}
+                    className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border-2 transition-colors ${
+                      on ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white' : 'border-gray-200 bg-white hover:border-[var(--gold)]'
+                    }`}
+                    data-testid={`wizard-goal-${id}`}
+                  >
+                    {on && <Check size={14} aria-hidden="true" />}{label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Their listing as customers will see it, filling in as they type
             (Tzvi, 10 Nov 2026: show the result straight away, not only at the end). */}
         {form.title.trim() && (
@@ -1119,7 +1271,10 @@ const CreateGig = () => {
 
         {step === 1 && !token && (
           <div className="mb-4 p-4 rounded-xl bg-white border border-[var(--brand-border)]" data-testid="wizard-email">
-            <label htmlFor="wizard-email-input" className="block text-base font-semibold">{t('wizard.emailTitle', 'Your email')}</label>
+            <label htmlFor="wizard-email-input" className="flex items-center gap-1.5 text-base font-semibold">
+              {t('wizard.emailTitle', 'Your email')}
+              {emailOk && <Check size={16} style={{ color: '#1F8A50' }} aria-label={t('wizard.looksGood', 'Looks good')} data-testid="wizard-email-ok" />}
+            </label>
             <p className="text-sm text-gray-600 mb-2">{t('wizard.emailBody', 'We save your progress as you go, so nothing is lost if you stop. We never show it on your page.')}</p>
             <input
               id="wizard-email-input"
@@ -1178,7 +1333,16 @@ const CreateGig = () => {
         )}
 
         {/* Then, because most businesses already run an ad somewhere. */}
-        {step === 1 && (
+        {step === 1 && !showPaste && !adText && (
+          <button type="button" onClick={() => setShowPaste(true)}
+            className="mb-6 w-full text-start px-4 py-3 rounded-xl border border-dashed border-[var(--brand-border)] bg-white text-sm font-semibold inline-flex items-center gap-2"
+            data-testid="wizard-paste-ad-open">
+            <Sparkles size={16} className="text-[var(--gold)] shrink-0" />
+            <span className="flex-1">{t('wizard.pasteAdOpen', 'Already advertised somewhere? Paste it and we fill this in')}</span>
+            <ChevronDown size={16} aria-hidden="true" />
+          </button>
+        )}
+        {step === 1 && (showPaste || !!adText) && (
           <div className="mb-6 p-4 rounded-xl bg-[var(--surface-muted)] border border-[var(--brand-border)]" data-testid="wizard-paste-ad">
             <div className="flex items-start gap-2 mb-2">
               <Sparkles size={18} className="text-[var(--gold)] mt-0.5 shrink-0" />
@@ -1287,9 +1451,9 @@ const CreateGig = () => {
         {/* --- Screen 1, continued: overview (title + category) --- */}
         {step === 1 && (
           <div className="space-y-4">
-            {askLogo && (
+            {askLogo && (firstBusiness || bizLogo) && (
               <div className="rounded-xl border bg-white p-4 flex items-start gap-4" style={{ borderColor: 'var(--brand-border)' }} data-testid="wizard-business">
-                <label className="shrink-0 cursor-pointer" aria-label={t('wizard.logoPick', 'Choose a logo')}>
+                {bizLogo && <label className="shrink-0 cursor-pointer" aria-label={t('wizard.logoPick', 'Choose a logo')}>
                   <input type="file" accept="image/*" className="hidden" onChange={pickLogo} data-testid="wizard-logo-input" />
                   <span className="h-20 w-20 rounded-xl border-2 border-dashed inline-flex items-center justify-center overflow-hidden"
                     style={{ borderColor: 'var(--brand-border)', background: 'var(--surface-muted, #f9fafb)' }}>
@@ -1299,7 +1463,7 @@ const CreateGig = () => {
                         ? <Loader2 className="animate-spin" size={18} style={{ color: 'var(--brand-muted)' }} />
                         : <span className="text-xs text-center px-2" style={{ color: 'var(--brand-muted)' }}>{t('wizard.logoAdd', 'Add logo')}</span>}
                   </span>
-                </label>
+                </label>}
                 <div className="flex-1 min-w-0">
                   {firstBusiness && (
                     <>
@@ -1310,10 +1474,6 @@ const CreateGig = () => {
                         data-testid="wizard-business-name" />
                     </>
                   )}
-                  <p className="text-xs mt-2" style={{ color: 'var(--brand-muted)' }}>
-                    {t('wizard.logoHint', 'Your logo shows on your page and beside everything you list. Optional:')}{' '}
-                    <span className="font-semibold">{t('wizard.logoLater', 'you can add it later.')}</span>
-                  </p>
                 </div>
               </div>
             )}
@@ -1403,6 +1563,11 @@ const CreateGig = () => {
           />
         )}
         {step === 2 && form.gig_type !== 'store' && (
+          <div className="mb-4">
+            <QuickProductAdd onPhotos={null} onExtract={extractProducts} bulkPhotos={false} extracting={extracting} testid="wizard-services" />
+          </div>
+        )}
+        {step === 2 && form.gig_type !== 'store' && (
           <TiersStep
             gigType={form.gig_type}
             category={form.category}
@@ -1418,12 +1583,8 @@ const CreateGig = () => {
         )}
 
         {/* --- Step 5 (appointment only): Weekly hours --- */}
-        {/* The optional FAQs, last on the screen, after what is required. */}
-        {step === 2 && (
-          <div className="mt-6 pt-4 border-t" style={{ borderColor: 'var(--brand-border)' }}>
-            <FaqEditor faqs={form.faqs || []} onChange={(faqs) => set({ faqs })} testidPrefix="wizard-faq" />
-          </div>
-        )}
+        {/* Questions are no longer asked here (Tzvi, 10 Nov 2026: fewer things
+            per screen); "Add common questions" waits on the dashboard checklist. */}
 
         {isAppointment && step === 3 && (
           <AvailabilityStep

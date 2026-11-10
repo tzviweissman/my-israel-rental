@@ -44,3 +44,13 @@ def test_weekly_ad_email_and_optout_token():
     he_subject, he_page = email_html(True, "דני", "קופסה", "https://x", "https://x/off")
     assert "קופסה" in he_subject and 'dir="rtl"' in he_page
     assert verify_notification_token(optout_token("u1"), OPT_OUT_PURPOSE)["user_id"] == "u1"
+
+
+def test_checklist_puts_the_owners_goals_first():
+    from routes.onboarding import order_by_goals
+    items = [{"id": i, "endowed": i == "biz.named"} for i in
+             ("biz.named", "biz.logo", "biz.about", "biz.service", "biz.areas", "biz.hours", "biz.automation", "biz.faq", "biz.ad")]
+    got = [x["id"] for x in order_by_goals(items, ["customers"])]
+    assert got[:4] == ["biz.named", "biz.ad", "biz.areas", "biz.logo"]
+    assert [x["id"] for x in order_by_goals(items, [])] == [x["id"] for x in items]
+    assert [x["id"] for x in order_by_goals(items, ["nonsense"])] == [x["id"] for x in items]

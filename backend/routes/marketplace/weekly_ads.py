@@ -14,9 +14,9 @@ import html
 from datetime import UTC, datetime, timedelta
 
 import jwt
-from fastapi import APIRouter, Body, HTTPException, Request
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 
-from routes.deps import db, logger
+from routes.deps import db, logger, verify_token
 from utils.auth import JWT_SECRET
 from utils.notification_tokens import NotificationTokenError, verify_notification_token
 
@@ -45,6 +45,48 @@ async def ad_emails_opt_out(request: Request, payload: dict = Body(...)):
         {"user_id": claims["user_id"]},
         {"$set": {OPT_OUT_FIELD: True, "updated_at": datetime.now(UTC).isoformat()}}, upsert=True)
     return {"ok": True}
+
+
+@router.post("/first-ad-shot")
+async def first_ad_shot(request: Request, payload: dict = Body(...), user=Depends(verify_token)):
+    """The first ad a new business gets is a professional AI product photo, not a plain layout
+    (Tzvi, 10 Nov 2026). Starts the ad maker's own product shoot for the business's first product
+    with a photo; the "your page is live" screen then opens the ad on it. 2 credits a picture
+    (Higgsfield's price check, 10 Nov 2026); the shoot's own daily limit and reuse still apply."""
+    from routes.short_links import ShotIn, _ad_facts, _assert_owns_target, make_ad_shot
+    bid = str(payload.get("business_id") or "")
+    if not bid:
+        raise HTTPException(status_code=400, detail="business_id is required.")
+    await _assert_owns_target("business", bid, user)
+    facts, extra = await _ad_facts("business", bid)
+    item = next((i for i in extra.get("items") or [] if i.get("name") and i.get("photo")), None)
+    if not item:
+        return {"status": "none"}
+    # A shop's product goes on a product set; a service's photo (people at work, a van, a room) would come out
+    # wrong there, so it is photographed again as its own scene.
+    if await db.marketplace_gigs.find_one({"business_id": bid, "gig_type": "store"}, {"_id": 1}):
+        return await make_ad_shot(ShotIn(target_type="business", target_id=bid, item=item["name"], shape="feed"), request, user)
+    import asyncio
+    import uuid
+
+    from routes.short_links import _shot_row
+    from utils.ad_shots import SHOTS_PER_DAY, prompt_for_scene, recent_count, run_shot
+    from utils.rate_limit import check_rate
+    key = {"target_id": bid, "item": item["name"][:40], "shape": "feed", "kind": "scene", "occasion": ""}
+    have = await db.ad_shots.find_one({**key, "status": {"$in": ["ready", "making"]}}, {"_id": 0})
+    if have:
+        return _shot_row(have)
+    rows = await db.ad_shots.find({"target_id": bid}, {"_id": 0, "created_at": 1, "status": 1}).to_list(200)
+    now = datetime.now(UTC)
+    if recent_count(rows, now) >= SHOTS_PER_DAY:
+        return {"status": "none"}
+    check_rate(request, bucket=f"ad_shots:{user['user_id']}", limit=SHOTS_PER_DAY * 2, window_seconds=86400)
+    row = {**key, "id": str(uuid.uuid4()), "status": "making", "by": user["user_id"], "created_at": now.isoformat(),
+           "photo": item["photo"], "word": "#F2D48A", "dark": True}
+    await db.ad_shots.insert_one(dict(row))
+    what = f"{item['name']}, by {facts.get('business_name') or 'a local business'}"
+    asyncio.create_task(run_shot(row["id"], item["photo"], prompt_for_scene(what, "feed"), "feed", None))
+    return _shot_row(row)
 
 
 def email_html(he: bool, business: str, item: str, link: str, optout: str) -> tuple[str, str]:

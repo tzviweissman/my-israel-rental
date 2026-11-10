@@ -195,7 +195,43 @@ async def _business_items(uid: str) -> list[dict[str, Any]]:
             )) if businesses else False,
             "href": "/dashboard?tab=network&view=automations",
         },
+        # Tzvi, 10 Nov 2026: the sign-up got shorter, so what it no longer
+        # asks lives here. Questions left the form; the first ad is the
+        # nearest thing to a first customer.
+        {
+            "id": "biz.faq",
+            "endowed": False,
+            "done": bool(await db.marketplace_gigs.find_one(
+                {"provider_user_id": uid, "faqs.0": {"$exists": True}}, {"_id": 1})),
+            "href": "/dashboard?tab=my-businesses&services=1",
+        },
+        {
+            "id": "biz.ad",
+            "endowed": False,
+            "done": bool(await db.saved_ads.find_one({"owner_user_id": uid}, {"_id": 1})),
+            "href": "/dashboard?tab=advertising",
+        },
     ]
+
+
+# What the owner said they want most on the sign-up's first screen, and the
+# rows that serve it. Those rows move to the top of their checklist.
+GOALS = {
+    "customers": ("biz.ad", "biz.areas", "biz.logo"),
+    "orders": ("biz.service", "biz.hours", "biz.faq"),
+    "bookings": ("biz.hours", "biz.service", "biz.automation"),
+    "page": ("biz.logo", "biz.about", "biz.faq"),
+}
+
+
+def order_by_goals(items: list[dict[str, Any]], goals: list[str]) -> list[dict[str, Any]]:
+    """Rows serving the owner's goals first, in the goals' own order; the rest
+    keep theirs. The endowed first row stays first: it is already ticked."""
+    wanted = [i for g in goals for i in GOALS.get(g, ())]
+    rank = {i: n for n, i in enumerate(dict.fromkeys(wanted))}
+    head = [x for x in items if x.get("endowed")]
+    rest = [x for x in items if not x.get("endowed")]
+    return head + sorted(rest, key=lambda x: rank.get(x["id"], len(rank)))
 
 
 async def _property_items(uid: str, user_doc: dict[str, Any]) -> list[dict[str, Any]]:
@@ -330,7 +366,7 @@ async def onboarding_state(payload: dict = Depends(verify_token)) -> dict[str, A
     uid = payload["user_id"]
     user_doc = await db.users.find_one(
         {"id": uid},
-        {"_id": 0, "role": 1, "created_at": 1, "phone": 1, "whatsapp_number": 1},
+        {"_id": 0, "role": 1, "created_at": 1, "phone": 1, "whatsapp_number": 1, "signup_goals": 1},
     )
     if not user_doc:
         raise HTTPException(status_code=404, detail="User not found")
@@ -349,7 +385,8 @@ async def onboarding_state(payload: dict = Depends(verify_token)) -> dict[str, A
 
     lists: list[dict[str, Any]] = []
     if wants_business:
-        lists.append({"role": "business", "items": await _business_items(uid)})
+        lists.append({"role": "business", "items": order_by_goals(
+            await _business_items(uid), user_doc.get("signup_goals") or [])})
     if wants_property:
         lists.append({"role": "property", "items": await _property_items(uid, user_doc)})
     # Primary role first.
@@ -391,6 +428,18 @@ async def onboarding_state(payload: dict = Depends(verify_token)) -> dict[str, A
             "started": bool(tour_doc.get("started_at")),
         },
     }
+
+
+class GoalsIn(BaseModel):
+    goals: list[str] = Field(default_factory=list, max_length=4)
+
+
+@router.post("/onboarding/goals")
+async def onboarding_goals(body: GoalsIn, payload: dict = Depends(verify_token)) -> dict[str, Any]:
+    """The answers to "What do you want most?" from the sign-up. Unknown ones are dropped."""
+    goals = [g for g in dict.fromkeys(body.goals) if g in GOALS]
+    await db.users.update_one({"id": payload["user_id"]}, {"$set": {"signup_goals": goals}})
+    return {"goals": goals}
 
 
 @router.post("/onboarding/dismiss")

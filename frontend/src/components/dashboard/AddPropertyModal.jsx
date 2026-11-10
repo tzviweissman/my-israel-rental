@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 
-import { Sparkles, X, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Sparkles, X, AlertTriangle, ArrowRight, Camera, Loader2 } from 'lucide-react';
 
 import DateField from './propertyForm/DateField';
 import LocationPicker from './propertyForm/LocationPicker';
@@ -82,6 +82,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
   // never for edits (we don't want to silently clobber a saved listing).
   const [smartPaste, setSmartPaste] = useState('');
   const [smartPasting, setSmartPasting] = useState(false);
+  const adShotsRef = useRef(null);
 
   // ── Soft duplicate warning ─────────────────────────────────────────
   // As the host types their address (or edits an existing listing's
@@ -155,33 +156,69 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         toast.error(t('dashboard.pasteAdNone', 'We could not find a listing in that text'));
         return;
       }
-      // Merge extracted fields into the current form, keeping defaults for
-      // anything Claude didn't populate.
-      const merged = { ...propertyForm };
-      for (const [k, v] of Object.entries(extracted)) {
-        if (v === null || v === undefined) continue;
-        // The reader answers yes/no as words (the CSV path wants them so);
-        // left as strings, "no" ticked its checkbox.
-        merged[k] = v === 'yes' ? true : v === 'no' ? false : v;
-      }
-      if (typeof merged.amenities === 'string') {
-        merged.amenities = merged.amenities.split(/[,;]/).map(a => a.trim()).filter(Boolean);
-      } else if (!Array.isArray(merged.amenities)) {
-        merged.amenities = [];
-      }
-      // Shabbat elevator implies regular elevator (backend does this for
-      // bulk uploads — replicate here so the UI stays consistent pre-save).
-      if (merged.is_shabbat_elevator) merged.has_elevator = true;
-      // A porch size or a sukkah without a count left porches at 0, which
-      // hides both fields while still saving them.
-      if (!merged.porches && (merged.porch_square_meters || merged.sukkah_compatible)) merged.porches = 1;
-      setPropertyForm(merged);
+      applyExtracted(extracted);
       setSmartPaste('');
       toast.success(t('dashboard.pasteAdDone', 'Filled in. Check the details, add photos and save.'));
     } catch (e) {
       toast.error(t('dashboard.pasteAdFailed', 'Could not read that ad. Try again, or fill in the form yourself.'));
     } finally {
       setSmartPasting(false);
+    }
+  };
+
+  // Screenshots of the ad they already run: the details AND its photos, cut out of the pictures (10 Nov 2026).
+  const handleAdPictures = async (files) => {
+    const chosen = Array.from(files || []).filter((f) => f.type.startsWith('image/')).slice(0, 6);
+    if (!chosen.length) return;
+    setSmartPasting(true);
+    try {
+      const body = new FormData();
+      chosen.forEach((f) => body.append('files', f));
+      if (smartPaste.trim()) body.append('text', smartPaste.trim());
+      const { data } = await axios.post(`${API}/properties/extract-from-pictures`, body, { headers: { Authorization: `Bearer ${token}` } });
+      if (!data.property) {
+        toast.error(t('dashboard.adPicsNone', 'We could not find a listing in those pictures.'));
+        return;
+      }
+      applyExtracted(data.property, data.images || []);
+      setSmartPaste('');
+      toast.success((data.images || []).length
+        ? t('dashboard.adPicsDone', { count: data.images.length, defaultValue: 'Filled in, with {{count}} photos from your ad. Check the details and save.' })
+        : t('dashboard.pasteAdDone', 'Filled in. Check the details, add photos and save.'));
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || t('dashboard.pasteAdFailed', 'Could not read that ad. Try again, or fill in the form yourself.'));
+    } finally {
+      setSmartPasting(false);
+    }
+  };
+
+  const applyExtracted = (extracted, photos = []) => {
+    // Merge extracted fields into the current form, keeping defaults for
+    // anything Claude didn't populate.
+    const merged = { ...propertyForm };
+    for (const [k, v] of Object.entries(extracted)) {
+      if (v === null || v === undefined) continue;
+      // The reader answers yes/no as words (the CSV path wants them so);
+      // left as strings, "no" ticked its checkbox.
+      merged[k] = v === 'yes' ? true : v === 'no' ? false : v;
+    }
+    if (typeof merged.amenities === 'string') {
+      merged.amenities = merged.amenities.split(/[,;]/).map(a => a.trim()).filter(Boolean);
+    } else if (!Array.isArray(merged.amenities)) {
+      merged.amenities = [];
+    }
+    // Shabbat elevator implies regular elevator (backend does this for
+    // bulk uploads — replicate here so the UI stays consistent pre-save).
+    if (merged.is_shabbat_elevator) merged.has_elevator = true;
+    // A porch size or a sukkah without a count left porches at 0, which
+    // hides both fields while still saving them.
+    if (!merged.porches && (merged.porch_square_meters || merged.sukkah_compatible)) merged.porches = 1;
+    merged.images = [...(propertyForm.images || []), ...photos];
+    setPropertyForm(merged);
+    if (photos.length) {
+      setUploadedFiles((prev) => [...prev, ...photos.map((url, i) => ({
+        url, file_type: 'image', filename: url.split('/').pop(), original_name: `Ad photo ${i + 1}`,
+      }))]);
     }
   };
 
@@ -399,7 +436,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 <div>
                   <h3 className="text-base font-semibold">{t('dashboard.pasteAdTitle', 'Already advertised somewhere?')}</h3>
                   <p className="text-sm text-gray-600">
-                    {t('dashboard.pasteAdBody', "Paste your ad from Yad2, Facebook, WhatsApp or anywhere else and we'll fill in the form for you. Check it, add photos, and you're done.")}
+                    {t('dashboard.pasteAdBody', "Paste your ad from Yad2, Facebook, WhatsApp or anywhere else, or add screenshots of it, and we'll fill in the form for you, photos included. Check it, and you're done.")}
                   </p>
                 </div>
               </div>
@@ -412,7 +449,20 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 maxLength={30000}
                 data-testid="smart-paste-input"
               />
-              <div className="flex justify-end mt-2">
+              <div className="flex flex-wrap justify-end gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => adShotsRef.current?.click()}
+                  disabled={smartPasting}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold border border-[#E5E5E5] bg-white disabled:opacity-50 inline-flex items-center gap-1.5"
+                  data-testid="smart-paste-pictures-btn"
+                >
+                  {smartPasting ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+                  {t('dashboard.adPicsBtn', 'Add screenshots of your ad')}
+                </button>
+                <input ref={adShotsRef} type="file" accept="image/*" multiple className="hidden"
+                  onChange={(e) => { const f = e.target.files; handleAdPictures(f); e.target.value = ''; }}
+                  data-testid="smart-paste-pictures-input" />
                 <button
                   type="button"
                   onClick={handleSmartPaste}

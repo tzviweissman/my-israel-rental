@@ -222,12 +222,12 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       toast.error(err.message || t('wizard.uploadFailed', 'Upload failed'));
     } finally { setBulkPhotos(false); }
   };
-  const extractProducts = async ({ text, file }) => {
+  const extractProducts = async ({ text, files = [] }) => {
     setExtracting(true);
     try {
       const body = new FormData();
       if (text) body.append('text', text);
-      if (file) body.append('file', file);
+      files.forEach((f) => body.append('files', f));
       const { data } = await axios.post(`${API}/marketplace/products/extract`, body, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -237,12 +237,17 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
         return false;
       }
       const at = options.length;
-      setOptions((prev) => [...prev, ...rows.map((r) => newProduct(prev, {
-        name: r.name || '',
-        price: r.price == null ? '' : String(r.price),
-        description: r.description || '',
-        ...(r.currency ? { currency: r.currency } : {}),
-      }))]);
+      // A service's row is a tier: name, price, description and its photos, nothing a product has.
+      setOptions((prev) => [...prev, ...rows.map((r) => {
+        const row = {
+          name: r.name || '',
+          price: r.price == null ? '' : String(r.price),
+          description: r.description || '',
+          currency: r.currency || prev[prev.length - 1]?.currency || 'ILS',
+          photos: r.image ? [r.image] : [],
+        };
+        return isStore ? newProduct(prev, row) : row;
+      })]);
       showFrom(at);
       toast.success(t('wizard.extractDone', { count: rows.length, defaultValue: '{{count}} products read. Check them, then add a photo to each.' }));
       return true;
@@ -848,10 +853,8 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                 ? t('editListing.products', 'Products')
                 : t('editListing.options', 'Services and prices')}
             </p>
-            {isStore && (
-              <QuickProductAdd onPhotos={addProductsFromPhotos} onExtract={extractProducts}
-                bulkPhotos={bulkPhotos} extracting={extracting} testid="edit-listing-products" />
-            )}
+            <QuickProductAdd onPhotos={isStore ? addProductsFromPhotos : null} onExtract={extractProducts}
+              bulkPhotos={bulkPhotos} extracting={extracting} testid="edit-listing-products" />
 
             {options.map((o, i) => (
               <div key={i} className="rounded-xl border p-3 space-y-3" style={{ borderColor: 'var(--brand-border)' }} data-testid={`edit-listing-option-${i}`}>

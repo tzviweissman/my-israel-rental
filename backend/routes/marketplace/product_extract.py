@@ -13,10 +13,11 @@ Two ways in, one endpoint, because they are the same job:
   * `file`  - a photograph or screenshot of a menu, a price list, an
               Instagram post, a printed card.
 
-WHAT IT DOES NOT DO. It never returns photos. The thumbnails on a menu are
-far too small to use as product images, and a product shown with a crop of
-someone's menu looks worse than one shown with nothing. Pictures come from
-the owner's camera roll, through the wizard's own multi-photo button.
+PHOTOS (10 Nov 2026). Each product's own picture is cut out of the page
+when it is big enough to show (utils/catalog_crops.py); a menu thumbnail is
+too small, looks worse than nothing, and is dropped, so that photo still
+comes from the owner. Up to MAX_PAGES pages in one go: a catalog is rarely
+one page.
 
 NOTHING IS SAVED HERE. The rows come back to the form for the owner to
 check and edit before anything is created. A price read off a blurry photo
@@ -32,7 +33,7 @@ from __future__ import annotations
 import json
 import re
 import uuid
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
@@ -44,6 +45,7 @@ router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
 MAX_PRODUCTS = 30
 MAX_TEXT = 8000
+MAX_PAGES = 6
 
 _SYSTEM = """You read a small business's own price list and return its products as JSON.
 
@@ -64,6 +66,7 @@ appear in the source. Each entry has EXACTLY these fields:
   description  string, and EMPTY unless the source itself describes the item.
                Never invent one. "Serves 6-8" or a list of what is on the
                board is a description; your own marketing is not.
+  {boxes}
 
 Rules that matter more than completeness:
 
@@ -116,6 +119,8 @@ def _rows(raw: str) -> list[dict[str, Any]]:
             "price": price,
             "currency": currency,
             "description": str(item.get("description") or "").strip()[:300],
+            "photo_box": item.get("photo_box"),
+            "page": item.get("page"),
         })
     return out
 
@@ -125,6 +130,7 @@ async def extract_products(
     request: Request,
     text: str = Form(""),
     file: Optional[UploadFile] = File(None),
+    files: List[UploadFile] = File(default_factory=list),
     user=Depends(verify_token),
 ):
     """Read products out of pasted text, a picture, or both. Saves nothing."""
@@ -136,17 +142,22 @@ async def extract_products(
 
     text = (text or "").strip()[:MAX_TEXT]
     images: list[tuple[str, bytes]] = []
-    if file is not None:
-        from routes.misc import _read_validated_upload
-        content, is_video = await _read_validated_upload(file)
+    pages = [f for f in ([file] if file is not None else []) + list(files or []) if f is not None]
+    if len(pages) > MAX_PAGES:
+        raise HTTPException(status_code=400, detail=f"Up to {MAX_PAGES} pages at a time.")
+    from routes.misc import _read_validated_upload
+    for f in pages:
+        content, is_video = await _read_validated_upload(f)
         if is_video:
             raise HTTPException(status_code=400, detail="A picture, not a video.")
-        images.append((file.content_type or "image/jpeg", content))
+        images.append((f.content_type or "image/jpeg", content))
     if not text and not images:
         raise HTTPException(status_code=400, detail="Paste a list or add a picture of one.")
 
     from utils.llm import LlmChat, UserMessage
-    chat = LlmChat(api_key=ANTHROPIC_API_KEY, session_id=str(uuid.uuid4()), system_message=_SYSTEM)
+    from utils.catalog_crops import BOX_RULE
+    chat = LlmChat(api_key=ANTHROPIC_API_KEY, session_id=str(uuid.uuid4()),
+                   system_message=_SYSTEM.replace("{boxes}", BOX_RULE if images else ""))
     chat.with_model("anthropic", "claude-sonnet-4-6")
     try:
         raw = await chat.send_message(UserMessage(
@@ -167,7 +178,12 @@ async def extract_products(
     products = _rows(raw)
     if not products:
         raise HTTPException(status_code=422, detail="No products found in that. Try a clearer picture, or type the list.")
-    logger.info("[product-extract] user=%s rows=%d image=%s", user["user_id"], len(products), bool(images))
+    from utils.catalog_crops import keep
+    for row in products:
+        box, page = row.pop("photo_box", None), row.pop("page", None)
+        row["image"] = await keep([c for _, c in images], {"photo_box": box, "page": page}) if images else None
+    logger.info("[product-extract] user=%s rows=%d pages=%d photos=%d", user["user_id"], len(products), len(images),
+                sum(1 for r in products if r["image"]))
     return {"products": products}
 
 

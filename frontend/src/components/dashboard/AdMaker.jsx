@@ -2577,14 +2577,18 @@ function drawShoot(canvas, a) {
   // With a cut-out, the word's foot goes a little behind the product's top; without one it stays above it, in the
   // top part the picture was made to keep plain.
   const productTop = S.cut ? cutTop(S.cut) * H : H;
-  const foot = Math.min(H * (a.format === 'story' ? 0.5 : 0.47), S.cut ? productTop + size * 0.18 : H * (a.format === 'story' ? 0.42 : 0.4));
+  let foot = Math.min(H * (a.format === 'story' ? 0.5 : 0.47), S.cut ? productTop + size * 0.18 : H * (a.format === 'story' ? 0.42 : 0.4));
   let leadSize = px(64);
   ctx.font = `italic 600 ${leadSize}px ${leadFace}`;
   while (leadSize > 30 && ctx.measureText(lead).width > W - PAD * 2) {
     leadSize -= 4;
     ctx.font = `italic 600 ${leadSize}px ${leadFace}`;
   }
-  const leadY = foot - size * 0.92 - px(18);
+  let leadY = foot - size * 0.92 - px(18);
+  // A tall product pushes the words up into the name at the top (sign-up test ad, 10 Nov 2026): never above
+  // the name's own line. The words move down instead; the cut-out still stands in front of the big word.
+  const clear = top + px(26) + px(24) - (leadY - (lead ? leadSize * 0.85 : -size * 0.08));
+  if (clear > 0) { leadY += clear; foot += clear; }
   part(ctx, 'words', [PAD, leadY - leadSize, W - PAD * 2, foot - leadY + leadSize], () => {
     // The name spaced out, as a label (Hebrew letters are not spaced).
     if (!a.rtl && 'letterSpacing' in ctx) ctx.letterSpacing = '0.28em';
@@ -3041,7 +3045,8 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const [savedId, setSavedId] = useState('');
   // A design or product asked for before it can be drawn (the cut-outs come
   // a moment after the words): taken as soon as it can.
-  const wantDesign = useRef('behind');
+  // start.design: the sign-up's first ad opens on its product photo (Tzvi, 10 Nov 2026).
+  const wantDesign = useRef(start?.design || 'behind');
   // A saved ad waiting for its design to be drawable: nothing overwrites it meanwhile.
   const savedPending = useRef('');
   const shownLang = useRef('');
