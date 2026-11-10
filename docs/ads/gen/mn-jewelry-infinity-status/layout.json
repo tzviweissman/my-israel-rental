@@ -1,0 +1,7 @@
+{"shape":"portrait","ground":"#1b1e2e",
+ "boxes":[{"what":"marble","x":0,"y":0.66,"w":1,"h":0.34,"colour":"#e9e6e0"},
+  {"what":"silk","x":0.72,"y":0.6,"w":0.3,"h":0.22,"colour":"#d8c7a6","angle":10},
+  {"what":"solitaire ring","form":"ring","band":0.07,"x":0.12,"y":0.33,"w":0.44,"h":0.33,"colour":"#e6e9ef"},
+  {"what":"diamond band","form":"ring","band":0.09,"x":0.44,"y":0.33,"w":0.44,"h":0.33,"colour":"#f2f4f8"},
+  {"what":"solitaire stone","x":0.3,"y":0.3,"w":0.08,"h":0.06,"colour":"#ffffff","angle":45}],
+ "keep_empty":[{"what":"top","x":0.04,"y":0.0,"w":0.92,"h":0.2},{"what":"foot","x":0.04,"y":0.84,"w":0.92,"h":0.14,"over":["marble"]}]}

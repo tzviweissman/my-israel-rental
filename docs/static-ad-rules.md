@@ -702,3 +702,14 @@ and strikes each that fails a named test: says the object without the why; guess
 insider's pun; sounds like something else; claims what the listing does not; over six words or leaning on its
 small line. The blueprint names the one chosen and why, and when Tzvi is in the conversation he sees the best three
 before anything is built. Step A2.11; ad-blueprint refuses an answer without five numbered lines and a "Chosen:".
+
+## 19. A 5 every time (Tzvi, 10 Nov 2026)
+
+"How do we make sure to make a 5 every time?" M and N Jewelry's first "FOREVER" was polished and passed the pro
+sheet, but beside the Pinterest library it was a plain "minimal luxury" ad, a kind that averages 3.24 of 5 there;
+the 5s that used the very same ring box made it the joke. Nothing guarantees a 5, but a 3 can no longer get out.
+Every ad names its kind of idea; scripts/ad-vs-library.py refuses a kind that averages under 4 on its own and puts
+the ad beside four 5/5 ads of its kind. The blueprint writes "Score: N" and what the ad shares with them, and only a
+5 is shown. When Tzvi is in the conversation he sees the best three ideas first, one line each, before any picture
+is paid for. The remade ad, their two rings linked into an infinity sign under "FOREVER / לנצח", was the first made
+this way. Step A9.7.

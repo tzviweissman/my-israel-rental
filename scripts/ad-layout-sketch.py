@@ -12,7 +12,8 @@ Exact parts (a phone's screen, a label) are still laid on afterwards in code.
 layout.json:
     {"shape": "story" | "feed" | "square" | "portrait" (3:4, the model's nearest to a tall frame with room above),
      "ground": "#2b2b2b",                                 optional: the main tone of the scene
-     "boxes": [{"what": "phone", "x": 0.4, "y": 0.34, "w": 0.2, "h": 0.32, "colour": "#9aa0a6", "angle": 0}],
+     "boxes": [{"what": "phone", "x": 0.4, "y": 0.34, "w": 0.2, "h": 0.32, "colour": "#9aa0a6", "angle": 0},
+               {"what": "ring", "form": "ring", "band": 0.08, "x": 0.2, "y": 0.4, "w": 0.34, "h": 0.25}],
      "keep_empty": [{"what": "headline", "x": 0.05, "y": 0.11, "w": 0.9, "h": 0.17},
                     {"what": "foot", "x": 0.04, "y": 0.76, "w": 0.92, "h": 0.12, "over": ["desk"]}]}
 x, y, w, h are shares of the width and height. Boxes are drawn in order, later ones in front. keep_empty areas are
@@ -32,8 +33,13 @@ def main(spec_path: str, out_path: str) -> None:
     im = Image.new("RGB", (W, H), spec.get("ground", "#2b2b2b"))
     for b in spec.get("boxes", []):
         w, h = round(b["w"] * W), round(b["h"] * H)
-        tile = Image.new("RGBA", (w, h), b.get("colour", "#9aa0a6"))
-        ImageDraw.Draw(tile).rectangle([0, 0, w - 1, h - 1], outline=(0, 0, 0, 90), width=3)
+        if b.get("form") == "ring":
+            # A ring seen from the front: an outline, its thickness a share of its width ("band", default 0.08).
+            tile = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+            ImageDraw.Draw(tile).ellipse([0, 0, w - 1, h - 1], outline=b.get("colour", "#dfe3ea"), width=max(4, round(w * b.get("band", 0.08))))
+        else:
+            tile = Image.new("RGBA", (w, h), b.get("colour", "#9aa0a6"))
+            ImageDraw.Draw(tile).rectangle([0, 0, w - 1, h - 1], outline=(0, 0, 0, 90), width=3)
         if b.get("angle"):
             tile = tile.rotate(b["angle"], expand=True, resample=Image.BICUBIC)
         cx, cy = round((b["x"] + b["w"] / 2) * W), round((b["y"] + b["h"] / 2) * H)

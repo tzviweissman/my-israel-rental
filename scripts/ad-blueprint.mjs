@@ -47,6 +47,7 @@ const SHEET_RULES = new Set(['A9.6']);
 const FIT_RULES = new Set(['A3.9']);
 const STRANGER_RULES = new Set(['A2.10']);
 const HEADLINE_RULES = new Set(['A2.11']);
+const SCORE_RULES = new Set(['A9.7']);
 const LAYOUT_RULES = new Set(['A3.11']);
 const blank = (plan) => !plan || /^(\.\.\.|todo|tbd)$/i.test(plan);
 
@@ -67,6 +68,14 @@ function problems(name, upTo, finished) {
       // A fit rule's answer says the picture was laid with the tool that refuses to shrink it (A3.9, 10 Nov 2026).
       // The headline test is written as what a stranger takes from it, not as "clear" (A2.10, 10 Nov 2026).
       // Five numbered headlines and the chosen one, never a single line graded by its writer (A2.11, 10 Nov 2026).
+      // Only a 5 is shown, judged beside the library's 5s of its kind (A9.7, 10 Nov 2026).
+      if (SCORE_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
+        const sheet = [...g.plan.matchAll(/([\w./-]+\.(?:jpg|jpeg|png))/gi)].map((x) => x[1]).some((f) => fs.existsSync(path.resolve(ROOT, f)));
+        const sc = /score:\s*(\d(?:\.\d)?)/i.exec(g.plan);
+        if (!sheet) out.push(`stage ${s.n}, ${it.id}: name the sheet from scripts/ad-vs-library.py`);
+        if (!sc) out.push(`stage ${s.n}, ${it.id}: write "Score: N" on the library's 1 to 5 scale`);
+        else if (Number(sc[1]) < 5) out.push(`stage ${s.n}, ${it.id}: scored ${sc[1]}; under 5 goes back to stage 1, not to anyone's phone`);
+      }
       if (HEADLINE_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
         const n = new Set([...g.plan.matchAll(/(?:^|\s)([1-9])\)/g)].map((x) => x[1])).size;
         if (n < 5 || !/chosen:\s*\d/i.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: write five numbered headlines 1) to 5), strike each failing one with its reason, and "Chosen: N" (found ${n} numbered)`);
