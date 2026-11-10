@@ -1140,6 +1140,11 @@ that policy).*
       (almost nothing on screen), VANISH and APPEAR (on a plain light ground, a crumb that is there and then gone in the
       open, or turns up from nowhere). Then each numbered step of the brief is ticked off against the clip at 8 fps:
       seen, or not seen. It caught all three faults of Krysp's first film and passed every other clip we have.
+   4. **Places and materials look photographed** (3w.15; Tzvi, 5 Nov 2026, RBS Cleaning: "the scene and the stone look kind of fake"). Before any
+      clip, the generated still is looked at full size beside a real photograph of that place or material. Hills smooth as dunes,
+      model villages, stones in tidy equal rows, flat soft light: a new still. Prompt it as an ordinary unretouched snapshot from a
+      named real place, saying what is really there. The brief's "## Looks real" section names the photograph (link or docs/inspo
+      path); film-gate refuses a paid video without it.
 
 22. **A scroll film is real video, tied exactly to the scroll** (Tzvi, 3 and 4 Nov 2026, Krysp: "the motions dont look
     smooth", "it still doesnt look so smooth like the video i sent you", "it keeps freezing", "its not playing in sync
@@ -1647,7 +1652,8 @@ docs/ui-videos/notes/2026-10-20-nine-videos.md). He approved all of them ("yes a
    space already kept for them; choosing something never moves the layout.
 3. One shadow, the soft kind (the single home of the shadow rule; 3c.9 and
    3i.1 point here): light, about 3 px down, about 30 px blur, no spread,
-   tinted with the background or brand colour, never black or a dark default.
+   tinted with the background or brand colour, never black or a dark default. It sits on the front layer only
+   (3z.2).
 4. One left edge: headings, text and buttons line up on the same margin.
 5. A name is at least 1.25 times the size of the line under it, and heavier.
 6. Controls that do the same job look the same (height, corner, style).
@@ -1950,7 +1956,8 @@ before paying, frosted or shaded text over film, the phone loop) is not repeated
 9. **The prompt shape.** Give the time of each shot, the lens, the camera path and the light. Name the one
    action and the second it lands, add texture words, and finish with plain "Do not" lines: no particles,
    glow, smoke or flash, no pieces appearing, no change of count. The template is in the folder README.
-   (3 videos, prompts seen on screen.)
+   (3 videos, prompts seen on screen.) Start from the closest proven prompt in `docs/prompts/README.md`
+   (Tzvi, 10 Nov 2026), keep the prompt text in the gen script, and add it there once its result is used.
 10. **Spend on the pictures, generate the clip once** (replaced 2 Nov 2026, Tzvi: "is there a way to do this
     cheaper instead of making a ton of versions per build"). A draft saves little and proves little: on
     Higgsfield a 5 s MiniMax clip costs 7.5 credits at 480p and 10 at 2K, and the final is a new roll that
@@ -1964,6 +1971,24 @@ before paying, frosted or shaded text over film, the phone loop) is not repeated
        generated.
     4. A small fault is fixed in the edit (trim it, or dissolve in from the still), not by a new clip.
     Look at every clip at 4 or more frames a second; check-clip runs on it. (2 videos; prices 2 Nov 2026.)
+    5. **The clip plan is written before the first clip, not learned from failed ones** (Tzvi, 10 Nov 2026:
+       "i want the rules to be made better so we dont have to regenerate from mistakes so many times").
+       The brief gets a "## Clip plan" section, and the film gate refuses any paid clip without it. For
+       each clip it names the start and end stills by file (they must already exist), and answers, from
+       the causes of every remade clip so far:
+       - Edges: the stills have no dark border, cut-off object or stray strip at any edge (RBS Cleaning,
+         a thin dark edge became black bars across the glass, remade).
+       - Same item: count, colour, size and words match the real photo at full size (Bake Away's
+         doughnut came out beige and too big; Whipped Cup had two caramel dishes; Bun Intended's bun
+         came out paler and flatter from design words). Fix a still, never a clip.
+       - One change: the stills differ by one physical step with a real path between them (Noa Levi v1
+         dropped boxes from nowhere, v2 turned the pile into something else; Krysp's bend and snap in
+         one clip came out in one frame).
+       - Price: the get_cost credits per clip, at full quality.
+       - In code: what moves without a clip (push-in, drift, holds, dissolves, the words).
+       - If it is nearly right: what gets trimmed or dissolved from the still instead of a new clip.
+       A clip that fails twice means the idea is wrong (rule 3h.19): stop and take it back to Tzvi
+       rather than a third roll.
 11. **A refused close-up gets a step back, not new words.** Macro shots of warm, soft surfaces were refused
     as unsafe twice. If a food close-up is refused, move the camera back a little. (1 video.)
 12. **Biting, chewing and tearing are not solved.** None of the seventeen shows a convincing one; the one
@@ -2108,6 +2133,46 @@ page, so no site made before them has to change.
    For a hover or a change of state, draw both states and say which is which. A piece that will not come out
    right in code (a glow, a fill) is drawn first and given as a picture. A cut-out's edge that shows while
    scrolling is pinned to the bottom of the screen until the next piece covers it.
+
+## 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+
+Tzvi asked what makes sites "look and feel more like a real website" and how they are laid out. Notes and frame
+sheets are in `docs/inspo/videos-2026-11-10/` (AI LABS, MotionSites, Nate Herk). Their menu bar, first screen and
+section order matched what 3k and 3v already ask; these seven were new. He left out the eighth idea (the first
+screen's words never fade in), because it clashes with our openings. Like every rule, these are not asked of a
+site published before today (rule-dates.mjs).
+
+1. **One card hangs over the edge of the next section** on the home page, so the page stops reading as a stack of
+   boxes (Herk; frame `sites/herk-salon-card-edge.jpg`, a "Next open slots" booking card on the hero's lower edge).
+   It is a card the visitor would use anyway: the open slots, the order card, the price from, the three facts or a
+   review. About a third to a half of it sits over the next section, never more, and it is the only thing that
+   crosses an edge. On a phone it stays whole and readable, never cut by the screen or the phone bar.
+2. **The first screen is three layers** (Herk; `sites/herk-60-30-10-depth.jpg`): at the back a real photo, the
+   film or a soft shape of the business's own colour, never a plain white box; in the middle the words and any
+   card; in front the main button. The soft shadow of 3s.3 goes only on that front layer (the main button and the
+   card of 3z.1).
+3. **A free taste before the order or contact form**, when what the customer gets depends on a choice (Herk;
+   `sites/herk-free-sample.jpg`): at most three short questions that end on a real answer from the owner's own
+   record, such as "How many people?" then the platter and its price, "Your dates" then the rental's price, or
+   "Which treatment?" then the one that fits and its price, each with a button that carries the answer into the
+   order (pre-filled, 3u). Never a price or a recommendation the record does not hold, and no name, phone or
+   email asked for it. A business with one product at one price has none.
+4. **Photos and films at their own brightness** (MotionSites: "AI always adds this dark overlay"). No dark layer
+   or gradient over a whole photo or film by default. Words over a picture sit on its calm part or in a soft card
+   (3s.8). A shade is added only where a measured contrast needs it, only behind the words, and the 40% limit for
+   phones still holds.
+5. **A dark site has one light section**, joined by a clean edge, not a fade (MotionSites' light FAQ;
+   `sites/motionsites-faq-pricing-stats.jpg`). It is the section that is read rather than looked at: questions,
+   prices or how ordering works. Sites on a light ground already have the reverse (3t's one dark section).
+6. **The headline uses the words a customer would search for** (Herk, from Campaign Monitor). The h1, or the line
+   right under it, holds the plain words people type for this business and its place ("Fruit platters in
+   Jerusalem", "Window cleaning in Beit Shemesh"), never only a slogan. Its BLUEPRINT.md plan line names the search
+   words chosen. This sharpens 3g.13; it does not add a line to the first screen.
+7. **Without the owner's photos, the cards' pictures are made as one set** from a real site's grid (MotionSites;
+   `sites/motionsites-image-grid.jpg`): a screenshot of a real site's 3x2 or 2x2 image grid is saved in docs/inspo,
+   and one generation makes all the tiles ("an image like this, remove all text, six images, three per row, about
+   <business>", then one line per tile saying what it shows). Each tile is then checked as in R8.1 (one shoot) and
+   cut out at full size. The owner's own photos always come first; this is only for cards they have no photo for.
 
 ## 4. What is reported to the owner instead (content gaps)
 

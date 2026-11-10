@@ -613,7 +613,7 @@ agency. The third is Higgsfield promoting Higgsfield, its numbers its own.
 | [I Made 150+ Static Ads](https://youtu.be/9hr1uEEap2o) | Nik Pakhrin | who it is for within half a second |
 | [Static Ads Masterclass 2026](https://youtu.be/2BrGawWj1aI) | Fraser Cottrell | skimmable, objection, proof |
 
-## Moving ads (Tzvi, 6 Nov 2026)
+## 11. Moving ads (Tzvi, 6 Nov 2026)
 
 "Moving ads for WhatsApp, statuses, Instagram and Facebook, so it's not just a static ad." The pieces of the
 same design move, drawn in the browser for free: the product arrives, the words land one at a time, the price
@@ -621,7 +621,7 @@ pops, the link and QR slide in, and it holds on the finished ad. A short MP4 rat
 smaller, and what statuses and feeds expect. Every still rule still applies, because the last frame is the
 still. Steps A10.1 to A10.4 in `docs/ad-rules-checklist.md`.
 
-## Never bland (Tzvi, 8 Nov 2026)
+## 12. Never bland (Tzvi, 8 Nov 2026)
 
 "This seems a bit bland... make sure we dont make it bland in the future." Our first product-photo ad had six
 small bagels under an empty wall, flat daylight, nothing happening and a small headline: correct, and forgettable
@@ -629,7 +629,7 @@ beside the pro ads. So every ad is put beside the pro references before it is sh
 must pass five checks: product as hero, strong light or colour, something happening, the headline as design, holds
 its own beside the pros. Step A9.5 in docs/ad-rules-checklist.md.
 
-## The pro look, for every ad (Tzvi, 8 Nov 2026)
+## 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
 
 "Use the new things you learnt for the ad and make it a rule for all future ad builds." What the pro ads share
 (docs/inspo/pro-references/README.md) is now stage 9 of docs/ad-rules-checklist.md (A11.1 to A11.8): one idea you
@@ -637,7 +637,7 @@ get in a second; words and picture interlocked; one colour world; a frozen momen
 carry the ad; a short headline in two voices; the product as the hero, standing on its set. Planned in the
 blueprint before building, checked on the ad-vs-pros sheet (A9.5) before anyone sees it.
 
-## Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
+## 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
 
 "He just might not like that the poppers look a little off, the ones in the air." Chicken Munch's status ad had his
 real bowl of Hot Poppers right, but the four pieces the model added leaping out of it were square, lighter, glowing
@@ -653,7 +653,7 @@ them from the front like the real photo's. Step A9.6 in docs/ad-rules-checklist.
 Ad picture prompts start from the closest proven one in `docs/prompts/README.md` (Tzvi, 10 Nov 2026: right the
 first time); a prompt whose picture is used goes in there with its number of takes.
 
-## Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
+## 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
 
 "The la cholent ad is whiteish on the sides; show his product clearly and make it look premium and delicious like
 with product photos with other things on the side to make it less plain." The first L.A. Cholent picture was made
@@ -665,7 +665,7 @@ rich surface in warm light, with two or three things from the business's own wor
 a challah, the marrow bones and beef they sell as add-ons, Shabbos candles), never in front of the product and never
 passed off as it.
 
-## The headline says the offer (Tzvi, 10 Nov 2026)
+## 16. The headline says the offer (Tzvi, 10 Nov 2026)
 
 "Set to low doesnt help explain anything that the business is trying to give over... the message should be short,
 intriguing, and clear." L.A. Cholent's "Set it to LOW." was a pun that worked only for someone who already knew the
@@ -675,7 +675,7 @@ Just add water."). Wordplay is welcome on top of that, never instead of it. Step
 the blueprint answer writes "A stranger reads:" and what that stranger would take from the headline alone, and the
 blueprint refuses an answer without it.
 
-## Layout first, and real screens (Tzvi, 10 Nov 2026)
+## 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
 
 "Why didnt it listen to you?" Told in words where things go, the text-only model centred the phone it was told to
 put at the side and drew eight notes for the thirty asked. Image models copy the arrangement of a picture they are

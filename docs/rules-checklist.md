@@ -109,6 +109,8 @@ R3h.18 | The film is physically possible: every object on screen is listed with 
 R3h.19 | Generate once, by choosing a physically possible story before generating (a better prompt only helps a little; a failed clip changes the story, not just the prompt): each clip's start and end frames hold the same objects (or they enter or leave past an edge), one kind of action per clip, clips chained by stills made and checked before any video, frame 1 / middle / last written in the brief first, at most two tries per clip | 3h.19 | LOOK: the clip plan in gen/<film>-brief.md and the number of generations; n/a if no generated film
 R3h.17 | Words and film take turns: a giant name sits on plain ground, the film appears as letters part, the film moves aside before the headline arrives | 3h.17 | script: readable; n/a if the page does not use it
 R3x.5 | A following light is used only for a dark-world business, has an off button, sweeps once by itself on a phone and with reduced motion, and never dims the words or main button | 3x.5 | LOOK on laptop and phone; n/a if not used
+R3z.2 | The first screen has three layers: a real photo, the film or a soft shape of the business's colour at the back, the words and any card in the middle, the main button in front with the only soft shadow | 3z.2 | LOOK: same screenshots
+R3z.6 | The h1 or the line under it holds the words a customer searches for this business and its place, the search words named in its BLUEPRINT.md plan line | 3z.6 | LOOK: read the h1 against BLUEPRINT.md
 
 ## 3. Sections and worlds
 
@@ -159,6 +161,8 @@ R3x.2 | A counted number is a real figure from the record, counts once, ends exa
 R3x.3 | Tabs for sizes or packages change one panel in place: picture, price and facts stay in the same spot | 3x.3, 3s.27 | LOOK: switch every tab; n/a with no tabs
 R3x.4 | With two or more sizes or packages, each is a card with its picture, price and the same measures in the same order | 3x.4 | LOOK; n/a with one size and no packages
 R3x.11 | A product to turn passed the suitability check, was made from a grey-ground source of the owner's photo as two candidates reviewed from four angles, has two or three light buttons named for the business, and keeps touch-action pan-y on a phone | 3x.11 | LOOK: the review sheet and a phone swipe; n/a if not used
+R3z.1 | One card the visitor would use (open slots, order card, price from, facts or a review) hangs a third to a half over the edge of the next section on the home page, the only thing that crosses an edge; on a phone it is whole and readable | 3z.1 | LOOK: laptop and phone screenshots of the edge
+R3z.5 | A site on a dark ground has one light section (questions, prices or how ordering works) joined by a clean edge, not a fade | 3z.5 | LOOK; n/a on a light site
 
 ## 4. Photos and media
 
@@ -184,6 +188,8 @@ R3s.24 | Media is light and sized: no photo over 600 KB, every `<img>` has width
 R3p.6 | Fits on one screen: every section fits below the menu bar at the laptop sizes; no photo taller than the screen at any of the six sizes; no photo shown over 1.35x its own size; a big photo of another shape than its box is extended to the box's shape (padded, the new edges generated, the original pasted back), never zoomed or framed (3c.12, Tzvi 27 Oct) | 3c.12, 3p.6, 3a | script: fits on every page
 R3o.5 | Every special character (₪, arrows, Hebrew, dots) renders in the font used for it | 3o.5, 3s GLYPH | script: site GLYPH
 R3x.7 | BRAND.md in the build folder (colours with their uses, two fonts, logo on light and dark, textures, Design bans) was written before any picture was generated, and the site uses it | 3x.7 | LOOK: BRAND.md against the CSS
+R3z.4 | No dark layer or gradient over a whole photo or film; a shade only behind the words where measured contrast needs it | 3z.4 | LOOK: every photo and film with words on it
+R3z.7 | Card pictures generated without owner photos were made as one set from a saved screenshot of a real site's grid (path in docs/inspo), each tile checked as R8.1 | 3z.7 | LOOK; n/a when every card has the owner's photo
 
 ## 5. Prices and savings
 
@@ -203,6 +209,7 @@ R3j.10 | A saving is shown as a percentage badge of two or three words ("25% off
 R3j.11 | A combined service against its parts, and basket lines a package would make cheaper (one line with the saving and a Switch button), are shown when real | 3j (Show the deal) | LOOK: build a basket that qualifies
 R3j.12 | An owner's own savings claim the prices contradict is not printed; the owner is asked | 3j (Show the deal) | LOOK
 R3.14 | Loud prices only when prices exist, never on a premium or quote-based business | 3 prices | LOOK
+R3z.3 | Where the answer depends on a choice, a free taste of at most three questions ends on a real answer and price from the record and carries it into the order; no contact details asked | 3z.3 | LOOK: answer every path; n/a with one product at one price
 
 ## 6. Order and booking flow
 
@@ -288,7 +295,7 @@ R3u.14 | gen/copy-pass.md holds a shorter version of every line over 20 words an
 R3w.1 | Every generated food shot has a real cause on screen (a hand, a spoon, gravity), one event of 2 to 4 s, and its end stays; nothing floats into place or appears, no smoke or flash wipes between shots; except in the opening film, where the owner's own ingredients may swirl and float round the product in advert style, marked in the brief (the product itself never changes, nothing pops in or out in the open) | 3w.1, 3w.2 | LOOK: the film's frame sheet at 4+ fps; n/a without generated food
 R3w.2 | Generated liquids and steam look real: sauces opaque and thick, no glassy drips or big glass bubbles, steam thin wisps lit from behind, never a cloud | 3w.3, 3w.4 | LOOK: frame sheet; n/a with no liquid or steam
 R3w.3 | Generated food is lit from the side and behind with the camera side darker, never flat from the front; a pour or fall stays sharp when paused | 3w.4, 3w.6 | LOOK: frame sheet, pause the fastest moment; n/a without generated food
-R3w.4 | The film's start and end pictures were right before any clip was made; each clip was made once at full quality (a draft only where get_cost showed it under a third of the price); simple motion (a growing crack, push-in, drift, holds) is done in code; every clip judged at 4+ fps | 3w.10 | LOOK: gen/ report or the generation log; n/a with no generated film
+R3w.4 | The film's start and end pictures were right before any clip was made; each clip was made once at full quality (a draft only where get_cost showed it under a third of the price); simple motion (a growing crack, push-in, drift, holds) is done in code; a nearly-right clip is trimmed or dissolved from the still, not remade; the brief's Clip plan (stills by file, edges, same item, one change, credits, in code, trim) was written before the first clip and no clip was rolled a third time; every clip judged at 4+ fps | 3w.10 | LOOK: gen/ report or the generation log; n/a with no generated film
 R3w.5 | No bite, chew or tear is shown in motion unless Tzvi approved that take; otherwise the film cuts to the result | 3w.12 | LOOK; n/a if the film has none
 R3w.6 | A scroll film's scrub ends where the clip's motion ends (check-clip's figure), the last hold is short, and its last frame is the picture the next section shows | 3w.13, 3w.14 | LOOK: scroll the film's end on a laptop; n/a with no scroll film
 R3w.7 | Generated places and materials look photographed: no dune-smooth hills, model villages, stones in tidy equal rows or flat soft light, checked at full size beside a real photograph of that place or material before any clip | 3w.15 | LOOK: full-size crop beside the real photograph named in the brief's Looks real section; n/a with no generated place or material

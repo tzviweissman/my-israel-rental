@@ -13,6 +13,8 @@
 //   4. "Approved by Tzvi: <date>" on its own line, written only after he said yes to the steps.
 //   5. "## Looks real": the real photograph (a link or docs/inspo path) the film's generated stills were compared with at full
 //      size (rule 3w.15; Tzvi, 5 Nov 2026, RBS Cleaning: "the scene and the stone look kind of fake").
+//   6. "## Clip plan" (rule 3w.10.5; Tzvi, 10 Nov 2026: stop remaking clips from mistakes): each clip's start and end
+//      stills by file (they must exist), edges, same item, one change, credits, what is in code, what gets trimmed.
 // Watches: Higgsfield generate_video / generate_video_batch (a price check with get_cost passes),
 // and Bash commands that run a gen/*.py script calling a video model (Higgsfield API, kie.ai).
 // Prints the refusal reason for the model; never blocks anything else.
@@ -56,8 +58,9 @@ process.stdin.on('end', () => {
       const hasReal = /https?:\/\/|docs\/inspo\//.test(real), hasKey = /^##+\s*Key moment/im.test(t);
       const looks = (t.split(/^##+\s*Looks real.*$/im)[1] || '').split(/^##\s/m)[0];
       const hasLooks = /https?:\/\/|docs\/inspo\//.test(looks);
-      seen.push(`${path.basename(b)}/gen/${f}: object list ${hasList ? 'yes' : 'MISSING'}, how it really happens (with its source) ${hasReal ? 'yes' : 'MISSING'}, key moment ${hasKey ? 'yes' : 'MISSING'}, looks real (with the real photograph) ${hasLooks ? 'yes' : 'MISSING'}, approval ${hasYes ? 'yes' : 'MISSING'}`);
-      if (hasList && hasReal && hasKey && hasLooks && hasYes) ok.push(p);
+      const plan = clipPlan(t, b, gen);
+      seen.push(`${path.basename(b)}/gen/${f}: object list ${hasList ? 'yes' : 'MISSING'}, how it really happens (with its source) ${hasReal ? 'yes' : 'MISSING'}, key moment ${hasKey ? 'yes' : 'MISSING'}, looks real (with the real photograph) ${hasLooks ? 'yes' : 'MISSING'}, clip plan ${plan || 'yes'}, approval ${hasYes ? 'yes' : 'MISSING'}`);
+      if (hasList && hasReal && hasKey && hasLooks && !plan && hasYes) ok.push(p);
     }
   }
   if (ok.length) process.exit(0);
@@ -65,12 +68,33 @@ process.stdin.on('end', () => {
     + 'with the numbered steps, a "## Every object" section (each object: where it comes from, where it ends; rule 3h.18), '
     + 'a "## How it really happens" section written from a real video of the action (its link or docs/inspo path in it), '
     + 'a "## Key moment" section giving that one step its own clip between its own before and after stills, '
-    + 'and a "## Looks real" section naming the real photograph (link or docs/inspo path) its stills were compared with at full size (rule 3w.15); '
+    + 'a "## Looks real" section naming the real photograph (link or docs/inspo path) its stills were compared with at full size (rule 3w.15), '
+    + 'and a "## Clip plan" section (rule 3w.10.5) naming the start and end stills by file (already made), and saying: edges clean, '
+    + 'same item as the real photo (count, colour, size, words), one change between the stills, the get_cost credits, what is done in code, '
+    + 'and what gets trimmed or dissolved if a clip is nearly right; '
     + 'show Tzvi the steps and the object list, and only after his yes add the line "Approved by Tzvi: <date and his words>". '
     + (seen.length ? `Briefs found this week: ${seen.join('; ')}.` : 'No brief changed in the last 7 days was found.');
   process.stdout.write(JSON.stringify({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: reason } }));
   process.exit(0);
 });
+
+// rule 3w.10.5 (Tzvi, 10 Nov 2026: plan the clip so it is not remade): '' when the plan is complete, else what is missing
+function clipPlan(t, build, gen) {
+  const sec = (t.split(/^##+\s*Clip plan.*$/im)[1] || '').split(/^##\s/m)[0];
+  if (!sec.trim()) return 'MISSING';
+  const stills = [...sec.matchAll(/[\w./\\-]+\.(?:png|jpe?g|webp)\b/gi)].map((m) => m[0]);
+  const found = stills.filter((s) => [build, gen].some((d) => fs.existsSync(path.resolve(d, s))));
+  const need = [
+    [found.length >= 2, 'start and end stills by file, made before the clip'],
+    [/edge/i.test(sec), 'edges'],
+    [/count|colou?r|size|words/i.test(sec), 'same item as the real photo'],
+    [/one change|one step/i.test(sec), 'one change between stills'],
+    [/credit/i.test(sec), 'get_cost credits'],
+    [/in code/i.test(sec), 'what is done in code'],
+    [/trim|dissolve/i.test(sec), 'what is trimmed if nearly right'],
+  ].filter(([ok]) => !ok).map(([, what]) => what);
+  return need.length ? `MISSING (${need.join(', ')})` : '';
+}
 
 function safeJson(s) { try { return JSON.parse(s); } catch { return {}; } }
 function resolveFrom(cwd, p) { const q = p.replace(/^["']|["']$/g, ''); return path.isAbsolute(q) ? q : path.resolve(cwd || process.cwd(), q); }

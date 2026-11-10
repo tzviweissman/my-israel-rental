@@ -98,7 +98,10 @@ always with `?as=owner`, never a sign-in.
 
 Follow "How a rule is added" at the end of §6: find every line it touches,
 show a before and after picture and get his yes, try it on every live site it
-covers, make its check fail before and pass after. Add it to `full-rules.md`,
-to the matching section of `reference/rules-digest.md`, and to
-`docs/rules-checklist.md` the same day. Edit this skill in the repo copy
-(`.claude/skills/build-business-page`), then `node scripts/check-rule-copies.mjs --sync`.
+covers, make its check fail before and pass after. Then, the same day, in this
+order: the full text in `docs/page-generation-rules.md` (its one home), a short
+version in the section of the same number in `reference/rules-digest.md` (what
+builds read, so keep it short), and its line in `docs/rules-checklist.md`
+naming that section. Run `node scripts/check-rule-copies.mjs --sync` (copies the
+full rulebook into `reference/full-rules.md` and this skill to the loaded copy)
+and `node scripts/check-rule-homes.mjs`; the commit is refused until both pass.

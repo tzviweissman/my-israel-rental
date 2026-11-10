@@ -2,6 +2,8 @@
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section numbers are unchanged, so "3g.13", "3h.11" and the like still point to the same text. The full rulebook is `full-rules.md`.
 
+Full rulebook only (read there when a step names them): 3a, 5a, 5b, 5c, 7, 8, 8a, 9, 10.
+
 Distilled from the MyIsraelRental page rules (`docs/page-generation-rules.md`
 in that repo, where the full history and examples live) and the corrections
 Tzvi made on real builds. Every rule here is a defect that once reached him.
@@ -1083,6 +1085,60 @@ facts, peek row. Effects to choose from, never on every site and never the last 
 cards, fanned photos, rolling letters, circle reveal, curtain between pages, picture buttons, statement
 band. All are in scrollcraft/starter/kit (kit.css, kit.js, test.html). The hand-drawn circle around a
 word was taken out by Tzvi; do not use it.
+
+## 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+
+Full text: reference/full-rules.md section 3u. **Order page:** the button names the order (3u.1); say plainly
+what is not possible and the next thing that is (3u.2); price per portion beside the size (3u.3); the order and
+total beside every step (3u.4). **Page:** the first screen arrives in a set order (3u.5); depth on laptops (3u.6);
+at most one rotating word in a headline (3u.7); a small tilted label over section headings (3u.8); question
+cards (3u.9); branches beside a map (3u.10). **Building:** the whole page is right before the film goes in
+(3u.11); new motion is tried on the test page first (3u.12, scrollcraft/starter/kit/test.html); every report ends
+with "Not done yet" and "For your call" (3u.13); a writing pass, shorter first, then applied (3u.14).
+
+## 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+
+Full text: reference/full-rules.md section 3w. **Food that looks filmed:** a real, ordinary cause on screen
+(3w.1); one event per shot, 2 to 4 s, and its end stays (3w.2); thick and opaque reads real, clear and glossy
+reads AI (3w.3); light it in words as a food shoot is lit (3w.4) and the background apart from the food (3w.5);
+fast things sharp (3w.6); the camera slow and steady (3w.7); whatever must be in the picture is in the start
+picture (3w.8). **The prompt shape (3w.9):** shot length, lens, camera path, light, the one action and the second
+it lands, texture words, "Do not" lines; start from a proven prompt in docs/prompts/README.md. **Spend on the
+pictures, generate the clip once (3w.10):** stills made right first, one clip at full quality, simple motion in
+code, a nearly-right clip trimmed not remade, and the brief's "## Clip plan" written before the first clip
+(film-gate refuses without it); two tries at most. A refused close-up gets a step back, not new words (3w.11);
+biting and chewing are not solved (3w.12). **On the page:** the scrub ends where the motion ends (3w.13); the
+film's last frame is the next section's picture (3w.14). **Places and materials (3w.15):** a generated place or
+material is checked beside a real photograph at full size before any clip ("## Looks real" in the brief).
+
+## 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+
+Full text: reference/full-rules.md section 3x. A product you can turn, made from the owner's photo (3x.1, made as
+3x.11); numbers that count, real figures only (3x.2); tabs that change one panel in place (3x.3); choices side by
+side with the same measures (3x.4); a light that follows the visitor, dark sites only, with an off button (3x.5);
+at most one sentence that lights up as you read (3x.6); **BRAND.md before the first picture** (3x.7: colours and
+their uses, two fonts, logo, textures, design bans); **web basics on every page** (3x.8: skip link, one h1, focus
+rings, labelled fields; check-web-basics); a request form that writes its summary as you fill it (3x.9); the price
+stays in view while the form is filled (3x.10); a thin progress line only on long pages (3x.12); one type scale
+and one spacing scale (3x.13); gift cards bought on the page (3x.14).
+
+## 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+
+Full text: reference/full-rules.md section 3y. Ways of working: nothing leaves the customer unsure, loads that fail
+say so with "Try again", forms carry the terms line, errors give the real reason (3y.1); a video can be made in
+code with scripts/code-video.mjs, generation only for what code cannot draw (3y.2); fix motion from a recording,
+not a longer description (3y.3).
+
+## 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+
+Full text: reference/full-rules.md section 3z; frames in docs/inspo/videos-2026-11-10/sites. One card the visitor
+would use hangs a third to a half over the edge of the next section on the home page, whole on a phone (3z.1). The
+first screen is three layers: a real photo, film or shape at the back, words and card in the middle, the main
+button in front with the only soft shadow (3z.2). Where the answer depends on a choice, a free taste of at most
+three questions ends on a real answer and price from the record and carries it into the order (3z.3). Photos and
+films at their own brightness, a shade only behind words where contrast needs it (3z.4). A dark site has one light
+section, joined by a clean edge (3z.5). The h1 or the line under it uses the words a customer searches for (3z.6).
+Card pictures without owner photos are made as one set from a real site's grid (3z.7).
 
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 

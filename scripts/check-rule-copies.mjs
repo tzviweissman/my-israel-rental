@@ -26,6 +26,13 @@ const walk = (d, base = d) => fs.readdirSync(d, { withFileTypes: true }).flatMap
 
 if (!fs.existsSync(HOME)) { console.log('no ~/.claude on this machine: nothing to compare'); process.exit(0); }
 const differ = [];
+// the full rulebook has one home, docs/page-generation-rules.md; the skill's full-rules.md is only its copy
+// (10 Nov 2026: the hand-kept copy had fallen 300 lines and four sections behind)
+const FULL = path.join(ROOT, 'docs', 'page-generation-rules.md'), FULL_COPY = path.join(PAIRS[0][0], 'reference', 'full-rules.md');
+if (fs.existsSync(FULL) && (!fs.existsSync(FULL_COPY) || text(FULL) !== text(FULL_COPY))) {
+  if (sync) { fs.copyFileSync(FULL, FULL_COPY); console.log(`synced ${FULL_COPY}`); }
+  else differ.push(`${path.relative(ROOT, FULL_COPY)} differs from docs/page-generation-rules.md (its one home)`);
+}
 for (const [repo, home] of PAIRS) {
   if (!fs.existsSync(repo)) continue;
   for (const rel of walk(repo).filter((f) => /\.(md|mjs|js|py|html|css)$/.test(f) && f !== 'README.md')) {

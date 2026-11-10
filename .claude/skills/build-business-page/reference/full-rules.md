@@ -177,7 +177,7 @@ any question they skip is left off.
 
 ## 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
 
-**One command runs every check** (24 Oct 2026): `node scripts/check-build.mjs scrollcraft/builds/<folder>` runs check-site, check-fits, check-motion and readable on every page, then check-concept, check-fingerprints and check-rules. A site is shown or published only after it passes. Builders start from `docs/build-brief-template.md`.
+**One command runs every check** (24 Oct 2026): `node scripts/check-build.mjs scrollcraft/builds/<folder>` runs check-site, check-fits, check-motion, check-speed, check-same-place and readable on every page, then check-concept, check-fingerprints and check-rules. A site is shown or published only after it passes. Since 27 Oct 2026 it also fails until `<folder>/review.md` holds an independent reviewer's "Verdict: PASS" (a Sonnet subagent that did not build the site, working from `docs/page-review-checklist.md`) dated after the site's last change, and publish-page refuses a new site without one; Tzvi: "how can we get it right more often the first time". Builders start from `docs/build-brief-template.md`.
 
 "In the future look through the page the AI creates before showing the
 business owner and implement the fixes and then show the finished product."
@@ -1051,7 +1051,6 @@ that policy).*
    over its foot passed them. `scripts/check-film-clear.mjs` (R3h.25) scrolls the film to 20, 40 and 60% on a laptop and
    a phone and fails when words, cards or names cover more than 3% of it (the site's own menu bar is not counted). The
    words wait for the end of the film, or sit beside or under it.
-
 18. **The story must be physically possible before anything is generated**
    (Tzvi, 25 Oct 2026, on LS Fruit Platter: "the watermelon inside just
    disappears ... before you make a video you need to make sure everything
@@ -1064,6 +1063,7 @@ that policy).*
    prompt. A start and end frame cannot fix an impossible middle: the model
    fills it with a morph. "A watermelon bursts into a whole platter of other
    fruit" failed twice for exactly this reason, both times on its middle.
+   (The owner's ingredients swirling round the product in an opening film are allowed: 3w.1, exception.)
    Show Tzvi the object list with the steps, and watch every generated clip
    at 8 fps asking the same question of each object.
    **The test is whether it looks off, not strict physics** (Tzvi, 26 Oct
@@ -1372,6 +1372,8 @@ small website. A single page stays fine for a business with little to say
 
 **Every order is saved before WhatsApp opens** (Tzvi, 22 Oct 2026: "when someone clicks order it saves all the information to the site and then redirects them to WhatsApp with a pre typed message"). The order or booking button first POSTs the order to MyIsraelRental through the business's order form (`/api/marketplace/order-form/<gig>/orders`, the way Chicken Munch's order.html does; bookings and quotes through their own endpoints), so it reaches the owner's dashboard, the customer gets a tracking link and the review request follows; only then does it open WhatsApp with the order written out. Every product on the site exists as a product of that business's listing (same name and price), so the saved order names real products. If saving fails, WhatsApp still opens (the customer is never stuck), and the failure is logged. check-site SAVE fails a page whose order reaches WhatsApp without that POST first.
 
+**An order form of its own has the discount code box** (Tzvi, 6 Nov 2026: American Crust turned on a first-time code and no customer could type it). Put `<div id="mir-code"></div>` with the small stub beside it above the total (copy from `scrollcraft/builds/american-crust/shop.html`), call `MirCode.mount` with the goods total, take the code off the goods only, never delivery, and send `discount_code: MirCode.code()` with the order and `MirCode.text()` in the WhatsApp message. The server adds the script and the box shows only when the business has a code. `check-pages-scripts.mjs` fails with NO CODE BOX without it.
+
 ## 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
 
 Chicken Munch's order page let a customer choose kinds of chicken for every
@@ -1482,7 +1484,8 @@ list of still sections. The film opening that delivers the wow is 3h.
 1. **Generated food in motion is allowed only in the full-screen opening film
    (3h)** (Tzvi, 22 Oct 2026). It is made in advert style and checked frame by
    frame at 4 frames a second or more: no food appearing from nowhere, no
-   glass or neon look, pieces never fade or vanish. **Everywhere else on the
+   glass or neon look, pieces never fade or vanish. (Advert-style ingredients
+   swirling round the product: 3w.1, exception.) **Everywhere else on the
    page, food stays the owner's real photo.** The single home of this policy;
    3h.13 to 3h.16, 3e and section 8 point here. Why the limit: in the page body
    generated food motion (a split piece, crumbs flying, a sauce splash, a toss,
@@ -1649,7 +1652,8 @@ docs/ui-videos/notes/2026-10-20-nine-videos.md). He approved all of them ("yes a
    space already kept for them; choosing something never moves the layout.
 3. One shadow, the soft kind (the single home of the shadow rule; 3c.9 and
    3i.1 point here): light, about 3 px down, about 30 px blur, no spread,
-   tinted with the background or brand colour, never black or a dark default.
+   tinted with the background or brand colour, never black or a dark default. It sits on the front layer only
+   (3z.2).
 4. One left edge: headings, text and buttons line up on the same margin.
 5. A name is at least 1.25 times the size of the line under it, and heavier.
 6. Controls that do the same job look the same (height, corner, style).
@@ -1661,6 +1665,17 @@ docs/ui-videos/notes/2026-10-20-nine-videos.md). He approved all of them ("yes a
    every item; it does not count toward the two mentions of the certificate
    in 3b).
 10. The picture appears the moment a thing is named.
+
+**Same thing, same place (3s.27)** (Tzvi, 26 Oct 2026, on Blazin' Boards' sizes on a phone: "the sizes are
+written in different places for different ones ... make a rule that these type of things need to be
+consistent"). When one kind of thing repeats (each size in a size walk, each step, each card, each
+slide, each state of a scroll scene), it is written in the same place, the same way, every time: the
+same position on screen, the same size and style. A block that grows (a size with three boards
+against a size with one) hangs from a fixed top line and grows downward, so its heading never moves;
+anchored at the bottom, the size with three boards rode up into the photo and the size with one sat
+low. Checked by stepping through every state on a phone and a laptop and measuring the label's top:
+it must not change.
+
 
 **It sells like a premium brand (honestly)
 11. One true sentence beside the price says why it costs that (handmade,
@@ -1891,6 +1906,273 @@ kit.css and kit.js into its site.css and site.js, with the site's colour tokens.
 and six and read fine, so the check does not count them. Comparing menu wording across pages failed every
 site whose order page calls its link "Your order", so it compares the pages linked instead. A drawn circle
 around a headline word (15): Tzvi took it out.
+
+## 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+
+Tzvi asked for many videos on cinematic websites and on realistic food films. Seventeen were watched as
+video, with the words and frame sheets read together. Six were cinematic-website builds. Four were guides to
+realistic AI video. Three were AI food adverts plus one Kling food study, all judged frame by frame. Six were
+on filming real food and drink adverts. Notes and pictures are in `docs/inspo/videos-2026-11-01/`. Each
+line says how many separate videos showed it. What we already do (scroll-bound frames, a plan and price
+before paying, frosted or shaded text over film, the phone loop) is not repeated here.
+
+**Food that looks filmed, not generated**
+
+1. **A real cause is on screen, and it is ordinary.** It is a hand, a spoon or gravity, in a real kitchen
+   or shop light. The best AI food advert has hands in an everyday kitchen, one thing per shot: lifting
+   bacon, a sauce poured from a spoon, tomato laid down. The worst has fries and burger layers floating into
+   place in mid-air, with sparks, and a smoke wall used as the cut. Floating assembly, pieces from nowhere
+   and smoke or flash wipes are refused. (3 AI adverts, frames.) This is 3h.18 seen on real examples.
+   **Exception: advert style in the opening film** (Tzvi, 2 Nov 2026, on Krysp, after five AI chocolate
+   adverts he liked, `docs/inspo/bar-breaking-2026-11-02/`: "allow it in the rules"). In the full-screen
+   opening film only, the product's own ingredients may swirl, orbit, float and splash round it as in a
+   studio advert, with no cause on screen, and may come in or go out past an edge or from out of focus
+   behind it. Still refused: anything that is not one of the owner's own ingredients, the product
+   changing shape, colour or size, pieces fading or popping in or out in the open, smoke or flash wipes,
+   glass or neon liquid. The brief's object list marks which objects are advert style; the single home of
+   this exception, 3h.18 and 3o.1 point here.
+2. **One event per shot, 2 to 4 s, and its end stays.** The sauce lands, forms a mound and stays there.
+   Nothing springs back, and nothing else moves except a little steam. (3 videos.)
+3. **Thick and opaque reads as real; clear and glossy reads as AI.** Opaque sauce, burrata, cream and
+   purée read real. Red syrup drips and big bubbles read as glass. This adds to 3o.2. (2 videos, frames.)
+4. **Light it in words the way a food shoot is lit.** Use one large soft light from the side, and a
+   narrower light behind and above that gives glass a thin bright edge and lights the steam. The camera
+   side stays darker. Never use flat light from the front, which washes out the texture. Steam shows only
+   where it is lit from behind, as thin wisps drifting one way, never as a cloud. Keep 3o.2's material
+   words with it, because a backlight alone makes sauce look like glass. (4 filming videos; the lighting
+   plan at 3:20 of qAa0n-Qxmng.)
+5. **Light the background apart from the food.** The food is warm. The background is a little cooler or
+   carries one soft window or leaf shadow, with a few warm lamps far behind as soft circles. Props are in
+   a colour that stands apart from the food. (3 videos.)
+6. **Fast things are sharp.** A pour, a falling piece or a drop is slow motion with sharp edges, and a
+   stream with body folds where it lands. A take whose drops smear when paused is refused. (2 filming
+   videos; the sharp-against-smeared shutter demo.)
+7. **The camera is slow and steady.** It is locked, pushes in slowly, or moves in a slow arc, and the
+   product is never filmed with shaky handheld. Open close on texture and pull out, then end on a push-in
+   or a view from above. (3 videos.)
+8. **Whatever must be in the picture is in the start picture.** Words alone did not stop an extra item.
+   Higgsfield's own workflow video removed an extra place setting only with a layout picture. (1 video.)
+   This joins "keep its traits" in section 8.
+9. **The prompt shape.** Give the time of each shot, the lens, the camera path and the light. Name the one
+   action and the second it lands, add texture words, and finish with plain "Do not" lines: no particles,
+   glow, smoke or flash, no pieces appearing, no change of count. The template is in the folder README.
+   (3 videos, prompts seen on screen.) Start from the closest proven prompt in `docs/prompts/README.md`
+   (Tzvi, 10 Nov 2026), keep the prompt text in the gen script, and add it there once its result is used.
+10. **Spend on the pictures, generate the clip once** (replaced 2 Nov 2026, Tzvi: "is there a way to do this
+    cheaper instead of making a ton of versions per build"). A draft saves little and proves little: on
+    Higgsfield a 5 s MiniMax clip costs 7.5 credits at 480p and 10 at 2K, and the final is a new roll that
+    need not match the draft. So, on every site's film:
+    1. Retry the start and end pictures (about 1 credit each) until both are exactly right; the clip is
+       made from them.
+    2. Make each clip once, straight at full quality. Check the price with get_cost first; a cheap draft
+       only where get_cost shows it under a third of the final's price.
+    3. Simple motion is done in code, free: a crack or line growing, a slow push-in, the background
+       drifting, holds and dissolves. Only what must look physically real (a pour, a stretch, a tear) is
+       generated.
+    4. A small fault is fixed in the edit (trim it, or dissolve in from the still), not by a new clip.
+    Look at every clip at 4 or more frames a second; check-clip runs on it. (2 videos; prices 2 Nov 2026.)
+    5. **The clip plan is written before the first clip, not learned from failed ones** (Tzvi, 10 Nov 2026:
+       "i want the rules to be made better so we dont have to regenerate from mistakes so many times").
+       The brief gets a "## Clip plan" section, and the film gate refuses any paid clip without it. For
+       each clip it names the start and end stills by file (they must already exist), and answers, from
+       the causes of every remade clip so far:
+       - Edges: the stills have no dark border, cut-off object or stray strip at any edge (RBS Cleaning,
+         a thin dark edge became black bars across the glass, remade).
+       - Same item: count, colour, size and words match the real photo at full size (Bake Away's
+         doughnut came out beige and too big; Whipped Cup had two caramel dishes; Bun Intended's bun
+         came out paler and flatter from design words). Fix a still, never a clip.
+       - One change: the stills differ by one physical step with a real path between them (Noa Levi v1
+         dropped boxes from nowhere, v2 turned the pile into something else; Krysp's bend and snap in
+         one clip came out in one frame).
+       - Price: the get_cost credits per clip, at full quality.
+       - In code: what moves without a clip (push-in, drift, holds, dissolves, the words).
+       - If it is nearly right: what gets trimmed or dissolved from the still instead of a new clip.
+       A clip that fails twice means the idea is wrong (rule 3h.19): stop and take it back to Tzvi
+       rather than a third roll.
+11. **A refused close-up gets a step back, not new words.** Macro shots of warm, soft surfaces were refused
+    as unsafe twice. If a food close-up is refused, move the camera back a little. (1 video.)
+12. **Biting, chewing and tearing are not solved.** None of the seventeen shows a convincing one; the one
+    bite was hidden behind a face. A film shows what happens after a tear or a bite (a cut to the pieces),
+    not the act itself, unless a draft shows it right frame by frame and Tzvi approves it. (All.)
+
+**On the page**
+
+13. **The scrub ends where the motion ends.** check-clip measures when the clip starts and stops moving. A
+    still start gets little scroll, the scrub ends where the motion ends, and the last hold is short. A
+    clip whose camera does not move gets a slow zoom in code. (1 video, with its figures on screen.)
+14. **The film's last frame is the next section's picture**, so nothing jumps where the film hands over to
+    the page. (3 videos.)
+
+**Places and materials that look photographed** (Tzvi, 5 Nov 2026, RBS Cleaning: "the scene and the stone look kind of fake make a more realsitic scene and make sure the rules make this happen in the future"; before and after in `docs/rule-pictures/real-scene-2026-11-05/`)
+
+15. **A generated place or material is checked like a photograph before any clip is made.** Landscapes, views
+    through windows, stone, walls, wood and rooms give themselves away in the same ways: hills smooth as sand
+    dunes, villages like models on a ridge, stones the same size in tidy rows with no gaps or dirt, flat even
+    light, everything soft. Look for those in the still, at full size, in a crop of the most detailed part,
+    beside a real photograph of that same place or material (the brief names it). Any of them means a new still.
+    Words that worked: an ordinary unretouched snapshot from a named real place, deep focus, what is really
+    there (lichen, dirt, dark gaps, weeds, broken terraces, plain apartment blocks), messy and irregular. Words
+    that made it worse: documentary, f/8, fine detail, which came out painted. A still costs about a credit and
+    a clip sixteen, and a fake view fixed after the clips means making the clips again. The brief's "## Looks
+    real" section says which real photograph it was compared with and what was looked at; film-gate refuses a
+    paid clip without it.
+
+## 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+
+Four videos: a list of 38 inspiration galleries, a flashlight hero, a 3D product site and brand kits. Notes,
+frames and the gallery list are in `docs/inspo/videos-2026-11-04/`. Items 1 to 4 are options a shop site
+picks from by what the business has. Items 5 and 6 are occasional touches. Item 7 is on every paid site.
+
+1. **The product you can turn.** A shop with one main item may let the visitor turn it: a 3D model, dragged
+   or swiped round, with up to four small dots on its parts, each opening one line of the owner's own facts
+   (the hashgacha, what is inside, the size). The model is made from the owner's photo, through the API
+   (Higgsfield API rule, cost checked first), and compared beside that photo before it stays; it looks
+   the same as the item in the film and tiles. Two buttons turn it too. It loads after the page, and with
+   no script or reduced motion it is their photo. The dots are 44 px to tap. ("Turn it over. Look
+   closer.", video 3.)
+2. **Numbers that count.** A real number from the record (pieces in a box, years, minutes to deliver)
+   may count up once when it is reached, ending on the exact figure; the figure is in the page's text, so
+   with no script or reduced motion it simply shows. Never a number we made up or rounded. (Video 3.)
+3. **Tabs that change one panel in place.** For sizes or packages, tabs change the picture, price and
+   facts in one panel that does not move (3s.27). (Video 3.)
+4. **Choices side by side.** Where the owner has two or more sizes or packages, each is a card with its
+   picture, price and the same measures in the same order, so they compare at a glance (3j, 3l). (Video 3.)
+5. **A light that follows the visitor**, only for a business whose own world is dark (a night tour, a
+   bar, candles): the opening photo is dim and a soft light follows the mouse, with a button to turn it
+   off. On a phone, and with reduced motion, the light sweeps once by itself, then the photo is lit. It
+   never dims the words or the main button. This is the one cursor effect 8a.4 allows, as a unique
+   touch. (Video 2.)
+6. **One sentence that lights up as you read**, word by word from grey to ink as it scrolls past: at most
+   one per site, and not on the site built just before. It is common on AI-built sites. (Video 4.)
+7. **A brand kit before the first picture.** Every paid build keeps `BRAND.md` in its folder, written
+   and shown to Tzvi before any picture is generated: the colours (each with its use; for a shop the button
+   colour is the product's own, with the photo it came from, 3g.19), the two fonts,
+   the logo versions (on light and on dark), and the textures or backgrounds, generated in the brand's
+   colours from the owner's own photos if needed, and a **Design bans** list: looks this site must not
+   use, starting from the bans in 3c and grown with every look Tzvi turns down on it. Every picture and
+   page uses it. (Videos 3 and 4; the bans list from the 3D site's build file.)
+
+**From the second look** (Tzvi, 4 Nov 2026: "yes do all five"; frames, the 3D site's build file and the
+power-design web rulebook, notes in the same folder):
+
+8. **The web basics, on every page** (`scripts/check-web-basics.mjs`, run by publish-page). A "Skip to
+   content" link is the first thing Tab reaches. There is exactly one h1, and no heading level is
+   skipped. Every link, button and field shows a focus ring of 2 px or more. Every field has a label a
+   screen reader reads (a placeholder is not one), and phone, email and name fields have the right type
+   and autocomplete so a phone fills them in. The basket count and the form's errors and sent message
+   are in a live region. The opening picture loads first and pictures far down load lazily. There are at
+   most two font families. Each page has a title of 60 characters or less, a description of 155 or
+   less, og:title and a 1200x630 share picture. The home page describes the business for Google
+   (JSON-LD of its kind, Bakery, Store, LocalBusiness, from the record's facts only). `starter/sitekit.py`
+   writes the skip link, the live count, the footer headings and the JSON-LD.
+9. **A request form that writes the summary as you fill it**, for a business whose order is a request
+   (a caterer, a mover, a cleaner, a photographer, events). Choices are chips, and beside the form (under
+   it on a phone) one plain paragraph builds as the fields fill ("A deep clean of a 4-room flat in Beit
+   Shemesh, Sunday 9 Nov, morning"). That paragraph is what is sent. It never states a price or a promise
+   the record does not give. (Video 4, the brief form.)
+10. **The price stays in view while the form is filled.** On a laptop the prices or the running total sit
+    beside the order or booking form. On a phone a total line sits above the send button. (Video 3, the
+    booking section.)
+11. **Making a product to turn** (3x.1), from the 3D site's build file:
+    - **Suitability first.** Use 3D only for a solid, opaque item: a box, a cake, a jar, a bottle, a
+      board. Thin or see-through parts (strings, balloons, glass, wire, hair, foliage), people and places
+      get the film instead.
+    - **The source picture.** Made from the owner's photo: the whole item, a three-quarter view, on a
+      plain mid-grey ground with even light. A long, thin item gets a side view.
+    - **Two candidates, reviewed.** Make two, from two 3D models, through the API with the cost checked
+      first. Look at each from four angles. Keep one only if its outline matches the photo, the key detail
+      is crisp, the back and base are believable, nothing of the ground is fused on, and no letters are
+      smeared on it. If neither passes, use the photo.
+    - **Lights.** Two or three light buttons named for the business's own world ("Kitchen light",
+      "Shabbat table"), each checked for readable words.
+    - **On a phone.** The drag area keeps `touch-action: pan-y`, so a swipe up or down still scrolls. A dot
+      hides when its side turns away.
+12. **A thin progress line** may run down the edge of a long single page (six screens or more). It is 2
+    to 3 px, in the accent colour, hidden from screen readers, and never over the menu bar or the phone
+    bar. (Video 3.)
+13. **One type scale and one spacing scale** (Tzvi, 4 Nov 2026: "look at power-design-web too and add what
+    helps"; its sections on the 8-point grid and the modular type scale). Every text size is a step of one
+    scale: the starter's `--t-1` to `--t5`, a ratio of 1.25 from a 17 px body, with the display steps growing
+    with the screen. Every gap and padding is a step of `--s1` to `--s10` (4 to 128 px). BRAND.md records
+    both, and nothing is sized in between. A page shows at most 10 text sizes (check-web-basics SCALE;
+    measured 4 Nov: Bake away had 14, The Whipped Cup 22, a starter page 5). Display names hidden from
+    screen readers do not count.
+14. **Gift cards are bought on the page** (Tzvi, 5 Nov 2026: "add gift card purchases straight from the page and
+    not through a separate link"). Every paid site has `SITE.gift_section()` and `gift.js` on its order page. The
+    section stays hidden until the owner switches gift cards on in the dashboard, so turning them on later needs
+    no rebuild. The buyer never leaves the page or signs in. When it is sent, the section says how to pay and
+    shows the owner's own payment links; the card goes out once the business confirms payment. It uses only the
+    amounts, note and links the owner set. Standard business pages open the same order in place.
+
+**Sources.** The galleries in the notes (Godly for scrolling videos of whole sites, Hover States for what
+buttons and pictures do, Unsection for single sections, Commerce Cream for shops on a phone, and the rest)
+are searched for each build; the build's REFERENCES.md line for `videos-2026-11-04` names the ones used.
+
+
+## 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+
+Notes and frames are in `docs/inspo/videos-2026-11-06/`. These three are ways of working, not checks on a finished
+page, so no site made before them has to change.
+
+1. **Nothing leaves the customer unsure** (Wyatt Feaster). A load that fails says so and offers "Try again"; it
+   never reads as "nothing here" or "this link no longer works" (only a real 404 does). A page that loads says what
+   it is loading. An empty state offers the next thing to do. A greyed send button says what is still missing.
+   A field whose reader is unclear says who reads it. Every form that takes a name, phone or email carries the
+   terms and privacy line under its button. Errors give the server's own reason (`apiErrorMessage`), never
+   "Something went wrong". The pieces are `components/common/LoadState.jsx` (PageLoading, LoadFailed,
+   FormConsent); designed sites get the terms line from `mir-order.js` with no rebuild.
+2. **A video can be made in code** (Tyler Mommsen). A film is an HTML page drawn frame by frame
+   (`scripts/code-video.mjs`, method in `docs/code-video.md`): no paid generation, exact timing, real pages
+   recorded live. Generation stays for what code cannot draw (food in motion, real places, 3h). The brief names
+   the product, one idea that runs through the whole film, the format, the look, the motion and the sound,
+   then the check: render, look at a frame every half second, critique as a senior motion designer, fix, at
+   least four rounds.
+3. **Fix motion from a recording, not a longer description** (AyzZ). Describe each section's motion in plain
+   words and build it once. Whatever still moves wrong is fixed from a screen recording of how it should move
+   (a reference site or a quick mock), passed through `docs/inspo` like any reference and named in REFERENCES.md.
+   For a hover or a change of state, draw both states and say which is which. A piece that will not come out
+   right in code (a glow, a fill) is drawn first and given as a picture. A cut-out's edge that shows while
+   scrolling is pinned to the bottom of the screen until the next piece covers it.
+
+## 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+
+Tzvi asked what makes sites "look and feel more like a real website" and how they are laid out. Notes and frame
+sheets are in `docs/inspo/videos-2026-11-10/` (AI LABS, MotionSites, Nate Herk). Their menu bar, first screen and
+section order matched what 3k and 3v already ask; these seven were new. He left out the eighth idea (the first
+screen's words never fade in), because it clashes with our openings. Like every rule, these are not asked of a
+site published before today (rule-dates.mjs).
+
+1. **One card hangs over the edge of the next section** on the home page, so the page stops reading as a stack of
+   boxes (Herk; frame `sites/herk-salon-card-edge.jpg`, a "Next open slots" booking card on the hero's lower edge).
+   It is a card the visitor would use anyway: the open slots, the order card, the price from, the three facts or a
+   review. About a third to a half of it sits over the next section, never more, and it is the only thing that
+   crosses an edge. On a phone it stays whole and readable, never cut by the screen or the phone bar.
+2. **The first screen is three layers** (Herk; `sites/herk-60-30-10-depth.jpg`): at the back a real photo, the
+   film or a soft shape of the business's own colour, never a plain white box; in the middle the words and any
+   card; in front the main button. The soft shadow of 3s.3 goes only on that front layer (the main button and the
+   card of 3z.1).
+3. **A free taste before the order or contact form**, when what the customer gets depends on a choice (Herk;
+   `sites/herk-free-sample.jpg`): at most three short questions that end on a real answer from the owner's own
+   record, such as "How many people?" then the platter and its price, "Your dates" then the rental's price, or
+   "Which treatment?" then the one that fits and its price, each with a button that carries the answer into the
+   order (pre-filled, 3u). Never a price or a recommendation the record does not hold, and no name, phone or
+   email asked for it. A business with one product at one price has none.
+4. **Photos and films at their own brightness** (MotionSites: "AI always adds this dark overlay"). No dark layer
+   or gradient over a whole photo or film by default. Words over a picture sit on its calm part or in a soft card
+   (3s.8). A shade is added only where a measured contrast needs it, only behind the words, and the 40% limit for
+   phones still holds.
+5. **A dark site has one light section**, joined by a clean edge, not a fade (MotionSites' light FAQ;
+   `sites/motionsites-faq-pricing-stats.jpg`). It is the section that is read rather than looked at: questions,
+   prices or how ordering works. Sites on a light ground already have the reverse (3t's one dark section).
+6. **The headline uses the words a customer would search for** (Herk, from Campaign Monitor). The h1, or the line
+   right under it, holds the plain words people type for this business and its place ("Fruit platters in
+   Jerusalem", "Window cleaning in Beit Shemesh"), never only a slogan. Its BLUEPRINT.md plan line names the search
+   words chosen. This sharpens 3g.13; it does not add a line to the first screen.
+7. **Without the owner's photos, the cards' pictures are made as one set** from a real site's grid (MotionSites;
+   `sites/motionsites-image-grid.jpg`): a screenshot of a real site's 3x2 or 2x2 image grid is saved in docs/inspo,
+   and one generation makes all the tiles ("an image like this, remove all text, six images, three per row, about
+   <business>", then one line per tile saying what it shows). Each tile is then checked as in R8.1 (one shoot) and
+   cut out at full size. The owner's own photos always come first; this is only for cards they have no photo for.
 
 ## 4. What is reported to the owner instead (content gaps)
 

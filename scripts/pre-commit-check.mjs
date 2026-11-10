@@ -35,6 +35,16 @@ if (staged.some((f) => /^(\.claude\/skills\/build-business-page|scripts\/hooks)\
   const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-rule-copies.mjs')], { cwd: ROOT, encoding: 'utf8' });
   if (c.status !== 0) { console.error(`Commit refused: ${c.stdout}`); process.exit(1); }
 }
+// a rule copied by hand falls behind: the full rulebook is copied into the skill, and both copies must match (10 Nov 2026)
+if (staged.includes('docs/page-generation-rules.md')) {
+  const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-rule-copies.mjs')], { cwd: ROOT, encoding: 'utf8' });
+  if (c.status !== 0) { console.error(`Commit refused: ${c.stdout}`); process.exit(1); }
+}
+// every rule has its home: a section of the short file a build reads, and a numbered section for each ad step (10 Nov 2026)
+if (staged.some((f) => /^(docs\/(page-generation-rules|rules-checklist|static-ad-rules|ad-rules-checklist)\.md|\.claude\/skills\/build-business-page\/(SKILL|reference\/rules-digest)\.md|scripts\/check-rule-homes\.mjs)$/.test(f))) {
+  const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-rule-homes.mjs')], { cwd: ROOT, encoding: 'utf8' });
+  if (c.status !== 0) { console.error(`Commit refused: ${c.stdout}`); process.exit(1); }
+}
 // every checklist rule is a step of the build blueprint: a new section must have a stage (4 Nov 2026, "8d")
 if (staged.includes('docs/rules-checklist.md') || staged.includes('scripts/blueprint.mjs')) {
   const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'blueprint.mjs'), '--order'], { cwd: ROOT, encoding: 'utf8' });
