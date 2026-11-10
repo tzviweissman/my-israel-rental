@@ -7,15 +7,15 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
 - [x] A0.1 One job: what you get, or a question, or a real offer. Never two.
   plan: what you get: a raw cholent kit you put in your own slow cooker, add water and leave on low. No offer, no question.
 - [x] A0.2 One-second test: a stranger knows what is offered and where. Clarity beats cleverness.
-  plan: a steel slow cooker with their sealed L.A. Cholent tubs in front of it, and the words 'Set it to LOW.' and 'Cholent kit, add water, about 20 hours on low' at the foot.
+  plan: their four tubs, a slow cooker and 'Pour. Water. Low. YUMMMMM.': a cholent kit you pour in, add water to, cook on low, and it tastes good.
 - [x] A9g.1 Starts from an ad that already works: name the ad in docs/inspo/pinterest-ads-2026-11-02 (or Meta's Ad Library, by reach and days running) it takes its idea from.
-  plan: the 'visual pun, one thing plays another' kind, the best scoring (4.3 over 144 ads in docs/inspo/pinterest-ads-2026-11-02), as in cafe 3247fc. Here the slow cooker's LOW setting plays the amount of effort.
+  plan: the short spoken headline in two voices from the pro references (Costa's 'KEEP GOING / Stay fueled', docs/inspo/pro-references): three plain steps, then the payoff.
 - [x] A9e.2 In one sentence: what the picture says that the words finish. Cover the words: the picture raises a question. Cover the picture: the words are not complete.
-  plan: the picture shows a closed slow cooker quietly cooking with their tubs in front; the words 'Set it to LOW.' finish it: low is the setting and the effort. Cover the words and it is a pot; cover the picture and 'LOW' means nothing.
+  plan: the picture shows their kit beside the slow cooker; the words say how little it takes (pour, water, low) and what you get (YUMMMMM). Cover the words: what are these tubs for? Cover the picture: what do you pour?
 - [x] A9e.3 The idea, by name: the product stands in for a familiar object, or sits in a familiar screen, or type and subject interlock, or surreal scale, or a pun. Not a good photo with a headline (scored 1.9 to 2.8).
-  plan: a pun (LOW is the dial and the effort) with type and subject interlocked: LOW. huge behind the pot, the pot and the tubs in front of the letters.
+  plan: type and subject interlock: YUMMMMM. sits behind the pot, its knob in front of the letters; the headline is the recipe in three words (Tzvi, 10 Nov 2026: 'pour.water.low. YUMMMMM').
 - [x] A9f.1 The angle, by name: a real moment and why ours wins there, or the exact reader, or an honest trade-off, or the want behind the feature, or a moment in the day, or a real review.
-  plan: the want behind the feature: Thursday night without the chopping. Said through their own instruction (add water, cook on low), never as a claim.
+  plan: the want behind the feature: Shabbos cholent that tastes great with almost no work. The three steps are their own label's.
 - [x] A9g.9 Is this a different-looking ad from the last ones for this business, and not the same design with another headline?
   plan: the first ad for L.A. Cholent; unlike the Chicken Munch ad (popping pieces, orange on navy) this is a still, warm candle-dark kitchen with steel and gold, their own colours.
 - [x] A9g.10 The gallery of one business looks varied at a glance: its designs do not share one colour or one layout, and each starts on its own product where there are several.
@@ -24,17 +24,17 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
 ## 2. The words
 
 - [x] A2.1 The headline is the biggest words on the ad and stops the scroll on its own; it is what the eye lands on first (squint test).
-  plan: LOW. in gold Anton capitals, about 400px, the biggest thing on the ad.
+  plan: YUMMMMM. in gold Anton capitals, 186px, the biggest thing on the ad.
 - [x] A2.2 At most about 8 words, never cut with a "…"; 2 to 6 is best. Rewrite, never shrink.
-  plan: 4 words: 'Set it to / LOW.'
+  plan: 5 words: 'Pour. Water. Low. / YUMMMMM.'
 - [x] A2.3 Says who it is for or where, plus what it is, most concrete fact first. Their situation, never a boast.
   plan: the foot says who and what (L.A. Cholent by Rabbi Samuels, raw cholent kit, Jerusalem, delivered across Israel).
 - [x] A2.4 Says it the way a person would, in the reader's words; from a real review when there is one.
-  plan: their own steps: 'add water', 'cook on low for about 20 hours'.
+  plan: their own label in three words (empty the kit into the slow cooker, add water, cook on low) and the word a person says when they taste it.
 - [x] A2.5 What it gets them, or the want behind it, not just the name again. A twisted known phrase or the reader's own world beats a description.
-  plan: the dial setting twisted into what it costs you: low effort.
+  plan: what it gets them: easy (three steps) and good (YUMMMMM). Tzvi, 10 Nov 2026: 'Set it to LOW' explained nothing the business gives.
 - [x] A2.6 Words a ten-year-old follows, one idea a sentence. No power words, no "even if", no made-up mechanism.
-  plan: four short words.
+  plan: one-word steps and one word of taste.
 - [x] A2.7 Copy rules: no long dash, no exclamation in the headline, no praise the listing never states.
   plan: checked by hand: no long dash, no exclamation, no praise.
 - [x] A2.8 Hebrew speaks in the plural (אתם), never to one man or one woman.
@@ -121,22 +121,22 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
 - [x] A9.1 Drawn and looked at on the real business, at phone size, beside the reference it came from.
   plan: drawn on L.A. Cholent with their own tubs photo, looked at at phone size beside medium.jpg and the pro sheet.
 - [x] A9.2 Would it stop you? Say what is surprising about it in one sentence; if nothing is, it goes back to stage 1.
-  plan: a slow cooker whose LOW setting is the headline, steam rising in front of the letters.
+  plan: the whole recipe in three words, then a stretched YUMMMMM behind the steaming pot.
 - [x] A9.3 The owner can change every word and the price stays right.
   plan: n/a: a hand-made status ad sent as a picture, not a maker design.
 - [x] A9.4 Cost read from the API before any generation, and the spend reported.
   plan: the API has no price lookup; the last measured price for this model was about 2 credits a picture. Three pictures made (the first had pale empty sides, Tzvi 10 Nov 2026; the second left no room for the words; a 4:5 request was refused and cost nothing), about 6 credits. Reported to Tzvi.
 - [x] A9.5 Never bland: before anyone sees it, the ad sits beside the pro ads at the same size (python scripts/ad_vs_pros.py, references in docs/inspo/pro-references). Five yes-or-no: the product is the hero, close and big (about half the width or more); one strong light or bold colour, not flat even light; something happens (a moment, motion, a surprise, an idea); the headline is part of the design, big, not a small line in a corner; it holds its own beside the pros. Any no: remade, not shown.
-  plan: docs/ads/la-cholent-vs-pros.jpg: the tubs fill most of the width, styled with challah, bones and candles, edge to edge; warm candle light on steel; steam rising; LOW. is the design; holds its own. All five yes.
+  plan: docs/ads/la-cholent-vs-pros.jpg: the tubs fill most of the width, styled with challah, bones and candles, edge to edge; warm candle light on steel; steam rising; YUMMMMM. is the design; holds its own. All five yes.
 - [x] A9.6 Every copy of the product the picture adds (pieces in the air, a second item, a stack, a pour) matches the real photo in shape, size, colour and coating, with nothing round it the real product would not make (crumbs, drops, glow). The prompt names those traits; the sheet from backend/.venv/Scripts/python scripts/product-match-sheet.py <picture> <real photo> <sheet.jpg> is looked at piece by piece. The answer names the sheet file, or n/a when no copies are added.
   plan: docs/ads/la-cholent-tubs-vs-real.jpg: no copies added, the four tubs of their photo, labels and kit compared beside medium.jpg; the props are not their product.
 
 ## 9. The pro look (Tzvi, 8 Nov 2026: "use the new things you learnt... make it a rule for all future ad builds")
 
 - [x] A11.1 One idea you get in a second: name the surprise, pun or visual question the picture asks; the words answer it. "A good photo with a headline" is not an idea.
-  plan: LOW is the slow cooker's setting and the effort.
+  plan: the recipe is three words long; the fourth is how it tastes.
 - [x] A11.2 Words and picture interlock: the headline or one huge word sits behind the subject with parts of the subject in front, or the subject sits inside the letters. Name how.
-  plan: LOW. behind the pot; the lid and knob in front of the letters, the steam in front of the W.
+  plan: YUMMMMM. behind the slow cooker, the lid's knob in front of the letters.
 - [x] A11.3 One colour world: the ground takes the product's own colour or its set's, with one accent; no stock yellow sticker or white button that belongs to no picture.
   plan: steel, gold and the cholent's brown on a candle-dark ground.
 - [x] A11.4 A frozen moment: something is happening (falling seeds, steam, a pour, a splash, motion). Name it, and keep it true to the product.
@@ -144,9 +144,9 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
 - [x] A11.5 Light that shapes: one strong side or back light, a fall to dark, real depth. Never flat even daylight on the hero.
   plan: warm low light from the left, a gold glow on the steel, falling to dark.
 - [x] A11.6 Three things carry the ad: the picture, the headline, the name. The link, code and price are small and quiet, and corners are left empty.
-  plan: picture, LOW., the name; link, QR and facts small at the foot.
+  plan: picture, YUMMMMM., the name; link, QR and facts small at the foot.
 - [x] A11.7 The headline is 2 to 5 spoken words, set big, in two voices where it helps (bold capitals with a lighter or script line).
-  plan: italic 'Set it to', then Anton 'LOW.'
+  plan: italic 'Pour. Water. Low.' then Anton 'YUMMMMM.'
 - [x] A11.8 The product is the hero: it fills about half the width or more, close, standing on its set like a product shoot, never pasted in front of one.
   plan: the pot and tubs fill about three quarters of the width, standing on the marble as shot.
 
