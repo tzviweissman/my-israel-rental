@@ -63,11 +63,11 @@ R3.12 pass: built to the blueprint: opening, the bento of services with price an
 R3c.1 pass: built to the blueprint: references in REFERENCES.md and CONCEPT.md with source links
 R3g.17 pass: built to the blueprint: each piece sourced in CONCEPT.md Effects from fresh 21st, Mobbin and Inspo searches
 R3g.19 n/a: a cleaning service, not a food or fashion shop
-R3c.2 pass: built to the blueprint: white and sky with navy, Secular One, a bento not three equal cards, one navy band
+R3c.2 pass: built to the blueprint: white and sky with navy, Fredoka, a bento not three equal cards, one navy band
 R3g.1 pass: built to the blueprint: CONCEPT.md style sheet
 R3g.3 pass: built to the blueprint: green only on the main button; prices in navy or white, bold and large
 R3g.7 n/a: no closing signature; the close band is plain
-R3g.11 pass: built to the blueprint: Secular One and Alef, both on the approved list
+R3g.11 pass: built to the blueprint: Fredoka and Alef, both on the approved list
 R3p.3 pass: built to the blueprint: check-fingerprints: different from all 17 other pages
 R3p.5 pass: built to the blueprint: the words wait on the soap and come back when the glass is clear
 R3q.1 pass: built to the blueprint: check-concept passes
@@ -112,6 +112,7 @@ R8.6 n/a: a service with no product to shoot
 R8.7 pass: built to the blueprint: gen/room-brief.md and gen/wipe-brief.md written before generating; no owner photo to compare with, only the flyer
 R8.2 n/a: one opening picture only, no set
 R3p.7 n/a: no item pictures
+R3p.8 n/a: the touch is on the soapy glass in the film, not on the buttons
 R3h.12 n/a: no products
 R3h.10 n/a: chips change the request sentence and price line, there are no option photos
 R3g.14 pass: built to the blueprint: one picture, so one grade
@@ -128,7 +129,7 @@ R3e.8 pass: built to the blueprint: readable passes on every page
 R3s.24 pass: built to the blueprint: pictures under 600 KB, every img with width and height, the film has its first frame as poster
 R3p.6 pass: built to the blueprint: fits passes at the six sizes; the opening picture is made in both shapes so nothing is zoomed
 R3o.5 pass: built to the blueprint: the ₪ sign set in Alef through kit.price
-R3x.7 pass: built to the blueprint: BRAND.md written before any picture: colours with uses, Secular One and Alef, the scale, logo on light and dark, bans
+R3x.7 pass: built to the blueprint: BRAND.md written before any picture: colours with uses, Fredoka and Alef, the scale, logo on light and dark, bans
 R3z.4 pass: built to the blueprint: no shade over the film or any photo; the opening words sit on a solid white card (3s.8), nothing darkens the picture
 R3z.7 n/a: the service cards have no pictures, only words and the price
 R3c.5 pass: built to the blueprint: every choice on the quote page is a chip; nothing marked popular
@@ -189,6 +190,7 @@ R3s.1 pass: built to the blueprint: every button and chip reacts within 100 ms
 R3s.8 pass: built to the blueprint: the opening button sits on the white edge shade
 R3s.10 n/a: nothing named with a picture
 R3s.27 pass: built to the blueprint: every service card and step card in the same order and style
+R3s.29 pass: built to the blueprint: buttons never wrap (white-space: nowrap); the quote steps say "Next: where and when", short enough at 360 px; check-same-button clean on all three pages
 R3s.28 pass: built to the blueprint: every stop of the opening shows the film or the room
 R3i.3 n/a: no live readout
 R3s.21 pass: built to the blueprint: site check passes: no errors, no dead links

@@ -21,7 +21,7 @@ head = css[:cut]
 head = re.sub(r'  --ground:.*?--line: #E5E5E5;',
               '  --ground: #FFFFFF; --surface: #EEF6FB; --ink: #0D2241; --soft: #4A5A6E; --accent: #27622A; --accent-ink: #FFFFFF; --line: #D6E4EE;\n  --sky: #6CC2E3; --leaf: #8FD18F;',
               head, flags=re.S)
-head = head.replace('--font-head: Georgia, serif; --font-body: system-ui, sans-serif;', "--font-head: 'Secular One', system-ui, sans-serif; --font-body: 'Alef', system-ui, sans-serif;")
+head = head.replace('--font-head: Georgia, serif; --font-body: system-ui, sans-serif;', "--font-head: 'Fredoka', system-ui, sans-serif; --font-body: 'Alef', system-ui, sans-serif;")
 head = head.replace('--r: 16px;', '--r: 14px;')
 head = head.replace('html { scroll-behavior: smooth; }', 'html { scroll-behavior: smooth; overflow-x: clip; } body { overflow-x: clip; }')
 own = open('gen/own.css', encoding='utf8').read()
@@ -36,7 +36,7 @@ SITE = kit.Site(
     name='RBS Cleaning', short='RBS Cleaning', slug='daniel',
     pages=[('index', 'Home'), ('book', 'Get a free quote'), ('contact', 'Contact')],
     contacts=[kit.Contact('whatsapp-only', '053-526-9002')],
-    fonts='family=Secular+One&family=Alef:wght@400;700',
+    fonts='family=Fredoka:wght@600;700&family=Alef:wght@400;700',
     cta=('book.html', 'Get a free quote'), bar=('₪400', 'Basic home clean'),
     place='Beit Shemesh', close_title='A clean home, streak-free windows.',
     mark_html=BROOM, count=False,
@@ -172,7 +172,7 @@ BOOK = SITE.page_head('Get a free quote', 'Choose what you need. Your request is
         <p class="pr"><b>Basic home clean {P(400)}</b>. Every other clean gets a free quote.</p>
         <p class="total" id="total-line">Basic home clean <b>{P(400)}</b></p>
         <p class="status" id="status" role="status" aria-live="polite"></p>
-        <button class="btn" id="send" type="submit"><span id="send-l">Continue to where and when</span></button>
+        <button class="btn" id="send" type="submit"><span id="send-l">Next: where and when</span></button>
         <button class="back" id="back" type="button" hidden>Back</button>
         <p class="note" id="send-note">Nothing to pay on this page.</p>
       </aside>

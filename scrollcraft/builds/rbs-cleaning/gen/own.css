@@ -57,6 +57,7 @@ h1, h2, h3 { font-weight: 400; letter-spacing: -.005em; }
 
 /* ---------- what we clean: the price on navy beside four services ---------- */
 section.sec.what { padding-block: var(--s6); }
+@media (max-height: 700px) and (min-width: 861px) { section.sec.what { padding-block: var(--s5); } }   /* fits a 650px-tall laptop with Fredoka (check-fits) */
 .what-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s2) var(--s6); margin-bottom: var(--s5); }
 .what-h .lede { margin: 0; }
 .bento { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); }
@@ -156,3 +157,5 @@ label.f { font-weight: 700; margin: var(--s5) 0 var(--s2); }
   .areas { padding-top: var(--s9); }
   .edge-card { transform: none; flex-wrap: wrap; width: 100%; padding: var(--s5); gap: var(--s3) var(--s5); }
 }
+
+.btn { white-space: nowrap; }   /* 3s.29: a button never breaks onto two lines */

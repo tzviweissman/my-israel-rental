@@ -12,7 +12,7 @@
 <meta property="og:image" content="https://myisraelrental.com/pages/daniel/assets/og.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Alef:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Alef:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site.css">
 </head>
 <body class="no-js" data-page="book">
@@ -60,7 +60,7 @@
         <p class="pr"><b>Basic home clean <span class="sym">₪</span>400</b>. Every other clean gets a free quote.</p>
         <p class="total" id="total-line">Basic home clean <b><span class="sym">₪</span>400</b></p>
         <p class="status" id="status" role="status" aria-live="polite"></p>
-        <button class="btn" id="send" type="submit"><span id="send-l">Continue to where and when</span></button>
+        <button class="btn" id="send" type="submit"><span id="send-l">Next: where and when</span></button>
         <button class="back" id="back" type="button" hidden>Back</button>
         <p class="note" id="send-note">Nothing to pay on this page.</p>
       </aside>
@@ -154,7 +154,7 @@
     $('w-sides').classList.toggle('on', k === 'windows');
     $('para').textContent = sentence() || 'Choose what you would like cleaned, and your request is written here.';
     $('total-line').innerHTML = k === 'basic' || !k ? 'Basic home clean <b>₪400</b>' : 'Your price: <b>a free quote</b>';
-    $('send-l').textContent = step === 1 ? 'Continue to where and when' : step === 2 ? 'Continue to your details' : (k === 'basic' ? 'Send the request, ₪400' : 'Send for a free quote');
+    $('send-l').textContent = step === 1 ? 'Next: where and when' : step === 2 ? 'Next: your details' : (k === 'basic' ? 'Send the request, ₪400' : 'Send for a free quote');
     $('send-note').textContent = step === 3 ? 'Opens WhatsApp with your request written out. Nothing to pay on this page.' : 'Nothing to pay on this page.';
     $('back').hidden = step === 1;
   }

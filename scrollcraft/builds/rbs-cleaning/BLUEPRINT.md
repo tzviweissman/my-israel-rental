@@ -74,6 +74,8 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: one opening picture only, no set
 - [x] R3p.7 Similar items are shown the same way: if one flavour's thumbnail is one jar, every flavour's is one jar; a list where pointing at an item changes a big photo does so for every item
   plan: n/a: no item pictures
+- [x] R3p.8 Optional: if the site's touch lives on its buttons, every button doing that job carries it in the same shape, small, moving only when pointed at or pressed, words still readable, reduced motion respected; n/a when the touch is elsewhere
+  plan: n/a: the touch is on the soapy glass in the film, not on the buttons
 - [x] R3h.12 One look per product everywhere: film frame, close-up, picker, tile, card and order form show the same object, cut or edited from one master; a name with unknown look gets no picture
   plan: n/a: no products
 - [x] R3h.10 Choosing an option changes its picture, words and button; one photo per option, from one shoot, sharp at the size shown (check: motion)
@@ -107,7 +109,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3o.5 Every special character (₪, arrows, Hebrew, dots) renders in the font used for it (check: site)
   plan: the ₪ sign set in Alef through kit.price
 - [x] R3x.7 BRAND.md in the build folder (colours with their uses, two fonts, logo on light and dark, textures, Design bans) was written before any picture was generated, and the site uses it
-  plan: BRAND.md written before any picture: colours with uses, Secular One and Alef, the scale, logo on light and dark, bans
+  plan: BRAND.md written before any picture: colours with uses, Fredoka and Alef, the scale, logo on light and dark, bans
 - [x] R3z.4 No dark layer or gradient over a whole photo or film; a shade only behind the words where measured contrast needs it
   plan: no shade over the film or any photo; the opening words sit on a solid white card (3s.8), nothing darkens the picture
 - [x] R3z.7 Card pictures generated without owner photos were made as one set from a saved screenshot of a real site's grid (path in docs/inspo), each tile checked as R8.1
@@ -191,7 +193,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3g.19 Shops (food-shop, fashion-shop): the main buttons are in the product's own colour, taken from its photo (meta product-colour with data-from, in BRAND.md), text 4.5:1 on it, and each button stands out 3:1 from what is behind it; n/a for other categories (check: check-button-colour)
   plan: n/a: a cleaning service, not a food or fashion shop
 - [x] R3c.2 No AI default look: not cream + serif + one italic word (unless their brand), no default font, purple or two-colour gradient, exactly three identical cards, frosted glass used everywhere, default "premium" palette; at least one section on a contrasting ground
-  plan: white and sky with navy, Secular One, a bento not three equal cards, one navy band
+  plan: white and sky with navy, Fredoka, a bento not three equal cards, one navy band
 - [x] R3g.1 A style sheet exists in CONCEPT.md before building (accent, ink, ground, two faces plus at most a third for one label style, one radius, motion limits) and every section follows it
   plan: CONCEPT.md style sheet
 - [x] R3g.3 The accent colour is used for the main button only; prices and everything else are in the main text colour, prices bold and large; at most one emphasised word per screen, set apart by weight or style in the text colour
@@ -199,7 +201,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3g.7 At most one closing signature (giant cropped name, or one playful moment in the footer/404), never in the way of the order path
   plan: n/a: no closing signature; the close band is plain
 - [x] R3g.11 Fonts come from the approved Latin + Hebrew list, licence checked
-  plan: Secular One and Alef, both on the approved list
+  plan: Fredoka and Alef, both on the approved list
 - [x] R3p.3 Not alike: no heading face shared with another site, no shared body face plus script, no two brand colours alike, design different on at least 4 of 6, effects overlap at most 2 points (check: prints)
   plan: check-fingerprints: different from all 17 other pages
 - [x] R3p.5 One small touch only this business would have, from their product, tagline or craft (check: concept)
@@ -422,6 +424,8 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: nothing named with a picture
 - [x] R3s.27 Same thing, same place: a repeated kind of thing (each size, step, card, slide, scroll state) is written in the same place and style every time, and a growing block hangs from a fixed top so its heading never moves
   plan: every service card and step card in the same order and style
+- [x] R3s.29 Same button, same shape: no button's words break onto a second line at any size, and a repeated button (each card's) is the same height every time; the text beside it gives way, never the button (check: check-same-button)
+  plan: buttons never wrap (white-space: nowrap); the quote steps say "Next: where and when", short enough at 360 px; check-same-button clean on all three pages
 - [x] R3s.28 No blank screen anywhere in the scroll: at every stop something is there to look at (words, a picture, the film), never a screen of plain ground (check: check-blank)
   plan: every stop of the opening shows the film or the room
 - [x] R3i.3 A live readout tied to the scroll shows only a true fact of their process, small mono at a corner, never a made-up number

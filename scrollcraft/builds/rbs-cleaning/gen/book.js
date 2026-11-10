@@ -54,7 +54,7 @@
     $('w-sides').classList.toggle('on', k === 'windows');
     $('para').textContent = sentence() || 'Choose what you would like cleaned, and your request is written here.';
     $('total-line').innerHTML = k === 'basic' || !k ? 'Basic home clean <b>₪400</b>' : 'Your price: <b>a free quote</b>';
-    $('send-l').textContent = step === 1 ? 'Continue to where and when' : step === 2 ? 'Continue to your details' : (k === 'basic' ? 'Send the request, ₪400' : 'Send for a free quote');
+    $('send-l').textContent = step === 1 ? 'Next: where and when' : step === 2 ? 'Next: your details' : (k === 'basic' ? 'Send the request, ₪400' : 'Send for a free quote');
     $('send-note').textContent = step === 3 ? 'Opens WhatsApp with your request written out. Nothing to pay on this page.' : 'Nothing to pay on this page.';
     $('back').hidden = step === 1;
   }

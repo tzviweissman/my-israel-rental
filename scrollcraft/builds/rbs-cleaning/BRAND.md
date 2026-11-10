@@ -22,7 +22,7 @@ white, pale sky and navy, as the flyer is.
 
 ## Fonts
 
-- Headings and the name: Secular One (400; Latin and Hebrew, SIL OFL), heavy and plain like the RBS wordmark.
+- Headings and the name: Fredoka (600 and 700; Latin and Hebrew, SIL OFL), heavy and rounded like the RBS wordmark. It replaced Secular One on 10 Nov 2026, when The Finest Cut went live with Secular One first.
 - Body, labels, buttons and prices: Alef (400 and 700; Latin and Hebrew, SIL OFL).
 - Two families only (3x.8). The ₪ sign is set in Alef (kit.price).
 
@@ -35,7 +35,7 @@ Every gap is one of --s1 4px to --s10 128px.
 
 ## Logo
 
-- On light: the word "RBS" in Secular One in the RBS green, then "Cleaning" in Secular One in navy, with
+- On light: the word "RBS" in Fredoka in the RBS green, then "Cleaning" in Fredoka in navy, with
   the broom mark drawn as a single-line icon in navy (no file was uploaded; the flyer's logo is part of a
   generated poster with text baked in, so it is not cropped).
 - On dark (footer, navy): "RBS" in #8FD18F (light green, 8.6:1 on navy) and "Cleaning" in white.
