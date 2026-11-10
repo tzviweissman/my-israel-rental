@@ -73,7 +73,10 @@ for (const { label: slug, url, sub } of targets) {
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
     try {
-      const res = await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 });
+      // load, then networkidle where it comes: Chrome pauses a big film's download once it has buffered,
+      // so a page with a long video never goes idle (Finest Cuts, 24 MB film, 9 Nov 2026)
+      const res = await page.goto(url, { waitUntil: 'load', timeout: 45000 });
+      await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
       if (res && res.status() >= 400) throw new Error(`answered ${res.status()}`);
       // A page missing from the build is answered by the app (200), which then
       // reloads into the business's home, so the title looks right. The first
