@@ -28,6 +28,7 @@ R3s.19 pass: built to the blueprint: same promise and the same room picture on t
 R6.1 pass: built to the blueprint: personal care playbook: the service with price and duration first, hours, then how to book
 R4.1 pass: built to the blueprint: what is missing (photos, FAQ, reviews, guarantee, travel fee) is listed in OWNER-QUESTIONS.md and left off
 R3g.13 pass: built to the blueprint: the picture, her logo large above the words (her ask, 7 Nov 2026; hidden on short phones), Get ready to glow (four words), one short line with where she is, one button; check-says-offer
+R3g.18 pass: built to the blueprint: each different kind of offer in <meta name="offers">; with two or more, the headline names each and the one button opens a page where they choose
 R3b.1 pass: built to the blueprint: what: makeup; where: Jerusalem; trust: price and lashes under the button; next: Book
 R3b.2 n/a: no certificate in the record, so nothing on the page says kosher
 R3b.3 pass: built to the blueprint: one solid button in the opening; the bar's Book is outline; the phone bar repeats it
@@ -59,6 +60,7 @@ R3x.5 n/a: not a following light and not a dark world; the bulbs are a fixed par
 R3.12 pass: built to the blueprint: hero (the room), features (Makeup with price and what is included), a closing band with Book and contact
 R3c.1 pass: built to the blueprint: kept with links in CONCEPT.md; picked the lit mirror because it says makeup artist with no words
 R3g.17 pass: built to the blueprint: pieces came from fresh searches named in CONCEPT.md Effects and REFERENCES.md; nothing from the last two pages
+R3g.19 n/a: a makeup artist, not a food or fashion shop
 R3c.2 pass: built to the blueprint: not the default look: her own logo pink, Bellefair, a dark plum band as contrast; no gradients between two colours, no glass
 R3g.1 pass: built to the blueprint: style sheet in CONCEPT.md, followed by site.css
 R3g.3 pass: built to the blueprint: rose only on the main button; prices in ink, large
@@ -215,6 +217,7 @@ R3w.3 n/a: not food
 R3w.4 n/a: no film; the opening is a still with light drawn over it in code (mirror.js), no generated clip
 R3w.5 n/a: not food
 R3w.6 n/a: no film; the opening is a still with light drawn over it in code (mirror.js), no generated clip
+R3w.7 pass: built to the blueprint: the generated room (assets/room-wide.webp and room-tall.webp, a plain wall, a table, the mirror) was looked at full size beside a real photograph of makeup on a table, named in the Looks real section of gen/mirror-brief.md: side light that falls off from the bulbs onto the wall and table, a speckled table, warm reflections in the metal, no flat light; only the bristles are cleaner than real ones. No clip is made from it
 R3v.1 pass: built to the blueprint: who: Hadassah Prys, "Your beauty, just elevated" · Pages · Ordering: Cash, PayPal, BACS · Reach us · base line, since 2021
 R3v.2 pass: built to the blueprint: Home, Book, Contact on every page; check-menu
 R3v.6 pass: built to the blueprint: check-heights passes: band, tall service, short hours, list
@@ -225,5 +228,3 @@ R3x.8 pass: built to the blueprint: sitekit writes the skip link, live basket co
 R3x.13 pass: built to the blueprint: every text size from the starter scale --t-1..--t5 and every gap from --s1..--s10, written into BRAND.md; nothing sized in between
 R3r.3 pass: built to the blueprint: check-build passed on every page after the last edit
 R3r.4 n/a: Tzvi has not had to point anything out twice on this site
-R3g.18 pass: one kind of offer, <meta name="offers" content="makeup">; check-says-offer passed (8 Nov 2026); the first screen is a makeup mirror lighting up under "Get ready to glow", so a stranger can tell it is makeup
-R3g.19 n/a: site-category is beauty, not a shop; the rule covers food-shop and fashion-shop only

@@ -27,3 +27,7 @@ Price asked first through get_cost: nano_banana_2 at 2k is 2 credits per image. 
 
 ## Compared after generating
 The room still has bulbs lit already, which the prompt asked against; kept, because a lit room is the end state, and the off state is made from the same pixels. Brush on the table and `gen/mirror/brush-0.png` compared beside `gen/brush-crop.jpg`: rose bristles darker at the tip, copper band, pale pink handle, same object in kind; the flyer's powder is left out on purpose. No person or words in the glass.
+
+## Looks real (rule 3w.15, checked 10 Nov 2026)
+Real photograph: https://commons.wikimedia.org/wiki/File:Makeup,_mirror,_watch_and_purse_on_the_table.jpg (makeup and a brush on a pale table in window light).
+Compared with `assets/room-wide.webp` at full size (table and brush crop): both have soft side light that falls off across the surface, not flat light; our table has fine speckle like a real laminate or stone top; the copper stand and band show warm, uneven reflections; the wall darkens away from the bulbs. The real brush shows wear and uneven tips; ours is cleaner, which reads as a new brush in a product photo, not as a model. Kept. No clip is made from this still.

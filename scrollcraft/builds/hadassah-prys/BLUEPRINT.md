@@ -113,6 +113,8 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 
 - [x] R3g.13 The first screen holds a picture, a headline of 2 to 5 words that says what the customer gets, at most one short line (where the business is: the line or the small label, not both; trust goes there or right under the button) and one button; the header does not count
   plan: the picture, her logo large above the words (her ask, 7 Nov 2026; hidden on short phones), Get ready to glow (four words), one short line with where she is, one button; check-says-offer
+- [x] R3g.18 The first screen shows what the business offers before any scroll: one kind may be shown by the picture or the words; two or more different kinds are each named in the headline or big words; the home page lists them in <meta name="offers"> (check: check-says-offer)
+  plan: each different kind of offer in <meta name="offers">; with two or more, the headline names each and the one button opens a page where they choose
 - [x] R3b.1 The first screen answers: what it is, where, why trust it, what to do next
   plan: what: makeup; where: Jerusalem; trust: price and lashes under the button; next: Book
 - [x] R3b.2 Proof (price, credential or rating) touches the main button; for food a kosher band sits just after the opening, not crowding the button, and the certificate is stated at most twice as a sentence or band (a small identical kosher tag on items does not count)
@@ -178,6 +180,8 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: kept with links in CONCEPT.md; picked the lit mirror because it says makeup artist with no words
 - [x] R3g.17 Every piece (button, arrow, each card or list effect, each section) came from a fresh Mobbin, 21st and Inspo search for this business, with the source named; nothing reused from the last two pages; each effect has a reason (says what a control does) (check: concept)
   plan: pieces came from fresh searches named in CONCEPT.md Effects and REFERENCES.md; nothing from the last two pages
+- [x] R3g.19 Shops (food-shop, fashion-shop): the main buttons are in the product's own colour, taken from its photo (meta product-colour with data-from, in BRAND.md), text 4.5:1 on it, and each button stands out 3:1 from what is behind it; n/a for other categories (check: check-button-colour)
+  plan: n/a: a makeup artist, not a food or fashion shop
 - [x] R3c.2 No AI default look: not cream + serif + one italic word (unless their brand), no default font, purple or two-colour gradient, exactly three identical cards, frosted glass used everywhere, default "premium" palette; at least one section on a contrasting ground
   plan: not the default look: her own logo pink, Bellefair, a dark plum band as contrast; no gradients between two colours, no glass
 - [x] R3g.1 A style sheet exists in CONCEPT.md before building (accent, ink, ground, two faces plus at most a third for one label style, one radius, motion limits) and every section follows it
@@ -480,6 +484,8 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: not food
 - [x] R3w.6 A scroll film's scrub ends where the clip's motion ends (check-clip's figure), the last hold is short, and its last frame is the picture the next section shows
   plan: n/a: no film; the opening is a still with light drawn over it in code (mirror.js), no generated clip
+- [x] R3w.7 Generated places and materials look photographed: no dune-smooth hills, model villages, stones in tidy equal rows or flat soft light, checked at full size beside a real photograph of that place or material before any clip
+  plan: the generated room (assets/room-wide.webp and room-tall.webp, a plain wall, a table, the mirror) was looked at full size beside a real photograph of makeup on a table, named in the Looks real section of gen/mirror-brief.md: side light that falls off from the bulbs onto the wall and table, a speckled table, warm reflections in the metal, no flat light; only the bristles are cleaner than real ones. No clip is made from it
 
 ## Stage 11. Finish
 
