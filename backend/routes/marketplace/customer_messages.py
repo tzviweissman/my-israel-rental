@@ -184,7 +184,9 @@ async def preview(business_id: str, aud: Audience, user=Depends(verify_token)):
 # itself in square brackets. Nothing is sent while one is left.
 # Only our own template gaps ("[Your opening hours over the holiday.]", "[שעות הפתיחה שלכם בחג.]"): any
 # bracket used to block sending, so an owner's real "[VIP]" or "[sale]" could not go out (21 Oct audit).
-_UNFILLED = re.compile(r"\[(?:Your |[^\]\n]*שלכם)[^\]\n]*\]")
+# The holiday and "been a while" gaps open with "What"/"An offer" (מה/הטבה), not "Your": they went out unchecked
+# until the 10 Nov code review (test_occasions.test_unfilled_brackets had been failing since 5 Nov).
+_UNFILLED = re.compile(r"\[(?:Your |What you offer |What is new|An offer for coming back|מה חדש|מה אתם מציעים|הטבה לחוזרים|[^\]\n]*שלכם)[^\]\n]*\]")
 
 
 class MessageIn(BaseModel):
