@@ -12,6 +12,7 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { writeMeasured } from './ad-measured.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
@@ -74,6 +75,7 @@ let lang = 'en';
 const LONG_NAME = 'the-very-long-business-name';
 await p.route('**/api/ads/make', (r) => { const f = fixture(lang); r.fulfill({ json: { ...f, link: { ...f.link, path: `/p/${LONG_NAME}` } } }); });
 await p.route('**/api/ads/cutouts', (r) => r.fulfill({ json: { items: fixture('en').cutouts } }));
+await p.route('**/api/ads/shots**', (r) => r.fulfill({ json: { shots: fixture('en').shots, left_today: 5 } }));
 await p.route('**/api/ads/saved**', (r) => (r.request().method() === 'GET' ? r.fulfill({ json: { ads: [] } }) : r.fulfill({ json: { id: 'x' } })));
 
 const fails = [];
@@ -315,7 +317,15 @@ const MOVING = async (qrBox) => {
   // the first frame shows more than a flat ground: squares that differ from the corner's colour
   let busy = 0;
   for (let i = 0; i < first.length; i += 4) if (Math.abs(first[i] - first[0]) + Math.abs(first[i + 1] - first[1]) + Math.abs(first[i + 2] - first[2]) > 30) busy += 1;
-  return { dur, w: v.videoWidth, h: v.videoHeight, end: diff(last, read(still)), busy: busy / 4096, moved: diff(middle, last), hold: diff(settled, last), qr: region(qrEarly, last), canvasW: still.width, canvasH: still.height };
+  // When the last frame and the still differ, both are kept as pictures so the difference can be seen, not guessed.
+  const end = diff(last, read(still));
+  let pics = null;
+  if (end > 3) {
+    const big = (src) => { const b = document.createElement('canvas'); b.width = 540; b.height = Math.round(540 * still.height / still.width); b.getContext('2d').drawImage(src, 0, 0, b.width, b.height); return b.toDataURL('image/png'); };
+    await new Promise((r) => { v.onseeked = r; v.currentTime = dur - 0.05; });
+    pics = { last: big(v), still: big(still) };
+  }
+  return { pics, dur, w: v.videoWidth, h: v.videoHeight, end, busy: busy / 4096, moved: diff(middle, last), hold: diff(settled, last), qr: region(qrEarly, last), canvasW: still.width, canvasH: still.height };
 };
 // In real Chrome, its own window: the moving ads need H.264, which the test browser does not have.
 {
@@ -328,7 +338,9 @@ const MOVING = async (qrBox) => {
   lang = 'en';
   await p.route('**/api/ads/make', (r) => { const f = fixture('en'); r.fulfill({ json: { ...f, link: { ...f.link, path: `/p/${LONG_NAME}` } } }); });
   await p.route('**/api/ads/cutouts', (r) => r.fulfill({ json: { items: fixture('en').cutouts } }));
+  await p.route('**/api/ads/shots**', (r) => r.fulfill({ json: { shots: fixture('en').shots, left_today: 5 } }));
   await p.route('**/api/ads/saved**', (r) => (r.request().method() === 'GET' ? r.fulfill({ json: { ads: [] } }) : r.fulfill({ json: { id: 'x' } })));
+  // The maker lives on the Advertising page since 6 Nov 2026.
   await p.goto(`${SITE}/dashboard?tab=advertising&as=owner`, { timeout: 180000 });
   await p.locator('[data-testid="ad-gallery"]').waitFor();
   await p.locator('[data-testid="ad-en"]').click();
@@ -345,7 +357,8 @@ const MOVING = async (qrBox) => {
     await p.locator(`[data-testid="ad-g-${k}"]`).click();
     await p.waitForTimeout(900);
     await p.locator('[data-testid="ad-video"]').click();
-    await p.locator('[data-testid="ad-video-preview"]').waitFor({ timeout: 300000 }); // made in the browser: over two minutes on a busy machine
+    // Each frame is drawn in full: about half a minute a video on this machine.
+    await p.locator('[data-testid="ad-video-preview"]').waitFor({ timeout: 300000 }).catch(() => { throw new Error(`moving ${k} ${f}: no video after 5 minutes`); });
     await p.waitForFunction(() => document.querySelector('[data-testid="ad-video-preview"]').readyState >= 2);
     const qrBox = await p.evaluate(() => {
       const c = document.querySelector('[data-testid="ad-preview"]').getBoundingClientRect();
@@ -356,7 +369,11 @@ const MOVING = async (qrBox) => {
     const where = `moving ${k} ${f}`;
     if (m.w !== m.canvasW || m.h !== m.canvasH) fails.push(`${where}: ${m.w}x${m.h}, the still is ${m.canvasW}x${m.canvasH}`);
     if (m.dur < 6 || m.dur > 7) fails.push(`${where}: ${m.dur.toFixed(1)} seconds`);
-    if (m.end > 3) fails.push(`${where}: the last frame is not the still (off by ${m.end.toFixed(1)})`);
+    if (m.end > 3) {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ad-moving-'));
+      for (const [n, u] of Object.entries(m.pics || {})) fs.writeFileSync(path.join(dir, `${k}-${f}-${n}.png`), Buffer.from(u.split(',')[1], 'base64'));
+      fails.push(`${where}: the last frame is not the still (off by ${m.end.toFixed(1)}; both pictures in ${dir})`);
+    }
     if (m.busy < 0.04) fails.push(`${where}: the first frame is an empty ground (${(m.busy * 100).toFixed(0)}% has anything on it)`);
     if (m.moved < 0.4) fails.push(`${where}: it hardly moves (${m.moved.toFixed(2)})`);
     if (m.hold > 3) fails.push(`${where}: still moving after 4.75 seconds (${m.hold.toFixed(1)})`);
@@ -381,10 +398,15 @@ await p.locator('[data-testid="ad-piece-qr"]').waitFor();
 await p.locator('[data-testid="advertising-url"]').waitFor();
 if (await p.locator('[role="dialog"]').count()) fails.push('advertising page: the maker should be on the page, not in a pop-up');
 // The preview stays in view while the options are scrolled (Tzvi, 5 Nov 2026).
+// To a point inside the options, measured once the page has settled: scrolling relative to a page still loading
+// above the maker overshot the end of the options on some runs (9 Nov 2026) and failed a preview that holds.
+await p.waitForTimeout(1500);
 await p.evaluate(async () => {
   const c = document.querySelector('[data-testid="ad-preview-column"]');
-  window.scrollBy(0, c.getBoundingClientRect().top + 300);
-  await new Promise((r) => { setTimeout(r, 200); });
+  const box = c.parentElement.getBoundingClientRect();
+  const top = box.top + scrollY;
+  window.scrollTo(0, top + Math.max(0, Math.min(300, box.height - c.offsetHeight - 120)));
+  await new Promise((r) => { setTimeout(r, 400); });
 });
 const held = await p.locator('[data-testid="ad-preview"]').evaluate((c) => { const r = c.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight ? '' : `top ${Math.round(r.top)}, bottom ${Math.round(r.bottom)} of ${innerHeight}, scrolled ${Math.round(scrollY)}`; });
 if (held) fails.push(`advertising page: the preview left the screen while scrolling the options (${held})`);

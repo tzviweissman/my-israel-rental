@@ -698,6 +698,10 @@ Return ONE JSON object:
             product: the thing itself, from the listing ("MEAT", "PIZZA",
             "CLEAN", "SUITE"; in Hebrew "בשר", "פיצה"). In the ad's
             language; capitals in English.
+  lead      2 to 5 words that come just before big_word and make one short
+            line with it, the way a person would say it: "Bring the" + "MEAT",
+            "Missing real American" + "BAGELS?", "Sunday morning" + "COFFEE".
+            Only what the listing supports; no praise words.
   caller    2 or 3 words for a phone screen that says "<caller> is
             calling...": what the reader gets, plainly ("Dinner", "A clean
             home", "Your weekend"). No brand name, no claim.
@@ -950,6 +954,72 @@ async def ad_cutouts(body: CutoutsIn, request: Request, user=Depends(verify_toke
     return {"items": await cutouts_for(items[:3])}
 
 
+# Product photos (utils/ad_shots.py): one of the owner's own products photographed by an image model on a set
+# that fits the business or the holiday. Paid, so capped per business per day and every picture is kept.
+class ShotIn(BaseModel):
+    target_type: str
+    target_id: str
+    item: str
+    shape: str = "feed"
+    kind: str = ""
+    occasion: str = ""
+
+
+def _shot_row(r: dict[str, Any]) -> dict[str, Any]:
+    return {k: r.get(k) for k in ("id", "item", "shape", "kind", "occasion", "status", "url", "cut_url", "word", "dark")}
+
+
+@router.get("/ads/shots")
+async def ad_shots(target_type: str, target_id: str, user=Depends(verify_token)):
+    await _assert_owns_target(target_type, target_id, user)
+    rows = await db.ad_shots.find({"target_id": target_id}, {"_id": 0}).sort("created_at", -1).to_list(60)
+    # A server update while a picture was being made leaves it "making" for ever: after ten minutes it failed.
+    stale = (datetime.now(UTC) - timedelta(minutes=10)).isoformat()
+    for r in rows:
+        if r.get("status") == "making" and r.get("created_at", "") < stale:
+            r["status"] = "failed"
+            await db.ad_shots.update_one({"id": r["id"]}, {"$set": {"status": "failed"}})
+    from utils.ad_shots import SHOTS_PER_DAY, recent_count
+    return {"shots": [_shot_row(r) for r in rows if r.get("status") != "failed"],
+            "left_today": max(0, SHOTS_PER_DAY - recent_count(rows, datetime.now(UTC)))}
+
+
+@router.post("/ads/shots")
+async def make_ad_shot(body: ShotIn, request: Request, user=Depends(verify_token)):
+    import asyncio
+    import uuid
+
+    from utils.ad_shots import ASPECT, KINDS, OCCASIONS, SHOTS_PER_DAY, guess_kind, look_for, prompt_for, recent_count, run_shot
+    if body.target_type != "business" or body.shape not in ASPECT:
+        raise HTTPException(status_code=400, detail="Product photos are for a business's own products.")
+    await _assert_owns_target(body.target_type, body.target_id, user)
+    occasion = body.occasion if body.occasion in OCCASIONS else ""
+    facts, extra = await _ad_facts(body.target_type, body.target_id)
+    kind = body.kind if body.kind in KINDS else guess_kind(" ".join(
+        [str(facts.get("business_name") or ""), str(facts.get("description") or ""), body.item]
+        + [f"{o.get('title', '')} {' '.join(str(i) for i in o.get('items') or [])}" for o in facts.get("offers") or []]))
+    key = {"target_id": body.target_id, "item": body.item[:40], "shape": body.shape, "kind": kind, "occasion": occasion}
+    have = await db.ad_shots.find_one({**key, "status": {"$in": ["ready", "making"]}}, {"_id": 0})
+    if have:
+        return _shot_row(have)
+    rows = await db.ad_shots.find({"target_id": body.target_id}, {"_id": 0, "created_at": 1, "status": 1}).to_list(200)
+    now = datetime.now(UTC)
+    if recent_count(rows, now) >= SHOTS_PER_DAY:
+        raise HTTPException(status_code=429, detail=f"{SHOTS_PER_DAY} product photos a day. More tomorrow.")
+    check_rate(request, bucket=f"ad_shots:{user['user_id']}", limit=SHOTS_PER_DAY * 2, window_seconds=86400)
+    # The photo comes from the business's own listing, never from the request: an ad only shows what they sell.
+    item = next((i for i in extra["items"] if i["name"] == body.item[:40]), None)
+    if not item:
+        raise HTTPException(status_code=404, detail="That product has no photo.")
+    look = look_for(kind, occasion)
+    what = f"{item['name']}, from {facts.get('business_name') or 'a local business'}"
+    row = {**key, "id": str(uuid.uuid4()), "status": "making", "by": user["user_id"], "created_at": now.isoformat(),
+           "photo": item["photo"], "word": look["word"], "dark": bool(look["dark"])}
+    await db.ad_shots.insert_one(dict(row))
+    asyncio.create_task(run_shot(row["id"], item["photo"], prompt_for(what, kind, occasion, body.shape), body.shape, look["set"]))
+    return _shot_row(row)
+
+
 # Saved ads (Canva's "your designs"): the owner's choices and words, so an
 # ad reopens as they left it and the dashboard can say which products have
 # no ad yet. The picture itself is redrawn from these; only a small preview
@@ -1157,7 +1227,7 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
         # The copy rules ban the long dash; the model reaches for it anyway.
         return re.sub(r"\s*[–—]\s*", ", ", str(v or "")).strip()[:n]
 
-    extra_words = {k: clean(data.get(k), n) for k, n in (("big_word", 12), ("caller", 24), ("decline", 16),
+    extra_words = {k: clean(data.get(k), n) for k, n in (("big_word", 12), ("lead", 32), ("caller", 24), ("decline", 16),
                                                     ("search", 60), ("switches", 120), ("checklist", 150),
                                                     ("situations", 300), ("mirror", 170),
                                                     ("post", 160), ("versus", 240), ("reasons", 220),

@@ -636,3 +636,19 @@ its own beside the pros. Step A9.5 in docs/ad-rules-checklist.md.
 get in a second; words and picture interlocked; one colour world; a frozen moment; light that shapes; three things
 carry the ad; a short headline in two voices; the product as the hero, standing on its set. Planned in the
 blueprint before building, checked on the ad-vs-pros sheet (A9.5) before anyone sees it.
+
+## Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
+
+"He just might not like that the poppers look a little off, the ones in the air." Chicken Munch's status ad had his
+real bowl of Hot Poppers right, but the four pieces the model added leaping out of it were square, lighter, glowing
+at the edges and surrounded by dry crumbs his glazed poppers never shed. Only the bowl had been compared with his
+photo; the added pieces were never looked at up close. So any generated picture that adds copies of the product
+(pieces in the air, a second item, a stack, a pour) gets a sheet from scripts/product-match-sheet.py: each separate
+piece cropped at full size over his real photo at the same scale, and each one must match in shape, size, colour and
+coating, with nothing round it that the real product would not make (crumbs, drops, steam, sparks). The prompt says
+so first: every added piece is a copy of the ones in the real photo, named by its own traits, and the light falls on
+them from the front like the real photo's. Step A9.6 in docs/ad-rules-checklist.md; its answer names the sheet, or
+"n/a" when the picture adds no copies.
+
+Ad picture prompts start from the closest proven one in `docs/prompts/README.md` (Tzvi, 10 Nov 2026: right the
+first time); a prompt whose picture is used goes in there with its number of takes.

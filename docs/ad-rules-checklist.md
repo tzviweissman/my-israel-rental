@@ -19,7 +19,8 @@ stage until the stage before it is answered.
   first. A rule added after a design shipped does not block that design (designs listed under "Made before the
   blueprint" in `scripts/ad-blueprint.mjs`), but the `auto` lines still measure it.
 
-Line format: `id | rule | where it comes from | auto:<measure>` or `decide`. `auto` lines are measured by
+Line format: `id | rule | where it comes from | auto:<measure>` or `decide`, optionally followed by `since:<date>`: a
+blueprint written before that date has no such line and is not held to it (new-rules-spare-made-sites). `auto` lines are measured by
 `check-ad-designs`, on every design, shape and language. `decide` lines get a written answer for this ad.
 
 ## 1. The idea
@@ -93,6 +94,7 @@ A9.2 | Would it stop you? Say what is surprising about it in one sentence; if no
 A9.3 | The owner can change every word and the price stays right. | intro, 6 | decide
 A9.4 | Cost read from the API before any generation, and the spend reported. | CLAUDE.md | decide
 A9.5 | Never bland: before anyone sees it, the ad sits beside the pro ads at the same size (python scripts/ad_vs_pros.py, references in docs/inspo/pro-references). Five yes-or-no: the product is the hero, close and big (about half the width or more); one strong light or bold colour, not flat even light; something happens (a moment, motion, a surprise, an idea); the headline is part of the design, big, not a small line in a corner; it holds its own beside the pros. Any no: remade, not shown. | Tzvi 8 Nov | decide
+A9.6 | Every copy of the product the picture adds (pieces in the air, a second item, a stack, a pour) matches the real photo in shape, size, colour and coating, with nothing round it the real product would not make (crumbs, drops, glow). The prompt names those traits; the sheet from backend/.venv/Scripts/python scripts/product-match-sheet.py <picture> <real photo> <sheet.jpg> is looked at piece by piece. The answer names the sheet file, or n/a when no copies are added. | Tzvi 9 Nov | decide since:2026-11-09
 
 ## 9. The pro look (Tzvi, 8 Nov 2026: "use the new things you learnt... make it a rule for all future ad builds")
 

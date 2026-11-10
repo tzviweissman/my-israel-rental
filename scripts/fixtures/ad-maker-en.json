@@ -259,5 +259,81 @@
    "key": "board"
   }
  ],
- "headline_key": "Meat"
+ "headline_key": "Meat",
+ "scene": "grill",
+ "lead": "Bring the",
+ "shots": [
+  {
+   "id": "s-square-day",
+   "item": "mini board",
+   "shape": "square",
+   "kind": "bakery",
+   "occasion": "",
+   "status": "ready",
+   "url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794166861/myisraelrental/ad-shots/8ff12ee5f7bf415d8fb97a58e2a87ece.jpg",
+   "cut_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794166884/myisraelrental/ad-shots/bc7871ffbbac4c71a8ebd0e4279c0a71.png",
+   "word": "#8A3B12",
+   "dark": false
+  },
+  {
+   "id": "s-square-chanukah",
+   "item": "mini board",
+   "shape": "square",
+   "kind": "bakery",
+   "occasion": "chanukah",
+   "status": "ready",
+   "url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794166861/myisraelrental/ad-shots/8ff12ee5f7bf415d8fb97a58e2a87ece.jpg",
+   "cut_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794166884/myisraelrental/ad-shots/bc7871ffbbac4c71a8ebd0e4279c0a71.png",
+   "word": "#8A3B12",
+   "dark": false
+  },
+  {
+   "id": "s-feed-day",
+   "item": "mini board",
+   "shape": "feed",
+   "kind": "bakery",
+   "occasion": "",
+   "status": "ready",
+   "url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794166861/myisraelrental/ad-shots/8ff12ee5f7bf415d8fb97a58e2a87ece.jpg",
+   "cut_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794166884/myisraelrental/ad-shots/bc7871ffbbac4c71a8ebd0e4279c0a71.png",
+   "word": "#8A3B12",
+   "dark": false
+  },
+  {
+   "id": "s-feed-chanukah",
+   "item": "mini board",
+   "shape": "feed",
+   "kind": "bakery",
+   "occasion": "chanukah",
+   "status": "ready",
+   "url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794166861/myisraelrental/ad-shots/8ff12ee5f7bf415d8fb97a58e2a87ece.jpg",
+   "cut_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794166884/myisraelrental/ad-shots/bc7871ffbbac4c71a8ebd0e4279c0a71.png",
+   "word": "#8A3B12",
+   "dark": false
+  },
+  {
+   "id": "s-story-day",
+   "item": "mini board",
+   "shape": "story",
+   "kind": "bakery",
+   "occasion": "",
+   "status": "ready",
+   "url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794166861/myisraelrental/ad-shots/8ff12ee5f7bf415d8fb97a58e2a87ece.jpg",
+   "cut_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794166884/myisraelrental/ad-shots/bc7871ffbbac4c71a8ebd0e4279c0a71.png",
+   "word": "#8A3B12",
+   "dark": false
+  },
+  {
+   "id": "s-story-chanukah",
+   "item": "mini board",
+   "shape": "story",
+   "kind": "bakery",
+   "occasion": "chanukah",
+   "status": "ready",
+   "url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794166861/myisraelrental/ad-shots/8ff12ee5f7bf415d8fb97a58e2a87ece.jpg",
+   "cut_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794166884/myisraelrental/ad-shots/bc7871ffbbac4c71a8ebd0e4279c0a71.png",
+   "word": "#8A3B12",
+   "dark": false
+  }
+ ]
 }

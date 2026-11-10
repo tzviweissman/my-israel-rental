@@ -338,8 +338,18 @@ const DEEP = [15, 94, 143];
 // The photo's own strongest colour (docs/static-ad-rules.md 9b): the average
 // of its most saturated pixels, darkened until white text on it passes
 // 4.5:1. So two businesses never get the same ground.
+// Measured once per photo. Read again on every frame, Chrome sometimes read the same photo a shade apart once a
+// page had made several videos, which tipped a ground into one more darkening step: the moving ad then ended a
+// shade darker than its still (check-ad-designs, "feast", 10 Nov 2026).
+const VIVID = new WeakMap();
 function vividColour(img) {
   if (!img) return DEEP;
+  if (VIVID.has(img)) return VIVID.get(img);
+  const col = measureVivid(img);
+  if (img.complete !== false && (img.naturalWidth || img.width)) VIVID.set(img, col);
+  return col;
+}
+function measureVivid(img) {
   const c = document.createElement('canvas');
   c.width = 32;
   c.height = 32;
@@ -1236,7 +1246,9 @@ function lookOf(name, brand, img) {
     brand: { bg: rgb(b), bg2: rgb(b), text: inkOn ? INK : '#FFFFFF', sub: inkOn ? 'rgba(17,24,39,.75)' : 'rgba(255,255,255,.8)', word: inkOn ? INK : '#FFFFFF',
       foot: INK, footDark: true, ring: inkOn ? '17,24,39' : '255,255,255', own: inkOn ? INK : rgb(b) },
     rosh: { bg: '#7A1022', bg2: '#3A0610', text: '#FFFFFF', sub: 'rgba(255,225,200,.85)', word: '#F5C542', foot: '#FFFFFF', footDark: false, ring: '245,197,66', own: '#7A1022' },
-    chanukah: { bg: '#0E2A5C', bg2: '#06142E', text: '#FFFFFF', sub: 'rgba(220,235,255,.8)', word: '#F5C542', foot: '#FFFFFF', footDark: false, ring: '245,197,66', own: '#0E2A5C' },
+    chanukah: PARTS && PARTS.sceneLight
+      ? { bg: '#EAF2FB', bg2: '#D6E6F7', text: INK, sub: '#3A5070', word: '#1F4E9A', foot: '#1F4E9A', footDark: true, ring: '31,78,154', own: '#1F4E9A' }
+      : { bg: '#0E2A5C', bg2: '#06142E', text: '#FFFFFF', sub: 'rgba(220,235,255,.8)', word: '#F5C542', foot: '#FFFFFF', footDark: false, ring: '245,197,66', own: '#0E2A5C' },
     purim: { bg: '#4B1F7A', bg2: '#22093F', text: '#FFFFFF', sub: 'rgba(235,220,255,.85)', word: '#FFD600', foot: '#FFFFFF', footDark: false, ring: '255,214,0', own: '#4B1F7A' },
     pesach: { bg: '#EAF4E1', bg2: '#D5E8C4', text: INK, sub: '#4B5D3A', word: '#2F6B2F', foot: '#2F6B2F', footDark: true, ring: '47,107,47', own: '#2F6B2F' },
     shavuot: { bg: '#F4EBD0', bg2: '#E8D9A8', text: INK, sub: '#6B5B2E', word: '#4C7A2E', foot: '#4C7A2E', footDark: true, ring: '76,122,46', own: '#4C7A2E' },
@@ -1301,7 +1313,69 @@ const footTopOf = (format, H) => H - (format === 'story' ? 230 : 0) - (format ==
 let PARTS = null;
 // The design's ground. With a background photo picked, the photo fills the ad
 // under a veil of the design's own colour, so its words keep reading.
+// Holiday scenes (Tzvi, 8 Nov 2026: "when i click chanukah the background isnt chanukah themed"): an empty
+// photographed set made once per holiday and shape (docs/ads/gen/scenes), the owner's real product laid on it.
+export const SCENES = { chanukah: ['chanukah-night', 'chanukah-light'] };
+// Where a product stands on each set, as a share of the set picture's height: the middle of the tabletop,
+// read off each picture (Tzvi, 8 Nov 2026: "the bagels should be sitting on the bakery table like a product photo").
+const FLOOR = {
+  'chanukah-night': { square: 0.82, feed: 0.82, story: 0.78 }, 'chanukah-light': { square: 0.7, feed: 0.67, story: 0.68 },
+};
+const SCENE_FILES = new Set(['chanukah-night', 'chanukah-light']);
+// The bright set for these layouts, the night set for the rest, so a holiday gallery is not one picture repeated.
+const LIGHT_SCENE = new Set(['phonepop', 'notify', 'toggle', 'mirror', 'post', 'reasons', 'moment', 'split', 'labels']);
+// The menorah's lights drawn, not generated: generated menorahs came with 7 or 11 branches. Nine soft flames out
+// of focus behind the product, eight in a row and the shamash raised in the middle.
+function menorahLights(ctx, W, H, rtl) {
+  const n = 9;
+  const span = W * 0.34;
+  const x0 = rtl ? W * 0.08 : W * 0.92 - span;
+  const y = H * (H > 1500 ? 0.3 : 0.33);
+  ctx.save();
+  for (let i = 0; i < n; i += 1) {
+    const x = x0 + (span * i) / (n - 1);
+    const fy = y - (i === 4 ? W * 0.045 : 0);
+    const g = ctx.createRadialGradient(x, fy, 0, x, fy, W * 0.034);
+    g.addColorStop(0, 'rgba(255,236,190,.95)');
+    g.addColorStop(0.35, 'rgba(255,196,110,.55)');
+    g.addColorStop(1, 'rgba(255,170,80,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, fy, W * 0.034, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+function paintScene(ctx, W, H, img) {
+  // Made for this shape. The feed set is 3:4 against the feed's 4:5: it fills the width and loses a strip of
+  // plain wall at the top, never the table or its props (extending the sides showed as dark bars).
+  const k = W / img.naturalWidth;
+  const w = img.naturalWidth * k;
+  const h = img.naturalHeight * k;
+  // The set sits at the bottom, then moves up or down so its tabletop is where the product stands. What that
+  // uncovers is the set's own wall (above) or table front (below), extended in their colours.
+  const top0 = H - h;
+  const off = PARTS.sceneAt && PARTS.sceneFloor ? Math.max(-H * 0.3, Math.min(H * 0.3, PARTS.sceneAt - (top0 + PARTS.sceneFloor * h))) : 0;
+  const top = top0 + off;
+  if (top > 0) {
+    ctx.fillStyle = sideColour(img, 'top', '#000');
+    ctx.fillRect(0, 0, W, top + 2);
+  }
+  if (top + h < H) {
+    ctx.fillStyle = sideColour(img, 'bottom', '#000');
+    ctx.fillRect(0, top + h - 2, W, H - top - h + 2);
+  }
+  ctx.drawImage(img, (W - w) / 2, top, w, h);
+  if (PARTS.sceneLights) menorahLights(ctx, W, H, PARTS.sceneRtl);
+  // A little shade where the words go, so they read on any set.
+  const g = ctx.createLinearGradient(0, 0, 0, H * 0.45);
+  g.addColorStop(0, PARTS.sceneLight ? 'rgba(255,255,255,.45)' : 'rgba(0,0,0,.35)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H * 0.45);
+}
 function paintGround(ctx, W, H) {
+  if (PARTS && PARTS.scene) { paintScene(ctx, W, H, PARTS.scene); return; }
   ctx.fillRect(0, 0, W, H);
   const img = PARTS && PARTS.photo;
   if (!img) return;
@@ -1503,17 +1577,39 @@ function drawSticker(ctx, { x, y, r, item, fromWord, body }) {
   ctx.fillText(item.priceText, x, y + (item.cheapest ? r * 0.38 : r * 0.2));
 }
 
-function shadowed(ctx, img, x, y, w, h, blur = 40, dy = 24, { name = 'product', tilt = PARTS && PARTS.tilt } = {}) {
+function shadowed(ctx, img, x0, y0, w, h, blur = 40, dy = 24, { name = 'product', tilt = PARTS && PARTS.tilt } = {}) {
+  // On a photographed set the product stands on the table: the set is moved so its tabletop meets the
+  // product's bottom (render() measures where the design put it), and the product casts a contact shadow.
+  const onSet = !!(PARTS && PARTS.sceneFloor);
+  const x = x0;
+  const y = y0;
   part(ctx, name, [x, y, w, h], () => {
     const cx = x + w / 2;
     const cy = y + h / 2;
-    // Light behind it, so it stands off the ground.
+    // Light behind it, so it stands off a flat ground. Not on a set, where it read as pasted on.
     const r = Math.max(w, h) * 0.62;
-    const glow = ctx.createRadialGradient(cx, cy, r * 0.2, cx, cy, r);
-    glow.addColorStop(0, 'rgba(255,255,255,.2)');
-    glow.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = glow;
-    ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+    if (!onSet) {
+      const glow = ctx.createRadialGradient(cx, cy, r * 0.2, cx, cy, r);
+      glow.addColorStop(0, 'rgba(255,255,255,.2)');
+      glow.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+    }
+    if (onSet) {
+      // Where it touches the table: a tight dark line under it, as a real object on a surface casts.
+      ctx.save();
+      ctx.translate(cx, y + h * 0.975);
+      ctx.scale(1, 0.09);
+      const touch = ctx.createRadialGradient(0, 0, 0, 0, 0, w * 0.4);
+      touch.addColorStop(0, 'rgba(10,6,3,.75)');
+      touch.addColorStop(0.6, 'rgba(10,6,3,.35)');
+      touch.addColorStop(1, 'rgba(10,6,3,0)');
+      ctx.fillStyle = touch;
+      ctx.beginPath();
+      ctx.arc(0, 0, w * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
     // Dark where it touches, so it sits on something rather than floats.
     ctx.save();
     ctx.translate(cx, y + h * 0.96);
@@ -2418,6 +2514,125 @@ function drawFullPhoto(canvas, a) {
   sticker(ctx, { x: a.rtl ? 130 : W - 130, y: footTop - 120, r: 100, item: a.item, fromWord: a.fromWord, body });
 }
 
+// Where a cut-out's product starts, from the top, as a share of its height. Read once per picture.
+function cutTop(img) {
+  if (img.cutTop != null) return img.cutTop;
+  const c = document.createElement('canvas');
+  c.width = 90;
+  c.height = 160;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.drawImage(img, 0, 0, 90, 160);
+  const d = g.getImageData(0, 0, 90, 160).data;
+  let row = 160;
+  for (let y = 0; y < 160 && row === 160; y += 1) {
+    let n = 0;
+    for (let x = 0; x < 90; x += 1) if (d[(y * 90 + x) * 4 + 3] > 128) n += 1;
+    if (n > 3) row = y;
+  }
+  img.cutTop = row / 160;
+  return img.cutTop;
+}
+
+// "Product photo" (Tzvi, 8 Nov 2026, from the American Crust and Blazin' Boards tests): the owner's own product,
+// photographed again by an image model on a set that fits the business (utils/ad_shots.py), the whole ad. One big
+// word, led in by a short line in another voice; the product stands in front of the word when its cut-out came out.
+function drawShoot(canvas, a) {
+  // Another shape than the one photographed, until the owner photographs this one too (the panel offers it).
+  if (!a.shot) { drawFullPhoto(canvas, a); return; }
+  const { ctx, W, H, body, px, top } = begin(canvas, a.format, a.rtl);
+  const S = a.shot;
+  const zoom = PARTS?.anim ? 1 + (1 - easeOut(progress(PARTS.anim.t, 0, MOVE_ENDS))) * 0.1 : 1;
+  // Made in this shape, so it covers the ad whole; a photo of another shape is centred and its edges kept.
+  const cover = (img) => {
+    const k = Math.max(W / img.naturalWidth, H / img.naturalHeight) * zoom;
+    const w = img.naturalWidth * k;
+    const h = img.naturalHeight * k;
+    ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+    return [(H - h) / 2, h];
+  };
+  ctx.imageSmoothingQuality = 'high';
+  cover(S.img);
+  const dark = S.dark;
+  const shade = ctx.createLinearGradient(0, 0, 0, H * 0.45);
+  shade.addColorStop(0, dark ? 'rgba(0,0,0,.5)' : 'rgba(255,255,255,.45)');
+  shade.addColorStop(1, dark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)');
+  ctx.fillStyle = shade;
+  ctx.fillRect(0, 0, W, H * 0.45);
+  const ink = (PARTS && PARTS.ink) || (dark ? '#F6E7C8' : '#1F2937');
+  const word = (PARTS && PARTS.ink) || S.word;
+  const PAD = 56;
+  const big = (a.words.big_word || a.words.key || '').trim();
+  const lead = (a.words.lead || (big ? '' : a.words.headline) || '').trim();
+  const bigFace = a.rtl ? '"Secular One"' : 'Anton';
+  const leadFace = a.rtl ? '"Frank Ruhl Libre"' : '"Playfair Display"';
+  ctx.textAlign = 'center';
+  // The big word as large as the width allows, and no taller than a quarter of the ad.
+  let size = Math.round(H * 0.24);
+  ctx.font = `400 ${size}px ${bigFace}`;
+  ctx.direction = dirOf(big, a.rtl);
+  while (size > 60 && ctx.measureText(big.toUpperCase()).width > W - PAD * 2) {
+    size -= 6;
+    ctx.font = `400 ${size}px ${bigFace}`;
+  }
+  // With a cut-out, the word's foot goes a little behind the product's top; without one it stays above it, in the
+  // top part the picture was made to keep plain.
+  const productTop = S.cut ? cutTop(S.cut) * H : H;
+  const foot = Math.min(H * (a.format === 'story' ? 0.5 : 0.47), S.cut ? productTop + size * 0.18 : H * (a.format === 'story' ? 0.42 : 0.4));
+  let leadSize = px(64);
+  ctx.font = `italic 600 ${leadSize}px ${leadFace}`;
+  while (leadSize > 30 && ctx.measureText(lead).width > W - PAD * 2) {
+    leadSize -= 4;
+    ctx.font = `italic 600 ${leadSize}px ${leadFace}`;
+  }
+  const leadY = foot - size * 0.92 - px(18);
+  part(ctx, 'words', [PAD, leadY - leadSize, W - PAD * 2, foot - leadY + leadSize], () => {
+    // The name spaced out, as a label (Hebrew letters are not spaced).
+    if (!a.rtl && 'letterSpacing' in ctx) ctx.letterSpacing = '0.28em';
+    say(ctx, (a.eyebrow || '').toUpperCase(), W / 2, top + px(26), { size: Math.max(px(28), 32), weight: 700, colour: dark ? 'rgba(245,226,190,.9)' : 'rgba(31,41,55,.8)', align: 'center', body, rtl: a.rtl, max: W - PAD * 2 });
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+    if (lead) {
+      ctx.font = `italic 600 ${leadSize}px ${leadFace}`;
+      ctx.fillStyle = ink;
+      ctx.direction = dirOf(lead, a.rtl);
+      ctx.textAlign = 'center';
+      ctx.fillText(lead, W / 2, leadY);
+    }
+    if (big) {
+      ctx.font = `400 ${size}px ${bigFace}`;
+      ctx.fillStyle = word;
+      ctx.direction = dirOf(big, a.rtl);
+      ctx.textAlign = 'center';
+      ctx.shadowColor = dark ? 'rgba(0,0,0,.35)' : 'rgba(255,255,255,.3)';
+      ctx.shadowBlur = 30;
+      ctx.fillText(a.rtl ? big : big.toUpperCase(), W / 2, foot);
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+    }
+  });
+  if (S.cut && !(PARTS && isMoved('words'))) cover(S.cut);
+  // The foot on its own shade, so the price and link read over any photo.
+  const footTop = H - (a.format === 'story' ? 230 : 0) - 40 - 150 - 10;
+  const base = ctx.createLinearGradient(0, footTop - px(150), 0, H);
+  base.addColorStop(0, 'rgba(0,0,0,0)');
+  base.addColorStop(0.45, 'rgba(0,0,0,.55)');
+  base.addColorStop(1, 'rgba(0,0,0,.75)');
+  ctx.fillStyle = base;
+  ctx.fillRect(0, footTop - px(150), W, H - footTop + px(150));
+  // The price first and whole; the item's name after it, shortened only when it runs out of room.
+  const name = a.item?.name || '';
+  const price = a.item?.priceText || '';
+  if (name || price) {
+    part(ctx, 'price', [PAD, footTop - px(70), W - PAD * 2, px(60)], () => {
+      const y = footTop - px(22);
+      ctx.font = `800 ${px(44)}px ${body}`;
+      const pw = price ? ctx.measureText(price).width + px(22) : 0;
+      if (price) say(ctx, price, a.rtl ? W - PAD : PAD, y, { size: px(44), weight: 800, colour: dark ? word : '#FFFFFF', align: a.rtl ? 'right' : 'left', body, rtl: a.rtl });
+      if (name) say(ctx, name, a.rtl ? W - PAD - pw : PAD + pw, y, { size: Math.max(px(32), 34), weight: 700, colour: '#FFF6E6', align: a.rtl ? 'right' : 'left', body, rtl: a.rtl, max: W - PAD * 2 - pw });
+    });
+  }
+  cornerFoot(ctx, { W, H, format: a.format, rtl: a.rtl, cta: a.cta, shortUrl: a.shortUrl, qr: a.qr, body });
+}
+
 // "Giant words" (food/63d54525 LEMONADE, food/8d1dcab0): the headline as large
 // as the ad allows, and the product small beside its end: the words are the ad.
 function drawGiant(canvas, a) {
@@ -2563,7 +2778,7 @@ export function adIssues(words, item) {
 // previews. `native` (Story) is drawn in the story shape only.
 // A gallery design is "layout:look" (THEMED below); the rest are one look.
 // The words each 9f layout reads, and edits in the panel.
-const NEW_FIELDS = ['situations', 'mirror', 'chat', 'post', 'versus', 'reasons', 'honest', 'moment', 'people'];
+const NEW_FIELDS = ['lead', 'situations', 'mirror', 'chat', 'post', 'versus', 'reasons', 'honest', 'moment', 'people'];
 const FIELD_OF = { situation: 'situations', mirror: 'mirror', chat: 'chat', post: 'post', versus: 'versus',
   reasons: 'reasons', honest: 'honest', moment: 'moment' };
 // "Labels" (the bag and foot diagrams, docs/inspo/ad-videos-2026-11-07): the product in the middle, its listing's
@@ -2690,7 +2905,7 @@ const THEMED = { behind: drawBehind, phonepop: drawPhonePop, calling: drawCallin
   notify: drawNotify, search: drawSearch, toggle: drawToggle, checklist: drawChecklist, custom: drawCustom,
   situation: drawSituation, mirror: drawMirror, chat: drawChat, post: drawPost, versus: drawVersus,
   reasons: drawReasons, honest: drawHonest, moment: drawMoment,
-  fullphoto: drawFullPhoto, giant: drawGiant, split: drawSplit, feast: drawFeast, labels: drawLabels };
+  shoot: drawShoot, fullphoto: drawFullPhoto, giant: drawGiant, split: drawSplit, feast: drawFeast, labels: drawLabels };
 // Each layout opens in its own colour, so the gallery is not one ad repeated
 // (Tzvi, 5 Nov 2026: "all very similar"). The owner's pick then replaces it.
 const START_LOOK = { behind: 'cream', phonepop: 'own', calling: 'night', notify: 'navy', search: 'cream', toggle: 'sun',
@@ -2698,7 +2913,7 @@ const START_LOOK = { behind: 'cream', phonepop: 'own', calling: 'night', notify:
   honest: 'night', moment: 'navy', giant: 'sun', split: 'navy', feast: 'own', labels: 'cream' };
 // The designs in the gallery, by family, most different first.
 const FAMILIES = [
-  ['lead', ['custom', 'fullphoto', 'giant', 'split', 'feast', 'behind', 'bigwords', 'torn', 'colour']],
+  ['lead', ['custom', 'shoot', 'fullphoto', 'giant', 'labels', 'split', 'feast', 'behind', 'bigwords', 'torn', 'colour']],
   ['screens', ['phonepop', 'calling', 'phone', 'notify', 'search', 'toggle', 'checklist', 'chat', 'post']],
   ['words', ['situation', 'mirror', 'versus', 'reasons', 'honest', 'moment', 'question', 'review', 'note']],
   ['simple', ['clean', 'night', 'grid', 'gallery', 'items', 'native']],
@@ -2730,7 +2945,15 @@ function paintGrain(ctx, W, H) {
 const CUT_ONLY = ['behind', 'phonepop', 'calling', 'split', 'feast'];
 const COLOUR_FIXED = ['colour', 'bigwords', 'grid', 'torn', 'question', 'phone'];
 const DARK_RGB = { night: [23, 23, 26], navy: [18, 59, 87] };
-function render(target, design, a) {
+function render(target, design, a0) {
+  let a = a0;
+  if (a.scene?.floor && !a.sceneMeasure && !a.sceneAt) {
+    // Drawn once to learn where the design puts the product, then again with the set's tabletop there.
+    const boxes = {};
+    render(target, design, { ...a, sceneMeasure: true, boxes, anim: null, stats: null });
+    const b = boxes.product;
+    if (b) a = { ...a, sceneAt: b[1] + b[3] * 0.975 };
+  }
   const canvas = sharpCanvas(target, a.scale || 1);
   const [layout, lookKey] = design.split(':');
   const look = lookKey || a.look;
@@ -2742,7 +2965,9 @@ function render(target, design, a) {
     if (anim && anim.cover > 0) hookCard(ctx, canvas.width, canvas.height, anim, a);
   };
   if (THEMED[layout]) {
-    PARTS = { moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: a.font || null, ink: a.ink || null, photo: a.photo || null, tilt: TILT[layout] || 0, anim, strips: !!a.strips, stats: a.stats || null };
+    PARTS = { moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: a.font || null, ink: a.ink || null, photo: a.photo || null, tilt: TILT[layout] || 0, anim, strips: !!a.strips, stats: a.stats || null,
+      scene: a.scene?.img || null, sceneLight: !!a.scene?.light, sceneLights: !!a.scene?.lights, sceneRtl: a.rtl,
+      sceneFloor: a.scene?.floor || 0, sceneAt: a.sceneAt || 0 };
     try {
       THEMED[layout](canvas, look ? { ...a, look } : a);
       extras(canvas, look ? { ...a, look } : a);
@@ -2848,6 +3073,41 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState('');
   const [video, setVideo] = useState(null);
+  // The holiday's photographed sets, every shape, loaded when the holiday is picked.
+  const [sceneImgs, setSceneImgs] = useState({});
+  useEffect(() => {
+    const names = (SCENES[holidayPick] || []).filter((n) => SCENE_FILES.has(n));
+    let alive = true;
+    Promise.all(names.flatMap((n) => ['square', 'feed', 'story'].map(async (f) => [`${n}-${f}`, await loadImage(`/ad-scenes/${n}-${f}.jpg`)])))
+      .then((rows) => { if (alive) setSceneImgs(Object.fromEntries(rows.filter(([, img]) => img))); });
+    return () => { alive = false; };
+  }, [holidayPick, words?.scene]);
+  // Product photos (utils/ad_shots.py): made on the server, about a minute each, a few a day per business.
+  const [shots, setShots] = useState([]);
+  const [shotsLeft, setShotsLeft] = useState(null);
+  const [shotImgs, setShotImgs] = useState({});
+  const [shotError, setShotError] = useState('');
+  const loadShots = () => (targetType !== 'business' ? Promise.resolve() : axios.get(`${API}/ads/shots`, {
+    params: { target_type: targetType, target_id: target.id }, headers: { Authorization: `Bearer ${token}` } })
+    .then(({ data }) => { setShots(data.shots || []); setShotsLeft(data.left_today ?? null); }).catch(() => {}));
+  useEffect(() => { loadShots(); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const shotMaking = shots.some((s) => s.status === 'making');
+  useEffect(() => {
+    if (!shotMaking) return undefined;
+    const id = setInterval(loadShots, 6000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shotMaking]);
+  useEffect(() => {
+    let alive = true;
+    shots.filter((s) => s.status === 'ready' && !shotImgs[s.id]).forEach(async (s) => {
+      const [img, cut] = await Promise.all([loadImage(s.url), s.cut_url ? loadImage(s.cut_url) : null]);
+      if (alive && img) setShotImgs((m) => ({ ...m, [s.id]: { img, cut } }));
+    });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shots]);
   const [strips, setStrips] = useState(false);
   const [withReview, setWithReview] = useState(false);
   const [deal, setDeal] = useState({ text: '', until: '' });
@@ -2886,7 +3146,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
         // The first idea leads; the plain headline stays one tap away.
         const lead = (data.ideas || [])[0];
         setWords(withCaption({ headline: lead?.text || data.headline, key: lead ? lead.key : data.headline_key || '', item: lead ? lead.item || '' : data.headline_item || '', plain: data.headline, plainKey: data.headline_key || '', plainItem: data.headline_item || '',
-          ideas: data.ideas || [], points: data.points, caption: data.caption,
+          ideas: data.ideas || [], points: data.points, caption: data.caption, scene: data.scene || '',
           big_word: data.big_word || '', caller: data.caller || '', decline: data.decline || '',
           search: data.search || '', switches: data.switches || '', checklist: data.checklist || '',
           ...Object.fromEntries(NEW_FIELDS.map((k) => [k, data[k] || ''])),
@@ -2994,12 +3254,50 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     const from = poolFor(l);
     if (!from.length) return null;
     // The owner's pick, else the product the headline talks about: never bagel words over a pizza photo.
-    const asked = pickBy[l] || start?.item || words?.item;
+    // The product photo design starts on a product already photographed for this shape and holiday.
+    const shotFor = l === 'shoot' && !pickBy[l] && from.find((it) => shots.some((x) => x.status === 'ready' && shotImgs[x.id] && x.item === it.name
+      && x.shape === format && x.occasion === (holidayPick === 'chanukah' ? 'chanukah' : '')));
+    const asked = pickBy[l] || (shotFor && shotFor.name) || start?.item || words?.item;
     // A cut-out looks better than a boxed photo, so the layouts start on one; any product can still be picked.
     const first = THEMED[l] && l !== 'fullphoto' && cutItems.length ? cutItems : from;
     return withPrice(from.find((it) => it.name === asked) || first[Math.max(0, layoutsInOrder.indexOf(l)) % first.length]);
   };
   const featured = itemFor(design);
+  // A product photo is made for one product, one shape and one setting: the business's kind, or the holiday
+  // (the holiday's own background, never only its words).
+  const shotOccasion = holidayPick === 'chanukah' ? 'chanukah' : '';
+  // Saved words from before the AI named a setting have none: the server then reads the kind off the listing.
+  const shotKind = words?.scene || '';
+  const shotOf = (it, shape = format) => {
+    if (!it || targetType !== 'business') return null;
+    const s = shots.find((x) => x.status === 'ready' && shotImgs[x.id] && x.item === it.name && x.shape === shape && x.occasion === shotOccasion);
+    return s ? { ...shotImgs[s.id], word: s.word, dark: !!s.dark } : null;
+  };
+  const askedShot = useRef('');
+  const makeShot = async () => {
+    const it = itemFor('shoot');
+    if (!it) return;
+    setShotError('');
+    try {
+      const { data } = await axios.post(`${API}/ads/shots`, { target_type: targetType, target_id: target.id, item: it.name, shape: format,
+        kind: shotKind, occasion: shotOccasion }, { headers: { Authorization: `Bearer ${token}` } });
+      askedShot.current = data.id;
+      setShots((m) => [data, ...m.filter((x) => x.id !== data.id)]);
+      if (data.status === 'making' && shotsLeft != null) setShotsLeft(Math.max(0, shotsLeft - 1));
+    } catch (e) {
+      setShotError(e.response?.data?.detail || lt('ads.shotFailed', 'Could not make the photo. Try again.'));
+    }
+  };
+  // The photo the owner asked for opens as soon as it is ready.
+  useEffect(() => {
+    const s = shots.find((x) => x.id === askedShot.current);
+    if (s && s.status === 'ready' && shotImgs[s.id]) { askedShot.current = ''; setDesignRaw('shoot'); }
+    if (askedShot.current && !shots.some((x) => x.id === askedShot.current)) {
+      askedShot.current = '';
+      setShotError(lt('ads.shotFailed', 'Could not make the photo. Try again.'));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shots, shotImgs]);
   // One price on an ad, and it is the price of the item in its picture
   // (ad rules 9e.8): a business's price is only shown beside that item's
   // own photo, never a lowest price beside whatever photo came first.
@@ -3042,6 +3340,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     ['honest', t('ads.honestL', 'Honest'), !!featured && lineList(words?.honest).length >= 2],
     ['moment', t('ads.momentL', 'Moment in the day'), !!featured && !!words?.moment],
     // Different to look at, not another screen (Tzvi, 5 Nov 2026; docs/ads/blueprints/design-*.md).
+    ['shoot', t('ads.shootL', 'Product photo'), !!shotOf(itemFor('shoot'))],
     ['fullphoto', t('ads.fullphotoL', 'Full photo'), !!featured],
     ['giant', t('ads.giantL', 'Giant words'), !!featured],
     ['split', t('ads.splitL', 'Half and half'), cut],
@@ -3128,7 +3427,15 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     const itemCta = targetType === 'business' && it?.name && it.price && it.name.length <= 20 ? lt('ads.ctaItem', 'Order {{item}}', { item: it.name }) : '';
     const today = new Date().toISOString().slice(0, 10);
     const dealOn = deal.text.trim() && deal.until && deal.until >= today;
+    // The holiday's own set behind the product; the product photo design is photographed in it already.
+    const sets = !hex && THEMED[l] && l !== 'custom' && l !== 'shoot' ? SCENES[holidayPick] : null;
+    const setName = sets && sets[LIGHT_SCENE.has(l) && sets[1] ? 1 : 0];
+    const shape = d === 'native' ? 'story' : format;
+    const sceneImg = setName && (sceneImgs[`${setName}-${shape}`] || sceneImgs[`${setName}-feed`]);
     return {
+      shot: l === 'shoot' ? shotOf(it) : null,
+      scene: sceneImg ? { img: sceneImg, light: /light/.test(setName), lights: holidayPick === 'chanukah',
+        floor: (FLOOR[setName] || {})[sceneImgs[`${setName}-${shape}`] ? shape : 'feed'] || 0 } : null,
       strips, reviewChip: withReview && review ? review : null,
       deal: dealOn ? `${deal.text.trim()} · ${lt('ads.dealUntil', 'until {{date}}', { date: new Date(`${deal.until}T12:00`).toLocaleDateString(rtl ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'short' }) })}` : '',
       // A deal takes the business name's place at the top: the name is in the link and the eyebrow sits where the deal goes.
@@ -3155,7 +3462,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       const link = document.createElement('link');
       link.id = 'ad-hand-fonts';
       link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Caveat:wght@700&display=swap';
+      link.href = 'https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Caveat:wght@700&family=Anton&family=Playfair+Display:ital,wght@1,600&family=Secular+One&display=swap';
       document.head.appendChild(link);
       await new Promise((r) => { link.onload = r; link.onerror = r; });
     }
@@ -3172,7 +3479,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     const hand = rtl ? 'Amatic SC' : 'Caveat';
     const picked = rtl ? fontPair[1] : fontPair[0];
     await Promise.all([`600 64px "${head}"`, `700 64px "${head}"`, `600 30px "${body}"`, `700 34px "${body}"`,
-      `800 90px "${body}"`, `700 60px "${hand}"`, `800 60px "${picked}"`, `500 30px "${picked}"`]
+      `800 90px "${body}"`, `700 60px "${hand}"`, rtl ? '400 90px "Secular One"' : '400 90px Anton', rtl ? '600 60px "Frank Ruhl Libre"' : 'italic 600 60px "Playfair Display"', `800 60px "${picked}"`, `500 30px "${picked}"`]
       .map((f) => document.fonts?.load(f, rtl ? 'אב' : 'ab').catch(() => null)));
   };
 
@@ -3196,7 +3503,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [words, format, design, imgs, itemImgs, cutItems, pickBy, rtl, eyebrow, cta, shortUrl, reviews, reviewIdx, faqs, faqIdx,
-    lookBy, holidayPick, customBy, photoBy, fontIdx, ink, bg, moves, situationIdx, strips, withReview, deal]);
+    lookBy, holidayPick, customBy, photoBy, fontIdx, ink, bg, moves, situationIdx, strips, withReview, deal, sceneImgs, shotImgs, shots]);
 
   // Every design at once, small, so the owner picks one by eye (rules 9b).
   // A moment after typing stops: each preview is a full drawing.
@@ -3227,7 +3534,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     return () => { cancelled = true; clearTimeout(timer); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [words, format, imgs, itemImgs, cutItems, pickBy, rtl, eyebrow, cta, shortUrl, reviews, reviewIdx, faqs, faqIdx,
-    lookBy, holidayPick, customBy, photoBy, fontIdx, ink, bg]);
+    lookBy, holidayPick, customBy, photoBy, fontIdx, ink, bg, sceneImgs, shotImgs, shots]);
 
   // The QR code and the post's link name the design (/p/{slug}/{design}),
   // so the owner can see which design brought visits (borrowed from the ad
@@ -3334,6 +3641,9 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       // Stays in one drawing mode: a browser switching modes mid-video shifted the grain, and the whole ad dimmed for two seconds.
       c.getContext('2d', { willReadFrequently: true });
       const a = { ...args(design), format: f, moves: moves[`${design}|${f}`] || moves[moveKey] || {} };
+      // Where the product stands, measured once rather than on every frame.
+      const probe = {};
+      if (a.scene?.floor) { render(c, design, { ...a, boxes: probe, sceneMeasure: true }); if (probe.product) a.sceneAt = probe.product[1] + probe.product[3] * 0.975; }
       const anim = { t: Infinity, n: 0, cover: 0 };
       render(c, design, { ...a, anim }); // counts the words and sizes the canvas
       // The opening word sits on the ad's own colour, read from its top corner.
@@ -3636,6 +3946,33 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
           {chips(holidayNow || 'noholiday', pickHoliday, [
             ['noholiday', t('ads.noHoliday', 'No holiday')], ...holidays.map((h) => [h, t(`ads.look.${h}`)])])}
         </div>
+        {targetType === 'business' && itemFor('shoot') && (() => {
+          const it = itemFor('shoot');
+          const have = !!shotOf(it);
+          const making = shots.some((x) => x.status === 'making' && x.item === it.name && x.shape === format && x.occasion === shotOccasion);
+          return (
+            <div className="rounded-xl border p-3 mb-4 flex flex-wrap items-center gap-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="ad-shot">
+              <div className="flex-1 min-w-[200px]">
+                <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.shotTitle', 'Product photo')}</p>
+                <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>
+                  {making ? t('ads.shotMaking', 'Photographing {{item}}. About a minute; you can keep working.', { item: it.name })
+                    : have ? t('ads.shotHave', '{{item}} is photographed for this shape. Pick "Product photo" below.', { item: it.name })
+                      : t('ads.shotWhy', 'We photograph your own {{item}} on a set that suits your business, like a product shoot.', { item: it.name })}
+                  {shotsLeft != null && !have && !making ? ` ${t('ads.shotLeft', '{{n}} left today.', { n: shotsLeft })}` : ''}
+                </p>
+                {shotError && <p className="text-xs mt-1" role="alert" style={{ color: '#B42318' }}>{shotError}</p>}
+              </div>
+              {making ? <Loader2 className="animate-spin" size={20} aria-label={t('ads.shotMakingShort', 'Making the photo')} />
+                : have ? (
+                  <button type="button" onClick={() => setDesign('shoot')} className="px-4 py-2 rounded-lg text-sm font-semibold"
+                    style={{ background: 'rgba(36,175,235,.33)', color: 'var(--ink)' }} data-testid="ad-shot-open">{t('ads.shotOpen', 'Open it')}</button>
+                ) : (
+                  <button type="button" onClick={makeShot} disabled={shotsLeft === 0} className="px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50"
+                    style={{ background: '#000' }} data-testid="ad-shot-make">{t('ads.shotMake', 'Photograph it')}</button>
+                )}
+            </div>
+          );
+        })()}
         {/* The gallery: every design, already made from this business. */}
         <p className="text-xs font-semibold mb-2" style={{ color: 'var(--ink)' }}>{t('ads.galleryTitle', 'Pick a look. Every ad is made from your own product, name and price.')}</p>
         <div className="grid grid-cols-3 sm:grid-cols-7 gap-2 max-h-[36vh] overflow-y-auto mb-5 pe-1" data-testid="ad-gallery">
@@ -3707,7 +4044,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
             )}
           </div>
           <div className="space-y-4">
-            {((themed && layout !== 'custom' && layout !== 'fullphoto') || COLOUR_FIXED.includes(layout)) && (
+            {((themed && layout !== 'custom' && layout !== 'fullphoto' && layout !== 'shoot') || COLOUR_FIXED.includes(layout)) && (
               <div className="space-y-1.5">
                 <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.colourTitle', 'Background colour')}</p>
                 <div className="flex flex-wrap items-center gap-2" data-testid="ad-colours">

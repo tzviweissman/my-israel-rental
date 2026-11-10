@@ -24,8 +24,8 @@ function stages() {
   for (const line of fs.readFileSync(path.join(ROOT, 'docs', 'ad-rules-checklist.md'), 'utf8').split(/\r?\n/)) {
     const h = /^##\s+([0-9]+)\.\s+(.*)$/.exec(line);
     if (h) { out.push({ n: Number(h[1]), name: h[2], items: [] }); continue; }
-    const m = /^(A[0-9][0-9a-z]*\.[0-9]+)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(decide|auto:[a-z-]+)\s*$/.exec(line);
-    if (m && out.length) out[out.length - 1].items.push({ id: m[1], rule: m[2], how: m[4] });
+    const m = /^(A[0-9][0-9a-z]*\.[0-9]+)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(decide|auto:[a-z-]+)(?:\s+since:(\d{4}-\d{2}-\d{2}))?\s*$/.exec(line);
+    if (m && out.length) out[out.length - 1].items.push({ id: m[1], rule: m[2], how: m[4], since: m[5] || null });
   }
   return out;
 }
@@ -42,6 +42,8 @@ function read(file) {
   }
   return out;
 }
+// Rules answered by a sheet that must exist (A9.6: every added copy of the product beside the real photo, 9 Nov 2026).
+const SHEET_RULES = new Set(['A9.6']);
 const blank = (plan) => !plan || /^(\.\.\.|todo|tbd)$/i.test(plan);
 
 function problems(name, upTo, finished) {
@@ -53,8 +55,15 @@ function problems(name, upTo, finished) {
     if (s.n > upTo) continue;
     for (const it of s.items) {
       const g = got.get(it.id);
+      // A rule with a start date spares blueprints written before it: they have no such line (new-rules-spare-made-sites).
+      if (!g && it.since) continue;
       if (!g) { out.push(`${it.id}: missing (rule added since? re-run node scripts/ad-blueprint.mjs ${name})`); continue; }
-      if (blank(g.plan)) out.push(`stage ${s.n}, ${it.id}: no answer. ${it.rule}`);
+      if (blank(g.plan)) { out.push(`stage ${s.n}, ${it.id}: no answer. ${it.rule}`); continue; }
+      // A sheet rule's answer is a picture someone looked at, not a sentence: the file it names must exist.
+      if (SHEET_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
+        const files = [...g.plan.matchAll(/([\w./-]+\.(?:jpg|jpeg|png|webp))/gi)].map((x) => x[1]);
+        if (!files.some((f) => fs.existsSync(path.resolve(ROOT, f)))) out.push(`stage ${s.n}, ${it.id}: name the sheet file it was checked on (none of ${files.length ? files.join(', ') : 'no file'} exists)`);
+      }
       else if (finished && !g.ticked && !/^n\/a:/i.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: not ticked`);
     }
   }
