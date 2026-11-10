@@ -2,8 +2,9 @@
 
 ## In short
 - Business owners who click "Stop these emails" on the new weekly "your ad is ready" email have no way to turn them back on: there is no switch for it in the dashboard's email settings, unlike every other email that offers a stop link.
+- Fixed tonight: a business sending a holiday or "it has been a while" message to its customers could send it with our fill-in prompt still in it, for example "[What you offer for the holiday, and how to order or book it.]". The check that stops this missed those prompts since 5 Nov; it now catches every one, in English and Hebrew.
 - Fixed tonight: reading products or a listing out of photos (the new "cut the pictures out" feature) froze the whole site for every visitor while it worked, up to about 12 seconds for a 30-item menu. It now works in the background.
-- Fixed tonight: after reading a listing from screenshots, one photo said "with 1 photos". It now says "1 photo" in English and reads correctly in Hebrew. Both fixes are on branch `claude/exciting-bell-v86yyg`.
+- Fixed tonight: after reading a listing from screenshots, one photo said "with 1 photos". It now says "1 photo" in English and reads correctly in Hebrew. All three fixes are on branch `claude/exciting-bell-v86yyg`.
 - Needs your decision: the weekly ad email will go to every existing business owner with a product photo and no saved ad on the first Sunday to Thursday morning after this deploys, all at once. If that is not what you want, say so before it ships.
 
 ## New findings
@@ -11,11 +12,15 @@
 2. **Medium (fixed): picture cutting blocked the server.** `backend/utils/catalog_crops.py` `crop()` ran PIL and numpy work directly inside the async handlers `products/extract` (up to 30 rows) and `properties/extract-from-pictures` (up to 20 photos). Proof: 0.39 s per crop on a 3000x4000 photo; a loop-latency check over 5 crops showed other requests stalled 1.87 s. Fixed in 879d76dc.
 3. **Low (fixed): `dashboard.adPicsDone` had no plural forms.** `frontend/src/components/dashboard/AddPropertyModal.jsx:186` passes `{count}`; `test-i18n-parity` failed on it ("no NEW t(key, { count }) without a plural set"). Fixed in d10948a5.
 
+4. **Medium (fixed): customer messages could go out with template gaps unfilled.** `backend/routes/marketplace/customer_messages.py:187` `_UNFILLED` (narrowed 5 Nov, a87a0c7e) only matched gaps opening with "Your" or "שלכם". The 8 holiday templates' main gap and both "been a while" gaps (`en.js:7451-7483`, `he.js:7273-7305`) open otherwise, so `_check_filled` let them through. Proof: `tests/test_occasions.py::test_unfilled_brackets` failed (`assert None` on "[What is new: a product]"); a scan found 10 English and 10 Hebrew template gaps the regex missed. Not from today's commits; surfaced by tonight's full suite. Fixed in 965610bd.
+
 No other findings; none dropped.
 
 ## Fixed this run
 - d10948a5: `adPicsDone_one/_other` (English) and `_one/_two/_other` (Hebrew). After: `test-i18n-parity` no longer lists it; the three known counters remain (below).
 - 879d76dc: `crop()` now runs through `asyncio.to_thread` in `catalog_crops.keep` and in `extract_from_pictures`. After: loop stall 0.02 s over the same 5 crops; `python utils/catalog_crops.py` self-test prints ok; `test_business_lookup.py` and `test_listing_price_parity.py` 23 passed.
+
+- 965610bd: `_UNFILLED` also matches the template openings "What you offer", "What is new", "An offer for coming back", "מה חדש", "מה אתם מציעים", "הטבה לחוזרים". After: `test_occasions.py` 4 passed; 0 template gaps in en.js or he.js missed; "[VIP]", "[sale]", "Size [M]" still allowed.
 
 ## Still open
 - `ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits` without plural forms, first seen 6 Nov. Fixed on the audit branch (d5450913), not yet on main.
@@ -44,5 +49,6 @@ No other findings; none dropped.
 - FAILED  playwright + chromium (last lines: at ChildProcess.<anonymous> (/home/user/my-israel-rental/node_modules/playwright-core/lib/coreBundle.js:32015:32) at ChildProcess.emit (node:events:519:28) at ChildProcess._handle.onexit (node:internal/child_)
 - FAILED  mongodb on :27017 (last lines: at ChildProcess.emit (node:events:519:28) at ChildProcess._handle.onexit (node:internal/child_process:293:12) curl: (22) The requested URL returned error: 403 )
 - SKIPPED api (no database)
-- So the weekly email loop, the first-ad-shot flow and the full backend suite (it reached about 10% in 15 minutes without a database) were not run end to end.
+- Full backend suite (three uncollectable files left out), no database: 1127 passed, 949 skipped, 105 failed, 44 errors in 6 min. All failures and errors but two are database connection errors (pymongo). Of the two: `test_occasions` is finding 4 above (fixed); `test_type_coverage::test_mypy_clean` fails because the sandbox's mypy cannot import pydantic (environment, not code).
+- The weekly email loop and the first-ad-shot flow were not run end to end.
 - The commits that only touched business sites, ad blueprints and ad-checker scripts were not reviewed for logic (visual layer and tooling).

@@ -312,4 +312,5 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - [Low] Weekly "your ad is ready" email: "Stop these emails" has no switch to turn them back on (`ad_emails_off` missing from `EMAIL_SWITCHES` and `EmailSwitches.jsx`). First seen 10 Nov 2026 (2026-11-10-site-audit.md). Open.
 - [Medium] Catalog and ad picture cutting blocked the server for every visitor (~0.4 s a picture, up to 30). First seen 10 Nov 2026 (2026-11-10-site-audit.md). [Fixed 10 Nov, 879d76dc]
 - [Low] `dashboard.adPicsDone` without plural forms ("with 1 photos"); test-i18n-parity failed. First seen 10 Nov 2026 (2026-11-10-site-audit.md). [Fixed 10 Nov, d10948a5]
+- [Medium] Customer messages: holiday and "been a while" templates could be sent with their [What you offer...] gaps unfilled; `_UNFILLED` matched only "Your"/"שלכם" since 5 Nov. First seen 10 Nov 2026 (2026-11-10-site-audit.md). [Fixed 10 Nov, 965610bd]
 - [Decision] Weekly ad email will reach every existing business with a product photo and no saved ad on the first weekday morning after deploy. First seen 10 Nov 2026 (2026-11-10-site-audit.md).
