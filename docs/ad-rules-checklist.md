@@ -45,6 +45,7 @@ A2.6 | Words a ten-year-old follows, one idea a sentence. No power words, no "ev
 A2.7 | Copy rules: no long dash, no exclamation in the headline, no praise the listing never states. | voice.md, 5 | auto:words
 A2.8 | Hebrew speaks in the plural (אתם), never to one man or one woman. | 9f, voice.md | decide
 A2.9 | The caption: who or where, what it is and one or two facts, one plain invitation. No hashtags, no signature. | 9c | decide
+A2.10 | Short, intriguing and clear: the headline with its one small line says what the business gives and why you would want it, in plain words a stranger gets in one look (the product or service named, or unmistakable in the picture, plus what it does for them). A pun or a twist only on top of that, never instead of it: 'Set it to LOW.' told nobody what L.A. Cholent sells. The answer writes 'A stranger reads:' and what someone who has never heard of the business would take from the headline alone. | Tzvi 10 Nov | decide since:2026-11-10
 
 ## 3. The picture
 

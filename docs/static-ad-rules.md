@@ -664,3 +664,13 @@ a picture that does not fit is made again in a shorter shape. A3.10: a product s
 rich surface in warm light, with two or three things from the business's own world at the sides (for L.A. Cholent:
 a challah, the marrow bones and beef they sell as add-ons, Shabbos candles), never in front of the product and never
 passed off as it.
+
+## The headline says the offer (Tzvi, 10 Nov 2026)
+
+"Set to low doesnt help explain anything that the business is trying to give over... the message should be short,
+intriguing, and clear." L.A. Cholent's "Set it to LOW." was a pun that worked only for someone who already knew the
+kit. A headline, with its one small line, must tell a stranger in one look what is on offer and why they would want
+it: the product or service named, or unmistakable in the picture, plus what it does for them ("Shabbos cholent?
+Just add water."). Wordplay is welcome on top of that, never instead of it. Step A2.10 in docs/ad-rules-checklist.md:
+the blueprint answer writes "A stranger reads:" and what that stranger would take from the headline alone, and the
+blueprint refuses an answer without it.
