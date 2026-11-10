@@ -26,6 +26,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { newerRules } from './rule-dates.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const CHECKLIST = path.join(ROOT, 'docs', 'rules-checklist.md');
@@ -155,8 +156,12 @@ if (mode === 'done') {
 if (mode === 'rules') {
   const lines = [`# Rules for ${path.basename(dir)}, written from BLUEPRINT.md (scripts/blueprint.mjs --rules)`, ''];
   let open = 0;
+  // a rule made after the site first went live and not built yet is left out, so check-rules spares it (rule-dates.mjs);
+  // writing it as todo would hold the site to it (Gifted Israel, 10 Nov 2026)
+  const newer = newerRules(ROOT, dir);
   for (const it of items) {
     const p = plans.get(it.id);
+    if (newer.has(it.id) && !na(p) && !(p.done && planned(p))) continue;
     if (na(p)) lines.push(`${it.id} ${p.plan.replace(/^n\/a\s*:?\s*/i, 'n/a: ')}`);
     else if (p.done && planned(p)) lines.push(`${it.id} pass: built to the blueprint: ${p.plan}`);
     else { lines.push(`${it.id} todo`); open++; }

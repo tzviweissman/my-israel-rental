@@ -108,6 +108,10 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: Shekel sign and Hebrew render in Alef; arrows in the body face
 - [x] R3x.7 BRAND.md in the build folder (colours with their uses, two fonts, logo on light and dark, textures, Design bans) was written before any picture was generated, and the site uses it
   plan: BRAND.md written before any picture; none generated; site.css follows it
+- [x] R3z.4 No dark layer or gradient over a whole photo or film; a shade only behind the words where measured contrast needs it
+  plan: No shade over any room picture; the words sit on a stone card and the captions carry only a soft text shadow
+- [x] R3z.7 Card pictures generated without owner photos were made as one set from a saved screenshot of a real site's grid (path in docs/inspo), each tile checked as R8.1
+  plan: n/a: every card picture is their own photo, cut out and set on a generated set (gen/backdrops.py)
 
 ## Stage 3. Opening
 
@@ -171,6 +175,10 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3x.5 A following light is used only for a dark-world business, has an off button, sweeps once by itself on a phone and with reduced motion, and never dims the words or main button
   plan: n/a: no following light; not a dark-world business
+- [ ] R3z.2 The first screen has three layers: a real photo, the film or a soft shape of the business's colour at the back, the words and any card in the middle, the main button in front with the only soft shadow
+  plan: not yet: rule made 10 Nov 2026 evening, after this site first went live that morning (28fc8d5a); spared, open for its next change: the room is the back, the card the middle, but the card carries the shadow, not the button
+- [ ] R3z.6 The h1 or the line under it holds the words a customer searches for this business and its place, the search words named in its BLUEPRINT.md plan line
+  plan: not yet: rule made 10 Nov 2026 evening, after this site first went live that morning (28fc8d5a); spared, open for its next change: the h1 says 'For all your gifting needs', with no search words or place
 
 ## Stage 4. Sections
 
@@ -266,6 +274,10 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: no sizes or packages to compare
 - [x] R3x.11 A product to turn passed the suitability check, was made from a grey-ground source of the owner's photo as two candidates reviewed from four angles, has two or three light buttons named for the business, and keeps touch-action pan-y on a phone
   plan: n/a: no product to turn
+- [ ] R3z.1 One card the visitor would use (open slots, order card, price from, facts or a review) hangs a third to a half over the edge of the next section on the home page, the only thing that crosses an edge; on a phone it is whole and readable
+  plan: not yet: rule made 10 Nov 2026 evening, after this site first went live that morning (28fc8d5a); spared, open for its next change: no card crosses into the next section
+- [x] R3z.5 A site on a dark ground has one light section (questions, prices or how ordering works) joined by a clean edge, not a fade
+  plan: n/a: the site's ground is light stone, not dark
 
 ## Stage 5. Site structure (menu, footer, facts, layouts)
 
@@ -320,6 +332,8 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: they make no savings claim
 - [x] R3.14 Loud prices only when prices exist, never on a premium or quote-based business
   plan: Prices calm and in ink, never loud, for a shop with real prices
+- [x] R3z.3 Where the answer depends on a choice, a free taste of at most three questions ends on a real answer and price from the record and carries it into the order; no contact details asked
+  plan: n/a: every piece has its own fixed price; no answer depends on a choice
 
 ## Stage 7. Order and booking flow
 
@@ -478,7 +492,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: no film, no food
 - [x] R3w.3 Generated food is lit from the side and behind with the camera side darker, never flat from the front; a pour or fall stays sharp when paused
   plan: n/a: no film, no food
-- [x] R3w.4 The film's start and end pictures were right before any clip was made; each clip was made once at full quality (a draft only where get_cost showed it under a third of the price); simple motion (a growing crack, push-in, drift, holds) is done in code; every clip judged at 4+ fps
+- [x] R3w.4 The film's start and end pictures were right before any clip was made; each clip was made once at full quality (a draft only where get_cost showed it under a third of the price); simple motion (a growing crack, push-in, drift, holds) is done in code; a nearly-right clip is trimmed or dissolved from the still, not remade; the brief's Clip plan (stills by file, edges, same item, one change, credits, in code, trim) was written before the first clip and no clip was rolled a third time; every clip judged at 4+ fps
   plan: n/a: no film on this site; the opening is an event built in code from their own photos in generated rooms (GI-F2), no clip
 - [x] R3w.5 No bite, chew or tear is shown in motion unless Tzvi approved that take; otherwise the film cuts to the result
   plan: n/a: no film, no food

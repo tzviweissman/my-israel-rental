@@ -103,6 +103,7 @@ R3x.2 n/a: no number counts
 R3x.3 n/a: no tabs; a piece's choices are chips
 R3x.4 n/a: no sizes or packages to compare
 R3x.11 n/a: no product to turn
+R3z.5 n/a: the site's ground is light stone, not dark
 R8.1 pass: built to the blueprint: All product photos are one studio white from their own site; five with another ground (bibs, napkin rings) are named in the report for better photos
 R8.6 pass: built to the blueprint: Their own studio shots: one product large and sharp on white, as sold
 R8.7 pass: built to the blueprint: Fourteen empty sets generated (gen/backdrops-brief.md), no item in them: every piece on the site is their own photo laid over one, nothing of theirs redrawn
@@ -125,6 +126,8 @@ R3s.24 pass: built to the blueprint: Product photos 800 px webp around 30 KB, wi
 R3p.6 pass: built to the blueprint: fits script passes at the six sizes; the pieces are their photos cut off their white, the floor is made in code; item pictures are their photos over a generated empty set (gen/backdrops.py), never cropped
 R3o.5 pass: built to the blueprint: Shekel sign and Hebrew render in Alef; arrows in the body face
 R3x.7 pass: built to the blueprint: BRAND.md written before any picture; none generated; site.css follows it
+R3z.4 pass: built to the blueprint: No shade over any room picture; the words sit on a stone card and the captions carry only a soft text shadow
+R3z.7 n/a: every card picture is their own photo, cut out and set on a generated set (gen/backdrops.py)
 R3c.5 pass: built to the blueprint: Finish, nusach and delivery are tiles to tap; no Most popular
 R3c.6 pass: built to the blueprint: Add 2, 770 shekels; Send for Thursday with the total
 R3c.7 n/a: the record and their words give no saving; every piece shows its one price
@@ -141,6 +144,7 @@ R3j.10 n/a: the record and their words give no saving; every piece shows its one
 R3j.11 n/a: the record and their words give no saving; every piece shows its one price
 R3j.12 n/a: they make no savings claim
 R3.14 pass: built to the blueprint: Prices calm and in ink, never loud, for a shop with real prices
+R3z.3 n/a: every piece has its own fixed price; no answer depends on a choice
 R3k.7 pass: built to the blueprint: Three steps, three-line step bar, order and total beside each, Back, browser back through #order-2 and -3
 R3k.8 pass: built to the blueprint: Remove button of 40 px beside each stepper
 R3k.6 pass: built to the blueprint: Basket in localStorage across pages; the engraving Add puts the menorah in and opens the order

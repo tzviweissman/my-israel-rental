@@ -406,11 +406,12 @@ label.chip { display: inline-flex; align-items: center; position: relative; }
 .r-card .btn-facts { margin-top: var(--s2); }
 .r-card .btn { margin-top: var(--s4); }
 /* on arrival the first piece settles onto its stone and its name slides in behind it (transforms only; pictures never fade) */
-.rooms .r-room:first-child .r-front { animation: r-rise 1100ms var(--out) both; }
-.rooms .r-room:first-child .r-word { animation: r-name 1300ms var(--out) both; }
+/* rooms.js adds .go once the first room's piece has loaded, so the settling is seen, not spent while the picture is still coming */
+.rooms.go .r-room:first-child .r-front { animation: r-rise 2400ms cubic-bezier(.4, 0, .2, 1) both; }
+.rooms.go .r-room:first-child .r-word { animation: r-name 2600ms cubic-bezier(.4, 0, .2, 1) both; }
 @keyframes r-rise { from { transform: translateY(4%); } }
 @keyframes r-name { from { transform: translateX(-6%); } }
-@media (prefers-reduced-motion: reduce) { .rooms .r-room:first-child .r-front, .rooms .r-room:first-child .r-word { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .rooms.go .r-room:first-child .r-front, .rooms.go .r-room:first-child .r-word { animation: none; } }
 .r-dots { display: none; }
 .rooms.live { height: calc(var(--n) * 100svh); }
 .rooms.live .r-stage { position: sticky; top: 0; height: 100svh; min-height: 560px; overflow: hidden; }

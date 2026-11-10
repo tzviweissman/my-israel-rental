@@ -57,9 +57,13 @@
     });
   }
   function ask() { if (!raf) raf = requestAnimationFrame(frame); }
-  addEventListener('scroll', ask, { passive: true });
+  // the arrival ends at once when the visitor scrolls: the wipe is the motion from then on, and two at once stutter
+  addEventListener('scroll', function () { if (scrollY > 0 && st.classList.contains('go')) { st.classList.remove('go'); st.classList.add('went'); } ask(); }, { passive: true });
   addEventListener('resize', function () { place(); ask(); });
   place();
+  var first = rooms[0] && rooms[0].querySelector('.r-front');
+  function go() { if (!st.classList.contains('went')) st.classList.add('go'); }
+  if (!first || first.complete) go(); else { first.addEventListener('load', go); first.addEventListener('error', go); }
   if (document.fonts) document.fonts.ready.then(place);
   // a chapter name jumps to its room
   dots.forEach(function (d, i) {
