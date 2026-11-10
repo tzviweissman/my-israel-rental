@@ -102,6 +102,9 @@
   $('back').addEventListener('click', function () { history.back(); });
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
 
+  // a discount code the business made (mir-code.js, the same check as every order page); only the basic clean has a price
+  function goods() { return pick('kind') === 'basic' || !pick('kind') ? 400 : 0; }
+  MirCode.mount({ api: API, gig: GIG, goods: goods, phone: 'ph', field: 'fld', onChange: function () { update(); } });
   $('form').addEventListener('submit', function (e) {
     e.preventDefault();
     if (phase) return;
@@ -110,11 +113,12 @@
     if (step < 3) { go(step + 1, true); return; }
     var para = sentence(), k = pick('kind');
     var text = 'Hi, I would like ' + (k === 'basic' ? 'to book a basic home clean (₪400)' : 'a free quote') + ':\n' + para + '\nName: ' + v('me') + ', ' + v('ph');
+    if (MirCode.code()) text += '\n' + MirCode.text(goods());
     phase = 'open'; $('send').setAttribute('aria-busy', 'true');
     // saved on MyIsraelRental first (rules 3k.9, R0b.13); the WhatsApp tab opens at once so the pop-up blocker allows it
     var tab = window.open('', '_blank');
     var post = fetch(API + '/marketplace/gigs/' + GIG + '/book', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ tier_name: k === 'basic' ? 'Basic home clean' : 'Free quote', preferred_date: v('day'), guest_name: v('me'), contact_phone: v('ph'), message: para, lang: 'en' }) })
+      body: JSON.stringify({ tier_name: k === 'basic' ? 'Basic home clean' : 'Free quote', preferred_date: v('day'), guest_name: v('me'), contact_phone: v('ph'), message: para, lang: 'en', discount_code: MirCode.code() || undefined }) })
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
       if (saved && saved.track_path) text += '\n\nFollow the request: https://myisraelrental.com' + saved.track_path;

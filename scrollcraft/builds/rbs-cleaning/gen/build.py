@@ -164,6 +164,7 @@ BOOK = SITE.page_head('Get a free quote', 'Choose what you need. Your request is
           <div id="w-me"><label class="f" for="me">Your name</label><input class="fld" id="me" name="name" type="text" autocomplete="name" maxlength="80"><p class="err" id="e-me"></p></div>
           <div id="w-ph"><label class="f" for="ph">Your phone</label><input class="fld" id="ph" name="tel" type="tel" autocomplete="tel" inputmode="tel" maxlength="30"><p class="err" id="e-ph"></p></div>
           <label class="f" for="note">Anything we should know? (optional)</label><textarea class="fld" id="note" name="note" rows="3" maxlength="400"></textarea>
+          <div id="mir-code"></div><script>window.MirCode=window.MirCode||{{mount:function(){{}},refresh:function(){{}},code:function(){{return null}},after:function(n){{return n}},text:function(){{return ""}}}};</script>
         </div>
       </div>
       <aside class="card sum" aria-labelledby="sum-h">
