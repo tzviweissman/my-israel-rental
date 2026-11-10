@@ -417,6 +417,8 @@ label.chip { display: inline-flex; align-items: center; position: relative; }
 .rooms.live .r-room { position: absolute; inset: 0; clip-path: inset(0 0 0 calc((1 - var(--t, 1)) * 100%)); }
 .rooms.live .r-room:not(:first-child) { --t: 0; }
 .rooms.live .r-room .r-word { translate: calc((1 - var(--t, 1)) * -12%) -50%; }  /* the name trails the wipe a little, away from the room list */
+/* placed by rooms.js in the open wall above the piece, at the size that fits there */
+.rooms.live .r-room .r-word.at { right: auto; padding: 0; white-space: nowrap; line-height: .9; translate: calc((1 - var(--t, 1)) * -12%) 0; }
 @media (min-width: 761px) { .rooms.live .r-room .r-word { right: 11rem; font-size: clamp(4rem, min(14vw, (100vw - 11rem) * 1.45 / var(--len, 7)), 15rem); } }  /* clear of the room list at the right */
 .rooms.live .r-dots { position: absolute; z-index: 3; right: var(--gutter); top: 50%; translate: 0 -50%; display: flex; flex-direction: column; gap: var(--s2); }
 .r-dots a { color: rgba(255, 255, 255, .72); font-size: var(--t-1); text-decoration: none; text-align: right; min-height: 28px; display: flex; align-items: center;
@@ -428,7 +430,10 @@ label.chip { display: inline-flex; align-items: center; position: relative; }
   .r-words { top: calc(var(--top-h) + var(--s3)); }
   .r-card { padding: var(--s4); }
   .r-card h1 { font-size: var(--t3); }
-  .r-card .btn-facts { font-size: var(--t-1); gap: var(--s3); }
+  /* a low card on a phone, the headline on one line: the room names need the wall below it */
+  .r-card { padding: var(--s3) var(--s4); }
+  .r-card h1 { font-size: 1.4rem; max-width: none; }
+  .r-card .btn-facts { margin-top: var(--s1); font-size: var(--t-1); gap: var(--s3); }
   .r-card .btn { margin-top: var(--s3); }
   .r-word { top: 50%; font-size: clamp(2.8rem, 15vw, 6rem); white-space: normal; line-height: .86; padding-inline: var(--gutter); }
   .r-cap { bottom: calc(var(--bar-h) + var(--s4)); font-size: var(--t-1); }

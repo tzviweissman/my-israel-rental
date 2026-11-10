@@ -28,7 +28,7 @@ R3s.19 pass: built to the blueprint: Same line in the share text, home and shop;
 R6.1 pass: built to the blueprint: Shops playbook: product grid just below the first screen, then occasions and how ordering works
 R4.1 pass: built to the blueprint: Delivery fee reads "we confirm the fee on WhatsApp"; engraving price the same; gaps listed in OWNER-QUESTIONS.md
 R3g.13 pass: built to the blueprint: Picture, five-word headline, one line, one button; the small label says where; trust facts under the button
-R3g.18 pass: built to the blueprint: One kind of offer, gifts: the headline says "For all your gifting needs" on the first screen over their piece in its room, and each room names its kind of gift huge; <meta name="offers" content="gifts"> on the home page; check-says-offer passes; the teal room holds the Gedolim book, so it says GIFTS, not games, and still opens the Games & Gifts shop (Tzvi, 10 Nov 2026)
+R3g.18 pass: built to the blueprint: One kind of offer, gifts: the headline says "For all your gifting needs" on the first screen over their piece in its room, and each room names its kind of gift huge; <meta name="offers" content="gifts"> on the home page; check-says-offer passes; the teal room holds the Gedolim book, so it says GIFTS, not games, and still opens the Games & Gifts shop (Tzvi, 10 Nov 2026); each name is placed by rooms.js in the open wall above its piece, never behind it, sized to fit there
 R3b.1 pass: built to the blueprint: What and where in the label and line, trust as prices and the count, next step the button
 R3b.2 n/a: not a food business, nothing on the site says kosher
 R3b.3 pass: built to the blueprint: One red button per screen; header outline; everything else link, tile or chip

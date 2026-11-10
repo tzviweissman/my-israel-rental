@@ -70,6 +70,14 @@ LABEL = {'Games & Gifts': 'Gifts'}
 ROOM_SLUG = lambda c: re.sub(r'[^a-z]+', '-', c.lower()).strip('-')
 
 
+def piece_box(f, shape):
+    # where the piece stands in its room picture, as shares (top, left, right): rooms.js keeps the big word clear of it
+    from PIL import Image
+    a = Image.open(f'assets/rooms/{f}-{shape}-front.webp').getchannel('A').point(lambda v: 255 if v > 40 else 0)
+    x0, y0, x1, _ = a.getbbox()
+    return f'{y0 / a.height:.3f},{x0 / a.width:.3f},{x1 / a.width:.3f}'
+
+
 def room(i, cat, word):
     n = sum(1 for x in ITEMS if x['cat'] == cat)
     low = min(x['price'] for x in ITEMS if x['cat'] == cat)
@@ -77,7 +85,7 @@ def room(i, cat, word):
     lazy = '' if i == 0 else ' fetchpriority="low"'   # never lazy: a room wiped in before its picture loaded showed the last room under its words
     pic = lambda part: (f'<picture><source media="(max-aspect-ratio: 1/1)" srcset="assets/rooms/{f}-tall{part}.webp" width="1152" height="2048">'
                         f'<img class="r-{"front" if part else "bg"}" src="assets/rooms/{f}-wide{part}.webp" alt="" width="2048" height="1152"{lazy} decoding="async"></picture>')
-    return (f'<div class="r-room" id="room-{f}" style="--i:{i}">{pic("")}<span class="r-word" aria-hidden="true" style="--len:{len(word)}">{escape(word)}</span>{pic("-front")}'
+    return (f'<div class="r-room" id="room-{f}" style="--i:{i}" data-wide="{piece_box(f, "wide")}" data-tall="{piece_box(f, "tall")}">{pic("")}<span class="r-word" aria-hidden="true" style="--len:{len(word)}">{escape(word)}</span>{pic("-front")}'
             f'<p class="r-cap"><b>{escape(LABEL.get(cat, cat))}</b> {n} pieces, from {money(low)} <a class="lnk" href="shop.html?c={quote(cat)}">Shop {escape(LABEL.get(cat, cat))} <span class="arw" aria-hidden="true"></span></a></p></div>')
 
 

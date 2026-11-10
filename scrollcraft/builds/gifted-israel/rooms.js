@@ -27,9 +27,40 @@
       dots.forEach(function (d, i) { d.setAttribute('aria-current', i === cur ? 'true' : 'false'); });
     }
   }
+  // each room's big word goes in the open wall, never behind its piece (Tzvi, 10 Nov 2026: "some of the words cant be read at all"): the
+  // piece's place in its picture is written by gen/build.py (data-wide, data-tall: top, left, right as shares), mapped the way the
+  // picture is laid on the screen (cover, 50% 85%). Two places are tried, the full width under the card and the wall right of the
+  // card, both above the piece; the word takes the one where it can be biggest.
+  var stage = st.querySelector('.r-stage'), card = st.querySelector('.r-card'), list = st.querySelector('.r-dots');
+  function place() {
+    var S = stage.getBoundingClientRect(), W = S.width, H = S.height, tall = matchMedia('(max-aspect-ratio: 1/1)').matches;
+    var iw = tall ? 1152 : 2048, ih = tall ? 2048 : 1152, s = Math.max(W / iw, H / ih), ox = (W - iw * s) / 2, oy = (H - ih * s) * .85;
+    var c = card.getBoundingClientRect(), d = list.getBoundingClientRect(), g = 16, gap = 10;
+    var cT = c.top - S.top, cB = c.bottom - S.top, cR = c.right - S.left, edge = d.width ? d.left - S.left - 2 * g : W - g;
+    var most = Math.min(240, W * (tall ? .15 : .14));
+    rooms.forEach(function (room) {
+      var w = room.querySelector('.r-word'), b = (room.dataset[tall ? 'tall' : 'wide'] || '').split(',').map(Number);
+      if (b.length < 3) return;
+      var py = oy + b[0] * ih * s - gap;
+      w.classList.add('at');
+      w.style.fontSize = '100px';
+      var w100 = w.scrollWidth / 100, best = null;
+      [[g, cB + gap, edge, py], [cR + 2 * g, cT, edge, py]].forEach(function (r) {
+        var bw = r[2] - r[0], bh = r[3] - r[1], f = Math.min(most, bw / w100, bh / .9);
+        if (bw > 0 && bh > 0 && (!best || f > best.f)) best = { f: f, r: r };
+      });
+      if (!best) { w.classList.remove('at'); w.style.fontSize = ''; return; }
+      var f = Math.floor(best.f), r = best.r;
+      w.style.fontSize = f + 'px';
+      w.style.left = Math.round(r[0] + (r[2] - r[0] - w100 * f) / 2) + 'px';
+      w.style.top = Math.round(r[1] + (r[3] - r[1] - .9 * f) / 2) + 'px';
+    });
+  }
   function ask() { if (!raf) raf = requestAnimationFrame(frame); }
   addEventListener('scroll', ask, { passive: true });
-  addEventListener('resize', ask);
+  addEventListener('resize', function () { place(); ask(); });
+  place();
+  if (document.fonts) document.fonts.ready.then(place);
   // a chapter name jumps to its room
   dots.forEach(function (d, i) {
     d.addEventListener('click', function (e) {
