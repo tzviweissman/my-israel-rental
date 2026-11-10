@@ -111,6 +111,11 @@ STEPS = f'''  <section class="sec how" id="how" aria-labelledby="h-how">
 '''
 
 AREAS_BAND = f'''  <section class="areas" id="areas" aria-labelledby="h-areas">
+    <div class="wrap edge-wrap"><aside class="edge-card" aria-label="Price from">
+      <p class="edge-amt"><span class="sym">₪</span>400</p>
+      <p class="edge-l"><b>Basic home clean</b><br>Every other clean quoted free on WhatsApp.</p>
+      <a class="btn" href="book.html?svc=basic">Get a free quote</a>
+    </aside></div>
     <div class="wrap areas-in">
       <h2 id="h-areas" class="rev">Where we clean</h2>
       <ul class="places rev">{''.join(f'<li>{a}</li>' for a in AREAS)}</ul>

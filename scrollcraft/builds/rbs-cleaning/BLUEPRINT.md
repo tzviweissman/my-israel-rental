@@ -108,11 +108,17 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: the ₪ sign set in Alef through kit.price
 - [x] R3x.7 BRAND.md in the build folder (colours with their uses, two fonts, logo on light and dark, textures, Design bans) was written before any picture was generated, and the site uses it
   plan: BRAND.md written before any picture: colours with uses, Secular One and Alef, the scale, logo on light and dark, bans
+- [x] R3z.4 No dark layer or gradient over a whole photo or film; a shade only behind the words where measured contrast needs it
+  plan: no shade over the film or any photo; the opening words sit on a solid white card (3s.8), nothing darkens the picture
+- [x] R3z.7 Card pictures generated without owner photos were made as one set from a saved screenshot of a real site's grid (path in docs/inspo), each tile checked as R8.1
+  plan: n/a: the service cards have no pictures, only words and the price
 
 ## Stage 3. Opening
 
 - [x] R3g.13 The first screen holds a picture, a headline of 2 to 5 words that says what the customer gets, at most one short line (where the business is: the line or the small label, not both; trust goes there or right under the button) and one button; the header does not count
   plan: picture, the 4-word headline, one short line with the place, one button, then the three facts
+- [x] R3g.18 The first screen shows what the business offers before any scroll: one kind may be shown by the picture or the words; two or more different kinds are each named in the headline or big words; the home page lists them in <meta name="offers"> (check: check-says-offer)
+  plan: <meta name="offers" content="home cleaning|apartment management">; the big line under the headline names both, "Home cleaning · Apartment management", and the one button opens the quote page where they choose (check-says-offer passes)
 - [x] R3b.1 The first screen answers: what it is, where, why trust it, what to do next
   plan: what (home cleaning), where (Beit Shemesh), trust (₪400 price and WhatsApp number), next (Get a free quote)
 - [x] R3b.2 Proof (price, credential or rating) touches the main button; for food a kosher band sits just after the opening, not crowding the button, and the certificate is stated at most twice as a sentence or band (a small identical kosher tag on items does not count)
@@ -169,6 +175,10 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: no giant name; the words wait for the film
 - [x] R3x.5 A following light is used only for a dark-world business, has an off button, sweeps once by itself on a phone and with reduced motion, and never dims the words or main button
   plan: n/a: a bright business, no following light
+- [x] R3z.2 The first screen has three layers: a real photo, the film or a soft shape of the business's colour at the back, the words and any card in the middle, the main button in front with the only soft shadow
+  plan: back: the window film; middle: the white card with the headline and words; front: the green Get a free quote button, the only soft shadow on the first screen (the card has a hairline edge, no shadow)
+- [x] R3z.6 The h1 or the line under it holds the words a customer searches for this business and its place, the search words named in its BLUEPRINT.md plan line
+  plan: search words "home cleaning" and "Beit Shemesh": the line under the h1 names the offer and "In Beit Shemesh and the surrounding areas."
 
 ## Stage 4. Sections
 
@@ -178,6 +188,8 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: references in REFERENCES.md and CONCEPT.md with source links
 - [x] R3g.17 Every piece (button, arrow, each card or list effect, each section) came from a fresh Mobbin, 21st and Inspo search for this business, with the source named; nothing reused from the last two pages; each effect has a reason (says what a control does) (check: concept)
   plan: each piece sourced in CONCEPT.md Effects from fresh 21st, Mobbin and Inspo searches
+- [x] R3g.19 Shops (food-shop, fashion-shop): the main buttons are in the product's own colour, taken from its photo (meta product-colour with data-from, in BRAND.md), text 4.5:1 on it, and each button stands out 3:1 from what is behind it; n/a for other categories (check: check-button-colour)
+  plan: n/a: a cleaning service, not a food or fashion shop
 - [x] R3c.2 No AI default look: not cream + serif + one italic word (unless their brand), no default font, purple or two-colour gradient, exactly three identical cards, frosted glass used everywhere, default "premium" palette; at least one section on a contrasting ground
   plan: white and sky with navy, Secular One, a bento not three equal cards, one navy band
 - [x] R3g.1 A style sheet exists in CONCEPT.md before building (accent, ink, ground, two faces plus at most a third for one label style, one radius, motion limits) and every section follows it
@@ -262,6 +274,10 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: one item in one size in the record, nothing to compare
 - [x] R3x.11 A product to turn passed the suitability check, was made from a grey-ground source of the owner's photo as two candidates reviewed from four angles, has two or three light buttons named for the business, and keeps touch-action pan-y on a phone
   plan: n/a: no product to turn
+- [x] R3z.1 One card the visitor would use (open slots, order card, price from, facts or a review) hangs a third to a half over the edge of the next section on the home page, the only thing that crosses an edge; on a phone it is whole and readable
+  plan: the price-from card (Basic home clean ₪400, Get a free quote) hangs about 40% over the top edge of the dark Where we clean band, measured 0.42 on a laptop and 0.39 on a phone, whole on both; nothing else crosses an edge
+- [x] R3z.5 A site on a dark ground has one light section (questions, prices or how ordering works) joined by a clean edge, not a fade
+  plan: n/a: a light site; its one dark section is the Where we clean band
 
 ## Stage 5. Site structure (menu, footer, facts, layouts)
 
@@ -316,6 +332,8 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: no savings claims
 - [x] R3.14 Loud prices only when prices exist, never on a premium or quote-based business
   plan: the one real price is large; everything else is a free quote, as he quotes
+- [x] R3z.3 Where the answer depends on a choice, a free taste of at most three questions ends on a real answer and price from the record and carries it into the order; no contact details asked
+  plan: n/a: the record holds one price (basic home clean ₪400) and every other clean is quoted by the owner, so a taste could end on no real answer; the quote form carries the choice instead
 
 ## Stage 7. Order and booking flow
 
@@ -474,7 +492,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: no generated liquid
 - [x] R3w.3 Generated food is lit from the side and behind with the camera side darker, never flat from the front; a pour or fall stays sharp when paused
   plan: n/a: no food
-- [x] R3w.4 The film's start and end pictures were right before any clip was made; each clip was made once at full quality (a draft only where get_cost showed it under a third of the price); simple motion (a growing crack, push-in, drift, holds) is done in code; every clip judged at 4+ fps
+- [x] R3w.4 The film's start and end pictures were right before any clip was made; each clip was made once at full quality (a draft only where get_cost showed it under a third of the price); simple motion (a growing crack, push-in, drift, holds) is done in code; a nearly-right clip is trimmed or dissolved from the still, not remade; the brief's Clip plan (stills by file, edges, same item, one change, credits, in code, trim) was written before the first clip and no clip was rolled a third time; every clip judged at 4+ fps
   plan: the start and end stills were right before the clip; simple motion (the room coming in) is in code; judged frame by frame
 - [x] R3w.5 No bite, chew or tear is shown in motion unless Tzvi approved that take; otherwise the film cuts to the result
   plan: n/a: no food

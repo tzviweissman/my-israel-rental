@@ -9,7 +9,7 @@ R3.1 n/a: no certificate in the record, so nothing on the page says kosher
 R3.2 pass: built to the blueprint: no counts, no deadlines, no "only today" anywhere
 R3.3 pass: built to the blueprint: every line names cleaning, Beit Shemesh, the squeegee or the request; no stock phrases
 R3.4 pass: built to the blueprint: checked: no exclamation marks, no long dashes, no capital words
-R3.5 pass: built to the blueprint: headline "Your home, crystal clear.", the offers line "Home cleaning · Apartment management" and "In Beit Shemesh and the surrounding areas" (Tzvi chose this, option B, 8 Nov 2026)
+R3.5 pass: built to the blueprint: headline "Your home, crystal clear." and the line "Home cleaning in Beit Shemesh and the surrounding areas"
 R3.6 pass: built to the blueprint: English only, every line
 R3.7 pass: built to the blueprint: gallery and questions are hidden owner-filled places; no reviews, no placeholder text
 R3.8 pass: built to the blueprint: none of these on any page
@@ -28,6 +28,7 @@ R3s.19 pass: built to the blueprint: every page has its own title, description a
 R6.1 pass: built to the blueprint: cleaning playbook: services with the price lead after the opening, action is the quote request, no insured or eco claims
 R4.1 pass: built to the blueprint: everything without a price reads "Ask for a free quote"; gaps listed in gen/report.md
 R3g.13 pass: built to the blueprint: picture, the 4-word headline, one short line with the place, one button, then the three facts
+R3g.18 pass: built to the blueprint: <meta name="offers" content="home cleaning|apartment management">; the big line under the headline names both, "Home cleaning · Apartment management", and the one button opens the quote page where they choose (check-says-offer passes)
 R3b.1 pass: built to the blueprint: what (home cleaning), where (Beit Shemesh), trust (₪400 price and WhatsApp number), next (Get a free quote)
 R3b.2 n/a: no certificate in the record, so nothing on the page says kosher
 R3b.3 pass: built to the blueprint: one solid green button per screen; header button is outline; links elsewhere
@@ -56,11 +57,12 @@ R3h.18 pass: built to the blueprint: listed in gen/wipe-brief.md: glass, lather,
 R3h.19 pass: built to the blueprint: second story after the first failed; start and end stills made first; two tries in all
 R3h.17 n/a: no giant name; the words wait for the film
 R3x.5 n/a: a bright business, no following light
+R3z.2 pass: built to the blueprint: back: the window film; middle: the white card with the headline and words; front: the green Get a free quote button, the only soft shadow on the first screen (the card has a hairline edge, no shadow)
+R3z.6 pass: built to the blueprint: search words "home cleaning" and "Beit Shemesh": the line under the h1 names the offer and "In Beit Shemesh and the surrounding areas."
 R3.12 pass: built to the blueprint: opening, the bento of services with price and what is included, and the close band with the button
 R3c.1 pass: built to the blueprint: references in REFERENCES.md and CONCEPT.md with source links
 R3g.17 pass: built to the blueprint: each piece sourced in CONCEPT.md Effects from fresh 21st, Mobbin and Inspo searches
-R3g.18 pass: two kinds for different customers, <meta name="offers" content="home cleaning|apartment management">; both in the big words of the first screen as an h2 under the headline (42 px laptop, 28 px phone); check-says-offer passed at 1366x800 and 390x844 (8 Nov 2026)
-R3g.19 n/a: site-category is service (cleaning), not a shop; the rule covers food-shop and fashion-shop only
+R3g.19 n/a: a cleaning service, not a food or fashion shop
 R3c.2 pass: built to the blueprint: white and sky with navy, Secular One, a bento not three equal cards, one navy band
 R3g.1 pass: built to the blueprint: CONCEPT.md style sheet
 R3g.3 pass: built to the blueprint: green only on the main button; prices in navy or white, bold and large
@@ -103,6 +105,8 @@ R3x.2 n/a: no counted number
 R3x.3 n/a: one item in one size in the record, so no tabs
 R3x.4 n/a: one item in one size in the record, nothing to compare
 R3x.11 n/a: no product to turn
+R3z.1 pass: built to the blueprint: the price-from card (Basic home clean ₪400, Get a free quote) hangs about 40% over the top edge of the dark Where we clean band, measured 0.42 on a laptop and 0.39 on a phone, whole on both; nothing else crosses an edge
+R3z.5 n/a: a light site; its one dark section is the Where we clean band
 R8.1 n/a: no set of images side by side; the site has one picture
 R8.6 n/a: a service with no product to shoot
 R8.7 pass: built to the blueprint: gen/room-brief.md and gen/wipe-brief.md written before generating; no owner photo to compare with, only the flyer
@@ -125,6 +129,8 @@ R3s.24 pass: built to the blueprint: pictures under 600 KB, every img with width
 R3p.6 pass: built to the blueprint: fits passes at the six sizes; the opening picture is made in both shapes so nothing is zoomed
 R3o.5 pass: built to the blueprint: the ₪ sign set in Alef through kit.price
 R3x.7 pass: built to the blueprint: BRAND.md written before any picture: colours with uses, Secular One and Alef, the scale, logo on light and dark, bans
+R3z.4 pass: built to the blueprint: no shade over the film or any photo; the opening words sit on a solid white card (3s.8), nothing darkens the picture
+R3z.7 n/a: the service cards have no pictures, only words and the price
 R3c.5 pass: built to the blueprint: every choice on the quote page is a chip; nothing marked popular
 R3c.6 pass: built to the blueprint: the last button says "Send the request, ₪400" for the basic clean, "Send for a free quote" for the rest
 R3c.7 n/a: no offers
@@ -141,6 +147,7 @@ R3j.10 n/a: no savings
 R3j.11 n/a: no combined services
 R3j.12 n/a: no savings claims
 R3.14 pass: built to the blueprint: the one real price is large; everything else is a free quote, as he quotes
+R3z.3 n/a: the record holds one price (basic home clean ₪400) and every other clean is quoted by the owner, so a taste could end on no real answer; the quote form carries the choice instead
 R3k.7 pass: built to the blueprint: the request in three steps with a Step bar, the sentence beside each step, Back, browser back, each step checks its own fields
 R3k.8 n/a: no basket, a request
 R3k.6 n/a: no basket; links carry the chosen clean (?svc=)
