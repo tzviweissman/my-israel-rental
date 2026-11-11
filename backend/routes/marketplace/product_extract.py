@@ -557,16 +557,22 @@ async def _public_text(url: str) -> str:
             # The check resolves the host with a blocking DNS lookup: off the event loop, or one slow domain stalls every request.
             if not await asyncio.to_thread(_is_public_ical_url, url):
                 return ""
-            r = await http.get(url)
-            if r.is_redirect and r.headers.get("location"):
-                url = str(r.url.join(r.headers["location"]))
-                continue
+            async with http.stream("GET", url) as r:
+                if r.is_redirect and r.headers.get("location"):
+                    url = str(r.url.join(r.headers["location"]))
+                    continue
+                if r.status_code >= 400 or "html" not in r.headers.get("content-type", ""):
+                    return ""
+                # At most _PAGE_BYTES is read: a huge or endless page must not fill the server's memory.
+                buf = bytearray()
+                async for chunk in r.aiter_bytes():
+                    buf += chunk
+                    if len(buf) >= _PAGE_BYTES:
+                        break
+                page = bytes(buf[:_PAGE_BYTES]).decode(r.encoding or "utf-8", errors="replace")
             break
         else:
             return ""
-    if r.status_code >= 400 or "html" not in r.headers.get("content-type", ""):
-        return ""
-    page = r.text[:_PAGE_BYTES]
 
     def meta(name: str) -> str:
         m = re.search(r'<meta[^>]+(?:property|name)=["\']' + re.escape(name) + r'["\'][^>]*content=["\']([^"\']*)', page, re.I) \
