@@ -72,7 +72,7 @@ R3q.1 pass: built to the blueprint: CONCEPT.md complete; check-concept
 R5a.7 pass: built to the blueprint: one idea: the tour of the board; the page ends on the order; not used on any other site
 R9.1 pass: built to the blueprint: their board photo really does hold four parts and three cups, so it carries the tour
 R3f.2 pass: built to the blueprint: signature: the tour. accents: the light coming up on arrival, the line under the numbers tied to the scroll, the closing name. quiet: blur-in reveals, button light, press
-R3m.1 pass: built to the blueprint: gallery place on the home page with its template, product in data-mir-catalog with list, group and item templates
+R3m.1 pass: built to the blueprint: gallery place on the home page with its template; the feast and the whole menu in data-mir-catalog on home and shop (list, group and item templates), so items, prices and stock follow the listing
 R3m.3 pass: built to the blueprint: FAQ is the kit fixed place; hours and fees are not shown until given; areas in fixed lines
 R3k.1 pass: built to the blueprint: Home, Shop, Contact; the feast and the order are one page; no separate menu or order address exists to forward
 R3k.2 pass: built to the blueprint: sitekit menu bar on all pages, Menu button with Close on a phone
@@ -129,21 +129,21 @@ R3c.5 pass: built to the blueprint: whose table and where are tiles, never a dro
 R3c.6 pass: built to the blueprint: Add, $215; on the last step Send for Sunday, $215
 R3c.7 n/a: no offers
 R3j.1 n/a: no guarantee offered; asked
-R3j.2 n/a: the listing has one product, nothing to add
+R3j.2 n/a: no add-on offered at the order step; the whole menu (wine among it) sits beside the feast on the shop, nothing pre-ticked
 R3j.3 n/a: no taster or free offer
 R3j.4 n/a: no group discount
 R3j.5 n/a: no stamp card; the tracking link is the only return path
-R3j.6 n/a: one size
+R3j.6 n/a: the boards come in three sizes once the owner prices them; no pick is marked, none is invented
 R3j.7 pass: built to the blueprint: none: the price is the listing price, nothing struck through
-R3j.8 n/a: one product, nothing to compare
-R3j.9 n/a: one product
+R3j.8 n/a: no saving shown; the prices are the listing prices
+R3j.9 n/a: no saving shown
 R3j.10 n/a: no saving
-R3j.11 n/a: one product
+R3j.11 n/a: no package or combined price offered
 R3j.12 n/a: the owner makes no savings claim
 R3.14 pass: built to the blueprint: one price, shown large, as a food shop does
 R3k.7 pass: built to the blueprint: three step bar, order and total beside each, Back, browser back with #order-2, each step checks its own fields; check-site
-R3k.8 pass: built to the blueprint: a bin button, 40 px, Remove Ultimate Feast from the basket, beside its stepper
-R3k.6 pass: built to the blueprint: any Order the feast link puts one in the basket by ?add= and opens the order step; kept in localStorage
+R3k.8 pass: built to the blueprint: every basket line has a bin button, 40 px, Remove <item> from the basket, beside its stepper
+R3k.6 pass: built to the blueprint: any Add on home or shop puts that item in the basket by ?add= and opens the order step; kept in localStorage
 R3k.9 pass: built to the blueprint: POST to the order form with product id idx:0, then WhatsApp; the name differs from the listing only by the spelling Tzvi is asked to correct
 R3k.10 pass: built to the blueprint: the day holds tomorrow, or Sunday after a Saturday; quantity 1; Your table and In Jerusalem chosen; check-prefill
 R3.15 pass: built to the blueprint: ordering has the Shop; messaging has Contact
@@ -153,8 +153,8 @@ R0b.13 pass: built to the blueprint: shop.js saves first and adds the track_url 
 R3l.1 pass: built to the blueprint: asked in OWNER-QUESTIONS.md: can a customer choose the types or sauces
 R3l.2 pass: built to the blueprint: the one item says 4 types of chicken and 3 sauces on the tile, the order line and the message
 R3l.3 n/a: the record lists no choices for the item; asked
-R3l.4 n/a: one item
-R3l.6 pass: built to the blueprint: the board photo is the listing photo for this product
+R3l.4 pass: built to the blueprint: the boards sit side by side in one grid, each tile with its own size from the listing (26x20, 34x24, 40x30 cm)
+R3l.6 pass: built to the blueprint: the feast is the listing photo; the other items use the pictures from the owner WhatsApp catalog
 R3l.7 pass: built to the blueprint: the item reads alone: what you get and its price, with no choice to make
 R3e.9 pass: built to the blueprint: all buttons have rest, hover and pressed; fields focus and error; Add confirms by a note; check-site
 R3e.19 pass: built to the blueprint: after sending, a thank-you line says the order is open in WhatsApp; the basket empties

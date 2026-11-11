@@ -17,6 +17,7 @@
  *     <template data-mir-group><h3 data-f="group"></h3><ul data-f="items"></ul></template>
  *     <template data-mir-item>
  *       <li><a data-f="link"><img data-f="img" alt=""><b data-f="name"></b><span data-f="price"></span></a></li>
+ *   (data-f="desc", optional: the product's description from the dashboard; removed when it has none)
  *     </template>
  *   </div>
  *
@@ -86,6 +87,7 @@
         var li = it.firstElementChild;
         var price = priceText(p, askLabel);
         var name = it.querySelector('[data-f="name"]'); if (name) name.textContent = p.name;
+        var ds = it.querySelector('[data-f="desc"]'); if (ds) { if (p.description) ds.textContent = p.description; else ds.remove(); }
         var pr = it.querySelector('[data-f="price"]'); if (pr) pr.textContent = p.in_stock ? price : outLabel;
         var img = it.querySelector('[data-f="img"]');
         if (img) { if (p.image) { img.src = p.image; img.alt = p.name; } else img.remove(); }
