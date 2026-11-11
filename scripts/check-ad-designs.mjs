@@ -65,6 +65,14 @@ const RECORD = () => {
   });
   const image = P.drawImage;
   P.drawImage = function (img, ...r) {
+    // The test logo (A4.6): where it lands, so words under it fail.
+    if (this.canvas.isConnected && img instanceof HTMLImageElement && /ad-test-logo/.test(img.src) && r.length >= 4) {
+      const [x, y, w, h] = r.length >= 8 ? r.slice(4) : r;
+      const m = this.getTransform();
+      const a = m.transformPoint(new DOMPoint(x, y));
+      const c = m.transformPoint(new DOMPoint(x + w, y + h));
+      window.__drawn.push({ on: this.canvas, logo: [Math.min(a.x, c.x), Math.min(a.y, c.y), Math.max(a.x, c.x), Math.max(a.y, c.y)], H: this.canvas.height });
+    }
     if (this.canvas.isConnected && img instanceof HTMLCanvasElement && r.length >= 4) window.__drawn.push({ on: this.canvas, qr: Math.min(r[2], r[3]) * Math.hypot(this.getTransform().a, this.getTransform().b), H: this.canvas.height });
     return image.call(this, img, ...r);
   };
@@ -77,6 +85,15 @@ await p.route('**/api/ads/make', (r) => { const f = fixture(lang); r.fulfill({ j
 await p.route('**/api/ads/cutouts', (r) => r.fulfill({ json: { items: fixture('en').cutouts } }));
 await p.route('**/api/ads/shots**', (r) => r.fulfill({ json: { shots: fixture('en').shots, left_today: 5 } }));
 await p.route('**/api/ads/saved**', (r) => (r.request().method() === 'GET' ? r.fulfill({ json: { ads: [] } }) : r.fulfill({ json: { id: 'x' } })));
+// Every owner's business gets a logo (A4.6): a real wide one, M and N Jewelry's oval.
+const TEST_LOGO = path.join(ROOT, 'docs', 'ads', 'gen', 'mn-jewelry-infinity-status', 'logo-medal.png');
+await p.route('**/ad-test-logo.png', (r) => r.fulfill({ body: fs.readFileSync(TEST_LOGO), contentType: 'image/png' }));
+await p.route('**/api/marketplace/businesses', async (r) => {
+  const res = await r.fetch();
+  const j = await res.json();
+  (Array.isArray(j) ? j : j.businesses || []).forEach((x) => { x.logo_url = `${SITE}/ad-test-logo.png`; });
+  r.fulfill({ response: res, json: j });
+});
 
 const fails = [];
 function measure(where, all0, H, wanted) {
@@ -97,6 +114,16 @@ function measure(where, all0, H, wanted) {
   if (wanted.price && prices.size > 1) out.push(`price: ${[...prices].join(' and ')} on one ad`);
   if (wanted.link && !/myisraelrental\.com/.test(all)) out.push('link: no short link printed');
   if (wanted.path && !all.replace(/\s/g, '').includes(`myisraelrental.com/p/${wanted.path}`)) out.push(`link: /p/${wanted.path} not printed whole`);
+  if (wanted.logo) {
+    const lg = drawn.filter((d) => d.logo).map((d) => d.logo).pop();
+    if (!lg) out.push('logo: the business logo is not on the ad');
+    else {
+      if (lg[3] - lg[1] < 54) out.push(`logo: ${Math.round(lg[3] - lg[1])}px high, too small to read`);
+      if (lg[0] < -1 || lg[2] > drawn[0].W + 1 || lg[1] < 0 || lg[3] > H) out.push('logo: runs off the picture');
+      if (story && (lg[1] < SAFE_TOP - 1 || lg[3] > H - SAFE_BOTTOM + 1)) out.push(`story-safe: the logo at y ${Math.round(lg[1])}`);
+      for (const d of words) if (d.x0 < lg[2] && d.x1 > lg[0] && d.top < lg[3] && d.y > lg[1]) out.push(`logo: covers "${d.t.slice(0, 28)}"`);
+    }
+  }
   const qr = drawn.filter((d) => d.qr).map((d) => d.qr);
   if (wanted.link && qr.length && Math.max(...qr) < 149.5) out.push(`qr: ${Math.round(Math.max(...qr))}px`);
   for (const m of [...new Set(out)]) fails.push(`${where}: ${m}`);
@@ -133,7 +160,7 @@ for (const l of ['en', 'he']) {
         await p.locator(`[data-testid="ad-${f}"]`).click();
         await p.locator(`[data-testid="ad-g-${k}"]`).click();
       });
-      measure(`maker ${k} ${f} ${l}`, drawn, { square: 1080, feed: 1350, story: 1920 }[f], { price: k !== 'items', link: true, path: LONG_NAME }); // Side by side: each item above its own price (rules 9b.3)
+      measure(`maker ${k} ${f} ${l}`, drawn, { square: 1080, feed: 1350, story: 1920 }[f], { price: k !== 'items', link: true, path: LONG_NAME, logo: true }); // Side by side: each item above its own price (rules 9b.3)
       count += 1;
       if (pictures) {
         const d = await p.locator('[data-testid="ad-preview"]').evaluate((c) => c.toDataURL('image/jpeg', 0.8));
