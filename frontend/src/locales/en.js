@@ -1414,7 +1414,7 @@ const en = {
         todoPhoto: 'Add a photo',
         todoArea: 'Add your area',
         todoContact: 'Add your WhatsApp',
-        liveTitle: 'Your page is live!',
+        liveTitle: 'Your page is live',
         liveBody: 'Customers can find {{name}} now. Share it today to get your first customers.',
         liveAd: 'Make your first ad',
         liveCopy: 'Copy your page link',
