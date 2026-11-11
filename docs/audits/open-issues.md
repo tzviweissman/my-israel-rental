@@ -307,3 +307,16 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - [Medium] Audit setup, 7 Nov: no MongoDB (403), no Chromium, full backend suite cannot run; `pytest_asyncio` and `mongomock_motor` missing from the venv. Still open since 15 Oct.
 - [Medium] Sign-up draft reminder email goes to any address a visitor types (no verification), up to 10 new drafts per day per IP (`signup_drafts.py` save_draft). First seen 9 Nov 2026 (2026-11-09-site-audit.md).
 - [To fix] Audit setup hung over 10 minutes without a database on 8 Nov (dead-ends audit), so no signed-in clicking. First seen 23 Oct (2026-11-08-dead-ends.md).
+
+## Code review of 10 Nov 2026
+- [Low] Weekly "your ad is ready" email: "Stop these emails" has no switch to turn them back on (`ad_emails_off` missing from `EMAIL_SWITCHES` and `EmailSwitches.jsx`). First seen 10 Nov 2026 (2026-11-10-site-audit.md). Open.
+- [Medium] Catalog and ad picture cutting blocked the server for every visitor (~0.4 s a picture, up to 30). First seen 10 Nov 2026 (2026-11-10-site-audit.md). [Fixed 10 Nov, 879d76dc; on this branch fb2b7fa0]
+- [Low] `dashboard.adPicsDone` without plural forms ("with 1 photos"); test-i18n-parity failed. First seen 10 Nov 2026 (2026-11-10-site-audit.md). [Fixed 10 Nov, d10948a5; on this branch 2f994fc4]
+- [Medium] Customer messages: holiday and "been a while" templates could be sent with their [What you offer...] gaps unfilled; `_UNFILLED` matched only "Your"/"שלכם" since 5 Nov. First seen 10 Nov 2026 (2026-11-10-site-audit.md). [Fixed 10 Nov, 965610bd; on this branch 3c9a22fa]
+- [Decision] Weekly ad email will reach every existing business with a product photo and no saved ad on the first weekday morning after deploy. First seen 10 Nov 2026 (2026-11-10-site-audit.md).
+
+## UI audit of 11 Nov 2026
+- [Low] Sign-up: "Your page is 0% ready" sits on a step bar already a third full, so the two progress signals disagree on the first screen (`CreateGig.jsx:1157` and `:1183`). First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
+- [Low] Sign-up: the seven "+ Add ..." shortcut chips are 26px tall, "Start over" 16px and the bare-header language switch 34px, under 44px on phones (`CreateGig.jsx:1198`, `:1176`; `Navigation.js:354`). First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
+- [Low] L.A. Cholent home, 1000x700 window: the kosher line "Kosher, hechsher from Rabbi Weiner" wraps and its second line is cut by the pinned opening (bottom 713px of 700) while the opening holds. First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
+- [Low] Sign-up "your page is live" heading had an exclamation mark (en + he). First seen 11 Nov 2026. [Fixed 11 Nov, 9d2ecd60; on this branch 46fada04]
