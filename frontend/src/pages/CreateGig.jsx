@@ -1168,14 +1168,14 @@ const CreateGig = () => {
             <button
               type="button"
               onClick={() => setShowWelcome(false)}
-              className="absolute top-3 right-3 text-white/70 hover:text-white transition-colors"
+              className="absolute top-3 end-3 text-white/70 hover:text-white transition-colors"
               aria-label={t('wizard.dismiss', 'Dismiss')}
               data-testid="create-gig-welcome-dismiss"
             >
               <X size={16} />
             </button>
-            <div className="pr-6">
-              <div className="text-xs font-semibold uppercase tracking-wider text-[var(--gold)] mb-1">
+            <div className="pe-6">
+              <div className="text-xs font-semibold uppercase tracking-wider text-white/80 mb-1">
                 {t('wizard.welcomeEyebrow', 'Welcome aboard')}
               </div>
               <div className="text-lg font-semibold mb-1" style={{ fontFamily: 'var(--font-head)' }}>
@@ -1189,7 +1189,7 @@ const CreateGig = () => {
         )}
         <div className="mb-6" data-testid="wizard-progress">
           <div className="flex items-baseline justify-between gap-3 mb-2 text-sm">
-            <span className="font-semibold" data-testid="wizard-progress-pct">
+            <span id="wizard-progress-label" className="font-semibold" data-testid="wizard-progress-pct">
               {missing.length
                 ? t('wizard.progressPct', { pct: readyPct, defaultValue: 'Your page is {{pct}}% ready' })
                 : t('wizard.progressDone', 'Your page is ready to publish')}
@@ -1207,21 +1207,23 @@ const CreateGig = () => {
                 try { localStorage.removeItem('signup-draft-id'); } catch { /* private mode */ }
                 window.location.assign(window.location.pathname);
               }}
-              className="text-xs text-gray-600 underline"
+              className="inline-flex items-center min-h-[44px] px-2 -my-3 -me-2 text-xs text-gray-600 underline"
               data-testid="wizard-start-over"
             >
               {t('wizard.startOver', 'Start over')}
             </button>
           </div>
-          <div className="flex items-center gap-2">
-            {Array.from({ length: totalSteps }, (_, i) => i + 1).map((n) => (
-              <div key={n} className={`flex-1 h-1 rounded-full ${n <= step ? 'bg-[var(--brand-primary)]' : 'bg-gray-200'}`} />
-            ))}
+          {/* The bar shows the same readiness as the words above it. It filled by step number, so
+              step 1 showed a third full under "0% ready" (11 Nov UI audit). */}
+          <div className="h-1 rounded-full bg-gray-200 overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={100}
+               aria-valuenow={missing.length ? readyPct : 100} aria-labelledby="wizard-progress-label">
+            <div className="h-full rounded-full bg-[var(--brand-primary)] transition-[width] duration-300"
+                 style={{ width: `${missing.length ? readyPct : 100}%` }} />
           </div>
           {missing.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-3">
               {readiness.map((x) => (x.ok ? (
-                <span key={x.k} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-500 line-through">
+                <span key={x.k} className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-full text-xs bg-gray-100 text-gray-500 line-through">
                   <Check size={12} aria-hidden="true" /> {x.label}
                 </span>
               ) : (
@@ -1230,7 +1232,7 @@ const CreateGig = () => {
                   type="button"
                   disabled={x.step > step}
                   onClick={() => setStep(x.step)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border border-[var(--brand-border)] bg-white enabled:hover:border-[var(--gold)] disabled:cursor-default"
+                  className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-full text-xs font-semibold border border-[var(--brand-border)] bg-white enabled:hover:border-[var(--gold)] disabled:cursor-default"
                   data-testid={`wizard-todo-${x.k}`}
                 >
                   + {x.label}

@@ -2319,6 +2319,8 @@ const en = {
         availabilityHint: 'A reminder when the dates on one of your rentals are about to run out.',
         pricingTitle: 'Pricing tips',
         pricingHint: 'A weekly note on suggested prices. It covers vacation rentals that have Smart Pricing turned on, and nothing else.',
+        adsTitle: 'Ready-made ads',
+        adsHint: 'When a product has no ad yet, we make one from its photo and price and email it to you, once a week.',
         saved: 'Saved',
         failed: 'Could not save. Try again.',
       },
@@ -6155,6 +6157,7 @@ const en = {
         failed: 'Could not add it. Please try again.',
       },
       pageEditor: {
+        savedPrices: "Saved. The new price is in your listing too: {{names}}.",
         page: 'Page',
         open: 'Edit your page',
         notFound: 'This page could not be opened',

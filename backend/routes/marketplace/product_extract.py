@@ -474,8 +474,13 @@ def _hours(periods: list) -> dict:
         day = _DAY_KEYS[o["day"] % 7]
         if out[day]:
             continue
-        out[day] = [{"start": f"{o.get('hour', 0):02d}:{o.get('minute', 0):02d}",
-                     "end": f"{c.get('hour', 0):02d}:{c.get('minute', 0):02d}"}]
+        start = f"{o.get('hour', 0):02d}:{o.get('minute', 0):02d}"
+        end = f"{c.get('hour', 0):02d}:{c.get('minute', 0):02d}"
+        # Open past midnight (20:00 to 02:00): a window ending before it starts reads as no hours at
+        # all to the slot finder (gigs.py), so the day runs to 23:59 (9 Nov 2026 code review).
+        if c.get("day", o["day"]) != o["day"] or end <= start:
+            end = "23:59"
+        out[day] = [{"start": start, "end": end}]
     return out
 
 

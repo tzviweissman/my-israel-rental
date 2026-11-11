@@ -126,6 +126,8 @@ EMAIL_SWITCHES = {
     "jobs_emails": ("prefs", "jobs_emails_off"),
     "availability_emails": ("users", "availability_reminders_optout"),
     "pricing_emails": ("users", "pricing_insights_optout"),
+    # The weekly "your ad is ready" email (weekly_ads.py), whose stop link had no way back (10 Nov audit).
+    "ad_emails": ("prefs", "ad_emails_off"),
 }
 
 
@@ -135,6 +137,7 @@ class EmailSwitchesIn(BaseModel):
     jobs_emails: bool | None = None
     availability_emails: bool | None = None
     pricing_emails: bool | None = None
+    ad_emails: bool | None = None
 
 
 async def _switches(user_id: str) -> dict[str, bool]:

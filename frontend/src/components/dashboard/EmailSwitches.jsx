@@ -1,7 +1,7 @@
 /**
  * On/off switches for every email that promises a way to stop it: the
  * Monday summary, requests board matches, job matches, availability
- * reminders and pricing tips. Without these, the "stop these emails" link
+ * reminders, pricing tips and the weekly ready-made ad. Without these, the "stop these emails" link
  * or the "pause them in settings" line was a one-way door or a promise
  * with nowhere to keep it (dead ends, 4 Oct). Backed by
  * /marketplace/notification-preferences/emails.
@@ -18,6 +18,7 @@ const SWITCHES = [
   { key: 'jobs_emails', title: ['emailSwitches.jobsTitle', 'Matching jobs'], hint: ['emailSwitches.jobsHint', 'Emails about new jobs that match what you offer, one at a time or as a daily round-up.'] },
   { key: 'availability_emails', title: ['emailSwitches.availabilityTitle', 'Availability reminders'], hint: ['emailSwitches.availabilityHint', 'A reminder when the dates on one of your rentals are about to run out.'] },
   { key: 'pricing_emails', title: ['emailSwitches.pricingTitle', 'Pricing tips'], hint: ['emailSwitches.pricingHint', 'A weekly note when a price on one of your rentals looks out of step with similar places.'] },
+  { key: 'ad_emails', title: ['emailSwitches.adsTitle', 'Ready-made ads'], hint: ['emailSwitches.adsHint', 'When a product has no ad yet, we make one from its photo and price and email it to you, once a week.'] },
 ];
 
 export default function EmailSwitches({ API, token }) {

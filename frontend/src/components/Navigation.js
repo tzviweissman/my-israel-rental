@@ -351,7 +351,7 @@ const Navigation = () => {
             <img src={logoMark} alt="" aria-hidden="true" className="h-9 w-auto block" />
             <span className="font-bold tracking-tight text-[17px]" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>MyIsraelRental</span>
           </Link>
-          <button onClick={toggleLanguage} className="px-3 py-1.5 rounded-full border text-sm font-semibold" style={{ borderColor: '#E3E3E3', color: 'var(--ink)' }}
+          <button onClick={toggleLanguage} className="px-3 min-h-[44px] rounded-full border text-sm font-semibold" style={{ borderColor: '#E3E3E3', color: 'var(--ink)' }}
             data-testid="language-toggle" aria-label={t('nav.toggleLanguage')}>
             עברית / EN
           </button>
