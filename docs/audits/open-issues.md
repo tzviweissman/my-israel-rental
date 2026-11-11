@@ -320,3 +320,15 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - [Low] Sign-up: the seven "+ Add ..." shortcut chips are 26px tall, "Start over" 16px and the bare-header language switch 34px, under 44px on phones (`CreateGig.jsx:1198`, `:1176`; `Navigation.js:354`). First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
 - [Low] L.A. Cholent home, 1000x700 window: the kosher line "Kosher, hechsher from Rabbi Weiner" wraps and its second line is cut by the pinned opening (bottom 713px of 700) while the opening holds. First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
 - [Low] Sign-up "your page is live" heading had an exclamation mark (en + he). First seen 11 Nov 2026. [Fixed 11 Nov, 9d2ecd60; on this branch 46fada04]
+
+## Follow-up 11 Nov 2026 (audits of 6 to 11 Nov)
+
+- Fixed, merged to main with this follow-up: visit counters' plural check (`advertising.visits`, `ads.nudgeVisits` read {{n}}; `ads.weekVisits` got plural forms in the locales, so `AdMaker.jsx` stayed untouched); `dashboard.adPicsDone` plural; picture cutting in a thread; holiday and win-back template gaps; "Your page is live" without "!".
+- Fixed 11 Nov (9eb94972): ad emails stop link now has a switch (Ready-made ads, email settings); Google hours past midnight end at 23:59; sign-up bar fills with readiness, not step; sign-up chips, Start over and language switch 44px; sign-up welcome eyebrow readable (was accent on accent).
+- Fixed 11 Nov: `audit-setup.sh` installs pytest-asyncio and mongomock-motor, so the three test files collect.
+- Not a bug: booking discount minimum uses the browser's amount (`gigs.py`, 6 Nov). Hand-built pages send their own composed price, the business sees that price and the discount in the booking message, and no payment is taken, so an inflated amount only fools the customer's own booking. Rejected.
+- Not a bug: `GET /gigs/{id}/code-box` without a rate limit (6 Nov). It returns a yes/no and the pause state only. Rejected.
+- Moot: the weekly ad email going to every owner at once on first deploy (10 Nov). It deployed with main on 10 Nov.
+- Waiting for Tzvi: sign-up draft reminder emails any typed address (9 Nov, Medium). Options: send only after a Google sign-in with that address, or not at all.
+- Left to the L.A. Cholent session: the kosher line is cut by 11px at 1000x700 (11 Nov). Another session was changing that site the same day.
+- Still open, not re-checked: Hadassah Prys phone booking bar over the Day field (9 Nov, unconfirmed); Gifted Israel basket column at the end of the shop (11 Nov, unconfirmed); footer and menu links on business sites under 44px (2 Nov); ad maker close button about 34px (30 Oct, `AdMaker.jsx` needs check-ad-designs with local servers); audit sandbox has no MongoDB or Chromium download (proxy, since 15 Oct).
