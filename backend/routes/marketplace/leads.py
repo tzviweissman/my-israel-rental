@@ -14,7 +14,9 @@ Cards are worked out from what already exists, nothing is copied:
   * quote requests and prices (db.quote_requests): new / quoted / won /
     lost from their status;
   * leads the business adds by hand (db.leads), for a phone call or a
-    walk-in: whatever stage it puts them in.
+    walk-in: whatever stage it puts them in;
+  * emails sent or forwarded to the business's own address
+    (email_inbox.py): "new" until answered, with Claude's draft reply.
 
 The business can move any card. A move is kept with the stage the card
 had when it was moved, and holds until the enquiry itself changes (the
@@ -144,6 +146,10 @@ async def leads_board(business_id: str, user=Depends(verify_token)):
                       "title": ld.get("note") or "", "last_text": "", "created_at": ld["created_at"],
                       "last_at": ld.get("updated_at") or ld["created_at"], "auto_stage": ld.get("stage", "new")}
 
+    # Emails to the business's own address (email_inbox.py).
+    from .email_inbox import email_cards
+    cards.update(await email_cards(business_id, since))
+
     moves = {m["key"]: m async for m in db.lead_moves.find({"business_id": business_id})}
     closed_cut = (datetime.now(UTC) - timedelta(days=CLOSED_KEEP_DAYS)).isoformat()
     out = []
@@ -157,6 +163,9 @@ async def leads_board(business_id: str, user=Depends(verify_token)):
         c.pop("replied", None)
         out.append(c)
     out.sort(key=lambda c: c.get("last_at") or "", reverse=True)
+    # The suggested reply a nudge or the owner asked for (lead_nudge.py).
+    from .lead_nudge import attach_drafts
+    await attach_drafts(business_id, out)
     return {"stages": list(STAGES), "leads": out, "counts": {s: sum(1 for c in out if c["stage"] == s) for s in STAGES}}
 
 

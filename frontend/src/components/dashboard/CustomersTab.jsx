@@ -18,6 +18,7 @@ import OccasionsCard from './OccasionsCard';
 import PaymentRequestsPanel from './PaymentRequestsPanel';
 import LeadsBoard from './LeadsBoard';
 import AwayReplyCard from './AwayReplyCard';
+import InboxCard from './InboxCard';
 import { ImportCustomersPanel } from './OrdersTab';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
@@ -178,6 +179,7 @@ export default function CustomersTab({ API, token }) {
   const [view, setView] = useState(() => { try { return new URLSearchParams(window.location.search).get('view') === 'leads' ? 'leads' : 'list'; } catch { return 'list'; } });
   // ?pay=1: the notification "a customer says they paid" opens the requests.
   const [searchParams, setSearchParams] = useSearchParams();
+  const [leadsKey, setLeadsKey] = useState(0);
   useEffect(() => {
     const v = searchParams.get('view');
     if (v !== 'leads' && v !== 'list') return;
@@ -278,7 +280,7 @@ export default function CustomersTab({ API, token }) {
         <PaymentRequestsPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPaying(false)} />
       )}
 
-      {view === 'leads' ? (<><AwayReplyCard API={API} auth={auth} businessId={biz.id} /><LeadsBoard API={API} auth={auth} businessId={biz.id} /></>) : (<>
+      {view === 'leads' ? (<><InboxCard API={API} auth={auth} businessId={biz.id} onChange={() => setLeadsKey((k) => k + 1)} /><AwayReplyCard API={API} auth={auth} businessId={biz.id} /><LeadsBoard API={API} auth={auth} businessId={biz.id} refreshKey={leadsKey} /></>) : (<>
       {!composing && (biz.permissions || []).includes('messages') && (
         <OccasionsCard API={API} auth={auth} biz={biz} onCompose={(m) => setComposing(m)} />
       )}

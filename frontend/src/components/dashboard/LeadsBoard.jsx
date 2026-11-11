@@ -2,8 +2,13 @@
  * Customers → Leads (backend routes/marketplace/leads.py): every enquiry in
  * stages, New → Replied → Price sent → Won / Lost, built from the chats about
  * the business's listings, its quote requests and prices, and leads it adds
- * itself (a phone call, a walk-in). Any card can be moved; a move holds until
- * the enquiry itself changes.
+ * itself (a phone call, a walk-in), and emails to the business's own address
+ * (InboxCard, email_inbox.py). Any card can be moved; a move holds until the
+ * enquiry itself changes.
+ *
+ * A new chat or email card carries a suggested reply (lead_nudge.py,
+ * utils/lead_assist.py) the owner can edit and send from the card. Nothing
+ * is sent without them pressing Send.
  *
  * Columns side by side on a laptop, swiped one at a time on a phone.
  */
@@ -12,14 +17,14 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Loader2, MessageCircle, Calculator, PhoneCall, Plus, Trash2, X } from 'lucide-react';
+import { Loader2, MessageCircle, Calculator, PhoneCall, Plus, Trash2, X, Mail, Sparkles, Send } from 'lucide-react';
 import { money } from '../../utils/currency';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
-const SOURCE_ICON = { chat: MessageCircle, quote: Calculator, manual: PhoneCall };
+const SOURCE_ICON = { chat: MessageCircle, quote: Calculator, manual: PhoneCall, email: Mail };
 
-export default function LeadsBoard({ API, auth, businessId }) {
+export default function LeadsBoard({ API, auth, businessId, refreshKey }) {
   const { t, i18n } = useTranslation();
   const [data, setData] = useState(null);
   const [adding, setAdding] = useState(false);
@@ -27,6 +32,7 @@ export default function LeadsBoard({ API, auth, businessId }) {
   const base = `${API}/marketplace/businesses/${businessId}/leads`;
   const load = useCallback(() => axios.get(base, auth).then(({ data: d }) => setData(d)).catch(() => setData(false)), [base, auth]);
   useEffect(() => { setData(null); load(); }, [load]);
+  useEffect(() => { if (refreshKey) load(); }, [refreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const STAGE = {
     new: t('leads.st.new', 'New'), replied: t('leads.st.replied', 'Replied'), quoted: t('leads.st.quoted', 'Price sent'),
@@ -135,6 +141,9 @@ export default function LeadsBoard({ API, auth, businessId }) {
                           <button type="button" onClick={() => remove(c)} className="grid place-content-center w-11 h-11" aria-label={t('leads.delete', 'Delete')}><Trash2 size={14} /></button>
                         )}
                       </div>
+                      {s === 'new' && (c.source === 'chat' || c.source === 'email') && (
+                        <ReplyBox card={c} base={base} auth={auth} onSent={load} />
+                      )}
                     </li>
                   );
                 })}
@@ -145,5 +154,90 @@ export default function LeadsBoard({ API, auth, businessId }) {
         })}
       </div>
     </div>
+  );
+}
+
+/** The suggested reply on a new chat or email card: ask for one, edit it, send it. */
+function ReplyBox({ card, base, auth, onSent }) {
+  const { t } = useTranslation();
+  const [text, setText] = useState(card.draft || '');
+  const [subject, setSubject] = useState(card.draft_subject || (card.subject ? `Re: ${card.subject}` : ''));
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { setText(card.draft || ''); }, [card.draft]);
+  const isEmail = card.source === 'email';
+  if (isEmail && !card.can_send) return <p className="text-[11px] mt-2" style={{ color: 'var(--brand-muted)' }}>{t('leads.noAddress', 'This email has no address to answer. Reply from your own email.')}</p>;
+
+  const suggest = async () => {
+    setBusy(true);
+    try {
+      const { data } = await axios.post(`${base}/draft`, { key: card.key }, auth);
+      setText(data.draft || ''); if (data.draft_subject) setSubject(data.draft_subject); setOpen(true);
+    } catch (err) { toast.error(err?.response?.data?.detail || t('leads.failed', 'Could not save. Try again.')); }
+    setBusy(false);
+  };
+  const send = async () => {
+    setBusy(true);
+    try {
+      await axios.post(`${base}/reply`, { key: card.key, text, subject: isEmail ? subject : null }, auth);
+      toast.success(t('leads.sent', 'Sent')); onSent();
+    } catch (err) { toast.error(err?.response?.data?.detail || t('leads.sendFailed', 'That did not send. Try again.')); }
+    setBusy(false);
+  };
+  const markEmail = async (status) => {
+    try { await axios.post(base.replace(/\/leads$/, `/inbox/${card.email_id}/status`), { status }, auth); onSent(); } catch { toast.error(t('leads.failed', 'Could not save. Try again.')); }
+  };
+
+  if (!open) {
+    return (
+      <div className="flex flex-wrap gap-1 mt-2">
+        {text ? (
+          <button type="button" onClick={() => setOpen(true)} className="px-3 min-h-[36px] inline-flex items-center gap-1 rounded-lg text-xs font-semibold"
+                  style={{ background: 'var(--accent-soft)', color: 'var(--ink)' }} data-testid="lead-draft-open">
+            <Sparkles size={12} /> {t('leads.seeDraft', 'Suggested reply ready')}
+          </button>
+        ) : (
+        <button type="button" onClick={suggest} disabled={busy} className="px-3 min-h-[36px] inline-flex items-center gap-1 rounded-lg border text-xs font-semibold disabled:opacity-50" style={fieldStyle} data-testid="lead-suggest">
+          {busy ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />} {busy ? t('leads.suggesting', 'Writing…') : t('leads.suggest', 'Suggest a reply')}
+        </button>
+        )}
+        {isEmail && <EmailMarks t={t} mark={markEmail} />}
+      </div>
+    );
+  }
+  return (
+    <div className="mt-2 pt-2 border-t" style={{ borderColor: 'var(--brand-border)' }} data-testid="lead-reply">
+      <p className="text-[11px] font-semibold flex items-center gap-1" style={{ color: 'var(--ink)' }}><Sparkles size={12} style={{ color: 'var(--gold)' }} aria-hidden="true" /> {t('leads.draftLabel', 'Suggested reply')}</p>
+      {isEmail && (
+        <input value={subject} onChange={(e) => setSubject(e.target.value)} maxLength={200} aria-label={t('leads.subject', 'Subject')}
+               className="w-full px-2 py-1.5 mt-1 rounded-lg border text-xs bg-white" style={fieldStyle} dir="auto" />
+      )}
+      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} maxLength={8000} dir="auto" aria-label={t('leads.draftLabel', 'Suggested reply')}
+                className="w-full px-2 py-1.5 mt-1 rounded-lg border text-xs bg-white" style={fieldStyle} data-testid="lead-reply-text" />
+      <p className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>
+        {isEmail ? t('leads.emailTo', { email: card.customer_email, defaultValue: 'To {{email}}. If they answer, it comes to your own email.' }) + ' ' : ''}
+        {t('leads.draftNote', 'Written by AI from what your page says. Check it before you send.')}
+      </p>
+      <div className="flex flex-wrap gap-1 mt-1">
+        <button type="button" onClick={send} disabled={busy || !text.trim() || (isEmail && !subject.trim())}
+                className="px-4 min-h-[36px] inline-flex items-center gap-1 rounded-full text-xs font-semibold disabled:opacity-50"
+                style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="lead-reply-send">
+          <Send size={12} /> {t('leads.send', 'Send')}
+        </button>
+        <button type="button" onClick={suggest} disabled={busy} className="px-3 min-h-[36px] inline-flex items-center gap-1 rounded-lg border text-xs font-semibold disabled:opacity-50" style={fieldStyle}>
+          {busy ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />} {t('leads.suggest', 'Suggest a reply')}
+        </button>
+        {isEmail && <EmailMarks t={t} mark={markEmail} />}
+      </div>
+    </div>
+  );
+}
+
+function EmailMarks({ t, mark }) {
+  return (
+    <>
+      <button type="button" onClick={() => mark('done')} className="px-3 min-h-[36px] inline-flex items-center rounded-lg border text-xs font-semibold" style={fieldStyle}>{t('leads.markDone', 'Done')}</button>
+      <button type="button" onClick={() => mark('spam')} className="px-3 min-h-[36px] inline-flex items-center rounded-lg border text-xs font-semibold" style={fieldStyle}>{t('leads.markSpam', 'Spam')}</button>
+    </>
   );
 }
