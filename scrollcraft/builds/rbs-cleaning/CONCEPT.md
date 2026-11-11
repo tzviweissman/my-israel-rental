@@ -12,7 +12,7 @@ Category: service
 A, the squeegee pass: his own words, his own craft, the cause on screen for the whole stroke. It was first drawn in code; that did not look real, so it is a filmed clip (gen/wipe-brief.md), a wide blade pulled down one soapy pane, then the bright room comes in. The room is a generated home, never shown as a customer's or our own.
 
 ## Style sheet
-Accent #27622A (the RBS green) on the main button only; ink #0D2241 navy; ground white with pale sky #EEF6FB; Secular One for headings, Alef for text (BRAND.md); one radius 14 px; one soft shadow 3 px down, 30 px blur, tinted; motion: the wipe, short rises once, nothing else moves.
+Accent #27622A (the RBS green) on the main button only; ink #0D2241 navy; ground white with pale sky #EEF6FB; Fredoka for headings (Secular One until 10 Nov 2026, when The Finest Cut went live with it), Alef for text (BRAND.md); one radius 14 px; one soft shadow 3 px down, 30 px blur, tinted; motion: the wipe, short rises once, nothing else moves.
 
 ## Wow gate
 1. Strongest photo, big: there is no real photo yet (only an illustrated flyer), so the opening is a generated film and room, full screen at every size; Daniel is asked for real photos (OWNER-QUESTIONS.md 10).

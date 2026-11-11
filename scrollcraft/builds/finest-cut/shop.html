@@ -47,6 +47,27 @@
     </div>
   </section>
 
+  <section class="sec more" id="more" aria-labelledby="h-more" hidden>
+    <div class="wrap">
+      <h2 id="h-more">The whole menu</h2>
+      <div data-mir-catalog data-href="shop.html?add={name}#order" data-other="" data-out="Out of stock right now, message us">
+        <div data-mir-list></div>
+        <template data-mir-group><div class="fc-grid" data-f="items"></div></template>
+        <template data-mir-item>
+          <article class="fc">
+            <div class="ph"><img data-f="img" alt="" width="480" height="480" loading="lazy"></div>
+            <div class="info">
+              <h3 data-f="name"></h3>
+              <p class="fc-d" data-f="desc"></p>
+              <p class="pr-row"><span class="pr" data-f="price"></span></p>
+              <a class="btn-line" data-f="link">Add to your order</a>
+            </div>
+          </article>
+        </template>
+      </div>
+    </div>
+  </section>
+
   <section class="sec" id="order" aria-labelledby="h-basket">
     <div class="wrap">
       <ol class="osteps" id="steps" aria-label="Order steps">

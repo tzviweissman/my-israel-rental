@@ -236,3 +236,20 @@ section.feast, section.who { padding-block: var(--s7); }
 @media (prefers-reduced-motion: reduce) and (max-aspect-ratio: 1/1) and (max-height: 700px) {
   .screen canvas { transform: translateY(-60px) scale(.88); transform-origin: 50% 0; }
 }
+
+/* the whole menu (the listing's products, live): the feast large, the rest as tiles beside it */
+.fc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--s6) var(--s5); }
+.fc-grid > .fc:first-child { grid-column: 1 / -1; }
+.fc-grid > .fc:not(:first-child), .more .fc-grid > .fc { display: flex; flex-direction: column; gap: var(--s3); }
+.fc-grid > .fc:not(:first-child) .ph, .more .fc-grid > .fc .ph { aspect-ratio: 1; max-height: none; }
+.fc-grid > .fc:not(:first-child) .ph img, .more .fc-grid > .fc .ph img { width: 100%; height: 100%; max-height: none; object-fit: cover; }
+.fc-grid > .fc:not(:first-child) h3, .more .fc-grid > .fc h3 { font-size: var(--t2); }
+.fc-grid .btn-line { margin-top: var(--s3); }
+.fc-d { margin: var(--s2) 0 0; color: var(--soft); }
+.more .fc-grid > .fc:first-child { grid-column: auto; }
+.fc.is-out { opacity: .55; }
+.fc-grid > .fc:not(:first-child), .more .fc-grid > .fc { align-items: stretch; }
+/* their catalogue photos are cut from WhatsApp tiles: a little larger, so the tile's round corners fall outside */
+.fc-grid > .fc:not(:first-child) .ph img, .more .fc-grid > .fc:not(:first-child) .ph img { transform: scale(1.14); }
+.fc.is-out .pr { font: 500 var(--t0)/1.4 var(--font-body); }
+.fc.is-out .btn-line { display: none; }

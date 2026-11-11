@@ -80,7 +80,7 @@ HOME = f'''  <section class="open film" id="board" aria-labelledby="h-open" data
   <section class="sec feast" id="feast" aria-labelledby="h-feast">
     <div class="wrap">
       <h2 id="h-feast" class="rev">Enhance your table</h2>
-      <div data-mir-catalog data-href="shop.html?add={{name}}" data-other="" data-out="Out of stock right now, message us">
+      <div data-mir-catalog data-href="shop.html?add={{name}}#order" data-other="" data-out="Out of stock right now, message us">
         <div data-mir-list>
           <article class="fc rev">
             <div class="ph"><img src="assets/board.webp" alt="The Ultimate Feast from above" width="1400" height="1120" loading="lazy"></div>
@@ -91,14 +91,15 @@ HOME = f'''  <section class="open film" id="board" aria-labelledby="h-open" data
             </div>
           </article>
         </div>
-        <template data-mir-group><div data-f="items"></div></template>
+        <template data-mir-group><div class="fc-grid" data-f="items"></div></template>
         <template data-mir-item>
           <article class="fc">
             <div class="ph"><img data-f="img" alt="" width="1400" height="1120" loading="lazy"></div>
             <div class="info">
               <h3 data-f="name"></h3>
-              <p class="pr-row"><span class="pr" data-f="price"></span><span class="unit">XL chicken board</span></p>
-              <a class="btn" data-f="link">{SITE.cta[1]}</a>
+              <p class="fc-d" data-f="desc"></p>
+              <p class="pr-row"><span class="pr" data-f="price"></span></p>
+              <a class="btn-line" data-f="link">Add to your order</a>
             </div>
           </article>
         </template>
@@ -175,6 +176,27 @@ SHOP = f'''  <form id="form" novalidate>
           <li>Delivery throughout Jerusalem</li>
           <li>Under the hashgacha of Rabbi Weiner</li>
         </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec more" id="more" aria-labelledby="h-more" hidden>
+    <div class="wrap">
+      <h2 id="h-more">The whole menu</h2>
+      <div data-mir-catalog data-href="shop.html?add={{name}}#order" data-other="" data-out="Out of stock right now, message us">
+        <div data-mir-list></div>
+        <template data-mir-group><div class="fc-grid" data-f="items"></div></template>
+        <template data-mir-item>
+          <article class="fc">
+            <div class="ph"><img data-f="img" alt="" width="480" height="480" loading="lazy"></div>
+            <div class="info">
+              <h3 data-f="name"></h3>
+              <p class="fc-d" data-f="desc"></p>
+              <p class="pr-row"><span class="pr" data-f="price"></span></p>
+              <a class="btn-line" data-f="link">Add to your order</a>
+            </div>
+          </article>
+        </template>
       </div>
     </div>
   </section>

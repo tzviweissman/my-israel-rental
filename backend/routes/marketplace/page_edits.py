@@ -278,7 +278,7 @@ async def get_page_edits(slug_or_id: str):
     products: list[dict[str, Any]] = []
     async for g in db.marketplace_gigs.find({"business_id": biz["_id"], "status": "published"}, {"products": 1, "tiers": 1, "gig_type": 1}):
         if g.get("gig_type") == "store":
-            for p in g.get("products") or []:
+            for i, p in enumerate(g.get("products") or []):
                 name = (p.get("name") or "").strip()
                 try:
                     price = float(p.get("price"))
@@ -287,7 +287,8 @@ async def get_page_edits(slug_or_id: str):
                 if not name or price < 0:
                     continue
                 products.append({
-                    "id": p.get("id"),
+                    # the id the order form gives it (orders._products_for_order): idx:N until the listing is saved again
+                    "id": p.get("id") or f"idx:{i}",
                     # with the listing, so an order page can place a real
                     # order for it (POST /order-form/<gig_id>/orders)
                     "gig_id": g["_id"],
@@ -299,6 +300,7 @@ async def get_page_edits(slug_or_id: str):
                     "image": (p.get("images") or [None])[0] or p.get("image"),
                     "group": (p.get("group") or "").strip() or None,
                     "in_stock": bool(p.get("in_stock", True)),
+                    "description": (p.get("description") or "").strip() or None,
                 })
         for row in (g.get("products") or []) + (g.get("tiers") or []):
             if row.get("price_kind") == "quote":

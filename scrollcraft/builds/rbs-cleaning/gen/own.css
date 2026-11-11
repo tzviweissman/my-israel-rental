@@ -29,7 +29,7 @@ h1, h2, h3 { font-weight: 400; letter-spacing: -.005em; }
 .film .room { z-index: 1; opacity: 0; transition: opacity 600ms var(--out); }
 .film.c3 .room, .no-js .film .room { opacity: 1; }
 /* the words: a small card on the soap at the start, away while the film runs, back once the camera has stopped, so the room stays in view (rules 3h.25) */
-.film .hero { z-index: 3; position: absolute; left: var(--gutter); top: calc(var(--top-h) + var(--s4)); height: auto; width: min(30rem, calc(100% - 2 * var(--gutter))); margin: 0; padding: var(--s5) var(--s6); background: #fff; border-radius: 16px; box-shadow: 0 12px 36px rgba(0,0,0,.14); transition: opacity 400ms var(--out), visibility 400ms; }
+.film .hero { z-index: 3; position: absolute; left: var(--gutter); top: calc(var(--top-h) + var(--s4)); height: auto; width: min(30rem, calc(100% - 2 * var(--gutter))); margin: 0; padding: var(--s5) var(--s6); background: #fff; border-radius: 16px; border: 1px solid var(--line); transition: opacity 400ms var(--out), visibility 400ms; }
 .film .hero h1 { font-size: clamp(2rem, 3.4vw, 3.1rem); }
 /* both offers in big words on the first screen (rules 3g.18; Tzvi chose this, option B, 8 Nov 2026): 28 px on a phone, 40+ on a laptop */
 .hero .offers { font-family: var(--font-head); font-weight: 700; font-size: clamp(1.75rem, 3.1vw, 2.6rem); line-height: 1.1; color: var(--ink); margin: var(--s3) 0 0; }
@@ -57,6 +57,7 @@ h1, h2, h3 { font-weight: 400; letter-spacing: -.005em; }
 
 /* ---------- what we clean: the price on navy beside four services ---------- */
 section.sec.what { padding-block: var(--s6); }
+@media (max-height: 700px) and (min-width: 861px) { section.sec.what { padding-block: var(--s5); } }   /* fits a 650px-tall laptop with Fredoka (check-fits) */
 .what-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s2) var(--s6); margin-bottom: var(--s5); }
 .what-h .lede { margin: 0; }
 .bento { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); }
@@ -142,3 +143,19 @@ label.f { font-weight: 700; margin: var(--s5) 0 var(--s2); }
 .keep.on { visibility: visible; }
 @media (prefers-reduced-motion: reduce) { .film { height: 100vh; height: 100svh; } }
 .slot { display: grid; } .slot > * { grid-area: 1 / 1; }
+
+/* 3z.1: the price card hangs about 40% over the top edge of the dark areas band, the only thing that crosses an edge;
+   3z.2: it and the main button carry the only soft shadows */
+.areas { position: relative; padding-top: calc(var(--s9) + var(--s8)); }
+.edge-wrap { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: flex-start; align-items: flex-start; height: 0; }
+.edge-card { position: relative; transform: translateY(-42%); display: flex; align-items: center; gap: var(--s5); padding: var(--s5) var(--s6); background: var(--ground); color: var(--ink); border-radius: 16px; box-shadow: 0 12px 36px rgba(13, 34, 65, .16); }
+.edge-amt { margin: 0; font: 400 var(--t4)/1 var(--font-head); }
+.edge-l { margin: 0; color: var(--soft); max-width: 15rem; } .edge-l b { color: var(--ink); }
+@media (max-width: 860px) {
+  .edge-wrap { position: static; height: auto; margin-top: calc(-2 * var(--s9)); margin-bottom: var(--s6); }
+  section.sec.how { padding-bottom: calc(var(--s9) + var(--s5)); }
+  .areas { padding-top: var(--s9); }
+  .edge-card { transform: none; flex-wrap: wrap; width: 100%; padding: var(--s5); gap: var(--s3) var(--s5); }
+}
+
+.btn { white-space: nowrap; }   /* 3s.29: a button never breaks onto two lines */

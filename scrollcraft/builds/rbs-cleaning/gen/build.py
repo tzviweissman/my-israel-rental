@@ -21,7 +21,7 @@ head = css[:cut]
 head = re.sub(r'  --ground:.*?--line: #E5E5E5;',
               '  --ground: #FFFFFF; --surface: #EEF6FB; --ink: #0D2241; --soft: #4A5A6E; --accent: #27622A; --accent-ink: #FFFFFF; --line: #D6E4EE;\n  --sky: #6CC2E3; --leaf: #8FD18F;',
               head, flags=re.S)
-head = head.replace('--font-head: Georgia, serif; --font-body: system-ui, sans-serif;', "--font-head: 'Secular One', system-ui, sans-serif; --font-body: 'Alef', system-ui, sans-serif;")
+head = head.replace('--font-head: Georgia, serif; --font-body: system-ui, sans-serif;', "--font-head: 'Fredoka', system-ui, sans-serif; --font-body: 'Alef', system-ui, sans-serif;")
 head = head.replace('--r: 16px;', '--r: 14px;')
 head = head.replace('html { scroll-behavior: smooth; }', 'html { scroll-behavior: smooth; overflow-x: clip; } body { overflow-x: clip; }')
 own = open('gen/own.css', encoding='utf8').read()
@@ -36,7 +36,7 @@ SITE = kit.Site(
     name='RBS Cleaning', short='RBS Cleaning', slug='daniel',
     pages=[('index', 'Home'), ('book', 'Get a free quote'), ('contact', 'Contact')],
     contacts=[kit.Contact('whatsapp-only', '053-526-9002')],
-    fonts='family=Secular+One&family=Alef:wght@400;700',
+    fonts='family=Fredoka:wght@600;700&family=Alef:wght@400;700',
     cta=('book.html', 'Get a free quote'), bar=('₪400', 'Basic home clean'),
     place='Beit Shemesh', close_title='A clean home, streak-free windows.',
     mark_html=BROOM, count=False,
@@ -111,6 +111,11 @@ STEPS = f'''  <section class="sec how" id="how" aria-labelledby="h-how">
 '''
 
 AREAS_BAND = f'''  <section class="areas" id="areas" aria-labelledby="h-areas">
+    <div class="wrap edge-wrap"><aside class="edge-card" aria-label="Price from">
+      <p class="edge-amt"><span class="sym">₪</span>400</p>
+      <p class="edge-l"><b>Basic home clean</b><br>Every other clean quoted free on WhatsApp.</p>
+      <a class="btn" href="book.html?svc=basic">Get a free quote</a>
+    </aside></div>
     <div class="wrap areas-in">
       <h2 id="h-areas" class="rev">Where we clean</h2>
       <ul class="places rev">{''.join(f'<li>{a}</li>' for a in AREAS)}</ul>
@@ -159,6 +164,7 @@ BOOK = SITE.page_head('Get a free quote', 'Choose what you need. Your request is
           <div id="w-me"><label class="f" for="me">Your name</label><input class="fld" id="me" name="name" type="text" autocomplete="name" maxlength="80"><p class="err" id="e-me"></p></div>
           <div id="w-ph"><label class="f" for="ph">Your phone</label><input class="fld" id="ph" name="tel" type="tel" autocomplete="tel" inputmode="tel" maxlength="30"><p class="err" id="e-ph"></p></div>
           <label class="f" for="note">Anything we should know? (optional)</label><textarea class="fld" id="note" name="note" rows="3" maxlength="400"></textarea>
+          <div id="mir-code"></div><script>window.MirCode=window.MirCode||{{mount:function(){{}},refresh:function(){{}},code:function(){{return null}},after:function(n){{return n}},text:function(){{return ""}}}};</script>
         </div>
       </div>
       <aside class="card sum" aria-labelledby="sum-h">
@@ -167,7 +173,7 @@ BOOK = SITE.page_head('Get a free quote', 'Choose what you need. Your request is
         <p class="pr"><b>Basic home clean {P(400)}</b>. Every other clean gets a free quote.</p>
         <p class="total" id="total-line">Basic home clean <b>{P(400)}</b></p>
         <p class="status" id="status" role="status" aria-live="polite"></p>
-        <button class="btn" id="send" type="submit"><span id="send-l">Continue to where and when</span></button>
+        <button class="btn" id="send" type="submit"><span id="send-l">Next: where and when</span></button>
         <button class="back" id="back" type="button" hidden>Back</button>
         <p class="note" id="send-note">Nothing to pay on this page.</p>
       </aside>
