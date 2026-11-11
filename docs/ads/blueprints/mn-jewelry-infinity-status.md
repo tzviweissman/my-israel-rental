@@ -85,6 +85,8 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
   plan: n/a: no reviews.
 - [x] A4.5 Press or partner logos only if the business really has them, four at most.
   plan: n/a.
+- [x] A4.6 The business's own logo is on every ad it pays for or is shown in.
+  plan: docs/ads/gen/mn-jewelry-infinity-status/logo-src.jpg (their listing picture with the gold M&N oval), cut out as logo-medal.png with its own marble inside, 264px wide at the top from 100px down, the name in words below it. Added after Tzvi: "the ad doesnt show their logo".
 - [x] A1.3 The action: one thing to do, the short link and QR code, last on the eye's path.
   plan: myisraelrental.com/p/m-and-n-jewelry and its QR, bottom right.
 

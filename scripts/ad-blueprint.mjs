@@ -45,6 +45,7 @@ function read(file) {
 // Rules answered by a sheet that must exist (A9.6: every added copy of the product beside the real photo, 9 Nov 2026).
 const SHEET_RULES = new Set(['A9.6']);
 const FIT_RULES = new Set(['A3.9']);
+const LOGO_RULES = new Set(['A4.6']);
 const STRANGER_RULES = new Set(['A2.10']);
 const HEADLINE_RULES = new Set(['A2.11']);
 const SCORE_RULES = new Set(['A9.7']);
@@ -89,6 +90,10 @@ function problems(name, upTo, finished) {
         if (finished && fs.existsSync(gen) && !/layout/.test(fs.readFileSync(gen, 'utf8'))) out.push(`stage ${s.n}, ${it.id}: docs/ads/gen/${name}/gen.py does not give the model the layout picture`);
       }
       if (FIT_RULES.has(it.id) && !/^n\/a:/i.test(g.plan) && !/ad-fit-picture/.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: name scripts/ad-fit-picture.py, the way the picture was laid on the ad, or n/a`);
+      if (LOGO_RULES.has(it.id) && !/^n\/a: no logo/i.test(g.plan)) {
+        const files = [...g.plan.matchAll(/([\w./-]+\.(?:jpg|jpeg|png|webp|svg))/gi)].map((x) => x[1]);
+        if (!files.some((f) => fs.existsSync(path.resolve(ROOT, f)))) out.push(`stage ${s.n}, ${it.id}: name the business's logo file on the ad (none of ${files.length ? files.join(', ') : 'no file'} exists), or "n/a: no logo"`);
+      }
       if (SHEET_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
         const files = [...g.plan.matchAll(/([\w./-]+\.(?:jpg|jpeg|png|webp))/gi)].map((x) => x[1]);
         if (!files.some((f) => fs.existsSync(path.resolve(ROOT, f)))) out.push(`stage ${s.n}, ${it.id}: name the sheet file it was checked on (none of ${files.length ? files.join(', ') : 'no file'} exists)`);

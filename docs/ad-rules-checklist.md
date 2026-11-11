@@ -71,6 +71,7 @@ A4.2 | One price, and it is the price of the thing in the picture. "From" only f
 A4.3 | A struck-through price only when real: same thing bought separately at real prices, or really charged before. | 4 | decide
 A4.4 | A review is real, shown on the public page, rated 4 or 5, the reviewer's words, shortened only by cutting. No hearts or counts. | 4 | decide
 A4.5 | Press or partner logos only if the business really has them, four at most. | 4 | decide
+A4.6 | The business's own logo is on every ad it pays for or is shown in: their real logo file (the listing's logo, or cut cleanly out of a picture of theirs), never redrawn, retyped or generated, placed where it reads at phone size and clear of the phone's top bar (from 100px down on a 1920 status). The name in words may sit beside it, never in place of it. The answer names the logo file used; n/a only with "n/a: no logo" when the business has none, and then the name is set in their own style. | 20, Tzvi 11 Nov | decide since:2026-11-11
 A1.3 | The action: one thing to do, the short link and QR code, last on the eye's path. | 1, 8 | auto:link
 
 ## 5. Honesty

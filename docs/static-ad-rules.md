@@ -713,3 +713,12 @@ the ad beside four 5/5 ads of its kind. The blueprint writes "Score: N" and what
 5 is shown. When Tzvi is in the conversation he sees the best three ideas first, one line each, before any picture
 is paid for. The remade ad, their two rings linked into an infinity sign under "FOREVER / לנצח", was the first made
 this way. Step A9.7.
+
+## 20. Their logo on every ad (Tzvi, 11 Nov 2026)
+
+"The ad doesn't show their logo." M and N Jewelry's infinity ad scored a 5 beside the library and still went out
+with the name only in typed letters, although their gold M&N oval was already in the picture we had downloaded from
+their listing. A business recognises its ad by its logo, and so do its customers. Every ad now carries the
+business's own logo: the real file, or cut cleanly out of a picture of theirs, never redrawn or generated, big
+enough to read at phone size and below the phone's top bar. Step A4.6; ad-blueprint refuses an answer that names no
+logo file that exists, unless it says "n/a: no logo".
