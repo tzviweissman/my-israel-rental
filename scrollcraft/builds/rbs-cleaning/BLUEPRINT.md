@@ -315,7 +315,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3j.3 A free taster, sample, consultation or quote the owner really offers is the headline offer beside the main button
   plan: the free quote from his flyer is the main button beside the ₪400 fact
 - [x] R3j.4 Group discounts (students, soldiers, first order, olim) only when the owner offers them, said once near the price; they are standing, so no end date is needed
-  plan: n/a: no group discounts
+  plan: n/a: no group discounts on the page; a code the owner makes is typed in the quote form's "Have a discount code?" box (mir-code.js), sent with the booking
 - [x] R3j.5 Come-back features only if real: a stamp card the owner runs, a Reorder button; no streaks, valueless points, or reminders for something not started
   plan: n/a: no come-back features
 - [x] R3j.6 The natural pick among three sizes/packages is shown, but no invented option to make another look good

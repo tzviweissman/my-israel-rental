@@ -138,7 +138,7 @@ R3c.7 n/a: no offers
 R3j.1 n/a: no guarantee offered (question 11)
 R3j.2 n/a: no add-on in the record
 R3j.3 pass: built to the blueprint: the free quote from his flyer is the main button beside the ₪400 fact
-R3j.4 n/a: no group discounts
+R3j.4 n/a: no group discounts on the page; a code the owner makes is typed in the quote form's "Have a discount code?" box (mir-code.js), sent with the booking
 R3j.5 n/a: no come-back features
 R3j.6 n/a: one package
 R3j.7 n/a: no struck prices or endorsements
