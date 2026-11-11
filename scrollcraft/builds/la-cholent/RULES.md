@@ -27,7 +27,7 @@ R5.4 pass: facts script found no they, them or their in visible text
 R5b.2 pass: the one main button reads "Order now" on every page and goes to the order page (order.html), because it opens the order page, not a message (Tzvi, 10 Nov 2026: "it says message to order but it takes to the shop page"): the bar, the opening, the three size cards (order.html?size=N preselects the size), the footer button and link, the phone bar, the next-step rows on How it works and Reviews; on the order page the button under the dial says "Order Large, ₪180", and the form button says what it does, "Send my order on WhatsApp"
 R5b.8 pass: the closing line is "A higher standard of flavor." then the button
 R3.11 pass: Home: the pitch, the film, the sizes with prices, three customer messages; How it works: the kit and its steps, the occasions; Reviews: all ten messages; Kosher and delivery: the facts and Rabbi Samuels' line; Order: the dial, then the order form
-R3o.4 n/a: the page shows no phone or email by the owner choice (chat only)
+R3o.4 pass: since 11 Nov 2026 the owner wants their email as a way to reach them: lacholentisrael@gmail.com (from their own flyers) beside WhatsApp in every footer and phone menu
 R3e.22 n/a: owner must send a photo of Rabbi Samuels; the seal and his quoted line are shown
 R3s.19 pass: single page; title, description, og:title, og:description and og:image (the tubs) now all present
 R6.1 pass: the lead block is the product and the price; sizes, kosher, delivery and the order all present
@@ -55,7 +55,7 @@ R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW
 R3h.13 pass: the pot film is one clip showing the lid, steam and the dial together; frames viewed at 20 hours show no heap or vanish
 R3h.14 pass: the pot stays in frame through the whole film at 1440x900, 1280x650 and 390x844
 R3h.17 pass: the page does not use words-and-film turns
-R3h.18 pass: objects in each generated clip, all in frame from the first frame to the last: pot film = the crock pot, its lid, the dial (turns to Low) and steam (rises from the lid and leaves past the top edge); kitchen clip = the counter, beans, barley bag, peelings, onion skins and knife, which stay put (only the light flickers, the water ripples and a drip falls into the bowl); table clip = the Shabbos table and candles, the flames flicker. Nothing appears, changes into something else or vanishes
+R3h.18 pass: objects in each generated clip, all in frame from the first frame to the last: pot film = the crock pot, its lid, the dial (turns to Low) and steam (rises from the lid and leaves past the top edge); kitchen clip = the counter, the bowl of soaking barley, barley bag, marrow bones and beef on butcher paper, onion skins and knife, which stay put (since 11 Nov 2026 made in code from the edited still: a slow push-in and a faint flicker of the light; their classic recipe has no beans or potatoes, so those were taken out); table clip = the Shabbos table and candles, the flames flicker. Nothing appears, changes into something else or vanishes
 
 ## 3. Sections and worlds
 R3.12 pass: dramatic opening, a features section (sizes with price and what is included) on the home page; the order page closes the journey with the dial, the proof facts being on the home page and in its footer
@@ -74,7 +74,7 @@ R9.1 pass: the signature uses their own tubs and a closed slow cooker
 R3f.2 pass: effect budget: one signature (the dial), accents (the split, the pot film, the facts rows); frames captured at three sizes
 R3m.1 pass: data-mir-gallery block present and hidden until photos exist
 R3m.3 pass: hours, areas and FAQ stay in fixed hidden blocks until the owner sends them
-R3k.1 pass: five pages (Tzvi, 6 Nov 2026: "split all 4 into separate pages", and 10 Nov 2026: the menu items are pages, not scrolls): Home (the film, sizes, three messages), How it works (kit, occasions), Reviews, Kosher and delivery, and Order (the dial and the order form); old addresses /business/<slug>#order and #details forward to the Order page by a short script on Home, and index.html#sizes still lands on the sizes. No contact page: the record has one WhatsApp number and no address, email or hours, which the footer shows on every page
+R3k.1 pass: five pages (Tzvi, 6 Nov 2026: "split all 4 into separate pages", and 10 Nov 2026: the menu items are pages, not scrolls): Home (the film, sizes, three messages), How it works (kit, occasions), Reviews, Kosher and delivery, and Order (the dial and the order form); old addresses /business/<slug>#order and #details forward to the Order page by a short script on Home, and index.html#sizes still lands on the sizes. No contact page: the record has one WhatsApp number and no address or hours; their email (from their flyers, wanted by the owner 11 Nov 2026), which the footer shows on every page
 R3k.2 pass: the bar is the same markup on every page: the name to Home, Home, How it works, Reviews, Kosher and delivery, each its own page (Tzvi, 10 Nov 2026: the menu only scrolled down), and the one Order now button with the dial; on Home it waits for the opening film, on the other pages it is on from the start; under 861px the links fold into a Menu button that opens the same list plus Order now and the WhatsApp number
 R3k.4 pass: shared site.css and site.js; section classes are not reused for shared state
 R8a.1 pass: no 21st components or external script hosts; only the Google Fonts stylesheet
@@ -101,7 +101,7 @@ R0b.12 n/a: not published, so there is no pages-list preview clip yet
 
 ## 4. Photos and media
 R8.1 pass: the three size cards show one product hero shot of their own tub in three colours (gold, olive, steel), the same slate block, light and camera; the sizes differ only in their words, because they have no photo of each size (asked in the report)
-R8.6 pass: the size cards are product hero shots edited from their own tub photo: one sealed tub on a slate block, dry beans, barley, a potato and a marrow bone round it (what the label says goes in), one colour story per card, one warm light, still; label read line by line against their photo
+R8.6 pass: the size cards are product hero shots edited from their own tub photo: one sealed tub on a slate block, a raw marrow bone beside it (the label says 1 to 2 marrow bones; beans, barley and a potato were taken out 11 Nov 2026, as their classic recipe has no beans or potatoes), one colour story per card, one warm light, still; label read line by line against their photo
 R8.2 pass: their own photograph plus generated scenery stills made earlier; the tub hero shots are edited from their tub photo (Higgsfield nano_banana_2); the steel version's label was put back from the gold one in code (the model wrote 'Stir wall')
 R3p.7 pass: the three sizes are shown the same way and the dial buttons show the three the same way
 R3h.12 pass: the product looks the same everywhere: the same photograph of the four tubs in the opening, the three cards and the how-it-works band
