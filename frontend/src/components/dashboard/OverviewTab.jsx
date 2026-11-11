@@ -140,6 +140,7 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
   // list, so the strip at the top and the first card cannot disagree.
   const attention = [
     unreadMessages > 0 && { key: 'messages', tab: 'messages', n: unreadMessages, text: t('dashboard.attentionMessages', '{{n}} unread messages', { n: unreadMessages }) },
+    summary.leads_waiting > 0 && { key: 'leads', tab: 'customers', view: 'leads', n: summary.leads_waiting, text: t('dashboard.attentionLeads', { count: summary.leads_waiting, defaultValue: '{{count}} customers waiting for your answer' }) },
     summary.orders_new > 0 && { key: 'orders-new', tab: 'orders', n: summary.orders_new, text: t('dashboard.attentionOrdersNew', '{{n}} new orders not started', { n: summary.orders_new }) },
     summary.orders_due_today > 0 && { key: 'orders-today', tab: 'orders', n: 0, text: t('dashboard.attentionOrdersToday', '{{n}} orders due today', { n: summary.orders_due_today }) },
     summary.service_bookings_pending > 0 && { key: 'appointments', tab: 'appointments', n: summary.service_bookings_pending, text: t('dashboard.attentionAppointments', '{{n}} appointment or quote requests waiting for you', { n: summary.service_bookings_pending }) },
@@ -189,7 +190,7 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
           <ul className="flex flex-wrap gap-2">
             {attention.map((r) => (
               <li key={r.key}>
-                <button type="button" onClick={() => onGoToTab(r.tab)} className="inline-flex items-center gap-1.5 px-3.5 min-h-[40px] rounded-full border text-sm font-medium bg-white hover:bg-[var(--surface-muted,#f9fafb)]"
+                <button type="button" onClick={() => { if (r.view) { try { const u = new URL(window.location.href); u.searchParams.set('view', r.view); window.history.replaceState(null, '', u); } catch { /* opens on the list */ } } onGoToTab(r.tab); }} className="inline-flex items-center gap-1.5 px-3.5 min-h-[40px] rounded-full border text-sm font-medium bg-white hover:bg-[var(--surface-muted,#f9fafb)]"
                         style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid={`overview-attention-${r.key}`}>
                   {r.text} <ArrowRight size={13} className="rtl:rotate-180" aria-hidden="true" />
                 </button>

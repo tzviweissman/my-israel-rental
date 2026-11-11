@@ -370,6 +370,9 @@ async def startup_tasks() -> None:
     # "We got your message" when a business has not answered (away_reply.py).
     from routes.marketplace.away_reply import away_reply_loop
     asyncio.create_task(away_reply_loop())
+    # "A customer is waiting for your answer", with drafted replies (lead_nudge.py).
+    from routes.marketplace.lead_nudge import lead_nudge_loop
+    asyncio.create_task(lead_nudge_loop())
     # "Tell me when it's back" (restock.py) and the birthday treat (birthdays.py).
     from routes.marketplace.restock import restock_loop
     asyncio.create_task(restock_loop())
@@ -631,6 +634,10 @@ async def startup_tasks() -> None:
         await ensure_lead_indexes()
         from routes.marketplace.away_reply import ensure_away_indexes
         await ensure_away_indexes()
+        from routes.marketplace.email_inbox import ensure_inbox_indexes
+        await ensure_inbox_indexes()
+        from routes.marketplace.lead_nudge import ensure_nudge_indexes
+        await ensure_nudge_indexes()
         from routes.marketplace.discounts import ensure_discount_indexes
         await ensure_discount_indexes()
         from routes.marketplace.referrals import ensure_referral_indexes

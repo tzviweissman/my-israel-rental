@@ -454,6 +454,15 @@ async def act_on_services_pitch(
     return {"message": "OK"}
 
 
+async def _leads_waiting(uid: str) -> int:
+    try:
+        from routes.marketplace.lead_nudge import waiting_count
+        return await waiting_count(uid)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("leads_waiting failed: %s", e)
+        return 0
+
+
 @api_router.get("/dashboard/summary")
 async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
     """Every count the dashboard needs, in one call (spec D4/D5).
@@ -615,6 +624,9 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         "has_sessions": bool(has_sessions),
         "gift_cards_waiting": gift_cards_waiting,
         "members_waiting": members_waiting,
+        # Chats and emails waiting for an answer (leads board, lead_nudge.py):
+        # the Customers badge and a line in "Needs your attention".
+        "leads_waiting": await _leads_waiting(uid) if owned_ids else 0,
         "deposits_to_return": deposits_to_return,
         "my_service_bookings": my_service_bookings,
         "my_rental_bookings": my_rental_bookings,
