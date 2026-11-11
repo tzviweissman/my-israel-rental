@@ -133,3 +133,14 @@ def test_recent_emails_read_postmark_reports_and_a_bounce_wins(monkeypatch):
                                  {"record_type": "Delivery", "raw": {"Metadata": {"log_id": "L2"}}}]
     rows = asyncio.run(oe.recent_emails("b1"))
     assert [r["status"] for r in rows] == ["delivered", "bounced", "sent"]
+
+
+def test_email_drops_the_texts_pointer_at_a_link():
+    # The texts end "Your tracking link:" because the link follows; an email's link is its button.
+    vals = {"order": "#1042", "business": "Bakery", "service": "Haircut"}
+    assert oe.email_line({}, "order_confirmed", "en", vals) == "Your order #1042 from Bakery is confirmed."
+    assert oe.email_line({}, "order_confirmed", "he", {**vals, "business": "מאפייה"}) == "ההזמנה שלך #1042 ממאפייה אושרה."
+    assert oe.email_line({}, "booking_declined", "en", vals) == "Sorry, your booking for Haircut could not be accepted this time."
+    assert oe.email_line({}, "order_declined", "en", vals) == "Sorry, Bakery can't take your order #1042 this time."
+    own = {"order_settings": {"text_templates": {"order_confirmed": {"en": "Track it:"}}}}
+    assert oe.email_line(own, "order_confirmed", "en", vals) == "Track it:"   # nothing else to keep: left alone
