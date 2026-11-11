@@ -1240,26 +1240,43 @@ async def _email_guest_status(booking: dict, event: str, gig_title: str | None =
         return
     try:
         from utils import email as em
-        what = em._esc(gig_title or "your request")
-        head, line = {
+        from .order_emails import email_line, note_html
+        from .orders import _email
+        gig = await db.marketplace_gigs.find_one({"_id": booking.get("gig_id")}, {"business_id": 1}) or {}
+        biz = await db.businesses.find_one({"_id": gig.get("business_id")}) or {}
+        lang = "he" if (booking.get("lang") or "").startswith("he") else "en"
+        he = lang == "he"
+        what = em._esc(gig_title or ("הבקשה שלך" if he else "your request"))
+        # Accepted and declined in the business's own words from its texts panel (order_emails.py).
+        vals = {"service": gig_title or "", "customer": booking.get("guest_name") or "", "business": (biz.get("name_he") if he and biz.get("name_he") else biz.get("name")) or ""}
+        said = {k: em._esc(email_line(biz, k, lang, vals)) for k in ("booking_confirmed", "booking_declined")}
+        head, line = ({
+            "created": ("קיבלנו את הבקשה שלך", f"הבקשה שלך ל<strong>{what}</strong> נשלחה. נשלח לך מייל כשהעסק יענה; בעמוד הזה תמיד מופיע העדכון האחרון."),
+            "accepted": ("התור שלך אושר", said["booking_confirmed"]),
+            "declined": ("התור שלך לא אושר", said["booking_declined"]),
+            "expired": ("עדיין אין תשובה", f"לא התקבלה תשובה לגבי <strong>{what}</strong>, ולכן השעה שוחררה. אפשר לבקש שעה אחרת."),
+        } if he else {
             "created": ("We got your request", f"Your request for <strong>{what}</strong> was sent. You will get an email when the business answers; this page always shows the latest."),
-            "accepted": ("Your booking was accepted", f"Good news: <strong>{what}</strong> was accepted."),
-            "declined": ("Your booking was declined", f"<strong>{what}</strong> could not be accepted this time. You can request another time."),
+            "accepted": ("Your booking was accepted", said["booking_confirmed"]),
+            "declined": ("Your booking was declined", said["booking_declined"]),
             "expired": ("No reply yet", f"There was no reply about <strong>{what}</strong>, so the time was released. You can request another."),
-        }[event]
+        })[event]
         link = f"{em.FRONTEND_URL}/bookings/track/{token}"
         inner = (
             f'<h2 style="color:#222;font-size:22px;margin:0 0 8px;">{head}</h2>'
             f'<p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 18px;">{line}</p>'
-            + em._button("See your booking", link)
+            + (note_html(biz) if event == "accepted" else "")
+            + em._button("לפרטי התור" if he else "See your booking", link)
         )
         if event == "accepted" and booking.get("preferred_date") and booking.get("time_slot"):
             from utils.calendar_link import google_calendar_url
             cal = google_calendar_url(gig_title or "Appointment", booking["preferred_date"], booking["time_slot"],
                                       booking.get("duration_minutes") or 60, details=link)
             if cal:
-                inner += f'<p style="margin:14px 0 0;font-size:14px;"><a href="{em._esc(cal)}" style="color:#167AB8;">Add to Google Calendar</a></p>'
-        await em.send_email(to, head, em._wrap(inner, preheader=head), tag=f"guest_booking_{event}")
+                inner += f'<p style="margin:14px 0 0;font-size:14px;"><a href="{em._esc(cal)}" style="color:#167AB8;">{"הוספה ליומן Google" if he else "Add to Google Calendar"}</a></p>'
+        await _email(to, head, inner, tag=f"guest_booking_{event}", lang=lang,
+                     log={"business_id": gig.get("business_id"), "who": "customer", "kind": f"booking_{event}",
+                          "ref_id": booking.get("_id"), "label": gig_title or ""})
     except Exception:  # noqa: BLE001
         logger.exception("could not email booking status link for %s", booking.get("_id"))
 
@@ -1438,6 +1455,11 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
         booking["_id"],
     )
     await _email_guest_status(booking, "created", gig.get("title"))
+    # And by email, with the one-tap Confirm / Decline link (order_emails.py).
+    from .order_emails import email_owner_new_booking
+    _when_e = " ".join(x for x in (payload.preferred_date, payload.time_slot) if x)
+    await email_owner_new_booking(gig, booking, guest_name or (user or {}).get("name") or "",
+                                  f"{gig.get('title') or ''} - {payload.tier_name or ''}" + (f" ({_when_e})" if _when_e else ""))
     # And on WhatsApp, where the business actually looks (orders.py
     # alert_business_on_whatsapp). In the background, never blocking.
     from utils.bg_tasks import spawn
