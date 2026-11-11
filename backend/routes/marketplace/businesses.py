@@ -173,6 +173,8 @@ class BusinessIn(BaseModel):
     # allowlist in utils/payment_links: an arbitrary URL rendered as a
     # button on a page carrying our name is an open redirect.
     payment_links: Optional[list[PaymentLink]] = None
+    # Their Instagram, Facebook, TikTok and website (utils/social_links), from the sign-up on.
+    socials: Optional[dict[str, str]] = None
     hours: Optional[str] = Field(None, max_length=200)
     # "By appointment only" instead of opening hours (Tzvi, 17 Oct 2026).
     by_appointment: Optional[bool] = None
@@ -278,6 +280,8 @@ class BusinessPatch(BaseModel):
     # allowlist in utils/payment_links: an arbitrary URL rendered as a
     # button on a page carrying our name is an open redirect.
     payment_links: Optional[list[PaymentLink]] = None
+    # Their Instagram, Facebook, TikTok and website (utils/social_links), from the sign-up on.
+    socials: Optional[dict[str, str]] = None
     active: Optional[bool] = None
     hours: Optional[str] = Field(None, max_length=200)
     # "By appointment only" instead of opening hours (Tzvi, 17 Oct 2026).
@@ -389,6 +393,7 @@ def _public(
         "brand_fonts": doc.get("brand_fonts") or {"heading": None, "body": None},
         "notice": doc.get("notice"),
         "payment_links": doc.get("payment_links") or [],
+        "socials": doc.get("socials") or {},
         # The composition, exactly as stored. Not re-validated on the way
         # out: a block type retired after this was saved would otherwise
         # 500 the owner's whole dashboard rather than costing them one
@@ -587,6 +592,9 @@ async def create_business(payload: BusinessIn, user=Depends(verify_token)):
         areas=normalize_service_areas(payload.areas),
     )
     doc["serves_nationwide"] = bool(payload.serves_nationwide)
+    from utils.social_links import clean as clean_socials
+    if clean_socials(payload.socials):
+        doc["socials"] = clean_socials(payload.socials)
     if payload.logo_url:
         doc["logo_url"] = payload.logo_url
     try:
@@ -683,6 +691,9 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
     # Jerusalem shop that ships countrywide is both at once.
     if payload.areas is not None:
         update["areas"] = normalize_service_areas(payload.areas)
+    if payload.socials is not None:
+        from utils.social_links import clean as clean_socials
+        update["socials"] = clean_socials(payload.socials)
     if payload.serves_nationwide is not None:
         update["serves_nationwide"] = bool(payload.serves_nationwide)
 

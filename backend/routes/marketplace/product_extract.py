@@ -25,8 +25,9 @@ is a suggestion, not a fact, and the one thing worse than slow data entry
 is a wrong price nobody noticed.
 
 The file's bytes are read from the upload in this request and handed
-straight to the model. No URL is ever fetched server-side: that would be
-an SSRF hole aimed at our own network, for no gain.
+straight to the model. The one place a URL is fetched is /socials/read at
+the foot of this file (the owner's own accounts), and every hop there is
+checked to be a public host first.
 """
 from __future__ import annotations
 
@@ -36,7 +37,7 @@ import uuid
 from typing import Any, List, Optional
 
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Request, UploadFile
 
 from routes.deps import ANTHROPIC_API_KEY, logger, verify_token
 from utils.rate_limit import check_rate
@@ -524,3 +525,92 @@ async def lookup_business_details(request: Request, place_id: str, lang: str = "
         "description": (p.get("editorialSummary") or {}).get("text", ""),
         "weekly_availability": _hours(periods) if periods else None,
     }
+
+
+# ---------------------------------------------------------------------------
+# Their own accounts (Tzvi, 11 Nov 2026): the Instagram, Facebook, TikTok and
+# website typed at sign-up are read for what they say publicly, and that
+# goes through the same advert reader as a pasted post. Instagram and
+# Facebook show little to anyone not signed in (a name, a bio, a count),
+# so what comes back is whatever is public; the owner checks it either way.
+# ---------------------------------------------------------------------------
+_PAGE_BYTES = 1_500_000
+
+
+async def _public_text(url: str) -> str:
+    """The page's title, description and (for a website) its readable words. Every hop is checked to be a
+    public host before it is fetched; nothing on our own network can be reached through this."""
+    import html as html_mod
+
+    import httpx
+
+    from utils.helpers import _is_public_ical_url
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; MyIsraelRentalBot/1.0)", "Accept-Language": "he,en;q=0.8"}
+    async with httpx.AsyncClient(timeout=10, follow_redirects=False, headers=headers) as http:
+        for _ in range(4):
+            if not _is_public_ical_url(url):
+                return ""
+            r = await http.get(url)
+            if r.is_redirect and r.headers.get("location"):
+                url = str(r.url.join(r.headers["location"]))
+                continue
+            break
+        else:
+            return ""
+    if r.status_code >= 400 or "html" not in r.headers.get("content-type", ""):
+        return ""
+    page = r.text[:_PAGE_BYTES]
+
+    def meta(name: str) -> str:
+        m = re.search(r'<meta[^>]+(?:property|name)=["\']' + re.escape(name) + r'["\'][^>]*content=["\']([^"\']*)', page, re.I) \
+            or re.search(r'<meta[^>]+content=["\']([^"\']*)["\'][^>]*(?:property|name)=["\']' + re.escape(name), page, re.I)
+        return html_mod.unescape(m.group(1)).strip() if m else ""
+
+    title = re.search(r"<title[^>]*>(.*?)</title>", page, re.I | re.S)
+    parts = [html_mod.unescape(title.group(1)).strip() if title else "", meta("og:title"), meta("og:description"), meta("description")]
+    body = re.sub(r"(?is)<(script|style|noscript|svg)[^>]*>.*?</\1>", " ", page)
+    body = html_mod.unescape(re.sub(r"(?s)<[^>]+>", " ", body))
+    parts.append(" ".join(body.split())[:6000])
+    seen, out = set(), []
+    for p in parts:
+        if p and p not in seen:
+            seen.add(p)
+            out.append(p)
+    # Instagram and Facebook wrap names in invisible direction marks.
+    return re.sub("[‎‏‪-‮]", "", "\n".join(out))[:8000]
+
+
+@router.post("/socials/read")
+async def read_socials(request: Request, payload: dict = Body(...), user=Depends(verify_token)):
+    """Fill the sign-up from the business's own accounts. Saves nothing; returns the same fields as /ad/extract,
+    plus the tidied links and which of them could be read."""
+    from utils.social_links import clean
+    check_rate(request, bucket=f"socials_read:{user['user_id']}", limit=20, window_seconds=3600)
+    links = clean(payload.get("links") or {})
+    if not links:
+        raise HTTPException(status_code=400, detail="Add your Instagram, Facebook, TikTok or website first.")
+    texts, read = [], []
+    for kind, url in links.items():
+        try:
+            words = await _public_text(url)
+        except Exception as exc:  # noqa: BLE001 - one closed account must not stop the rest
+            logger.info("[socials-read] %s not read: %s", kind, type(exc).__name__)
+            words = ""
+        if len(words) > 40:
+            read.append(kind)
+            texts.append(f"From their {kind} ({url}):\n{words}")
+    if not texts:
+        return {"links": links, "read": [], "fields": None}
+    try:
+        fields = await extract_business(request, text="\n\n".join(texts)[:MAX_TEXT], file=None, user=user)
+    except HTTPException as exc:
+        # Read, but nothing in it for the form (a bare bio): the links are still kept.
+        if exc.status_code != 502:
+            raise
+        fields = None
+    if not fields:
+        # Instagram and Facebook show a stranger little more than the name ("Noa Leather (@noa.leather) • ...").
+        m = re.match(r"\s*([^\n(•|]{2,80}?)\s*(?:\(@|•|\||\n)", texts[0].split(":\n", 1)[-1])
+        name = m.group(1).strip() if m else ""
+        fields = {"business_name": name} if name and name.lower() not in ("instagram", "facebook", "tiktok") else None
+    return {"links": links, "read": read, "fields": fields}

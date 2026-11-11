@@ -584,42 +584,11 @@ const CreateGig = () => {
       const { data } = await axios.post(`${API}/marketplace/ad/extract`, body, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const type = data.gig_type || form.gig_type;
-      const items = data.items || [];
-      const price = (r) => (r.price == null ? '' : String(r.price));
-      setForm((f) => {
-        const next = {
-          ...f,
-          gig_type: type,
-          title: data.title || f.title,
-          category: data.category || f.category,
-          subcategory: data.category ? (data.subcategory || '') : f.subcategory,
-          description: data.description || f.description,
-          area: data.area || f.area,
-          whatsapp: data.whatsapp || f.whatsapp,
-          contact_email: data.contact_email || f.contact_email,
-        };
-        if (type === 'store') {
-          next.tiers = [];
-          next.products = items.length
-            ? items.map((r) => ({ ...emptyProduct(r.currency), name: r.name, price: price(r), description: r.description || '' }))
-            : (f.products.length ? f.products : [emptyProduct()]);
-        } else {
-          next.products = [];
-          next.tiers = items.length
-            ? items.map((r) => ({
-              ...emptyTierFor(type, r.currency), name: r.name, price: price(r), description: r.description || '',
-              ...(type === 'appointment' && r.duration_minutes ? { duration_minutes: r.duration_minutes } : {}),
-            }))
-            : (f.tiers.length ? f.tiers : [emptyTierFor(type)]);
-        }
-        return next;
-      });
+      applyRead(data);
       // Read now, not when the button was pressed: the businesses may have loaded while the flyer was read.
       const ex = existingRef.current;
       const first = ex !== null && ex.length === 0;
       const dest = ex && (ex.find((x) => x.id === targetBusinessId) || ex[0]);
-      if (data.business_name && first) setBizName((n) => (n.trim() ? n : data.business_name));
       // The logo on the flyer goes in the logo spot: cut out with a margin, on a square of the flyer's own colour.
       if (sent && data.logo_box && ex !== null && (first || (dest && !dest.logo_url))) {
         setLogoUploading(true);
@@ -633,6 +602,68 @@ const CreateGig = () => {
     } catch (err) {
       toast.error(apiErrorMessage(err, t('wizard.pasteAdFailed', 'Could not read that ad. Try again, or fill in the form yourself.'), t), { duration: 8000 });
     } finally { setAdReading(false); }
+  };
+
+  // What the reader found (an advert, a flyer or their own accounts) goes into the form.
+  const applyRead = (data) => {
+    const type = data.gig_type || form.gig_type;
+    const items = data.items || [];
+    const price = (r) => (r.price == null ? '' : String(r.price));
+    setForm((f) => {
+      const next = {
+        ...f,
+        gig_type: type,
+        title: data.title || f.title,
+        category: data.category || f.category,
+        subcategory: data.category ? (data.subcategory || '') : f.subcategory,
+        description: data.description || f.description,
+        area: data.area || f.area,
+        whatsapp: data.whatsapp || f.whatsapp,
+        contact_email: data.contact_email || f.contact_email,
+      };
+      if (type === 'store') {
+        next.tiers = [];
+        next.products = items.length
+          ? items.map((r) => ({ ...emptyProduct(r.currency), name: r.name, price: price(r), description: r.description || '' }))
+          : (f.products.length ? f.products : [emptyProduct()]);
+      } else {
+        next.products = [];
+        next.tiers = items.length
+          ? items.map((r) => ({
+            ...emptyTierFor(type, r.currency), name: r.name, price: price(r), description: r.description || '',
+            ...(type === 'appointment' && r.duration_minutes ? { duration_minutes: r.duration_minutes } : {}),
+          }))
+          : (f.tiers.length ? f.tiers : [emptyTierFor(type)]);
+      }
+      return next;
+    });
+    const ex = existingRef.current;
+    if (data.business_name && ex !== null && ex.length === 0) setBizName((n) => (n.trim() ? n : data.business_name));
+  };
+
+  // Their Instagram, Facebook, TikTok and website (Tzvi, 11 Nov 2026): kept with the business for its
+  // custom site later, and read now to fill in what they say publicly.
+  const [socialsReading, setSocialsReading] = useState(false);
+  const socials = form.socials || {};
+  const setSocial = (k, v) => set({ socials: { ...socials, [k]: v } });
+  const readSocials = async () => {
+    if (needAccount('readSocials')) return;
+    setSocialsReading(true);
+    try {
+      const { data } = await axios.post(`${API}/marketplace/socials/read`, { links: socials }, { headers: { Authorization: `Bearer ${token}` } });
+      set({ socials: { ...socials, ...data.links } });
+      if (data.fields && Object.keys(data.fields).length > 1) {
+        applyRead(data.fields);
+        toast.success(t('wizard.socialsDone', 'Filled in from your accounts. Check each step and add your photos.'));
+      } else if (data.fields?.business_name) {
+        applyRead(data.fields);
+        toast(t('wizard.socialsNameOnly', 'Saved, and we added your business name. Instagram and Facebook keep the rest private, so fill it in below.'), { duration: 8000 });
+      } else {
+        toast(t('wizard.socialsNone', 'Saved. Instagram and Facebook keep most of a page private, so fill in the rest below.'), { duration: 8000 });
+      }
+    } catch (err) {
+      toast.error(apiErrorMessage(err, t('wizard.socialsFailed', 'Could not read those. They are saved, so fill in the rest below.'), t), { duration: 8000 });
+    } finally { setSocialsReading(false); }
   };
 
   // ---- Find your business on Google ------------------------------------------
@@ -911,16 +942,20 @@ const CreateGig = () => {
       const auth = { headers: { Authorization: `Bearer ${token}` } };
       // The business first, with the name and logo from step 2, so the
       // listing is published under it rather than under a silent default.
-      if (firstBusiness && (bizName.trim().length >= 2 || bizLogo)) {
+      const socialsOut = Object.fromEntries(Object.entries(form.socials || {}).filter(([, v]) => String(v || '').trim()));
+      if (firstBusiness && (bizName.trim().length >= 2 || bizLogo || Object.keys(socialsOut).length)) {
         // A blank name falls back to the person's name, as the silent
         // default always did. The API needs two characters.
         const name = [bizName.trim(), (user?.name || '').trim(), 'My business'].find((n) => n.length >= 2);
         const { data: biz } = await axios.post(`${API}/marketplace/businesses`, {
-          name, logo_url: bizLogo || null,
+          name, logo_url: bizLogo || null, socials: socialsOut,
         }, auth).catch(() => ({ data: null }));
         if (biz?.id) payload.business_id = biz.id;
-      } else if (bizLogo && destination && !destination.logo_url) {
-        await axios.patch(`${API}/marketplace/businesses/${destination.id}`, { logo_url: bizLogo }, auth).catch(() => {});
+      } else if (destination && ((bizLogo && !destination.logo_url) || Object.keys(socialsOut).length)) {
+        await axios.patch(`${API}/marketplace/businesses/${destination.id}`, {
+          ...(bizLogo && !destination.logo_url ? { logo_url: bizLogo } : {}),
+          ...(Object.keys(socialsOut).length ? { socials: { ...(destination.socials || {}), ...socialsOut } } : {}),
+        }, auth).catch(() => {});
       }
       const { data } = await axios.post(`${API}/marketplace/gigs`, payload, auth);
       // The translation now runs in the background (it used to hold the
@@ -1016,7 +1051,7 @@ const CreateGig = () => {
 
 
   const waiting = {
-    uploadLogo, uploadTierImages, uploadProductImage, addProductsFromPhotos, extractProducts, fillFromAd, submit,
+    uploadLogo, uploadTierImages, uploadProductImage, addProductsFromPhotos, extractProducts, fillFromAd, readSocials, submit,
   };
   useEffect(() => {
     if (!token) return;
@@ -1329,6 +1364,48 @@ const CreateGig = () => {
               </ul>
             )}
             {finding && <p className="mt-2 text-sm text-gray-600 inline-flex items-center gap-1.5"><Loader2 size={14} className="animate-spin" />{t('wizard.findLoading', 'Filling in your details…')}</p>}
+          </div>
+        )}
+
+        {/* Their own accounts: kept for their site, and read to fill this in. */}
+        {step === 1 && (
+          <div className="mb-4 p-4 rounded-xl bg-white border border-[var(--brand-border)]" data-testid="wizard-socials">
+            <h2 className="text-base font-semibold">{t('wizard.socialsTitle', 'Your Instagram, Facebook or website')}</h2>
+            <p className="text-sm text-gray-600 mb-3">{t('wizard.socialsBody', 'Add any you have. We can read them to fill this in for you, and we keep them for your page.')}</p>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {[
+                ['instagram', 'Instagram', '@yourbusiness'],
+                ['facebook', 'Facebook', 'facebook.com/yourbusiness'],
+                ['tiktok', 'TikTok', '@yourbusiness'],
+                ['website', t('wizard.socialsWebsite', 'Website'), 'yourbusiness.co.il'],
+              ].map(([k, label, ph]) => (
+                <label key={k} className="block text-xs font-semibold text-gray-700">
+                  {label}
+                  <input
+                    value={socials[k] || ''}
+                    onChange={(e) => setSocial(k, e.target.value)}
+                    placeholder={ph}
+                    dir="ltr"
+                    inputMode="url"
+                    autoCapitalize="none"
+                    className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm font-normal focus:outline-none focus:border-[var(--brand-primary)]"
+                    data-testid={`wizard-social-${k}`}
+                  />
+                </label>
+              ))}
+            </div>
+            <div className="flex justify-end mt-3">
+              <button
+                type="button"
+                onClick={readSocials}
+                disabled={socialsReading || !Object.values(socials).some((v) => String(v || '').trim())}
+                className="btn-primary px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
+                data-testid="wizard-socials-read"
+              >
+                {socialsReading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                {socialsReading ? t('wizard.socialsReading', 'Reading your accounts…') : t('wizard.socialsRead', 'Fill in from these')}
+              </button>
+            </div>
           </div>
         )}
 
