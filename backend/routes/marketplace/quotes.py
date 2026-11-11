@@ -133,15 +133,17 @@ async def request_quote(gig_id: str, body: QuoteIn, request: Request, viewer=Dep
     await _notify(gig.get("provider_user_id"), "quote_request",
                   f"New quote request for {gig.get('title') or 'your listing'} from {q['name']}.", q["_id"])
     from .orders import _email, _esc
-    owner = await db.users.find_one({"id": gig.get("provider_user_id")}, {"email": 1}) or {}
-    await _email(owner.get("email"), f"Quote request: {gig.get('title') or ''}",
+    from .order_emails import business_email
+    # The business's own address and switch (order_emails.py).
+    await _email(await business_email(biz), f"Quote request: {gig.get('title') or ''}",
                  f"<p><b>{_esc(q['name'])}</b> asked for a price:</p><p>{_esc(q['description'])}</p>"
                  # The business's own questions and what this customer
                  # answered. Without them the email says "asked for a
                  # price" and leaves the pickup time in the dashboard.
                  + (f"<p>{_esc(answers_text(answers))}</p>".replace("\n", "<br>") if answers else "")
                  + (f"<p>{len(q['photos'])} photo(s) attached.</p>" if q["photos"] else ""),
-                 tag="quote-request", button=("Answer with a price", "/dashboard?tab=appointments"))
+                 tag="quote-request", button=("Answer with a price", "/dashboard?tab=appointments"),
+                 log={"business_id": gig.get("business_id"), "who": "business", "kind": "quote_new", "ref_id": q["_id"], "label": q["name"]})
     await _email_customer(q, gig, biz, "received")
     # With texts on the customer is not sent to WhatsApp, so both sides hear by text.
     from utils.bg_tasks import spawn

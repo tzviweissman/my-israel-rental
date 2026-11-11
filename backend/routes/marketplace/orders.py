@@ -1165,9 +1165,13 @@ def _subject(s: str) -> str:
     return " ".join(str(s or "").split())
 
 
-async def _email(to: Optional[str], subject: str, inner_html: str, *, tag: str, button: tuple[str, str] | None = None) -> None:
+async def _email(to: Optional[str], subject: str, inner_html: str, *, tag: str, button: tuple[str, str] | None = None,
+                 lang: str = "en", log: Optional[dict[str, Any]] = None) -> bool:
     """Fire-and-forget through the site's Postmark wrapper. Missing address
     or unconfigured mail is a no-op, never an error on the request.
+    `lang="he"` sets the email right to left. `log` ({business_id, who, kind,
+    label, ref_id}) keeps the email in the business's Recent emails
+    (order_emails.py).
 
     NOTE: `inner_html` is trusted markup by the time it arrives here. Every
     caller is responsible for putting user text through `_esc`/`_esc_ml`
@@ -1175,7 +1179,7 @@ async def _email(to: Optional[str], subject: str, inner_html: str, *, tag: str, 
     escaping the tags the caller deliberately wrote.
     """
     if not to:
-        return
+        return False
     subject = _subject(subject)
     try:
         from utils.email import _button, _wrap, send_email
@@ -1187,9 +1191,16 @@ async def _email(to: Optional[str], subject: str, inner_html: str, *, tag: str, 
         if href.startswith("/"):
             href = _frontend_url() + href
         html = inner_html + (_button(button[0], href) if button else "")
-        await send_email(to, subject, _wrap(html), tag=tag)
+        log_id = str(uuid.uuid4()) if log else None
+        ok = await send_email(to, subject, _wrap(html, preheader=_esc(subject), lang=lang), tag=tag,
+                              metadata={"log_id": log_id} if log_id else None)
+        if ok and log:
+            from .order_emails import keep
+            await keep(log_id, to, subject, log)
+        return ok
     except Exception as exc:  # noqa: BLE001
         logger.warning("[orders] email '%s' to %s failed: %s", tag, (to or "")[:3] + "***", exc)
+        return False
 
 
 def _order_line(o: dict[str, Any]) -> str:
@@ -1906,6 +1917,7 @@ async def _owner_settings_out(biz: dict[str, Any]) -> dict[str, Any]:
         {"whatsapp": 1, "provider_user_id": 1},
     )
     from .order_texts import texts_on
+    from .order_emails import emails_on
     return {**_settings_out(biz, await _store_of(biz["_id"])), "pause": pause_of(biz), "text_on": texts_on(biz),
             "text_number": (biz.get("order_settings") or {}).get("text_number"),
             "text_note": (biz.get("order_settings") or {}).get("text_note") or "",
@@ -1913,6 +1925,9 @@ async def _owner_settings_out(biz: dict[str, Any]) -> dict[str, Any]:
             "auto_confirm": bool((biz.get("order_settings") or {}).get("auto_confirm")),
             "business_name": biz.get("name") or "", "business_name_he": biz.get("name_he") or "",
             "text_defaults": TEXT_DEFAULTS,
+            # Emails (order_emails.py): on unless switched off; the account's address unless another is chosen.
+            "email_on": emails_on(biz), "email_to": (biz.get("order_settings") or {}).get("email_to") or "",
+            "account_email": ((await db.users.find_one({"id": biz.get("owner_user_id")}, {"email": 1})) or {}).get("email") or "",
             "whatsapp_number": (await gig_whatsapp_number(selling)) if selling else ""}
 
 
@@ -1948,6 +1963,8 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         "text_note": old.get("text_note"),
         "text_templates": old.get("text_templates"),
         "auto_confirm": old.get("auto_confirm"),
+        "email_on": old.get("email_on"),
+        "email_to": old.get("email_to"),
         "pause": old.get("pause"),
         # An older client that does not send the switch keeps the old
         # meaning: delivery times set means delivery offered.
@@ -2035,6 +2052,33 @@ async def put_order_texts(business_id: str, payload: OrderTextsIn, user=Depends(
         settings["text_templates"] = clean_templates(payload.text_templates)
     if payload.auto_confirm is not None:
         settings["auto_confirm"] = payload.auto_confirm
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"order_settings": settings}})
+    return await _owner_settings_out({**biz, "order_settings": settings})
+
+
+class OrderEmailsIn(BaseModel):
+    # Off stops the business's own emails about new orders, bookings and quote
+    # requests. Customers still get theirs: it is their receipt.
+    email_on: bool
+    # Where they go when it is not the account's address. Empty: the account's.
+    email_to: Optional[str] = Field(None, max_length=200)
+
+
+@router.get("/businesses/{business_id}/orders/emails/recent")
+async def get_recent_emails(business_id: str, user=Depends(verify_token)):
+    """The last order and booking emails, with whether each one arrived."""
+    await _owned_business(business_id, user)
+    from .order_emails import recent_emails
+    return {"emails": await recent_emails(business_id)}
+
+
+@router.put("/businesses/{business_id}/orders/emails")
+async def put_order_emails(business_id: str, payload: OrderEmailsIn, user=Depends(verify_token)):
+    biz = await _owned_business(business_id, user, None)
+    to = (payload.email_to or "").strip().lower() or None
+    if to and not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", to):
+        raise HTTPException(status_code=400, detail="That does not look like an email address")
+    settings = {**(biz.get("order_settings") or {}), "email_on": payload.email_on, "email_to": to if payload.email_on else None}
     await db.businesses.update_one({"_id": business_id}, {"$set": {"order_settings": settings}})
     return await _owner_settings_out({**biz, "order_settings": settings})
 
@@ -2707,29 +2751,13 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     spawn(alert_business_on_whatsapp(gig, biz.get("owner_user_id"), payload.customer_name,
                                      items_text, "/dashboard?tab=orders", "order", order_id=doc["_id"]))
     from .order_texts import _texts_after, text_customer_received
-    spawn(_texts_after(doc, biz, True, tell_business=False) if auto else text_customer_received(doc, biz))
-    owner = await db.users.find_one({"id": biz["owner_user_id"]}, {"_id": 0, "email": 1})
-    await _email(
-        (owner or {}).get("email"), f"New order {order_no(doc)} from table {payload.table}" if payload.table else f"New order {order_no(doc)} from {payload.customer_name}",
-        f"<p><strong>{_esc(payload.customer_name)}</strong> ordered on your page:</p><p>{_esc_ml(items_text)}</p>"
-        f"<p>{'Delivery to ' + _esc(address) if payload.fulfilment == 'delivery' else (f'Table {payload.table}' if payload.table else 'Pickup')} · {_esc(needed_by.replace('T', ' '))}"
-        + (f" · {_esc(sym)}{total:g}" if total is not None else "") + "</p>",
-        tag="order-new", button=("Open my orders", f"{_frontend_url()}/dashboard?tab=orders"),
-    )
-    # Tell the customer, with the link and how to pay.
-    pay = biz.get("payment_note") or ""
-    links = "".join(
-        f'<p><a href="{_esc(l.get("url"))}">{_esc(l.get("label") or l.get("url"))}</a></p>'
-        for l in allowed_payment_links(biz.get("payment_links"))
-    )
-    await _email(
-        payload.customer_email, f"Your order {order_no(doc)} from {biz.get('name')}",
-        f"<p>Thanks, {_esc(payload.customer_name)}. {_esc(biz.get('name'))} has your order:</p><p>{_esc_ml(items_text)}</p>"
-        f"<p>{'Delivery to ' + _esc(address) if payload.fulfilment == 'delivery' else (f'Served at table {payload.table}' if payload.table else 'Pickup at the store')} · {_esc(needed_by.replace('T', ' '))}"
-        + (f" · {_esc(sym)}{total:g}" if total is not None else "") + "</p>"
-        + (f"<p>Payment goes to the store directly. {_esc(pay)}</p>{links}" if (pay or links) else "<p>Payment goes to the store directly.</p>"),
-        tag="order-confirmation", button=("Follow your order", track),
-    )
+    # The customer's receipt below already says "confirmed" when it was accepted automatically: no second email.
+    spawn(_texts_after(doc, biz, True, tell_business=False, email=False) if auto else text_customer_received(doc, biz))
+    # The business's email, with its one-tap Confirm / Decline link, and the
+    # customer's receipt (order_emails.py: the business's switch, address and wording).
+    from .order_emails import email_customer_received, email_owner_new_order
+    await email_owner_new_order(doc, biz)
+    await email_customer_received(doc, biz)
     return {"order_id": doc["_id"], "track_token": doc["track_token"], "track_url": track, "total": total, "currency": currency,
             "delivery_fee": doc["delivery_fee"], "discount": discount}
 

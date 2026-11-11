@@ -404,11 +404,10 @@ async def customer_told_of_decision(o: dict[str, Any], status: str) -> None:
     await _texts_after(o, biz, status != DECLINED_STATUS, tell_business=False)
 
 
-async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool, tell_business: bool = True) -> None:
+async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool, tell_business: bool = True, email: bool = True) -> None:
     """The customer and the business each get one text. Never raises: the
     order has already moved."""
     try:
-        name = biz.get("name_he") if o.get("lang") == "he" and biz.get("name_he") else biz.get("name") or ""
         no = order_no(o)
         customer = o.get("customer_phone_e164") or o.get("customer_phone")
         if customer and texts_on(biz):
@@ -417,7 +416,9 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool, te
                     else compose(biz, "order_declined", lang, _order_vals(o, biz, lang)))
             await _text(customer, body + (_note(biz) if confirm else ""), biz_id=o.get("business_id"), who="customer",
                         kind="order_confirmed" if confirm else "order_declined", ref_id=o.get("_id"), label=no)
-        await _email_customer(o, name, no, confirm)
+        if email:
+            from .order_emails import email_customer_decision
+            await email_customer_decision(o, biz, confirm)
         if confirm and tell_business:
             # The phone that tapped is the business's: the alert went to it.
             number = await _business_text_number(o)
@@ -428,21 +429,6 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool, te
                 await _text(number, body, biz_id=o.get("business_id"), who="business", kind="order_confirmed", ref_id=o.get("_id"), label=no)
     except Exception as exc:  # noqa: BLE001
         logger.warning("order texts after %s failed: %s", "confirm" if confirm else "decline", type(exc).__name__)
-
-
-async def _email_customer(o: dict[str, Any], name: str, no: str, confirm: bool) -> None:
-    """The same news by email (Tzvi, 6 Nov 2026), with the tracking link."""
-    from .orders import _email, _esc, _esc_ml
-    he = o.get("lang") == "he"
-    if confirm:
-        subject = f"ההזמנה שלך {no} מ{name} אושרה" if he else f"Your order {no} from {name} is confirmed"
-        html = f"<p>{_esc(subject)}.</p><p>{_esc_ml(o.get('items') or '')}</p>"
-        button = ("מעקב אחר ההזמנה" if he else "Follow your order", track_link(o))
-    else:
-        subject = f"ההזמנה שלך {no} מ{name}" if he else f"Your order {no} from {name}"
-        sorry = f"מצטערים, {name} לא יכולים לקבל את ההזמנה שלך {no} הפעם." if he else f"Sorry, {name} can't take your order {no} this time."
-        html, button = f"<p>{_esc(sorry)}</p>", None
-    await _email(o.get("customer_email"), subject, html, tag="order-confirmed" if confirm else "order-declined", button=button)
 
 
 async def _business_text_number(o: dict[str, Any]) -> Optional[str]:

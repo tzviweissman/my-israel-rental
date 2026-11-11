@@ -77,6 +77,7 @@ async def send_email(
     message_stream: str = "outbound",
     from_name: str | None = None,
     headers: dict[str, str] | None = None,
+    metadata: dict[str, str] | None = None,
 ) -> bool:
     """Send an HTML email through Postmark. Non-blocking for callers via
     asyncio.to_thread. Returns True on success, False otherwise.
@@ -151,6 +152,9 @@ async def send_email(
             Tag=tag or "transactional",
             ReplyTo=reply_to or EMAIL_REPLY_TO,
             **({"Headers": headers} if headers else {}),
+            # Comes back on Postmark's delivery and bounce reports, so a sent
+            # email can be matched to its report (order_emails.recent_emails).
+            **({"Metadata": metadata} if metadata else {}),
         )
 
     try:
