@@ -56,7 +56,10 @@ def email_line(biz: dict[str, Any], key: str, lang: str, vals: dict[str, Any]) -
     t = own or (EMAIL_WORDS.get(key) or TEMPLATES[key])[lang]
     for k in PLACEHOLDERS:
         t = t.replace("{" + k + "}", str(vals.get(k) or ""))
-    return re.sub(r"[ \t]{2,}", " ", t).strip()
+    t = re.sub(r"[ \t]{2,}", " ", t).strip()
+    # A text's wording ends by pointing at the link that follows it ("Your tracking link:"). In an email the
+    # link is a button further down, so that closing pointer is dropped.
+    return re.sub(r"(?<=[.!?])\s+[^.!?:]*:$", "", t)
 
 
 def note_html(biz: dict[str, Any]) -> str:
