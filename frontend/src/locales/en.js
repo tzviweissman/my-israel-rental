@@ -4742,6 +4742,7 @@ const en = {
         labelsL: "Labels",
         strips: "Headline on strips",
         withReview: "Add a customer review",
+        withLogo: "Show my logo",
         deal: "A real deal you are running (optional)",
         dealHint: "Buy 2, get 1 free",
         dealEnds: "Ends on",

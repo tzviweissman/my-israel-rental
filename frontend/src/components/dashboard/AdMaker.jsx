@@ -213,8 +213,10 @@ function drawFooter(ctx, { W, PAD, QR, rtl, dark, cta, shortUrl, qr, body, px, s
 }
 
 // A link is never cut with a "…": with a business's name in it, it breaks after /p/ instead.
-function linkLines(ctx, shortUrl, width) {
+// With a logo, the link leaves it room in the foot (A4.6) and breaks after /p/ sooner.
+function linkLines(ctx, shortUrl, width0) {
   const url = shortUrl.replace(/^https?:\/\//, '');
+  const width = width0 - ((PARTS && PARTS.logoRoom) || 0);
   if (ctx.measureText(url).width <= width) return [url];
   const at = url.indexOf('/p/') + 3;
   return [url.slice(0, at), url.slice(at)];
@@ -1443,8 +1445,8 @@ function pieceMove(name, { t, layout, rtl }, w, h, H) {
     const p = progress(t, 0, 0.5);
     return { alpha: 0.3 + 0.7 * p, s: 1 + (1 - easeOut(p)) * 0.35 };
   }
-  if (name === 'qr' || name === 'link' || name === 'name' || name === 'labels' || name === 'review' || name === 'deal') {
-    const p = progress(t, { qr: 1.55, link: 1.7, name: 1.1, labels: 0.9, review: 1.9, deal: 1.4 }[name], 0.4);
+  if (name === 'qr' || name === 'logo' || name === 'link' || name === 'name' || name === 'labels' || name === 'review' || name === 'deal') {
+    const p = progress(t, { qr: 1.55, logo: 1.45, link: 1.7, name: 1.1, labels: 0.9, review: 1.9, deal: 1.4 }[name], 0.4);
     return { alpha: p, y: (1 - easeOut(p)) * 60 };
   }
   return null;
@@ -2847,6 +2849,63 @@ function extras(canvas, a) {
   const { width: W, height: H } = canvas;
   const body = bodyFont(a.rtl);
   const story = a.format === 'story';
+  const q = PARTS && PARTS.boxes.qr;
+  const lk = PARTS && PARTS.boxes.link;
+  if (a.logo && q) {
+    // The business's own logo (ad rule A4.6, Tzvi 11 Nov 2026: "the ad doesnt show their logo"), on a white tile
+    // so it reads on any ground. Its place is the empty middle of the foot, between the code and the link, the
+    // same on every design; above the code only when the link leaves no room (it covered price stickers there).
+    const img = a.logo;
+    const m = 14;
+    const ratio = img.naturalWidth / img.naturalHeight;
+    const row = lk && lk[1] < q[1] + q[3] && lk[1] + lk[3] > q[1];
+    const gap = row ? (lk[0] > q[0] ? [q[0] + q[2], lk[0]] : [lk[0] + lk[2], q[0]]) : null;
+    let th = q[3] * 0.66;
+    let tw = Math.min(ratio * (th - m * 2) + m * 2, W * 0.4);
+    let x;
+    let y;
+    if (gap && gap[1] - gap[0] >= Math.min(tw, th * 1.4) + 56) {
+      tw = Math.min(tw, gap[1] - gap[0] - 56);
+      x = (gap[0] + gap[1]) / 2 - tw / 2;
+      y = q[1] + (q[3] - th) / 2;
+    } else {
+      // No room beside the link: the first spot round the code (or under the link) that covers nothing else on
+      // the ad, a size smaller if none is free; never under 64px high, the smallest that reads (checked at 54).
+      const top = story ? 220 : 0;
+      const foot = story ? H - 230 : H;
+      const free = (bx, by, bw, bh) => bx >= 0 && bx + bw <= W && by >= top && by + bh <= foot
+        && Object.entries(PARTS.boxes).every(([nm, b]) => nm === 'logo' || bx >= b[0] + b[2] || bx + bw <= b[0] || by >= b[1] + b[3] || by + bh <= b[1]);
+      let got = null;
+      for (const sh of [1, 0.8, 0.64]) {
+        const h1 = Math.max(64, th * sh);
+        const w1 = Math.min(q[2] * 1.3, ratio * (h1 - m * 2) + m * 2);
+        const h2 = Math.min(h1, (w1 - m * 2) / ratio + m * 2);
+        const spots = [[q[0] + (q[2] - w1) / 2, q[1] - 16 - h2], [q[0] - 16 - w1, q[1] + (q[3] - h2) / 2],
+          [q[0] + q[2] + 16, q[1] + (q[3] - h2) / 2], [q[0] + (q[2] - w1) / 2, q[1] + q[3] + 16]];
+        if (lk) spots.push([a.rtl ? lk[0] + lk[2] - w1 : lk[0], lk[1] + lk[3] + 12]);
+        const at = spots.find(([bx, by]) => free(bx, by, w1, h2));
+        if (at) { got = [at[0], at[1], w1, h2]; break; }
+      }
+      if (!got) {
+        const w1 = Math.min(q[2], ratio * (th - m * 2) + m * 2);
+        got = [q[0] + (q[2] - w1) / 2, q[1] - 16 - th, w1, Math.min(th, (w1 - m * 2) / ratio + m * 2)];
+      }
+      [x, y, tw, th] = got;
+    }
+    const k = Math.min((tw - m * 2) / img.naturalWidth, (th - m * 2) / img.naturalHeight);
+    const w = img.naturalWidth * k;
+    const h = img.naturalHeight * k;
+    part(ctx, 'logo', [x, y, tw, th], () => {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.shadowColor = 'rgba(0,0,0,.18)';
+      ctx.shadowBlur = 14;
+      ctx.beginPath();
+      ctx.roundRect(x, y, tw, th, 16);
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+      ctx.drawImage(img, x + (tw - w) / 2, y + (th - h) / 2, w, h);
+    });
+  }
   if (a.deal) {
     // Top middle, where the business name was; a status keeps its top clear, so there it sits above the link.
     ctx.font = `800 32px ${body}`;
@@ -2968,8 +3027,9 @@ function render(target, design, a0) {
     PARTS.later.forEach((paint) => paint());
     if (anim && anim.cover > 0) hookCard(ctx, canvas.width, canvas.height, anim, a);
   };
+  const logoRoom = a.logo ? Math.min(a0.format === 'square' ? 300 : 360, (a.logo.naturalWidth / a.logo.naturalHeight) * 100 + 28) + 56 : 0;
   if (THEMED[layout]) {
-    PARTS = { moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: a.font || null, ink: a.ink || null, photo: a.photo || null, tilt: TILT[layout] || 0, anim, strips: !!a.strips, stats: a.stats || null,
+    PARTS = { logoRoom, moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: a.font || null, ink: a.ink || null, photo: a.photo || null, tilt: TILT[layout] || 0, anim, strips: !!a.strips, stats: a.stats || null,
       scene: a.scene?.img || null, sceneLight: !!a.scene?.light, sceneLights: !!a.scene?.lights, sceneRtl: a.rtl,
       sceneFloor: a.scene?.floor || 0, sceneAt: a.sceneAt || 0 };
     try {
@@ -2984,7 +3044,7 @@ function render(target, design, a0) {
     return undefined;
   }
   // One look each, so no font or word colour here; pieces move all the same.
-  PARTS = { moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: null, ink: null, photo: a.photo || null, col: a.col || null, anim, strips: !!a.strips, stats: a.stats || null };
+  PARTS = { logoRoom, moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: null, ink: null, photo: a.photo || null, col: a.col || null, anim, strips: !!a.strips, stats: a.stats || null };
   try {
     const fixed = { phone: drawPhone, torn: drawTorn, review: drawReview, native: drawStory, colour: drawColour,
       bigwords: drawBigWords, grid: drawGrid, items: drawItems, note: drawNote, question: drawQuestion }[design];
@@ -3115,6 +3175,15 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   }, [shots]);
   const [strips, setStrips] = useState(false);
   const [withReview, setWithReview] = useState(false);
+  // On whenever the business has a logo, unless the owner turned it off on this saved ad.
+  const [logoOn, setLogoOn] = useState(true);
+  const [logoImg, setLogoImg] = useState(null);
+  useEffect(() => {
+    let gone = false;
+    setLogoImg(null);
+    if (target.logo_url) loadImage(target.logo_url).then((img) => { if (!gone) setLogoImg(img); });
+    return () => { gone = true; };
+  }, [target.logo_url]);
   const [deal, setDeal] = useState({ text: '', until: '' });
   const [canStrip, setCanStrip] = useState(false);
   const [videoPct, setVideoPct] = useState(null);
@@ -3205,6 +3274,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     setInk(st.ink || '');
     setStrips(!!st.strips);
     setWithReview(!!st.withReview);
+    setLogoOn(st.logo !== false);
     setDeal(st.deal || { text: '', until: '' });
     setMoves(st.moves || {});
     const img = st.bg?.src ? await loadImage(st.bg.src) : null;
@@ -3441,7 +3511,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       shot: l === 'shoot' ? shotOf(it) : null,
       scene: sceneImg ? { img: sceneImg, light: /light/.test(setName), lights: holidayPick === 'chanukah',
         floor: (FLOOR[setName] || {})[sceneImgs[`${setName}-${shape}`] ? shape : 'feed'] || 0 } : null,
-      strips, reviewChip: withReview && review ? review : null,
+      strips, reviewChip: withReview && review ? review : null, logo: logoOn ? logoImg : null,
       deal: dealOn ? `${deal.text.trim()} · ${lt('ads.dealUntil', 'until {{date}}', { date: new Date(`${deal.until}T12:00`).toLocaleDateString(rtl ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'short' }) })}` : '',
       // A deal takes the business name's place at the top: the name is in the link and the eyebrow sits where the deal goes.
       format: d === 'native' ? 'story' : format, words, eyebrow: dealOn ? '' : eyebrow, price: priceOf(it), cta: itemCta || cta, shortUrl, rtl, imgs: imgsOf(it), items, pool: poolFor(l), qr: qrRef.current,
@@ -3508,7 +3578,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [words, format, design, imgs, itemImgs, cutItems, pickBy, rtl, eyebrow, cta, shortUrl, reviews, reviewIdx, faqs, faqIdx,
-    lookBy, holidayPick, customBy, photoBy, fontIdx, ink, bg, moves, situationIdx, strips, withReview, deal, sceneImgs, shotImgs, shots]);
+    lookBy, holidayPick, customBy, photoBy, fontIdx, ink, bg, moves, situationIdx, strips, withReview, logoOn, logoImg, deal, sceneImgs, shotImgs, shots]);
 
   // Every design at once, small, so the owner picks one by eye (rules 9b).
   // A moment after typing stops: each preview is a full drawing.
@@ -3606,7 +3676,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       const { data } = await axios.post(`${API}/ads/saved`, {
         target_type: targetType, target_id: target.id, id: asNew ? null : (savedId || null), lang, design, kept,
         item: featured?.name || '', words, thumb: c.toDataURL('image/jpeg', 0.7),
-        settings: { format, look, customHex, fontIdx, ink, strips, withReview, deal, moves, adName, bg: bg.src ? { src: bg.src } : { id: bg.id || 'sand' }, photo: photoBy[layout]?.src || null, reviewIdx, faqIdx, situationIdx },
+        settings: { format, look, customHex, fontIdx, ink, strips, withReview, logo: logoOn, deal, moves, adName, bg: bg.src ? { src: bg.src } : { id: bg.id || 'sand' }, photo: photoBy[layout]?.src || null, reviewIdx, faqIdx, situationIdx },
       }, auth);
       setSavedId(data.id);
       loadSaved();
@@ -4121,6 +4191,12 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                   <label className="inline-flex items-center gap-1.5">
                     <input type="checkbox" checked={strips} onChange={(e) => setStrips(e.target.checked)} data-testid="ad-strips" />
                     {t('ads.strips', 'Headline on strips')}
+                  </label>
+                )}
+                {logoImg && (
+                  <label className="inline-flex items-center gap-1.5">
+                    <input type="checkbox" checked={logoOn} onChange={(e) => setLogoOn(e.target.checked)} data-testid="ad-logo" />
+                    {t('ads.withLogo', 'Show my logo')}
                   </label>
                 )}
                 {reviews.length > 0 && design !== 'review' && (

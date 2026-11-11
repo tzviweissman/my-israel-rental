@@ -722,3 +722,8 @@ their listing. A business recognises its ad by its logo, and so do its customers
 business's own logo: the real file, or cut cleanly out of a picture of theirs, never redrawn or generated, big
 enough to read at phone size and below the phone's top bar. Step A4.6; ad-blueprint refuses an answer that names no
 logo file that exists, unless it says "n/a: no logo".
+
+The ad maker on the site does the same for every business that has uploaded a logo: it sits on a white tile in the
+empty middle of the foot, between the code and the link, on every design (above the code only when the link leaves
+no room), with a "Show my logo" switch to take it off. check-ad-designs draws every design with a wide test logo
+and fails one that is missing, under 54px high, outside a status's safe area, or over any word.
