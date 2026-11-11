@@ -2517,6 +2517,8 @@ const he = {
         needTemplate: 'צריכים תבנית?',
         smartPricing: 'תמחור חכם',
         attentionMessages: '{{n}} הודעות שלא נקראו',
+        attentionLeads_one: 'לקוח אחד מחכה לתשובה שלכם',
+        attentionLeads_other: '{{count}} לקוחות מחכים לתשובה שלכם',
         attentionBookings: '{{n}} הזמנות ממתינות לתשובה שלכם',
         attentionAppointments: "{{n}} בקשות לתור או להצעת מחיר ממתינות לכם",
         attentionMembers: "{{n}} מנויים חדשים ממתינים לאישור תשלום",
@@ -6867,7 +6869,7 @@ const he = {
       leads: {
         viewList: "לקוחות",
         viewBoard: "פניות",
-        body: "כל הפניות במקום אחד: שיחות על המודעות שלכם, בקשות להצעת מחיר וההצעות ששלחתם. הוסיפו שיחת טלפון בעצמכם, והעבירו כרטיס כשמשהו משתנה.",
+        body: "כל הפניות במקום אחד: שיחות, מיילים, בקשות להצעת מחיר וההצעות ששלחתם. לכל שיחה או מייל חדשים מצורפת תשובה מוצעת. הוסיפו שיחת טלפון בעצמכם, והעבירו כרטיס כשמשהו משתנה.",
         add: "הוספת פנייה",
         name: "שם",
         phone: "טלפון (לא חובה)",
@@ -6917,6 +6919,18 @@ const he = {
         noAddress: "אין במייל הזה כתובת לענות אליה. ענו מהמייל שלכם.",
         markDone: "טופל",
         markSpam: "ספאם",
+      },
+      // The row of switches above the leads board (LeadsSettings.jsx).
+      leadsSettings: {
+        label: "הגדרות לפניות שלכם",
+        email: "מייל העסק",
+        remind: "תזכורות",
+        auto: "תשובה אוטומטית",
+        on: "פועל",
+        off: "כבוי",
+        setUp: "להגדרה",
+        waiting_one: "לקוח אחד מחכה",
+        waiting_other: "{{count}} לקוחות מחכים",
       },
       // The business's own email address (backend email_inbox.py, lead_nudge.py).
       inbox: {

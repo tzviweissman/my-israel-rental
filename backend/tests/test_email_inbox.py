@@ -270,3 +270,14 @@ async def test_nudge_off_and_at_night(env):
     r = await c.put("/api/marketplace/businesses/biz1/lead-nudge", headers=_auth(OWNER), json={"on": False})
     assert r.status_code == 200
     assert await ln.run_once(now) == 0 and sent == []
+
+
+@pytest.mark.asyncio
+async def test_dashboard_counts_customers_waiting(env):
+    c, fake, *_ = env
+    await fake.messages.insert_one({"id": "m1", "property_id": "gig1", "sender_id": CUSTOMER, "receiver_id": OWNER,
+                                    "message": "Hi", "created_at": datetime.now(UTC).isoformat()})
+    await ei.receive(_payload(MessageID="pm-9"), draft_now=True)
+    assert await ln.waiting_count(OWNER) == 2
+    r = await c.get("/api/dashboard/summary", headers=_auth(OWNER))
+    assert r.status_code == 200 and r.json()["leads_waiting"] == 2

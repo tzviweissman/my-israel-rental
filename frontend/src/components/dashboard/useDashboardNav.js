@@ -103,7 +103,7 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
         // whose area it is and who have no Overview of the business.
         { id: 'summary', label: t('dashboard.summary', 'Sales summary'), Icon: BarChart3, show: !runsBusiness && staff('summary') },
         // Every business has customers, whatever it sells: not a tool to switch.
-        { id: 'customers', label: t('dashboard.customers', 'Customers'), Icon: Contact, show: runsBusiness || staff('customers') },
+        { id: 'customers', label: t('dashboard.customers', 'Customers'), Icon: Contact, badge: summary.leads_waiting, show: runsBusiness || staff('customers') },
         { id: 'discounts', label: t('dashboard.discountsGifts', 'Discounts and gift cards'), Icon: TicketPercent, badge: summary.gift_cards_waiting, show: tool('orders') || tool('members') || staff('discounts') },
         { id: 'network', label: t('dashboard.network', 'Network'), Icon: Network, badge: summary.network_requests_in, show: tool('network') || (summary.network_requests_in || 0) > 0 },
         { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, badge: summary.work_offers_open, show: tool('job-requests') },

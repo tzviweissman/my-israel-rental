@@ -629,7 +629,7 @@ const Dashboard = () => {
           <DiscountsTab API={API} token={token} />
         )}
         {activeTab === 'customers' && (showGigTabs || staffIn('customers')) && (
-          <CustomersTab API={API} token={token} />
+          <CustomersTab API={API} token={token} leadsWaiting={summary.leads_waiting || 0} />
         )}
         {activeTab === 'tools' && showGigTabs && (
           <ToolsTab

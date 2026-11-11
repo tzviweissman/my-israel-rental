@@ -17,8 +17,7 @@ import MessageComposer from './MessageComposer';
 import OccasionsCard from './OccasionsCard';
 import PaymentRequestsPanel from './PaymentRequestsPanel';
 import LeadsBoard from './LeadsBoard';
-import AwayReplyCard from './AwayReplyCard';
-import InboxCard from './InboxCard';
+import LeadsSettings from './LeadsSettings';
 import { ImportCustomersPanel } from './OrdersTab';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
@@ -161,7 +160,7 @@ function Detail({ API, auth, businessId, row, onClose, onSaved, lang }) {
   );
 }
 
-export default function CustomersTab({ API, token }) {
+export default function CustomersTab({ API, token, leadsWaiting = 0 }) {
   const { t, i18n } = useTranslation();
   const lang = String(i18n.language || 'en').split('-')[0];
   const auth = useMemo(() => ({ headers: { Authorization: `Bearer ${token}` } }), [token]);
@@ -266,7 +265,13 @@ export default function CustomersTab({ API, token }) {
         {[['list', t('leads.viewList', 'Customers')], ['leads', t('leads.viewBoard', 'Leads')]].map(([k, l]) => (
           <button key={k} type="button" role="tab" aria-selected={view === k} onClick={() => setView(k)}
                   className="px-4 min-h-[36px] rounded-full text-sm font-semibold"
-                  style={view === k ? { background: 'var(--ink)', color: '#fff' } : { color: 'var(--ink)' }} data-testid={`customers-view-${k}`}>{l}</button>
+                  style={view === k ? { background: 'var(--ink)', color: '#fff' } : { color: 'var(--ink)' }} data-testid={`customers-view-${k}`}>
+            {l}
+            {k === 'leads' && leadsWaiting > 0 && (
+              <span className="ms-1.5 inline-flex min-w-[20px] h-5 px-1.5 items-center justify-center rounded-full text-[11px] font-bold"
+                    style={{ background: 'var(--gold)', color: '#fff' }} aria-label={t('leadsSettings.waiting', { count: leadsWaiting })}>{leadsWaiting}</span>
+            )}
+          </button>
         ))}
       </div>
 
@@ -280,7 +285,7 @@ export default function CustomersTab({ API, token }) {
         <PaymentRequestsPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPaying(false)} />
       )}
 
-      {view === 'leads' ? (<><InboxCard API={API} auth={auth} businessId={biz.id} onChange={() => setLeadsKey((k) => k + 1)} /><AwayReplyCard API={API} auth={auth} businessId={biz.id} /><LeadsBoard API={API} auth={auth} businessId={biz.id} refreshKey={leadsKey} /></>) : (<>
+      {view === 'leads' ? (<><LeadsSettings API={API} auth={auth} businessId={biz.id} onChange={() => setLeadsKey((k) => k + 1)} /><LeadsBoard API={API} auth={auth} businessId={biz.id} refreshKey={leadsKey} /></>) : (<>
       {!composing && (biz.permissions || []).includes('messages') && (
         <OccasionsCard API={API} auth={auth} biz={biz} onCompose={(m) => setComposing(m)} />
       )}

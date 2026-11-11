@@ -119,6 +119,22 @@ async def attach_drafts(business_id: str, cards: list[dict[str, Any]]) -> None:
             c["draft"] = d.get("text")
 
 
+async def waiting_count(user_id: str) -> int:
+    """Chats and emails waiting for this person's answer, across the
+    businesses they own: the dashboard's "customers waiting" badge. Quote
+    requests are left out, the Appointments badge already counts them."""
+    from routes.marketplace.leads import leads_board
+    n = 0
+    async for b in db.businesses.find({"owner_user_id": user_id}, {"_id": 1}):
+        try:
+            board = await leads_board(b["_id"], {"user_id": user_id})
+        except Exception as e:  # noqa: BLE001
+            logger.warning("[lead-nudge] waiting count for %s failed: %s", b["_id"], e)
+            continue
+        n += sum(1 for c in board["leads"] if c.get("stage") == "new" and c.get("source") in SOURCES and c.get("last_from_customer"))
+    return n
+
+
 # --------------------------------------------------------------------------
 # The pass
 # --------------------------------------------------------------------------

@@ -9,7 +9,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { MessageSquareReply } from 'lucide-react';
 
-export default function AwayReplyCard({ API, auth, businessId }) {
+export default function AwayReplyCard({ API, auth, businessId, onSaved }) {
   const { t } = useTranslation();
   const [s, setS] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -26,6 +26,7 @@ export default function AwayReplyCard({ API, auth, businessId }) {
     try {
       const { data } = await axios.put(`${API}/marketplace/businesses/${businessId}/away-reply`, { on: next.on, text: next.text }, auth);
       setS({ ...next, ...data });
+      if (onSaved) onSaved(data);
       toast.success(data.on ? t('awayReply.savedOn', 'Automatic reply is on') : t('awayReply.savedOff', 'Automatic reply is off'));
     } catch {
       toast.error(t('awayReply.failed', 'That did not save. Try again.'));

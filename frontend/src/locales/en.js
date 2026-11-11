@@ -2546,6 +2546,8 @@ const en = {
         needTemplate: 'Need a template?',
         smartPricing: 'Smart Pricing',
         attentionMessages: '{{n}} unread messages',
+        attentionLeads_one: '1 customer waiting for your answer',
+        attentionLeads_other: '{{count}} customers waiting for your answer',
         attentionBookings: '{{n}} bookings awaiting your reply',
         attentionAppointments: "{{n}} appointment or quote requests waiting for you",
         attentionMembers: "{{n}} new members waiting for you to confirm payment",
@@ -7049,7 +7051,7 @@ const en = {
       leads: {
         viewList: "Customers",
         viewBoard: "Leads",
-        body: "Every enquiry in one place: chats about your listings, quote requests and the prices you sent. Add a phone call yourself, and move a card when it changes.",
+        body: "Every enquiry in one place: chats, emails, quote requests and the prices you sent. A new chat or email comes with a suggested reply. Add a phone call yourself, and move a card when it changes.",
         add: "Add a lead",
         name: "Name",
         phone: "Phone (optional)",
@@ -7099,6 +7101,18 @@ const en = {
         noAddress: "This email has no address to answer. Reply from your own email.",
         markDone: "Done",
         markSpam: "Spam",
+      },
+      // The row of switches above the leads board (LeadsSettings.jsx).
+      leadsSettings: {
+        label: "Settings for your enquiries",
+        email: "Business email",
+        remind: "Reminders",
+        auto: "Automatic reply",
+        on: "On",
+        off: "Off",
+        setUp: "Set up",
+        waiting_one: "{{count}} customer waiting",
+        waiting_other: "{{count}} customers waiting",
       },
       // The business's own email address (backend email_inbox.py, lead_nudge.py).
       inbox: {

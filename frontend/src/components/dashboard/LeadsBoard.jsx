@@ -79,7 +79,7 @@ export default function LeadsBoard({ API, auth, businessId, refreshKey }) {
     <div data-testid="leads-board" data-tour="leads-board">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
         <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>
-          {t('leads.body', 'Every enquiry in one place: chats about your listings, quote requests and the prices you sent. Add a phone call yourself, and move a card when it changes.')}
+          {t('leads.body', 'Every enquiry in one place: chats, emails, quote requests and the prices you sent. A new chat or email comes with a suggested reply. Add a phone call yourself, and move a card when it changes.')}
         </p>
         {!adding && (
           <button type="button" onClick={() => setAdding(true)} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold"

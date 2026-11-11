@@ -2,8 +2,8 @@
 
 Built 11 Nov 2026. Code: `backend/routes/marketplace/email_inbox.py`,
 `backend/routes/marketplace/lead_nudge.py`, `backend/utils/lead_assist.py`,
-UI in `frontend/src/components/dashboard/InboxCard.jsx` and `LeadsBoard.jsx`
-(Dashboard, Customers, Leads). Tests: `backend/tests/test_email_inbox.py`.
+UI in `frontend/src/components/dashboard/LeadsSettings.jsx` and `LeadsBoard.jsx`
+(Dashboard, Customers, Leads; the count of waiting customers also shows on Overview and as the Customers badge). Tests: `backend/tests/test_email_inbox.py`.
 
 ## What it does
 
