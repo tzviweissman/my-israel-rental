@@ -48,7 +48,7 @@ export default function DemandByPerson({ token, range }) {
     const needle = q.trim().toLowerCase();
     if (!needle) return all;
     return all.filter((r) =>
-      `${r.name || ''} ${r.email || ''}`.toLowerCase().includes(needle));
+      `${r.name || ''} ${r.email || ''} ${(r.businesses || []).join(' ')}`.toLowerCase().includes(needle));
   }, [data, q]);
 
   // Tighter on a phone: four columns have to fit in 343px without the
@@ -68,13 +68,13 @@ export default function DemandByPerson({ token, range }) {
           </p>
         </div>
         <label className="relative">
-          <span className="sr-only">{t('admin.byPersonSearch', 'Search by name or email')}</span>
+          <span className="sr-only">{t('admin.byPersonSearchAll', 'Search a person or business')}</span>
           <Search size={14} className="absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none" style={{ color: 'var(--brand-muted)' }} aria-hidden="true" />
           <input
             type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder={t('admin.byPersonSearch', 'Search by name or email')}
+            placeholder={t('admin.byPersonSearchAll', 'Search a person or business')}
             className="w-64 max-w-full rounded-lg border ps-8 pe-3 py-2 text-sm"
             style={{ borderColor: 'var(--brand-border)' }}
             data-testid="admin-demand-search"
@@ -101,6 +101,7 @@ export default function DemandByPerson({ token, range }) {
               <tr>
                 <th className={th} style={{ color: 'var(--brand-muted)' }}>{t('admin.byPersonColPerson', 'Person')}</th>
                 <th className={`${th} text-end`} style={{ color: 'var(--brand-muted)' }}>{t('admin.kpiWhatsappClicks', 'WhatsApp taps')}</th>
+                <th className={`${th} text-end`} style={{ color: 'var(--brand-muted)' }}>{t('admin.byPersonColOtherTaps', 'Calls & other taps')}</th>
                 <th className={`${th} text-end`} style={{ color: 'var(--brand-muted)' }}>{t('admin.byPersonColVisitors', 'Visitors')}</th>
                 <th className={`${th} text-end`} style={{ color: 'var(--brand-muted)' }}>{t('admin.kpiQrScans', 'QR scans')}</th>
               </tr>
@@ -112,6 +113,9 @@ export default function DemandByPerson({ token, range }) {
                     {r.name || r.email ? (
                       <>
                         <div className="font-semibold break-words" dir="auto" style={{ color: 'var(--ink)' }}>{r.name || r.email}</div>
+                        {r.businesses?.length > 0 && (
+                          <div className="text-xs font-medium break-words" dir="auto" style={{ color: 'var(--gold-text-on-light, var(--brand-primary))' }}>{r.businesses.join(' · ')}</div>
+                        )}
                         {r.name && r.email && (
                           <div className="text-xs break-all" dir="ltr" style={{ color: 'var(--brand-muted)' }}>{r.email}</div>
                         )}
@@ -123,13 +127,14 @@ export default function DemandByPerson({ token, range }) {
                     )}
                   </td>
                   <td className={`${num} font-semibold`} style={{ color: 'var(--ink)' }}>{r.whatsapp_clicks}</td>
+                  <td className={num} style={{ color: 'var(--ink)' }}>{r.other_taps || 0}</td>
                   <td className={num} style={{ color: 'var(--ink)' }}>{r.visitors}</td>
                   <td className={num} style={{ color: 'var(--ink)' }}>{r.qr_scans}</td>
                 </tr>
               ))}
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-sm text-center" style={{ color: 'var(--brand-muted)' }}>
+                  <td colSpan={5} className="px-4 py-6 text-sm text-center" style={{ color: 'var(--brand-muted)' }}>
                     {t('admin.byPersonNoMatch', 'Nobody matches that search.')}
                   </td>
                 </tr>

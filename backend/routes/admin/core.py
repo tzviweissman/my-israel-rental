@@ -223,7 +223,15 @@ async def get_admin_metrics(
         _, site_days = view_tracking.il_day_window(max(METRIC_RANGES.get(range) or 1, 1))
     site = await site_summary(site_days)
     flow["site_visitors"] = site["visitors"]
-    flow["site_pageviews"] = site["pageviews"]
+    # Designed business sites are plain HTML outside the React app, so the
+    # site counter never sees them; their pages are counted in
+    # page_view_counts instead. Without this a busy business site showed as
+    # business views but not as pages opened (Tzvi, 12 Nov 2026).
+    pv_match = {} if site_days is None else {"day": {"$in": site_days}}
+    designed = await db.page_view_counts.aggregate([
+        {"$match": pv_match}, {"$group": {"_id": None, "n": {"$sum": "$n"}}},
+    ]).to_list(1)
+    flow["site_pageviews"] = site["pageviews"] + (designed[0]["n"] if designed else 0)
 
     # When view logging actually began, so "all time" can say what it means
     # instead of implying it covers the whole life of the site.
@@ -253,6 +261,67 @@ async def get_admin_metrics(
         # nothing before it was recorded, and saying so is the honest label.
         "site_since": site["since"],
     }
+
+
+@api_router.get("/admin/metrics/daily")
+async def get_admin_metrics_daily(payload: dict = Depends(verify_token), days: int = 90) -> dict:
+    """One number per Israel day per measure, for the overview's growth
+    graphs. Each series reads the same collection its card above does, so
+    a graph and its card cannot disagree. Days with nothing are zeros."""
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    days = max(7, min(days, 365))
+    cut, keys = view_tracking.il_day_window(days)
+    tz = "Asia/Jerusalem"
+    series = {k: dict.fromkeys(keys, 0) for k in (
+        "site_visitors", "site_pageviews", "views", "service_views", "whatsapp_clicks", "qr_scans", "new_users")}
+
+    def add(name, day, n):
+        if day in series[name]:
+            series[name][day] += int(n or 0)
+
+    async for r in db.site_visits.aggregate([
+        {"$match": {"day": {"$in": keys}}},
+        {"$group": {"_id": "$day", "v": {"$sum": 1}, "p": {"$sum": "$pageviews"}}},
+    ]):
+        add("site_visitors", r["_id"], r["v"])
+        add("site_pageviews", r["_id"], r["p"])
+    async for r in db.page_view_counts.aggregate([
+        {"$match": {"day": {"$in": keys}}}, {"$group": {"_id": "$day", "n": {"$sum": "$n"}}},
+    ]):
+        add("site_pageviews", r["_id"], r["n"])
+    async for r in db.property_view_events.aggregate([
+        {"$match": {"at": {"$type": "date", "$gte": cut}}},
+        {"$group": {"_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$at", "timezone": tz}}, "n": {"$sum": 1}}},
+    ]):
+        add("views", r["_id"], r["n"])
+    async for r in db.marketplace_view_events.aggregate([
+        {"$match": {"day": {"$in": keys}, "entity_type": {"$in": ["gig", "business"]}}},
+        {"$group": {"_id": "$day", "n": {"$sum": 1}}},
+    ]):
+        add("service_views", r["_id"], r["n"])
+    # lead_events keeps an ISO string; its first ten characters are the UTC
+    # day, at most a few hours off the Israel day - fine for a trend line.
+    iso_cut = cut.replace(tzinfo=None).isoformat()
+    async for r in db.lead_events.aggregate([
+        {"$match": {"type": "whatsapp_click", "created_at": {"$gte": iso_cut}}},
+        {"$group": {"_id": {"$substrBytes": ["$created_at", 0, 10]}, "n": {"$sum": 1}}},
+    ]):
+        add("whatsapp_clicks", r["_id"], r["n"])
+    async for r in db.site_taps.aggregate([
+        {"$match": {"day": {"$in": keys}, "kind": "whatsapp"}}, {"$group": {"_id": "$day", "n": {"$sum": 1}}},
+    ]):
+        add("whatsapp_clicks", r["_id"], r["n"])
+    async for link in db.short_links.find({}, {"daily": 1}):
+        for k, v in (link.get("daily") or {}).items():
+            add("qr_scans", k, v)
+    async for r in db.users.aggregate([
+        {"$match": {"created_at": {"$gte": iso_cut}}},
+        {"$group": {"_id": {"$substrBytes": [{"$toString": "$created_at"}, 0, 10]}, "n": {"$sum": 1}}},
+    ]):
+        add("new_users", r["_id"], r["n"])
+
+    return {"days": keys, "series": {k: [v[d] for d in keys] for k, v in series.items()}}
 
 
 @api_router.get("/admin/metrics/by-user")
@@ -303,9 +372,26 @@ async def get_admin_metrics_by_user(
     ]):
         visitors[row["_id"]] = row["n"]
 
+    # Designed business sites use their own wa.me / tel: links, recorded in
+    # site_taps rather than lead_events. Leaving them out made the table
+    # look like it only covered rentals (Tzvi, 12 Nov 2026).
+    other_taps: dict = {}
+    async for row in db.site_taps.aggregate([
+        {"$match": view_q},
+        {"$group": {"_id": {"o": "$owner_id", "wa": {"$eq": ["$kind", "whatsapp"]}}, "n": {"$sum": 1}}},
+    ]):
+        uid = row["_id"]["o"]
+        bucket = taps if row["_id"]["wa"] else other_taps
+        bucket[uid] = bucket.get(uid, 0) + row["n"]
+
     scans = await _qr_scans_by_owner(range)
 
-    ids = [i for i in set(taps) | set(visitors) | set(scans) if i]
+    ids = [i for i in set(taps) | set(other_taps) | set(visitors) | set(scans) if i]
+    biz_names: dict = {}
+    async for b in db.businesses.find({"owner_user_id": {"$in": ids}}, {"name": 1, "owner_user_id": 1}):
+        names = biz_names.setdefault(b["owner_user_id"], [])
+        if b.get("name") and b["name"] not in names:
+            names.append(b["name"])
     people = {
         u["id"]: u async for u in db.users.find(
             {"id": {"$in": ids}}, {"_id": 0, "id": 1, "name": 1, "email": 1, "role": 1},
@@ -322,11 +408,13 @@ async def get_admin_metrics_by_user(
             "name": u.get("name"),
             "email": u.get("email"),
             "role": u.get("role"),
+            "businesses": biz_names.get(uid, []),
             "whatsapp_clicks": taps.get(uid, 0),
+            "other_taps": other_taps.get(uid, 0),
             "visitors": visitors.get(uid, 0),
             "qr_scans": scans.get(uid, 0),
         })
-    rows.sort(key=lambda r: (-r["whatsapp_clicks"], -r["visitors"], -r["qr_scans"], r["name"] or ""))
+    rows.sort(key=lambda r: (-(r["whatsapp_clicks"] + r["other_taps"]), -r["visitors"], -r["qr_scans"], r["name"] or ""))
     return {"range": range, "people": len(rows), "rows": rows[:limit]}
 
 
@@ -430,8 +518,42 @@ async def get_admin_bookings(
 async def get_all_users(payload: dict = Depends(verify_token)) -> list[dict]:
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
-    users = await db.users.find({}, {"_id": 0, "password": 0}).sort("created_at", -1).to_list(1000)
+    # A record missing its email or role fails the response model and
+    # took the whole list down with it; those are half-made test rows.
+    users = await db.users.find(
+        {"email": {"$type": "string"}, "role": {"$type": "string"}}, {"_id": 0, "password": 0},
+    ).sort("created_at", -1).to_list(5000)
     return users
+
+
+@api_router.get("/admin/users/holdings")
+async def get_user_holdings(payload: dict = Depends(verify_token)) -> dict:
+    """What each person has on the site, keyed by user id: their
+    businesses, rental listings and services. Lets the Users tab search by
+    a business or listing name and show it all on one row. Three whole-
+    collection reads, not one per user."""
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    out: dict[str, dict] = {}
+
+    def slot(uid):
+        return out.setdefault(uid, {"businesses": [], "listings": [], "services": []})
+
+    biz_owner = {}
+    async for b in db.businesses.find({}, {"_id": 1, "name": 1, "slug": 1, "owner_user_id": 1}):
+        uid = b.get("owner_user_id")
+        if not uid:
+            continue
+        biz_owner[b["_id"]] = uid
+        slot(uid)["businesses"].append({"id": b["_id"], "name": b.get("name") or "", "slug": b.get("slug")})
+    async for g in db.marketplace_gigs.find({}, {"_id": 1, "title": 1, "status": 1, "business_id": 1}):
+        uid = biz_owner.get(g.get("business_id"))
+        if uid:
+            slot(uid)["services"].append({"id": g["_id"], "title": g.get("title") or "", "status": g.get("status")})
+    async for p in db.properties.find({"owner_id": {"$exists": True}}, {"_id": 0, "id": 1, "title": 1, "status": 1, "owner_id": 1}):
+        if p.get("owner_id"):
+            slot(p["owner_id"])["listings"].append({"id": p.get("id"), "title": p.get("title") or "", "status": p.get("status")})
+    return out
 
 
 @api_router.put("/admin/users/{user_id}/status", response_model=AdminToggleStatusResponse)

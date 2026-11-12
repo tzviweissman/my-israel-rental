@@ -1,15 +1,75 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Search, Ban, CheckCircle, Trash2, LogIn, Mail, RotateCcw, Sparkles } from 'lucide-react';
+import { Search, Ban, CheckCircle, Trash2, LogIn, Mail, RotateCcw, Sparkles, Store, Home, Briefcase, EyeOff, Eye } from 'lucide-react';
 import { API, AuthContext } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 
+const isOn = (kind, item) => (kind === 'listing' ? item.status === 'active' : item.status === 'published');
+
+// One line per business, listing and service the person has. Matches to the
+// search are bold, so it is clear why a person showed up.
+// Businesses always show; listings and services fold into one count line
+// (some people have 80+ services) and open on click, or show the ones a
+// search matched.
+const Holdings = ({ h, term, busyItem, onToggle, t }) => {
+  const [open, setOpen] = React.useState(false);
+  if (!h) return null;
+  const matches = (label) => !!term && (label || '').toLowerCase().includes(term);
+  const items = [
+    ...h.listings.map((l) => ({ kind: 'listing', item: l, label: l.title, href: `/property/${l.id}`, Icon: Home })),
+    ...h.services.map((g) => ({ kind: 'service', item: g, label: g.title, href: `/businesses/${g.id}`, Icon: Briefcase })),
+  ];
+  const rows = [
+    ...h.businesses.map((b) => ({ kind: 'business', item: b, label: b.name, href: `/business/${b.slug || b.id}`, Icon: Store })),
+    ...(open ? items : items.filter((r) => matches(r.label))),
+  ];
+  const counts = [
+    h.listings.length && t('admin.nListings', '{{count}} listings', { count: h.listings.length }),
+    h.services.length && t('admin.nServices', '{{count}} services', { count: h.services.length }),
+  ].filter(Boolean).join(' · ');
+  if (!rows.length && !counts) return null;
+  return (
+    <ul className="mt-1.5 space-y-1" data-testid="user-holdings">
+      {rows.map(({ kind, item, label, href, Icon }) => {
+        const hit = matches(label);
+        const on = kind === 'business' || isOn(kind, item);
+        return (
+          <li key={`${kind}-${item.id}`} className="flex items-center gap-2 text-xs" style={{ color: on ? 'var(--ink)' : 'var(--brand-muted)' }}>
+            <Icon size={13} aria-hidden="true" style={{ color: 'var(--gold)' }} />
+            <a href={href} target="_blank" rel="noopener noreferrer" dir="auto" className={`hover:underline ${hit ? 'font-bold' : ''}`}>
+              {label || t('admin.untitled', 'Untitled')}
+            </a>
+            {kind !== 'business' && (
+              <button
+                type="button"
+                onClick={() => onToggle(kind, item)}
+                disabled={busyItem === item.id}
+                className="inline-flex items-center gap-1 px-1.5 rounded hover:bg-gray-100 disabled:opacity-50"
+                title={on ? t('admin.hideItem', 'Hide from the site') : t('admin.showItem', 'Show on the site')}
+                data-testid={`toggle-${kind}-${item.id}`}
+              >
+                {on ? <Eye size={12} /> : <EyeOff size={12} />}
+                {on ? t('admin.live', 'Live') : t('admin.hidden', 'Hidden')}
+              </button>
+            )}
+          </li>
+        );
+      })}
+      {counts && (
+        <li>
+          <button type="button" onClick={() => setOpen(!open)} className="text-xs font-semibold hover:underline" style={{ color: 'var(--brand-primary)' }} data-testid="user-holdings-more">
+            {open ? t('admin.hideList', 'Hide list') : counts}
+          </button>
+        </li>
+      )}
+    </ul>
+  );
+};
+
 export const UsersTab = ({ token, onStatsChange, prefilter }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { impersonate } = React.useContext(AuthContext);
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -27,6 +87,30 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
     `${API}/admin/users/deleted`, token, { initial: { deleted: [] } }
   );
   const deleted = deletedData?.deleted || [];
+  // Each person's businesses, listings and services, so one search finds a
+  // person by their business or listing name too, and it all sits on their row.
+  const { data: holdings, refresh: fetchHoldings } = useApiSWR(
+    `${API}/admin/users/holdings`, token, { initial: {} }
+  );
+  const [busyItem, setBusyItem] = useState('');
+
+  const toggleItem = async (kind, item) => {
+    setBusyItem(item.id);
+    try {
+      if (kind === 'listing') {
+        await axios.put(`${API}/admin/properties/${item.id}/status`, {}, { headers });
+      } else {
+        const next = item.status === 'published' ? 'unpublished' : 'published';
+        await axios.patch(`${API}/admin/gigs/${item.id}/status`, { status: next }, { headers });
+      }
+      fetchHoldings();
+      notifyStatsChange();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || t('admin.toggleFailed', 'That did not work'));
+    } finally {
+      setBusyItem('');
+    }
+  };
   const [restoringId, setRestoringId] = useState('');
 
   const restoreUser = async (snapshotId) => {
@@ -101,9 +185,16 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
     ), { duration: 10000 });
   };
 
-  const filteredUsers = users.filter(u =>
-    !searchTerm || u.name?.toLowerCase().includes(searchTerm.toLowerCase()) || u.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const term = searchTerm.trim().toLowerCase();
+  const has = (v) => (v || '').toString().toLowerCase().includes(term);
+  const filteredUsers = users.filter((u) => {
+    if (!term) return true;
+    const h = holdings?.[u.id];
+    return has(u.name) || has(u.email) || has(u.phone)
+      || (h && (h.businesses.some((b) => has(b.name) || has(b.slug))
+        || h.listings.some((l) => has(l.title))
+        || h.services.some((g) => has(g.title))));
+  });
 
   const impersonateUser = async (u) => {
     try {
@@ -111,9 +202,11 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
       // impersonate() stashes the current admin token so the banner can
       // offer a one-click "Return to admin". Then we jump to /dashboard —
       // exactly what the target user would see after their own login.
+      // A full page load, not navigate(): the /admin route redirects a
+      // non-admin to the home page, and that redirect won over /dashboard
+      // in the same render. The new session is in sessionStorage already.
       impersonate(res.data.token, res.data.user);
-      toast.success(`Now viewing as ${u.name || u.email}`);
-      navigate('/dashboard');
+      window.location.assign('/dashboard');
     } catch (e) {
       toast.error(e.response?.data?.detail || 'Impersonation failed');
     }
@@ -170,7 +263,10 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
           <tbody>
             {filteredUsers.map(u => (
               <tr key={u.id} className="border-t border-[var(--brand-border)] hover:bg-gray-50" data-testid={`user-row-${u.id}`}>
-                <td className="px-5 py-3 font-medium text-sm">{u.name}</td>
+                <td className="px-5 py-3 text-sm align-top">
+                  <div className="font-medium" dir="auto">{u.name}</div>
+                  <Holdings h={holdings?.[u.id]} term={term} busyItem={busyItem} onToggle={toggleItem} t={t} />
+                </td>
                 <td className="px-5 py-3 text-sm text-gray-600">{u.email}</td>
                 <td className="px-5 py-3">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${u.role === 'admin' ? 'bg-yellow-100 text-yellow-800' : u.role === 'owner' || u.role === 'manager' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>
