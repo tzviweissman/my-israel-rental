@@ -30,12 +30,13 @@ rows.
 """
 from __future__ import annotations
 
+import re
 import time
 from datetime import UTC, datetime, timedelta
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from routes.deps import db, logger
 from utils.auth import optional_user, verify_token
@@ -172,6 +173,8 @@ async def ensure_site_visit_indexes() -> None:
         partialFilterExpression={"visitor": {"$type": "string"}}, background=True,
     )
     await db[RESTAURANT_TAPS].create_index([("day", 1), ("place_id", 1)], background=True)
+    await db[PRESSES].create_index([("day", 1), ("section", 1)], background=True)
+    await db[STEPS].create_index([("day", 1), ("visitor", 1), ("flow", 1), ("step", 1)], unique=True, background=True)
     await db[SEARCHES].create_index(
         [("day", 1), ("visitor", 1), ("kind", 1), ("area", 1), ("what", 1)],
         unique=True, background=True,
@@ -396,4 +399,100 @@ async def admin_sections(days: int = 30, payload: dict = Depends(verify_token)) 
     days = max(1, min(int(days), 365))
     _, keys = il_day_window(days)
     first = await db[SECTION_COLLECTION].find_one({}, {"day": 1}, sort=[("day", 1)])
-    return {"days": days, "since": (first or {}).get("day"), "sections": await section_summary(keys)}
+    return {"days": days, "since": (first or {}).get("day"), "sections": await section_summary(keys),
+            "presses": await press_summary(keys), "steps": await step_summary(keys)}
+
+
+# ---------------------------------------------------------------------------
+# Button presses and form steps across the site (Tzvi, 12 Nov 2026: "Yes, all of it", after the business pages).
+# A press: which part of the site, what kind of button and the words on it (frontend/src/utils/tapKind.js), never
+# the path. Not in the dashboard or chats, whose buttons can carry a customer's name. A step: how far a visitor got
+# in signing up, adding a business or ordering, once per visitor per day per step, so the admin sees where people
+# stop. Same privacy rule as visits: the anonymous browser id, no IP, no account.
+# ---------------------------------------------------------------------------
+
+PRESSES = "site_presses"
+STEPS = "site_steps"
+PRESS_SECTIONS = SECTIONS - {"dashboard", "chat"}
+PRESS_KINDS = Literal["whatsapp", "phone", "email", "directions", "instagram", "facebook", "tiktok", "order", "button"]
+FLOW_STEPS = {
+    "signup": ("open", "details", "done"),
+    "add_business": ("open", "2", "3", "4", "done"),
+    "order": ("open", "basket", "done"),
+}
+
+
+def clean_label(raw: str | None) -> str | None:
+    """The words on a button, at most 40 characters. None when they could be someone's email or phone number."""
+    v = " ".join((raw or "").split())[:40]
+    return None if not v or "@" in v or re.search(r"\d{5,}", v.replace(" ", "").replace("-", "")) else v
+
+
+class PressIn(BaseModel):
+    section: str = Field(max_length=40)
+    kind: PRESS_KINDS
+    label: str | None = Field(None, max_length=80)
+
+
+class StepIn(BaseModel):
+    flow: Literal["signup", "add_business", "order"]
+    step: str = Field(max_length=12)
+
+
+def _counted(request: Request, viewer, bucket: str) -> bool:
+    if _is_bot(request) or (viewer or {}).get("role") == "admin":
+        return False
+    try:
+        check_rate(request, bucket=bucket, limit=150, window_seconds=600)
+    except Exception:  # noqa: BLE001 - over the limit: drop it, quietly
+        return False
+    return True
+
+
+@router.post("/site/press", status_code=204)
+async def record_press(body: PressIn, request: Request, viewer=Depends(optional_user)) -> Response:
+    """Note one button pressed. Always 204, like a visit."""
+    if body.section in PRESS_SECTIONS and _counted(request, viewer, "site-press"):
+        now = datetime.now(UTC)
+        visitor = (request.headers.get("X-Visitor-Id") or "").strip()[:_MAX_VISITOR_LEN] or None
+        try:
+            await db[PRESSES].insert_one({"day": il_day_of(now), "at": now, "section": body.section, "kind": body.kind,
+                                          "label": clean_label(body.label), "visitor": visitor})
+        except Exception:  # noqa: BLE001
+            logger.exception("press insert failed")
+    return Response(status_code=204)
+
+
+@router.post("/site/step", status_code=204)
+async def record_step(body: StepIn, request: Request, viewer=Depends(optional_user)) -> Response:
+    """Note how far someone got in a form. Needs the browser id, or one person could not be told from many."""
+    visitor = (request.headers.get("X-Visitor-Id") or "").strip()[:_MAX_VISITOR_LEN]
+    if visitor and body.step in FLOW_STEPS[body.flow] and _counted(request, viewer, "site-step"):
+        now = datetime.now(UTC)
+        try:
+            await db[STEPS].update_one({"day": il_day_of(now), "visitor": visitor, "flow": body.flow, "step": body.step},
+                                       {"$setOnInsert": {"at": now}}, upsert=True)
+        except Exception:  # noqa: BLE001 - a duplicate race or a lost metric, never an error
+            pass
+    return Response(status_code=204)
+
+
+async def press_summary(day_keys: list[str]) -> list[dict]:
+    """The 40 most pressed buttons over the window: part of the site, kind, words, presses and people."""
+    rows = await db[PRESSES].aggregate([
+        {"$match": {"day": {"$in": day_keys}}},
+        {"$group": {"_id": {"s": "$section", "k": "$kind", "l": "$label"}, "n": {"$sum": 1},
+                    "people": {"$addToSet": "$visitor"}}},
+        {"$sort": {"n": -1}}, {"$limit": 40},
+    ]).to_list(40)
+    return [{"section": r["_id"]["s"], "kind": r["_id"]["k"], "label": r["_id"].get("l"), "presses": r["n"],
+             "people": len([p for p in r["people"] if p])} for r in rows]
+
+
+async def step_summary(day_keys: list[str]) -> dict:
+    """Per form, distinct people who reached each step, in the form's own order."""
+    got = {(r["_id"]["f"], r["_id"]["s"]): len(r["v"]) for r in await db[STEPS].aggregate([
+        {"$match": {"day": {"$in": day_keys}}},
+        {"$group": {"_id": {"f": "$flow", "s": "$step"}, "v": {"$addToSet": "$visitor"}}},
+    ]).to_list(100)}
+    return {flow: [{"step": s, "people": got.get((flow, s), 0)} for s in steps] for flow, steps in FLOW_STEPS.items()}

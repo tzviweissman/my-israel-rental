@@ -64,6 +64,7 @@ import PhoneInput from '../components/common/PhoneInput';
 import { apiErrorMessage } from '../utils/apiError';
 import { useTranslation } from 'react-i18next';
 import { PriceKindPicker } from '../components/forms/PriceKind';
+import { countStep } from '../utils/tapKind';
 
 // ---- Gig type registry ------------------------------------------------------
 // Central definition of every gig-type-aware behaviour so the wizard, the
@@ -133,6 +134,8 @@ const CreateGig = () => {
     const d = readDraft('create-gig');
     return (d?.layout === DRAFT_LAYOUT && d?.step) || 1;
   });
+  // How far people get (admin overview, "Where people stop"): 'open' is screen 1.
+  useEffect(() => { countStep('add_business', step === 1 ? 'open' : step); }, [step]);
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -958,6 +961,7 @@ const CreateGig = () => {
         }, auth).catch(() => {});
       }
       const { data } = await axios.post(`${API}/marketplace/gigs`, payload, auth);
+      countStep('add_business', 'done');
       // The translation now runs in the background (it used to hold the
       // publish for 3-6 s so this toast could say "also translated"). Say
       // what is true instead: it is coming.

@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import i18n from 'i18next';
 import { API } from '../../App';
 import safeRedirect from '../../utils/safeRedirect';
+import { countStep } from '../../utils/tapKind';
 
 // sessionStorage key used to smuggle role intent through the sign-in step.
 // Lives here (single source of truth) so the button and this helper can't
@@ -45,6 +46,8 @@ export default async function completeGoogleSignIn(accessToken, login, navigate,
   });
   let { token, user } = res.data || {};
   if (!token || !user) throw new Error('Invalid response from auth server');
+  // A Google account made just now is a finished sign-up (admin overview, "Where people stop").
+  if (res.data.is_new) countStep('signup', 'done');
 
   // Only a traveller is promoted: a host who signs in from the business
   // wizard stays a host (9 Nov 2026).

@@ -18,6 +18,7 @@ from fastapi import APIRouter, Depends, Query, Request, Response
 from pydantic import BaseModel, Field
 
 from routes.deps import db, verify_token
+from routes.site_visits import clean_label
 from utils import view_tracking
 from utils.rate_limit import check_rate
 
@@ -46,7 +47,7 @@ async def designed_site_tap(slug_or_id: str, body: TapIn, request: Request):
         now = datetime.now(UTC)
         await db.site_taps.insert_one({
             "business_id": biz["_id"], "owner_id": biz.get("owner_user_id"), "kind": body.kind,
-            "page": view_tracking.page_name(body.page), "label": " ".join((body.label or "").split())[:40] or None, "at": now, "day": view_tracking.il_day_of(now),
+            "page": view_tracking.page_name(body.page), "label": clean_label(body.label), "at": now, "day": view_tracking.il_day_of(now),
             **view_tracking.visit_facts(request),
         })
     return Response(status_code=204)

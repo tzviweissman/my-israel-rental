@@ -16,6 +16,9 @@ const NAMES = {
   order: 'Order forms', signup: 'Sign up and sign in', dashboard: 'Dashboards', chat: 'Chats', info: 'Info pages',
 };
 
+const FLOWS = { signup: 'Signing up', add_business: 'Adding a business', order: 'Ordering' };
+const STEP_NAMES = { open: 'Opened the form', details: 'Filled in their details', basket: 'Chose something', done: 'Finished' };
+
 export default function SiteSections({ token }) {
   const { t } = useTranslation();
   const [days, setDays] = useState(7);
@@ -70,6 +73,54 @@ export default function SiteSections({ token }) {
             ))}
           </tbody>
         </table>
+      )}
+      {data?.steps && (
+        <div className="mt-5" data-testid="admin-site-steps">
+          <h3 className="text-sm font-bold mb-1">{t('admin.stepsTitle', 'Where people stop')}</h3>
+          <p className="text-xs mb-2" style={{ color: 'var(--brand-muted)' }}>
+            {t('admin.stepsHelp', 'People who reached each step. A big drop between two steps is where they give up.')}
+          </p>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {Object.entries(data.steps).map(([flow, steps]) => (
+              <div key={flow} data-testid={`steps-${flow}`}>
+                <p className="text-xs font-semibold mb-1">{t(`admin.stepsFlow.${flow}`, FLOWS[flow] || flow)}</p>
+                <ol className="text-sm">
+                  {steps.map((st) => (
+                    <li key={st.step} className="flex justify-between border-t border-[var(--brand-border)] py-1">
+                      <span>{t(`admin.stepName.${st.step}`, STEP_NAMES[st.step] || t('admin.stepScreen', 'Screen {{n}}', { n: st.step }))}</span>
+                      <span className="font-semibold" dir="ltr">{st.people.toLocaleString()}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {data?.presses?.length > 0 && (
+        <div className="mt-5" data-testid="admin-site-presses">
+          <h3 className="text-sm font-bold mb-2">{t('admin.pressesTitle', 'Most pressed buttons')}</h3>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-xs text-gray-500">
+                <th className="text-start font-semibold py-1">{t('admin.pressesButton', 'Button')}</th>
+                <th className="text-start font-semibold py-1">{t('admin.sectionsPart', 'Part of the site')}</th>
+                <th className="text-end font-semibold py-1">{t('admin.pressesPeople', 'People')}</th>
+                <th className="text-end font-semibold py-1">{t('admin.pressesCount', 'Presses')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.presses.map((p, i) => (
+                <tr key={i} className="border-t border-[var(--brand-border)]">
+                  <td className="py-1.5" dir="auto">{p.label || t(`visits.tap_${p.kind}`, p.kind)}</td>
+                  <td className="py-1.5 text-gray-600">{t(`admin.sectionName.${p.section}`, NAMES[p.section] || p.section)}</td>
+                  <td className="py-1.5 text-end font-semibold">{p.people.toLocaleString()}</td>
+                  <td className="py-1.5 text-end">{p.presses.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
       {data?.since && (
         <p className="text-xs mt-2" style={{ color: 'var(--brand-muted)' }}>

@@ -402,6 +402,8 @@ async def google_session_exchange(
             "role": user_doc.get("role", "renter"),
             "email_verified": True,
         },
+        # A Google account made by this call: the browser counts a finished sign-up (site_visits STEPS).
+        "is_new": not existing,
     }
 
 

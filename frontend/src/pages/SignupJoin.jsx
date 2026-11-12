@@ -29,6 +29,7 @@ import WelcomePopups from '../components/WelcomePopups';
 import DemandLines from '../components/common/DemandLines';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import AuthShell from '../components/auth/AuthShell';
+import { countStep } from '../utils/tapKind';
 import WorkForYou from '../components/auth/WorkForYou';
 
 // Namespaced so it cannot collide with the listing wizard's draft.
@@ -134,6 +135,8 @@ const SignupJoin = () => {
   // address are already known, so the account form opens straight away.
   const fromWizard = searchParams.get('role') === 'provider' && !!redirectParam;
   const [step, setStep] = useState(() => (fromWizard ? 2 : savedSignup?.step || 1));
+  // How far people get (admin overview, "Where people stop").
+  useEffect(() => { countStep('signup', step === 1 ? 'open' : 'details'); }, [step]);
   const [selectedRole, setSelectedRole] = useState(() => (fromWizard ? 'provider' : savedSignup?.selectedRole || null)); // "traveler" | "host" | "provider"
   const [form, setForm] = useState(() => ({
     name: '', email: '', phone: '',
@@ -214,6 +217,7 @@ const SignupJoin = () => {
       setSignedUp(true);
       clearDraft(SIGNUP_DRAFT);
       login(res.data.token, res.data.user);
+      countStep('signup', 'done');
       toast.success(t('auth.accountCreated', 'Account created - welcome!'));
       if (activeCard.backendRole === 'renter') {
         setShowWelcomePopups(true);

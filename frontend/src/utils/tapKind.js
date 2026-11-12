@@ -4,7 +4,8 @@
  * both together. Returns null for a click on nothing pressable.
  */
 import axios from 'axios';
-import { visitorHeaders } from './visitorId';
+import { visitorHeaders, getVisitorId } from './visitorId';
+import { API } from '../lib/apiBase';
 
 export function tapOf(target) {
   const el = target?.closest?.('a[href],button,[role=button],summary,input[type=submit]');
@@ -25,3 +26,18 @@ export function countBusinessTap(api, slugOrId, e) {
   axios.post(`${api}/marketplace/business/${encodeURIComponent(slugOrId)}/tap`, { ...tap, page: 'profile' },
     { headers: visitorHeaders() }).catch(() => {});
 }
+
+// One small POST with the browser id and, when signed in, the token (so admins are skipped). Never fails loudly.
+export function send(path, body) {
+  let token = null;
+  try { token = sessionStorage.getItem('token'); } catch { /* private mode */ }
+  const headers = { 'X-Visitor-Id': getVisitorId() || '', 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  try {
+    fetch(`${API}${path}`, { method: 'POST', headers, body: JSON.stringify(body), keepalive: true }).catch(() => {});
+  } catch { /* not fatal */ }
+}
+
+// How far someone got in signing up, adding a business or ordering (backend FLOW_STEPS). Counted once per visitor
+// per day per step by the server, so calling it on every render of a step is fine.
+export const countStep = (flow, step) => send('/site/step', { flow, step: String(step) });

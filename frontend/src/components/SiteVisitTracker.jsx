@@ -14,8 +14,7 @@
  */
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { API } from '../lib/apiBase';
-import { getVisitorId } from '../utils/visitorId';
+import { tapOf, send } from '../utils/tapKind';
 
 // The last page counted, at module level so it survives a remount. React's
 // development mode runs every effect twice on start-up, and a re-render or
@@ -47,20 +46,27 @@ const SECTION_RULES = [
 ];
 export const sectionOf = (path) => (SECTION_RULES.find(([re]) => re.test(path)) || [])[1] || '';
 
+
 export default function SiteVisitTracker() {
   const { pathname } = useLocation();
 
   useEffect(() => {
     if (pathname === lastCounted) return;
     lastCounted = pathname;
-    let token = null;
-    try { token = sessionStorage.getItem('token'); } catch { /* private mode */ }
-    const headers = { 'X-Visitor-Id': getVisitorId() || '', 'Content-Type': 'application/json' };
-    if (token) headers.Authorization = `Bearer ${token}`;
-    try {
-      fetch(`${API}/site/visit`, { method: 'POST', headers, body: JSON.stringify({ section: sectionOf(pathname) }), keepalive: true }).catch(() => {});
-    } catch { /* not fatal */ }
+    send('/site/visit', { section: sectionOf(pathname) });
   }, [pathname]);
+
+  // Every button and link pressed (Tzvi, 12 Nov 2026: "Yes, all of it"): the part of the site, the kind and the
+  // words on it (utils/tapKind.js). The server keeps none from the dashboard or chats.
+  useEffect(() => {
+    const onClick = (e) => {
+      const tap = tapOf(e.target);
+      const section = sectionOf(window.location.pathname);
+      if (tap && section && section !== 'dashboard' && section !== 'chat') send('/site/press', { section, ...tap });
+    };
+    document.addEventListener('click', onClick, true);
+    return () => document.removeEventListener('click', onClick, true);
+  }, []);
 
   return null;
 }

@@ -54,6 +54,7 @@ import DateField, { toISODate } from '../components/common/DateField';
 import CustomFieldInputs from '../components/forms/CustomFieldInputs';
 import DiscountCodeInput, { discountOn } from '../components/forms/DiscountCodeInput';
 import NoticeBar from '../components/marketplace/NoticeBar';
+import { countStep } from '../utils/tapKind';
 import WhatsAppAboutThis, { whatsAppHref, orderMessage, reserveWhatsAppTab } from '../components/marketplace/WhatsAppAboutThis';
 
 // How far ahead a customer can order. The server sets no limit; this keeps
@@ -93,6 +94,10 @@ export default function OrderPage() {
   const tableCode = params.get('k') || '';
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);       // {track_url, total}
+  // How far people get (admin overview, "Where people stop").
+  useEffect(() => { countStep('order', 'open'); }, []);
+  const anyChosen = Object.values(qty).some((n) => n > 0);
+  useEffect(() => { if (anyChosen) countStep('order', 'basket'); }, [anyChosen]);
 
   useEffect(() => {
     document.body.classList.add('orders-bare');
@@ -300,6 +305,7 @@ export default function OrderPage() {
         handoff.go(whatsAppHref(gigId, 'order', waText));
       }
       setDone({ ...res, waText });
+      countStep('order', 'done');
       window.scrollTo({ top: 0 });
       // Ordered: nothing to remind about, and the next basket is a new one.
       const bid = basketId(gigId);
