@@ -25,17 +25,20 @@ from .businesses import _resolve
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
-Tap = Literal["whatsapp", "phone", "email", "directions", "instagram", "facebook", "tiktok"]
+# "order" and "button" added 12 Nov 2026 (Tzvi: "track clicks on the business pages too"): every other button or link
+# on a business page, with the words on it, so the owner sees which ones people press.
+Tap = Literal["whatsapp", "phone", "email", "directions", "instagram", "facebook", "tiktok", "order", "button"]
 
 
 class TapIn(BaseModel):
     kind: Tap
     page: Optional[str] = Field(None, max_length=40)
+    label: Optional[str] = Field(None, max_length=80)
 
 
 @router.post("/business/{slug_or_id}/tap", status_code=204)
 async def designed_site_tap(slug_or_id: str, body: TapIn, request: Request):
-    check_rate(request, bucket="designed_tap", limit=60, window_seconds=600)
+    check_rate(request, bucket="designed_tap", limit=150, window_seconds=600)
     if view_tracking.is_bot(request.headers.get("user-agent") or ""):
         return Response(status_code=204)
     biz = await _resolve(slug_or_id)
@@ -43,7 +46,7 @@ async def designed_site_tap(slug_or_id: str, body: TapIn, request: Request):
         now = datetime.now(UTC)
         await db.site_taps.insert_one({
             "business_id": biz["_id"], "owner_id": biz.get("owner_user_id"), "kind": body.kind,
-            "page": view_tracking.page_name(body.page), "at": now, "day": view_tracking.il_day_of(now),
+            "page": view_tracking.page_name(body.page), "label": " ".join((body.label or "").split())[:40] or None, "at": now, "day": view_tracking.il_day_of(now),
             **view_tracking.visit_facts(request),
         })
     return Response(status_code=204)
@@ -90,6 +93,9 @@ async def visits_breakdown(days: int = Query(30, ge=1, le=365), everyone: bool =
     ]).to_list(1)
     f = facets[0] if facets else {}
     taps = await db.site_taps.aggregate([{"$match": match}, *by("kind")]).to_list(20)
+    buttons = await db.site_taps.aggregate([
+        {"$match": {**match, "label": {"$type": "string"}}}, *by("label"), {"$sort": {"n": -1}}, {"$limit": 12},
+    ]).to_list(12)
     pages = await db.page_view_counts.aggregate([
         {"$match": match}, {"$group": {"_id": "$page", "n": {"$sum": "$n"}}}, {"$sort": {"n": -1}}, {"$limit": 10},
     ]).to_list(10)
@@ -104,6 +110,7 @@ async def visits_breakdown(days: int = Query(30, ge=1, le=365), everyone: bool =
         "new": back.get(False, 0),
         "returning": back.get(True, 0),
         "taps": _rows(taps),
+        "buttons": _rows(buttons),
         "pages": _rows(pages),
         "listings": await _names(f.get("listings") or []),
     }

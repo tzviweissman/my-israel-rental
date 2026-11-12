@@ -66,6 +66,7 @@ export default function VisitBreakdown({ API, token, everyone = false, className
         <Rows title={t('visits.newOrBack', 'New or returning')} rows={whoIs} label={word('who')} testid="visits-who" />
         <Rows title={t('visits.langs', 'Language')} rows={d.langs} label={word('lang')} testid="visits-langs" />
         <Rows title={t('visits.taps', 'Taps on your site')} rows={d.taps} label={word('tap')} testid="visits-taps" />
+        <Rows title={t('visits.buttons', 'Buttons people pressed')} rows={d.buttons} label={(k) => k} testid="visits-buttons" />
         <Rows title={t('visits.pages', 'Busiest pages on your site')} rows={d.pages} label={word('page')} testid="visits-pages" />
         <Rows title={t('visits.listings', 'Most visited')} rows={listings} label={nameOf} testid="visits-listings" />
       </div>

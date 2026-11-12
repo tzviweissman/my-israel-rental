@@ -51,6 +51,7 @@ import { PAGE_SIZE } from '../components/pagebuilder/ServicesBlock';
 import SiteFooter from '../components/common/SiteFooter';
 import { getGigCover } from '../utils/gigAvailability';
 import { visitorHeaders } from '../utils/visitorId';
+import { countBusinessTap } from '../utils/tapKind';
 import BusinessCoverBand, { BusinessLogoMark } from '../components/marketplace/BusinessCoverBand';
 import SafeImage from '../components/common/SafeImage';
 import ConnectButton from '../components/marketplace/ConnectButton';
@@ -426,7 +427,10 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)', paddingTop: 'var(--nav-h, 68px)' }}
-      data-testid="business-page">
+      data-testid="business-page"
+      // Every button pressed, for the owner's taps (utils/tapKind.js). Not the owner, an admin or the editor.
+      onClickCapture={preview || user?.role === 'admin' || (user?.id && user.id === biz.owner_user_id)
+        ? undefined : (e) => countBusinessTap(API, biz.slug || biz.id, e)}>
       {/* B2 — the picture a share card shows. Logo first, else the first
           listing's cover, else PageMeta's branded default.
 
