@@ -24,6 +24,29 @@ import { getVisitorId } from '../utils/visitorId';
 // repeats are dropped.
 let lastCounted = null;
 
+// Which part of the site a path is (Tzvi, 12 Nov 2026: "everything we can should be tracked"). Only these names
+// are sent, never the path itself: some paths carry a signing link or a staff key. Kept in step with SECTIONS in
+// backend/routes/site_visits.py. First match wins; a path that matches none is counted for the site only.
+const SECTION_RULES = [
+  [/^\/(home)?$/, 'home'],
+  [/^\/(stays|properties\/)/, 'stays'],
+  [/^\/(property|sublease)\//, 'listing'],
+  [/^\/(businesses|services)\/(jobs|post-job)/, 'jobs'],
+  [/^\/(businesses\/add|services\/create-gig)/, 'add_business'],
+  [/^\/(businesses|services)\/?$/, 'businesses'],
+  [/^\/(businesses|services\/gig)\/[^/]+$/, 'business_service'],
+  [/^\/business\//, 'business_page'],
+  [/^\/restaurants/, 'restaurants'],
+  [/^\/requests\/post/, 'post_request'],
+  [/^\/requests/, 'requests'],
+  [/^\/order\//, 'order'],
+  [/^\/(signup|join|auth\/)/, 'signup'],
+  [/^\/dashboard/, 'dashboard'],
+  [/^\/chat\//, 'chat'],
+  [/^\/(why-list|why-host|for-providers|what-you-can-do|showcase|getting-started|features\/|faq|terms|privacy|contact|join-rules)/, 'info'],
+];
+export const sectionOf = (path) => (SECTION_RULES.find(([re]) => re.test(path)) || [])[1] || '';
+
 export default function SiteVisitTracker() {
   const { pathname } = useLocation();
 
@@ -32,10 +55,10 @@ export default function SiteVisitTracker() {
     lastCounted = pathname;
     let token = null;
     try { token = sessionStorage.getItem('token'); } catch { /* private mode */ }
-    const headers = { 'X-Visitor-Id': getVisitorId() || '' };
+    const headers = { 'X-Visitor-Id': getVisitorId() || '', 'Content-Type': 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
     try {
-      fetch(`${API}/site/visit`, { method: 'POST', headers, keepalive: true }).catch(() => {});
+      fetch(`${API}/site/visit`, { method: 'POST', headers, body: JSON.stringify({ section: sectionOf(pathname) }), keepalive: true }).catch(() => {});
     } catch { /* not fatal */ }
   }, [pathname]);
 

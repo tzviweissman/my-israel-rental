@@ -34,13 +34,13 @@ import time
 from datetime import UTC, datetime, timedelta
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 
 from routes.deps import db, logger
-from utils.auth import optional_user
+from utils.auth import optional_user, verify_token
 from utils.rate_limit import check_rate
-from utils.view_tracking import il_day_of, is_bot as _is_bot_ua
+from utils.view_tracking import il_day_of, il_day_window, is_bot as _is_bot_ua
 
 router = APIRouter()
 
@@ -86,7 +86,48 @@ async def record_site_visit(request: Request, viewer=Depends(optional_user)) -> 
             )
     except Exception:  # noqa: BLE001
         logger.exception("site visit insert failed")
+    # Which part of the site (Tzvi, 12 Nov 2026: "everything we can should be tracked"). Never the path: the browser
+    # sends a section NAME from frontend/src/components/SiteVisitTracker.jsx, and only names in SECTIONS are kept,
+    # so a signing link or a staff key can never land in this table.
+    try:
+        section = str((await request.json()).get("section") or "")
+    except Exception:  # noqa: BLE001 - no body, or not JSON: an old page, counted above only
+        section = ""
+    if section in SECTIONS:
+        try:
+            if visitor:
+                await db[SECTION_COLLECTION].update_one(
+                    {"day": day, "visitor": visitor, "section": section},
+                    {"$setOnInsert": {"first_at": now}, "$inc": {"pageviews": 1}}, upsert=True)
+            else:
+                await db[SECTION_COLLECTION].insert_one(
+                    {"day": day, "visitor": None, "section": section, "first_at": now, "pageviews": 1})
+        except Exception:  # noqa: BLE001
+            logger.exception("section visit insert failed")
     return Response(status_code=204)
+
+
+SECTION_COLLECTION = "section_visits"
+# The names the browser may send, one per kind of page. Kept in step with sectionOf() in SiteVisitTracker.jsx.
+SECTIONS = frozenset({
+    "home", "stays", "listing", "businesses", "business_service", "business_page", "add_business", "jobs",
+    "restaurants", "requests", "post_request", "order", "signup", "dashboard", "info", "chat",
+})
+
+
+async def section_summary(day_keys: list[str] | None) -> list[dict]:
+    """Visitors and pages opened per section, busiest first. Visitors are distinct people across the window, as in
+    site_summary."""
+    match = {} if day_keys is None else {"day": {"$in": day_keys}}
+    out = []
+    async for row in db[SECTION_COLLECTION].aggregate([
+        {"$match": match},
+        {"$group": {"_id": "$section", "pageviews": {"$sum": "$pageviews"}, "named": {"$addToSet": "$visitor"},
+                    "anonymous": {"$sum": {"$cond": [{"$eq": ["$visitor", None]}, 1, 0]}}}},
+    ]):
+        out.append({"section": row["_id"], "pageviews": int(row["pageviews"]),
+                    "visitors": len([v for v in row["named"] if v]) + int(row["anonymous"])})
+    return sorted(out, key=lambda r: -r["visitors"])
 
 
 async def site_summary(day_keys: list[str] | None) -> dict:
@@ -126,6 +167,11 @@ async def ensure_site_visit_indexes() -> None:
         partialFilterExpression={"visitor": {"$type": "string"}}, background=True,
     )
     await db[COLLECTION].create_index("day", background=True)
+    await db[SECTION_COLLECTION].create_index(
+        [("day", 1), ("visitor", 1), ("section", 1)], unique=True,
+        partialFilterExpression={"visitor": {"$type": "string"}}, background=True,
+    )
+    await db[RESTAURANT_TAPS].create_index([("day", 1), ("place_id", 1)], background=True)
     await db[SEARCHES].create_index(
         [("day", 1), ("visitor", 1), ("kind", 1), ("area", 1), ("what", 1)],
         unique=True, background=True,
@@ -214,3 +260,71 @@ async def site_demand(response: Response) -> dict:
         _DEMAND_CACHE["at"] = now
     response.headers["Cache-Control"] = "public, max-age=300"
     return _DEMAND_CACHE["data"]
+
+
+# ---------------------------------------------------------------------------
+# Restaurant taps (Tzvi, 12 Nov 2026: "i cant see if anyone is using the restaurants"). One row per tap on a
+# restaurant card's Call, WhatsApp, Directions, Website or Order button: which place, which button, the day and the
+# anonymous browser id. Same privacy rule as visits: no IP, no account. The admin Restaurants tab reads it.
+# ---------------------------------------------------------------------------
+
+RESTAURANT_TAPS = "restaurant_taps"
+
+
+class RestaurantTapIn(BaseModel):
+    place_id: str
+    kind: Literal["call", "whatsapp", "directions", "website", "order"]
+
+
+@router.post("/site/restaurant-tap", status_code=204)
+async def record_restaurant_tap(body: RestaurantTapIn, request: Request, viewer=Depends(optional_user)) -> Response:
+    """Note one tap. Always 204, like a visit."""
+    if _is_bot(request) or (viewer or {}).get("role") == "admin":
+        return Response(status_code=204)
+    try:
+        check_rate(request, bucket="restaurant-tap", limit=60, window_seconds=60)
+    except Exception:  # noqa: BLE001 - over the limit: drop it, quietly
+        return Response(status_code=204)
+    now = datetime.now(UTC)
+    visitor = (request.headers.get("X-Visitor-Id") or "").strip()[:_MAX_VISITOR_LEN] or None
+    try:
+        await db[RESTAURANT_TAPS].insert_one({"day": il_day_of(now), "at": now, "place_id": body.place_id[:120],
+                                              "kind": body.kind, "visitor": visitor})
+    except Exception:  # noqa: BLE001
+        logger.exception("restaurant tap insert failed")
+    return Response(status_code=204)
+
+
+async def restaurant_usage(days: int) -> dict:
+    """The restaurants section over the last `days` Israel days: visitors and pages opened, searches, taps by button,
+    and the ten most tapped places with their names."""
+    _, keys = il_day_window(days)
+    pages = next((s for s in await section_summary(keys) if s["section"] == "restaurants"),
+                 {"visitors": 0, "pageviews": 0})
+    by_kind = {r["_id"]: r["n"] for r in await db[RESTAURANT_TAPS].aggregate([
+        {"$match": {"day": {"$in": keys}}}, {"$group": {"_id": "$kind", "n": {"$sum": 1}}}]).to_list(10)}
+    top = await db[RESTAURANT_TAPS].aggregate([
+        {"$match": {"day": {"$in": keys}}},
+        {"$group": {"_id": "$place_id", "n": {"$sum": 1}, "people": {"$addToSet": "$visitor"}}},
+        {"$sort": {"n": -1}}, {"$limit": 10}]).to_list(10)
+    names = {d["place_id"]: (d.get("contact") or {}) for d in await db.restaurants.find(
+        {"place_id": {"$in": [t["_id"] for t in top]}}, {"place_id": 1, "contact.name_en": 1, "contact.name_he": 1}
+    ).to_list(10)}
+    return {
+        "days": days, "visitors": pages["visitors"], "pageviews": pages["pageviews"],
+        "taps": sum(by_kind.values()), "taps_by_kind": by_kind,
+        "top": [{"place_id": t["_id"], "taps": t["n"], "people": len([p for p in t["people"] if p]),
+                 "name": names.get(t["_id"], {}).get("name_en") or names.get(t["_id"], {}).get("name_he") or t["_id"]}
+                for t in top],
+    }
+
+
+@router.get("/admin/site/sections")
+async def admin_sections(days: int = 30, payload: dict = Depends(verify_token)) -> dict:
+    """Each part of the site, busiest first, over the last `days` Israel days (1 = today)."""
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    days = max(1, min(int(days), 365))
+    _, keys = il_day_window(days)
+    first = await db[SECTION_COLLECTION].find_one({}, {"day": 1}, sort=[("day", 1)])
+    return {"days": days, "since": (first or {}).get("day"), "sections": await section_summary(keys)}

@@ -24,6 +24,8 @@ import {
   IceCreamCone, MapPin, MessageCircle, Navigation, Phone, Pizza, Salad, Sandwich, ShoppingBag, Soup, UtensilsCrossed,
 } from 'lucide-react';
 import RestaurantFeedback from './RestaurantFeedback';
+import { API } from '../../lib/apiBase';
+import { getVisitorId } from '../../utils/visitorId';
 
 export const CATEGORY_ICONS = {
   pizza: Pizza, burgers: Hamburger, meat_grill: Beef, sushi_asian: Soup, cafe: Coffee,
@@ -50,10 +52,22 @@ export const directionsUrl = (r) => {
 
 const formatKm = (km) => (km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(km < 10 ? 1 : 0)} km`);
 
-function Action({ href, icon: Icon, children, testId, external, small }) {
+// One tap on a card's button, for the admin Restaurants tab (Tzvi, 12 Nov 2026; backend routes/site_visits.py).
+export const countTap = (placeId, kind) => {
+  try {
+    fetch(`${API}/site/restaurant-tap`, {
+      method: 'POST', keepalive: true,
+      headers: { 'Content-Type': 'application/json', 'X-Visitor-Id': getVisitorId() || '' },
+      body: JSON.stringify({ place_id: placeId, kind }),
+    }).catch(() => {});
+  } catch { /* a lost count is never an error */ }
+};
+
+function Action({ href, icon: Icon, children, testId, external, small, onTap }) {
   return (
     <a
       href={href}
+      onClick={onTap}
       {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
       className={`inline-flex items-center gap-1.5 rounded-full border font-semibold transition-colors hover:bg-[rgb(var(--brand-primary-rgb)/0.06)] active:scale-[0.97] ${small ? 'min-h-[40px] px-3 text-[13px]' : 'px-3 py-1.5 text-sm'}`}
       style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
@@ -80,22 +94,22 @@ export default function RestaurantCard({ r, active, photoFirst }) {
 
   const actions = (small) => (
     <>
-      {tel && <Action small={small} href={tel} icon={Phone} testId="restaurant-call">{t('restaurants.call', 'Call')}</Action>}
+      {tel && <Action small={small} href={tel} icon={Phone} testId="restaurant-call" onTap={() => countTap(r.id, 'call')}>{t('restaurants.call', 'Call')}</Action>}
       {r.whatsapp && (
-        <Action small={small} href={`https://wa.me/${r.whatsapp}`} icon={MessageCircle} external testId="restaurant-whatsapp">
+        <Action small={small} href={`https://wa.me/${r.whatsapp}`} icon={MessageCircle} external testId="restaurant-whatsapp" onTap={() => countTap(r.id, 'whatsapp')}>
           WhatsApp
         </Action>
       )}
-      <Action small={small} href={directionsUrl(r)} icon={Navigation} external testId="restaurant-directions">
+      <Action small={small} href={directionsUrl(r)} icon={Navigation} external testId="restaurant-directions" onTap={() => countTap(r.id, 'directions')}>
         {t('restaurants.directions', 'Directions')}
       </Action>
       {r.website && (
-        <Action small={small} href={r.website} icon={Globe} external testId="restaurant-website">
+        <Action small={small} href={r.website} icon={Globe} external testId="restaurant-website" onTap={() => countTap(r.id, 'website')}>
           {t('restaurants.website', 'Website')}
         </Action>
       )}
       {r.order_url && (
-        <Action small={small} href={r.order_url} icon={ShoppingBag} external testId="restaurant-order">
+        <Action small={small} href={r.order_url} icon={ShoppingBag} external testId="restaurant-order" onTap={() => countTap(r.id, 'order')}>
           {t('restaurants.orderWolt', 'Order on Wolt')}
         </Action>
       )}
