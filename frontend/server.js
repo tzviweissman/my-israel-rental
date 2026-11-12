@@ -490,7 +490,11 @@ function applyPrices(html, slug, live) {
     const fmt = Number.isInteger(now) ? String(now) : now.toFixed(2);
     const sym = String(v.sym).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     swaps.push([new RegExp(`(${sym}\\s?)${v.was}(?![\\d.,])`, 'g'), `$1${fmt}`]);
-    if (v.sym === '₪') swaps.push([new RegExp(`(?<![\\d.,])${v.was}(\\s?NIS)`, 'g'), `${fmt}$1`]);
+    if (v.sym === '₪') {
+      swaps.push([new RegExp(`(?<![\\d.,])${v.was}(\\s?NIS)`, 'g'), `${fmt}$1`]);
+      // the sign written as a character code, as hand-built pages often do (L.A. Cholent's &#8362;330 was never swapped)
+      swaps.push([new RegExp(`((?:&#8362;|&#x20aa;)\\s?)${v.was}(?![\\d.,])`, 'gi'), `$1${fmt}`]);
+    }
   }
   if (!swaps.length) return html;
   return html.split(/(<script\b[\s\S]*?<\/script>)/i).map((part) => {
@@ -508,6 +512,9 @@ async function sendHandBuilt(req, res, slug, file) {
   let html = applyPrices(applyEdits(raw, data && data.edits, editor, live), slug, data && data.prices);
   // An order form's code box (public/pages/mir-code.js), ahead of the page's own script that uses it.
   html = html.replace('<div id="mir-code"></div>', `<div id="mir-code"></div><script>window.MIR_PAUSED=${JSON.stringify(data && data.paused && data.paused.active ? data.paused : null).replace(/</g, '\\u003c')};</script><script src="/pages/mir-code.js?v=${EDITOR_STAMP}"></script>`);
+  // The listing's prices, for a page script that adds up an order (L.A. Cholent's order.html), so the total it sends is
+  // the price set in the dashboard, not the one the page was built with. Before the page's own scripts.
+  if (data && data.prices) html = html.replace(/<head>/i, `<head><script>window.MIR_PRICES=${JSON.stringify(data.prices).replace(/</g, '\\u003c')};</script>`);
   // A form of the page's own gets what the standard order page has (public/pages/mir-order.js).
   if (!editor && /type="tel"|window\.open\(''/.test(html)) {
     html = html.replace(/<\/body>/i, `<script src="/pages/mir-order.js?v=${EDITOR_STAMP}"${data && data.texts_on ? ' data-texts="1"' : ''}></script></body>`);

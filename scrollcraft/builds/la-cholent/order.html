@@ -51,10 +51,10 @@
           <div class="size-pick" role="group" aria-label="Pick a size">
             <button type="button" data-i="0" aria-pressed="false"><b>Medium</b><span>Feeds 4 to 6</span><em>&#8362;100</em></button>
             <button type="button" data-i="1" aria-pressed="true"><b>Large</b><span>Feeds 8 to 12</span><em>&#8362;180</em><i class="tab">10% off</i></button>
-            <button type="button" data-i="2" aria-pressed="false"><b>Kiddush</b><span>Any guest count</span><em>&#8362;250</em></button>
+            <button type="button" data-i="2" aria-pressed="false"><b>Kiddush</b><span>Feeds 16 to 24</span><em>&#8362;330</em><i class="tab">8% off</i></button>
           </div>
           <p class="pick"><span class="size-name" id="size-name">Large</span><span class="feeds" id="feeds">Feeds 8 to 12, about &#8362;15 a person</span></p>
-          <p class="price"><span class="now" id="price"><small>₪</small>180</span><span class="was" id="was"><s>&#8362;200</s><b>10% off</b><small data-mir-key="t-39c7dcac-1">2 Mediums, &#8362;200</small></span><span class="alt" id="alt">₪85 if you add your own meat, or keep it parve.</span></p>
+          <p class="price"><span class="now" id="price"><small>₪</small>180</span><span class="was" id="was"><s id="was-s">&#8362;200</s><b id="was-off">10% off</b><small id="was-note">2 Mediums, &#8362;200</small></span><span class="alt" id="alt">₪85 if you add your own meat, or keep it parve.</span></p>
           <div class="menu">
             <div><span>Slow cooker liner</span><b>Free</b></div>
             <div><span>Extra meat</span><b>₪50 / lb</b></div>
@@ -106,7 +106,7 @@
     <div class="closing-cols">
       <div class="fbrand"><a class="fname" href="index.html">L.A. Cholent by Rabbi Samuels</a><p>Just throw our raw ingredients into your crock pot, add water, and enjoy.</p><a class="fcta" href="order.html">Order now</a></div>
       <nav aria-label="Pages"><h3>Pages</h3><a href="index.html">Home</a><a href="index.html#sizes">Sizes and prices</a><a href="how.html">How it works</a><a href="reviews.html">Reviews</a><a href="kosher.html">Kosher and delivery</a><a href="order.html">Order</a></nav>
-      <div><h3>Ordering</h3><a href="order.html?size=0">Medium, feeds 4 to 6, &#8362;100</a><a href="order.html?size=1">Large, feeds 8 to 12, &#8362;180</a><a href="order.html?size=2">Kiddush, sized to your guests, &#8362;250</a><p>Free local delivery on your first order</p></div>
+      <div><h3>Ordering</h3><a href="order.html?size=0">Medium, feeds 4 to 6, &#8362;100</a><a href="order.html?size=1">Large, feeds 8 to 12, &#8362;180</a><a href="order.html?size=2">Kiddush, feeds 16 to 24, &#8362;330</a><p>Free local delivery on your first order</p></div>
       <div><h3>Reach us</h3><a href="https://wa.me/972553311442" target="_blank" rel="noopener">WhatsApp +972 55-331-1442</a><a href="mailto:lacholentisrael@gmail.com">lacholentisrael@gmail.com</a><p>Made in Jerusalem, delivered across Israel.</p><p>Kosher: Vaad HaKashrus, Rabbi Shmuel Weiner.</p></div>
     </div>
     <p class="closing-base"><span>&copy; 2026 L.A. Cholent by Rabbi Samuels.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission &middot; <a href="https://myisraelrental.com/privacy">Privacy</a></span><a href="#top">Back to the top</a></p>
@@ -132,8 +132,22 @@
   var sizes = [
     { name: 'Medium', feeds: 'Feeds 4 to 6, about ₪16 a person', price: 100, alt: '₪55 if you add your own meat, or keep it parve.', angle: -60, label: 'MEDIUM' },
     { name: 'Large', feeds: 'Feeds 8 to 12, about ₪15 a person', price: 180, alt: '₪85 if you add your own meat, or keep it parve.', angle: 0, label: 'LARGE' },
-    { name: 'Extra Large / Kiddush', feeds: 'Sized to your guest list', price: 250, alt: 'Sizes are customizable depending on amount of guests.', angle: 60, label: 'KIDDUSH' }
+    { name: 'Extra Large / Kiddush', feeds: 'Feeds 16 to 24, about ₪14 a person', price: 330, alt: 'Sizes are customizable depending on amount of guests.', angle: 60, label: 'KIDDUSH' }
   ];
+  // The price set in the dashboard wins, so the total sent always matches the listing (frontend/server.js puts the
+  // listing's prices in window.MIR_PRICES; Tzvi, 11 Nov 2026, after a Kiddush price edited as page text sent ₪250).
+  sizes.forEach(function (s) { var p = Number((window.MIR_PRICES || {})[s.name]); if (p > 0) s.price = p; });
+  // Each size's saving against two of the size below, which feed the same number (rule 3j: like for like, real
+  // money): Large against 2 Mediums, Kiddush against 2 Larges. Worked out from the prices, so it follows the dashboard.
+  sizes.forEach(function (s, i) {
+    if (!i) return;
+    var two = 2 * sizes[i - 1].price, off = Math.round((two - s.price) / two * 100);
+    if (off >= 1) s.deal = { was: two, off: off + '% off', note: '2 ' + sizes[i - 1].label.charAt(0) + sizes[i - 1].label.slice(1).toLowerCase() + 's, ₪' + two };
+  });
+  document.querySelectorAll('.size-pick button').forEach(function (b, i) {
+    var t = b.querySelector('.tab'), d = sizes[i] && sizes[i].deal;
+    if (t && !d) t.remove(); else if (t) t.textContent = d.off;
+  });
   var dial = document.getElementById('dial');
   buildKnob(dial, sizes.map(function (s) { return [s.label, s.angle]; }));
   var buttons = document.querySelectorAll('.size-pick button');
@@ -150,7 +164,8 @@
     document.getElementById('feeds').textContent = s.feeds;
     document.getElementById('price').innerHTML = '<small>₪</small>' + s.price;
     document.getElementById('alt').textContent = s.alt;
-    document.getElementById('was').style.opacity = cur === 1 ? '1' : '0';
+    document.getElementById('was').style.opacity = s.deal ? '1' : '0';
+    if (s.deal) { document.getElementById('was-s').textContent = '₪' + s.deal.was; document.getElementById('was-off').textContent = s.deal.off; document.getElementById('was-note').textContent = s.deal.note; }
     if (window.labelOrder) window.labelOrder(); else document.getElementById('order-label').textContent = 'Order Large, \u20aa180';
     buttons.forEach(function (b, n) { b.setAttribute('aria-pressed', n === cur ? 'true' : 'false'); });
     // the words that change ease in, so a size change is never one hard swap

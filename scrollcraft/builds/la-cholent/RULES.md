@@ -101,7 +101,7 @@ R0b.12 n/a: not published, so there is no pages-list preview clip yet
 
 ## 4. Photos and media
 R8.1 pass: the three size cards show one product hero shot of their own tub in three colours (gold, olive, steel), the same slate block, light and camera; the sizes differ only in their words, because they have no photo of each size (asked in the report)
-R8.6 pass: the size cards are product hero shots edited from their own tub photo: one sealed tub on a slate block, a raw marrow bone beside it (the label says 1 to 2 marrow bones; beans, barley and a potato were taken out 11 Nov 2026, as their classic recipe has no beans or potatoes), one colour story per card, one warm light, still; label read line by line against their photo
+R8.6 pass: the size cards are product hero shots edited from their own tub photo: one sealed tub on a slate block, a raw marrow bone beside it (the label says 1 to 2 marrow bones; beans, barley and a potato were taken out 11 Nov 2026, as their classic recipe has no beans or potatoes), one colour story per card, one warm light, still; label read line by line against their photo. Since 11 Nov 2026 the Large card shows their own Large tub (their photo src/owner-2026-11-11/large-tub.jpg, with the slow cooker liner and "Add 5 cups of water", gen/tub_large.py, label read line by line), and all three shots are widened to 21:9 in code (the wall and table carried out sideways, never cropped, rule 3c.12) so the wide, short cards show the whole slate and bone
 R8.2 pass: their own photograph plus generated scenery stills made earlier; the tub hero shots are edited from their tub photo (Higgsfield nano_banana_2); the steel version's label was put back from the gold one in code (the model wrote 'Stir wall')
 R3p.7 pass: the three sizes are shown the same way and the dial buttons show the three the same way
 R3h.12 pass: the product looks the same everywhere: the same photograph of the four tubs in the opening, the three cards and the how-it-works band
@@ -131,12 +131,12 @@ R3j.3 pass: no taster is shown because none is offered
 R3j.4 n/a: no group discounts; free local delivery on the first order is shown once beside the button (his flyer)
 R3j.5 pass: no come-back feature is shown
 R3j.6 pass: the Large is the default on the dial; no invented option
-R3j.7 pass: the struck ₪200 is two Medium kits at ₪100 each, which feed 8 to 12 like one Large; the card and the dial now say so beside it ("2 Mediums, ₪200"); no .99 endings
-R3j.8 pass: per unit: Medium ₪100 feeds 4 to 6; Large ₪180 feeds 8 to 12 against two Mediums at ₪200 (same servings); the Kiddush is custom
-R3j.9 pass: the one saving is in the Medium and Large group; the Kiddush has none
-R3j.10 pass: 10% off = (200-180)/200 = 10, struck price beside the new price
+R3j.7 pass: each struck price is two of the size below, which feed the same: ₪200 is two Mediums (8 to 12, like one Large), ₪360 is two Larges (16 to 24, like one Kiddush, since 11 Nov 2026 when the owner set the Kiddush to ₪330 for 16 to 24); the card and the dial say so beside it; no .99 endings
+R3j.8 pass: per unit: Medium ₪100 feeds 4 to 6; Large ₪180 feeds 8 to 12 against two Mediums at ₪200; Kiddush ₪330 feeds 16 to 24 against two Larges at ₪360 (same servings)
+R3j.9 pass: one saving per size, each against two of the size below; worked out in the page from the listing prices (index.html and order.html), so a new price in the dashboard never leaves an old saving showing
+R3j.10 pass: 10% off = (200-180)/200; 8% off = (360-330)/360 = 8.3, rounded; struck price beside the new price
 R3j.11 n/a: no combined service exists
-R3j.12 pass: the owner made no savings claim; the 10% is derived from two Mediums against one Large
+R3j.12 pass: the owner made no savings claim beyond "XL Kiddush sizes, discount pricing" on her flyer; both savings are derived from two of the size below
 R3.14 pass: loud prices only because prices exist (boxes, pans, sizes), none invented
 
 ## 6. Order and booking flow

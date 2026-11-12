@@ -258,6 +258,32 @@ async def tell_admins(biz: dict[str, Any], lines: list[str]) -> None:
 
 class EditsBody(BaseModel):
     edits: dict[str, Any]
+    # A price changed on the page, by its name in the listing (Tzvi, 11 Nov 2026: "changes on the page will
+    # automatically change it in her dashboard"). The page editor (public/pages/mir-editor.js) sends a price here
+    # instead of as words, so the listing, the page and the order total never disagree.
+    prices: dict[str, float] | None = None
+
+
+async def set_listing_prices(biz_id: str, prices: dict[str, float]) -> dict[str, float]:
+    """Set each named size or product's price in this business's own published listings. Returns what was set."""
+    done: dict[str, float] = {}
+    for name, price in prices.items():
+        name = str(name).strip()[:200]
+        try:
+            price = round(float(price), 2)
+        except (TypeError, ValueError):
+            continue
+        if not name or not 0 <= price <= 1_000_000:
+            continue
+        for field in ("tiers", "products"):
+            r = await db.marketplace_gigs.update_many(
+                {"business_id": biz_id, "status": "published", f"{field}.name": name},
+                {"$set": {f"{field}.$[row].price": price}},
+                array_filters=[{"row.name": name}],
+            )
+            if r.modified_count or r.matched_count:
+                done[name] = price
+    return done
 
 
 @router.get("/business/{slug_or_id}/page-edits")
@@ -278,7 +304,7 @@ async def get_page_edits(slug_or_id: str):
     products: list[dict[str, Any]] = []
     async for g in db.marketplace_gigs.find({"business_id": biz["_id"], "status": "published"}, {"products": 1, "tiers": 1, "gig_type": 1}):
         if g.get("gig_type") == "store":
-            for i, p in enumerate(g.get("products") or []):
+            for p in g.get("products") or []:
                 name = (p.get("name") or "").strip()
                 try:
                     price = float(p.get("price"))
@@ -287,8 +313,7 @@ async def get_page_edits(slug_or_id: str):
                 if not name or price < 0:
                     continue
                 products.append({
-                    # the id the order form gives it (orders._products_for_order): idx:N until the listing is saved again
-                    "id": p.get("id") or f"idx:{i}",
+                    "id": p.get("id"),
                     # with the listing, so an order page can place a real
                     # order for it (POST /order-form/<gig_id>/orders)
                     "gig_id": g["_id"],
@@ -300,7 +325,6 @@ async def get_page_edits(slug_or_id: str):
                     "image": (p.get("images") or [None])[0] or p.get("image"),
                     "group": (p.get("group") or "").strip() or None,
                     "in_stock": bool(p.get("in_stock", True)),
-                    "description": (p.get("description") or "").strip() or None,
                 })
         for row in (g.get("products") or []) + (g.get("tiers") or []):
             if row.get("price_kind") == "quote":
@@ -338,15 +362,16 @@ async def get_page_edits(slug_or_id: str):
 async def put_page_edits(business_id: str, body: EditsBody, user=Depends(verify_token)):
     biz = await _owned(business_id, user)
     edits = clean_edits(body.edits)
+    prices = await set_listing_prices(biz["_id"], body.prices) if body.prices else {}
     now = datetime.now(UTC).isoformat()
     before = (await db.page_edits.find_one({"_id": biz["_id"]}, {"edits": 1}) or {}).get("edits") or {}
-    asyncio.create_task(tell_admins(biz, what_changed(before, edits)))
+    asyncio.create_task(tell_admins(biz, what_changed(before, edits) + [f"Price of {n}: {p:g}" for n, p in prices.items()]))
     await db.page_edits.update_one(
         {"_id": biz["_id"]},
         {"$set": {"edits": edits, "slug": biz.get("slug"), "updated_at": now, "updated_by": user["user_id"]}},
         upsert=True,
     )
-    return {"edits": edits, "updated_at": now}
+    return {"edits": edits, "updated_at": now, "prices": prices}
 
 
 # The page's gallery (Tzvi, 19 Oct 2026: "if Chicken Munch wants to add more

@@ -28,7 +28,7 @@
   var edits;
   function setEdits(d) {
     d = d || {};
-    edits = { text: d.text || {}, img: d.img || {}, style: d.style || {}, items: d.items || {}, bind: d.bind || {}, alt: d.alt || {} };
+    edits = { text: d.text || {}, img: d.img || {}, style: d.style || {}, items: d.items || {}, bind: d.bind || {}, alt: d.alt || {}, price: d.price || {} };
   }
   try { setEdits(JSON.parse(dataEl ? dataEl.textContent : '{}')); } catch (e) { setEdits({}); }
   // The dashboard's own figures, for linked words (mir:live).
@@ -39,6 +39,7 @@
   try { heUI = /^he/i.test(window.parent.document.documentElement.lang || ''); } catch (e) { /* stays English */ }
   var HE = {
     'Edit text': 'עריכת טקסט', 'Link': 'קישור', 'Replace photo': 'החלפת תמונה', 'Change': 'שינוי',
+    'When you save, the price of {name} in your listing changes to {price} too, so the page, your dashboard and the order total all match.': 'בשמירה, גם המחיר של {name} במודעה שלכם ישתנה ל-{price}, כך שהעמוד, לוח הבקרה וסכום ההזמנה יהיו זהים.',
     'Shows your opening hours': 'מציג את שעות הפתיחה', 'Shows the price of ': 'מציג את המחיר של ',
     '+ Add a line': '+ הוספת שורה', '+ Add a card': '+ הוספת כרטיס', '+ Add another': '+ הוספת עוד אחד',
     'Remove line': 'הסרת שורה', 'Remove card': 'הסרת כרטיס', 'Remove ': 'הסרה', 'Removed': 'הוסר', 'Put back': 'החזרה',
@@ -423,7 +424,7 @@
   function startTyping(el, x, y) {
     if (isImg(el) || (!isField(el) && edits.bind[keyOf(el)])) return;
     stopTyping();
-    typing = el;
+    typing = el; el._mirWas = el.innerHTML;
     el.classList.add('mir-typing');
     el.setAttribute('contenteditable', 'true');
     el.focus();
@@ -435,6 +436,29 @@
     }
     if (!range || !el.contains(range.startContainer)) { range = document.createRange(); range.selectNodeContents(el); }
     var s = window.getSelection(); s.removeAllRanges(); s.addRange(range);
+  }
+  // A price changed on the page changes in the listing too (Tzvi, 11 Nov 2026: L.A. Cholent's Kiddush read ₪330 on the
+  // page while the order sent the listing's ₪250; "make it that changes on the page will automatically change it in her
+  // dashboard"). When the words held one of the listing's prices and now hold a new amount, that size or product's new
+  // price goes with the save as edits.price, and page_edits.py sets it in the listing.
+  var AMOUNT = /[₪$€£]\s?\d+(?:[.,]\d+)*|\d+(?:[.,]\d+)*\s?(?:₪|NIS|ש"ח)/g;
+  var amounts = function (html) { var d = document.createElement('div'); d.innerHTML = html; return (d.textContent.match(AMOUNT) || []).map(function (x) { return Number(x.replace(/,(?=\d{3}\b)/g, '').replace(/[^\d.]/g, '')); }); };
+  function priceChange(before, after) {
+    var had = amounts(before), now = amounts(after);
+    if (!had.length || had.length !== now.length) return null;
+    for (var i = 0; i < had.length; i++) {
+      if (had[i] === now[i]) continue;
+      var names = Object.keys(live.prices).filter(function (n) { return Number(live.prices[n]) === had[i]; });
+      if (names.length === 1) return { name: names[0], price: now[i] };
+    }
+    return null;
+  }
+  function say(text) { tip.textContent = text; tip.style.transition = 'none'; tip.style.opacity = '1'; clearTimeout(say.t); say.t = setTimeout(function () { tip.style.transition = 'opacity .4s'; tip.style.opacity = '0'; }, 9000); }
+  function notePrice(before, after) {
+    var c = priceChange(before, after);
+    if (!c) return;
+    edits.price[c.name] = c.price;
+    say(T('When you save, the price of {name} in your listing changes to {price} too, so the page, your dashboard and the order total all match.').replace('{name}', c.name).replace('{price}', String(c.price)));
   }
   function stopTyping() {
     if (!typing) return;
@@ -448,12 +472,14 @@
       // An emptied line goes, as it would in a list anywhere.
       if (!html.replace(/<br>/g, '').trim() && el.closest('[data-mir-copy]').tagName === 'LI') { removeItem(el); return; }
       e.t = e.t || {};
+      notePrice(el._mirWas || '', html);
       if (e.t[el.getAttribute('data-mir-field')] !== html) { e.t[el.getAttribute('data-mir-field')] = html; changed(); translate(el); }
       return;
     }
     var k = keyOf(el);
     var before = edits.text[k] !== undefined ? edits.text[k] : loaded[k];
     if (html === before) return;
+    notePrice(before, html);
     twins(el).forEach(function (t) { edits.text[keyOf(t)] = html; if (t !== el) t.innerHTML = html; });
     changed();
     translate(el);
