@@ -15,6 +15,7 @@
  *   - the page has no data-order-total, so what the customer was shown cannot be compared
  *   - a booking's price differs from the listing's price for that service, or names a service the listing lacks
  *   - an order refused by the server leaves no message on the page (one more press, answered with a refusal)
+ *   - a choice changes nothing in the order but its typed notes (the dashboard gets words, not a pick or its price)
  *   - the form could not be sent at all (no send button found, or nothing was sent)
  *
  *   node scripts/check-order-data.mjs <order or booking page urls>        exit 1 when it fails
@@ -111,6 +112,9 @@ for (const url of urls) {
   await p.goto(url, { waitUntil: 'networkidle' }).catch(() => {});
   await p.waitForTimeout(1200);
   const steps = [{ kind: 'as it opens', label: 'as it opens' }, ...(await choices(p))];
+  let base = null;   // what the page sends as it opens, to see what each choice changes
+  // a choice whose only change to the order is in the typed notes: the dashboard has it as words, not a pick or a price
+  const strip = (b) => { const { notes, extra_items, message, guest_name, contact_email, contact_phone, customer_name, customer_phone, customer_email, date, ...rest } = b || {}; return JSON.stringify(rest); };
 
   for (const step of steps) {
     if (step.kind !== 'as it opens') {
@@ -130,6 +134,9 @@ for (const url of urls) {
     if (!caught.length) { if (step.kind === 'as it opens') problems.push(`${where}: pressing send sent no order to the dashboard (a check on the page stopped it, or the page only opens WhatsApp)`); continue; }
     for (const c of caught) {
       const r = c.res, say = `${where} [${step.label}]`;
+      if (step.kind === 'as it opens') base = c.sent;
+      else if (base && step.kind !== 'plus' && strip(c.sent) === strip(base) && (c.sent.notes !== base.notes || c.sent.extra_items !== base.extra_items || c.sent.message !== base.message))
+        problems.push(`${say}: this choice reaches the dashboard only as typed notes (make it a product, an option or a service on the listing)`);
       if (!r.ok) { problems.push(`${say}: the dashboard would refuse it: ${r.body && r.body.detail ? JSON.stringify(r.body.detail) : r.status}`); continue; }
       if (r.body.tier_name !== undefined) {   // a booking
         if (!r.body.tier_found) problems.push(`${say}: books "${r.body.tier_name}", a service the listing does not have`);
