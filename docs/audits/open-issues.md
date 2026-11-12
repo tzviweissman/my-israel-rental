@@ -329,6 +329,6 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - Not a bug: booking discount minimum uses the browser's amount (`gigs.py`, 6 Nov). Hand-built pages send their own composed price, the business sees that price and the discount in the booking message, and no payment is taken, so an inflated amount only fools the customer's own booking. Rejected.
 - Not a bug: `GET /gigs/{id}/code-box` without a rate limit (6 Nov). It returns a yes/no and the pause state only. Rejected.
 - Moot: the weekly ad email going to every owner at once on first deploy (10 Nov). It deployed with main on 10 Nov.
-- Waiting for Tzvi: sign-up draft reminder emails any typed address (9 Nov, Medium). Options: send only after a Google sign-in with that address, or not at all.
+- Decided 12 Nov (Tzvi: "do it for any email they put in"): the sign-up draft reminder keeps going to any typed address. Closed; noted in `signup_drafts.py` so audits do not re-report it.
 - Left to the L.A. Cholent session: the kosher line is cut by 11px at 1000x700 (11 Nov). Another session was changing that site the same day.
 - Still open, not re-checked: Hadassah Prys phone booking bar over the Day field (9 Nov, unconfirmed); Gifted Israel basket column at the end of the shop (11 Nov, unconfirmed); footer and menu links on business sites under 44px (2 Nov); ad maker close button about 34px (30 Oct, `AdMaker.jsx` needs check-ad-designs with local servers); audit sandbox has no MongoDB or Chromium download (proxy, since 15 Oct).
