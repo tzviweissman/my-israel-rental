@@ -5,7 +5,7 @@ Category: food-shop
 Reworked 22 Oct 2026 to rule 3t. The candlelit split opening and the crock-pot dial are kept. Everything after the opening used to be dark picture screens (Moto Card's look); it is now a bright shop: one colour room per size with servings and price, the three steps, the occasions, the facts, then the dial order on the same light ground. See BRIEF.md for the facts and the first design.
 
 ## Ideas
-- **A colour room per size** (docs/inspo/awwwards-anatomy-2026-10-22/food/bestbean-colour-per-product.webp): each coffee is a full-height panel on its own colour with name and a plus button. For them: Medium, Large and Kiddush are three rooms (gold, plum, steel) with feeds, price and an Order button that turns the dial to that size.
+- **A colour room per size** (docs/inspo/awwwards-anatomy-2026-10-22/food/bestbean-colour-per-product.webp): each coffee is a full-height panel on its own colour with name and a plus button. For them: Medium, Large and Kiddush are three rooms (gold, plum, steel) with feeds, price and an Order button that turns the dial to that size. Replaced 12 Nov 2026 by one calm look (Tzvi, after Gremier's shop): three white cards on the cream ground, one light sand picture behind each tub, so only the tub and the numbers change.
 - **The kit as the product on a flat colour, facts in small type** (docs/inspo/awwwards-anatomy-2026-10-22/food/agrumea.webp): Agrumea shows the jar with ingredients and a short taste line in small print. For them: their four tubs on a calm ground with the three flyer steps and "each tub yields about 3 to 4 pounds" as the small print.
 - **A restaurant-style trust block** (docs/inspo/awwwards-anatomy-2026-10-22/food/qissa-menu-list.webp): Qissa lists its facts plainly with the main button always in the bar. For them: kosher, recipes, yield and delivery as numbered rows, with Rabbi Samuels' own line and the seal.
 - Own: the crock-pot dial. The knob from the opening's divider clicks to Low, and at the end it is the size picker: turn it and the size, who it feeds and the price change.
@@ -25,7 +25,7 @@ The shop rooms straight after the opening, with the dial as the one control at t
 ## Effects
 - button: gold pill with the dial icon, outline pill on the cards, from the Qissa gold pill (docs/inspo/awwwards-anatomy-2026-10-22/food/qissa-menu-list.webp)
 - link: none
-- tile: colour room whose Order button inverts the card's colours on hover, from Best Bean Best Cup (bestbean-colour-per-product.webp)
+- tile: one calm white card per size on the cream ground, its Order button filling ink on hover (12 Nov 2026, replacing the colour rooms from Best Bean Best Cup)
 - reveal: the facts rows fade up once, from the Qissa facts list (qissa-menu-list.webp)
 - steps: three numbered steps from their flyer, plain rows with no scroll light-up
 - price: Oswald light numerals in the card's text colour, the struck price above the new one, from their flyer

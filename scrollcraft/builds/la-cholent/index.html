@@ -127,15 +127,15 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
   <section class="shop" id="sizes" aria-labelledby="sizes-h">
     <div class="sc-wrap shop-head"><h2 id="sizes-h">Pick your size</h2><p>A raw kit for your crock pot, in Original, Spicy, Heimish or Gluten-Free. Add water and cook on low for about 20 hours.</p></div>
     <div class="rooms">
-      <article class="room gold"><div class="ph"><img src="assets/card-medium.webp" alt="A sealed Medium tub of L.A. Cholent by Rabbi Samuels on a slate block, a small dish of pearl barley on a linen napkin at its left and two raw marrow bones at its right" width="1680" height="720" loading="lazy"></div>
+      <article class="room plum"><div class="ph"><img src="assets/card-medium.webp" alt="A sealed Medium tub of L.A. Cholent by Rabbi Samuels on a slate block, a small dish of pearl barley on a linen napkin at its left and two raw marrow bones at its right" width="1680" height="720" loading="lazy"></div>
         <div class="rb"><h3>Medium</h3><p class="feeds">Feeds 4 to 6, about &#8362;16 a person</p><p class="what">Add your own meat or keep it parve: &#8362;55</p></div>
         <div class="rf"><div class="price">&#8362;100</div><a class="btn-line add" href="order.html?size=0" data-size="0" aria-label="Order Medium">Order now<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a></div></article>
-      <article class="room plum"><div class="ph"><img src="assets/card-large.webp" alt="A sealed tub of L.A. Cholent by Rabbi Samuels on a slate block, a small dish of pearl barley on a linen napkin at its left and two raw marrow bones at its right" width="1680" height="720" loading="lazy"><span class="tag">10% off</span></div>
+      <article class="room gold"><div class="ph"><img src="assets/card-large.webp" alt="A sealed tub of L.A. Cholent by Rabbi Samuels on a slate block, a small dish of pearl barley on a linen napkin at its left and two raw marrow bones at its right" width="1680" height="720" loading="lazy"><span class="tag">10% off</span></div>
         <div class="rb"><h3>Large</h3><p class="feeds">Feeds 8 to 12, about &#8362;15 a person</p><p class="what">Add your own meat or keep it parve: &#8362;85</p></div>
-        <div class="rf"><div class="price"><span class="was"><s>&#8362;200</s><small>2 Mediums, &#8362;200</small></span> &#8362;180</div><a class="btn-line add" href="order.html?size=1" data-size="1" aria-label="Order Large">Order now<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a></div></article>
-      <article class="room steel"><div class="ph"><img src="assets/card-kiddush.webp" alt="The bigger Extra Large tub of L.A. Cholent by Rabbi Samuels with a slow cooker liner on top, on a slate block, a small dish of pearl barley on a linen napkin at its left and two raw marrow bones at its right" width="1680" height="720" loading="lazy"><span class="tag">18% off</span></div>
+        <div class="rf"><div class="price"><span class="was"><s>&#8362;200</s></span> &#8362;180</div><a class="btn-line add" href="order.html?size=1" data-size="1" aria-label="Order Large">Order now<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a></div></article>
+      <article class="room steel"><div class="ph"><img src="assets/card-kiddush.webp" alt="The bigger Extra Large tub of L.A. Cholent by Rabbi Samuels on a slate block, a small dish of pearl barley on a linen napkin at its left and two raw marrow bones at its right" width="1680" height="720" loading="lazy"><span class="tag">18% off</span></div>
         <div class="rb"><h3>Extra Large / Kiddush</h3><p class="feeds">Feeds 16 to 24</p><p class="what">Sizes are customizable depending on the number of guests</p></div>
-        <div class="rf"><div class="price"><span class="was"><s>&#8362;400</s><small>4 Mediums, &#8362;400</small></span> &#8362;330</div><a class="btn-line add" href="order.html?size=2" data-size="2" aria-label="Order Extra Large / Kiddush">Order now<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a></div></article>
+        <div class="rf"><div class="price"><span class="was"><s>&#8362;400</s></span> &#8362;330</div><a class="btn-line add" href="order.html?size=2" data-size="2" aria-label="Order Extra Large / Kiddush">Order now<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a></div></article>
     </div>
   </section>
 
@@ -144,11 +144,31 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
     <div class="sc-wrap">
       <h2 id="said-h">What customers wrote to us</h2>
       <p class="said-note">Messages customers sent us on WhatsApp, in their own words.</p>
-      <ul class="said-list" data-sc-in data-sc-stagger="70">
+      <!-- The messages move by slowly, all ten, round and round (Tzvi, 12 Nov 2026: "maybe you can make this a moving
+           review section"); they stop while pointed at or focused, and stand still for reduced motion. The second
+           run is a copy for the loop only, hidden from screen readers. -->
+      <div class="said-move"><ul class="said-list said-track">
         <li><blockquote><p>Thank you! The Cholent was amazing!! Such clear easy instructions and awesome consistency and flavor!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
         <li><blockquote><p>Gut voch. Thank you so much it was completely polished off and was really amazing. We told the oylam that it was the famous LA cholent</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
         <li><blockquote><p>Heyyy!!! Was so amazing!!!! Was a little bit of an issue cuz we barely had any left for shabbos 🙈🙈 Thanks so much was legit heaven!!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
-      </ul>
+        <li><blockquote><p>WOW IT WAS SOO DELICIOUS <bdi lang="he" dir="rtl">ברוך השם!</bdi> May HaShem bless you! 🙏 Mamash perfect in flavor and consistency and everything!!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li><blockquote><p>Hiiii gv! The cholent was a huge hit! It was delish!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li><blockquote><p>Hey, we loved ur cholent so much last week! Can we get again this week?</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li><blockquote><p>Epic thank you so much for delivering!! I’m super excited my friend from LA highly recommended as well from valley Torah</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li><blockquote><p>Ur cholent was amazing!! We really enjoyed. Thank you thank you ❤️❤️</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li><blockquote><p>Hi! You beat me to it! We loved it! TY!!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li><blockquote><p>Thank you! It was amazing!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li aria-hidden="true"><blockquote><p>Thank you! The Cholent was amazing!! Such clear easy instructions and awesome consistency and flavor!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li aria-hidden="true"><blockquote><p>Gut voch. Thank you so much it was completely polished off and was really amazing. We told the oylam that it was the famous LA cholent</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li aria-hidden="true"><blockquote><p>Heyyy!!! Was so amazing!!!! Was a little bit of an issue cuz we barely had any left for shabbos 🙈🙈 Thanks so much was legit heaven!!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li aria-hidden="true"><blockquote><p>WOW IT WAS SOO DELICIOUS <bdi lang="he" dir="rtl">ברוך השם!</bdi> May HaShem bless you! 🙏 Mamash perfect in flavor and consistency and everything!!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li aria-hidden="true"><blockquote><p>Hiiii gv! The cholent was a huge hit! It was delish!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li aria-hidden="true"><blockquote><p>Hey, we loved ur cholent so much last week! Can we get again this week?</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li aria-hidden="true"><blockquote><p>Epic thank you so much for delivering!! I’m super excited my friend from LA highly recommended as well from valley Torah</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li aria-hidden="true"><blockquote><p>Ur cholent was amazing!! We really enjoyed. Thank you thank you ❤️❤️</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li aria-hidden="true"><blockquote><p>Hi! You beat me to it! We loved it! TY!!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li aria-hidden="true"><blockquote><p>Thank you! It was amazing!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+      </ul></div>
       <p class="said-more"><a class="btn-line" href="reviews.html">Read all 10 messages</a></p>
     </div>
   </section>
@@ -189,6 +209,13 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
 <script src="scrollcraft.js"></script>
 <script>ScrollCraft.mount(document.body);</script>
 <script>
+/* The moving messages run only while on screen (check-speed BUSY: an animation out of sight still costs a phone). */
+(function () {
+  var box = document.querySelector('.said-move'); if (!box || !('IntersectionObserver' in window)) { if (box) box.classList.add('is-on'); return; }
+  new IntersectionObserver(function (e) { box.classList.toggle('is-on', e[0].isIntersecting); }).observe(box);
+})();
+</script>
+<script>
 /* The size cards follow the prices set in the dashboard (frontend/server.js window.MIR_PRICES): each price, and each
    saving against the Mediums that feed the same number (rule 3j, like for like: Large = 2, Kiddush = 4; Tzvi, 12 Nov
    2026: "it should always be comparing to the original so its easier to see the rising savings"), worked out again,
@@ -201,7 +228,7 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
   rooms.forEach(function (room, i) {
     var box = room.querySelector('.rf .price'), tag = room.querySelector('.ph .tag');
     var two = MEDIUMS[i] * price[0], off = i ? Math.round((two - price[i]) / two * 100) : 0;
-    box.innerHTML = (off >= 1 ? '<span class="was"><s>₪' + two + '</s><small>' + MEDIUMS[i] + ' Mediums, ₪' + two + '</small></span> ' : '') + '₪' + price[i];
+    box.innerHTML = (off >= 1 ? '<span class="was"><s>₪' + two + '</s></span> ' : '') + '₪' + price[i];
     if (off >= 1) { if (!tag) { tag = document.createElement('span'); tag.className = 'tag'; room.querySelector('.ph').appendChild(tag); } tag.textContent = off + '% off'; }
     else if (tag) tag.remove();
   });

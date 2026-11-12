@@ -91,6 +91,31 @@ def main(names):
         # one master, then the others edited from it, so everything stays in its place (rule 8, hero shot 9)
         master()
         return
+    if names == ["calm"]:
+        # Tzvi, 12 Nov 2026: one calm look for the cards (like Gremier's shop): one light warm ground for all three
+        sand = ("Change only the colour of the wall and the table to a light warm sand beige, soft and calm, the wall a gentle "
+                "gradient a little lighter at the top, the table a touch deeper.")
+        edit("calm-standard", sand, ["card-master.png"])
+        edit("calm-kiddush", sand, ["card-kiddush-turned-fixed.png"])
+        return
+    if names == ["turn"]:
+        # Tzvi, 12 Nov 2026: "i can tell that the xl was originally facing the other way ... something looks off"
+        edit("kiddush-turned", "Turn only the tub so it stands at exactly the same angle as the tub in image 2: lid facing the "
+             "camera, turned the same way, its side wall showing on the RIGHT as in image 2, sitting flat and steady on the "
+             "slate, lit by the same light from the left. Keep it this bigger Extra Large tub, the same height and width as "
+             "now, the same cholent inside and the same label words ('L.A. CHOLENT', 'By Rabbi Samuels', '1) Thaw, and empty "
+             "contents into a slow cooker pot', '2) Add 5 cups of water* (amount may vary due to pot)', '3) Mix well', '4) Slow "
+             "cook on low for about 20 hours', '5) Stir well before serving and enjoy'). Neat cling film, no bunched film.",
+             ["card-kiddush-final.png", "tub-std-crop.jpg"])
+        return
+    if names == ["noliner"]:
+        # Tzvi, 12 Nov 2026: "in the xl the cholent has a napkin taped on can you remove that"
+        edit("kiddush-noliner", "Remove only the folded white slow cooker liner taped on the front of the tub, and the tape. "
+             "Where it was, show the rest of the tub as it is: the clear plastic and the cholent inside, and the lower part "
+             "of the same black label with its last recipe lines in the same small white type ('4) Slow cook on low for "
+             "about 20 hours', '5) Stir well before serving and enjoy'). The tub, its size, its cling film and the top of "
+             "its label stay exactly as they are.", ["card-kiddush.png"])
+        return
     if names == ["edits"]:
         edit("large", "Change only the colour of the wall and the table to a deep olive green, the same soft gradient.", ["card-master.png"])
         edit("kiddush", "Change the colour of the wall and the table to a dark warm charcoal brown, the same soft gradient. "

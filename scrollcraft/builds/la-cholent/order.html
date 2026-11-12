@@ -54,7 +54,7 @@
             <button type="button" data-i="2" aria-pressed="false"><b>Kiddush</b><span>Feeds 16 to 24</span><em>&#8362;330</em><i class="tab">18% off</i></button>
           </div>
           <p class="pick"><span class="size-name" id="size-name">Large</span><span class="feeds" id="feeds">Feeds 8 to 12, about &#8362;15 a person</span></p>
-          <p class="price"><span class="now" id="price"><small>₪</small>180</span><span class="was" id="was"><s id="was-s">&#8362;200</s><b id="was-off">10% off</b><small id="was-note">2 Mediums, &#8362;200</small></span><span class="alt" id="alt">₪85 if you add your own meat, or keep it parve.</span></p>
+          <p class="price"><span class="now" id="price"><small>₪</small>180</span><span class="was" id="was"><s id="was-s">&#8362;200</s><b id="was-off">10% off</b></span><span class="alt" id="alt">₪85 if you add your own meat, or keep it parve.</span></p>
           <div class="menu">
             <div><span>Slow cooker liner</span><b>Free</b></div>
             <div><span>Extra meat</span><b>₪50 / lb</b></div>
@@ -144,7 +144,7 @@
   sizes.forEach(function (s, i) {
     if (!i) return;
     var two = MEDIUMS[i] * sizes[0].price, off = Math.round((two - s.price) / two * 100);
-    if (off >= 1) s.deal = { was: two, off: off + '% off', note: MEDIUMS[i] + ' Mediums, ₪' + two };
+    if (off >= 1) s.deal = { was: two, off: off + '% off' };
   });
   document.querySelectorAll('.size-pick button').forEach(function (b, i) {
     var t = b.querySelector('.tab'), d = sizes[i] && sizes[i].deal;
@@ -167,12 +167,12 @@
     document.getElementById('price').innerHTML = '<small>₪</small>' + s.price;
     document.getElementById('alt').textContent = s.alt;
     document.getElementById('was').style.opacity = s.deal ? '1' : '0';
-    if (s.deal) { document.getElementById('was-s').textContent = '₪' + s.deal.was; document.getElementById('was-off').textContent = s.deal.off; document.getElementById('was-note').textContent = s.deal.note; }
+    if (s.deal) { document.getElementById('was-s').textContent = '₪' + s.deal.was; document.getElementById('was-off').textContent = s.deal.off; }
     if (window.labelOrder) window.labelOrder(); else document.getElementById('order-label').textContent = 'Order Large, \u20aa180';
     buttons.forEach(function (b, n) { b.setAttribute('aria-pressed', n === cur ? 'true' : 'false'); });
     // the words that change ease in, so a size change is never one hard swap
     if (was !== cur && !reduce && document.getElementById('price').animate) {
-      ['size-name', 'feeds', 'price', 'alt', 'order-label'].forEach(function (id) {
+      ['size-name', 'feeds', 'price', 'was', 'alt', 'order-label'].forEach(function (id) {
         document.getElementById(id).animate([{ opacity: 0.6 }, { opacity: 1 }], { duration: 240, easing: "ease-out" });
       });
     }
