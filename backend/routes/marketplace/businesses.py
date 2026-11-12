@@ -176,6 +176,8 @@ class BusinessIn(BaseModel):
     # Their Instagram, Facebook, TikTok and website (utils/social_links), from the sign-up on.
     socials: Optional[dict[str, str]] = None
     hours: Optional[str] = Field(None, max_length=200)
+    # The street address as the business writes it, read from its website at sign-up (12 Nov 2026).
+    address: Optional[str] = Field(None, max_length=200)
     # "By appointment only" instead of opening hours (Tzvi, 17 Oct 2026).
     by_appointment: Optional[bool] = None
     # Ordering and booking close from candle lighting to havdalah (shabbat.py).
@@ -284,6 +286,8 @@ class BusinessPatch(BaseModel):
     socials: Optional[dict[str, str]] = None
     active: Optional[bool] = None
     hours: Optional[str] = Field(None, max_length=200)
+    # The street address as the business writes it, read from its website at sign-up (12 Nov 2026).
+    address: Optional[str] = Field(None, max_length=200)
     # "By appointment only" instead of opening hours (Tzvi, 17 Oct 2026).
     by_appointment: Optional[bool] = None
     # Ordering and booking close from candle lighting to havdalah (shabbat.py).
@@ -372,6 +376,7 @@ def _public(
         # "could not find where to change his hours" - he had found it; it
         # was showing him nothing.
         "hours": doc.get("hours"),
+        "address": doc.get("address"),
         "by_appointment": bool(doc.get("by_appointment")),
         "shabbat_closing": bool(doc.get("shabbat_closing")),
         "languages": doc.get("languages") or [],
@@ -597,6 +602,10 @@ async def create_business(payload: BusinessIn, user=Depends(verify_token)):
         doc["socials"] = clean_socials(payload.socials)
     if payload.logo_url:
         doc["logo_url"] = payload.logo_url
+    # Read from their website at sign-up (12 Nov 2026); the owner checks them on the form first.
+    for key in ("hours", "address", "cover_url"):
+        if (getattr(payload, key, None) or "").strip():
+            doc[key] = getattr(payload, key).strip()
     try:
         await db.businesses.insert_one(doc)
     except DuplicateKeyError:
@@ -829,7 +838,7 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
         update["by_appointment"] = bool(payload.by_appointment)
     if "shabbat_closing" in provided:
         update["shabbat_closing"] = bool(payload.shabbat_closing)
-    for key in ("hours", "delivery_note", "lead_time", "payment_note",
+    for key in ("hours", "address", "delivery_note", "lead_time", "payment_note",
                 "founded_year", "kosher_certification", "cover_url",
                 "license_number"):
         if key in provided:
@@ -1187,6 +1196,7 @@ async def public_business(
         # C6 — passed through as stored. Absent fields stay absent; the
         # page renders a row only where there is something to say.
         "hours": biz.get("hours"),
+        "address": biz.get("address"),
         "by_appointment": bool(biz.get("by_appointment")),
         "languages": biz.get("languages") or [],
         "shabbat": biz.get("shabbat"),

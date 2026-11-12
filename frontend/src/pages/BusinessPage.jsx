@@ -387,6 +387,7 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
     biz.serves_nationwide && { key: 'serving', label: t('pageV3.serving', 'Serving'), value: t('serviceArea.chipNationwide', 'All of Israel') },
     biz.by_appointment ? { key: 'hours', label: t('businessPage.hours', 'Hours'), value: t('businessPage.byAppointment', 'By appointment only') }
       : biz.hours && { key: 'hours', label: t('businessPage.hours', 'Hours'), value: biz.hours },
+    biz.address && { key: 'address', label: t('wizard.address', 'Address'), value: biz.address },
     biz.lead_time && { key: 'notice', label: t('businessPage.leadTime', 'Notice needed'), value: biz.lead_time },
     biz.delivery_note && { key: 'delivery', label: t('businessPage.delivery', 'Delivery'), value: biz.delivery_note },
   ].filter(Boolean);

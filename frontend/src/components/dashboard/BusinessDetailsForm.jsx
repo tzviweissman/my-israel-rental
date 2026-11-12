@@ -58,6 +58,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
     description: b.description || '',
     description_he: b.description_he || '',
     hours: b.hours || '',
+    address: b.address || '',
     by_appointment: !!b.by_appointment,
     shabbat_closing: !!b.shabbat_closing,
     // Kept as text while editing; split on save. A chip editor here means
@@ -158,6 +159,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
         // Empty string clears it, so a removed Hebrew text stops showing.
         description_he: form.description_he.trim(),
         hours: orNull(form.hours),
+        address: orNull(form.address),
         by_appointment: !!form.by_appointment,
         shabbat_closing: !!form.shabbat_closing,
         languages,
@@ -365,6 +367,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
             t('businesses.aboutPh', 'What you do, and what makes you worth choosing.'), { textarea: true })}
           {field('description_he', t('businesses.aboutHe', 'About your business, in Hebrew (optional)'),
             t('businesses.aboutHePh', 'Hebrew readers see this instead. Leave it empty and they see the text above.'), { textarea: true, dir: 'rtl' })}
+          {field('address', t('wizard.address', 'Address'), t('wizard.addressHint', 'Street, number, city'))}
           {/* "By appointment only" replaces opening hours on the page, in
               each visitor's language (Tzvi, 17 Oct 2026). */}
           <div>

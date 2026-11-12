@@ -623,6 +623,9 @@ const CreateGig = () => {
         area: data.area || f.area,
         whatsapp: data.whatsapp || f.whatsapp,
         contact_email: data.contact_email || f.contact_email,
+        // For the business, not the listing: shown on screen 1 to check, saved with the business.
+        biz_hours: (f.biz_hours || '').trim() ? f.biz_hours : (data.hours || ''),
+        biz_address: (f.biz_address || '').trim() ? f.biz_address : (data.address || ''),
       };
       if (type === 'store') {
         next.tiers = [];
@@ -654,7 +657,9 @@ const CreateGig = () => {
     setSocialsReading(true);
     try {
       const { data } = await axios.post(`${API}/marketplace/socials/read`, { links: socials }, { headers: { Authorization: `Bearer ${token}` } });
-      set({ socials: { ...socials, ...data.links } });
+      set({ socials: { ...socials, ...data.links }, site_pictures: data.pictures || null,
+        // Their logo and main picture are picked to start with, the photos are theirs to tap.
+        picked: [...(data.pictures?.logo && !bizLogo ? [data.pictures.logo] : []), ...(data.pictures?.cover ? [data.pictures.cover] : [])] });
       if (data.fields && Object.keys(data.fields).length > 1) {
         applyRead(data.fields);
         toast.success(t('wizard.socialsDone', 'Filled in from your accounts. Check each step and add your photos.'));
@@ -667,6 +672,33 @@ const CreateGig = () => {
     } catch (err) {
       toast.error(apiErrorMessage(err, t('wizard.socialsFailed', 'Could not read those. They are saved, so fill in the rest below.'), t), { duration: 8000 });
     } finally { setSocialsReading(false); }
+  };
+
+  const [picturesSaving, setPicturesSaving] = useState(false);
+  const togglePicked = (url) => set({ picked: (form.picked || []).includes(url) ? form.picked.filter((u) => u !== url) : [...(form.picked || []), url] });
+  const savePictures = async () => {
+    const pics = form.site_pictures || {};
+    const chosen = (form.picked || []).slice(0, 13);
+    if (!chosen.length) return;
+    setPicturesSaving(true);
+    try {
+      const { data } = await axios.post(`${API}/marketplace/socials/pictures`, { urls: chosen }, { headers: { Authorization: `Bearer ${token}` } });
+      const ours = Object.fromEntries(chosen.map((u, i) => [u, (data.urls || [])[i]]).filter(([, v]) => v));
+      if (pics.logo && ours[pics.logo]) setBizLogo((cur) => cur || ours[pics.logo]);
+      const photos = chosen.filter((u) => u !== pics.logo && ours[u]).map((u) => ours[u]);
+      setForm((f) => ({
+        ...f,
+        biz_cover: pics.cover && ours[pics.cover] ? ours[pics.cover] : f.biz_cover,
+        gallery: [...(f.gallery || []), ...photos.filter((u) => !(f.gallery || []).includes(u))],
+        site_pictures: null,
+        picked: [],
+      }));
+      const n = Object.keys(ours).length;
+      if (n) toast.success(t('wizard.picturesDone', { defaultValue: 'Added {{n}} pictures from your site.', n }));
+      else toast.error(t('wizard.picturesFailed', 'Could not copy those pictures. Add your own photos below.'));
+    } catch (err) {
+      toast.error(apiErrorMessage(err, t('wizard.picturesFailed', 'Could not copy those pictures. Add your own photos below.'), t));
+    } finally { setPicturesSaving(false); }
   };
 
   // ---- Find your business on Google ------------------------------------------
@@ -952,11 +984,17 @@ const CreateGig = () => {
         const name = [bizName.trim(), (user?.name || '').trim(), 'My business'].find((n) => n.length >= 2);
         const { data: biz } = await axios.post(`${API}/marketplace/businesses`, {
           name, logo_url: bizLogo || null, socials: socialsOut,
+          hours: (form.biz_hours || '').trim() || null, address: (form.biz_address || '').trim() || null,
+          cover_url: form.biz_cover || null,
         }, auth).catch(() => ({ data: null }));
         if (biz?.id) payload.business_id = biz.id;
-      } else if (destination && ((bizLogo && !destination.logo_url) || Object.keys(socialsOut).length)) {
+      } else if (destination && ((bizLogo && !destination.logo_url) || Object.keys(socialsOut).length
+        || (form.biz_hours && !destination.hours) || (form.biz_address && !destination.address) || (form.biz_cover && !destination.cover_url))) {
         await axios.patch(`${API}/marketplace/businesses/${destination.id}`, {
           ...(bizLogo && !destination.logo_url ? { logo_url: bizLogo } : {}),
+          ...((form.biz_hours || '').trim() && !destination.hours ? { hours: form.biz_hours.trim() } : {}),
+          ...((form.biz_address || '').trim() && !destination.address ? { address: form.biz_address.trim() } : {}),
+          ...(form.biz_cover && !destination.cover_url ? { cover_url: form.biz_cover } : {}),
           ...(Object.keys(socialsOut).length ? { socials: { ...(destination.socials || {}), ...socialsOut } } : {}),
         }, auth).catch(() => {});
       }
@@ -1412,6 +1450,56 @@ const CreateGig = () => {
                 {socialsReading ? t('wizard.socialsReading', 'Reading your accounts…') : t('wizard.socialsRead', 'Fill in from these')}
               </button>
             </div>
+            {((form.biz_hours || form.biz_address) || (form.site_pictures && (form.site_pictures.logo || form.site_pictures.cover || (form.site_pictures.photos || []).length))) && (
+              <div className="mt-4 pt-4 border-t border-[var(--brand-border)] space-y-3" data-testid="wizard-site-found">
+                <p className="text-sm font-semibold text-[var(--ink)]">{t('wizard.siteFound', 'Also found. Check it, change anything:')}</p>
+                {[['biz_hours', t('businessPage.hours', 'Hours'), 'Sun to Thu 9:00 to 18:00, Fri 9:00 to 13:00'],
+                  ['biz_address', t('wizard.address', 'Address'), t('wizard.addressHint', 'Street, number, city')]].map(([k, label, ph]) => (
+                  (form[k] || '').length > 0 || form[k] === '' ? (
+                    <label key={k} className="block text-xs font-semibold text-gray-700">
+                      {label}
+                      <input value={form[k] || ''} onChange={(e) => set({ [k]: e.target.value })} placeholder={ph} dir="auto" maxLength={200}
+                        className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm font-normal focus:outline-none focus:border-[var(--brand-primary)]"
+                        data-testid={`wizard-${k}`} />
+                    </label>
+                  ) : null
+                ))}
+                {form.site_pictures && (() => {
+                  const pics = form.site_pictures;
+                  const all = [...(pics.logo ? [[pics.logo, t('wizard.picLogo', 'Logo')]] : []), ...(pics.cover ? [[pics.cover, t('wizard.picCover', 'Main picture')]] : []),
+                    ...(pics.photos || []).map((u) => [u, ''])];
+                  if (!all.length) return null;
+                  const n = (form.picked || []).length;
+                  return (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-700 mb-1.5">{t('wizard.picPick', 'Pictures from your site: tap the ones to keep')}</p>
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" role="group" aria-label={t('wizard.picPick', 'Pictures from your site: tap the ones to keep')}>
+                        {all.map(([u, label]) => {
+                          const on = (form.picked || []).includes(u);
+                          return (
+                            <button key={u} type="button" onClick={() => togglePicked(u)} aria-pressed={on}
+                              className="relative aspect-square rounded-lg overflow-hidden border-2 bg-gray-300"
+                              style={{ borderColor: on ? 'var(--brand-primary, #167AB8)' : 'var(--brand-border, #E3E3E3)' }} data-testid="wizard-site-picture">
+                              <img src={u} alt={label} loading="lazy" referrerPolicy="no-referrer" className={`w-full h-full ${label ? 'object-contain p-1' : 'object-cover'}`}
+                                onError={(e) => { e.currentTarget.closest('button').style.display = 'none'; }} />
+                              {label && <span className="absolute bottom-0 inset-x-0 bg-white/90 text-[10px] font-semibold text-center text-[var(--ink)]">{label}</span>}
+                              {on && <span className="absolute top-1 end-1 h-5 w-5 rounded-full text-white text-xs flex items-center justify-center" style={{ background: 'var(--brand-primary, #167AB8)' }} aria-hidden="true">✓</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="flex justify-end mt-2">
+                        <button type="button" onClick={savePictures} disabled={!n || picturesSaving}
+                          className="btn-primary px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-1.5" data-testid="wizard-site-pictures-save">
+                          {picturesSaving && <Loader2 size={14} className="animate-spin" />}
+                          {t('wizard.picKeep', { defaultValue: 'Keep {{n}} pictures', n })}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
         )}
 
