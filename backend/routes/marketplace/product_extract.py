@@ -545,6 +545,7 @@ _PAGE_BYTES = 1_500_000
 async def _public_text(url: str) -> str:
     """The page's title, description and (for a website) its readable words. Every hop is checked to be a
     public host before it is fetched; nothing on our own network can be reached through this."""
+    import asyncio
     import html as html_mod
 
     import httpx
@@ -553,18 +554,25 @@ async def _public_text(url: str) -> str:
     headers = {"User-Agent": "Mozilla/5.0 (compatible; MyIsraelRentalBot/1.0)", "Accept-Language": "he,en;q=0.8"}
     async with httpx.AsyncClient(timeout=10, follow_redirects=False, headers=headers) as http:
         for _ in range(4):
-            if not _is_public_ical_url(url):
+            # The check resolves the host with a blocking DNS lookup: off the event loop, or one slow domain stalls every request.
+            if not await asyncio.to_thread(_is_public_ical_url, url):
                 return ""
-            r = await http.get(url)
-            if r.is_redirect and r.headers.get("location"):
-                url = str(r.url.join(r.headers["location"]))
-                continue
+            async with http.stream("GET", url) as r:
+                if r.is_redirect and r.headers.get("location"):
+                    url = str(r.url.join(r.headers["location"]))
+                    continue
+                if r.status_code >= 400 or "html" not in r.headers.get("content-type", ""):
+                    return ""
+                # At most _PAGE_BYTES is read: a huge or endless page must not fill the server's memory.
+                buf = bytearray()
+                async for chunk in r.aiter_bytes():
+                    buf += chunk
+                    if len(buf) >= _PAGE_BYTES:
+                        break
+                page = bytes(buf[:_PAGE_BYTES]).decode(r.encoding or "utf-8", errors="replace")
             break
         else:
             return ""
-    if r.status_code >= 400 or "html" not in r.headers.get("content-type", ""):
-        return ""
-    page = r.text[:_PAGE_BYTES]
 
     def meta(name: str) -> str:
         m = re.search(r'<meta[^>]+(?:property|name)=["\']' + re.escape(name) + r'["\'][^>]*content=["\']([^"\']*)', page, re.I) \
