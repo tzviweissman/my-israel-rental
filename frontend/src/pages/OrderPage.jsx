@@ -49,6 +49,7 @@ import PageMeta from '../components/PageMeta';
 import { phoneError } from '../utils/phoneValidation';
 import { pastCutoff } from '../utils/orderCutoffs';
 import { money } from '../utils/currency';
+import KeepExploring from '../components/orders/KeepExploring';
 import DateField, { toISODate } from '../components/common/DateField';
 import CustomFieldInputs from '../components/forms/CustomFieldInputs';
 import DiscountCodeInput, { discountOn } from '../components/forms/DiscountCodeInput';
@@ -359,6 +360,7 @@ export default function OrderPage() {
           )}
           {email.trim() && <p className="text-xs mt-3" style={{ color: 'var(--brand-muted)' }}>{t('order.emailSent', 'We emailed the details to {{email}}.', { email: email.trim() })}</p>}
         </div>
+        <KeepExploring token={done.track_token} businessName={bizName} currency={done.currency || currency} />
       </div>
     );
   }

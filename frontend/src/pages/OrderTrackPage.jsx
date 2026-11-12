@@ -25,6 +25,7 @@ import ReferralCard from '../components/forms/ReferralCard';
 import WhatsAppAboutThis from '../components/marketplace/WhatsAppAboutThis';
 import OrderSteps from '../components/orders/OrderSteps';
 import OrderJourney from '../components/orders/OrderJourney';
+import KeepExploring from '../components/orders/KeepExploring';
 
 const REFRESH_MS = 30_000;
 
@@ -222,6 +223,7 @@ export default function OrderTrackPage() {
           </p>
         )}
         <ReferralCard kind="order" token={token} />
+        <KeepExploring token={token} businessName={bizName} currency={data.currency} />
         <p className="text-[11px] mt-6 text-center" style={{ color: 'var(--brand-muted)' }}>
           {t('orders.track.footer', 'Questions about the order? Contact the store directly.')}
         </p>

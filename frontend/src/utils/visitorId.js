@@ -64,6 +64,10 @@ export function getVisitorId() {
 // The designed sites' script in frontend/server.js does the same with the same key.
 export function visitSource() {
   try {
+    // A ?src= on the address wins over what the visit began with: a "Keep exploring" link under an order
+    // (?src=orders) is clicked in the same tab the order was placed in, which already said "direct".
+    const fromLink = new URLSearchParams(window.location.search).get('src');
+    if (fromLink) window.sessionStorage.setItem('mir_src', fromLink);
     let s = window.sessionStorage.getItem('mir_src');
     if (!s) {
       const ref = document.referrer ? new URL(document.referrer).hostname : '';

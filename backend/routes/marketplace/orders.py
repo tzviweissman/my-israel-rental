@@ -1166,7 +1166,7 @@ def _subject(s: str) -> str:
 
 
 async def _email(to: Optional[str], subject: str, inner_html: str, *, tag: str, button: tuple[str, str] | None = None,
-                 lang: str = "en", log: Optional[dict[str, Any]] = None) -> bool:
+                 lang: str = "en", log: Optional[dict[str, Any]] = None, after_button: str = "") -> bool:
     """Fire-and-forget through the site's Postmark wrapper. Missing address
     or unconfigured mail is a no-op, never an error on the request.
     `lang="he"` sets the email right to left. `log` ({business_id, who, kind,
@@ -1190,7 +1190,7 @@ async def _email(to: Optional[str], subject: str, inner_html: str, *, tag: str, 
         href = button[1] if button else ""
         if href.startswith("/"):
             href = _frontend_url() + href
-        html = inner_html + (_button(button[0], href) if button else "")
+        html = inner_html + (_button(button[0], href) if button else "") + after_button   # after_button: trusted markup, as inner_html
         log_id = str(uuid.uuid4()) if log else None
         ok = await send_email(to, subject, _wrap(html, preheader=_esc(subject), lang=lang), tag=tag,
                               metadata={"log_id": log_id} if log_id else None)
