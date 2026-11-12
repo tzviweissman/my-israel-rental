@@ -268,13 +268,13 @@ async def site_demand(response: Response) -> dict:
 # ---------------------------------------------------------------------------
 # The work the site did for businesses lately (Tzvi, 12 Nov 2026, from polsia.com's running "Replying to customer
 # emails..." line): the join page shows it one line at a time. Real rows only, from the texts and emails the site
-# sent (sms_log, email_log), its automatic "we got your message" replies (away_replies) and the replies it drafted
+# sent (sms_log, email_log) in the last WORK_DAYS days, its automatic "we got your message" replies (away_replies) and the replies it drafted
 # for a customer left waiting (lead_nudges). Nothing that names anyone: the kind of message, text or email, the
 # business's area and when. Fewer than MIN_SHOWN rows in the window and the line is not shown at all.
 # ---------------------------------------------------------------------------
 
 _WORK_CACHE: dict = {"at": 0.0, "data": None}
-WORK_DAYS = 14
+WORK_DAYS = 30
 WORK_SHOWN = 12
 
 
