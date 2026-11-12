@@ -1140,6 +1140,14 @@ films at their own brightness, a shade only behind words where contrast needs it
 section, joined by a clean edge (3z.5). The h1 or the line under it uses the words a customer searches for (3z.6).
 Card pictures without owner photos are made as one set from a real site's grid (3z.7).
 
+## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+
+Full text: reference/full-rules.md section 3ab; notes in docs/inspo/videos-2026-11-12-landing-pages. Every h1 to h3
+says what the visitor gets, never only a section label like "How it works" or "Our services" (3ab.1,
+check-headings.mjs). Reviews stacked and open on a phone, never a swiping row, ribbon or fold-out (3ab.2,
+check-reviews-open.mjs). Each review shows the first name and where it was left, with a link (3ab.3). A real rating
+shows score, count and source on the first screen (3ab.4, how 3c.2 is done for a rating).
+
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 
 Full text: `reference/design-rules.md`. The rules both builders share are

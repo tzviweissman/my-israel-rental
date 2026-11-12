@@ -111,6 +111,7 @@ R3h.17 | Words and film take turns: a giant name sits on plain ground, the film 
 R3x.5 | A following light is used only for a dark-world business, has an off button, sweeps once by itself on a phone and with reduced motion, and never dims the words or main button | 3x.5 | LOOK on laptop and phone; n/a if not used
 R3z.2 | The first screen has three layers: a real photo, the film or a soft shape of the business's colour at the back, the words and any card in the middle, the main button in front with the only soft shadow | 3z.2 | LOOK: same screenshots
 R3z.6 | The h1 or the line under it holds the words a customer searches for this business and its place, the search words named in its BLUEPRINT.md plan line | 3z.6 | LOOK: read the h1 against BLUEPRINT.md
+R3ab.4 | A real rating sits on the first screen beside the headline or main button with its score, count and source; with no real rating nothing stands in its place | 3ab.4, 3c.2 | LOOK: first screen at laptop and phone; n/a with no real rating
 
 ## 3. Sections and worlds
 
@@ -163,6 +164,9 @@ R3x.4 | With two or more sizes or packages, each is a card with its picture, pri
 R3x.11 | A product to turn passed the suitability check, was made from a grey-ground source of the owner's photo as two candidates reviewed from four angles, has two or three light buttons named for the business, and keeps touch-action pan-y on a phone | 3x.11 | LOOK: the review sheet and a phone swipe; n/a if not used
 R3z.1 | One card the visitor would use (open slots, order card, price from, facts or a review) hangs a third to a half over the edge of the next section on the home page, the only thing that crosses an edge; on a phone it is whole and readable | 3z.1 | LOOK: laptop and phone screenshots of the edge
 R3z.5 | A site on a dark ground has one light section (questions, prices or how ordering works) joined by a clean edge, not a fade | 3z.5 | LOOK; n/a on a light site
+R3ab.1 | Every h1 to h3 says what the visitor gets on its own, never only a section label ("How it works", "Our services", "Why choose us" and their Hebrew); "Questions" and contact headings allowed | 3ab.1 | script: `node scripts/check-headings.mjs <urls>`
+R3ab.2 | Real reviews are stacked and fully shown on a phone, never in a swiping row, moving ribbon or fold-out | 3ab.2 | script: `node scripts/check-reviews-open.mjs <urls>`; n/a with no reviews
+R3ab.3 | Each review shows the first name the owner may show and where it was left (with a link when the source has one), a photo only with permission; a press mention is the outlet's own sentence, never a bare logo | 3ab.3 | LOOK: read every review; n/a with no reviews
 
 ## 4. Photos and media
 
