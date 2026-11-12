@@ -23,7 +23,8 @@ import { useHandBuilt } from '../utils/handBuiltPages';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { GiftCardPanel } from '../components/marketplace/GiftCardForm';
-import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, Zap, CreditCard, Globe, Users, Gift } from 'lucide-react';
+import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, Zap, CreditCard, Globe, Users, Gift, ArrowLeft } from 'lucide-react';
+import { useReturnDestination } from '../hooks/useBackNavigation';
 import BusyTimes from '../components/business/BusyTimes';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -69,11 +70,14 @@ import useCoverScrim from '../hooks/useCoverScrim';
  * @param {boolean} preview  true when this is being shown inside the editor
  *   rather than being visited.
  */
+const BACK_PREFIXES = ['/businesses', '/services', '/stays'];
+
 const BusinessPage = ({ business: injected = null, preview = false, pageSlug: previewPage = null, onPagePick = null }) => {
   const { slug, pageSlug: routePage } = useParams();
   // One of the business's extra pages (backend ExtraPage), or the main page.
   const extraSlug = injected ? previewPage : routePage;
   const navigate = useNavigate();
+  const backTo = useReturnDestination(BACK_PREFIXES, '/businesses');
   const { t, i18n } = useTranslation();
   const { token, user } = useContext(AuthContext);
   const [fetched, setFetched] = useState(null);
@@ -448,6 +452,18 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
           // by default - see utils/businessHost.js.
           canonicalUrl={businessCanonicalUrl(biz.slug, biz.id)}
         />
+      )}
+
+      {/* Back to the list the visitor came from (Tzvi, 12 Nov 2026). Not in the editor, and not on the
+          business's own address, where the page is their site, not one of ours. */}
+      {!preview && !currentBusinessHostSlug() && (
+        <div className="px-4 pt-4">
+          <button type="button" onClick={() => navigate(backTo, { state: { restoreScroll: true } })}
+            className={`${columnWidth} mx-auto text-sm text-gray-600 flex items-center gap-1 hover:text-[var(--brand-primary)]`}
+            data-testid="business-back">
+            <ArrowLeft size={14} className="rtl:rotate-180" /> {t('gigDetail.backToServices', 'Back to businesses')}
+          </button>
+        </div>
       )}
 
       {/* A draft preview link: say so, so nobody takes it for the live page. */}

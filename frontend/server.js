@@ -542,6 +542,8 @@ async function sendHandBuilt(req, res, slug, file) {
     const json = JSON.stringify(data.products).replace(/</g, '\\u003c');
     html = html.replace(/<\/body>/i, `<script id="mir-live-products" type="application/json">${json}</script><script src="/pages/mir-catalog.js?v=${EDITOR_STAMP}"></script></body>`);
   }
+  // "Back to businesses" for a visitor who came from our own pages (Tzvi, 12 Nov 2026); never in the editor.
+  if (!editor) html = html.replace(/<\/body>/i, `<script src="/pages/mir-back.js?v=${EDITOR_STAMP}"></script></body>`);
   // A visit, counted for the owner's sales summary (backend page_edits.py designed_site_visit): the browser's
   // visitor id, so one visitor counts once a day; never in the editor or the owner's "View live" (?fresh).
   if (!editor && !/[?&]fresh(?:=|&|$)/.test(req.url || '')) {
