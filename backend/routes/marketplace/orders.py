@@ -2430,7 +2430,7 @@ def _areas_out(biz: dict[str, Any]) -> list[dict[str, Any]]:
 
 @router.get("/order-form/{gig_id}")
 async def order_form(gig_id: str):
-    from .order_texts import texts_on
+    from .order_texts import hears_without_whatsapp
     from .discounts import has_codes
     gig, biz = await _store_for_ordering(gig_id)
     st = biz.get("order_settings") or {}
@@ -2441,7 +2441,7 @@ async def order_form(gig_id: str):
                 # only; the number stays behind the counting redirect).
                 # A business with texts on hears about the order that way, so
                 # the customer is not also sent to WhatsApp.
-                "whatsapp": not texts_on(biz) and await _order_has_whatsapp({"gig_id": gig["_id"]})},
+                "whatsapp": not hears_without_whatsapp(biz) and await _order_has_whatsapp({"gig_id": gig["_id"]})},
         "business": {
             "id": biz["_id"], "name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url"), "slug": biz.get("slug"),
             "birthday_on": bool((biz.get("birthday_settings") or {}).get("on")),
@@ -2508,8 +2508,11 @@ async def _full(biz: dict[str, Any], today: str, days_ahead: int = 21) -> dict[s
 
 
 @router.post("/order-form/{gig_id}/orders")
-async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Request, viewer=Depends(optional_user)):
-    check_rate(request, bucket="orders_website", limit=20, window_seconds=600)
+async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Request, viewer=Depends(optional_user), dry_run: bool = False):
+    # dry_run=true: a practice order (scripts/check-order-data.mjs). Every check below runs and the total that would
+    # be saved comes back, but nothing is saved, no stock or code is used and nobody is told (Tzvi, 12 Nov 2026: "these
+    # issues shouldnt happen in the first place").
+    check_rate(request, bucket="orders_website_dry" if dry_run else "orders_website", limit=400 if dry_run else 20, window_seconds=600)
     gig, biz = await _store_for_ordering(gig_id)
     st = biz.get("order_settings") or {}
     now = datetime.now(_IL_TZ)
@@ -2629,7 +2632,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     # back if the discount code is then refused (stock.py).
     from .stock import OutOfStock, _put_back, take
     try:
-        stock_taken = await take(gig["_id"], lines, products)
+        stock_taken = [] if dry_run else await take(gig["_id"], lines, products)
     except OutOfStock as e:
         raise HTTPException(status_code=400, detail=(f"{e.name} is sold out" if not e.left else f"Only {e.left} left of {e.name}")) from e
 
@@ -2644,7 +2647,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         except CodeRefused as e:
             await _put_back(gig["_id"], stock_taken)
             raise HTTPException(status_code=400, detail=say(str(e), payload.lang)) from e
-        if not await redeem(code_doc, off, payload.customer_phone):
+        if not dry_run and not await redeem(code_doc, off, payload.customer_phone):
             await _put_back(gig["_id"], stock_taken)
             raise HTTPException(status_code=400, detail="This code has been used up")
         discount = {"code": code_doc["code"], "amount": off}
@@ -2670,6 +2673,10 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         notes = (notes + "\n" if notes else "") + f"Discount {discount['code']}: -{sym}{discount['amount']:g}"
     if to_confirm:
         notes = (notes + "\n" if notes else "") + "Priced from: confirm the final price on this order"
+
+    if dry_run:
+        return {"dry_run": True, "lines": lines, "subtotal": round(subtotal, 2) if lines else None, "delivery_fee": fee,
+                "discount": discount, "total": total, "currency": currency, "fulfilment": payload.fulfilment, "address": address}
 
     stamp = _now_iso()
     doc = {

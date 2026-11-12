@@ -686,8 +686,8 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
     gig["birthday_on"] = bool(((business or {}).get("birthday_settings") or {}).get("on"))
     # Yes or no only. On, the booking form does not send the customer on to
     # WhatsApp afterwards: the business hears by text.
-    from .order_texts import texts_on
-    gig["texts_on"] = texts_on(business or {})
+    from .order_texts import hears_without_whatsapp
+    gig["texts_on"] = hears_without_whatsapp(business or {})
     gig["provider"] = {
         "user_id": gig["provider_user_id"],
         "name": _public_provider_name(business, user),
@@ -1282,7 +1282,7 @@ async def _email_guest_status(booking: dict, event: str, gig_title: str | None =
 
 
 @router.post("/gigs/{gig_id}/book")
-async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depends(optional_user)):
+async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depends(optional_user), dry_run: bool = False):
     """Signed in or not. Nobody has to sign in to book (Tzvi, 7 Oct 2026):
     a guest gives a name and an email or a phone, and the reply comes back
     on a status link (GET /bookings/track/{token}) instead of a dashboard."""
@@ -1295,7 +1295,8 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
     if not user:
         # A guest request holds a slot, so it is limited per address and
         # must say who and how to reach them.
-        check_rate(request, bucket="guest-booking", limit=6, window_seconds=3600)
+        # dry_run=true: a practice booking (scripts/check-order-data.mjs), nothing held or saved.
+        check_rate(request, bucket="guest-booking-dry" if dry_run else "guest-booking", limit=400 if dry_run else 6, window_seconds=3600)
         if len(guest_name) < 2:
             raise HTTPException(status_code=400, detail="Please add your name")
         if not (email or phone):
@@ -1375,6 +1376,10 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
         price = payload.amount or None   # 0: this choice is priced later, as on Michal Yodaiken's page
     currency = tier.get("currency") or "ILS"
     discount = None
+    if dry_run:
+        # What the dashboard would store, beside what the listing says, so a page price that differs is caught.
+        return {"dry_run": True, "tier_name": payload.tier_name, "tier_found": bool(tier), "tier_price": float(tier["price"]) if tier.get("price") else None,
+                "price": price, "currency": currency, "duration_minutes": duration}
     if payload.discount_code and payload.discount_code.strip():
         from .discounts import CodeRefused, say, use_code
         if not phone:

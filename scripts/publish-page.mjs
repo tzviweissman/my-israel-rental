@@ -146,7 +146,12 @@ const CHECK_ONLY = process.argv.includes('--check');
     // a button's words stay on one line and repeats match (Tzvi, 10 Nov 2026, rules 3s.29)
     ['check-same-button.mjs', 'has a button that breaks onto two lines', 'R3s.29'],
     // headings say the benefit, reviews stay open on a phone (Tzvi, 12 Nov 2026, rules 3ab)
-    ['check-headings.mjs', 'has a heading that is only a section label', 'R3ab.1'], ['check-reviews-open.mjs', 'hides its reviews on a phone', 'R3ab.2']]) {
+    ['check-headings.mjs', 'has a heading that is only a section label', 'R3ab.1'], ['check-reviews-open.mjs', 'hides its reviews on a phone', 'R3ab.2'],
+    // Correctness, so no rule date: they run on every site, however old (Tzvi, 12 Nov 2026: "these issues shouldnt
+    // happen in the first place"). Fields that zoom or overlap on an iPhone; an order the dashboard would refuse or
+    // save other than the customer saw (practice orders on the live server, nothing saved).
+    ['check-form-fields.mjs', 'has form fields that overlap or make an iPhone zoom in'],
+    ['check-order-data.mjs', 'sends orders the dashboard would refuse or save differently from what the customer saw']]) {
     if (rule && newer.has(rule)) { console.log(`${script}: not run, rule ${rule} was added after this site was made`); continue; }
     let r = await run(script);
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }
