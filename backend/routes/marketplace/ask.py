@@ -148,7 +148,7 @@ async def forward(slug_or_id: str, body: ForwardIn, request: Request):
     now = datetime.now(UTC).isoformat()
     lead_id = str(uuid.uuid4())
     await db.leads.insert_one({"_id": lead_id, "business_id": biz["_id"], "name": body.name.strip(),
-                               "phone": None if is_email else contact, "note": note[:300], "stage": "new",
+                               "phone": None if is_email else contact, "email": contact if is_email else None, "note": note[:300], "stage": "new",
                                "by": "ask", "created_at": now, "updated_at": now})
     if biz.get("owner_user_id"):
         await db.notifications.insert_one({"id": str(uuid.uuid4()), "user_id": biz["owner_user_id"], "type": "lead",

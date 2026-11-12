@@ -17,18 +17,122 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Loader2, MessageCircle, Calculator, PhoneCall, Plus, Trash2, X, Mail, Sparkles, Send } from 'lucide-react';
+import { Loader2, MessageCircle, Calculator, PhoneCall, Plus, Trash2, X, Mail, Sparkles, Send, Copy, Search } from 'lucide-react';
 import { money } from '../../utils/currency';
+import { buildWhatsAppLinkWithMessage } from '../../utils/whatsappLink';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 const SOURCE_ICON = { chat: MessageCircle, quote: Calculator, manual: PhoneCall, email: Mail };
+const btn = 'px-3 min-h-[36px] inline-flex items-center gap-1 rounded-lg border text-xs font-semibold';
+
+/**
+ * Writes a personal message for any lead, or for a post on the Requests board
+ * (backend leads.py draft_message, POST .../leads/write): follow up on a price,
+ * check in, win back, introduce the business, in English or Hebrew. The owner
+ * edits it, then copies it or opens it in email or WhatsApp. Nothing is sent
+ * by us. A new chat or email card has its own reply-and-send box (ReplyBox).
+ * Modelled on the AI first-line writers in Lemlist and Clay (Tzvi, 12 Nov 2026).
+ */
+function MessageWriter({ API, auth, businessId, target, onClose }) {
+  const { t, i18n } = useTranslation();
+  const GOALS = {
+    answer: t('leads.goal.answer', 'Answer their enquiry'),
+    follow_up: t('leads.goal.follow_up', 'Follow up on the price'),
+    check_in: t('leads.goal.check_in', 'Check in, it went quiet'),
+    win_back: t('leads.goal.win_back', 'Win them back'),
+    introduce: t('leads.goal.introduce', 'Introduce your business'),
+  };
+  const [goal, setGoal] = useState(target.goal);
+  const [lang, setLang] = useState(String(i18n.language || '').startsWith('he') ? 'he' : 'en');
+  const [extra, setExtra] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState(null);
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  const write = async () => {
+    setBusy(true);
+    try {
+      const { data } = await axios.post(`${API}/marketplace/businesses/${businessId}/leads/write`,
+        { key: target.key || null, request_id: target.requestId || null, goal, lang, extra }, auth);
+      setMsg(data);
+    } catch (err) { toast.error(err?.response?.data?.detail || t('leads.writeFailed', 'Could not write it right now. Try again.')); }
+    setBusy(false);
+  };
+  const text = msg ? msg.body : '';
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(text); toast.success(t('leads.copied', 'Copied. Paste it and send.')); }
+    catch { toast.error(t('leads.copyFailed', 'Could not copy. Select the text and copy it.')); }
+  };
+  const wa = msg && target.phone ? buildWhatsAppLinkWithMessage(target.phone, text) : null;
+  const mail = msg && target.email ? `mailto:${encodeURIComponent(target.email)}?subject=${encodeURIComponent(msg.subject || '')}&body=${encodeURIComponent(text)}` : null;
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center p-4" style={{ background: 'rgba(17,24,39,.45)' }} onClick={onClose} role="presentation">
+      <div role="dialog" aria-modal="true" aria-labelledby="lead-writer-h" onClick={(e) => e.stopPropagation()}
+           className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-4 sm:p-5" style={{ boxShadow: '0 20px 50px rgba(0,0,0,.2)' }} data-testid="lead-writer">
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="min-w-0">
+            <h3 id="lead-writer-h" className="text-base font-semibold" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>
+              {t('leads.writeTitle', 'A personal message')}
+            </h3>
+            <p className="text-xs truncate" style={{ color: 'var(--brand-muted)' }} dir="auto">{target.label}</p>
+          </div>
+          <button type="button" onClick={onClose} className="grid place-content-center w-11 h-11 -m-2" aria-label={t('customers.close', 'Close')}><X size={16} /></button>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+          <label className="text-sm" style={{ color: 'var(--ink)' }}>{t('leads.goalLabel', 'What it should do')}
+            <select value={goal} onChange={(e) => setGoal(e.target.value)} className={`${field} mt-1`} style={fieldStyle} data-testid="lead-writer-goal">
+              {Object.entries(GOALS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </select>
+          </label>
+          <label className="text-sm" style={{ color: 'var(--ink)' }}>{t('leads.langLabel', 'Language')}
+            <select value={lang} onChange={(e) => setLang(e.target.value)} className={`${field} mt-1`} style={fieldStyle}>
+              <option value="en">English</option><option value="he">עברית</option>
+            </select>
+          </label>
+        </div>
+        <label className="block text-sm mt-2" style={{ color: 'var(--ink)' }}>{t('leads.extraLabel', 'Anything to add? (optional)')}
+          <input value={extra} maxLength={300} onChange={(e) => setExtra(e.target.value)} className={`${field} mt-1`} style={fieldStyle} dir="auto"
+                 placeholder={t('leads.extraPh', 'Free on Thursday morning')} />
+        </label>
+        <button type="button" onClick={write} disabled={busy} className="mt-3 w-full inline-flex justify-center items-center gap-1.5 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-60"
+                style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="lead-writer-go">
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+          {msg ? t('leads.writeAgain', 'Write another') : t('leads.write', 'Write it for me')}
+        </button>
+        {msg && (
+          <div className="mt-3 grid gap-2">
+            {target.email && (
+              <label className="text-sm" style={{ color: 'var(--ink)' }}>{t('leads.subject', 'Email subject')}
+                <input value={msg.subject} onChange={(e) => setMsg({ ...msg, subject: e.target.value })} className={`${field} mt-1`} style={fieldStyle} dir="auto" />
+              </label>
+            )}
+            <textarea value={msg.body} onChange={(e) => setMsg({ ...msg, body: e.target.value })} rows={8} dir="auto" aria-label={t('leads.message', 'Message')}
+                      className="w-full px-3 py-2 rounded-lg border text-sm bg-white leading-relaxed" style={fieldStyle} data-testid="lead-writer-body" />
+            <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('leads.checkIt', 'Read it and change anything before you send. We never send it for you.')}</p>
+            <div className="flex flex-wrap gap-1.5">
+              <button type="button" onClick={copy} className={btn} style={fieldStyle} data-testid="lead-writer-copy"><Copy size={13} /> {t('leads.copy', 'Copy')}</button>
+              {mail && <a href={mail} className={btn} style={fieldStyle}><Mail size={13} /> {t('leads.email', 'Open in email')}</a>}
+              {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className={btn} style={fieldStyle}><MessageCircle size={13} /> WhatsApp</a>}
+              {target.link && <Link to={target.link} className={btn} style={fieldStyle}>{target.requestId ? t('leads.replyOnPost', 'Reply on their post') : t('leads.openChat', 'Open')}</Link>}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function LeadsBoard({ API, auth, businessId, refreshKey }) {
   const { t, i18n } = useTranslation();
   const [data, setData] = useState(null);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ name: '', phone: '', note: '' });
+  const [form, setForm] = useState({ name: '', phone: '', email: '', note: '' });
+  const [writing, setWriting] = useState(null);
+  const closeWriter = useCallback(() => setWriting(null), []);
   const base = `${API}/marketplace/businesses/${businessId}/leads`;
   const load = useCallback(() => axios.get(base, auth).then(({ data: d }) => setData(d)).catch(() => setData(false)), [base, auth]);
   useEffect(() => { setData(null); load(); }, [load]);
@@ -42,6 +146,13 @@ export default function LeadsBoard({ API, auth, businessId, refreshKey }) {
     new: t('leads.hint.new', 'Waiting for your answer'), replied: t('leads.hint.replied', 'You answered'),
     quoted: t('leads.hint.quoted', 'Waiting for the customer'), won: t('leads.hint.won', 'Booked or accepted'), lost: t('leads.hint.lost', 'Not going ahead'),
   };
+  const NEXT = {
+    answer: t('leads.next.answer', 'Answer now'), follow_up: t('leads.next.follow_up', 'Follow up'), check_in: t('leads.next.check_in', 'Check in'),
+  };
+  const writeFor = (c) => setWriting({
+    key: c.key, phone: c.phone, email: c.email || c.customer_email, link: c.link, label: [c.name, c.title].filter(Boolean).join(' · '),
+    goal: c.next || (c.stage === 'lost' ? 'win_back' : c.stage === 'quoted' ? 'follow_up' : 'answer'),
+  });
   const ago = (iso) => {
     if (!iso) return '';
     const mins = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
@@ -63,8 +174,8 @@ export default function LeadsBoard({ API, auth, businessId, refreshKey }) {
   const add = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(base, { ...form, phone: form.phone || null }, auth);
-      setForm({ name: '', phone: '', note: '' }); setAdding(false); load();
+      await axios.post(base, { ...form, phone: form.phone || null, email: form.email || null }, auth);
+      setForm({ name: '', phone: '', email: '', note: '' }); setAdding(false); load();
     } catch (err) { toast.error(err?.response?.data?.detail || t('leads.failed', 'Could not save. Try again.')); }
   };
   const remove = async (c) => {
@@ -89,12 +200,15 @@ export default function LeadsBoard({ API, auth, businessId, refreshKey }) {
         )}
       </div>
       {adding && (
-        <form onSubmit={add} className="rounded-xl border bg-white p-3 mb-3 grid gap-2 sm:grid-cols-[1fr_1fr_2fr_auto] items-end" style={{ borderColor: 'var(--brand-border)' }} data-testid="leads-add-form">
+        <form onSubmit={add} className="rounded-xl border bg-white p-3 mb-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_2fr_auto] items-end" style={{ borderColor: 'var(--brand-border)' }} data-testid="leads-add-form">
           <label className="text-sm" style={{ color: 'var(--ink)' }}>{t('leads.name', 'Name')}
             <input value={form.name} maxLength={80} onChange={(e) => setForm({ ...form, name: e.target.value })} className={`${field} mt-1`} style={fieldStyle} dir="auto" required />
           </label>
           <label className="text-sm" style={{ color: 'var(--ink)' }}>{t('leads.phone', 'Phone (optional)')}
             <input type="tel" value={form.phone} maxLength={40} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={`${field} mt-1`} style={fieldStyle} dir="ltr" />
+          </label>
+          <label className="text-sm" style={{ color: 'var(--ink)' }}>{t('leads.emailField', 'Email (optional)')}
+            <input type="email" value={form.email} maxLength={120} onChange={(e) => setForm({ ...form, email: e.target.value })} className={`${field} mt-1`} style={fieldStyle} dir="ltr" />
           </label>
           <label className="text-sm" style={{ color: 'var(--ink)' }}>{t('leads.note', 'What they want')}
             <input value={form.note} maxLength={300} onChange={(e) => setForm({ ...form, note: e.target.value })} className={`${field} mt-1`} style={fieldStyle} dir="auto"
@@ -105,6 +219,34 @@ export default function LeadsBoard({ API, auth, businessId, refreshKey }) {
             <button type="button" onClick={() => setAdding(false)} className="grid place-content-center w-11 h-11" aria-label={t('customers.close', 'Close')}><X size={16} /></button>
           </div>
         </form>
+      )}
+
+      {!!data.found?.length && (
+        <section className="rounded-2xl border bg-white p-3 mb-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="leads-found">
+          <h3 className="text-sm font-semibold flex items-center gap-1.5" style={{ color: 'var(--ink)' }}>
+            <Search size={14} style={{ color: 'var(--gold)' }} /> {t('leads.foundTitle', 'People looking for what you do')}
+            <span className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }}>{data.found.length}</span>
+          </h3>
+          <p className="text-xs mb-2" style={{ color: 'var(--brand-muted)' }}>{t('leads.foundBody', 'Posted on the Requests board in your line of work. Be the first to answer: a personal reply wins the job.')}</p>
+          <ul className="flex gap-2 overflow-x-auto snap-x pb-1" style={{ scrollbarWidth: 'thin' }}>
+            {data.found.map((r) => (
+              <li key={r.id} className="snap-start shrink-0 w-[80%] sm:w-[260px] rounded-xl border p-3 flex flex-col" style={{ borderColor: 'var(--brand-border)', background: '#F9FAFB' }} data-testid="found-card">
+                <p className="text-sm font-semibold line-clamp-2" style={{ color: 'var(--ink)' }} dir="auto">{r.title}</p>
+                {r.description && <p className="text-xs mt-1 line-clamp-2" style={{ color: 'var(--ink)' }} dir="auto">{r.description}</p>}
+                <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }} dir="auto">
+                  {[r.poster_display_name, r.area, r.budget_type === 'fixed' && r.budget_amount ? money(r.budget_amount, r.budget_currency || 'ILS') : null, ago(r.created_at)].filter(Boolean).join(' · ')}
+                </p>
+                <div className="flex flex-wrap gap-1 mt-auto pt-2">
+                  <button type="button" onClick={() => setWriting({ requestId: r.id, link: `/requests/${r.id}`, label: r.title, goal: 'introduce' })}
+                          className={btn} style={{ background: 'var(--action)', color: 'var(--action-ink)', borderColor: 'var(--action)' }} data-testid="found-write">
+                    <Sparkles size={13} /> {t('leads.writeReply', 'Write a reply')}
+                  </button>
+                  <Link to={`/requests/${r.id}`} className={btn} style={fieldStyle}>{t('leads.open', 'Open')}</Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-3 -mx-1 px-1" style={{ scrollbarWidth: 'thin' }}>
@@ -125,6 +267,12 @@ export default function LeadsBoard({ API, auth, businessId, refreshKey }) {
                         <p className="text-sm font-semibold min-w-0 truncate" style={{ color: 'var(--ink)' }} dir="auto">{c.name || t('leads.someone', 'A customer')}</p>
                         <Icon size={14} className="shrink-0 mt-0.5" style={{ color: 'var(--brand-muted)' }} aria-label={t(`leads.src.${c.source}`)} />
                       </div>
+                      {c.next && (
+                        <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[11px] font-semibold" data-testid="lead-next"
+                              style={c.next === 'answer' ? { background: 'var(--ink)', color: '#fff' } : { background: 'rgba(36,175,235,.33)', color: 'var(--ink)' }}>
+                          {NEXT[c.next]}
+                        </span>
+                      )}
                       {c.title && <p className="text-xs truncate" style={{ color: 'var(--brand-muted)' }} dir="auto">{c.title}</p>}
                       {c.last_text && c.last_text !== c.title && <p className="text-xs mt-1 line-clamp-2" style={{ color: 'var(--ink)' }} dir="auto">{c.last_text}</p>}
                       <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>
@@ -135,6 +283,11 @@ export default function LeadsBoard({ API, auth, businessId, refreshKey }) {
                                 className="flex-1 min-w-[120px] px-2 min-h-[36px] rounded-lg border text-xs bg-white" style={fieldStyle} data-testid="lead-move">
                           {data.stages.map((x) => <option key={x} value={x}>{STAGE[x]}</option>)}
                         </select>
+                        {!(s === 'new' && (c.source === 'chat' || c.source === 'email')) && (
+                          <button type="button" onClick={() => writeFor(c)} className={btn} style={fieldStyle} data-testid="lead-write">
+                            <Sparkles size={13} /> {t('leads.writeShort', 'Write')}
+                          </button>
+                        )}
                         {c.link && <Link to={c.link} className="px-3 min-h-[36px] inline-flex items-center rounded-lg border text-xs font-semibold" style={fieldStyle}>{t('leads.open', 'Open')}</Link>}
                         {c.phone && <a href={`tel:${c.phone}`} className="px-3 min-h-[36px] inline-flex items-center rounded-lg border text-xs font-semibold" style={fieldStyle} dir="ltr">{t('leads.call', 'Call')}</a>}
                         {c.source === 'manual' && (
@@ -153,6 +306,7 @@ export default function LeadsBoard({ API, auth, businessId, refreshKey }) {
           );
         })}
       </div>
+      {writing && <MessageWriter API={API} auth={auth} businessId={businessId} target={writing} onClose={closeWriter} />}
     </div>
   );
 }
