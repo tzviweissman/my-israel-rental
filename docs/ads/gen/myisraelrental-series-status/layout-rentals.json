@@ -1,0 +1,130 @@
+{
+ "shape": "story",
+ "ground": "#1d2a3a",
+ "boxes": [
+  {
+   "what": "desk",
+   "x": 0,
+   "y": 0.52,
+   "w": 1,
+   "h": 0.48,
+   "colour": "#7a5232"
+  },
+  {
+   "what": "phone",
+   "x": 0.07,
+   "y": 0.43,
+   "w": 0.33,
+   "h": 0.36,
+   "colour": "#111111"
+  },
+  {
+   "what": "phone screen",
+   "x": 0.09,
+   "y": 0.445,
+   "w": 0.29,
+   "h": 0.33,
+   "colour": "#f4f6f8"
+  },
+  {
+   "what": "phone stand",
+   "x": 0.17,
+   "y": 0.78,
+   "w": 0.13,
+   "h": 0.03,
+   "colour": "#333333"
+  },
+  {
+   "what": "little stone house",
+   "x": 0.55,
+   "y": 0.42,
+   "w": 0.34,
+   "h": 0.2,
+   "colour": "#e6dcc8"
+  },
+  {
+   "what": "door",
+   "x": 0.68,
+   "y": 0.54,
+   "w": 0.06,
+   "h": 0.08,
+   "colour": "#a33"
+  },
+  {
+   "what": "ramp",
+   "x": 0.4,
+   "y": 0.6,
+   "w": 0.3,
+   "h": 0.03,
+   "colour": "#b08a5a",
+   "angle": -8
+  },
+  {
+   "what": "sofa",
+   "x": 0.46,
+   "y": 0.57,
+   "w": 0.08,
+   "h": 0.03,
+   "colour": "#3c6e91"
+  },
+  {
+   "what": "boxes",
+   "x": 0.6,
+   "y": 0.64,
+   "w": 0.06,
+   "h": 0.04,
+   "colour": "#c8a46e"
+  },
+  {
+   "what": "tiny person",
+   "x": 0.45,
+   "y": 0.6,
+   "w": 0.025,
+   "h": 0.045,
+   "colour": "#ffffff"
+  },
+  {
+   "what": "tiny person",
+   "x": 0.53,
+   "y": 0.59,
+   "w": 0.025,
+   "h": 0.045,
+   "colour": "#ffffff"
+  },
+  {
+   "what": "tiny person",
+   "x": 0.62,
+   "y": 0.67,
+   "w": 0.025,
+   "h": 0.045,
+   "colour": "#ffffff"
+  },
+  {
+   "what": "moving van",
+   "x": 0.78,
+   "y": 0.66,
+   "w": 0.16,
+   "h": 0.06,
+   "colour": "#ffffff"
+  }
+ ],
+ "keep_empty": [
+  {
+   "what": "headline",
+   "x": 0.05,
+   "y": 0.12,
+   "w": 0.9,
+   "h": 0.17
+  },
+  {
+   "what": "foot",
+   "x": 0.04,
+   "y": 0.83,
+   "w": 0.92,
+   "h": 0.05,
+   "over": [
+    "desk"
+   ]
+  }
+ ]
+}

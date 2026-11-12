@@ -90,7 +90,8 @@ function problems(name, upTo, finished) {
         if (finished && fs.existsSync(gen) && !/layout/.test(fs.readFileSync(gen, 'utf8'))) out.push(`stage ${s.n}, ${it.id}: docs/ads/gen/${name}/gen.py does not give the model the layout picture`);
       }
       if (FIT_RULES.has(it.id) && !/^n\/a:/i.test(g.plan) && !/ad-fit-picture/.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: name scripts/ad-fit-picture.py, the way the picture was laid on the ad, or n/a`);
-      if (LOGO_RULES.has(it.id) && !/^n\/a: no logo/i.test(g.plan)) {
+      // A design's blueprint says how the maker places every business's logo ("built by ..."), not one file.
+      if (LOGO_RULES.has(it.id) && !/^(n\/a: no logo|built by )/i.test(g.plan)) {
         const files = [...g.plan.matchAll(/([\w./-]+\.(?:jpg|jpeg|png|webp|svg))/gi)].map((x) => x[1]);
         if (!files.some((f) => fs.existsSync(path.resolve(ROOT, f)))) out.push(`stage ${s.n}, ${it.id}: name the business's logo file on the ad (none of ${files.length ? files.join(', ') : 'no file'} exists), or "n/a: no logo"`);
       }
@@ -104,9 +105,32 @@ function problems(name, upTo, finished) {
   return out;
 }
 
+// Ad rules a shared part already builds (docs/rules-as-blueprint/ad-rules.json, status "built"; Tzvi 12 Nov 2026: the
+// ad builder works like the page builder, built from the rules instead of made, checked and redone). A design in the
+// app (design-<key>) gets every rule AdMaker, AdStudio or sharpCanvas builds; a hand-made ad gets those of the scripts
+// its docs/ads/gen/<name>/ folder runs. They are ticked with the part as the plan; the sheet checks below still apply.
+function builtByParts(name) {
+  const out = new Map();
+  let reg = [];
+  try { reg = JSON.parse(fs.readFileSync(path.join(ROOT, 'docs', 'rules-as-blueprint', 'ad-rules.json'), 'utf8')).rules || []; } catch { return out; }
+  let gen = '';
+  try { const g = path.join(ROOT, 'docs', 'ads', 'gen', name); for (const f of fs.readdirSync(g)) if (/\.(py|mjs|js|sh)$/.test(f)) gen += fs.readFileSync(path.join(g, f), 'utf8'); } catch { /* no gen folder */ }
+  const inApp = name.startsWith('design-');
+  for (const r of reg) {
+    if (r.status !== 'built' || !r.built_by) continue;
+    const by = r.built_by.split(/;\s*to build:/)[0];
+    const scripts = [...by.matchAll(/(ad-[a-z-]+\.py|ad-[a-z-]+\.mjs)/g)].map((m) => m[1]);
+    const app = /\b(AdMaker|AdStudio|sharpCanvas)\b/.test(by);
+    const ok = (app && inApp) || (scripts.length && scripts.every((s) => gen.includes(s)));
+    if (ok) out.set(r.id, `built by ${by.trim()}; confirm: ${r.confirmed_by || 'look once'}`);
+  }
+  return out;
+}
+
 function write(name) {
   const file = path.join(DIR, `${name}.md`);
   const old = fs.existsSync(file) ? read(file) : new Map();
+  for (const [id, plan] of builtByParts(name)) { const g = old.get(id); if (!g || blank(g.plan)) old.set(id, { id, ticked: true, plan }); }
   const lines = [`# Ad blueprint: ${name}`, '', 'Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage before making it; tick [x] once made.', ''];
   for (const s of stages()) {
     lines.push(`## ${s.n}. ${s.name}`, '');

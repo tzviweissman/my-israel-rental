@@ -198,7 +198,7 @@ function draw(canvas, { format, design, words, eyebrow, price, cta, shortUrl, rt
 
 // The link and its code. The code sits on a white tile even on the dark
 // design: scanners need dark modules on light.
-function drawFooter(ctx, { W, PAD, QR, rtl, dark, cta, shortUrl, qr, body, px, start, textW, bottom }) {
+function drawFooter(ctx, { W, PAD, QR, rtl, dark, cta, shortUrl, qr, body, px, start, textW, bottom, plate = false }) {
   const qy = bottom - QR;
   const qx = rtl ? PAD : W - PAD - QR;
   qrTile(ctx, qr, qx, qy, QR, 10);
@@ -209,14 +209,12 @@ function drawFooter(ctx, { W, PAD, QR, rtl, dark, cta, shortUrl, qr, body, px, s
   linkPiece(ctx, { rtl, x: start, lines: [
     { text: cta, y: qy + QR / 2 - 6 - lift, font: `700 ${px(34)}px ${body}`, size: px(34), colour: dark ? '#FFFFFF' : INK, strong: INK },
     ...urls.map((text, i) => ({ text, y: qy + QR / 2 + px(40) - lift + i * px(38), font: `600 ${px(30)}px ${body}`, size: px(30), colour: dark ? 'rgba(255,255,255,.7)' : ACCENT, strong: ACCENT })),
-  ], width: linkW });
+  ], width: linkW, onPlate: plate });
 }
 
 // A link is never cut with a "…": with a business's name in it, it breaks after /p/ instead.
-// With a logo, the link leaves it room in the foot (A4.6) and breaks after /p/ sooner.
-function linkLines(ctx, shortUrl, width0) {
+function linkLines(ctx, shortUrl, width) {
   const url = shortUrl.replace(/^https?:\/\//, '');
-  const width = width0 - ((PARTS && PARTS.logoRoom) || 0);
   if (ctx.measureText(url).width <= width) return [url];
   const at = url.indexOf('/p/') + 3;
   return [url.slice(0, at), url.slice(at)];
@@ -471,16 +469,15 @@ function begin(canvas, format, rtl) {
   return { ctx, W, H, body, head: (PARTS && PARTS.font) || headFont(rtl), px: (n) => Math.round(n * k), top: format === 'story' ? 220 : 64 };
 }
 
-// The link and its code on a band across the foot, white unless a ground
-// is given. On a story the band runs under the reply bar, its content above.
-function footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, ground = '#FFFFFF', dark = false }) {
+// The link and its code across the foot. No coloured band any more (Tzvi, 12 Nov 2026, from the library's 5/5 ads,
+// whose foot is one thin line or nothing): the design's own ground runs to the edge, the code on its white tile and
+// the link on a small white plate, so both read on any ground. On a story they sit above the reply bar.
+function footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, dark = false }) {
   const QR = format === 'square' ? 150 : 170;
   const safe = format === 'story' ? 230 : 0;
   const top = H - safe - QR - 80;
-  ctx.fillStyle = ground;
-  ctx.fillRect(0, top, W, H - top);
   drawFooter(ctx, { W, PAD: 64, QR, rtl, dark, cta, shortUrl, qr, body, px: (n) => n,
-    start: rtl ? W - 64 : 64, textW: W - 128, bottom: top + 40 + QR });
+    start: rtl ? W - 64 : 64, textW: W - 128, bottom: top + 40 + QR, plate: true });
   return top;
 }
 
@@ -2844,68 +2841,30 @@ function drawLabels(canvas, a) {
 }
 // A real review (public, 4 or 5 stars, the reviewer's own words) as a small bubble on any design, and the
 // owner's real deal with its end date (rules A4.4, A4.3, A5.2). Both the owner's choice, both draggable.
+// Whether a picture has no see-through parts at its edges (a logo on its own ground), measured once.
+const SOLID = new WeakMap();
+function solidImage(img) {
+  if (SOLID.has(img)) return SOLID.get(img);
+  let solid = true;
+  try {
+    const c = document.createElement('canvas');
+    c.width = 32;
+    c.height = 32;
+    const x = c.getContext('2d');
+    x.drawImage(img, 0, 0, 32, 32);
+    const d = x.getImageData(0, 0, 32, 32).data;
+    for (let i = 0; i < 32 && solid; i += 1) {
+      for (const [px, py] of [[i, 0], [i, 31], [0, i], [31, i]]) if (d[(py * 32 + px) * 4 + 3] < 250) { solid = false; break; }
+    }
+  } catch (e) { solid = false; }
+  SOLID.set(img, solid);
+  return solid;
+}
 function extras(canvas, a) {
   const ctx = canvas.getContext('2d');
   const { width: W, height: H } = canvas;
   const body = bodyFont(a.rtl);
   const story = a.format === 'story';
-  const q = PARTS && PARTS.boxes.qr;
-  const lk = PARTS && PARTS.boxes.link;
-  if (a.logo && q) {
-    // The business's own logo (ad rule A4.6, Tzvi 11 Nov 2026: "the ad doesnt show their logo"), on a white tile
-    // so it reads on any ground. Its place is the empty middle of the foot, between the code and the link, the
-    // same on every design; above the code only when the link leaves no room (it covered price stickers there).
-    const img = a.logo;
-    const m = 14;
-    const ratio = img.naturalWidth / img.naturalHeight;
-    const row = lk && lk[1] < q[1] + q[3] && lk[1] + lk[3] > q[1];
-    const gap = row ? (lk[0] > q[0] ? [q[0] + q[2], lk[0]] : [lk[0] + lk[2], q[0]]) : null;
-    let th = q[3] * 0.66;
-    let tw = Math.min(ratio * (th - m * 2) + m * 2, W * 0.4);
-    let x;
-    let y;
-    if (gap && gap[1] - gap[0] >= Math.min(tw, th * 1.4) + 56) {
-      tw = Math.min(tw, gap[1] - gap[0] - 56);
-      x = (gap[0] + gap[1]) / 2 - tw / 2;
-      y = q[1] + (q[3] - th) / 2;
-    } else {
-      // No room beside the link: the first spot round the code (or under the link) that covers nothing else on
-      // the ad, a size smaller if none is free; never under 64px high, the smallest that reads (checked at 54).
-      const top = story ? 220 : 0;
-      const foot = story ? H - 230 : H;
-      const free = (bx, by, bw, bh) => bx >= 0 && bx + bw <= W && by >= top && by + bh <= foot
-        && Object.entries(PARTS.boxes).every(([nm, b]) => nm === 'logo' || bx >= b[0] + b[2] || bx + bw <= b[0] || by >= b[1] + b[3] || by + bh <= b[1]);
-      let got = null;
-      for (const sh of [1, 0.8, 0.64]) {
-        const h1 = Math.max(64, th * sh);
-        const w1 = Math.min(q[2] * 1.3, ratio * (h1 - m * 2) + m * 2);
-        const h2 = Math.min(h1, (w1 - m * 2) / ratio + m * 2);
-        const spots = [[q[0] + (q[2] - w1) / 2, q[1] - 16 - h2], [q[0] - 16 - w1, q[1] + (q[3] - h2) / 2],
-          [q[0] + q[2] + 16, q[1] + (q[3] - h2) / 2], [q[0] + (q[2] - w1) / 2, q[1] + q[3] + 16]];
-        if (lk) spots.push([a.rtl ? lk[0] + lk[2] - w1 : lk[0], lk[1] + lk[3] + 12]);
-        const at = spots.find(([bx, by]) => free(bx, by, w1, h2));
-        if (at) { got = [at[0], at[1], w1, h2]; break; }
-      }
-      if (!got) {
-        const w1 = Math.min(q[2], ratio * (th - m * 2) + m * 2);
-        got = [q[0] + (q[2] - w1) / 2, q[1] - 16 - th, w1, Math.min(th, (w1 - m * 2) / ratio + m * 2)];
-      }
-      [x, y, tw, th] = got;
-    }
-    const k = Math.min((tw - m * 2) / img.naturalWidth, (th - m * 2) / img.naturalHeight);
-    const w = img.naturalWidth * k;
-    const h = img.naturalHeight * k;
-    part(ctx, 'logo', [x, y, tw, th], () => {
-      ctx.fillStyle = '#FFFFFF';
-      ctx.shadowColor = 'rgba(0,0,0,.18)';
-      ctx.shadowBlur = 14;
-      ctx.beginPath();
-      ctx.roundRect(x, y, tw, th, 16);
-      ctx.fill();
-      ctx.shadowColor = 'transparent';
-      ctx.drawImage(img, x + (tw - w) / 2, y + (th - h) / 2, w, h);
-    });
-  }
   if (a.deal) {
     // Top middle, where the business name was; a status keeps its top clear, so there it sits above the link.
     ctx.font = `800 32px ${body}`;
@@ -2963,6 +2922,86 @@ function extras(canvas, a) {
       lines.forEach((l, i) => ctx.fillText(l, tx, y + 92 + i * 42));
     });
   }
+  // Last, so it keeps clear of everything above, the deal and the review included.
+  const q = PARTS && PARTS.boxes.qr;
+  const lk = PARTS && PARTS.boxes.link;
+  if (a.logo && q) {
+    // The business's own logo (ad rule A4.6, Tzvi 11 Nov 2026: "the ad doesnt show their logo"). Where the
+    // library's 5/5 ads put it (12 Nov): small, in the top corner the headline leaves free, about a tenth of the
+    // width. A logo with see-through parts brings a white tile so it reads on any ground; a solid one its own.
+    const img = a.logo;
+    const solid = solidImage(img);
+    const m = solid ? 0 : 12;
+    const ratio = img.naturalWidth / img.naturalHeight;
+    const top = story ? 220 : 0;
+    const foot = story ? H - 230 : H;
+    const free = (bx, by, bw, bh, skipProduct) => bx >= 0 && bx + bw <= W && by >= top && by + bh <= foot
+      && Object.entries(PARTS.boxes).every(([nm, b]) => nm === 'logo' || (skipProduct && nm.startsWith('product'))
+        || bx >= b[0] + b[2] + 12 || bx + bw + 12 <= b[0] || by >= b[1] + b[3] + 12 || by + bh + 12 <= b[1])
+      && PARTS.texts.every((b) => bx >= b[0] + b[2] + 12 || bx + bw + 12 <= b[0] || by >= b[1] + b[3] + 12 || by + bh + 12 <= b[1]);
+    // Never under 60px of logo (the check fails under 54): a wide logo may then take up to 42% of the width.
+    const sizeAt = (h0) => {
+      const w0 = Math.min(W * 0.42, Math.max(ratio * (h0 - m * 2) + m * 2, ratio * 60 + m * 2));
+      return [w0, Math.min(Math.max(h0, 60 + m * 2), (w0 - m * 2) / ratio + m * 2)];
+    };
+    const edge = Math.round(W * 0.045);
+    const y0 = story ? 236 : edge;
+    let got = null;
+    for (const skipProduct of [false, true]) {
+      for (const sh of [1, 0.8]) {
+        const [tw, th] = sizeAt(W * 0.085 * sh);
+        const corners = [[W - edge - tw, y0], [edge, y0], [(W - tw) / 2, y0]];
+        if (a.rtl) corners.unshift(corners.splice(1, 1)[0]);
+        const at = corners.find(([bx, by]) => free(bx, by, tw, th, skipProduct));
+        if (at) { got = [at[0], at[1], tw, th]; break; }
+      }
+      if (got) break;
+    }
+    if (!got) {
+      // No top corner is free: the first spot round the code (or under the link) that covers nothing.
+      for (const sh of [1, 0.8, 0.64]) {
+        const [tw, th] = sizeAt(Math.max(64, q[3] * 0.66 * sh));
+        const spots = [[q[0] + (q[2] - tw) / 2, q[1] - 16 - th], [q[0] - 16 - tw, q[1] + (q[3] - th) / 2],
+          [q[0] + q[2] + 16, q[1] + (q[3] - th) / 2], [q[0] + (q[2] - tw) / 2, q[1] + q[3] + 16]];
+        if (lk) spots.push([a.rtl ? lk[0] + lk[2] - tw : lk[0], lk[1] + lk[3] + 12]);
+        const at = spots.find(([bx, by]) => free(bx, by, tw, th, true));
+        if (at) { got = [at[0], at[1], tw, th]; break; }
+      }
+    }
+    // Still nothing: the first free place anywhere, top first, rather than over a word.
+    for (const sh of [0.8, 0.64]) {
+      if (got) break;
+      const [tw, th] = sizeAt(W * 0.085 * sh);
+      for (let by = top + 16; by + th <= foot - 16 && !got; by += 24) {
+        for (let bx = 16; bx + tw <= W - 16; bx += 24) {
+          if (free(bx, by, tw, th, true)) { got = [bx, by, tw, th]; break; }
+        }
+      }
+    }
+    if (!got) return;
+    const [x, y, tw, th] = got;
+    const k = Math.min((tw - m * 2) / img.naturalWidth, (th - m * 2) / img.naturalHeight);
+    const w = img.naturalWidth * k;
+    const h = img.naturalHeight * k;
+    part(ctx, 'logo', [x, y, tw, th], () => {
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,.18)';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.roundRect(x, y, tw, th, solid ? Math.min(12, th * 0.15) : 14);
+      if (!solid) {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+      } else {
+        ctx.fillStyle = 'rgba(0,0,0,0)';
+        ctx.fill();
+        ctx.clip();
+      }
+      ctx.drawImage(img, x + (tw - w) / 2, y + (th - h) / 2, w, h);
+      ctx.restore();
+    });
+  }
 }
 const THEMED = { behind: drawBehind, phonepop: drawPhonePop, calling: drawCalling,
   notify: drawNotify, search: drawSearch, toggle: drawToggle, checklist: drawChecklist, custom: drawCustom,
@@ -3005,9 +3044,32 @@ function paintGrain(ctx, W, H) {
   ctx.fillRect(0, 0, W, H);
   ctx.restore();
 }
+// The designs that are a menu or an order screen: their price is the point, so it shows with the switch off.
+const PRICE_ON = new Set(['items', 'phonepop']);
 const CUT_ONLY = ['behind', 'phonepop', 'calling', 'split', 'feast'];
 const COLOUR_FIXED = ['colour', 'bigwords', 'grid', 'torn', 'question', 'phone'];
 const DARK_RGB = { night: [23, 23, 26], navy: [18, 59, 87] };
+// Every word a design writes, where it lands in the ad's own units, so the logo never sits on one (some lines, like
+// the business's name, are not movable pieces and so are not in PARTS.boxes).
+if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.__adWords) {
+  const fill = CanvasRenderingContext2D.prototype.fillText;
+  CanvasRenderingContext2D.prototype.__adWords = true;
+  CanvasRenderingContext2D.prototype.fillText = function adFill(s, x, y, ...r) {
+    const T = PARTS && PARTS.texts;
+    if (T && this === PARTS.ctx && String(s).trim()) {
+      const tm = this.measureText(s);
+      const al = this.textAlign;
+      const fromRight = al === 'right' || (al === 'start' && this.direction === 'rtl') || (al === 'end' && this.direction !== 'rtl');
+      const x0 = al === 'center' ? x - tm.width / 2 : (fromRight ? x - tm.width : x);
+      // In the ad's 1080-wide numbers: sharpCanvas's getTransform already takes its scale out.
+      const m = this.getTransform();
+      const a = m.transformPoint(new DOMPoint(x0, y - (tm.actualBoundingBoxAscent || 0)));
+      const c = m.transformPoint(new DOMPoint(x0 + tm.width, y + (tm.actualBoundingBoxDescent || 0)));
+      T.push([Math.min(a.x, c.x), Math.min(a.y, c.y), Math.abs(c.x - a.x), Math.abs(c.y - a.y)]);
+    }
+    return fill.call(this, s, x, y, ...r);
+  };
+}
 function render(target, design, a0) {
   let a = a0;
   if (a.scene?.floor && !a.sceneMeasure && !a.sceneAt) {
@@ -3027,9 +3089,8 @@ function render(target, design, a0) {
     PARTS.later.forEach((paint) => paint());
     if (anim && anim.cover > 0) hookCard(ctx, canvas.width, canvas.height, anim, a);
   };
-  const logoRoom = a.logo ? Math.min(a0.format === 'square' ? 300 : 360, (a.logo.naturalWidth / a.logo.naturalHeight) * 100 + 28) + 56 : 0;
   if (THEMED[layout]) {
-    PARTS = { logoRoom, moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: a.font || null, ink: a.ink || null, photo: a.photo || null, tilt: TILT[layout] || 0, anim, strips: !!a.strips, stats: a.stats || null,
+    PARTS = { texts: [], ctx: canvas.getContext('2d'), moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: a.font || null, ink: a.ink || null, photo: a.photo || null, tilt: TILT[layout] || 0, anim, strips: !!a.strips, stats: a.stats || null,
       scene: a.scene?.img || null, sceneLight: !!a.scene?.light, sceneLights: !!a.scene?.lights, sceneRtl: a.rtl,
       sceneFloor: a.scene?.floor || 0, sceneAt: a.sceneAt || 0 };
     try {
@@ -3044,7 +3105,7 @@ function render(target, design, a0) {
     return undefined;
   }
   // One look each, so no font or word colour here; pieces move all the same.
-  PARTS = { logoRoom, moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: null, ink: null, photo: a.photo || null, col: a.col || null, anim, strips: !!a.strips, stats: a.stats || null };
+  PARTS = { texts: [], ctx: canvas.getContext('2d'), moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: null, ink: null, photo: a.photo || null, col: a.col || null, anim, strips: !!a.strips, stats: a.stats || null };
   try {
     const fixed = { phone: drawPhone, torn: drawTorn, review: drawReview, native: drawStory, colour: drawColour,
       bigwords: drawBigWords, grid: drawGrid, items: drawItems, note: drawNote, question: drawQuestion }[design];
@@ -3177,6 +3238,9 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const [withReview, setWithReview] = useState(false);
   // On whenever the business has a logo, unless the owner turned it off on this saved ad.
   const [logoOn, setLogoOn] = useState(true);
+  // The price is off unless the owner wants it (Tzvi, 12 Nov 2026: the library's best ads rarely show one); the menu
+  // and order-screen designs, where the price is the point, keep it. A saved ad keeps what it was saved with.
+  const [priceOn, setPriceOn] = useState(false);
   const [logoImg, setLogoImg] = useState(null);
   useEffect(() => {
     let gone = false;
@@ -3213,7 +3277,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       if (langNow.current !== lang) return;
       setAd(data);
       if (row) {
-        setWords(withCaption({ ...row.words }));
+        setWords(withCaption({ ...row.words, picked: true }));
         await applySaved(row);
       } else {
         setSavedId('');
@@ -3275,6 +3339,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     setStrips(!!st.strips);
     setWithReview(!!st.withReview);
     setLogoOn(st.logo !== false);
+    setPriceOn(st.price !== false);
     setDeal(st.deal || { text: '', until: '' });
     setMoves(st.moves || {});
     const img = st.bg?.src ? await loadImage(st.bg.src) : null;
@@ -3322,6 +3387,16 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const pool = [...cutItems, ...itemImgs.filter((i) => !cutItems.some((c) => c.name === i.name))];
   const poolFor = (l) => (CUT_ONLY.includes(l) && cutItems.length ? cutItems : pool);
   const layoutsInOrder = Object.keys(THEMED);
+  // Each design its own headline from the AI's ideas until the owner picks or writes one (Tzvi, 12 Nov 2026: the
+  // gallery read as one ad repeated, "Dinner, sorted before they arrive" on nearly every design).
+  const galleryOrder = FAMILIES.flatMap(([, keys]) => keys);
+  const wordsFor = (l) => {
+    if (!words || words.picked) return words;
+    const opts = [...(words.ideas || []), ...(words.plain ? [{ text: words.plain, key: words.plainKey || '', item: words.plainItem || '' }] : [])];
+    if (opts.length < 2) return words;
+    const o = opts[Math.max(0, galleryOrder.indexOf(l)) % opts.length];
+    return { ...words, headline: o.text, key: o.key || '', item: o.item || '' };
+  };
   // Each design starts on its own product, so the gallery is not one photo
   // repeated; the owner's pick for a design stays with that design.
   const itemFor = (d) => {
@@ -3332,7 +3407,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     // The product photo design starts on a product already photographed for this shape and holiday.
     const shotFor = l === 'shoot' && !pickBy[l] && from.find((it) => shots.some((x) => x.status === 'ready' && shotImgs[x.id] && x.item === it.name
       && x.shape === format && x.occasion === (holidayPick === 'chanukah' ? 'chanukah' : '')));
-    const asked = pickBy[l] || (shotFor && shotFor.name) || start?.item || words?.item;
+    const asked = pickBy[l] || (shotFor && shotFor.name) || start?.item || wordsFor(l)?.item;
     // A cut-out looks better than a boxed photo, so the layouts start on one; any product can still be picked.
     const first = THEMED[l] && l !== 'fullphoto' && cutItems.length ? cutItems : from;
     return withPrice(from.find((it) => it.name === asked) || first[Math.max(0, layoutsInOrder.indexOf(l)) % first.length]);
@@ -3343,9 +3418,12 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const shotOccasion = holidayPick === 'chanukah' ? 'chanukah' : '';
   // Saved words from before the AI named a setting have none: the server then reads the kind off the listing.
   const shotKind = words?.scene || '';
+  // One idea in the picture, or the plain shoot (Tzvi, 12 Nov 2026: "tiny people at work", from the library's 5s).
+  const [shotIdea, setShotIdea] = useState('');
+  const sameShot = (x, it, shape) => x.item === it.name && x.shape === shape && x.occasion === shotOccasion && (x.idea || '') === shotIdea;
   const shotOf = (it, shape = format) => {
     if (!it || targetType !== 'business') return null;
-    const s = shots.find((x) => x.status === 'ready' && shotImgs[x.id] && x.item === it.name && x.shape === shape && x.occasion === shotOccasion);
+    const s = shots.find((x) => x.status === 'ready' && shotImgs[x.id] && sameShot(x, it, shape));
     return s ? { ...shotImgs[s.id], word: s.word, dark: !!s.dark } : null;
   };
   const askedShot = useRef('');
@@ -3355,7 +3433,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     setShotError('');
     try {
       const { data } = await axios.post(`${API}/ads/shots`, { target_type: targetType, target_id: target.id, item: it.name, shape: format,
-        kind: shotKind, occasion: shotOccasion }, { headers: { Authorization: `Bearer ${token}` } });
+        kind: shotKind, occasion: shotOccasion, idea: shotIdea }, { headers: { Authorization: `Bearer ${token}` } });
       askedShot.current = data.id;
       setShots((m) => [data, ...m.filter((x) => x.id !== data.id)]);
       if (data.status === 'making' && shotsLeft != null) setShotsLeft(Math.max(0, shotsLeft - 1));
@@ -3489,7 +3567,8 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const args = (d) => {
     const review = reviews.length ? reviews[reviewIdx % reviews.length] : null;
     const l = d.split(':')[0];
-    const it = itemFor(d);
+    const it0 = itemFor(d);
+    const it = it0 && !priceOn && !PRICE_ON.has(l) ? { ...it0, priceText: '' } : it0;
     const hex = customBy[l] || '';
     const lk = hex ? 'brand' : lookFor(l);
     // A fixed design's colour, only when the owner picked one for it.
@@ -3514,7 +3593,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       strips, reviewChip: withReview && review ? review : null, logo: logoOn ? logoImg : null,
       deal: dealOn ? `${deal.text.trim()} · ${lt('ads.dealUntil', 'until {{date}}', { date: new Date(`${deal.until}T12:00`).toLocaleDateString(rtl ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'short' }) })}` : '',
       // A deal takes the business name's place at the top: the name is in the link and the eyebrow sits where the deal goes.
-      format: d === 'native' ? 'story' : format, words, eyebrow: dealOn ? '' : eyebrow, price: priceOf(it), cta: itemCta || cta, shortUrl, rtl, imgs: imgsOf(it), items, pool: poolFor(l), qr: qrRef.current,
+      format: d === 'native' ? 'story' : format, words: wordsFor(l), eyebrow: dealOn ? '' : eyebrow, price: priceOf(it), cta: itemCta || cta, shortUrl, rtl, imgs: imgsOf(it), items, pool: poolFor(l), qr: qrRef.current,
       photo: l === 'custom' ? null : photoBy[l]?.img || null, col, grain: !hex,
       item: it, fromWord: lt('ads.fromWord', 'from'), addLabel: lt('ads.addToOrder', 'Add to order'),
       callingLabel: lt('ads.isCalling', 'is calling…'), acceptLabel: lt('ads.callAccept', 'Order'),
@@ -3578,7 +3657,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [words, format, design, imgs, itemImgs, cutItems, pickBy, rtl, eyebrow, cta, shortUrl, reviews, reviewIdx, faqs, faqIdx,
-    lookBy, holidayPick, customBy, photoBy, fontIdx, ink, bg, moves, situationIdx, strips, withReview, logoOn, logoImg, deal, sceneImgs, shotImgs, shots]);
+    lookBy, holidayPick, customBy, photoBy, fontIdx, ink, bg, moves, situationIdx, strips, withReview, logoOn, logoImg, priceOn, deal, sceneImgs, shotImgs, shots]);
 
   // Every design at once, small, so the owner picks one by eye (rules 9b).
   // A moment after typing stops: each preview is a full drawing.
@@ -3675,8 +3754,8 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     try {
       const { data } = await axios.post(`${API}/ads/saved`, {
         target_type: targetType, target_id: target.id, id: asNew ? null : (savedId || null), lang, design, kept,
-        item: featured?.name || '', words, thumb: c.toDataURL('image/jpeg', 0.7),
-        settings: { format, look, customHex, fontIdx, ink, strips, withReview, logo: logoOn, deal, moves, adName, bg: bg.src ? { src: bg.src } : { id: bg.id || 'sand' }, photo: photoBy[layout]?.src || null, reviewIdx, faqIdx, situationIdx },
+        item: featured?.name || '', words: { ...wordsFor(layout), picked: true }, thumb: c.toDataURL('image/jpeg', 0.7),
+        settings: { format, look, customHex, fontIdx, ink, strips, withReview, logo: logoOn, price: priceOn, deal, moves, adName, bg: bg.src ? { src: bg.src } : { id: bg.id || 'sand' }, photo: photoBy[layout]?.src || null, reviewIdx, faqIdx, situationIdx },
       }, auth);
       setSavedId(data.id);
       loadSaved();
@@ -4024,7 +4103,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
         {targetType === 'business' && itemFor('shoot') && (() => {
           const it = itemFor('shoot');
           const have = !!shotOf(it);
-          const making = shots.some((x) => x.status === 'making' && x.item === it.name && x.shape === format && x.occasion === shotOccasion);
+          const making = shots.some((x) => x.status === 'making' && sameShot(x, it, format));
           return (
             <div className="rounded-xl border p-3 mb-4 flex flex-wrap items-center gap-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="ad-shot">
               <div className="flex-1 min-w-[200px]">
@@ -4036,6 +4115,12 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                   {shotsLeft != null && !have && !making ? ` ${t('ads.shotLeft', '{{n}} left today.', { n: shotsLeft })}` : ''}
                 </p>
                 {shotError && <p className="text-xs mt-1" role="alert" style={{ color: '#B42318' }}>{shotError}</p>}
+                <div className="flex flex-wrap gap-1.5 mt-2" role="group" aria-label={t('ads.shotIdeaLabel', 'The picture')} data-testid="ad-shot-ideas">
+                  {[['', t('ads.shotPlain', 'Product shoot')], ['tiny', t('ads.shotTiny', 'Tiny people at work')]].map(([k, label]) => (
+                    <button key={k || 'plain'} type="button" onClick={() => setShotIdea(k)} aria-pressed={shotIdea === k}
+                      className={chip(shotIdea === k)} style={chipStyle(shotIdea === k)} data-testid={`ad-shot-idea-${k || 'plain'}`}>{label}</button>
+                  ))}
+                </div>
               </div>
               {making ? <Loader2 className="animate-spin" size={20} aria-label={t('ads.shotMakingShort', 'Making the photo')} />
                 : have ? (
@@ -4193,6 +4278,12 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                     {t('ads.strips', 'Headline on strips')}
                   </label>
                 )}
+                {targetType === 'business' && !PRICE_ON.has(layout) && featured?.price ? (
+                  <label className="inline-flex items-center gap-1.5">
+                    <input type="checkbox" checked={priceOn} onChange={(e) => setPriceOn(e.target.checked)} data-testid="ad-price" />
+                    {t('ads.withPrice', 'Show the price')}
+                  </label>
+                ) : null}
                 {logoImg && (
                   <label className="inline-flex items-center gap-1.5">
                     <input type="checkbox" checked={logoOn} onChange={(e) => setLogoOn(e.target.checked)} data-testid="ad-logo" />
@@ -4296,15 +4387,15 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                     <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('ads.ideasTitle', 'Pick a headline, or write your own')}</p>
                     <div className="flex flex-wrap gap-1.5">
                       {[...words.ideas, ...(words.plain ? [{ text: words.plain, key: words.plainKey || '', item: words.plainItem || '' }] : [])].map((o, i) => (
-                        <button key={o.text} type="button" dir="auto" onClick={() => { setWords({ ...words, headline: o.text, key: o.key, item: o.item || '' }); if (o.item) setPickBy({}); }} aria-pressed={words.headline === o.text}
-                          className={`${chip(words.headline === o.text)} text-start`} style={chipStyle(words.headline === o.text)} data-testid={`ad-idea-${i}`}>
+                        <button key={o.text} type="button" dir="auto" onClick={() => { setWords({ ...words, headline: o.text, key: o.key, item: o.item || '', picked: true }); if (o.item) setPickBy({}); }} aria-pressed={wordsFor(layout).headline === o.text}
+                          className={`${chip(wordsFor(layout).headline === o.text)} text-start`} style={chipStyle(wordsFor(layout).headline === o.text)} data-testid={`ad-idea-${i}`}>
                           {o.text}
                         </button>
                       ))}
                     </div>
                   </div>
                 )}
-                <input className={field} value={words.headline} maxLength={60} onChange={(e) => setWords({ ...words, headline: e.target.value })} aria-label={t('ads.headline', 'Headline')} />
+                <input className={field} value={wordsFor(layout).headline} maxLength={60} onChange={(e) => setWords({ ...wordsFor(layout), headline: e.target.value, picked: true })} aria-label={t('ads.headline', 'Headline')} />
                 {headlineWords > 9 && (
                   <p className="text-xs font-semibold rounded-lg px-2.5 py-2" style={{ background: '#FFF4E5', color: '#7A4100' }} data-testid="ad-one-message">
                     {t('ads.oneMessage', 'One idea per ad works best: try 9 words or fewer in the headline.')}

@@ -282,6 +282,94 @@ function drawShowcase(ctx, W, H, shape, f, logo, pages) {
 }
 
 // "Photo and words": one picture, whole, under a headline.
+// Scene ads (Tzvi, 12 Nov 2026: "all the ads for myisraelrental is a picture of 1 of our businesses just with small
+// changes ... i want more ads like the one you just created it shows what we do and catches peoples eye"). One thing
+// the site does per ad, as one surreal miniature scene on the same walnut desk and navy wall, our real screen on the
+// phone: made by docs/ads/gen/myisraelrental-series-status and -automation-status (blueprints in docs/ads/blueprints),
+// kept as /ads/scenes/<scene>-<shape>.jpg at the shape's full width, the words typed on top here.
+export const SCENES = ['factory', 'moving', 'shop', 'inbox', 'press'];
+function drawScene(ctx, W, H, shape, f, logo, bg) {
+  ctx.fillStyle = '#1d2a3a';
+  ctx.fillRect(0, 0, W, H);
+  if (bg) ctx.drawImage(bg, 0, 0, W, (bg.naturalHeight * W) / bg.naturalWidth);
+  const g = ctx.createLinearGradient(0, H - 520, 0, H);
+  g.addColorStop(0, 'rgba(16,22,32,0)');
+  g.addColorStop(0.45, 'rgba(16,22,32,.8)');
+  g.addColorStop(1, 'rgba(16,22,32,.95)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, H - 520, W, 520);
+  const status = shape === 'status';
+  const rtl = isHe(`${f.headline}${f.headline2}${f.sub}`);
+  const ff = fonts(`${f.headline}${f.headline2}`);
+  const x = rtl ? W - 64 : 64;
+  ctx.textAlign = rtl ? 'right' : 'left';
+  ctx.direction = rtl ? 'rtl' : 'ltr';
+  ctx.textBaseline = 'alphabetic';
+  let y = status ? 240 : 56;
+  if (logo) {
+    const L = 68;
+    const lx = rtl ? W - 64 - L : 64;
+    ctx.fillStyle = '#123B57';
+    ctx.beginPath();
+    ctx.roundRect(lx, y, L, L, 16);
+    ctx.fill();
+    ctx.drawImage(logo, lx + 9, y + 9, L - 18, L - 18);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `800 34px ${fonts('').body}`;
+    ctx.direction = 'ltr';
+    ctx.textAlign = rtl ? 'right' : 'left';
+    ctx.fillText('MyIsraelRental', rtl ? lx - 16 : lx + L + 16, y + 46);
+    ctx.direction = rtl ? 'rtl' : 'ltr';
+  }
+  y += status ? 92 : 80;
+  const size = status ? 124 : 104;
+  ctx.font = `800 ${size}px ${ff.head}`;
+  ctx.shadowColor = 'rgba(0,0,0,.35)';
+  ctx.shadowBlur = 30;
+  [[f.headline, '#FFFFFF'], [f.headline2, '#5CC0F0']].forEach(([line, colour]) => {
+    if (!line) return;
+    y += size * 1.02;
+    ctx.fillStyle = colour;
+    ctx.fillText(wrap(ctx, line, W - 128, 1)[0] || '', x, y);
+  });
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  if (f.sub) {
+    ctx.font = `700 40px ${fonts(f.sub).body}`;
+    ctx.fillStyle = 'rgba(255,255,255,.9)';
+    y += 22;
+    wrap(ctx, f.sub, W * 0.6, 2).forEach((l) => { y += 52; ctx.fillText(l, x, y); });
+  }
+  // The action and the link on a white plate at the foot, above a status's reply bar.
+  const bottom = H - (status ? 250 : 56);
+  const bf = fonts(f.title).body;
+  ctx.font = `800 40px ${bf}`;
+  const cta = wrap(ctx, f.title || '', W - 200, 1)[0] || '';
+  const cw = ctx.measureText(cta).width + 52;
+  ctx.font = `700 34px ${fonts('').body}`;
+  const lw = ctx.measureText(f.link || '').width;
+  const pw = Math.max(cw, lw) + 52;
+  const ph = 168;
+  const px = rtl ? W - 56 - pw : 56;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.roundRect(px, bottom - ph, pw, ph, 18);
+  ctx.fill();
+  const ix = rtl ? px + pw - 26 : px + 26;
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.roundRect(rtl ? ix - cw : ix, bottom - ph + 22, cw, 66, 33);
+  ctx.fill();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = `800 40px ${bf}`;
+  ctx.fillText(cta, rtl ? ix - 26 : ix + 26, bottom - ph + 70);
+  ctx.fillStyle = ACCENT;
+  ctx.font = `700 34px ${fonts('').body}`;
+  ctx.direction = 'ltr';
+  ctx.textAlign = rtl ? 'right' : 'left';
+  ctx.fillText(f.link || '', ix, bottom - 30);
+}
+
 function drawPhoto(ctx, W, H, shape, f, logo, photo) {
   ctx.fillStyle = '#F6EFE4';
   ctx.fillRect(0, 0, W, H);
@@ -644,7 +732,11 @@ async function render(target, ad, shape, scale = 1) {
   const logo = await loadImage(LOGO);
   await Promise.all(['700 80px "Playfair Display"', '700 40px Manrope', '500 30px Manrope', '800 30px Manrope',
     '700 80px "Frank Ruhl Libre"', '700 40px Assistant'].map((x) => document.fonts?.load(x).catch(() => null)));
-  if (ad.design === 'chat') drawChat(ctx, W, H, shape, f, logo);
+  // A Hebrew ad's scene is mirrored (its words sit on the right), its real screen laid on the right way round.
+  if (SCENES.includes(ad.design)) {
+    const rtl = isHe(`${f.headline}${f.headline2}${f.sub}`) ? '-rtl' : '';
+    drawScene(ctx, W, H, shape, f, logo, await loadImage(`/ads/scenes/${ad.design}-${shape}${rtl}.jpg`));
+  } else if (ad.design === 'chat') drawChat(ctx, W, H, shape, f, logo);
   else if (ad.design === 'call') drawCall(ctx, W, H, shape, f, logo);
   else if (ad.design === 'bgphoto') drawBackdropPhoto(ctx, W, H, shape, f, logo, f.photo ? await loadImage(f.photo) : null);
   else if (ad.design === 'notify') drawNotify(ctx, W, H, shape, f, logo, await loadImage(f.page));
@@ -662,6 +754,9 @@ async function render(target, ad, shape, scale = 1) {
 function freshAd(design, t, lang) {
   const d = (k) => t(`adStudio.defaults.${design}.${k}`);
   const common = { title: d('title'), line: d('line'), link: 'myisraelrental.com', caption: d('caption') };
+  if (SCENES.includes(design)) {
+    return { design, lang, name: d('name'), fields: { ...common, link: d('link'), headline: d('headline'), headline2: d('headline2'), sub: d('sub') } };
+  }
   if (design === 'chat') {
     return { design, lang, name: d('name'), fields: { ...common, headline: d('headline'), highlight: d('highlight'),
       group: d('group'), post: d('post'), messages: d('messages'), pill: d('pill') } };
@@ -686,7 +781,7 @@ function freshAd(design, t, lang) {
   return { design, lang, name: d('name'), fields };
 }
 
-export const DESIGNS = ['bgphoto', 'chat', 'showcase', 'photo', 'call', 'notify', 'search', 'toggle', 'checklist', 'beforeafter'];
+export const DESIGNS = [...SCENES, 'bgphoto', 'chat', 'showcase', 'photo', 'call', 'notify', 'search', 'toggle', 'checklist', 'beforeafter'];
 
 export default function AdStudio({ token }) {
   const { t, i18n } = useTranslation();
@@ -921,6 +1016,7 @@ export default function AdStudio({ token }) {
               <span className={label} style={{ color: 'var(--ink)' }}>{t('adStudio.field.name')}</span>
               <input className={field} dir="auto" value={ad.name} onChange={(e) => setAd({ ...ad, name: e.target.value })} data-testid="ad-studio-name" />
             </label>
+            {SCENES.includes(ad.design) && [box('headline'), box('headline2'), box('sub', 2)]}
             {ad.design === 'chat' && [box('headline', 2), box('highlight'), box('group'), box('post', 2), box('messages', 6), box('pill')]}
             {ad.design === 'showcase' && (
               <>
