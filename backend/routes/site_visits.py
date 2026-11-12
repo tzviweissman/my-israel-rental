@@ -263,6 +263,75 @@ async def site_demand(response: Response) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# The work the site did for businesses lately (Tzvi, 12 Nov 2026, from polsia.com's running "Replying to customer
+# emails..." line): the join page shows it one line at a time. Real rows only, from the texts and emails the site
+# sent (sms_log, email_log), its automatic "we got your message" replies (away_replies) and the replies it drafted
+# for a customer left waiting (lead_nudges). Nothing that names anyone: the kind of message, text or email, the
+# business's area and when. Fewer than MIN_SHOWN rows in the window and the line is not shown at all.
+# ---------------------------------------------------------------------------
+
+_WORK_CACHE: dict = {"at": 0.0, "data": None}
+WORK_DAYS = 14
+WORK_SHOWN = 12
+
+
+def _work_kind(who: str, kind: str) -> str | None:
+    """What a text or email was, in the few kinds the page names. None: not shown."""
+    kind = kind or ""
+    if "review" in kind:
+        return "review_asked"
+    if "reminder" in kind:
+        return "reminder_sent"
+    if who == "business":
+        return "order_alert" if kind.split("_")[0] in ("order", "booking", "quote") else None
+    if who == "customer":
+        if "declined" in kind:
+            return None
+        return "confirmed" if "confirmed" in kind else "received"
+    return None
+
+
+async def _work_rows() -> list[dict]:
+    since = datetime.now(UTC) - timedelta(days=WORK_DAYS)
+    iso = since.isoformat()
+    rows: list[dict] = []
+    for coll, channel in (("sms_log", "text"), ("email_log", "email")):
+        async for r in db[coll].find({"at": {"$gte": iso}}, {"_id": 0, "who": 1, "kind": 1, "business_id": 1, "at": 1}
+                                     ).sort("at", -1).limit(200):
+            k = _work_kind(r.get("who") or "", r.get("kind") or "")
+            if k:
+                rows.append({"kind": k, "channel": channel, "business_id": r.get("business_id"), "at": r.get("at")})
+    for coll, k in (("away_replies", "auto_reply"), ("lead_nudges", "reply_drafted")):
+        async for r in db[coll].find({}, {"_id": 0, "business_id": 1, "at": 1}).sort("at", -1).limit(100):
+            at = r.get("at")
+            at = at.isoformat() if isinstance(at, datetime) else str(at or "")
+            if at >= iso:
+                rows.append({"kind": k, "channel": "", "business_id": r.get("business_id"), "at": at})
+    rows.sort(key=lambda r: r["at"], reverse=True)
+    return rows
+
+
+@router.get("/site/work")
+async def site_work(response: Response) -> dict:
+    """The latest work done for businesses, anonymised: [{kind, channel, area, at}], newest first. Cached two
+    minutes. Empty when there is too little to show."""
+    now = time.time()
+    if _WORK_CACHE["data"] is None or now - _WORK_CACHE["at"] > 120:
+        rows = await _work_rows()
+        ids = list({r["business_id"] for r in rows[:WORK_SHOWN] if r.get("business_id")})
+        areas: dict = {}
+        if ids:
+            async for b in db.businesses.find({"_id": {"$in": ids}}, {"areas": 1}):
+                areas[b["_id"]] = ((b.get("areas") or [""])[0]) or ""
+        events = [{"kind": r["kind"], "channel": r["channel"], "area": areas.get(r.get("business_id"), ""), "at": r["at"]}
+                  for r in rows[:WORK_SHOWN]]
+        _WORK_CACHE["data"] = {"events": events if len(rows) >= MIN_SHOWN else []}
+        _WORK_CACHE["at"] = now
+    response.headers["Cache-Control"] = "public, max-age=60"
+    return _WORK_CACHE["data"]
+
+
+# ---------------------------------------------------------------------------
 # Restaurant taps (Tzvi, 12 Nov 2026: "i cant see if anyone is using the restaurants"). One row per tap on a
 # restaurant card's Call, WhatsApp, Directions, Website or Order button: which place, which button, the day and the
 # anonymous browser id. Same privacy rule as visits: no IP, no account. The admin Restaurants tab reads it.

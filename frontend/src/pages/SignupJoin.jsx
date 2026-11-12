@@ -29,6 +29,7 @@ import WelcomePopups from '../components/WelcomePopups';
 import DemandLines from '../components/common/DemandLines';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import AuthShell from '../components/auth/AuthShell';
+import WorkForYou from '../components/auth/WorkForYou';
 
 // Namespaced so it cannot collide with the listing wizard's draft.
 const SIGNUP_DRAFT = 'signup-join';
@@ -425,6 +426,8 @@ const SignupJoin = () => {
                 </Link>
               </span>
             </div>
+            {/* On a laptop this sits in the right panel (SignupSphere); a phone has no panel, so it follows here. */}
+            <WorkForYou className="mt-6 lg:hidden" />
           </section>
         )}
 
