@@ -553,24 +553,32 @@ _PAGE_BYTES = 1_500_000
 async def _fetch(url: str) -> tuple[str, str]:
     """One public page: (its HTML, the address it ended on). Every hop is checked to be a public host before it
     is fetched, so nothing on our own network can be reached through this. ("", url) when it cannot be read."""
+    import asyncio
+
     import httpx
 
     from utils.helpers import _is_public_ical_url
     headers = {"User-Agent": "Mozilla/5.0 (compatible; MyIsraelRentalBot/1.0)", "Accept-Language": "he,en;q=0.8"}
     async with httpx.AsyncClient(timeout=10, follow_redirects=False, headers=headers) as http:
         for _ in range(4):
-            if not _is_public_ical_url(url):
+            # The check resolves the host with a blocking DNS lookup: off the event loop, or one slow domain stalls
+            # every request on the server (11 and 13 Nov 2026 code reviews).
+            if not await asyncio.to_thread(_is_public_ical_url, url):
                 return "", url
-            r = await http.get(url)
-            if r.is_redirect and r.headers.get("location"):
-                url = str(r.url.join(r.headers["location"]))
-                continue
-            break
-        else:
-            return "", url
-    if r.status_code >= 400 or "html" not in r.headers.get("content-type", ""):
+            async with http.stream("GET", url) as r:
+                if r.is_redirect and r.headers.get("location"):
+                    url = str(r.url.join(r.headers["location"]))
+                    continue
+                if r.status_code >= 400 or "html" not in r.headers.get("content-type", ""):
+                    return "", url
+                # At most _PAGE_BYTES is read: a huge or endless page must not fill the server's memory.
+                buf = bytearray()
+                async for chunk in r.aiter_bytes():
+                    buf += chunk
+                    if len(buf) >= _PAGE_BYTES:
+                        break
+                return bytes(buf[:_PAGE_BYTES]).decode(r.encoding or "utf-8", errors="replace"), str(r.url)
         return "", url
-    return r.text[:_PAGE_BYTES], str(r.url)
 
 
 def _meta(page: str, name: str) -> str:
