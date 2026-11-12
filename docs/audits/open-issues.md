@@ -316,8 +316,8 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - [Decision] Weekly ad email will reach every existing business with a product photo and no saved ad on the first weekday morning after deploy. First seen 10 Nov 2026 (2026-11-10-site-audit.md).
 
 ## UI audit of 11 Nov 2026
-- [Low] Sign-up: "Your page is 0% ready" sits on a step bar already a third full, so the two progress signals disagree on the first screen (`CreateGig.jsx:1157` and `:1183`). First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
-- [Low] Sign-up: the seven "+ Add ..." shortcut chips are 26px tall, "Start over" 16px and the bare-header language switch 34px, under 44px on phones (`CreateGig.jsx:1198`, `:1176`; `Navigation.js:354`). First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
+- [Low] Sign-up: "Your page is 0% ready" sits on a step bar already a third full, so the two progress signals disagree on the first screen (`CreateGig.jsx:1157` and `:1183`). First seen 11 Nov 2026 (2026-11-11-ui-audit.md). [Fixed 11 Nov, 94740084]
+- [Low] Sign-up: the seven "+ Add ..." shortcut chips are 26px tall, "Start over" 16px and the bare-header language switch 34px, under 44px on phones (`CreateGig.jsx:1198`, `:1176`; `Navigation.js:354`). First seen 11 Nov 2026 (2026-11-11-ui-audit.md). [Fixed 11 Nov, 94740084]
 - [Low] L.A. Cholent home, 1000x700 window: the kosher line "Kosher, hechsher from Rabbi Weiner" wraps and its second line is cut by the pinned opening (bottom 713px of 700) while the opening holds. First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
 - [Low] Sign-up "your page is live" heading had an exclamation mark (en + he). First seen 11 Nov 2026. [Fixed 11 Nov, 9d2ecd60; on this branch 46fada04]
 
@@ -332,3 +332,11 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - Decided 12 Nov (Tzvi: "do it for any email they put in"): the sign-up draft reminder keeps going to any typed address. Closed; noted in `signup_drafts.py` so audits do not re-report it.
 - Left to the L.A. Cholent session: the kosher line is cut by 11px at 1000x700 (11 Nov). Another session was changing that site the same day.
 - Still open, not re-checked: Hadassah Prys phone booking bar over the Day field (9 Nov, unconfirmed); Gifted Israel basket column at the end of the shop (11 Nov, unconfirmed); footer and menu links on business sites under 44px (2 Nov); ad maker close button about 34px (30 Oct, `AdMaker.jsx` needs check-ad-designs with local servers); audit sandbox has no MongoDB or Chromium download (proxy, since 15 Oct).
+
+## UI audit of 12 Nov 2026
+- [Medium] Business sites, phones: the "Back to businesses" pill sits over the in-page "Order Large" button on L.A. Cholent's order page; `lift()` only clears fixed bars (`mir-back.js:26`). First seen 12 Nov 2026 (2026-11-12-ui-audit.md).
+- [Low] Business sites: "Back to businesses" pill is 26px tall, under 44px (`mir-back.js:23`); size needs Tzvi's decision ("block less"). First seen 12 Nov 2026 (2026-11-12-ui-audit.md).
+- [Low] M and N Jewelry home: "Scroll to see the stone" scroll hint (`m-and-n-jewelry/index.html:39`, `build.py:100`), against rule 5b.6; RULES.md marks it passed. First seen 12 Nov 2026 (2026-11-12-ui-audit.md).
+- [Medium] M and N Jewelry home: opening film frozen on 48% of frames (`check-film-video`), RULES.md R3h.24 marks it passed; blocks any republish of the site. First seen 12 Nov 2026 (2026-11-12-ui-audit.md).
+- [Low] Dashboard leads settings, order texts panel and overview: new controls at 36 to 40px (`LeadsSettings.jsx:23,71,80,108`, `TextNotificationsPanel.jsx:152,188,199`, `OverviewTab.jsx:193`). First seen 12 Nov 2026 (2026-11-12-ui-audit.md).
+- (info, audit tooling) The repo's Playwright runs if `/opt/pw-browsers/chromium_headless_shell-1243` is linked as `-1234` (and `chromium-1243` as `-1234`). 12 Nov 2026.
