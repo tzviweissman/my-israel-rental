@@ -612,3 +612,9 @@ p.price .was { white-space: nowrap; }
   .room { padding: .7rem 1rem; gap: .45rem; }
   .room .ph { width: 86%; margin-inline: auto; }
 }
+/* The moving cards draw no shadow (a shadow on each of 20 sliding cards cost a slowed phone 80 ms a frame, 12 Nov 2026). */
+.said-track li { box-shadow: none; border: 1px solid rgb(122 83 15 / .14); }
+.said-move { contain: paint; }
+
+  /* One order button everywhere (Tzvi, 12 Nov): the size cards use the same solid gold pill with the dial. */
+  .room .btn { white-space: nowrap; flex: none; }

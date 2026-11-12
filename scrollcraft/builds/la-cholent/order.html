@@ -11,9 +11,9 @@
 <meta name="site-category" content="food-shop">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Order · L.A. Cholent by Rabbi Samuels</title>
-<meta name="description" content="Pick Medium, Large or Kiddush, then send your order on WhatsApp. Kosher, Vaad HaKashrus, Rabbi Shmuel Weiner. Made in Jerusalem, delivered across Israel. Free local delivery on your first order.">
+<meta name="description" content="Pick Medium, Large or Kiddush and order. Kosher, Vaad HaKashrus, Rabbi Shmuel Weiner. Made in Jerusalem, delivered across Israel. Free local delivery on your first order.">
 <meta property="og:title" content="Order · L.A. Cholent by Rabbi Samuels">
-<meta property="og:description" content="Pick Medium, Large or Kiddush, then send your order on WhatsApp. Kosher, Vaad HaKashrus, Rabbi Shmuel Weiner. Made in Jerusalem, delivered across Israel. Free local delivery on your first order.">
+<meta property="og:description" content="Pick Medium, Large or Kiddush and order. Kosher, Vaad HaKashrus, Rabbi Shmuel Weiner. Made in Jerusalem, delivered across Israel. Free local delivery on your first order.">
 <meta property="og:image" content="https://myisraelrental.com/pages/la-cholent/assets/tubs.webp">
 <link rel="icon" href="assets/seal.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -62,7 +62,7 @@
           </div>
           <p class="reassure"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Free local delivery on your first order</b></p>
           <div class="act">
-            <a class="btn" id="order-btn" href="#details"><span id="order-label">Order Large, &#8362;180</span><span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
+            <a class="btn" id="order-btn" href="#details"><span id="order-label">Order now, &#8362;180</span><span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
             <p>Delivered across Israel.</p>
           </div>
 </div>
@@ -90,7 +90,7 @@
       <div class="of"><label for="o-note">Anything else</label><input id="o-note" maxlength="300" placeholder="Own meat or parve? Extra meat or marrow bones by the pound?"></div>
         <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
         <div class="act">
-          <button class="btn" id="order-send" type="submit"><span id="order-send-label">Send my order on WhatsApp</span></button>
+          <button class="btn" id="order-send" type="submit"><span id="order-send-label">Order now</span><span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></button>
           <a class="btn-line" href="#order">Change the size</a>
         </div>
       </form>
@@ -168,7 +168,7 @@
     document.getElementById('alt').textContent = s.alt;
     document.getElementById('was').style.opacity = s.deal ? '1' : '0';
     if (s.deal) { document.getElementById('was-s').textContent = '₪' + s.deal.was; document.getElementById('was-off').textContent = s.deal.off; }
-    if (window.labelOrder) window.labelOrder(); else document.getElementById('order-label').textContent = 'Order Large, \u20aa180';
+    if (window.labelOrder) window.labelOrder(); else document.getElementById('order-label').textContent = 'Order now, \u20aa180';
     buttons.forEach(function (b, n) { b.setAttribute('aria-pressed', n === cur ? 'true' : 'false'); });
     // the words that change ease in, so a size change is never one hard swap
     if (was !== cur && !reduce && document.getElementById('price').animate) {
@@ -209,7 +209,7 @@
   $('o-when').value = new Date(Date.now() + 864e5 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   $('oform').querySelector('.qty').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; qty = Math.max(1, Math.min(20, qty + (+b.dataset.d))); $('o-qty').textContent = qty; window.labelOrder(); });
   $('o-how').addEventListener('change', function () { $('w-addr').hidden = this.value !== 'delivery'; });
-  function label() { var s = sizes[cur]; $('order-label').textContent = 'Order ' + (qty > 1 ? qty + ' \u00d7 ' : '') + s.label.charAt(0) + s.label.slice(1).toLowerCase() + ', \u20aa' + qty * s.price; }
+  function label() { var s = sizes[cur]; $('order-label').textContent = 'Order now, \u20aa' + qty * s.price; }
   function check(show) {
     var ok = true, e;
     e = v('o-when') ? '' : 'Choose the day'; if (e) ok = false; if (show || !e) mark('when', e);
@@ -250,7 +250,7 @@
       sending = false; btn.removeAttribute('aria-busy'); $('order-send-label').textContent = lab; 
     });
   });
-  function summary() { MirCode.refresh(); var s = sizes[cur], to = MirCode.after(qty * s.price); $('osum').textContent = qty + ' \u00d7 ' + NAMES[cur] + ', \u20aa' + to; $('order-send-label').textContent = 'Send my order on WhatsApp, \u20aa' + to; }
+  function summary() { MirCode.refresh(); var s = sizes[cur], to = MirCode.after(qty * s.price); $('osum').textContent = qty + ' \u00d7 ' + NAMES[cur] + ', \u20aa' + to; $('order-send-label').textContent = 'Order now, \u20aa' + to; }
   window.labelOrder = function () { label(); summary(); };
   pick(1);
   // a size picked on the home page or in the footer arrives as ?size=0|1|2
