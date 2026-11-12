@@ -1,0 +1,97 @@
+{
+ "shape": "story",
+ "ground": "#1d2a3a",
+ "boxes": [
+  {
+   "what": "desk",
+   "x": 0,
+   "y": 0.52,
+   "w": 1,
+   "h": 0.48,
+   "colour": "#7a5232"
+  },
+  {
+   "what": "tiny printing press",
+   "x": 0.08,
+   "y": 0.55,
+   "w": 0.28,
+   "h": 0.14,
+   "colour": "#555b63"
+  },
+  {
+   "what": "paper sheet",
+   "x": 0.33,
+   "y": 0.62,
+   "w": 0.2,
+   "h": 0.02,
+   "colour": "#ffffff"
+  },
+  {
+   "what": "billboard poster, plain white",
+   "x": 0.5,
+   "y": 0.36,
+   "w": 0.42,
+   "h": 0.26,
+   "colour": "#ffffff"
+  },
+  {
+   "what": "billboard legs",
+   "x": 0.6,
+   "y": 0.62,
+   "w": 0.22,
+   "h": 0.08,
+   "colour": "#444444"
+  },
+  {
+   "what": "ladder",
+   "x": 0.86,
+   "y": 0.45,
+   "w": 0.04,
+   "h": 0.2,
+   "colour": "#cccccc"
+  },
+  {
+   "what": "tiny person",
+   "x": 0.88,
+   "y": 0.42,
+   "w": 0.025,
+   "h": 0.045,
+   "colour": "#ffffff"
+  },
+  {
+   "what": "tiny person",
+   "x": 0.4,
+   "y": 0.68,
+   "w": 0.025,
+   "h": 0.045,
+   "colour": "#ffffff"
+  },
+  {
+   "what": "tiny person",
+   "x": 0.25,
+   "y": 0.72,
+   "w": 0.025,
+   "h": 0.045,
+   "colour": "#ffffff"
+  }
+ ],
+ "keep_empty": [
+  {
+   "what": "headline",
+   "x": 0.05,
+   "y": 0.12,
+   "w": 0.9,
+   "h": 0.17
+  },
+  {
+   "what": "foot",
+   "x": 0.04,
+   "y": 0.83,
+   "w": 0.92,
+   "h": 0.05,
+   "over": [
+    "desk"
+   ]
+  }
+ ]
+}

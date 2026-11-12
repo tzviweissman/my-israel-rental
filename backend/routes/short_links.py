@@ -665,7 +665,8 @@ How good ads are written (docs/static-ad-rules.md 9c):
 - Numbers only when the listing gives them.
 
 Return ONE JSON object:
-  headline  <= 38 characters, as above.
+  headline  <= 38 characters and at most 5 words, as above; 2 to 4 words is best
+            (the 5/5 ads in our library average 4 words).
   headline_key  the ONE word of the headline, copied exactly, that matters most.
   headline_item  when the headline is about one of the listed items and not the
             others, that item's name copied exactly; otherwise "".
@@ -677,7 +678,7 @@ Return ONE JSON object:
             parties, children), "beauty" (wigs, hair, nails, makeup, skin),
             "studio" (anything else, every service and every rental).
   ideas     exactly 3 other headlines as [{{"text": ..., "key": ..., "item": ...}}], each <= 38
-            characters, each with a real idea, each from a different angle: a
+            characters and at most 5 words, each with a real idea, each from a different angle: a
             twist on a phrase the reader already knows; the moment in the
             reader's day when this is the answer; the want behind the product,
             not the product. Short, in the reader's own words, the way a person
@@ -963,10 +964,12 @@ class ShotIn(BaseModel):
     shape: str = "feed"
     kind: str = ""
     occasion: str = ""
+    # One idea in the picture (utils/ad_shots.IDEAS, Tzvi 12 Nov 2026); "" is the plain product shoot.
+    idea: str = ""
 
 
 def _shot_row(r: dict[str, Any]) -> dict[str, Any]:
-    return {k: r.get(k) for k in ("id", "item", "shape", "kind", "occasion", "status", "url", "cut_url", "word", "dark")}
+    return {k: r.get(k) for k in ("id", "item", "shape", "kind", "occasion", "idea", "status", "url", "cut_url", "word", "dark")}
 
 
 @router.get("/ads/shots")
@@ -989,7 +992,8 @@ async def make_ad_shot(body: ShotIn, request: Request, user=Depends(verify_token
     import asyncio
     import uuid
 
-    from utils.ad_shots import ASPECT, KINDS, OCCASIONS, SHOTS_PER_DAY, guess_kind, look_for, prompt_for, recent_count, run_shot
+    from utils.ad_shots import (ASPECT, IDEAS, KINDS, OCCASIONS, SHOTS_PER_DAY, guess_kind, idea_layout, look_for, prompt_for,
+                                prompt_for_idea, recent_count, run_shot)
     if body.target_type != "business" or body.shape not in ASPECT:
         raise HTTPException(status_code=400, detail="Product photos are for a business's own products.")
     await _assert_owns_target(body.target_type, body.target_id, user)
@@ -998,8 +1002,10 @@ async def make_ad_shot(body: ShotIn, request: Request, user=Depends(verify_token
     kind = body.kind if body.kind in KINDS else guess_kind(" ".join(
         [str(facts.get("business_name") or ""), str(facts.get("description") or ""), body.item]
         + [f"{o.get('title', '')} {' '.join(str(i) for i in o.get('items') or [])}" for o in facts.get("offers") or []]))
+    idea = body.idea if body.idea in IDEAS else ""
     key = {"target_id": body.target_id, "item": body.item[:40], "shape": body.shape, "kind": kind, "occasion": occasion}
-    have = await db.ad_shots.find_one({**key, "status": {"$in": ["ready", "making"]}}, {"_id": 0})
+    # Plain shoots saved before ideas existed have no "idea" field: match those as the plain one.
+    have = await db.ad_shots.find_one({**key, "idea": idea or {"$in": ["", None]}, "status": {"$in": ["ready", "making"]}}, {"_id": 0})
     if have:
         return _shot_row(have)
     rows = await db.ad_shots.find({"target_id": body.target_id}, {"_id": 0, "created_at": 1, "status": 1}).to_list(200)
@@ -1013,10 +1019,14 @@ async def make_ad_shot(body: ShotIn, request: Request, user=Depends(verify_token
         raise HTTPException(status_code=404, detail="That product has no photo.")
     look = look_for(kind, occasion)
     what = f"{item['name']}, from {facts.get('business_name') or 'a local business'}"
-    row = {**key, "id": str(uuid.uuid4()), "status": "making", "by": user["user_id"], "created_at": now.isoformat(),
+    row = {**key, "idea": idea, "id": str(uuid.uuid4()), "status": "making", "by": user["user_id"], "created_at": now.isoformat(),
            "photo": item["photo"], "word": look["word"], "dark": bool(look["dark"])}
     await db.ad_shots.insert_one(dict(row))
-    asyncio.create_task(run_shot(row["id"], item["photo"], prompt_for(what, kind, occasion, body.shape), body.shape, look["set"]))
+    if idea:
+        asyncio.create_task(run_shot(row["id"], item["photo"], prompt_for_idea(idea, what, kind, occasion, body.shape), body.shape,
+                                     look["set"], [idea_layout(idea, body.shape)]))
+    else:
+        asyncio.create_task(run_shot(row["id"], item["photo"], prompt_for(what, kind, occasion, body.shape), body.shape, look["set"]))
     return _shot_row(row)
 
 

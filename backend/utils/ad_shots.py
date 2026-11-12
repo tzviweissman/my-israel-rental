@@ -98,6 +98,49 @@ def prompt_for(what: str, kind: str, occasion: str, shape: str) -> str:
     )
 
 
+# Idea pictures (Tzvi, 12 Nov 2026: "lets make the improvements"): the library's best ads put one idea in the
+# picture, and surprising scale is one of its two strongest kinds (4.13 of 5, docs/inspo/pinterest-ads-2026-11-02).
+# Tzvi picked one to build: a crew of tiny people at work on the giant product.
+# Blueprint: docs/ads/blueprints/design-shoot-ideas.md.
+IDEAS = {"tiny"}
+# The crew and their tools from the business's own world (ad rule A3.10).
+_CREW = {
+    "grill": "tiny chefs in white aprons and caps, with tongs and a small ladle",
+    "bakery": "tiny bakers in white aprons and caps, with a rolling pin and a small sack of flour",
+    "cafe": "tiny baristas in brown aprons, with a small jug and a tray",
+    "kitchen": "tiny chefs in white aprons and caps, with a ladle and a small measuring cup",
+    "gift": "tiny helpers in pastel overalls, with a roll of ribbon and a small gift tag",
+    "beauty": "tiny stylists in black smocks, with brushes and a small comb",
+    "studio": "tiny workers in white overalls, with cloths, a small bucket and a clipboard",
+}
+
+
+def idea_layout(idea: str, shape: str) -> Path:
+    """The layout sketch the model photographs for real (ad rule A3.11), drawn by scripts/ad-layout-sketch.py."""
+    return SETS / f"layout-{idea}-{shape}.png"
+
+
+def prompt_for_idea(idea: str, what: str, kind: str, occasion: str, shape: str) -> str:
+    """The product shoot with one idea in it. Image 1 the product, image 2 the set, image 3 the layout sketch."""
+    look = look_for(kind, occasion)
+    tall = shape == "story"
+    crew = _CREW.get(kind, _CREW["studio"])
+    return (
+        f"Surreal advertising photograph. Image 1 is the real product: {what}. Image 2 is the empty set. Image 3 is "
+        "the layout to photograph for real, keep its arrangement. The product from image 1 stands huge on the table "
+        f"of image 2, filling about {'85' if tall else '80'} percent of the picture's width in the lower part, like a "
+        f"giant building. A crew of five {crew}, each only about one tenth of the product's height, are busy looking "
+        "after it as if it were a monument: one climbing a small wooden ladder leaning against it, two standing on top "
+        "of it at work, one carrying a tool across the table, one looking up at it with a hand on the hip. They are "
+        "real miniature people photographed with the product, in sharp focus, with real small shadows. "
+        "Keep the product identical to image 1: the same shape, colours, labels, lids, texture and count; do not add, "
+        "remove, open, rearrange or improve anything about it, and nothing spills from it. "
+        f"{look['light']} "
+        f"The top {'35' if tall else '30'} percent of the picture is plain background for words. "
+        "No text, no letters, no logos, no giant people, no hands of normal size."
+    )
+
+
 def prompt_for_scene(what: str, shape: str) -> str:
     """A service's own photo (a cleaner at work, a van, a haircut) photographed again as an advert, not put on a
     product set: the same people, place and work, only the photography better (Tzvi, 10 Nov 2026)."""
@@ -123,7 +166,7 @@ def _fetchable(src: str) -> str:
     return src.replace("/upload/f_auto,q_auto/", "/upload/f_jpg,q_85,w_1400/")
 
 
-def make_picture(product_url: str, prompt: str, shape: str, set_name: str | None) -> bytes:
+def make_picture(product_url: str, prompt: str, shape: str, set_name: str | None, extra: list[Path] | None = None) -> bytes:
     """One billable call. Blocking: run it in a thread. HF_KEY is read by the client from the environment."""
     import os
 
@@ -138,7 +181,8 @@ def make_picture(product_url: str, prompt: str, shape: str, set_name: str | None
     r = higgsfield_client.subscribe(
         MODEL,
         arguments={"prompt": prompt, "image_urls": [_fetchable(product_url)]
-                   + ([higgsfield_client.upload_file(SETS / f"{set_name}.jpg")] if set_name else []),
+                   + ([higgsfield_client.upload_file(SETS / f"{set_name}.jpg")] if set_name else [])
+                   + [higgsfield_client.upload_file(x) for x in (extra or [])],
                    "aspect_ratio": ASPECT[shape], "resolution": "2k", "quality": "medium", "enhance_prompt": False},
         on_queue_update=lambda s: final.update(s=s),
     )
@@ -181,12 +225,13 @@ def front_cut(content: bytes) -> bytes | None:
     return buf.getvalue()
 
 
-async def run_shot(shot_id: str, product_url: str, prompt: str, shape: str, set_name: str | None) -> None:
+async def run_shot(shot_id: str, product_url: str, prompt: str, shape: str, set_name: str | None,
+                   extra: list[Path] | None = None) -> None:
     """Makes the picture and its cut-out and keeps both; the row says how it went. Never raises."""
     from routes.deps import db, logger
     from utils.cloud_storage import upload_bytes_to_cloudinary
     try:
-        content = await asyncio.to_thread(make_picture, product_url, prompt, shape, set_name)
+        content = await asyncio.to_thread(make_picture, product_url, prompt, shape, set_name, extra)
         url = (await upload_bytes_to_cloudinary(content, is_video=False, folder="myisraelrental/ad-shots"))["url"]
         cut_url = None
         try:
