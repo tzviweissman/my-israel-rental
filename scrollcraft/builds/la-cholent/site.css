@@ -618,3 +618,26 @@ p.price .was { white-space: nowrap; }
 
   /* One order button everywhere (Tzvi, 12 Nov): the size cards use the same solid gold pill with the dial. */
   .room .btn { white-space: nowrap; flex: none; }
+  /* Every order button flat and borderless (Tzvi, 12 Nov: "on mobile it looks off"): the shadow showed on the cream
+     sections only, and the form's <button> kept the browser's grey border. */
+  .btn { box-shadow: none; border: 0; }
+
+  /* Order picks and the saved message (12 Nov) */
+  .oform .hint { margin: .3rem 0 0; font-size: var(--sc-t-xs, .8rem); color: var(--lt-muted, #6b5d4f); }
+  .oform .sent { margin: 0 0 1rem; padding: .8rem 1rem; border-radius: 10px; background: #E6F4EA; color: #1d5c37; font-weight: 600; }
+  .oform .sent.bad { background: #FBEAEA; color: #8a1c1c; }
+  .oform .sent a { color: inherit; }
+
+  /* Order form on iPhone (Tzvi, 12 Nov 2026: boxes overlapped and the page zoomed on every tap).
+     Safari zooms into any field under 16px, so every field is 16px; its date field has a built-in minimum width
+     that pushed past its cell, so cells and fields may shrink; and every box is the same 48px tall. */
+  .oform .orow > * { min-width: 0; }
+  .oform input, .oform select, .oform textarea { font-size: 16px; height: 48px; min-height: 48px; min-width: 0; max-width: 100%; box-sizing: border-box; }
+  .oform input[type="date"] { -webkit-appearance: none; appearance: none; display: block; text-align: left; line-height: 46px; }
+  .oform input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+  .oform .qty { height: 48px; min-height: 48px; box-sizing: border-box; }
+  .oform .qty button { min-height: 46px; }
+
+  /* The order form is wider on a laptop, so its picks sit four to a row and the section fits one screen (12 Nov). */
+  @media (min-width: 900px) { .oform { max-width: 60rem; } .oform .orow { grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); } }
+  @media (min-width: 900px) and (max-height: 700px) { .details { padding-top: 2rem; padding-bottom: 2rem; } }
