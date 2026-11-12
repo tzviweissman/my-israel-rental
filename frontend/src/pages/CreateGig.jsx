@@ -1089,7 +1089,7 @@ const CreateGig = () => {
             <PartyPopper size={28} style={{ color: '#111827' }} aria-hidden="true" />
           </div>
           <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: 'var(--font-head)' }}>
-            {t('wizard.liveTitle', 'Your page is live!')}
+            {t('wizard.liveTitle', 'Your page is live')}
           </h1>
           <p className="text-base text-gray-600 mb-6">
             {t('wizard.liveBody', { name: published.name, defaultValue: 'Customers can find {{name}} now. Share it today to get your first customers.' })}
