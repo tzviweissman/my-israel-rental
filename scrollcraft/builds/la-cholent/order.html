@@ -51,7 +51,7 @@
           <div class="size-pick" role="group" aria-label="Pick a size">
             <button type="button" data-i="0" aria-pressed="false"><b>Medium</b><span>Feeds 4 to 6</span><em>&#8362;100</em></button>
             <button type="button" data-i="1" aria-pressed="true"><b>Large</b><span>Feeds 8 to 12</span><em>&#8362;180</em><i class="tab">10% off</i></button>
-            <button type="button" data-i="2" aria-pressed="false"><b>Kiddush</b><span>Feeds 16 to 24</span><em>&#8362;330</em><i class="tab">8% off</i></button>
+            <button type="button" data-i="2" aria-pressed="false"><b>Kiddush</b><span>Feeds 16 to 24</span><em>&#8362;330</em><i class="tab">18% off</i></button>
           </div>
           <p class="pick"><span class="size-name" id="size-name">Large</span><span class="feeds" id="feeds">Feeds 8 to 12, about &#8362;15 a person</span></p>
           <p class="price"><span class="now" id="price"><small>₪</small>180</span><span class="was" id="was"><s id="was-s">&#8362;200</s><b id="was-off">10% off</b><small id="was-note">2 Mediums, &#8362;200</small></span><span class="alt" id="alt">₪85 if you add your own meat, or keep it parve.</span></p>
@@ -137,12 +137,14 @@
   // The price set in the dashboard wins, so the total sent always matches the listing (frontend/server.js puts the
   // listing's prices in window.MIR_PRICES; Tzvi, 11 Nov 2026, after a Kiddush price edited as page text sent ₪250).
   sizes.forEach(function (s) { var p = Number((window.MIR_PRICES || {})[s.name]); if (p > 0) s.price = p; });
-  // Each size's saving against two of the size below, which feed the same number (rule 3j: like for like, real
-  // money): Large against 2 Mediums, Kiddush against 2 Larges. Worked out from the prices, so it follows the dashboard.
+  // Each size's saving against the Mediums that feed the same number (rule 3j: like for like, real money): Large
+  // against 2, Kiddush against 4, so the saving rises with the size (Tzvi, 12 Nov 2026). Worked out from the prices,
+  // so it follows the dashboard.
+  var MEDIUMS = [1, 2, 4];
   sizes.forEach(function (s, i) {
     if (!i) return;
-    var two = 2 * sizes[i - 1].price, off = Math.round((two - s.price) / two * 100);
-    if (off >= 1) s.deal = { was: two, off: off + '% off', note: '2 ' + sizes[i - 1].label.charAt(0) + sizes[i - 1].label.slice(1).toLowerCase() + 's, ₪' + two };
+    var two = MEDIUMS[i] * sizes[0].price, off = Math.round((two - s.price) / two * 100);
+    if (off >= 1) s.deal = { was: two, off: off + '% off', note: MEDIUMS[i] + ' Mediums, ₪' + two };
   });
   document.querySelectorAll('.size-pick button').forEach(function (b, i) {
     var t = b.querySelector('.tab'), d = sizes[i] && sizes[i].deal;

@@ -127,15 +127,15 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
   <section class="shop" id="sizes" aria-labelledby="sizes-h">
     <div class="sc-wrap shop-head"><h2 id="sizes-h">Pick your size</h2><p>A raw kit for your crock pot, in Original, Spicy, Heimish or Gluten-Free. Add water and cook on low for about 20 hours.</p></div>
     <div class="rooms">
-      <article class="room gold"><div class="ph"><img src="assets/tub-gold-wide.webp" alt="A sealed tub of L.A. Cholent by Rabbi Samuels with the cooking steps on its label, on a slate block beside a raw marrow bone." width="1680" height="720" loading="lazy"></div>
+      <article class="room gold"><div class="ph"><img src="assets/card-medium.webp" alt="A sealed Medium tub of L.A. Cholent by Rabbi Samuels on a slate block, a small dish of pearl barley on a linen napkin at its left and two raw marrow bones at its right" width="1680" height="720" loading="lazy"></div>
         <div class="rb"><h3>Medium</h3><p class="feeds">Feeds 4 to 6, about &#8362;16 a person</p><p class="what">Add your own meat or keep it parve: &#8362;55</p></div>
         <div class="rf"><div class="price">&#8362;100</div><a class="btn-line add" href="order.html?size=0" data-size="0" aria-label="Order Medium">Order now<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a></div></article>
-      <article class="room plum"><div class="ph"><img src="assets/tub-large-wide.webp" alt="A sealed Large tub of L.A. Cholent by Rabbi Samuels with a slow cooker liner on top, standing on a slate block beside a raw marrow bone" width="1680" height="720" loading="lazy"><span class="tag">10% off</span></div>
+      <article class="room plum"><div class="ph"><img src="assets/card-large.webp" alt="A sealed tub of L.A. Cholent by Rabbi Samuels on a slate block, a small dish of pearl barley on a linen napkin at its left and two raw marrow bones at its right" width="1680" height="720" loading="lazy"><span class="tag">10% off</span></div>
         <div class="rb"><h3>Large</h3><p class="feeds">Feeds 8 to 12, about &#8362;15 a person</p><p class="what">Add your own meat or keep it parve: &#8362;85</p></div>
         <div class="rf"><div class="price"><span class="was"><s>&#8362;200</s><small>2 Mediums, &#8362;200</small></span> &#8362;180</div><a class="btn-line add" href="order.html?size=1" data-size="1" aria-label="Order Large">Order now<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a></div></article>
-      <article class="room steel"><div class="ph"><img src="assets/tub-steel-wide.webp" alt="A sealed tub of L.A. Cholent by Rabbi Samuels with the cooking steps on its label, on a slate block beside a raw marrow bone." width="1680" height="720" loading="lazy"><span class="tag">8% off</span></div>
-        <div class="rb"><h3>Extra Large / Kiddush</h3><p class="feeds">Feeds 16 to 24, about &#8362;14 a person</p><p class="what">Sizes are customizable depending on the number of guests</p></div>
-        <div class="rf"><div class="price"><span class="was"><s>&#8362;360</s><small>2 Larges, &#8362;360</small></span> &#8362;330</div><a class="btn-line add" href="order.html?size=2" data-size="2" aria-label="Order Extra Large / Kiddush">Order now<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a></div></article>
+      <article class="room steel"><div class="ph"><img src="assets/card-kiddush.webp" alt="The bigger Extra Large tub of L.A. Cholent by Rabbi Samuels with a slow cooker liner on top, on a slate block, a small dish of pearl barley on a linen napkin at its left and two raw marrow bones at its right" width="1680" height="720" loading="lazy"><span class="tag">18% off</span></div>
+        <div class="rb"><h3>Extra Large / Kiddush</h3><p class="feeds">Feeds 16 to 24</p><p class="what">Sizes are customizable depending on the number of guests</p></div>
+        <div class="rf"><div class="price"><span class="was"><s>&#8362;400</s><small>4 Mediums, &#8362;400</small></span> &#8362;330</div><a class="btn-line add" href="order.html?size=2" data-size="2" aria-label="Order Extra Large / Kiddush">Order now<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a></div></article>
     </div>
   </section>
 
@@ -190,17 +190,18 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
 <script>ScrollCraft.mount(document.body);</script>
 <script>
 /* The size cards follow the prices set in the dashboard (frontend/server.js window.MIR_PRICES): each price, and each
-   saving against two of the size below (rule 3j, like for like), worked out again, so a new price never leaves an old
-   saving on the page. */
+   saving against the Mediums that feed the same number (rule 3j, like for like: Large = 2, Kiddush = 4; Tzvi, 12 Nov
+   2026: "it should always be comparing to the original so its easier to see the rising savings"), worked out again,
+   so a new price never leaves an old saving on the page. */
 (function () {
   var live = window.MIR_PRICES; if (!live) return;
-  var names = ['Medium', 'Large', 'Extra Large / Kiddush'], one = ['Medium', 'Large'], rooms = document.querySelectorAll('.rooms .room');
+  var names = ['Medium', 'Large', 'Extra Large / Kiddush'], MEDIUMS = [1, 2, 4], rooms = document.querySelectorAll('.rooms .room');
   var price = names.map(function (n, i) { var p = Number(live[n]); return p > 0 ? p : null; });
   if (price.some(function (p) { return p == null; })) return;
   rooms.forEach(function (room, i) {
     var box = room.querySelector('.rf .price'), tag = room.querySelector('.ph .tag');
-    var two = i ? 2 * price[i - 1] : 0, off = i ? Math.round((two - price[i]) / two * 100) : 0;
-    box.innerHTML = (off >= 1 ? '<span class="was"><s>₪' + two + '</s><small>2 ' + one[i - 1] + 's, ₪' + two + '</small></span> ' : '') + '₪' + price[i];
+    var two = MEDIUMS[i] * price[0], off = i ? Math.round((two - price[i]) / two * 100) : 0;
+    box.innerHTML = (off >= 1 ? '<span class="was"><s>₪' + two + '</s><small>' + MEDIUMS[i] + ' Mediums, ₪' + two + '</small></span> ' : '') + '₪' + price[i];
     if (off >= 1) { if (!tag) { tag = document.createElement('span'); tag.className = 'tag'; room.querySelector('.ph').appendChild(tag); } tag.textContent = off + '% off'; }
     else if (tag) tag.remove();
   });

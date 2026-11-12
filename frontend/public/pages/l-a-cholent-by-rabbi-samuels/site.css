@@ -562,3 +562,10 @@
   .size-pick button span { white-space: nowrap; }
   .said-cont { padding-top: 0; }
   .said-all li { box-shadow: 0 2px 10px rgb(122 83 15 / 0.10); }
+
+/* The saving line is one line on every card, so the struck price, its note and the price sit in the same place on each
+   (Tzvi, 12 Nov 2026: "consistency is key"; it wrapped on the Large card only, at some widths). */
+.room .price .was { flex-wrap: nowrap; white-space: nowrap; }
+/* The size-card pictures are one 21:9 set (gen/cards_set.py): the box takes the picture's own shape at every width, so
+   the slate, the barley and both bones always show and sit in the same place on each card (rule 8, hero shot 9). */
+.room .ph, .room .ph { height: auto !important; aspect-ratio: 21 / 9; }

@@ -131,12 +131,12 @@ R3j.3 pass: no taster is shown because none is offered
 R3j.4 n/a: no group discounts; free local delivery on the first order is shown once beside the button (his flyer)
 R3j.5 pass: no come-back feature is shown
 R3j.6 pass: the Large is the default on the dial; no invented option
-R3j.7 pass: each struck price is two of the size below, which feed the same: ₪200 is two Mediums (8 to 12, like one Large), ₪360 is two Larges (16 to 24, like one Kiddush, since 11 Nov 2026 when the owner set the Kiddush to ₪330 for 16 to 24); the card and the dial say so beside it; no .99 endings
-R3j.8 pass: per unit: Medium ₪100 feeds 4 to 6; Large ₪180 feeds 8 to 12 against two Mediums at ₪200; Kiddush ₪330 feeds 16 to 24 against two Larges at ₪360 (same servings)
-R3j.9 pass: one saving per size, each against two of the size below; worked out in the page from the listing prices (index.html and order.html), so a new price in the dashboard never leaves an old saving showing
-R3j.10 pass: 10% off = (200-180)/200; 8% off = (360-330)/360 = 8.3, rounded; struck price beside the new price
+R3j.7 pass: each struck price is the Mediums that feed the same: ₪200 is two Mediums (8 to 12, like one Large), ₪400 is four Mediums (16 to 24, like one Kiddush); the card and the dial say so beside it; no .99 endings
+R3j.8 pass: per unit: Medium ₪100 feeds 4 to 6; Large ₪180 feeds 8 to 12 against two Mediums at ₪200; Kiddush ₪330 feeds 16 to 24 against four Mediums at ₪400 (same servings)
+R3j.9 pass: one saving per size, each against the Mediums that feed the same; worked out in the page from the listing prices (index.html and order.html)
+R3j.10 pass: 10% off = (200-180)/200; 18% off = (400-330)/400 = 17.5, rounded; struck price beside the new price
 R3j.11 n/a: no combined service exists
-R3j.12 pass: the owner made no savings claim beyond "XL Kiddush sizes, discount pricing" on her flyer; both savings are derived from two of the size below
+R3j.12 pass: the owner made no savings claim beyond "XL Kiddush sizes, discount pricing" on her flyer; both savings are derived from the Mediums that feed the same
 R3.14 pass: loud prices only because prices exist (boxes, pans, sizes), none invented
 
 ## 6. Order and booking flow
@@ -226,3 +226,8 @@ Note, 6 Nov 2026: split into Home and Order (split-four-sites). The lines for th
 Note, 6 Nov 2026: the order form on the Order page carries the discount code box (mir-code.js), and the server adds the phone note, the required email and the texts step (mir-order.js); the phone Menu button was added to both pages. Looked at both pages on phone and laptop; the other rules were not re-read.
 R3s.29 pass: no button breaks onto two lines: the Large card's button did between 1000 and 1350px wide (Tzvi, 10 Nov 2026), buttons are now nowrap and the price beside them gives way; the order page's Kiddush card said "Sized to your guests" on two lines on a phone and now says "Any guest count" on one; check-same-button clean on all five pages at the eight sizes
 R3p.8 pass: the crock-pot dial chip is on every order button: the opening, the three size cards (chip in the card's ink, pointer in its colour), the menu bar, the phone bar, the footer and the next-step rows; it turns OFF to LOW only when pointed at or pressed, no turn under reduced motion; looked at on a phone and a laptop
+
+R3j.13 pass: every saving is against the smallest size, Large = 2 Mediums, Kiddush = 4 Mediums, so it rises with the size (10%, then 18%)
+R3j.14 pass: prices.json names Medium, Large and Extra Large / Kiddush; order.html reads window.MIR_PRICES before its own numbers; both savings are worked out from those prices; checked 12 Nov 2026 with the live listing at 250 and then 330, every place followed
+R8.8 pass: the three card pictures are one 21:9 set from one layout sketch (gen/cards_set.py: one master, the other two edited from it): slate, a dish of pearl barley on a linen napkin and two marrow bones in the same places on every card; the Kiddush tub is visibly bigger on the same slate; the box keeps the picture's 21:9 shape so nothing is cut at any width
+R8.9 pass: the owner's 11 Nov photo is of the Extra Large tub (Tzvi, 12 Nov 2026) and is on the Kiddush card only; Medium and Large show the standard tub from their four-tub photo
