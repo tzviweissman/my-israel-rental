@@ -15,7 +15,7 @@
 <title>Order a gift · The Gift Boutique</title>
 <meta name="site-category" content="fashion-shop">
 <meta name="description" content="Choose your gifts, say who they are for and where they are going, and send the order to The Gift Boutique on WhatsApp. Delivered across Israel.">
-<link rel="icon" href="/pages/the-gift-boutique/assets/logo-192.png?v=mw6wryg1">
+<link rel="icon" href="/pages/the-gift-boutique/assets/logo-192.png?v=mwewfipz">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
@@ -252,13 +252,18 @@
   /* three true facts under the main button (rules 3v.14) */
   .btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .9rem;  }
   .btn-facts li::before { content: ''; display: inline-block; vertical-align: middle; width: .4em; height: .4em; margin-inline-end: .45em; margin-bottom: .15em; border-radius: 50%; background: var(--gold); }
+  /* order form: fields at 16px so iPhones do not zoom in; grid cells may shrink */
+  input, textarea, select, #f input, #f textarea, #f select { font-size: 16px !important; min-width: 0; }  /* !important: a site-wide size rule above is !important too, and the id wins */
+  select { width: 100%; min-height: 48px; padding: .7rem .9rem; border: 1px solid var(--line-ivory); border-radius: 12px; background: #fff; color: var(--ink); font-family: var(--font-body); }
+  .cols > *, .fields > *, .fields > * > * { min-width: 0; }
+  .sum .why.bad { color: #FFD2CC; font-weight: 600; }
 </style>
 </head>
 <body>
 
 <header class="bar">
   <div class="wrap">
-    <a class="brand" href="/business/the-gift-boutique" aria-label="The Gift Boutique, home"><img src="/pages/the-gift-boutique/assets/logo.webp?v=mw6wryg1" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-e8c39563-0">THE GIFT BOUTIQUE</span></a>
+    <a class="brand" href="/business/the-gift-boutique" aria-label="The Gift Boutique, home"><img src="/pages/the-gift-boutique/assets/logo.webp?v=mwewfipz" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-e8c39563-0">THE GIFT BOUTIQUE</span></a>
     <nav class="nav" aria-label="Pages">
       <a class="link" href="/business/the-gift-boutique#make" data-mir-key="t-4dac8cb1-0">What we make</a>
       <a class="link" href="/business/the-gift-boutique#prices" data-mir-key="t-53b2fbd0-0">Prices</a>
@@ -291,7 +296,8 @@
         <p class="hint" data-mir-key="t-b3d55a20-0">We deliver across Israel.</p>
         <div class="fields">
           <div data-need><label for="to" data-mir-key="t-592a35c8-0">Who is it for?</label><input id="to" name="to" autocomplete="off"><p class="msg" data-mir-key="t-8f71d364-0">Tell us who the gift is for.</p></div>
-          <div data-need><label for="city" data-mir-key="t-59b7e1af-0">City</label><input id="city" name="city" autocomplete="address-level2"><p class="msg" data-mir-key="t-132b64fd-0">Which city is it going to?</p></div>
+          <div id="w-area" hidden><label for="area" data-mir-key="t-74bc1383-0">Area</label><select id="area" name="area"></select></div>
+          <div data-need id="w-hood"><label for="city" data-mir-key="t-59b7e1af-0">City</label><input id="city" name="city" autocomplete="address-level2"><p class="msg" data-mir-key="t-132b64fd-0">Which city is it going to?</p></div>
           <div class="full" data-need><label for="addr" data-mir-key="t-db12b167-0">Address</label><input id="addr" name="addr" autocomplete="street-address"><p class="msg" data-mir-key="t-3252eccd-0">Add the street and number.</p></div>
           <div data-need><label for="when" data-mir-key="t-a0254a34-0">Delivery date</label><input id="when" name="when" type="date"><p class="msg" data-mir-key="t-b60ee01e-0">Pick the day it should arrive.</p><p class="closed" id="closed" aria-live="polite" hidden><span id="closedt"></span> <button type="button" id="closedb" class="pickday"></button></p></div>
           <div><label for="tophone" data-mir-key="t-a5c8f5c6-0">Their phone <small>(optional, for the delivery)</small></label><input id="tophone" name="tophone" type="tel" inputmode="tel" autocomplete="off"></div>
@@ -314,7 +320,7 @@
       <p class="empty" id="empty">No gifts chosen yet.</p>
       <ul id="lines" aria-live="polite"></ul>
       <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
-      <div class="tot"><span data-mir-key="t-08a3f96c-0">Gifts</span><b id="total">$0</b></div>
+      <div class="tot"><span data-mir-key="t-08a3f96c-0">Gifts</span><b id="total" data-order-total>$0</b></div>
       <p class="note" data-mir-key="t-b73ddd1c-0">Delivery is added on WhatsApp once we know the city. You pay us directly; nothing is paid on this page.</p>
       <p class="reassure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span data-mir-key="t-7b950b37-0">Nothing is paid on this page. We confirm the delivery fee with you on WhatsApp first.</span></p>
       <a class="btn" id="send" href="#" aria-disabled="true">
@@ -347,11 +353,26 @@
 
 <script id="fallback-products" type="application/json">[{"name":"Gold Luxurious Wine Holder and Wine Glasses","price":150,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/gold-wine.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Silver Chain Wine Holder","price":52,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/silver-chain.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Electric Bottle Opener","price":47,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/electric-opener.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Bottle Opener with Roses","price":45,"price_to":80,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/bottle-opener.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Bottle Opener Gift Set","price":40,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/opener-set.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Bottle Opener with Snacks","price":25,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/opener-snacks.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"L'Chaim Cups","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/lchaim-cups.webp","group":"Wine and bottle gifts","in_stock":false},{"name":"Gold Bicycle Wine Holder","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/bicycle-wine.webp","group":"Wine and bottle gifts","in_stock":false},{"name":"Table Cloth and Napkins","price":45,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/tablecloth.webp","group":"For the table","in_stock":true},{"name":"Napkins & Gold Flower Napkin Rings","price":30,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/napkin-rings.webp","group":"For the table","in_stock":true},{"name":"Set of 4 Rosh Hashana Napkins","price":30,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/rh-napkins.webp","group":"For the table","in_stock":true},{"name":"Porcelain Napkin Holder","price":30,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/napkin-holder.webp","group":"For the table","in_stock":true},{"name":"Glass Salt Shaker","price":34,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/salt-shaker.webp","group":"For the table","in_stock":true},{"name":"Wooden serving board","price":50,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/wooden-board.webp","group":"For the table","in_stock":true},{"name":"Apple Shaped serving board","price":40,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/apple-board.webp","group":"For the table","in_stock":true},{"name":"White Vase","price":55,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/white-vase.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Gold Edged Bowl","price":35,"price_to":38,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/gold-bowl.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"White Marble Glass Bowl","price":35,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/marble-bowl.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Washing Cup and Hand Towels","price":40,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/washing-cup.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Small Glass Jar","price":33,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/glass-jar.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Small Glass, Gold Rimmed Bowls","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/gold-rim-bowls.webp","group":"Bowls, vases and washing cups","in_stock":false},{"name":"Black/Gold Vase","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/black-gold-vase.webp","group":"Bowls, vases and washing cups","in_stock":false},{"name":"Self-Care Gift","price":35,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/self-care.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Cream and Gold Cosmetic Bag","price":26,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/cream-bag.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Black and Gold Cosmetic Bag","price":26,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/black-bag.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Small Jewellery Organiser","price":25,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/jewellery.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Glass Cookie Jar","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/cookie-jar.webp","group":"Treats, self-care and keepsakes","in_stock":false}]</script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+function boot(LISTING) {
   var WA = '972535386042';
   function read(id) { var e = document.getElementById(id); if (!e) return null; try { return JSON.parse(e.textContent); } catch (x) { return null; } }
   var live = read('mir-live-products');
   var products = (Array.isArray(live) && live.length ? live : read('fallback-products')) || [];
+  var GIG = '9597d9d8-e78c-4efc-8718-e3ececea4f8f';
+  var STORE = { delivery: true, nationwide: true, areas: [{ slug: 'jerusalem', label: 'Jerusalem' }] };
+  if (LISTING && Array.isArray(LISTING.products) && LISTING.products.length) {
+    var mine = {}; products.forEach(function (o) { mine[String(o.name || '').toLowerCase()] = o; });
+    products = LISTING.products.map(function (g) {
+      var o = mine[String(g.name || '').toLowerCase()] || {};
+      return { id: g.id, gig_id: GIG, name: g.name, price: g.price, price_to: g.price_to, price_kind: g.price_kind || 'fixed', currency: String(g.currency || 'ILS').toUpperCase(),
+        image: o.image || g.image || null, group: g.group || o.group || null, in_stock: g.in_stock !== false, options: g.options || [] };
+    });
+    if (LISTING.settings && LISTING.settings.delivery_on === false) STORE.delivery = false;
+    if (LISTING.business) {
+      STORE.nationwide = !!LISTING.business.serves_nationwide;
+      if ((LISTING.business.areas || []).length) STORE.areas = LISTING.business.areas.map(function (a) { return { slug: a.slug, label: a.label || a.slug }; });
+    }
+  } else products.forEach(function (o) { if (o.id) o.gig_id = o.gig_id || GIG; });
 
   var SYM = { USD: '$', ILS: '₪', EUR: '€', GBP: '£' };
   function money(n, cur) { var v = Number(n); return (SYM[cur] || '') + (Number.isInteger(v) ? v : v.toFixed(2)); }
@@ -542,6 +563,18 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   function v(id) { return document.getElementById(id).value.trim(); }
+  // Where it goes: a store that does not ship everywhere takes an area from its list (the server refuses any other) and the
+  // typed neighbourhood or city goes inside the address; a nationwide store takes the typed city as it is.
+  function areaSel() { return document.getElementById('area'); }
+  function areaLabel() { var o = areaSel().selectedOptions[0]; return o ? o.textContent : STORE.areas[0].label; }
+  function citySlug() { return STORE.nationwide ? v('city').slice(0, 80) : (areaSel().value || STORE.areas[0].slug); }
+  function addrOut() { return STORE.nationwide || !v('city') ? v('addr') : v('addr') + ', ' + v('city'); }
+  areaSel().innerHTML = STORE.areas.map(function (a) { return '<option value="' + a.slug + '">' + a.label + '</option>'; }).join('');
+  document.getElementById('w-area').hidden = STORE.nationwide || STORE.areas.length < 2;
+  if (!STORE.delivery) {
+    ['w-hood'].forEach(function (id) { var w = document.getElementById(id); if (w) { w.hidden = true; w.removeAttribute('data-need'); } });
+    var ad = document.getElementById('addr'); if (ad) { var aw = ad.closest('[data-need]'); if (aw) { aw.hidden = true; aw.removeAttribute('data-need'); } }
+  }
   function message() {
     var L = ['Hi, I would like to order:'];
     chosen().forEach(function (p) { L.push('• ' + q[p._k] + ' × ' + p.name + ' (' + priceText(p) + ')'); });
@@ -550,7 +583,7 @@ document.addEventListener('DOMContentLoaded', function () {
     L.push('Gifts total: ' + totals().text + ', plus delivery');
     L.push('');
     L.push('For: ' + v('to') + (v('tophone') ? ', ' + v('tophone') : ''));
-    L.push('Address: ' + v('addr') + ', ' + v('city'));
+    L.push(STORE.delivery ? 'Address: ' + v('addr') + ', ' + v('city') + (!STORE.nationwide ? ', ' + areaLabel() : '') : 'Pick-up');
     if (v('when')) {
       var d = new Date(v('when') + 'T12:00:00');
       L.push('Delivery date: ' + d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
@@ -577,9 +610,10 @@ document.addEventListener('DOMContentLoaded', function () {
     notes.push('Sent from the order page by WhatsApp');
     var body = {
       lines: c.map(function (p) { return { product_id: p.id, qty: q[p._k] }; }),
-      fulfilment: 'delivery', date: v('when'), city: v('city').slice(0, 80), address: v('addr'),
+      fulfilment: STORE.delivery ? 'delivery' : 'pickup', date: v('when'),
       customer_name: v('me'), customer_phone: v('myphone'), notes: notes.join('\n'), discount_code: MirCode.code()
     };
+    if (STORE.delivery) { body.city = citySlug(); body.address = addrOut(); }
     var post = fetch(API + '/marketplace/order-form/' + gig + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     var late = new Promise(function (res) { setTimeout(function () { res(null); }, 5000); });
@@ -607,7 +641,8 @@ document.addEventListener('DOMContentLoaded', function () {
       sending = false;
       ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); b.removeAttribute('aria-busy'); });
       paintBtn();
-      why.textContent = saved ? 'Sent. Your order is saved, and the tracking link is in the message.' : '';
+      why.classList.toggle('bad', !saved);
+      why.textContent = saved ? 'Sent. Your order is saved, and the tracking link is in the message.' : 'Your order did not save on the site, so it is going to The Gift Boutique on WhatsApp instead. Please send that message.';
     });
   }
   document.getElementById('send').addEventListener('click', send);
@@ -638,6 +673,14 @@ document.addEventListener('DOMContentLoaded', function () {
     var p = chosen()[0];
     toast('Added: ' + p.name);
   }
+}
+// The listing (GET /order-form) is read first: prices, ids, options, delivery and areas come from it. If it does not answer
+// in 3 seconds, or the store says it is not taking orders, the page starts from its own list, as before.
+document.addEventListener('DOMContentLoaded', function () {
+  var GIG0 = '9597d9d8-e78c-4efc-8718-e3ececea4f8f', base = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api', started = false, t;
+  function go(d) { if (started) return; started = true; clearTimeout(t); boot(d); }
+  t = setTimeout(function () { go(null); }, 3000);
+  fetch(base + '/marketplace/order-form/' + GIG0).then(function (r) { return r.ok ? r.json() : null; }).then(go).catch(function () { go(null); });
 });
 </script>
 </body>
