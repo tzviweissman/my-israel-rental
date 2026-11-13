@@ -16,6 +16,7 @@ import { Loader2, BarChart3 } from 'lucide-react';
 import { money } from '../../utils/currency';
 import BusinessInsights, { Change, Tile, Section, Bars } from './BusinessInsights';
 import CustomerFeedback from './CustomerFeedback';
+import ItemSales from './ItemSales';
 import { PeriodPicker, TrendChart, DownloadButton, usePeriod } from './AnalyticsKit';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 
@@ -134,6 +135,8 @@ export default function SummaryTab({ API, token, embedded = false }) {
                   )}
                 </Section>
               </div>
+
+              <div className="mb-3"><ItemSales API={API} auth={auth} businessId={biz.id} params={params} periodKey={key} t={t} lang={lang} /></div>
 
               <div className="grid gap-3 md:grid-cols-2">
                 {d.memberships.has_any && (

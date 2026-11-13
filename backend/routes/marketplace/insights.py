@@ -25,6 +25,7 @@ from typing import Any, Iterable
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
 
 from routes.deps import db, verify_token
 
@@ -263,6 +264,124 @@ async def business_insights(business_id: str, days: int = Query(30, ge=1, le=366
     orders = await db.store_orders.find({"business_id": business_id}, fields).to_list(20000)
     now = datetime.now(_IL)
     return compute(orders, days, now, window(days, start, end, compare, now))
+
+
+# ---------------------------------------------------------------------------
+# Per item: what sells, what it leaves after its cost (Tzvi, 13 Nov 2026:
+# "track each item what sells the most and what sells the least ... add
+# their costs per item so they can see their margin and see if they should
+# discontinue a certain item"). Nothing is ever removed for them: the screen
+# only points at items that sell little or leave little.
+#
+# Costs live in their own collection, never on the product: products are
+# sent to every customer who opens the shop, and a cost is the owner's own.
+# ---------------------------------------------------------------------------
+SLOW_MAX = 2      # sold this many or fewer in the period: worth a look
+THIN_PCT = 15     # keeps less than this share of the price: a thin margin
+
+
+def _num(v: Any) -> float | None:
+    try:
+        return None if v is None or v == "" else float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def item_sales(products: Iterable[tuple[str, dict[str, Any]]], orders: Iterable[dict[str, Any]],
+               costs: dict[tuple[str, str], float], win: Window) -> list[dict[str, Any]]:
+    """Every listed product (sold or not) plus anything sold that is no longer listed, best sellers first.
+
+    products: (gig_id, product) pairs. costs: {(gig_id, product_id): cost of one}.
+    """
+    rows: dict[tuple[str, str], dict[str, Any]] = {}
+    by_name: dict[tuple[str, str], tuple[str, str]] = {}
+    for gig_id, p in products:
+        pid = p.get("id")
+        if not pid:
+            continue
+        price = None if p.get("price_kind") == "quote" else _num(p.get("price"))
+        rows[(gig_id, pid)] = {"gig_id": gig_id, "product_id": pid, "name": p.get("name") or "", "price": price or None,
+                               "currency": (p.get("currency") or "ILS").upper(), "listed": True, "qty": 0, "orders": 0, "revenue": 0.0}
+        by_name[(gig_id, (p.get("name") or "").strip().lower())] = (gig_id, pid)
+    for o in orders:
+        w = _when(o)
+        if o.get("status") in _SKIP or w is None or not (win.start <= w < win.end):
+            continue
+        gig_id = o.get("gig_id") or ""
+        seen = set()
+        for ln in o.get("lines") or []:
+            name = (ln.get("name") or "").strip()
+            pid = ln.get("product_id")
+            key = (gig_id, pid) if pid else by_name.get((gig_id, name.lower()))
+            if key is None:
+                if not name:
+                    continue
+                key = (gig_id, "name:" + name.lower())
+            if key not in rows:
+                rows[key] = {"gig_id": gig_id, "product_id": key[1], "name": name, "price": None,
+                             "currency": (o.get("currency") or "ILS").upper(), "listed": False, "qty": 0, "orders": 0, "revenue": 0.0}
+            q = int(ln.get("qty") or 0)
+            rows[key]["qty"] += q
+            rows[key]["revenue"] += q * (_num(ln.get("price")) or 0)
+            seen.add(key)
+        for k in seen:
+            rows[k]["orders"] += 1
+    out = []
+    for key, r in rows.items():
+        if not r["listed"] and not r["qty"]:
+            continue
+        cost = costs.get(key)
+        price = r["price"]
+        margin = round(price - cost, 2) if cost is not None and price else None
+        flags = []
+        if r["listed"] and r["qty"] <= SLOW_MAX:
+            flags.append("slow")
+        if margin is not None and margin < 0:
+            flags.append("loss")
+        elif margin is not None and 100 * margin / price < THIN_PCT:
+            flags.append("thin")
+        out.append({**r, "revenue": round(r["revenue"], 2), "cost": cost, "margin": margin,
+                    "margin_pct": round(100 * margin / price, 1) if margin is not None else None,
+                    "profit": round(r["revenue"] - r["qty"] * cost, 2) if cost is not None else None, "flags": flags})
+    out.sort(key=lambda r: (-r["qty"], -r["revenue"], r["name"].lower()))
+    return out
+
+
+@router.get("/businesses/{business_id}/items")
+async def business_items(business_id: str, days: int = Query(30, ge=1, le=366), start: str | None = None, end: str | None = None,
+                         user=Depends(verify_token)):
+    from utils.business_access import business_access
+    await business_access(db, business_id, user, "summary")
+    now = datetime.now(_IL)
+    win = window(days, start, end, "prev", now)
+    gigs = await db.marketplace_gigs.find({"business_id": business_id, "gig_type": "store"}, {"products": 1, "title": 1, "title_he": 1}).to_list(200)
+    products = [(g["_id"], p) for g in gigs for p in g.get("products") or []]
+    titles = {g["_id"]: {"store": g.get("title") or "", "store_he": g.get("title_he") or ""} for g in gigs}
+    orders = await db.store_orders.find({"business_id": business_id},
+                                        {"_id": 0, "status": 1, "created_at": 1, "gig_id": 1, "lines": 1, "currency": 1}).to_list(20000)
+    costs = {(c["gig_id"], c["product_id"]): float(c["cost"]) async for c in db.item_costs.find({"business_id": business_id})}
+    return {"days": win.days, "start": win.start.date().isoformat(), "end": (win.end - timedelta(seconds=1)).date().isoformat(),
+            "slow_max": SLOW_MAX, "thin_pct": THIN_PCT, "items": [{**r, **titles.get(r["gig_id"], {})} for r in item_sales(products, orders, costs, win)]}
+
+
+class CostIn(BaseModel):
+    gig_id: str = Field(..., min_length=1, max_length=64)
+    product_id: str = Field(..., min_length=1, max_length=200)
+    cost: float | None = Field(None, ge=0, le=10_000_000)   # None clears it
+
+
+@router.put("/businesses/{business_id}/items/cost")
+async def set_item_cost(business_id: str, payload: CostIn, user=Depends(verify_token)):
+    from utils.business_access import business_access
+    await business_access(db, business_id, user, "summary")
+    if not await db.marketplace_gigs.find_one({"_id": payload.gig_id, "business_id": business_id}, {"_id": 1}):
+        raise HTTPException(status_code=404, detail="Not found")
+    key = {"business_id": business_id, "gig_id": payload.gig_id, "product_id": payload.product_id}
+    if payload.cost is None:
+        await db.item_costs.delete_one(key)
+    else:
+        await db.item_costs.update_one(key, {"$set": {"cost": round(payload.cost, 2), "updated_at": datetime.now(_IL).isoformat()}}, upsert=True)
+    return {"ok": True, "cost": None if payload.cost is None else round(payload.cost, 2)}
 
 
 def orders_csv(orders: Iterable[dict[str, Any]], win: Window) -> str:
