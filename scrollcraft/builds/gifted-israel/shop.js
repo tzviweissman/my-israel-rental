@@ -33,7 +33,7 @@
     var h = '';
     if (it.finish.length) h += '<fieldset class="opt-g"><legend>Finish</legend><div class="chips">' + it.finish.map(function (f, i) { return '<label class="chip"><input type="radio" name="fin" value="' + f + '"' + (i ? '' : ' checked') + '>' + f + '</label>'; }).join('') + '</div></fieldset>';
     if (it.nusach) h += '<fieldset class="opt-g"><legend>Nusach</legend><div class="chips">' + ['Ashkenaz', 'Sefard'].map(function (f, i) { return '<label class="chip"><input type="radio" name="nus" value="' + f + '"' + (i ? '' : ' checked') + '>' + f + '</label>'; }).join('') + '</div></fieldset>';
-    if (it.engrave) h += '<div class="opt-g"><label class="opt-l" for="sh-engr">Engraving (optional)</label><input class="fld" id="sh-engr" maxlength="28" autocomplete="off" placeholder="A name or a date"><p class="hint">We confirm the wording, the price and where it goes with you on WhatsApp before we engrave.</p></div>';
+    if (it.engrave) h += '<div class="opt-g"><label class="opt-l" for="sh-engr">Engraving (optional)</label><input class="fld" id="sh-engr" maxlength="28" autocomplete="off" placeholder="A name or a date"><p class="hint">Your wording goes on the order as a note. We confirm it, and any cost, with you on WhatsApp before we engrave. Engraving is not in the total shown.</p></div>';
     document.getElementById('sh-opts').innerHTML = h || '<p class="hint">One piece, nothing to choose.</p>';
     label();
     sheet.showModal(); document.body.style.overflow = 'hidden';
@@ -68,7 +68,53 @@
   Object.keys(saved).forEach(function (k) { if (by[GI.split(k).id]) q[k] = Math.max(0, Math.min(20, +saved[k] || 0)); });
   var step = 1, send = document.getElementById('send');
   function pickup() { return document.querySelector('input[name=ful]:checked').value === 'pickup'; }
+  // The listing (GET /order-form) is the price list: prices, stock, the delivery fee and the delivery areas come from it, and the
+  // total shown is the total the server saves (goods plus the delivery fee). FALLBACK is used only if the listing does not answer.
+  var LIVE = null, FALLBACK = { delivery_fee: null };
+  function st() { return LIVE ? (LIVE.settings || {}) : FALLBACK; }
+  function areas() { return (LIVE && LIVE.business && LIVE.business.areas) || []; }
+  function nationwide() { return !!(LIVE && LIVE.business && LIVE.business.serves_nationwide); }
+  function canDeliver() { return !LIVE || (st().delivery_on !== false && (nationwide() || areas().length > 0)); }
+  // the city the server wants: none for a business that serves the whole country, else the one area, or the one chosen
+  function cityOut() { if (!LIVE || pickup() || nationwide()) return undefined; var a = areas(); if (a.length > 1) { var c = document.getElementById('city'); return c ? c.value : a[0].slug; } return a[0] ? a[0].slug : undefined; }
+  function areaFee() { return (st().area_fees || {})[cityOut() || '']; }
+  function fee() { if (!total() || pickup()) return 0; var s = st(); if (s.free_over && total() >= Number(s.free_over)) return 0; var af = areaFee(); return Number(af != null ? af : (s.delivery_fee || 0)); }
+  function feeSet() { var s = st(); return s.delivery_fee != null || areaFee() != null || !!(s.free_over && total() >= Number(s.free_over)); }
+  function feeSaid() { return fee() ? money(fee()) : feeSet() ? 'free' : 'confirmed on WhatsApp, not in the total'; }
+  function grand() { return total() + fee(); }
+  // delivery the listing cannot take (switched off, or no area and not nationwide) is not offered: pickup is chosen for them and
+  // the reason is said. A business with several areas gets an area choice.
+  function applyDelivery() {
+    var del = document.querySelector('input[name=ful][value=delivery]'), pk = document.querySelector('input[name=ful][value=pickup]'), group = document.querySelector('.ful');
+    var note = document.getElementById('h-nodel'), a = areas();
+    if (!canDeliver()) {
+      del.disabled = true; pk.checked = true;
+      if (!note) { note = document.createElement('p'); note.className = 'hint'; note.id = 'h-nodel'; group.parentNode.insertBefore(note, group.nextSibling); }
+      note.textContent = 'Delivery cannot be ordered on the site right now. Pickup is free, or message us on WhatsApp to arrange a delivery.';
+    } else { del.disabled = false; if (note) note.remove(); }
+    var need = !!LIVE && canDeliver() && !nationwide() && a.length > 1, box = document.getElementById('w-city');
+    if (need && !box) {
+      box = document.createElement('div'); box.id = 'w-city';
+      box.innerHTML = '<label class="f" for="city">Delivery area</label><select class="fld" id="city">' + a.map(function (x) { return '<option value="' + x.slug + '">' + x.label + '</option>'; }).join('') + '</select>';
+      var w = document.getElementById('w-addr'); w.insertBefore(box, w.firstChild);
+      box.querySelector('select').addEventListener('change', function () { update(); });
+    }
+    if (box) box.hidden = !need;
+    var h = document.getElementById('h-fee');
+    if (h && st().delivery_fee != null) h.textContent = h.textContent.replace(/We confirm the fee on WhatsApp\./, 'Delivery is ' + money(Number(st().delivery_fee)) + (st().free_over ? ', free over ' + money(Number(st().free_over)) : '') + '.');
+  }
+  function loadLive() {
+    fetch(API + '/marketplace/order-form/' + GIG).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j) return;
+      LIVE = j;
+      (j.products || []).forEach(function (p) { var it = by[p.id]; if (it) { if (p.price != null) it.price = Number(p.price); it.out = p.in_stock === false; } });
+      applyDelivery(); update(); check(false); drawStep();
+    }).catch(function () {});
+  }
   function total() { var t = 0; for (var k in q) t += q[k] * GI.unit(k); return t; }
+  // finish and nusach are real options on the listing's product (see LISTING-CHANGES.json), the id is their lower-case names joined by a dash
+  function slug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-'); }
+  function optId(k) { var s = GI.split(k), it = by[s.id], p = []; if (!it) return undefined; if (it.finish.length && s.finish) p.push(slug(s.finish)); if (it.nusach && s.nusach) p.push(slug(s.nusach)); return p.length ? p.join('-') : undefined; }
   function engrNote(k) { var e = GI.split(k).engr; return e ? 'Engrave: “' + e + '”' : ''; }
   function update() {
     var html = '', mini = '';
@@ -78,9 +124,12 @@
       mini += '<li><span>' + q[k] + ' × ' + nm + '</span><span>' + money(q[k] * GI.unit(k)) + '</span></li>';
     }
     document.getElementById('sum-list').innerHTML = html || '<li><span>Your basket is empty. Tap a piece above to add it.</span></li>';
-    if (total() && !pickup()) mini += '<li><span>Delivery</span><span>fee confirmed on WhatsApp</span></li>';
+    if (total() && !pickup()) mini += '<li><span>Delivery</span><span>' + feeSaid() + '</span></li>';
+    // engraving is a note on the order, never a price in the total: the shop confirms the wording and any cost with the customer
+    var eng = false; for (var ke in q) if (q[ke] && GI.split(ke).engr) eng = true;
+    if (eng) mini += '<li><span>Engraving is confirmed with you on WhatsApp before we engrave. It is not in this total.</span></li>';
     document.getElementById('sum-mini').innerHTML = mini || '<li><span>Nothing yet</span></li>';
-    document.getElementById('total').textContent = money(total());
+    document.getElementById('total').textContent = money(grand());
     var s = {}; for (var k2 in q) if (q[k2]) s[k2] = q[k2]; window.siteBasket.set(s);
     drawStep();
   }
@@ -95,7 +144,7 @@
     var ok = true, e; upto = upto || 3;
     e = total() ? '' : 'Add a piece to your basket'; if (e) ok = false; if (show || !e) mark('items', e);
     if (upto < 2) return ok;
-    e = pickup() || v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
+    e = pickup() ? '' : !canDeliver() ? 'Delivery cannot be ordered on the site right now. Choose pickup, or message us on WhatsApp.' : !v('addr') ? 'Where should we deliver?' : st().min_order && total() < Number(st().min_order) ? 'Delivery needs an order of at least ' + money(Number(st().min_order)) + '. Add something, or choose pickup.' : ''; if (e) ok = false; if (show || !e) mark('addr', e);
     e = !v('when') ? 'Choose the day' : v('when') < minDay ? 'The first day we can do is ' + new Date(minDay + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : ''; if (e) ok = false; if (show || !e) mark('when', e);
     document.getElementById('first-day').hidden = !(v('when') && v('when') < minDay);
     if (upto < 3) return ok;
@@ -109,10 +158,10 @@
   [].forEach.call(document.querySelectorAll('input[name=ful]'), function (i) { i.addEventListener('change', function () { update(); }); });
   function itemised() { var out = []; for (var k in q) if (q[k]) { var en = engrNote(k); out.push('• ' + q[k] + ' × ' + GI.label(k) + ' (' + money(q[k] * GI.unit(k)) + ')' + (en ? ', ' + en : '')); } return out; }
   function save(notes) {
-    var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: GI.split(k).id, qty: q[k] });
+    var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: GI.split(k).id, qty: q[k], option_id: optId(k) });
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: ls, fulfilment: pickup() ? 'pickup' : 'delivery', address: pickup() ? undefined : v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
-      .then(function (r) { return r.json().then(function (j) { return r.ok ? j : null; }, function () { return null; }); }).catch(function () { return null; });
+      body: JSON.stringify({ lines: ls, fulfilment: pickup() ? 'pickup' : 'delivery', city: cityOut(), address: pickup() ? undefined : v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
+      .then(function (r) { return r.json().then(function (j) { return r.ok ? j : { error: (typeof j.detail === 'string' && j.detail) || 'It could not be saved.' }; }, function () { return r.ok ? null : { error: 'It could not be saved.' }; }); }).catch(function () { return null; });
     return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
   }
   var sending = false;
@@ -123,7 +172,8 @@
     if (!check(true)) { for (var s1 = 1; s1 <= 3; s1++) if (!check(false, s1)) { check(true, s1); go(s1, true); break; } var bad = document.querySelector('.ostep:not([hidden]) .bad .fld'); if (bad) bad.focus(); return; }
     var out = ['Hi Gifted Israel, I would like to order:'].concat(itemised());
     if (v('note')) out.push('Notes: ' + v('note'));
-    out.push('Total: ' + money(total()) + (pickup() ? '' : ' (delivery fee to be confirmed)'));
+    if (!pickup()) out.push('Delivery: ' + feeSaid());
+    out.push('Total: ' + money(grand()) + (!pickup() && !fee() && !feeSet() ? ' plus delivery' : ''));
     out.push((pickup() ? 'Pickup (please send me the address)' : 'Delivery to: ' + v('addr')));
     out.push((pickup() ? 'Pickup day: ' : 'Delivery day: ') + dayName({ weekday: 'long', day: 'numeric', month: 'long' }));
     out.push('Name: ' + v('me') + ', ' + v('ph'));
@@ -135,7 +185,8 @@
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
       sending = false; send.removeAttribute('aria-busy');
-      var sent = document.getElementById('sent'); sent.textContent = 'Thanks, ' + v('me').split(/\s+/)[0] + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false;
+      var failed = !ok || !!ok.error, sent = document.getElementById('sent');
+      sent.textContent = failed ? 'Your order did not go through on the site (it was not saved' + (ok && ok.error ? ': ' + ok.error : '') + '). It is open in WhatsApp instead: please send that message so we get it.' : 'Thanks, ' + v('me').split(/\s+/)[0] + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false; sent.setAttribute('role', failed ? 'alert' : 'status'); sent.classList.toggle('bad', failed);
     });
   });
   document.getElementById('sum-list').addEventListener('click', function (e) {
@@ -149,7 +200,7 @@
     [].forEach.call(document.querySelectorAll('#steps li'), function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
     var pk = pickup(); document.getElementById('w-addr').hidden = pk; document.getElementById('h-pick').hidden = !pk; document.getElementById('when-l').textContent = pk ? 'Pickup day' : 'Delivery day';
     var day = v('when') ? dayName({ weekday: 'long' }) : '';
-    send.lastElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? (day ? 'Send for ' + day : 'Send order on WhatsApp') + ', ' + money(total()) : 'Send order on WhatsApp');
+    send.lastElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? (day ? 'Send for ' + day : 'Send order on WhatsApp') + ', ' + money(grand()) : 'Send order on WhatsApp');
     send.classList.toggle('idle', !check(false, step));
     document.getElementById('send-note').textContent = STEP_NOTE[step];
     document.getElementById('back').hidden = step === 1;
@@ -167,7 +218,7 @@
 
   var qs = new URLSearchParams(location.search);
   if (qs.get('c')) addEventListener('load', function () { jump(qs.get('c'), false); });
-  update();
+  update(); loadLive();
   var m0 = /#order-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
   var pick = by[qs.get('p')] || byName[(qs.get('add') || '').toLowerCase()];
   if (pick) open(pick);

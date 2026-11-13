@@ -1,0 +1,358 @@
+{
+  "gig_id": "75512153-f18d-47b4-9daf-ffbed495089a",
+  "products": [
+    {
+      "id": "gi9c9a360471",
+      "name": "Classic Luxe Dreidel Card + Block",
+      "options": [
+        {
+          "id": "ashkenaz",
+          "name": "Ashkenaz",
+          "price": null
+        },
+        {
+          "id": "sefard",
+          "name": "Sefard",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi822eff3bb5",
+      "name": "Classic 2.0 Chanukah Brachos Match Cloche",
+      "options": [
+        {
+          "id": "ashkenaz",
+          "name": "Ashkenaz",
+          "price": null
+        },
+        {
+          "id": "sefard",
+          "name": "Sefard",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "giafa3efe681",
+      "name": "Painted by Batya Chanukah Brachos Tabletop 8\"x8\"",
+      "options": [
+        {
+          "id": "ashkenaz",
+          "name": "Ashkenaz",
+          "price": null
+        },
+        {
+          "id": "sefard",
+          "name": "Sefard",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gid3c9bd3757",
+      "name": "Onyx Tabletop Chanukah Brachos",
+      "options": [
+        {
+          "id": "ashkenaz",
+          "name": "Ashkenaz",
+          "price": null
+        },
+        {
+          "id": "sefard",
+          "name": "Sefard",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi597bed41a0",
+      "name": "Pearlstone Oil Jug Chanukah Block",
+      "options": [
+        {
+          "id": "ashkenaz",
+          "name": "Ashkenaz",
+          "price": null
+        },
+        {
+          "id": "sefard",
+          "name": "Sefard",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi2e5ff3aa7a",
+      "name": "Painted by Batya Chanukah Block",
+      "options": [
+        {
+          "id": "ashkenaz",
+          "name": "Ashkenaz",
+          "price": null
+        },
+        {
+          "id": "sefard",
+          "name": "Sefard",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi7970fcaba0",
+      "name": "Painted Chanukah Block",
+      "options": [
+        {
+          "id": "ashkenaz",
+          "name": "Ashkenaz",
+          "price": null
+        },
+        {
+          "id": "sefard",
+          "name": "Sefard",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi588a360b4f",
+      "name": "Leather Simanim Pouch & Card Set",
+      "options": [
+        {
+          "id": "ashkenaz",
+          "name": "Ashkenaz",
+          "price": null
+        },
+        {
+          "id": "sefard",
+          "name": "Sefard",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi37f839c653",
+      "name": "Rosh Hashanah Pomegranate Leather Simanim Cards & Pouch",
+      "options": [
+        {
+          "id": "ashkenaz",
+          "name": "Ashkenaz",
+          "price": null
+        },
+        {
+          "id": "sefard",
+          "name": "Sefard",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi95f7bf98e0",
+      "name": "Scalloped Finger Towel",
+      "options": [
+        {
+          "id": "pink",
+          "name": "Pink",
+          "price": null
+        },
+        {
+          "id": "silver",
+          "name": "Silver",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi096e87e07a",
+      "name": "Classic 2.0 Simanim Tabletop Plaque",
+      "options": [
+        {
+          "id": "gold",
+          "name": "Gold",
+          "price": null
+        },
+        {
+          "id": "silver",
+          "name": "Silver",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gicf99e252c9",
+      "name": "Leather Pouch Bencher Set",
+      "options": [
+        {
+          "id": "gold",
+          "name": "Gold",
+          "price": null
+        },
+        {
+          "id": "silver",
+          "name": "Silver",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi08308c64b4",
+      "name": "Classic Knife Stand",
+      "options": [
+        {
+          "id": "gold",
+          "name": "Gold",
+          "price": null
+        },
+        {
+          "id": "silver",
+          "name": "Silver",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gie6358acd02",
+      "name": "Suspended Mayim Achronim",
+      "options": [
+        {
+          "id": "gold",
+          "name": "Gold",
+          "price": null
+        },
+        {
+          "id": "silver",
+          "name": "Silver",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi3ea03ba931",
+      "name": "Leaf Embroidered Challah Pouch Cover",
+      "options": [
+        {
+          "id": "gold",
+          "name": "Gold",
+          "price": null
+        },
+        {
+          "id": "silver",
+          "name": "Silver",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gif0f05c65ef",
+      "name": "Painted Leather Hadlokas Neiros Booklet [Pages for",
+      "options": [
+        {
+          "id": "gold",
+          "name": "Gold",
+          "price": null
+        },
+        {
+          "id": "white",
+          "name": "White",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi8636cdf65e",
+      "name": "Embossed Havdalah Candle",
+      "options": [
+        {
+          "id": "black",
+          "name": "Black",
+          "price": null
+        },
+        {
+          "id": "blue",
+          "name": "Blue",
+          "price": null
+        },
+        {
+          "id": "marble",
+          "name": "Marble",
+          "price": null
+        },
+        {
+          "id": "white",
+          "name": "White",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi8a500fb7ec",
+      "name": "Traditional Havdalah Plate",
+      "options": [
+        {
+          "id": "black",
+          "name": "Black",
+          "price": null
+        },
+        {
+          "id": "gold",
+          "name": "Gold",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gia0e5e4c466",
+      "name": "Square Match Holder",
+      "options": [
+        {
+          "id": "gold",
+          "name": "Gold",
+          "price": null
+        },
+        {
+          "id": "silver",
+          "name": "Silver",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi152849e56d",
+      "name": "Suspended Match Jar",
+      "options": [
+        {
+          "id": "gold",
+          "name": "Gold",
+          "price": null
+        },
+        {
+          "id": "silver",
+          "name": "Silver",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "gi984d252ada",
+      "name": "Suspended Besamim Jar",
+      "options": [
+        {
+          "id": "gold",
+          "name": "Gold",
+          "price": null
+        },
+        {
+          "id": "silver",
+          "name": "Silver",
+          "price": null
+        }
+      ]
+    }
+  ],
+  "new_products": [],
+  "business_settings_needed": {
+    "why": "The business is not nationwide and lists no delivery areas, so the server refuses every delivery order (\"This store does not deliver there\"). The page now offers only pickup until one of these is set.",
+    "either": "set serves_nationwide to true",
+    "or": "add at least one area (slug and label) to the business areas; with two or more the page shows an area choice"
+  },
+  "reason": "Finish (Gold, Silver, ...) and nusach (Ashkenaz, Sefard) were only typed into the order notes. The page now sends each as option_id (lower-case names joined by a dash, e.g. gold-ashkenaz). Option price null means the product price. Until added the page still works: a product with no options ignores option_id. Engraving stays a note and is not priced."
+}

@@ -232,3 +232,5 @@ R3x.8 pass: built to the blueprint: sitekit parts, one h1, labels and autocomple
 R3x.13 pass: built to the blueprint: Every size from the starter scale and every gap from --s; recorded in BRAND.md
 R3r.3 pass: built to the blueprint: check-rules run after the last edit
 R3r.4 n/a: nothing Tzvi has had to point out twice on this site
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
