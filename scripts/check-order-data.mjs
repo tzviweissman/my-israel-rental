@@ -124,7 +124,8 @@ for (const url of urls) {
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'practice', track_url: 'about:blank', track_token: 'practice' }) });
   });
   await p.addInitScript(() => { window.open = () => ({ location: {}, close() {}, document: { write() {} } }); });
-  await p.route(/wa\.me|api\.whatsapp\.com|whatsapp:\/\//, (r) => r.abort());
+  let toWa = false;   // a refused order that goes on to WhatsApp is not lost (mir-order.js: a failed save opens WhatsApp)
+  await p.route(/wa\.me|api\.whatsapp\.com|whatsapp:\/\//, (r) => { toWa = true; return r.abort(); });
   await p.goto(url, { waitUntil: 'networkidle' }).catch(() => {});
   await p.waitForTimeout(1200);
   const steps = [{ kind: 'as it opens', label: 'as it opens' }, ...(await choices(p))];
@@ -167,11 +168,11 @@ for (const url of urls) {
   await p.goto(url, { waitUntil: 'networkidle' }).catch(() => {});
   await p.waitForTimeout(800);
   if (await fill(p)) {
-    refuse = true; caught = [];
+    refuse = true; caught = []; toWa = false;
     const before = await p.evaluate(() => document.body.innerText);
     await press(p);
     const after = await p.evaluate(() => document.body.innerText);
-    const told = after !== before && /practice refusal|not (go through|saved|sent)|did not|didn.t|try again|went wrong|לא נשמר|נסו שוב/i.test(after);
+    const told = toWa || after !== before && /practice refusal|not (go through|saved|sent)|did not|didn.t|try again|went wrong|לא נשמר|נסו שוב/i.test(after);
     if (caught.length && !told) problems.push(`${where}: when the dashboard refuses the order, the page says nothing (the customer thinks it went through)`);
     refuse = false;
   }

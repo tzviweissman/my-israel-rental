@@ -226,3 +226,5 @@ Note, 1 Nov 2026: and no glow behind those facts on short phones.
 <!-- 6 Nov 2026: the only change is the discount code box on the order form (public/pages/mir-code.js, Tzvi: American Crust's first-time code had nowhere to be typed). Looked at the form with the box and a test order on phone and laptop; the rest of the site is unchanged, so the other rules were not re-read. -->
 
 Note, 7 Nov 2026: the order form follows each product's price type from the dashboard. A product priced on request shows "Ask for a price" (to the business page's price request) instead of Add; a "from" product says "from". Nothing else changed.
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->

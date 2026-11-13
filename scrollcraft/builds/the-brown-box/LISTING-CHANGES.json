@@ -1,0 +1,102 @@
+{
+  "gig_id": "5dab5731-bb0b-4830-ba02-0db28178f031",
+  "products": [
+    {
+      "id": "cad5709eb2f1",
+      "options": [
+        {
+          "id": "classic",
+          "name": "Classic",
+          "price": null
+        },
+        {
+          "id": "classic-alm",
+          "name": "Classic + almond butter",
+          "price": 65
+        },
+        {
+          "id": "tropical",
+          "name": "Tropical",
+          "price": null
+        },
+        {
+          "id": "tropical-alm",
+          "name": "Tropical + almond butter",
+          "price": 65
+        },
+        {
+          "id": "sunrise",
+          "name": "Sunrise",
+          "price": null
+        },
+        {
+          "id": "sunrise-alm",
+          "name": "Sunrise + almond butter",
+          "price": 65
+        },
+        {
+          "id": "superfruit",
+          "name": "Superfruit",
+          "price": null
+        },
+        {
+          "id": "superfruit-alm",
+          "name": "Superfruit + almond butter",
+          "price": 65
+        },
+        {
+          "id": "own",
+          "name": "Build your own",
+          "price": 66
+        },
+        {
+          "id": "own-alm",
+          "name": "Build your own + almond butter",
+          "price": 71
+        }
+      ]
+    },
+    {
+      "id": "445fce26f570",
+      "options": [
+        {
+          "id": "muf-oat",
+          "name": "2 oatmeal chocolate chip muffins",
+          "price": null
+        },
+        {
+          "id": "muf-blue",
+          "name": "2 blueberry sourdough muffins",
+          "price": null
+        },
+        {
+          "id": "muf-both",
+          "name": "One of each muffin",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "fd7f31d92cee",
+      "options": [
+        {
+          "id": "muf-oat",
+          "name": "2 oatmeal chocolate chip muffins",
+          "price": null
+        },
+        {
+          "id": "muf-blue",
+          "name": "2 blueberry sourdough muffins",
+          "price": null
+        },
+        {
+          "id": "muf-both",
+          "name": "One of each muffin",
+          "price": null
+        }
+      ]
+    }
+  ],
+  "new_products": [],
+  "reason": "The order page added 'Build your own bowl' (+6) and almond butter (+5) on the page only, so the dashboard total was lower than what the customer saw. Acai bowl options now carry the real prices: a flavour, with or without almond butter (own = 66, almond = 65, own + almond = 71, written as absolute prices because an option price replaces the product price; if the Acai bowl base price (60) changes, these option prices must be changed with it). Gift box muffins are a real choice, so they are options at the box's own price. A bowl's two free extras, the four toppings of a build-your-own bowl, and the bowl flavours inside a gift box change no price and stay in the order notes."
+}
