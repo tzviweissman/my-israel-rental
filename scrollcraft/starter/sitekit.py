@@ -24,6 +24,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from html import escape
 import json
+import re
 
 KINDS = {
     # what each kind of number can do, said on the page (3o.4)
@@ -111,7 +112,7 @@ class Site:
   <a class="mark" href="index.html" aria-label="{escape(self.short)}, home">{self.mark_html}<span>{escape(self.short)}</span></a>
   <nav class="nav" id="nav" aria-label="{escape(self.short)}">{links}</nav>
   <div class="top-r">
-    <a class="btn-line" href="{self.cta[0]}">{escape(self.cta[1])}{count}</a>
+    <a class="btn-line" href="{self.cta[0]}" data-label="{escape(self.cta[1], True)}">{escape(self.cta[1])}{count}</a>
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
   </div>
 </header>
@@ -177,6 +178,7 @@ class Site:
 
     def write(self, page: str, title: str, desc: str, og: str, body: str, tail: str = '') -> None:
         html = self.head(page, title, desc, og) + self.header(page) + body + self.footer() + tail + '</body>\n</html>\n'
+        html = guard(page, title, desc, html)
         with open(f'{page}.html', 'w', encoding='utf8') as f:
             f.write(html)
 
@@ -198,6 +200,49 @@ class Site:
     <p class="lede">{lede}</p>
   </div></header>
 '''
+
+
+class BuildError(ValueError):
+    """A rule broken while writing a page: fix the words or markup it names, then write again."""
+
+
+def guard(page: str, title: str, desc: str, html: str) -> str:
+    """Rules built into writing a page (12 Nov 2026, rules as a blueprint), so they are right before any check runs:
+    share title 60 and description 155 characters (3x.8, check-web-basics), one h1 (3x.8), every picture sized (3s.24),
+    no long dash or exclamation mark in the words (3.4), and pictures after the first section load lazily (3x.8)."""
+    import re
+    bad = []
+    if not 1 <= len(title) <= 60:
+        bad.append(f'title is {len(title)} characters (1 to 60): {title!r}')
+    if not 1 <= len(desc) <= 155:
+        bad.append(f'description is {len(desc)} characters (1 to 155): {desc!r}')
+    h1s = len(re.findall(r'<h1[\s>]', html))
+    if h1s != 1:
+        bad.append(f'{h1s} h1 headings, one needed')
+    shown = re.sub(r'<template\b.*?</template>', '', html, flags=re.S)   # templates are filled by live data, sized there
+    for tag in re.findall(r'<img\b[^>]*>', shown):
+        if 'width=' not in tag or 'height=' not in tag:
+            bad.append(f'a picture without width and height: {tag[:90]}')
+    words = re.sub(r'<script.*?</script>|<style.*?</style>|<[^>]+>', ' ', html, flags=re.S)
+    for ch, name in (('—', 'long dash'), ('–', 'long dash'), ('!', 'exclamation mark')):
+        for m in re.finditer(re.escape(ch), words):
+            bad.append(f'{name} in the words: ...{" ".join(words[max(0, m.start() - 40):m.end() + 20].split())}...')
+    if bad:
+        # a site made before these guards (its RULES.md is older than 12 Nov 2026) only hears about it: new rules never
+        # block a site that is already made (page rules 6, rule-dates); a new site stops here
+        import os
+        import sys
+        from datetime import datetime
+        made = os.path.exists('RULES.md') and datetime.fromtimestamp(os.path.getmtime('RULES.md')) < datetime(2026, 11, 12)
+        if made:
+            sys.stderr.write(f'note (made before the 12 Nov guards): {page}.html: ' + '; '.join(bad) + '\n')
+        else:
+            raise BuildError(f'{page}.html: ' + '; '.join(bad))
+    # pictures after the first section load lazily (the opening's own pictures keep their fetchpriority)
+    cut = html.find('</section>')
+    if cut > 0:
+        html = html[:cut] + re.sub(r'<img\b(?![^>]*\bloading=)(?![^>]*fetchpriority)', '<img loading="lazy" decoding="async"', html[cut:])
+    return html
 
 
 def gallery(title_html: str, kicker: str = '', max_photos: int = 12, seed: str = '') -> str:
@@ -233,3 +278,76 @@ def price(amount, currency: str = 'ILS') -> str:
     sym = {'ILS': '₪', 'USD': '$', 'EUR': '€', 'GBP': '£'}.get(currency, '')
     n = f'{amount:g}' if isinstance(amount, (int, float)) else str(amount)
     return f'<span class="sym">{sym}</span>{n}'
+
+
+# ── parts made to the rules (12 Nov 2026, rules as a blueprint): use these instead of hand-writing the markup ──
+
+def picture(src: str, alt: str, w: int, h: int, *, tall: str = '', tall_wh: tuple[int, int] | None = None,
+            first: bool = False, cls: str = '') -> str:
+    """A photo that is right by construction: sized (3s.24), lazy unless it is the opening's (3x.8), and on a phone the
+    owner's photo extended to the tall shape (extend_photo.py) instead of cropped (3c.12)."""
+    load = ' fetchpriority="high"' if first else ' loading="lazy" decoding="async"'
+    c = f' class="{cls}"' if cls else ''
+    img = f'<img{c} src="{src}" alt="{escape(alt, True)}" width="{w}" height="{h}"{load}>'
+    if not tall:
+        return img
+    tw, th = tall_wh or (w, h)
+    return f'<picture><source media="(max-aspect-ratio: 1/1)" srcset="{tall}" width="{tw}" height="{th}">{img}</picture>'
+
+
+def facts(items: list[str]) -> str:
+    """The true facts under the main button (3v.14): three at most, each item its own dot, so a wrapped line never
+    starts with a separator (3a.8). Items may hold price() markup."""
+    if not 1 <= len(items) <= 3:
+        raise BuildError(f'facts: {len(items)} items, 1 to 3')
+    return '<ul class="btn-facts">' + ''.join(f'<li>{x}</li>' for x in items) + '</ul>'
+
+
+def opening_slides(slides: list[tuple[str, str, str]], h1_html: str, line: str, cta: tuple[str, str],
+                   fact_items: list[str], end_photo: tuple[str, int, int], end_title: str, label: str,
+                   hold: float = 1.0, push: float = 0.55) -> str:
+    """The opening as connected slides (join method 'slides'; slides.js). slides: [(file stem in assets/film, big word,
+    short line)], each with assets/film/<stem>-d.mp4 and -m.mp4 and their -d.webp / -m.webp posters (clip-chain writes
+    them). Placement is the part's, so it is right by construction: the headline, line, button and facts on a tight
+    shade at the left (5b.3, at most 40% of a phone's picture), the slide's big word on its own slide at the lower left
+    (laptop only: a phone keeps the film clear, 3h.25), the closing title and button at the end, and on a phone the
+    business's own photo whole at the end (3c.12). label: what the whole film shows, for screen readers."""
+    if not 2 <= len(slides) <= 6:
+        raise BuildError(f'opening_slides: {len(slides)} slides, 2 to 6')
+    words = len(re.sub(r'<[^>]+>', ' ', h1_html).split())
+    if not 2 <= words <= 5:
+        raise BuildError(f'opening_slides: the headline has {words} words, 2 to 5 (3g.13)')
+    src, w, h = end_photo
+    def one(sl):
+        s, word, sub = sl[:3]
+        still = len(sl) > 3 and sl[3]   # (stem, word, line, True): a still slide, the business's own photo (clipchain end_still)
+        vid = '' if still else f' data-video="assets/film/{s}-{{k}}.mp4"'
+        return (f'        <div class="slide"{vid} data-poster="assets/film/{s}-{{k}}.webp">'
+                f'<p class="chap" aria-hidden="true"><b>{escape(word)}</b><span>{escape(sub)}</span></p></div>\n')
+    # a clip made from the last frame of the clip before (clipchain) carries on in place: pushing it up would show that
+    # one picture twice, leaving and arriving, which reads as a restart (review 12 Nov, Gremier). Only a change of scene
+    # (a still, or a clip not chained) is pushed up as a new slide (3aa.2).
+    def is_still(sl): return len(sl) > 3 and sl[3]
+    items = ''.join(one(sl).replace('<div class="slide"', '<div class="slide" data-same', 1)
+                    if k and not is_still(sl) and not is_still(slides[k - 1]) else one(sl)
+                    for k, sl in enumerate(slides))
+    return f'''  <section class="film slides" id="film" aria-labelledby="h-open" data-hold="{hold}" data-push="{push}">
+    <div class="stage">
+      <div class="track" role="img" aria-label="{escape(label, True)}">
+{items}      </div>
+      <noscript><img src="{src}" width="{w}" height="{h}" alt=""></noscript>
+      <div class="over w0" data-arrive>
+        <h1 id="h-open">{h1_html}</h1>
+        <p class="ln">{line}</p>
+        <a class="btn" href="{cta[0]}">{escape(cta[1])}</a>
+        {facts(fact_items)}
+      </div>
+      <div class="end-photo" aria-hidden="true"><img src="{src}" alt="" width="{w}" height="{h}" loading="lazy" decoding="async"></div>
+      <div class="over w-end"><h2>{escape(end_title)}</h2><a class="btn" href="{cta[0]}" tabindex="-1">{escape(cta[1])}</a></div>
+    </div>
+  </section>
+'''
+
+
+# the shop parts live in shopkit.py (12 Nov 2026)
+from shopkit import card, catalog_js, price_row, shop_page  # noqa: E402,F401

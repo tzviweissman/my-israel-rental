@@ -28,7 +28,8 @@ document.body.classList.remove('no-js');
     tick = 0;
     var vh = innerHeight;
     top.classList.toggle('solid', scrollY > 10);
-    if (bar) bar.classList.toggle('on', scrollY > vh * .5 && (!form || form.getBoundingClientRect().top > vh * .75));
+    // once something is in the basket the bar stays, as the phone's way to the basket (review 12 Nov, Gremier)
+    if (bar) bar.classList.toggle('on', (scrollY > vh * .5 || document.body.classList.contains('has-basket')) && (!form || form.getBoundingClientRect().top > vh * .75));
   }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();
@@ -38,6 +39,14 @@ document.body.classList.remove('no-js');
 
   // An Add link anywhere (data-add="<item>") puts one in the basket; its href opens the order page.
   [].forEach.call(document.querySelectorAll('[data-add]'), function (a) {
-    a.addEventListener('click', function () { var b = window.siteBasket.get(); if (!b[a.dataset.add]) b[a.dataset.add] = 1; window.siteBasket.set(b); });
+    a.addEventListener('click', function () { if (window.CAT) return;   // a shop page's catalog.js adds it, with a toast
+      var b = window.siteBasket.get(); if (!b[a.dataset.add]) b[a.dataset.add] = 1; window.siteBasket.set(b); });
   });
+})();
+// a short confirmation after an Add ("Added: <name>"), used by catalog.js. It never floats over the page (a toast
+// covered the cards' prices and Add buttons, review 12 Nov): screen readers hear it, and catalog.js shows it in the
+// menu bar's basket button on a laptop and in the phone bar.
+window.siteToast = (function () {
+  var el = document.createElement('div'); el.className = 'sr-only'; el.setAttribute('role', 'status'); document.body.appendChild(el);
+  return function (msg) { el.textContent = msg; document.dispatchEvent(new CustomEvent('site:added', { detail: msg })); };
 })();

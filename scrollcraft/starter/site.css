@@ -13,7 +13,7 @@
   --r: 16px;
   /* one type scale and one spacing scale (rules 3x.13): every size on the site is one of these, nothing in between.
      Ratio 1.25 from a 17 px body; the display steps grow with the screen. */
-  --t-1: .8125rem; --t0: 1.0625rem; --t1: 1.3125rem; --t2: 1.625rem; --t3: clamp(1.75rem, 1.4rem + 1.6vw, 2.25rem);
+  --t-1: .875rem; --t0: 1.0625rem; --t1: 1.3125rem; --t2: 1.625rem; --t3: clamp(1.75rem, 1.4rem + 1.6vw, 2.25rem);
   --t4: clamp(2.1rem, 1.5rem + 3vw, 3.25rem); --t5: clamp(2.6rem, 1.6rem + 5vw, 4.75rem);
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px; --s10: 128px;
   --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --top-h: 68px; --out: cubic-bezier(.2, .7, .2, 1);
@@ -36,6 +36,14 @@ h1, h2, h3 { font-family: var(--font-head); margin: 0; line-height: 1.04; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; min-height: 54px; padding: 0 1.7rem; border-radius: 999px; border: 0;
   background: var(--accent); color: var(--accent-ink); font: 600 var(--t0)/1 var(--font-body); text-decoration: none; cursor: pointer; transition: transform 160ms var(--out), filter 160ms; }
 .btn[aria-busy="true"] { opacity: .7; pointer-events: none; }
+/* built in (12 Nov 2026, rules as a blueprint): a hover and a press on every control, so no site ships without them;
+   the site's own button effect below adds to these, never removes them */
+.btn:hover, .btn:focus-visible { filter: brightness(1.08); box-shadow: 0 8px 20px -10px color-mix(in srgb, var(--accent) 70%, transparent); }
+.btn:active, .btn-line:active, .menu-btn:active, button:active { transform: translateY(2px); }
+.btn-line:hover, .btn-line:focus-visible { background: var(--ink); color: var(--ground); }
+.menu-btn:hover { border-color: var(--ink); }
+.btn, .btn-line, .menu-btn { min-height: 44px; }
+@media (prefers-reduced-motion: reduce) { .btn:active, .btn-line:active, .menu-btn:active, button:active { transform: none; } }
 /* CHANGE: the button's hover and press (effects.button in fingerprints.json),
    found by a fresh 21st search for this business, never copied from the last
    site. The starter used to hold a lift, press and travelling arrow here, and
@@ -66,7 +74,7 @@ h1, h2, h3 { font-family: var(--font-head); margin: 0; line-height: 1.04; }
 }
 
 /* sections, reveals and inner page heads */
-section.sec { padding-block: clamp(4.5rem, 10vw, 7.5rem); }
+section.sec { padding-block: clamp(2.5rem, 7svh, 5rem); }
 .sec h2 { font-size: var(--t4); }
 .sec .lede { color: var(--soft); font-size: var(--t0); max-width: 36rem; margin: .9rem 0 0; }
 /* CHANGE: how sections appear (effects.reveal). site.js adds .in to each .rev
@@ -152,6 +160,8 @@ textarea.fld { min-height: 88px; resize: vertical; }
 .bar { position: fixed; inset: auto 0 0; z-index: 25; display: none; align-items: center; justify-content: space-between; gap: .8rem; height: calc(var(--bar-h) + env(safe-area-inset-bottom));
   padding: 0 var(--gutter) env(safe-area-inset-bottom); background: var(--surface); border-top: 1px solid var(--line); transform: translateY(110%); transition: transform 300ms var(--out); }
 .bar.on { transform: none; }
+/* a bar that is not showing is hidden for real, so nothing reads it behind the page (built in, 12 Nov 2026) */
+.bar:not(.on), .bar.off { visibility: hidden; }
 .bar .p { font-size: var(--t-1); line-height: 1.25; margin: 0; color: var(--soft); }
 .bar .p b { color: var(--ink); font: 700 var(--t1)/1 var(--font-head); display: block; }
 .bar .btn { min-height: 46px; padding: 0 1.2rem; }
@@ -160,3 +170,179 @@ textarea.fld { min-height: 88px; resize: vertical; }
 
 /* ── BELOW HERE: this business only. Its opening, its signature moment, its
    sections. Nothing here is copied from another site. ── */
+
+/* parts made to the rules (12 Nov 2026): facts and words over a photo */
+/* facts under the button (3v.14): every item carries its own dot, so a wrapped line never starts with one (3a.8) */
+.btn-facts { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s5); list-style: none; padding: 0; margin: var(--s4) 0 0; color: var(--ink); font-size: var(--t0); }
+.btn-facts li { position: relative; padding-left: 14px; white-space: nowrap; }   /* one text run, so a price's sign stays with its number */
+.btn-facts li::before { content: ""; position: absolute; left: 0; top: .6em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+/* words over a photo or film (5b.3): a tight shade only behind the words, kept clear of the button below; on a phone
+   the block is only as wide as its words, so the photo stays at least 60% clear (check-photo-clear) */
+.over { position: relative; z-index: 2; width: fit-content; max-width: min(34rem, 100%); }
+.over::before { content: ""; position: absolute; z-index: -1; inset: -14px -16px; border-radius: var(--r); background: color-mix(in srgb, var(--ground) 92%, transparent); pointer-events: none; }
+.over h1, .over h2 { margin-bottom: var(--s3); }
+.over .btn { margin-top: var(--s3); }
+@media (max-width: 860px) { .over::before { inset: -10px -12px; } .over .lede, .over .ln { display: none; } }
+
+/* the slides opening (sitekit.opening_slides, slides.js; 12 Nov 2026). Every placement here is a rule built in:
+   words on a tight shade at the left, kept off the film once it plays (3h.25); the big word per slide moves with its
+   slide, laptop only; the phone bar waits for the film's end; on a phone the end is the business's own photo whole. */
+.film.slides { position: relative; }
+.film.slides .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; background: var(--ground); }
+.film.slides .track { position: absolute; inset: 0; will-change: transform; }
+.film.slides .slide { position: absolute; left: 0; right: 0; height: 100%; overflow: hidden; background: var(--ground); }
+.film.slides .slide video, .film.slides .slide img.still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.film.slides .over { position: absolute; left: var(--gutter); top: 50%; transform: translateY(-40%); transition: opacity 420ms var(--out), transform 420ms var(--out); }
+.film.slides .over h1 { font-size: var(--t5); line-height: 1.02; }
+.film.slides .over .ln { font-size: var(--t1); margin: var(--s4) 0 var(--s5); max-width: 30rem; }
+.film.slides.c2 .w0 { opacity: 0; transform: translateY(-46%); pointer-events: none; }
+.film.slides .w-end { top: auto; bottom: 14svh; transform: none; opacity: 0; pointer-events: none; }
+.film.slides.at-end .w-end { opacity: 1; pointer-events: auto; }
+.film.slides.at-end .chap { opacity: 0; }   /* the closing card takes the last slide's place, never sits on its caption */
+.film.slides .w-end h2 { font-size: var(--t4); }
+.film.slides .chap { position: absolute; z-index: 2; left: var(--gutter); bottom: 9svh; margin: 0; padding: var(--s2) var(--s4); border-radius: var(--r); background: color-mix(in srgb, var(--ground) 90%, transparent); transition: opacity 360ms var(--out); }
+.film.slides .chap b { display: block; font: 600 var(--t3)/1 var(--font-head); color: var(--accent); }
+.film.slides .chap span { display: block; margin-top: var(--s1); font-size: var(--t-1); font-weight: 600; }
+.film.slides:not(.c2) .slide:first-child .chap { opacity: 0; }
+.film.slides .end-photo { display: none; }
+.bar.in-film { visibility: hidden; transform: translateY(110%); }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .film.slides .over { top: calc(var(--top-h) + var(--s4)); transform: none; max-width: calc(100% - 2 * var(--gutter)); }
+  .film.slides .over h1 { font-size: clamp(1.6rem, 7.6vw, 2.4rem); }
+  .film.slides.c2 .w0 { transform: translateY(-8px); }
+  .film.slides .chap, .film.slides .over.w0, .film.slides .w-end { top: calc(50% + 2.6vw + 20px); bottom: auto; transform: none; }   /* the film at the top under the menu bar, the words on the ground under it (3aa.14, 3aa.16) */
+  .film.slides .w-end { top: calc(var(--top-h) + var(--s6)); bottom: auto; }
+  .film.slides .slide img.still, .film.slides .slide video { object-fit: contain; }   /* the whole film and the last photo on the page ground, never cut down (clipchain pads them; 3aa.14) */
+  .film.slides.on-last .w-end { opacity: 1; pointer-events: auto; }
+
+  .film.slides.at-end .end-photo { opacity: 1; }
+  .film.slides .end-photo img { width: calc(100% - 2 * var(--gutter)); height: auto; border-radius: var(--r); }
+}
+@media (max-width: 860px) and (max-height: 700px) { .film.slides .over h1 { font-size: 1.5rem; } }
+@media (prefers-reduced-motion: reduce) {
+  .film.slides .w0, .film.slides.c2 .w0 { opacity: 1 !important; transform: none !important; pointer-events: auto; }
+  .film.slides .chap, .film.slides .w-end { display: none; }
+  .film.slides .over { top: calc(var(--top-h) + var(--s5)); }
+}
+
+/* the shop (sitekit.shop_page, catalog.js, shop.js; 12 Nov 2026, tested on Gremier Coffee) */
+/* the price bold beside its size, the old price struck through */
+.pr-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .5rem; margin: .3rem 0 0; }
+.pr { font: 600 var(--t1)/1 var(--font-body); color: var(--ink); white-space: nowrap; }
+.pr-row s { color: var(--soft); font-size: var(--t0); }
+.pr-row .unit { color: var(--soft); font-size: var(--t0); }
+.hint { color: var(--soft); font-size: var(--t-1); line-height: 1.55; margin: var(--s3) 0 0; }
+
+/* product cards (sitekit.card): name, the price bold beside its size, Add; a stripe of the item's own colour grows on hover */
+.cards { list-style: none; padding: 0; margin: var(--s7) 0 0; display: grid; gap: var(--s6) var(--s5); }
+.cards.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.cards.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.pc { --stripe: var(--accent); position: relative; display: flex; flex-direction: column; min-width: 0; }
+.pc-a { display: block; flex: 1; text-decoration: none; color: var(--ink); }
+.pc-ph { display: block; position: relative; aspect-ratio: 3 / 2; overflow: hidden; border-radius: var(--r); background: var(--surface); }
+.pc-ph img { width: 100%; height: 100%; }
+.pc-ph::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: var(--stripe); transform: scaleX(.18); transform-origin: left; transition: transform 380ms var(--out); }
+.pc-a:hover .pc-ph::after, .pc-a:focus-visible .pc-ph::after { transform: none; }
+.pc-t { display: block; margin-top: var(--s3); }
+.pc-t b { display: block; font: 600 var(--t0)/1.3 var(--font-body); }
+.pc .btn-sm { align-self: flex-start; margin-top: var(--s3); }
+@media (max-width: 1100px) { .cards.five { grid-template-columns: repeat(3, minmax(0, 1fr)); } .cards.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .cards.five, .cards.four { grid-template-columns: 1fr 1fr; gap: var(--s5) var(--s3); } .pr { font-size: var(--t0); } }
+
+/* shop: chips, groups, the product sheet */
+.chips { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s3); }
+.chip { position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s4); border: 1.5px solid var(--line); background: var(--ground); color: var(--ink); border-radius: var(--r); font: 600 var(--t0)/1 var(--font-body); cursor: pointer; }
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"], .chip:has(input:checked) { border-color: var(--ink); background: var(--ink); color: var(--ground); }
+.chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.chip:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+.filters { position: sticky; top: var(--top-h); z-index: 5; background: var(--ground); padding: var(--s3) 0; margin-top: var(--s6); border-bottom: 1px solid var(--line); }
+.filters .chips { margin: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 2px; }
+.filters .chip { white-space: nowrap; flex: none; }
+.grp { margin-top: var(--s8); scroll-margin-top: calc(var(--top-h) + 80px); }
+.grp > h2 { font-size: var(--t3); border-bottom: 1px solid var(--line); padding-bottom: var(--s3); }
+.grp .cards { margin-top: var(--s5); }
+.sheet { width: min(64rem, 100vw - 2 * var(--gutter)); max-width: none; max-height: min(92svh, 52rem); padding: 0; border: 0; border-radius: var(--r); background: var(--ground); color: var(--ink); box-shadow: 0 3px 30px rgba(28, 20, 16, .2); overflow: auto; }
+.sheet::backdrop { background: rgba(28, 20, 16, .5); }
+.sheet[open] { animation: sheet-in 320ms var(--out); }
+@keyframes sheet-in { from { opacity: 0; transform: translateY(16px); } }
+.sh-in { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: var(--s6); padding: var(--s6) var(--s6) 0; }
+.sh-ph { margin: 0; align-self: start; }
+.sh-ph img { width: 100%; height: auto; border-radius: var(--r); }
+.sh-close { position: absolute; top: var(--s3); right: var(--s3); width: 44px; height: 44px; border-radius: var(--r); border: 1.5px solid var(--line); background: var(--ground); color: var(--ink); font-size: var(--t1); cursor: pointer; z-index: 2; }
+.sh-close:hover { border-color: var(--ink); }
+.sheet h2 { font-size: var(--t3); padding-right: var(--s8); }
+.sheet .desc { color: var(--soft); margin: var(--s4) 0 0; }
+.buy { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; margin-top: var(--s5); padding-block: var(--s4); background: var(--ground); border-top: 1px solid var(--line); }
+.step { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: var(--r); }
+.step button { width: 44px; height: 44px; border: 0; background: none; font-size: var(--t1); cursor: pointer; color: var(--ink); }
+.step output { min-width: 2ch; text-align: center; font-weight: 600; }
+.step.sm button { width: 40px; height: 40px; }
+.grab { display: none; }
+@media (max-width: 760px) {
+  .sheet { width: 100vw; max-height: 90svh; margin: auto 0 0; border-radius: var(--r) var(--r) 0 0; }
+  .sheet[open] { animation-name: sheet-up; }
+  .sh-in { grid-template-columns: 1fr; padding: var(--s5) var(--gutter) env(safe-area-inset-bottom); gap: var(--s4); }
+  .sh-ph img { max-height: 34svh; width: auto; margin: 0 auto; }
+  .grab { display: block; width: 44px; height: 5px; border-radius: 3px; background: var(--line); margin: var(--s2) auto 0; }
+}
+@keyframes sheet-up { from { transform: translateY(40%); } }
+
+/* the order, in three steps */
+.osteps { list-style: none; padding: 0; margin: 0 0 var(--s5); display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); }
+.osteps button { border: 0; background: none; padding: var(--s2) 0; font: 600 var(--t0)/1.2 var(--font-body); color: var(--soft); cursor: default; border-bottom: 2px solid transparent; min-height: 40px; transition: color 100ms, border-color 100ms; }
+.osteps .is-now button { color: var(--ink); border-bottom-color: var(--accent); }
+.osteps .is-done button { color: var(--ink); cursor: pointer; }
+.blist, .sum ul { list-style: none; padding: 0; margin: var(--s4) 0 0; }
+.bl { display: flex; justify-content: space-between; gap: var(--s3); align-items: center; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.bl > span:first-child { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; }
+.bl-r { display: flex; align-items: center; gap: var(--s2); font-weight: 600; white-space: nowrap; }
+.rm { width: 40px; height: 40px; display: grid; place-items: center; border: 1.5px solid var(--line); border-radius: var(--r); background: var(--ground); color: var(--ink); cursor: pointer; }
+.rm:hover { border-color: var(--ink); }
+.sum h3 { font-size: var(--t2); }
+.sum ul li { display: flex; justify-content: space-between; gap: var(--s3); padding: var(--s1) 0; font-size: var(--t-1); }
+.total { display: flex; justify-content: space-between; margin: var(--s4) 0; padding-top: var(--s3); border-top: 1px solid var(--line); font: 600 var(--t1)/1 var(--font-body); }
+.sum .btn { width: 100%; }
+.sum .btn.idle { opacity: .8; }
+.back { margin-top: var(--s2); width: 100%; min-height: 44px; border: 1.5px solid var(--line); background: var(--ground); border-radius: var(--r); font: 600 var(--t0)/1 var(--font-body); cursor: pointer; color: var(--ink); }
+.note, .sent { color: var(--soft); font-size: var(--t-1); margin: var(--s3) 0 0; }
+.sent { color: var(--ink); font-weight: 600; }
+.keep { margin-top: var(--s3); }
+.ful { display: flex; gap: var(--s2); }
+.toast { position: fixed; left: 50%; bottom: calc(var(--pad-bar, 0px) + 20px); width: max-content; max-width: 92vw; z-index: 40; display: flex; gap: var(--s2); align-items: center; padding: var(--s3) var(--s5);
+  background: var(--ink); color: var(--ground); border-radius: var(--r); font-weight: 600; transform: translate(-50%, 140%); opacity: 0; transition: transform 300ms var(--out), opacity 300ms; pointer-events: none; }
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+.toast .tk::before { content: "\2713"; }
+
+.addon { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: var(--s3) var(--s4); align-items: center; margin-top: var(--s5); padding: var(--s4); border: 1px dashed var(--line); border-radius: var(--r); background: var(--ground); }
+.addon img { width: 96px; height: 64px; border-radius: 8px; object-fit: cover; }
+.addon p { margin: 0; } .addon p b { display: block; }
+.addon-b { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--s4); }
+.off { display: inline-block; padding: 2px 8px; border-radius: 999px; background: var(--ink); color: var(--ground); font: 600 var(--t-1)/1.4 var(--font-body); }
+
+/* order steps answer when pointed at (3e.9) */
+.osteps button:hover { color: var(--ink); border-bottom-color: var(--line); }
+.osteps .is-now button:hover { border-bottom-color: var(--soft); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* review 12 Nov (rules 3s.27, same thing same place): every card name holds two lines, so prices and Add line up across a row */
+.pc-t b { min-height: 2.6em; }
+/* the top Add button wraps cleanly when it is long, the price kept with its sign */
+.st-top .btn-line { white-space: normal; height: auto; min-height: 44px; padding-block: var(--s2); text-align: left; line-height: 1.3; }
+.st-top .btn-line .sym { margin-left: .25em; }
+/* review 12 Nov: on a phone every price row holds two lines, so a struck price and its badge never push Add lower than the card beside it */
+@media (max-width: 560px) { .pc-t .pr-row { min-height: 3.2em; align-content: flex-start; } }
+
+/* lessons from past reviews (rules 3aa.25): a plain link in running text is in the site's ink, underlined, never the
+   browser's blue (Aaron, on tan); any element jumped to by a link stops clear of the fixed menu bar (Aaron's booking
+   steps scrolled under the header) */
+p a:not([class]), li a:not([class]) { color: inherit; text-decoration: underline; text-underline-offset: .15em; }
+[id] { scroll-margin-top: calc(var(--top-h) + 16px); }
+
+/* a window narrower than 16:10 (a small laptop, a browser not full screen) never crops the film's sides: the whole
+   film on the page's own ground (rules 3aa.14; Tzvi 12 Nov 2026: "its still zoomed in" on his laptop) */
+@media (min-width: 761px) and (max-aspect-ratio: 8/5) {
+  .film.slides .slide video, .film.slides .slide img.still { object-fit: contain; }
+  .film.slides .slide { background: var(--ground); }
+}
+
+.film.slides .slide.early .chap { opacity: 0; }   /* the word waits for its own scene (3aa.20) */
