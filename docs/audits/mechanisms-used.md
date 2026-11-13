@@ -149,3 +149,4 @@ regardless, per the brief.
 should read and extend this file rather than re-reading every report.
 treat it as used and do not repeat it.
 which is a different report type). Flagged as documentation drift, same as the
+2026-11-13 - choice visibility (options with prices shown, not in a drop-down) - L.A. Cholent order form meat choice
