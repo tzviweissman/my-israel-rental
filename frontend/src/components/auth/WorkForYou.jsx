@@ -36,9 +36,12 @@ const WORDS = {
 function ago(at, lang) {
   const s = Math.max(0, (Date.now() - new Date(at).getTime()) / 1000);
   const rtf = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
-  if (s < 3600) return rtf.format(-Math.max(1, Math.round(s / 60)), 'minute');
-  if (s < 86400) return rtf.format(-Math.round(s / 3600), 'hour');
-  return rtf.format(-Math.round(s / 86400), 'day');
+  // Hebrew adds the number in brackets to the singular and the dual ("לפני שעתיים (2)"); the word already says it
+  // (same fix as LeadsBoard's ago()).
+  const f = (n, unit) => rtf.format(-n, unit).replace(/\s*\(\d+\)/, '');
+  if (s < 3600) return f(Math.max(1, Math.round(s / 60)), 'minute');
+  if (s < 86400) return f(Math.round(s / 3600), 'hour');
+  return f(Math.round(s / 86400), 'day');
 }
 
 function LiveLine() {
