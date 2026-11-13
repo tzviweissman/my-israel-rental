@@ -24,7 +24,7 @@ import { buildWhatsAppLinkWithMessage } from '../../utils/whatsappLink';
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 const SOURCE_ICON = { chat: MessageCircle, quote: Calculator, manual: PhoneCall, email: Mail };
-const btn = 'px-3 min-h-[36px] inline-flex items-center gap-1 rounded-lg border text-xs font-semibold';
+const btn = 'px-3 min-h-[44px] inline-flex items-center gap-1 rounded-lg border text-xs font-semibold';
 
 /**
  * Writes a personal message for any lead, or for a post on the Requests board
