@@ -1,0 +1,734 @@
+/* The STRUCTURE every designed site shares (page rules 3k), from
+   scrollcraft/starter. It sets how things work, not how the business looks:
+   every value marked CHANGE is the brand, chosen fresh for each business from
+   its own logo, photos and menu, and checked with
+   `node scripts/check-fingerprints.mjs <build>` so no two sites look alike.
+   Never start a look from another site's tokens. */
+:root {
+  /* CHANGE: the brand. Ground, surface, ink, soft text, the accent, the line. */
+  --ground: #F6EEE3; --surface: #ECDFCC; --ink: #1C1410; --soft: #5E5148; --accent: #3B0A02; --accent-ink: #FFFFFF; --line: #DCCFBC; --brew: #3B0A02; --brew-2: #6B2A14;
+  /* CHANGE: three faces at most, none the same as another site's heading face. */
+  --font-head: 'Noto Serif', 'Noto Serif Hebrew', Georgia, serif; --font-body: 'IBM Plex Sans', 'IBM Plex Sans Hebrew', system-ui, sans-serif;
+  /* CHANGE: one radius for images and buttons. */
+  --r: 14px;
+  /* one type scale and one spacing scale (rules 3x.13): every size on the site is one of these, nothing in between.
+     Ratio 1.25 from a 17 px body; the display steps grow with the screen. */
+  --t-1: .8125rem; --t0: 1.0625rem; --t1: 1.3125rem; --t2: 1.625rem; --t3: clamp(1.75rem, 1.4rem + 1.6vw, 2.25rem);
+  --t4: clamp(2.1rem, 1.5rem + 3vw, 3.25rem); --t5: clamp(2.6rem, 1.6rem + 5vw, 4.75rem);
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px; --s10: 128px;
+  --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --top-h: 68px; --out: cubic-bezier(.2, .7, .2, 1);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 400 var(--t0)/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; }
+h1, h2, h3 { font-family: var(--font-head); margin: 0; line-height: 1.04; }
+.wrap { max-width: 74rem; margin: 0 auto; padding-inline: var(--gutter); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+/* the first Tab stop (rules 3x.8): hidden until a keyboard reaches it */
+.skip { position: absolute; left: -999px; top: .6rem; z-index: 100; padding: .6rem 1rem; background: var(--ink); color: var(--ground); border-radius: 6px; font-weight: 700; }
+.skip:focus { left: .6rem; }
+[hidden] { display: none !important; }
+.sym { font-family: var(--font-body); font-weight: 500; font-size: .62em; margin-right: .08em; vertical-align: .18em; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* the one solid button and the outline one; every button reacts when pressed */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; min-height: 54px; padding: 0 1.7rem; border-radius: 999px; border: 0;
+  background: var(--accent); color: var(--accent-ink); font: 600 var(--t0)/1 var(--font-body); text-decoration: none; cursor: pointer; transition: transform 160ms var(--out), filter 160ms; }
+.btn[aria-busy="true"] { opacity: .7; pointer-events: none; }
+/* CHANGE: the button's hover and press (effects.button in fingerprints.json),
+   found by a fresh 21st search for this business, never copied from the last
+   site. The starter used to hold a lift, press and travelling arrow here, and
+   every site built from it came out with the same button (rules 3p.4). */
+.btn-line { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 1.15rem; border-radius: 999px; border: 2px solid var(--ink);
+  color: var(--ink); font: 600 var(--t0)/1 var(--font-body); text-decoration: none; background: transparent; cursor: pointer; transition: background 160ms, color 160ms, transform 140ms; }
+/* CHANGE: the outline button's hover and press, chosen with the main one */
+
+/* the menu bar: the same on every page; on a phone the pages fold into Menu */
+.top { position: fixed; inset: 0 0 auto; z-index: 30; height: var(--top-h); display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-inline: var(--gutter);
+  background: color-mix(in srgb, var(--ground) 92%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid transparent; transition: border-color 240ms; }
+.top.solid { border-bottom-color: var(--line); }
+.mark { display: inline-flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--ink); font: 700 var(--t0)/1 var(--font-head); }
+.mark img { width: 36px; height: auto; }
+.nav { display: flex; gap: .2rem; }
+.nav a { padding: .55rem .9rem; border-radius: 999px; color: var(--soft); font: 600 var(--t0)/1 var(--font-body); text-decoration: none; transition: color 160ms, background 160ms; }
+.nav a:hover, .nav a[aria-current="page"] { color: var(--ink); background: var(--surface); }
+.top-r { display: flex; align-items: center; gap: .6rem; }
+.count { display: inline-grid; place-items: center; min-width: 22px; height: 22px; margin-left: .45rem; padding: 0 6px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font: 800 var(--t-1)/1 var(--font-body); }
+.menu-btn { display: none; min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); font: 600 var(--t0)/1 var(--font-body); cursor: pointer; }
+@media (max-width: 800px) {
+  .menu-btn { display: inline-flex; align-items: center; }
+  .top .btn-line { display: none; }
+  .nav { position: fixed; inset: var(--top-h) 0 auto; flex-direction: column; gap: 0; padding: .4rem var(--gutter) 1.2rem; background: var(--ground); border-bottom: 1px solid var(--line);
+    transform: translateY(-8px); opacity: 0; visibility: hidden; transition: opacity 200ms var(--out), transform 200ms var(--out), visibility 0s 200ms; }
+  .nav.shown { transform: none; opacity: 1; visibility: visible; transition: opacity 200ms var(--out), transform 200ms var(--out); }
+  .nav a { padding: 1rem .4rem; border-radius: 0; border-bottom: 1px solid var(--line); font-size: var(--t0); }
+}
+
+/* sections, reveals and inner page heads */
+section.sec { padding-block: clamp(4.5rem, 10vw, 7.5rem); }
+.sec h2 { font-size: var(--t4); }
+.sec .lede { color: var(--soft); font-size: var(--t0); max-width: 36rem; margin: .9rem 0 0; }
+/* CHANGE: how sections appear (effects.reveal). site.js adds .in to each .rev
+   as it comes into view; the look is chosen per site (fade up was on all nine
+   live pages, 20 Oct 2026). Write .rev and .rev.in below the marked line, and
+   keep .no-js .rev and reduced motion visible. */
+.no-js .rev { opacity: 1; transform: none; }
+.page-head { padding: calc(var(--top-h) + clamp(3rem, 8vw, 5rem)) 0 0; }
+.page-head h1 { font-size: var(--t5); }
+.page-head .lede { color: var(--soft); font-size: var(--t0); max-width: 38rem; margin: 1rem 0 0; }
+
+/* owner-filled places (3m): gallery and questions */
+.gal-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .9rem; margin-top: clamp(2rem, 4vw, 3rem); }
+.gal-grid[data-count="1"] { grid-template-columns: minmax(0, 46rem); }
+.gal-grid[data-count="2"], .gal-grid[data-count="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.gal-ph { margin: 0; border-radius: var(--r); overflow: hidden; aspect-ratio: 4 / 3; background: var(--surface); }
+.gal-ph img { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 760px) { .gal-grid { grid-template-columns: 1fr 1fr; } }
+.faq-list { margin-top: clamp(1.5rem, 3vw, 2.2rem); max-width: 50rem; }
+.faq-q { border-top: 1px solid var(--line); } .faq-q:last-child { border-bottom: 1px solid var(--line); }
+.faq-q summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 1rem; padding: 1.1rem 0; font: 600 var(--t0)/1.35 var(--font-body); }
+.faq-q summary::-webkit-details-marker { display: none; }
+.faq-q summary::after { content: '+'; color: var(--accent); font-size: var(--t1); line-height: 1; transition: transform 200ms var(--out); }
+.faq-q[open] summary::after { transform: rotate(45deg); }
+.faq-q p { margin: 0 0 1.2rem; color: var(--soft); }
+
+/* forms (order or book) */
+.form { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: clamp(1.5rem, 4vw, 3rem); margin-top: clamp(1.5rem, 3vw, 2.4rem); align-items: start; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: clamp(1.2rem, 3vw, 1.7rem); }
+.card + .card { margin-top: 1.1rem; }
+label.f { display: block; font-weight: 600; font-size: var(--t0); margin: .9rem 0 .35rem; }
+.fld { width: 100%; min-height: 48px; padding: .7rem .9rem; border-radius: 12px; border: 1.5px solid var(--line); background: var(--ground); color: var(--ink); font: 400 var(--t0)/1.4 var(--font-body); }
+textarea.fld { min-height: 88px; resize: vertical; }
+.fld:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+.bad .fld { border-color: #B3261E; }
+.err { color: #A3221B; font-size: var(--t-1); margin: .3rem 0 0; min-height: 1.1em; }
+.sum { position: sticky; top: calc(var(--top-h) + 20px); }
+@media (max-width: 860px) { .form { grid-template-columns: 1fr; } .sum { position: static; } }
+
+/* the closing band, footer and phone bar */
+.close { padding-top: clamp(3.5rem, 8vw, 6rem); overflow: hidden; background: var(--ink); color: var(--ground); }
+.close .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.2rem; align-items: center; }
+.close h2 { font-size: var(--t4); }
+.close p { margin: .5rem 0 0; line-height: 1.8; opacity: .9; }
+.close p a { color: inherit; font-weight: 700; white-space: nowrap; }
+.giant { font: 700 min(11vw, 34svh)/1 var(--font-head); white-space: nowrap; text-align: center; margin: clamp(2rem, 5vw, 3rem) 0 0; padding-bottom: .08em; opacity: .9; }
+/* gift cards on the page (gift.js, rules 3x.14); restyle with the brand like any other section */
+.gift-form { display: grid; gap: var(--s5); max-width: 36rem; margin-top: var(--s5); }
+.gift-form fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: var(--s3); }
+.gift-form legend { padding: 0; margin-bottom: var(--s3); font-weight: 700; }
+.gift-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr)); gap: var(--s2); }
+.gift-tile { min-height: 64px; border: 1px solid var(--line); border-radius: var(--r); background: var(--ground); color: var(--ink); font: 700 var(--t1)/1.1 var(--font-body); cursor: pointer; }
+.gift-tile[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.gift-switch { display: inline-flex; justify-self: start; padding: var(--s1); border: 1px solid var(--line); border-radius: 999px; }
+.gift-switch button { min-height: 44px; padding: 0 var(--s4); border: 0; border-radius: 999px; background: transparent; color: var(--soft); font: 700 var(--t0)/1 var(--font-body); cursor: pointer; }
+.gift-switch button[aria-pressed="true"] { background: var(--ink); color: var(--ground); }
+.gift-to { display: grid; gap: var(--s3); }
+.gift-to[hidden] { display: none; }
+.gift-field { display: grid; gap: var(--s1); }
+.gift-field[hidden] { display: none; }
+.gift-field label { font-weight: 700; }
+.gift-field input, .gift-field textarea { width: 100%; min-height: 48px; padding: var(--s3); border: 1px solid var(--line); border-radius: 8px; background: var(--ground); color: var(--ink); font: 400 var(--t0)/1.4 var(--font-body); }
+.gift-note, .gift-msg { margin: 0; color: var(--soft); font-size: var(--t-1); }
+.gift-msg:empty { display: none; }
+.gift-msg { color: var(--ink); font-weight: 700; }
+.gift-done { display: grid; gap: var(--s3); justify-items: start; max-width: 36rem; margin-top: var(--s5); }
+.gift-done h3, .gift-done p { margin: 0; }
+.gift-see { font-weight: 700; color: var(--ink); }
+.foot { background: var(--ink); color: var(--ground); opacity: .95; font-size: var(--t-1); text-align: center; padding: 1.1rem var(--gutter) calc(1.1rem + var(--pad-bar, 0px)); }
+.foot a { color: inherit; } .foot nav { margin-bottom: .55rem; font-weight: 600; } .foot nav a { margin: 0 .35rem; }
+/* the full footer (rules 3v.1): parts with a small heading, two to a row on a phone, then the base line */
+.foot.full { text-align: start; font-size: var(--t-1); padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) calc(1.4rem + var(--pad-bar, 0px)); }
+.foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+.foot.full h4, .foot.full h2 { margin: 0 0 .9rem; font: 600 var(--t-1)/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; opacity: .7; }
+.foot.full nav { margin: 0; font-weight: 400; } .foot.full nav a { margin: 0 0 .55rem; }
+.foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; margin: 0 0 .55rem; }
+.foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+.foot .fgrid a.fname { font: 700 var(--t2)/1 var(--font-head); margin-bottom: .9rem; }
+.foot .fbrand p { max-width: 30ch; opacity: .8; line-height: 1.55; }
+.foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; }
+.foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: var(--t-1); opacity: .85; }
+@media (max-width: 760px) { .foot .fgrid { grid-template-columns: 1fr 1fr; } .foot .fbrand { grid-column: 1 / -1; } }
+.bar { position: fixed; inset: auto 0 0; z-index: 25; display: none; align-items: center; justify-content: space-between; gap: .8rem; height: calc(var(--bar-h) + env(safe-area-inset-bottom));
+  padding: 0 var(--gutter) env(safe-area-inset-bottom); background: var(--surface); border-top: 1px solid var(--line); transform: translateY(110%); transition: transform 300ms var(--out); }
+.bar.on { transform: none; }
+.bar .p { font-size: var(--t-1); line-height: 1.25; margin: 0; color: var(--soft); }
+.bar .p b { color: var(--ink); font: 700 var(--t1)/1 var(--font-head); display: block; }
+.bar .btn { min-height: 46px; padding: 0 1.2rem; }
+@media (max-width: 760px) { .bar { display: flex; } body { --pad-bar: var(--bar-h); } }
+@media (prefers-reduced-motion: reduce) { .rev, .rev.in { opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important; transition: none !important; } }
+
+/* ── BELOW HERE: this business only. Its opening, its signature moment, its
+   sections. Nothing here is copied from another site. ── */
+
+h1, h2, h3 { font-weight: 600; letter-spacing: -.01em; }
+.sec.alt { background: var(--surface); }
+.sec-h { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s5) var(--s7); align-items: end; }
+.sec-h .lede { margin: 0; }
+.sec-foot { margin: var(--s6) 0 0; }
+@media (max-width: 760px) { .sec-h { grid-template-columns: 1fr; } }
+
+/* GC-B1: a lighter coffee level rises inside the button when pointed at; it presses down when tapped
+   (from 21st "Liquid Button", good-listener) */
+.btn { position: relative; overflow: hidden; isolation: isolate; border-radius: var(--r); }
+.btn::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--brew-2); transform: translateY(101%); transition: transform 340ms var(--out); }
+.btn:hover::before, .btn:focus-visible::before { transform: translateY(0); }
+.btn:active { transform: translateY(2px) scale(.985); }
+.btn.added::before { animation: fill-up 600ms var(--out); }
+@keyframes fill-up { 0% { transform: translateY(101%); } 50% { transform: translateY(0); } 100% { transform: translateY(101%); } }
+@media (prefers-reduced-motion: reduce) { .btn::before { transition: none; } .btn.added::before { animation: none; } }
+.btn-sm { min-height: 44px; padding: 0 1.1rem; font-size: var(--t0); }
+.btn-line { border-radius: var(--r); border-color: var(--brew); color: var(--brew); }
+.btn-line:hover { background: var(--brew); color: #fff; }
+.btn-line:active { transform: translateY(2px); }
+/* the touch: the basket count in a small ring like their badge */
+.count { background: transparent; color: inherit; border: 1.5px solid currentColor; box-shadow: inset 0 0 0 2px var(--ground); border-radius: 50%; min-width: 24px; height: 24px; padding: 0; }
+.btn-line:hover .count { box-shadow: inset 0 0 0 2px var(--brew); }
+.mark img { width: 40px; height: 40px; border-radius: 50%; }
+
+/* L4: links carry an arrow in a ring */
+.lnk { display: inline-flex; align-items: center; gap: .55rem; min-height: 44px; color: var(--ink); font-weight: 600; text-decoration: none; }
+.lnk .arw { display: inline-grid; place-items: center; width: 30px; height: 30px; border: 1.5px solid var(--line); border-radius: 50%; transition: border-color 200ms, background 200ms, color 200ms, transform 200ms var(--out); }
+.lnk .arw::before { content: "\2192"; font-size: .9em; }
+.lnk:hover .arw, .lnk:focus-visible .arw { border-color: var(--brew); background: var(--brew); color: #fff; transform: translateX(3px); }
+
+/* GC-R1: each block's words fade in while a thin cold brew line fills across above its heading */
+.rev { opacity: 0; transition: opacity 480ms var(--out); }
+.rev.in { opacity: 1; }
+.sec-h.rev, h2.rev { position: relative; padding-top: var(--s4); }
+.sec-h.rev::before, h2.rev::before { content: ""; position: absolute; top: 0; left: 0; width: 56px; height: 3px; border-radius: 2px; background: var(--brew); transform: scaleX(0); transform-origin: left; transition: transform 700ms var(--out) 120ms; }
+.sec-h.rev.in::before, h2.rev.in::before { transform: none; }
+.no-js .rev::before { transform: none; }
+@media (prefers-reduced-motion: reduce) { .rev::before { transform: none !important; transition: none !important; } }
+
+/* GC-P1: the price bold beside its size, the old price struck through */
+.pr-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .5rem; margin: .3rem 0 0; }
+.pr { font: 600 var(--t1)/1 var(--font-body); color: var(--ink); white-space: nowrap; }
+.pr-row s { color: var(--soft); font-size: var(--t0); }
+.pr-row .unit { color: var(--soft); font-size: var(--t0); }
+.hint { color: var(--soft); font-size: var(--t-1); line-height: 1.55; margin: var(--s3) 0 0; }
+
+/* the opening: their sunlit coffee bar on the right, the jar steeps from pale water to cold brew (GC-F1) */
+.steep { height: 260vh; position: relative; }
+.steep.still { height: auto; }
+.st-stage { position: sticky; top: 0; height: 100svh; display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: center;
+  padding: calc(var(--top-h) + var(--s5)) var(--gutter) var(--s6); max-width: 1680px; margin: 0 auto; }
+.steep.still .st-stage { position: relative; height: auto; min-height: 100svh; }
+.st-words h1 { font-size: var(--t5); line-height: 1.02; }
+.st-words .amp { color: var(--brew); }
+.st-words .ln { font-size: var(--t1); color: var(--soft); margin: var(--s5) 0 var(--s6); max-width: 30rem; line-height: 1.45; }
+.btn-facts { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); list-style: none; padding: 0; margin: var(--s5) 0 0; color: var(--soft); font-size: var(--t0); }
+.btn-facts li { white-space: nowrap; }
+.btn-facts li + li::before { content: "\00B7"; margin-right: var(--s4); }
+.st-ph { position: relative; margin: 0; aspect-ratio: 3 / 2; justify-self: end; width: min(100%, (100svh - var(--top-h) - var(--s8)) * 1.5, 1200px); }
+.st-ph img { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: var(--r); }
+.st-base { box-shadow: 0 24px 60px -30px rgba(59, 10, 2, .45); }
+.st-water { pointer-events: none; will-change: opacity; }
+.steep.still .st-water { display: none; }
+.st-clock { position: absolute; left: 3%; top: 5%; display: flex; align-items: center; gap: var(--s3); padding: var(--s2) var(--s4) var(--s2) var(--s2); border-radius: 999px; background: var(--ground); color: var(--ink); font: 600 var(--t0)/1 var(--font-body); }
+.st-clock svg { width: 40px; height: 40px; }
+.st-clock .tr { fill: none; stroke: var(--line); stroke-width: 8; }
+.st-clock .arc { fill: none; stroke: var(--brew); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transform: rotate(-90deg); transform-origin: 60px 60px; }
+.st-clock .hand { stroke: var(--ink); stroke-width: 7; stroke-linecap: round; transform-origin: 60px 60px; }
+.steep.still .st-clock { display: none; }
+[data-arrive] > * { animation: arrive 700ms var(--out) both; }
+[data-arrive] > *:nth-child(2) { animation-delay: 120ms; } [data-arrive] > *:nth-child(3) { animation-delay: 240ms; } [data-arrive] > *:nth-child(4) { animation-delay: 360ms; }
+@keyframes arrive { from { opacity: 0; transform: translateY(14px); } }
+@media (prefers-reduced-motion: reduce) { [data-arrive] > * { animation: none; } }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .sec.flood { background: var(--ground); }   /* on a phone the film already ends on the cream ground */
+  .steep { height: 220vh; }
+  .st-stage { grid-template-columns: 1fr; align-content: start; gap: var(--s5); padding-top: calc(var(--top-h) + var(--s4)); }
+  .st-ph { order: -1; width: 100%; justify-self: stretch; }
+  .st-words .ln { margin: var(--s3) 0 var(--s4); font-size: var(--t0); }
+  .st-clock { padding: var(--s1) var(--s3) var(--s1) var(--s1); font-size: var(--t-1); } .st-clock svg { width: 32px; height: 32px; }
+}
+
+/* product cards; GC-T1: the coffee's own label stripe grows along the card's foot when pointed at */
+.cards { list-style: none; padding: 0; margin: var(--s7) 0 0; display: grid; gap: var(--s6) var(--s5); }
+.cards.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.cards.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.pc { --stripe: var(--brew); position: relative; display: flex; flex-direction: column; min-width: 0; }
+.pc-a { display: block; flex: 1; text-decoration: none; color: var(--ink); }
+.pc-ph { display: block; position: relative; aspect-ratio: 3 / 2; overflow: hidden; border-radius: var(--r); background: var(--surface); }
+.pc-ph img { width: 100%; height: 100%; }
+.pc-ph::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: var(--stripe); transform: scaleX(.18); transform-origin: left; transition: transform 380ms var(--out); }
+.pc-a:hover .pc-ph::after, .pc-a:focus-visible .pc-ph::after { transform: none; }
+.pc-t { display: block; margin-top: var(--s3); }
+.pc-t b { display: block; font: 600 var(--t0)/1.3 var(--font-body); }
+.pc .btn-sm { align-self: flex-start; margin-top: var(--s3); }
+@media (max-width: 1100px) { .cards.five { grid-template-columns: repeat(3, minmax(0, 1fr)); } .cards.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .cards.five, .cards.four { grid-template-columns: 1fr 1fr; gap: var(--s5) var(--s3); } .pr { font-size: var(--t0); } }
+
+/* two-column sections */
+.of-grid, .bar-grid, .st-grid, .c-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+.of-ph, .story figure, .c-grid figure { margin: 0; }
+.of-ph img, .story figure img, .c-grid figure img { width: 100%; height: auto; border-radius: var(--r); }
+.of-list { list-style: none; padding: 0; margin: var(--s5) 0 0; }
+.of-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--s4); align-items: center; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.of-list .pr-row { margin: 0; flex-wrap: nowrap; }
+.of-list .pr-row .unit { display: none; }
+.office h2, .bars h2, .story h2 { font-size: var(--t4); }
+
+/* the coffee bar: where is your event? */
+.bar-ph { position: relative; aspect-ratio: 3 / 2; border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.bar-ph img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 420ms var(--out); }
+.bar-ph img.on { opacity: 1; }
+.seg { display: flex; flex-wrap: wrap; gap: var(--s2); margin: var(--s5) 0 0; }
+.seg button { min-height: 44px; padding: 0 var(--s4); border: 1.5px solid var(--line); border-radius: var(--r); background: var(--ground); color: var(--ink); font: 600 var(--t0)/1 var(--font-body); cursor: pointer; transition: border-color 160ms, background 160ms, color 160ms; }
+.seg button:hover { border-color: var(--brew); }
+.seg button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--ground); }
+.bar-buy { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--s4); margin-top: var(--s6); padding-top: var(--s5); border-top: 1px solid var(--line); }
+.bar-buy h3 { font-size: var(--t2); }
+
+/* the story and its two strengths */
+.two { display: grid; gap: var(--s5); margin: var(--s6) 0 0; }
+.two dt { font: 600 var(--t1)/1.25 var(--font-head); }
+.two dd { margin: var(--s2) 0 0; color: var(--soft); }
+
+/* how ordering works: a plain numbered list */
+.how-l { list-style: none; counter-reset: n; padding: 0; margin: var(--s6) 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s6); }
+.how-l li { counter-increment: n; border-top: 1px solid var(--line); padding-top: var(--s4); }
+.how-l li::before { content: counter(n); display: block; font: 600 var(--t3)/1 var(--font-head); color: var(--brew); margin-bottom: var(--s3); }
+.how-l b { display: block; font-size: var(--t1); }
+.how-l span { display: block; color: var(--soft); margin-top: var(--s2); }
+@media (max-width: 860px) { .of-grid, .bar-grid, .st-grid, .c-grid { grid-template-columns: 1fr; } .how-l { grid-template-columns: 1fr; gap: var(--s5); } }
+
+/* contact */
+.reach { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s5); }
+.reach li { border-top: 1px solid var(--line); padding-top: var(--s4); }
+.reach b { display: block; font: 600 var(--t-1)/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--soft); margin-bottom: var(--s2); }
+.reach a { font: 600 var(--t2)/1.2 var(--font-head); color: var(--ink); text-decoration: none; }
+.reach p { margin: var(--s2) 0 0; color: var(--soft); }
+
+/* the closing band and footer in cold brew */
+.close, .foot { background: var(--brew); color: #FFF6EC; }
+.close .btn { background: #FFF6EC; color: var(--brew); }
+.close .btn::before { background: #EADFCD; }
+.foot.full h2 { font-size: var(--t-1); }
+
+/* shop: chips, groups, the product sheet */
+.chips { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s3); }
+.chip { position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s4); border: 1.5px solid var(--line); background: var(--ground); color: var(--ink); border-radius: var(--r); font: 600 var(--t0)/1 var(--font-body); cursor: pointer; }
+.chip:hover { border-color: var(--brew); }
+.chip[aria-pressed="true"], .chip:has(input:checked) { border-color: var(--ink); background: var(--ink); color: var(--ground); }
+.chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.chip:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+.filters { position: sticky; top: var(--top-h); z-index: 5; background: var(--ground); padding: var(--s3) 0; margin-top: var(--s6); border-bottom: 1px solid var(--line); }
+.filters .chips { margin: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 2px; }
+.filters .chip { white-space: nowrap; flex: none; }
+.grp { margin-top: var(--s8); scroll-margin-top: calc(var(--top-h) + 80px); }
+.grp > h2 { font-size: var(--t3); border-bottom: 1px solid var(--line); padding-bottom: var(--s3); }
+.grp .cards { margin-top: var(--s5); }
+.sheet { width: min(64rem, 100vw - 2 * var(--gutter)); max-width: none; max-height: min(92svh, 52rem); padding: 0; border: 0; border-radius: var(--r); background: var(--ground); color: var(--ink); box-shadow: 0 3px 30px rgba(28, 20, 16, .2); overflow: auto; }
+.sheet::backdrop { background: rgba(28, 20, 16, .5); }
+.sheet[open] { animation: sheet-in 320ms var(--out); }
+@keyframes sheet-in { from { opacity: 0; transform: translateY(16px); } }
+.sh-in { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: var(--s6); padding: var(--s6) var(--s6) 0; }
+.sh-ph { margin: 0; align-self: start; }
+.sh-ph img { width: 100%; height: auto; border-radius: var(--r); }
+.sh-close { position: absolute; top: var(--s3); right: var(--s3); width: 44px; height: 44px; border-radius: var(--r); border: 1.5px solid var(--line); background: var(--ground); color: var(--ink); font-size: var(--t1); cursor: pointer; z-index: 2; }
+.sh-close:hover { border-color: var(--ink); }
+.sheet h2 { font-size: var(--t3); padding-right: var(--s8); }
+.sheet .desc { color: var(--soft); margin: var(--s4) 0 0; }
+.buy { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; margin-top: var(--s5); padding-block: var(--s4); background: var(--ground); border-top: 1px solid var(--line); }
+.step { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: var(--r); }
+.step button { width: 44px; height: 44px; border: 0; background: none; font-size: var(--t1); cursor: pointer; color: var(--ink); }
+.step output { min-width: 2ch; text-align: center; font-weight: 600; }
+.step.sm button { width: 40px; height: 40px; }
+.grab { display: none; }
+@media (max-width: 760px) {
+  .sheet { width: 100vw; max-height: 90svh; margin: auto 0 0; border-radius: var(--r) var(--r) 0 0; }
+  .sheet[open] { animation-name: sheet-up; }
+  .sh-in { grid-template-columns: 1fr; padding: var(--s5) var(--gutter) env(safe-area-inset-bottom); gap: var(--s4); }
+  .sh-ph img { max-height: 34svh; width: auto; margin: 0 auto; }
+  .grab { display: block; width: 44px; height: 5px; border-radius: 3px; background: var(--line); margin: var(--s2) auto 0; }
+}
+@keyframes sheet-up { from { transform: translateY(40%); } }
+
+/* the order, in three steps */
+.osteps { list-style: none; padding: 0; margin: 0 0 var(--s5); display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); }
+.osteps button { border: 0; background: none; padding: var(--s2) 0; font: 600 var(--t0)/1.2 var(--font-body); color: var(--soft); cursor: default; border-bottom: 2px solid transparent; min-height: 40px; transition: color 100ms, border-color 100ms; }
+.osteps .is-now button { color: var(--ink); border-bottom-color: var(--brew); }
+.osteps .is-done button { color: var(--ink); cursor: pointer; }
+.blist, .sum ul { list-style: none; padding: 0; margin: var(--s4) 0 0; }
+.bl { display: flex; justify-content: space-between; gap: var(--s3); align-items: center; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.bl > span:first-child { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; }
+.bl-r { display: flex; align-items: center; gap: var(--s2); font-weight: 600; white-space: nowrap; }
+.rm { width: 40px; height: 40px; display: grid; place-items: center; border: 1.5px solid var(--line); border-radius: var(--r); background: var(--ground); color: var(--ink); cursor: pointer; }
+.rm:hover { border-color: var(--ink); }
+.sum h3 { font-size: var(--t2); }
+.sum ul li { display: flex; justify-content: space-between; gap: var(--s3); padding: var(--s1) 0; font-size: var(--t-1); }
+.total { display: flex; justify-content: space-between; margin: var(--s4) 0; padding-top: var(--s3); border-top: 1px solid var(--line); font: 600 var(--t1)/1 var(--font-body); }
+.sum .btn { width: 100%; }
+.sum .btn.idle { opacity: .8; }
+.back { margin-top: var(--s2); width: 100%; min-height: 44px; border: 1.5px solid var(--line); background: var(--ground); border-radius: var(--r); font: 600 var(--t0)/1 var(--font-body); cursor: pointer; color: var(--ink); }
+.note, .sent { color: var(--soft); font-size: var(--t-1); margin: var(--s3) 0 0; }
+.sent { color: var(--ink); font-weight: 600; }
+.keep { margin-top: var(--s3); }
+.ful { display: flex; gap: var(--s2); }
+.toast { position: fixed; left: 50%; bottom: calc(var(--pad-bar, 0px) + 20px); width: max-content; max-width: 92vw; z-index: 40; display: flex; gap: var(--s2); align-items: center; padding: var(--s3) var(--s5);
+  background: var(--ink); color: var(--ground); border-radius: var(--r); font-weight: 600; transform: translate(-50%, 140%); opacity: 0; transition: transform 300ms var(--out), opacity 300ms; pointer-events: none; }
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+.toast .tk::before { content: "\2713"; }
+
+/* fixes after the first check-build pass */
+@media (max-width: 760px) { :root { --t-1: .875rem; } }
+.sym { font-size: max(.62em, 12px); }
+.pr-row s .sym, .pr-row .unit .sym { font-size: 1em; vertical-align: 0; }
+.btn:hover, .btn:focus-visible { box-shadow: 0 8px 20px -10px rgba(59, 10, 2, .6); }
+.osteps button:hover { color: var(--ink); border-bottom-color: var(--line); }
+.osteps .is-now button:hover { border-bottom-color: var(--brew-2); }
+.osteps button:active { transform: translateY(1px); }
+.steep { height: 440vh; }
+@media (max-width: 860px) { .steep { height: 380vh; } }
+.st-ph { animation: arrive-ph 900ms var(--out) 150ms both; }
+@keyframes arrive-ph { from { opacity: 0; transform: translateY(24px) scale(.97); } }
+@media (prefers-reduced-motion: reduce) { .st-ph { animation: none; } }
+.office { padding-block: clamp(2.5rem, 5vw, 3.5rem); }
+.office .of-grid { grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); }
+.office h2 { font-size: var(--t3); }
+.st-top { margin: var(--s5) 0 0; }
+.off { display: inline-block; padding: 2px 8px; border-radius: 999px; background: var(--ink); color: var(--ground); font: 600 var(--t-1)/1.4 var(--font-body); }
+.kband { border-block: 1px solid var(--line); }
+.kband .wrap { display: flex; align-items: center; justify-content: center; gap: var(--s4); padding-block: var(--s5); }
+.kband img { width: 44px; height: 44px; border-radius: 50%; }
+.kband p { margin: 0; font-weight: 600; }
+.nums { display: flex; gap: var(--s7); margin: var(--s5) 0 0; }
+.nums dt { font: 600 var(--t4)/1 var(--font-head); color: var(--brew); }
+.nums dd { margin: var(--s1) 0 0; color: var(--soft); }
+.how { padding-bottom: 0; }
+.deliv { position: relative; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s5); margin: var(--s8) 0 -72px; padding: var(--s6); border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); box-shadow: 0 3px 30px rgba(59, 10, 2, .14); }
+.deliv h3 { font-size: var(--t2); }
+.deliv p { margin: var(--s2) 0 0; color: var(--soft); max-width: 40rem; }
+.how + .gallery[hidden] + .faq[hidden] + .close, .how ~ .close { padding-top: calc(72px + clamp(3.5rem, 8vw, 6rem)); }
+.addon { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: var(--s3) var(--s4); align-items: center; margin-top: var(--s5); padding: var(--s4); border: 1px dashed var(--line); border-radius: var(--r); background: var(--ground); }
+.addon img { width: 96px; height: 64px; border-radius: 8px; }
+.addon p { margin: 0; } .addon p b { display: block; }
+.addon-b { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--s4); }
+.faq-q { border: 1px solid var(--line); border-radius: var(--r); padding: 0 var(--s5); margin-top: var(--s3); background: var(--surface); }
+.faq-q:last-child { border-bottom: 1px solid var(--line); }
+.faq-q summary::after { content: "+"; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--brew); color: #fff; flex: none; }
+.faq-q[open] summary::after { transform: rotate(45deg); }
+@media (max-width: 560px) { .deliv { padding: var(--s5); } .nums { gap: var(--s6); } }
+
+/* the opening, full screen (3h.1): their photo extended to the screen's shape, the words on its soft left band */
+.st-stage { display: block; max-width: none; padding: 0; height: 100svh; overflow: hidden; }
+.steep.still .st-stage { height: 100svh; }
+.st-ph { position: absolute; inset: 0; width: auto; max-height: none; aspect-ratio: auto; animation: none; justify-self: auto; }
+.st-ph picture { position: absolute; inset: 0; }
+.st-ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% 50%; border-radius: 0; box-shadow: none; }
+.st-base { animation: arrive-ph 1100ms var(--out) both; }
+@keyframes arrive-ph { from { opacity: 0; transform: scale(1.03); } }
+.st-words { position: absolute; z-index: 2; left: var(--gutter); top: 50%; transform: translateY(-42%); width: min(34rem, 40vw); padding: var(--s6) var(--s6) var(--s6) 0; }
+.st-words::before { content: ""; position: absolute; z-index: -1; inset: -40% -55% -40% -60vw; background: radial-gradient(closest-side, rgba(246, 238, 227, .9), rgba(246, 238, 227, .7) 55%, rgba(246, 238, 227, 0)); pointer-events: none; }
+.st-clock { left: auto; right: var(--gutter); top: calc(var(--top-h) + var(--s5)); z-index: 2; }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .steep { height: 380vh; }
+  .st-ph img { object-position: 50% 100%; }
+  .st-words { left: var(--gutter); right: var(--gutter); top: calc(var(--top-h) + var(--s4)); transform: none; width: auto; padding: 0; }
+  .st-words::before { inset: -30% -20% -20% -20%; }
+  .st-words h1 { font-size: clamp(2.3rem, 10vw, 3rem); }
+  .st-words .ln { font-size: var(--t0); }
+  .st-clock { top: auto; bottom: 44%; right: var(--gutter); }
+}
+@media (prefers-reduced-motion: reduce) { .st-base { animation: none; } }
+
+/* second pass: every section fits a short laptop (3p.6), heights vary (3v.6), the phone bar hides where it should */
+section.sec { padding-block: clamp(2.5rem, 7svh, 5rem); }
+.cards { margin-top: var(--s6); }
+.story figure img, .c-grid figure img { max-height: calc(100svh - var(--top-h) - 140px); width: auto; max-width: 100%; margin-inline: auto; }
+.bar-ph { max-height: calc(100svh - var(--top-h) - 140px); aspect-ratio: 3 / 2; width: min(100%, (100svh - var(--top-h) - 140px) * 1.5); }
+.office .of-ph img { max-height: 38svh; width: auto; max-width: 100%; }
+.story .lede { max-width: 34rem; }
+.story { padding-block: clamp(3.5rem, 12svh, 8rem); }
+.bar.off, .bar:not(.on) { visibility: hidden; }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .st-words .btn-facts { flex-direction: column; gap: var(--s1); }
+  .st-words .btn-facts li + li::before { content: none; }
+}
+#minis { padding-block: clamp(2rem, 5svh, 3.5rem); }
+#minis .cards.four { max-width: 60rem; gap: var(--s5) var(--s4); }
+#minis .sec-h h2 { font-size: var(--t3); }
+.story { padding-block: clamp(4rem, 16svh, 9rem); }
+.office h2 { font-size: var(--t2); }
+.office .of-list li { padding: var(--s2) 0; }
+.office .nums { margin-top: var(--s4); }
+.office .nums dt { font-size: var(--t3); }
+.bars .lede { margin-top: var(--s3); }
+.bar-buy { margin-top: var(--s5); padding-top: var(--s4); }
+section.sec.story { padding-block: clamp(2.5rem, 13svh - 30px, 9rem); }
+section.sec#minis { padding-block: clamp(2rem, 5svh, 3.5rem); }
+section.sec.office { padding-block: clamp(2.5rem, 5vw, 3.5rem); }
+@media (max-height: 700px) { section.sec.story { padding-block: var(--s6); } .story .two { margin-top: var(--s5); gap: var(--s4); } }
+.seg button { transition: border-color 160ms, background 160ms, color 160ms, transform 100ms; }
+.seg button[aria-pressed="true"]:hover { background: var(--brew); border-color: var(--brew); }
+.seg button:active { transform: translateY(2px); }
+.st-words .ln, .st-words .btn-facts { color: var(--ink); }
+.st-words::before { background: radial-gradient(closest-side, rgba(246, 238, 227, .95), rgba(246, 238, 227, .86) 60%, rgba(246, 238, 227, 0)); }
+
+/* review fixes (review.md, 11 Nov): the opening facts never wrap with a leading dot; jug rows stack on a phone */
+.st-words .btn-facts { flex-direction: column; gap: var(--s1); }
+.st-words .btn-facts li + li::before { content: none; }
+@media (max-width: 560px) {
+  .of-list li { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "n n" "p b"; gap: var(--s2) var(--s4); }
+  .of-list li > span { grid-area: n; font-weight: 600; }
+  .of-list li .pr-row { grid-area: p; }
+  .of-list li .btn { grid-area: b; }
+}
+section.sec.story { padding-block: clamp(3rem, 18svh - 30px, 10rem); }
+@media (max-height: 700px) { section.sec.story { padding-block: var(--s6); } }
+
+/* the opening film (gen/film-brief.md, 11 Nov): the cold brew journey led by the scroll (starter film.js). Words take
+   turns with the film at the left edge (3h.9), each chapter's word on its own soft cream shade */
+.steep { display: none; }
+.film { height: 520vh; position: relative; }
+.film .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; background: var(--ground); }
+.film .screen { position: absolute; inset: 0; }
+.film canvas, .film .screen img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.fw { position: absolute; z-index: 2; left: var(--gutter); top: 50%; transform: translateY(-40%); width: min(32rem, 40vw); transition: opacity 420ms var(--out), transform 420ms var(--out); }
+.fw::before { content: ""; position: absolute; z-index: -1; inset: -40% -55% -40% -60vw; background: radial-gradient(closest-side, rgba(246, 238, 227, .95), rgba(246, 238, 227, .86) 60%, rgba(246, 238, 227, 0)); pointer-events: none; }
+.fw h1 { font-size: var(--t5); line-height: 1.02; }
+.fw .amp { color: var(--brew); }
+.fw .ln { font-size: var(--t1); color: var(--ink); margin: var(--s5) 0 var(--s6); max-width: 30rem; line-height: 1.45; }
+.fw .btn-facts { flex-direction: column; gap: var(--s1); color: var(--ink); }
+.fw .btn-facts li + li::before { content: none; }
+.film.c2 .w0 { opacity: 0; transform: translateY(-46%); pointer-events: none; }
+.w6 { opacity: 0; pointer-events: none; top: auto; bottom: 14svh; transform: none; }
+.w6 h2 { font-size: var(--t4); margin-bottom: var(--s5); }
+.film.c6 .w6 { opacity: 1; pointer-events: auto; }
+.chap { position: absolute; z-index: 2; left: var(--gutter); bottom: 12svh; margin: 0; opacity: 0; transform: translateY(14px); transition: opacity 360ms var(--out), transform 360ms var(--out); }
+.chap::before { content: ""; position: absolute; z-index: -1; inset: -45% -40% -45% -30vw; background: radial-gradient(closest-side, rgba(246, 238, 227, .92), rgba(246, 238, 227, .78) 60%, rgba(246, 238, 227, 0)); }
+.chap b { display: block; font: 600 clamp(3rem, 2rem + 6vw, 7rem)/.95 var(--font-head); color: #9A4E2C; letter-spacing: -.02em; }
+.chap span { display: block; margin-top: var(--s2); font: 600 var(--t1)/1.3 var(--font-body); color: var(--ink); }
+.film.c2:not(.c3) .k2, .film.c3:not(.c4) .k3, .film.c4:not(.c5) .k4, .film.c5:not(.c6) .k5 { opacity: 1; transform: none; }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .film { height: 460vh; }
+  .fw { left: var(--gutter); right: var(--gutter); top: calc(var(--top-h) + var(--s4)); transform: none; width: auto; }
+  .fw::before { inset: -30% -20% -20% -20%; }
+  .fw h1 { font-size: clamp(2.3rem, 10vw, 3rem); }
+  .fw .ln { font-size: var(--t0); margin: var(--s3) 0 var(--s4); }
+  .film.c2 .w0 { transform: translateY(-8px); }
+  .w6 { top: auto; bottom: calc(var(--bar-h) + var(--s6)); }
+  .chap { top: calc(var(--top-h) + var(--s5)); bottom: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .film { height: 100svh; } .fw, .chap { transition: none; } }
+
+/* check fixes (11 Nov): the film stays clear while it plays (3h.25, at most 3% covered): chapter names are small
+   labels at the left edge with only a tight shade; the phone's opening words sit on a tight strip (5b.3);
+   with motion off the opening words show and the chapter labels are left out */
+.chap { bottom: 9svh; }
+.chap::before { inset: -10px -16px; border-radius: var(--r); background: rgba(246, 238, 227, .9); }
+.chap b { font: 600 var(--t3)/1 var(--font-head); }
+.chap span { font: 600 var(--t-1)/1.3 var(--font-body); margin-top: var(--s1); }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .fw::before { inset: -10px -12px; border-radius: var(--r); background: rgba(246, 238, 227, .9); }
+  .fw .ln { display: none; }
+  .fw h1 { font-size: clamp(2rem, 8.5vw, 2.6rem); }
+  .fw .btn { min-height: 46px; }
+  .fw .btn-facts { margin-top: var(--s3); font-size: var(--t-1); }
+  .chap span { display: none; }
+  .chap { top: auto; bottom: calc(var(--bar-h) + var(--s5)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .film .w0, .film.c2 .w0 { opacity: 1 !important; transform: translateY(-40%) !important; pointer-events: auto; }
+  .film .chap, .film .w6 { display: none; }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 860px) { .film .w0, .film.c2 .w0 { transform: none !important; } }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) { .film .chap { display: none; } .fw .btn-facts { display: none; } }
+.bar.in-film { visibility: hidden; transform: translateY(110%); }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .fw .btn-facts { display: flex; flex-direction: row; flex-wrap: wrap; gap: 0 var(--s2); margin-top: var(--s3); font-size: var(--t-1); }
+  .fw .btn-facts li + li::before { content: "\00B7"; margin-right: var(--s2); }
+}
+@media (max-width: 860px) and (max-height: 700px) { .fw h1 { font-size: 1.75rem; } .fw .btn { min-height: 44px; padding: 0 1.1rem; } .fw .btn-facts { margin-top: var(--s2); } }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) { .fw.w0 { right: auto; width: fit-content; max-width: calc(100% - 2 * var(--gutter)); } }
+@media (max-width: 860px) and (max-height: 700px) { .fw::before { inset: -6px -8px; } .fw h1 { font-size: 1.6rem; } }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) { .fw .btn-facts { gap: var(--s1) var(--s4); font-size: .9375rem; } .fw .btn-facts li + li::before { content: none; } }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) { .fw h1 { margin-bottom: var(--s3); } }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) { .fw h1 { font-size: clamp(1.75rem, 7.6vw, 2.4rem); margin-bottom: var(--s2); } .fw .btn { min-height: 44px; } }
+@media (max-width: 860px) and (max-height: 700px) { .fw h1 { font-size: 1.5rem; } }
+@media (max-width: 860px) and (max-height: 700px) { .fw::before { inset: -6px -4px; } .fw .btn-facts { gap: 0 var(--s3); } }
+/* review (11 Nov): on a phone the film's 9:16 crop cannot hold their whole coffee bar, so the last chapter shows their
+   photo in its own tall version (extended, never cropped, assets/open-tall.webp), with the words above it */
+.end-tall { display: none; }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .end-tall { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; opacity: 0; transition: opacity 500ms var(--out); z-index: 1; }
+  .film.c6 .end-tall { opacity: 1; }
+  .w6 { top: calc(var(--top-h) + var(--s6)); bottom: auto; }
+}
+/* review (11 Nov, second pass): the stretched tall fill looked fake; the phone ending is their real photo, whole,
+   full width on their cream, the words above it */
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .end-tall { background: var(--ground); display: flex; align-items: center; justify-content: center; padding: calc(var(--top-h) + 150px) 0 calc(var(--bar-h) + var(--s5)); }
+  .end-tall img { position: static; width: 100%; height: auto; max-height: 100%; object-fit: contain; }
+}
+@media (max-width: 860px), (max-aspect-ratio: 1/1) { .end-tall { align-items: flex-start; padding-top: calc(var(--top-h) + 170px); } .end-tall img { border-radius: var(--r); width: calc(100% - 2 * var(--gutter)); } }
+
+/* the opening as stacked slides (12 Nov, slides.js): each slide a full screen in a track the scroll pushes up */
+.film.slides { height: auto; }
+.film.slides .track { position: absolute; inset: 0; will-change: transform; }
+.film.slides .slide { position: absolute; left: 0; right: 0; height: 100%; overflow: hidden; background: var(--ground); }
+.film.slides .slide:nth-child(1) { top: 0; } .film.slides .slide:nth-child(2) { top: 100%; }
+.film.slides .slide:nth-child(3) { top: 200%; } .film.slides .slide:nth-child(4) { top: 300%; }
+.film.slides .slide video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.film.slides .chap { opacity: 1; transform: none; z-index: 2; }
+.film.slides .slide:first-child .chap { opacity: 0; }
+.film.slides.c3 .slide:first-child .chap, .film.slides.c2:not(.c3) .slide:first-child .chap { opacity: 1; }
+.film.slides .w0 { z-index: 3; }
+.film.slides.c3 .w0 { opacity: 0; transform: translateY(-46%); pointer-events: none; }
+.film.slides:not(.c3) .w0 { opacity: 1; }
+.film.slides.c6 .w6 { opacity: 1; pointer-events: auto; z-index: 3; }
+.film.slides .end-tall { z-index: 2; }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) { .film.slides.c3 .w0 { transform: translateY(-8px); } .film.slides .chap { display: none; } }
+.film.slides.c2 .w0 { opacity: 0; transform: translateY(-46%); pointer-events: none; }
+.film.slides:not(.c2) .w0 { opacity: 1; }
+.film.slides:not(.c2) .slide:first-child .chap { opacity: 0; }
+.film.slides.c2 .slide:first-child .chap { opacity: 1; }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) { .film.slides.c2 .w0 { transform: translateY(-8px); } }
+@media (prefers-reduced-motion: reduce) { .film.slides .w0, .film.slides.c2 .w0 { opacity: 1 !important; } .film.slides .track { transform: translate3d(0, -300%, 0) !important; } }
+/* five slides (12 Nov): the pour clip's own fade is now a slide push between the pour and the milk */
+.film.slides .slide:nth-child(5) { top: 400%; }
+.film.slides.c6 .w6 { opacity: 0; pointer-events: none; }
+.film.slides.c7 .w6 { opacity: 1; pointer-events: auto; z-index: 3; }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) { .film.slides.c6 .end-tall { opacity: 0; } .film.slides.c7 .end-tall { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .film.slides .track { transform: translate3d(0, -400%, 0) !important; } }
+
+/* ── 12 Nov 2026: the starter's parts used here (rules as a blueprint) ── */
+.bar:not(.on), .bar.off { visibility: hidden; }
+.osteps button:hover { color: var(--ink); border-bottom-color: var(--line); }
+/* parts made to the rules (12 Nov 2026): facts and words over a photo */
+/* facts under the button (3v.14): every item carries its own dot, so a wrapped line never starts with one (3a.8) */
+.btn-facts { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s5); list-style: none; padding: 0; margin: var(--s4) 0 0; color: var(--ink); font-size: var(--t0); }
+.btn-facts li { position: relative; padding-left: 14px; white-space: nowrap; }   /* one text run, so a price's sign stays with its number */
+.btn-facts li::before { content: ""; position: absolute; left: 0; top: .6em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+/* words over a photo or film (5b.3): a tight shade only behind the words, kept clear of the button below; on a phone
+   the block is only as wide as its words, so the photo stays at least 60% clear (check-photo-clear) */
+.over { position: relative; z-index: 2; width: fit-content; max-width: min(34rem, 100%); }
+.over::before { content: ""; position: absolute; z-index: -1; inset: -14px -16px; border-radius: var(--r); background: color-mix(in srgb, var(--ground) 92%, transparent); pointer-events: none; }
+.over h1, .over h2 { margin-bottom: var(--s3); }
+.over .btn { margin-top: var(--s3); }
+@media (max-width: 860px) { .over::before { inset: -10px -12px; } .over .lede, .over .ln { display: none; } }
+
+/* the slides opening (sitekit.opening_slides, slides.js; 12 Nov 2026). Every placement here is a rule built in:
+   words on a tight shade at the left, kept off the film once it plays (3h.25); the big word per slide moves with its
+   slide, laptop only; the phone bar waits for the film's end; on a phone the end is the business's own photo whole. */
+.film.slides { position: relative; }
+.film.slides .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; background: var(--ground); }
+.film.slides .track { position: absolute; inset: 0; will-change: transform; }
+.film.slides .slide { position: absolute; left: 0; right: 0; height: 100%; overflow: hidden; background: var(--ground); }
+.film.slides .slide video, .film.slides .slide img.still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.film.slides .over { position: absolute; left: var(--gutter); top: 50%; transform: translateY(-40%); transition: opacity 420ms var(--out), transform 420ms var(--out); }
+.film.slides .over h1 { font-size: var(--t5); line-height: 1.02; }
+.film.slides .over .ln { font-size: var(--t1); margin: var(--s4) 0 var(--s5); max-width: 30rem; }
+.film.slides.c2 .w0 { opacity: 0; transform: translateY(-46%); pointer-events: none; }
+.film.slides .w-end { top: auto; bottom: 14svh; transform: none; opacity: 0; pointer-events: none; }
+.film.slides.at-end .w-end { opacity: 1; pointer-events: auto; }
+.film.slides.at-end .chap { opacity: 0; }   /* the closing card takes the last slide's place, never sits on its caption */
+.film.slides .w-end h2 { font-size: var(--t4); }
+.film.slides .chap { position: absolute; z-index: 2; left: var(--gutter); bottom: 9svh; margin: 0; padding: var(--s2) var(--s4); border-radius: var(--r); background: color-mix(in srgb, var(--ground) 90%, transparent); transition: opacity 360ms var(--out); }
+.film.slides .chap b { display: block; font: 600 var(--t3)/1 var(--font-head); color: var(--accent); }
+.film.slides .chap span { display: block; margin-top: var(--s1); font-size: var(--t-1); font-weight: 600; }
+.film.slides:not(.c2) .slide:first-child .chap { opacity: 0; }
+.film.slides .end-photo { display: none; }
+.bar.in-film { visibility: hidden; transform: translateY(110%); }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .film.slides .over { top: calc(var(--top-h) + var(--s4)); transform: none; max-width: calc(100% - 2 * var(--gutter)); }
+  .film.slides .over h1 { font-size: clamp(1.6rem, 7.6vw, 2.4rem); }
+  .film.slides.c2 .w0 { transform: translateY(-8px); }
+  .film.slides .chap { display: none; }
+  .film.slides .w-end { top: calc(var(--top-h) + var(--s6)); bottom: auto; }
+  .film.slides .slide img.still { object-fit: contain; }
+  .film.slides.on-last .w-end { opacity: 1; pointer-events: auto; }
+  .film.slides .w-end { top: calc(50% - 13.55vw - 166px); }   /* right above the last photo, which clipchain pads to sit just below the middle: words and photo centred as one */   /* on a phone the closing words arrive with the last photo, never after it */   /* the last photo whole, on the page's ground (clipchain pads it) */
+  .film.slides.at-end .end-photo { opacity: 1; }
+  .film.slides .end-photo img { width: calc(100% - 2 * var(--gutter)); height: auto; border-radius: var(--r); }
+}
+@media (max-width: 860px) and (max-height: 700px) { .film.slides .over h1 { font-size: 1.5rem; } }
+@media (prefers-reduced-motion: reduce) {
+  .film.slides .w0, .film.slides.c2 .w0 { opacity: 1 !important; transform: none !important; pointer-events: auto; }
+  .film.slides .chap, .film.slides .w-end { display: none; }
+  .film.slides .over { top: calc(var(--top-h) + var(--s5)); }
+}
+
+/* review 12 Nov: one dot per fact (the old middle-dot rules above drew a second, misplaced one), and on a phone the
+   opening words sit low on the table, clear of the grinder and the beans falling into it */
+.btn-facts li::before, .btn-facts li + li::before, .fw .btn-facts li + li::before { content: "" !important; margin: 0 !important; }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) { .film.slides .over.w0 { top: auto; bottom: var(--s5); } }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* "you are the coffee" (12 Nov): on a phone the whole film on the cream ground (clipchain pads it, rules 3aa.14), and the
+   step's word on the ground right above the film */
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .film.slides .slide video { object-fit: contain; }
+  .film.slides .chap { display: block !important; top: calc(50% - 13.55vw - 96px); bottom: auto; }
+}
+/* the closing card in the clear top left of their coffee bar photo, off the glass (rules 3aa.16) */
+@media (min-width: 861px) and (min-aspect-ratio: 1/1) { .film.slides .w-end { top: calc(var(--top-h) + 7svh); bottom: auto; } }
+/* the film floods into the shop (rules 3aa.11): the tablecloth colour of the last frame runs down into the ground, and
+   the glass the film ended on stands in the middle with the bottles round it */
+.sec.flood { background: linear-gradient(180deg, rgb(188, 162, 147) 0, var(--ground) 22svh); }
+.cards.round { grid-template-columns: 1fr 1fr minmax(0, 1.1fr) 1fr 1fr; align-items: start; }   /* one row: two bottles, the glass, two bottles */
+.cards.round > .hero { list-style: none; align-self: center; }
+.cards.round .hero img { width: 100%; height: auto; border-radius: var(--r); }
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .sec.flood { background: var(--ground); }   /* on a phone the film already ends on the cream ground */
+  .cards.round { grid-template-columns: 1fr 1fr; }
+  .cards.round > * { grid-column: auto !important; grid-row: auto !important; }
+  .cards.round > .hero { grid-column: 1 / -1 !important; order: -1; max-width: 22rem; justify-self: center; }
+}
+/* review 12 Nov (rules 3s.27, same thing same place): every card name holds two lines, so prices and Add line up across a row */
+.pc-t b { min-height: 2.6em; }
+/* the top Add button wraps cleanly when it is long, the price kept with its sign */
+.st-top .btn-line { white-space: normal; height: auto; min-height: 44px; padding-block: var(--s2); text-align: left; line-height: 1.3; }
+.st-top .btn-line .sym { margin-left: .25em; }
+/* review 12 Nov: on a phone the office block is one column, the photo full width, the savings badges on their own line */
+@media (max-width: 860px) {
+  .office .of-grid { grid-template-columns: 1fr; }
+  .office .of-ph img { max-height: none; width: 100%; height: auto; }
+}
+/* phone: the film sits right under the menu bar (clipchain pads it at the top), and the words sit under the film,
+   so no screen opens on blank ground (review 12 Nov) */
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .film.slides .chap, .film.slides .over.w0, .film.slides .w-end { top: calc(50% + 2.6vw + 20px) !important; bottom: auto !important; transform: none; }
+}
+/* laptop: the opening words sit low on the left, under the huge COLD, never on it (review 12 Nov) */
+@media (min-width: 861px) and (min-aspect-ratio: 1/1) { .film.slides .over.w0 { top: auto; bottom: 5svh; transform: none; } .film.slides.c2 .w0 { transform: translateY(-8px); } }
+@media (min-width: 861px) and (min-aspect-ratio: 1/1) {
+  .film.slides .over.w0 { max-width: min(40rem, 40vw); }
+  .film.slides .over.w0 h1 { font-size: clamp(1.9rem, 2.6vw, 2.75rem); }
+  .film.slides .over.w0 h1 br { display: none; }
+  .film.slides .over.w0 .ln { margin: var(--s2) 0 var(--s3); }
+}
+@media (min-width: 861px) and (min-aspect-ratio: 1/1) and (max-height: 760px) { .film.slides .over.w0 .ln { display: none; } }
+/* review 12 Nov: on a phone every price row holds two lines, so a struck price and its badge never push Add lower than the card beside it */
+@media (max-width: 560px) { .pc-t .pr-row { min-height: 3.2em; align-content: flex-start; } }
+
+/* a window narrower than 16:10 (a small laptop, a browser not full screen) never crops the film's sides: the whole
+   film on the page's own ground (rules 3aa.14; Tzvi 12 Nov 2026: "its still zoomed in" on his laptop) */
+@media (min-width: 761px) and (max-aspect-ratio: 8/5) {
+  .film.slides .slide video, .film.slides .slide img.still { object-fit: contain; }
+  .film.slides .slide { background: var(--ground); }
+}
+
+.film.slides .slide.early .chap { opacity: 0; }   /* the word waits for its own scene (3aa.20) */
+/* phone film, tall clips (13 Nov 2026, Tzvi: "do the 60"): each step has its own 9:16 clip, so the film fills the phone.
+   contain, anchored to the bottom: nothing at the sides is cut, and on phones taller than 9:16 the band sits at the top,
+   under the menu bar, on the cream ground every scene starts from (a band under the waves read as a cut). The words sit at the bottom on a ground pill. */
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .film.slides .slide video, .film.slides .slide img.still { object-fit: contain; object-position: 50% 100%; }
+  .film.slides .chap { display: block !important; top: auto !important; bottom: calc(var(--s5) + env(safe-area-inset-bottom, 0px)) !important; }
+  .film.slides .over.w0 { top: auto !important; bottom: var(--s5) !important; }
+  .film.slides .w-end { top: calc(var(--top-h) + var(--s5)) !important; bottom: auto !important; }
+  .film.slides .end-photo, .film.slides.at-end .end-photo { display: none; }
+}
+/* review 13 Nov: on a phone the Pour and Serve words sit at the top, on the wall and the pale columns, off the glass and
+   their coffee bar at the bottom of those scenes */
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .film.slides .slide:nth-child(n+4) .chap { top: calc(var(--top-h) + var(--s5)) !important; bottom: auto !important; }
+}
+@media (max-width: 860px), (max-aspect-ratio: 1/1) { .film.slides .chap::before { content: none; } }   /* one card, not a card on a card */
+/* review 13 Nov: on a phone the closing words and button are one card (the headline sat above the panel) */
+@media (max-width: 860px), (max-aspect-ratio: 1/1) {
+  .film.slides .w-end { background: color-mix(in srgb, var(--ground) 92%, transparent); padding: var(--s3) var(--s4); border-radius: var(--r); }
+  .film.slides .w-end::before { content: none; }
+}

@@ -259,7 +259,7 @@ fixed using only the business's own words and facts.
    the first screen may hold is 3g.13, the single home.
 2. **Proof touches the main button:** the price, the credential (a kosher
    certificate, a licence, years in business) or the rating sits right beside
-   or under it, never only in a section further down.
+   or under it, never only in a section further down. A rating shows its score, count and source (3ab.4).
 3. **One solid ACTION per screen.** The header button and the phone bar repeat
    the same action; over a hero that already shows a solid button the header
    button is outline. Everything else is an outline, a link or a small tile. Wording and destination: 5b.2.
@@ -1295,6 +1295,22 @@ getting a deal"). Work it out from the owner's own prices, never invent it:
 - an owner's own savings claim the prices contradict is not printed: ask
   them (The Whipped Cup's "save 30+" is ₪20 for six Classic jars).
 
+**Every size against the smallest** (Tzvi, 12 Nov 2026, on L.A. Cholent's Kiddush card, which compared itself with two
+Larges: "it should always be comparing to the original so its easier to see the rising savings as you get a larger
+size"). When three or more sizes of one thing each show a saving, every saving is worked out against the smallest
+size, bought as many times as it takes to feed or hold the same: Large = 2 Mediums, Kiddush = 4 Mediums. Never against
+the size just below, which makes the biggest size look like the smaller deal. The saving then rises with the size
+(10%, then 18%). Only the struck price and the percentage are shown, never a line naming the smaller sizes
+("4 Mediums, ₪400"; Tzvi, 12 Nov 2026: "i dont like it just leave the price slash and the percent off").
+
+**Every price comes from the listing** (Tzvi, 11 Nov 2026, after L.A. Cholent's page said ₪330 while the order sent
+the listing's ₪250: "we should make sure that something like this wont happen in the future"). A price on a designed
+site is never only words. `prices.json` in the build names each price the page shows by its name in the listing,
+so frontend/server.js swaps in the dashboard's price; an order page that adds up a total reads `window.MIR_PRICES`
+(the listing's prices, put on the page by the server) before its own numbers; a saving is worked out in the page from
+those prices, never typed. A price the owner changes in the page editor is set in the listing too
+(page_edits.py `set_listing_prices`), so the page, the dashboard and the order total never disagree.
+
 ## 3k. A website, not a page (Tzvi, 19 Oct 2026)
 
 Tzvi: "I want our pages to be used instead of websites so they need to look
@@ -1576,6 +1592,17 @@ script, Jost), and Chicken Munch shares Anton with Michal Yodaiken.
    consistency"): if one flavour's thumbnail is one jar, every flavour's is
    one jar; a list where pointing at an item changes a big photo changes it
    for every item.
+8. **The buttons can carry the touch** (Tzvi, 10 Nov 2026, on L.A. Cholent's order
+   button with a slow-cooker dial that turns from OFF to LOW when pointed at: "this
+   is a nice personal touch which i like, we should do similar things like this
+   more often"). The main action buttons are a good home for the business's own
+   small device: a dial for a slow cooker, a ribbon for a gift shop, a drop for a
+   sauce. Once a site has one, every button that does the same job carries it
+   (the size cards' buttons too, the menu bar's, the phone bar's), in the same
+   shape, so it reads as the site's own button, not a one-off. It stays small,
+   moves only when pointed at or pressed, keeps the button's words readable and
+   respects reduced motion. Never the same device on two sites (3p.3). Optional
+   per site; CONCEPT.md's `- touch:` line says when the touch is the button.
 
 ## 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
 
@@ -1675,6 +1702,24 @@ against a size with one) hangs from a fixed top line and grows downward, so its 
 anchored at the bottom, the size with three boards rode up into the photo and the size with one sat
 low. Checked by stepping through every state on a phone and a laptop and measuring the label's top:
 it must not change.
+
+**Same colours, or a mirrored pattern (3s.30)** (Tzvi, 12 Nov 2026, on L.A. Cholent's three size cards, gold with black
+words and buttons beside olive and charcoal with white: "consistence is key to giving websites a professional look ...
+it would be fine if the left and right was white and middle was black or the opposite but now it looks off"). When
+cards, panels or tiles of one kind sit side by side on different grounds, their words and buttons are either all one
+colour or in a mirrored pattern (white, black, white; black, white, black), never two of one and one of the other.
+Fix it by ordering the grounds (dark, light, dark), never by forcing a colour that fails contrast. Applies to any row
+of three or more, and to every screen size the row shows at.
+
+**Same button, same shape (3s.29)** (Tzvi, 10 Nov 2026, on L.A. Cholent's three size cards: "things need to be
+consistent and here the middle one, the message to order, is two lines and the others are in 1 line"). A
+button's words never break onto a second line, and the same button repeated (each size card's, each step's)
+has the same height and shape every time. The Large card's struck-out price took the room, so only its
+button broke, and only on screens 1000 to 1350px wide. Buttons get `white-space: nowrap`; when a row is
+too tight, the price or text beside the button gives way, never the button. Picker cards count too: a
+second line that wraps on one card and not the others (L.A. Cholent's "Sized to your guests") is the same
+fault. Checked by `node scripts/check-same-button.mjs <urls>` at the six sizes (3p.6) plus 1024 and 1366
+(publish-page runs it).
 
 
 **It sells like a premium brand (honestly)
@@ -2174,6 +2219,233 @@ site published before today (rule-dates.mjs).
    <business>", then one line per tile saying what it shows). Each tile is then checked as in R8.1 (one shoot) and
    cut out at full size. The owner's own photos always come first; this is only for cards they have no photo for.
 
+## 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+
+Tzvi, on Gremier Coffee's first opening (a jar steeping while the rest of the screen stood still): "don't make a scroll
+when nothing but a small part of the screen moves". Then, with six scroll sites he sent (notes and frame sheets in
+`docs/inspo/videos-2026-11-12/`) and the Pinterest coffee site (`docs/inspo/pinterest-coffee-2026-11-11/`): "Do you see
+how in each of these videos everything connects its one smooth story?", and "not every build needs the separate
+frames". These are built by the starter where it can (`opening_slides`, `slides.js`, `clipchain.py`) and asked once in
+the blueprint where it cannot, so they are made right, not caught afterwards. Not asked of a site published before
+12 Nov 2026 (rule-dates.mjs).
+
+1. **The whole screen moves.** A scroll-led opening changes the whole screen as the product's journey (the camera
+   travels, the product crosses it, the layout grows), never a small change on a still: a jar filling in one corner
+   of a still photo is not a wow, however long the scroll.
+2. **One smooth story, one join.** The opening is one continuous story with no cuts or fades between its scenes. Each
+   build names one way to join them in CONCEPT.md (`- join:`), whichever suits the business: slides pushed up with
+   what is falling crossing the seam (the Pinterest coffee site); a camera journey whose changes hide inside cloud,
+   liquid or darkness (the mountain into space); one world going up or down in layers (the Wix cave); a guide that
+   stays on screen (the jellyfish, the chameleon); one material becoming the product (Amostify); for a site with no
+   film, a layout where each picture grows into the next section (FIND). With clips, each clip starts on the last
+   frame of the one before (`clipchain.py`), so the seam is the same picture on both sides.
+3. **One world.** One ground, the page's own colour, and one light all the way through: every clip prompt carries the
+   same world line (`gen/chain.json` "world"), and the film's ground is the page's ground.
+4. **The same objects.** Whatever carries the product (the jar, the bottle, the coffee) stays the same object from the
+   first frame to the last; nothing is swapped for a new one between scenes.
+5. **Huge words in the clear space.** One or two words per step (Grind, Steep, Serve), big, in the clear part of the
+   picture, with at most one short line under them; never small labels laid over the film.
+6. **Slow and few.** One subject, large, each step held for about a screen of scrolling before the next comes in
+   (`slides.js` hold and push); three to five steps.
+7. **Pinterest and our own library on every build.** Pinterest is searched as well as Inspo, Mobbin, 21st and
+   `docs/inspo/`, the pictures kept are saved to `docs/inspo/`, and REFERENCES.md says what was taken and why
+   (Tzvi, 11 Nov 2026: "Can we use Pinterest always as added inspo").
+
+## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+
+From "I Studied 1000 Landing Pages" (ThrillX; notes and frames in `docs/inspo/videos-2026-11-12-landing-pages/`).
+Most of that video we already ask (3c.2 reassurance and proof beside the button, 3c.3 proof where the worry is, 3t the
+category's familiar layout, the ban on logo walls and invented counts); these four were new. His uplift figures are his
+agency's own and are not repeated anywhere. Not asked of a site published before 12 Nov 2026 (rule-dates.mjs). When
+the scripts first ran, three live sites would fail; they are left as they are unless Tzvi asks: Kasher My BnB ("How it
+works."), Michal Balloons ("מה אנחנו עושים") and L.A. Cholent (its reviews slide past in a moving ribbon).
+
+1. **Headings say the benefit.** A visitor reads only the headings, so each h1 to h3 says what they get on its own: "Hot
+   cholent at your door by Friday noon", not "How it works"; "Three hours from order to your table", not "Our
+   services". A heading that is only a section label ("How it works", "Our services", "About us", "What makes us
+   unique", "Why choose us", "Testimonials", and their Hebrew) is refused. "Questions" and contact headings stay, since
+   people look for them by that name. A small label above a heading may name the section; the heading itself may not.
+   Check: `node scripts/check-headings.mjs <urls>` (GENERIC), list in the script.
+2. **Reviews stay open on a phone.** Real reviews are stacked and fully shown on a phone, never in a swiping row, a
+   moving ribbon or a fold-out ("what is hidden will not get seen"). On a laptop two or three may sit side by side, all
+   visible. Check: `node scripts/check-reviews-open.mjs <urls>` (SWIPE, FOLDED). A page without reviews passes.
+3. **Each review shows who and where.** Beside the words: the person's first name (or what the owner was allowed to
+   show) and where it was left (Google, Facebook, WhatsApp, our site), with a link when the source has one; a photo of
+   the person only when the owner sent one with permission. A review without a name the owner may show is not used. A
+   press mention, if the owner has one, is the outlet's own sentence with its name, never a bare logo (the logo-wall
+   ban stands).
+4. **A real rating near the top.** When the business has a real rating (Google, our reviews), its score, its count and
+   its source sit on the first screen beside the headline or main button ("4.9 on Google, 224 reviews"). This is how 3c.2
+   is done for a rating; with no real rating nothing stands in its place.
+
+Later the same day, Tzvi on Gremier's film: "its so zoomed in i cant see much of whats goin on", then, on our plan of
+a realistic wide shot of their coffee bar, with the whole POUR / PLAY coffee site again (`pour-play-full-sheet.jpg` and
+`pour-play-key-frames.jpg` in `docs/inspo/pinterest-coffee-2026-11-11/`): "this is soooo good ... the idea you just
+came up with which is just very basic". Asked why it happened when everything was worked out: the story was planned,
+the distance of the camera was not; the starter cut a phone's middle third out of every clip; and the stills he
+approved were shown full size, never as a phone sees them.
+
+8. **The right distance.** Every step shows its object whole and large in the middle of a plain ground of the page's
+   colour, about half to two thirds of the frame's height: never a close-up of one part for a whole clip (a spout, a
+   rim), never a far photo of a room where the product is small. Each step of `gen/chain.json` has a `frame` line
+   saying what the viewer sees, and `clipchain.py` refuses a step without one.
+9. **Words are part of the scene.** A step's big word is huge, nearly the frame's width, behind the object, with one
+   letter or part of the object in front so they interlock (POUR / PLAY's grinder standing in "Your"); drawn into the
+   step's still before the clip, from the layout sketch, never a small label in a box over the film. If the clip
+   bends the letters, the word goes in code in front of the film instead.
+10. **Show how it works.** Where the product has parts or a process (a grinder, a machine, layers, a filling), one step
+    shows it taken apart or opened in the air, so the visitor sees how it is made.
+11. **The product leads into the next section and the film ends where they buy.** The last step turns into the next
+    section's ground (a liquid rises as a wave and floods the screen, a cloth falls, a box opens) and that section is
+    the shop: the product in the middle, the items floating round it, Add on each. Not a still photo at the end.
+12. **One palette, a little life in every scene.** Props from the business's own world (a jug, beans, a cup) in the
+    site's two or three colours, and one small movement in each scene beside the main one (a kettle pours, beans
+    fly).
+13. **Approval pictures as the visitor sees them.** Every sketch, still and clip goes to Tzvi as a laptop frame beside
+    a phone frame, never only full size.
+14. **A phone never gets a cut-down film.** A phone sees the film's whole width on the page's ground with the words
+    above it, or a tall clip made for it; `clipchain.py` never crops a wide clip to a phone's middle third.
+
+**An option, not a rule: the product's own journey** (Tzvi, 12 Nov 2026: "not every build needs to be exactly like this but this should be a good option. personification of the item having people feel the journey"). The visitor rides with the product as if they were it, one camera all the way: for Gremier, the grounds fall from the grinder into waves of cold water and turn them brown, the waves become a whirlpool, run out of the tap into a glass, and the camera pulls back to their coffee bar. Offer it among the opening ideas (IDEAS.md) where the product has a journey of its own (coffee, juice, bread, a parcel, a cleaned room), never as the only kind.
+
+**An option, not a rule: the viewer in the world** (Tzvi, 12 Nov 2026: "make a rule so we can also make the viewer in
+the world"). The second kind of journey: the visitor is not the product but a person inside the business's own place,
+seeing it through their own eyes. The camera is at eye height and moves the way a person does: walking in through the
+door, sitting down at the bar, looking down at the table, being handed the cup. What happens is what happens to a
+customer there, in the order it happens: the bell over the door, the smell of coffee shown as steam, the barista's
+hands sliding the glass across, the first sip. Built so it works:
+- One camera, the visitor's eyes, never a cut to a view they could not have (no shot of themselves from outside).
+- Only the business's real place and real things (their photos are the reference for every still, rule 3w.15); their
+  people only with the owner's yes, shown from the shoulders down or as hands.
+- The world answers the visitor: on a laptop, a slow look-around as the pointer moves (a few degrees, never a spin), and
+  one small thing that reacts (steam that drifts from the pointer, a door that swings); on a phone, the scroll alone.
+- It ends where they act: the moment they are handed the thing is the moment the order button appears.
+Offer it among the opening ideas (IDEAS.md) where the place itself sells (a cafe, a restaurant, a shop, a guest house, a
+venue, a salon, a tour), beside the product's own journey where the product has one; never as the only kind.
+
+**The small touches** (Tzvi, 12 Nov 2026: "add all these subtle additions to the rules. its these small subtle additions
+that change a website from good to great"). Each was found on Gremier Coffee the same day; each is built by a starter
+part where one exists, so it is there without being remembered.
+
+15. **Keep the reveal for the end.** A journey does not show where it is until the camera pulls back: the waves fill
+    the whole frame, no glass rim or wall, so the visitor learns they were inside the jar only at the end (Tzvi: "so
+    people dont yet realize that they were in the jar"). The still before the reveal has nothing that names the place.
+16. **The words make way for the picture.** The closing words come only once the last picture has landed, never on the
+    one still moving; the closing card takes the last step word's place, never sits on it; on a phone the step word
+    sits on the ground above the film, never on it.
+17. **A join that is the same picture is no join.** Two clips that meet on the same frame carry on in place; pushing
+    the second up as a new slide shows that picture twice and reads as a restart. A slide push is only for a change of
+    scene.
+18. **Feedback where the eye already is.** An Add says "Added" in the basket button and, on a phone, in the bottom bar,
+    which then becomes the basket (count, total, Basket); never a message floating over the products.
+19. **Every number from its source.** A saving is worked out from the live prices of the same thing bought in the
+    smallest size (6 litres, 5 litres, 15 litres of the same coffee); a price changed in the dashboard reaches every card,
+    saving and total on the page.
+20. **The words fit the scene.** Every big word, step word or line shown with a scene names what is happening in that
+    scene, at that moment (Tzvi, 12 Nov 2026: "it shouldnt say cold by the beans because that hasnt nothing to do with
+    that step"). The beans going into the grinder say GRIND, the grounds falling into cold water say COLD, the glass
+    filling says SERVE; a word about a later step never stands on an earlier one, and a word drawn into a still belongs
+    to that still's step. Each clip step in `gen/chain.json` carries a `word` line, the word and what in the scene it
+    names ("none" for a step without one); `clipchain.py make` refuses a step without it.
+21. **Look at the start picture before any clip.** The `frame` line is a plan, not proof: the still itself is looked at
+    edge by edge before it is sent, and nothing the film is about (the top of the grinder where the beans go in) touches
+    or crosses an edge (12 Nov 2026: the grinder's top was cut off and it started already apart, so it never came
+    apart). Each step's `start_seen` line says what touches each edge; `clipchain.py make` refuses a new clip without it.
+22. **The start picture is the before.** A clip shows its step's action happening, so its start still shows the moment
+    before it: the grinder whole before it comes apart, the glass empty before it fills (12 Nov 2026: the grinder was drawn
+    already apart, so the film never showed it come apart). `start_seen` says what the start shows before the action;
+    `clipchain.py make` refuses a new clip whose line does not.
+23. **Nothing under a fall.** When the story goes on downward (grounds falling into water, a drop into a cup), the still
+    has no floor, table or ground line under the falling thing; the model lands it there and piles it up (12 Nov 2026:
+    the grounds heaped on a floor the still had). Where one slips in, cut the clip before the landing, never keep it. `clipchain.py make` looks for one for free before every paid clip: a straight line across nearly the whole width in the lower half of the start picture is refused unless a `floor_ok` line says why it belongs (an ocean's waterline, the table in the business's own photo). The check runs on every start picture, so the last frame of each clip is checked before the next clip is paid
+    for. Every still prompt for a floating object ends with "an endless plain ground, no table, floor, shelf or horizon"
+    unless the plan wants one.
+    **A planned floor is welcome.** The rule is against a floor the model slipped in, never against one the story uses:
+    the floor of one scene becoming the ceiling of the next (Tzvi, 12 Nov 2026, a Wix Studio parallax site: the mountain
+    ground the figure stands on becomes the cave roof with icicles hanging down as you scroll into the next section,
+    "it looked professional"). Plan it as its own step, built in code as layers or as one clip planned from the start,
+    and give that step a `floor_ok` line ("the mountain ground becomes the cave's ceiling, the join between scenes").
+24. **The phone is planned with the film.** Before any clip, `gen/chain.json` says how phones get the film: tall 9:16
+    clips (their cost from get_cost) or the whole width on the ground, and whose choice that was. Gremier's review found
+    each phone screen about 60 percent empty only after all the clips were paid for. `clipchain.py make` refuses a chain
+    without a `phone_plan` line.
+25. **Starter defaults for what reviews kept finding.** A plain link in running text is in the site's ink and
+    underlined, never the browser's blue (Aaron, on tan); anything a link jumps to stops clear of the fixed menu bar
+    (Aaron's booking steps scrolled under it). Both are in `scrollcraft/starter/site.css`; a build keeps them.
+26. **Phones are always asked before any generation** (Tzvi, 13 Nov 2026: "make a rule so phones are always asked before
+    generating"). Before the first paid still or clip of a film, ask Tzvi in plain words how phones get it: tall 9:16
+    clips (their get_cost credits) or the whole width on the cream ground (free, about a third of the screen), and write
+    his answer in his own words. Never decide it alone, never "for now": Gremier's phones were given the wide film on
+    cream without asking, and five more clips (60 credits, 78 with a remake) were made a day later. The film brief has
+    the line `Phones asked: <date>, Tzvi: "<his answer>"` and the film gate refuses any paid video without it;
+    `clipchain.py make` refuses a `phone_plan` that does not quote him. Ask it in the same message as the motion steps
+    (3h, confirm motion before generating), so it costs no extra round.
+
+## 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+
+Tzvi: "its these small subtle additions that change a website from good to great". Found in the sites and videos he
+sent and in our saved library (`docs/inspo/subtle-touches-2026-11-12.md`, every touch with the picture it was seen in;
+paths below are under `docs/inspo/`). They are a menu for new sites, never changes to a site already live
+(new-rules-spare-made-sites): each new site picks at least three, the ones that fit its category and its story, names
+them in CONCEPT.md on a `- touches:` line, and does not take the same three as the site built just before it. A touch
+that shows a fact uses only a true one: a quote as a sound wave only from a real recording, the local time and "Open now"
+only from the real hours, the size a model wears only when the owner says it, readouts only of true numbers (3i.3).
+
+1. **The ground changes colour with the product.** The whole background slides from purple to orange to green as the juice changes, so the colour itself tells you the scroll is moving. (`videos-2026-11-12/chroma-juice-chameleon.jpg`)
+2. **A thin progress line with a live number on the edge.** A fine line at the right edge fills as you scroll, with a small figure at its top that counts. It shows where you are without a bar across the page. (`videos-2026-11-04/mode-tabs-numbers.jpg` (right edge))
+3. **A line that draws itself.** A route traces round a track as you scroll, with three figures under it, so a fact is shown as a journey. (`videos-2026-11-07/f1-site-sections.jpg` ("This season, so far"))
+4. **A graph line climbs beside the counting number.** Two figures count while a stepped line rises between them, with the product ghosted behind. (`videos-2026-11-04/count-up-chart.jpg`)
+5. **The glow under the product changes with each choice.** Pick a mode and the light on the floor under the bike changes colour as well as the number. (`videos-2026-11-04/mode-tabs-numbers.jpg` and `turn-it-over-hotspots.jpg`)
+6. **One section flips from light to dark.** The page is pale, then a single section turns black with large white words, which resets the eye. (`videos-2026-11-12/find-real-estate-layout-motion.jpg` (rows 1 to 2))
+7. **The footer headline fills in.** A big sentence sits in the footer as a faint outline and becomes solid as you reach it, so the last screen has its own small event. (`videos-2026-11-04/footer-faded-headline.jpg`)
+8. **Options as big words with an arrow.** "Buy, Sell, Rent" are huge rows, each with a thin arrow, that slide as you scroll past. The choice is read in one second. (`videos-2026-11-12/find-real-estate-layout-motion.jpg` (rows 2 to 3))
+9. **A quote shown as a sound wave.** A customer's sentence sits beside a red wave and a play dot, so it feels spoken. Use only a real recording or leave it out. (`videos-2026-11-07/f1-site-sections.jpg` ("On the radio"))
+10. **Tiny readouts at the edges.** A small vertical label on the left and coordinates at the bottom (depth, place, number) make a site feel made for that world. (`videos-2026-11-04/flashlight-hero-sheet.jpg`)
+11. **A highlight paints behind a price on hover.** Hover a price and a block of colour wipes behind the figure while a ring follows the cursor. The price you are looking at is the one that lights. (`videos-2026-11-04/prices-beside-booking.jpg`)
+12. **The cursor becomes a round "View" bubble.** Over a row in a list the pointer turns into a labelled circle and a preview picture appears beside it. (`awwwards-categories-2026-10-18/mike-wilcock-1-hover-preview-list.webp`)
+13. **One signature button shape.** The main button has one clipped corner, the same on the menu button and the form button, so it reads as the brand's own. (`videos-2026-11-04/prices-beside-booking.jpg`)
+14. **A mode switch in the menu.** A small Auto, Morning, Day, Evening, Night control changes how the page looks and says "00:05 Night" beside the logo. (`awwwards-categories-2026-10-18/halcyon-lighting-1-lights-off-toggle.webp`)
+15. **Cookie wording in the brand's voice.** The notice says "Cookies, not umbrellas", with the two buttons the same size. A required box becomes a small smile. (`awwwards-categories-2026-10-18/blunt-umbrellas-1-product-hotspots.webp`)
+16. **The product ghosted behind the figures.** The bike sits faint and dark behind the big numbers, so the numbers never float on nothing. (`videos-2026-11-04/count-up-chart.jpg`)
+17. **A coloured top edge on the form card.** The booking form is a dark panel with one thin bright line along its top, which pulls the eye to where the action is. (`videos-2026-11-04/prices-beside-booking.jpg`)
+18. **A live local time and place in the menu bar.** "Manchester, UK / 21:50" sits centred in the header and ticks. For a local business it says someone is there now (use "Open now" only from real hours). (`awwwards-categories-2026-10-18/mike-wilcock-1-hover-preview-list.webp`)
+19. **One section peeks over the next.** A strip of products shows its tops above a full-bleed photo section, so the page feels layered, not stacked. (`awwwards-categories-2026-10-18/agnestoth-2-colour-dot-product.webp`)
+20. **Colour versions peek in a row.** The same bag in three colourways sits as a row of cut-off tops at the page edge, so you see there is a choice before you reach it. (`awwwards-categories-2026-10-18/agnestoth-2-colour-dot-product.webp`)
+21. **The next section's picture grows out of the last.** In the coffee site, the shop closes with the cup in the middle and the bags floating round it, so buying feels like the end of the story. (`pinterest-coffee-2026-11-11/pour-play-full-sheet.jpg` (last row))
+22. **The price sits beside the booking.** Two prices as thin rows on the left and the form on the right, so nobody asks the price after filling in. (`videos-2026-11-04/prices-beside-booking.jpg`)
+23. **Chapter counter in the corner.** Bottom right of each screen a small line reads "02 - Let the good stuff fall", bottom left "Skip to the blends", so the scroll has numbered chapters. (`videos-2026-11-08/bramble-chain.jpg`)
+24. **A start button as the gate.** One round red button reading "Start engine" sits between the two headline words and the screen waits for a press, so the first action is a small event. (`awwwards-categories-2026-10-18/bmw-f3-1-start-button.webp`)
+25. **A small tag on the product picture.** A tiny pill ("Rich + tangy") sits in the corner of the bottle picture and the same words repeat in a "The feeling" row. (`videos-2026-11-08/bramble-chain.jpg` (bottom row))
+26. **A still ticker strip as a section divider.** A lime band of short phrases with stars separates the dark film from the pale shop. (`videos-2026-11-08/bramble-chain.jpg`)
+27. **Live depth and count readouts.** Bottom right, small grey lines ("Depth 2,840 m, Particles 290,863") sit beside a number made of dots. (`awwwards-categories-2026-10-18/junkbranding-1-particle-counter.webp`)
+28. **A small join card in the corner.** A white card with underlined fields, an arrow "Sign up" and a close mark sits bottom right over the photo, never a full-screen box. (`awwwards-categories-2026-10-18/estudio-niksen-1-shop-the-look.webp`)
+29. **Say who models the size.** "Mateo is 5'11 and is wearing size 1" sits under a Shop the look block, with four items each showing price and a Bestseller tag. (`awwwards-categories-2026-10-18/estudio-niksen-1-shop-the-look.webp`)
+
+More from Pinterest across industries (Tzvi, 12 Nov 2026: "the waves across the screen, the coffee grinder pulling apart, the pictures showing some other products near the coffee cup, the jellyfish is pulsing like a real jellyfish"; sheets and notes in `docs/inspo/pinterest-touches-2026-11-12/`):
+
+30. **The product is a letter of the word.** the can is the "o" of Apple, the ring the "O" of STONE, the necklace the "E" of JEWELLERY (pinterest-touches-2026-11-12/fruity-cider-can-is-a-letter.jpg)
+31. **The product is handled, not placed.** a lid lifts off and settles back, a tube turns and lands in its card, a grinder opens into its pieces (pinterest-touches-2026-11-12/vera-skincare-lid-lifts-ingredients-orbit.jpg)
+32. **Its world around it.** the ingredients, fruit or other products sit round it (aloe, moss, fruit slices, the syrups by the cup), named with small icons or thin leader lines (pinterest-touches-2026-11-12/moss-haircare-splash-leader-lines.jpg)
+33. **Each choice brings its own world.** switching flavour changes the ground colour, the pieces flying in and the big word together (pinterest-touches-2026-11-12/fruity-cider-can-is-a-letter.jpg)
+34. **Something alive.** a jellyfish pulses like a real one, a flower opens round the bottle, leaf shadows drift over the ground; real, slow, small (pinterest-touches-2026-11-12/nooomo-jellyfish-pulses-word-marquee.jpg)
+35. **Words on a circle.** a line about the product runs round it on a curved path and turns slowly (pinterest-touches-2026-11-12/byredo-perfume-dahlia-circling-words.jpg)
+36. **Taste or feel as shapes.** the tasting notes in paint splats, a texture swatch, a splash of the material (pinterest-touches-2026-11-12/lagunitas-ipa-sticky-bottle-splats.jpg)
+37. **The product stays while the page moves.** one bottle held in place as the sections pass under it, then the whole range lines up (pinterest-touches-2026-11-12/lagunitas-ipa-sticky-bottle-splats.jpg)
+38. **Turns between sections, lands in a new pose.** the product turns in the air from one section to the next and lands showing what the next words describe (pinterest-touches-2026-11-12/phone-3d-turns-between-sections.jpg)
+39. **Move in to the detail the words name.** the camera goes close to the knob, the clasp or the stitching while the words talk about it, then back out (pinterest-touches-2026-11-12/loop-recorder-zooms-to-detail.jpg)
+40. **Torn or shaped edges between sections.** a torn paper edge or a wave line instead of a straight cut (pinterest-touches-2026-11-12/drinks-torn-edge-plinths.jpg)
+41. **Plinths of different heights.** the range stands on plinths so the line-up has a rhythm (pinterest-touches-2026-11-12/drinks-torn-edge-plinths.jpg)
+42. **A choice wheel.** the options turn on a ring and the product changes with each (pinterest-touches-2026-11-12/ashclair-ring-is-the-o-stone-wheel.jpg)
+43. **What it is made of, close up.** each material as a large close-up swatch with its name (pinterest-touches-2026-11-12/halden-furniture-word-behind-materials.jpg)
+44. **Shaped photo frames.** arches for jewellery, round portholes for houses, with a small true fact under each (the coordinates of the villa) (pinterest-touches-2026-11-12/ornavillas-porthole-coordinates.jpg)
+45. **A hand offers the product.** a hand reaches in from the side holding it, so it is given, not shown (pinterest-touches-2026-11-12/vera-skincare-lid-lifts-ingredients-orbit.jpg)
+46. **The next card grows into the background.** a small card of the next place or product grows to fill the screen (pinterest-touches-2026-11-12/travel-card-grows-into-background.jpg)
+47. **Huge words slide behind.** a line of huge words moves across behind the product as you scroll (pinterest-touches-2026-11-12/nooomo-jellyfish-pulses-word-marquee.jpg)
+48. **End on how it arrives.** the last section shows the box or the delivery: "And deliver it to your doorstep" (pinterest-touches-2026-11-12/jewellery-necklace-is-the-e-box-ending.jpg)
+49. **Ghost titles that fill in.** each section title starts faint and fills in as it is reached (pinterest-touches-2026-11-12/zenith-realestate-ghost-words-counters.jpg)
+50. **Other versions as small thumbnails.** round thumbnails of the other colours or models beside the hero, which swap it (pinterest-touches-2026-11-12/axtra-chair-variant-thumbs.jpg)
+51. **One scene's floor is the next one's ceiling.** Scrolling down, the ground of the opening (a mountain, a table, the sand) rises and turns out to be the roof of the next scene (a cave with icicles, the inside of the cupboard), so the two sections join as one world (Wix Studio parallax, Tzvi 12 Nov 2026).
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews
@@ -2520,6 +2792,17 @@ shellfish, no pork.
 
 Prompt shape that gives this (one line each, reused word for word across a set): the product and its plinth; the ingredients round it; the background colour; the light; the camera (eye level, three-quarter, shallow depth); "photorealistic advertising product photography, sharp product, no text added".
 
+
+9. **A full scene, the same on every card** (Tzvi, 12 Nov 2026, on L.A. Cholent's tubs with one marrow bone beside
+   each: "i dont like how its just one bone on the side its too empty", and "consistency is key and the different
+   sizes arent in the same position"). Two to four props from the business's own world round the product (for a
+   cholent kit: two marrow bones, a small dish of pearl barley, a linen napkin), never one lonely prop on an empty
+   table. Across a set, the plinth, the props and the product sit in the same places and at the same height in every
+   picture, so only the product changes; a bigger size looks bigger on the same plinth. Start from one layout sketch
+   for the whole set (the boxes for plinth, product and props) and give it to every generation.
+10. **The owner's photo goes on the item it shows.** A photo of one size or flavour is used only for that one; when the
+   owner does not say which it is, ask before building with it (11 Nov 2026: a photo of the Kiddush tub was put on
+   the Large card).
 
 **Right the first time, before any paid generation** (Tzvi, 24 Oct 2026, after the Bun Intended bun took two tries: "make a rule that will help us get it right the first time so we dont waste credits and waste time"). Before the first credit is spent, write `gen/<name>-brief.md` in the build and check it against these, then generate once:
 1. **The reference is cut first**: a close crop of the one item to show (their exact bun, platter, board), saved beside the brief. Never their whole photo of several items.

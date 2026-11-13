@@ -1,0 +1,52 @@
+{
+  "aspect": "9:16",
+  "ground": "#F6EEE3",
+  "world": "One continuous shot, no cuts, no fades: the camera moves smoothly and slowly the whole time, as if riding with the coffee. Soft warm daylight from the left, a plain warm cream ground above everything, the page itself. Real photographed materials: matte black metal, clear glass, clear water, real ice, real coffee, opaque deep brown, never glassy, no glow. Nothing appears from nowhere or vanishes. No hands, no people, no new text or logos.",
+  "first": "gen/world/g0t.png",
+  "steps": [
+    {
+      "prompt": "The roasted beans keep pouring down into the clear hopper of the black grinder and fill it. Then the grinder slowly comes apart in the air into its pieces like an exploded view: the hopper lifts up, the black body splits into two halves that slide out to the left and right, the steel burrs float between them turning, and fine dark coffee grounds begin to fall out of the bottom in a thin stream. The camera stays wide and still; every piece stays fully in frame.",
+      "word": "GRIND: the beans pouring into the grinder and the grinder opening to grind them",
+      "name": "K1t",
+      "start_seen": "g0t.png looked at full size: before the pour fills it, the whole grinder assembled in front of the I of GRIND, cream all round and below, no floor; only the falling beans touch the top edge; G and D clear of the sides",
+      "frame": "tall phone picture: the whole grinder about a third of the frame's height a little above the middle, in front of GRIND, cream space above and below, every piece in frame"
+    },
+    {
+      "prompt": "The camera tilts and glides smoothly down with the stream of coffee grounds. The taken-apart grinder and the word rise steadily up and out of the top of the picture while, at the same moment, the crests of a wavy ocean of clear cold water rise into view from the bottom, so the grinder is still leaving as the waves arrive and the picture is never empty. There is no table, shelf, floor or edge anywhere: only the cream ground, the falling grounds and the ocean. The camera comes to rest at the waterline, the waves running across the whole width of the picture, swells rolling toward the camera, the cream ground above the waves; the grounds land in the middle of the waves.",
+      "word": "COLD: the grounds falling into the cold ocean water",
+      "name": "K2t",
+      "end": "gen/world/o1t.png",
+      "start_seen": "the start is K1t's last frame, checked after K1t is made: before the fall, the taken-apart grinder whole in the frame on the cream ground",
+      "frame": "tall phone picture: from the taken-apart grinder whole in frame, falling with the grounds to the waterline a third of the way down, the waves filling the lower two thirds",
+      "eye_ok": "13 Nov, 6 frames a second from 2.6 to 5.3 s: one steady fall with the grounds, the waves rising smoothly from the bottom and never an empty frame; the flagged RUSH is the swells filling the whole tall frame, every pixel moving, not a lurch"
+    },
+    {
+      "prompt": "The camera rides up and down with the swells at the waterline. The grounds sink into the water in curling brown clouds like ink, and the brown spreads swell by swell until the whole ocean is deep brown cold brew, the waves still rolling toward the camera, spray catching the light. Then the brown water slowly begins to turn round the middle into a whirlpool.",
+      "word": "STEEP: the grounds steeping in the water and turning it brown",
+      "name": "K3t",
+      "start_seen": "o1t.png looked at full size: before the brown spreads, waves from edge to edge filling the lower two thirds, cream above, the stream of grounds from the top edge into the middle",
+      "frame": "tall phone picture: the waterline a third of the way down, the wavy ocean filling the lower two thirds edge to edge, swells rolling at the camera",
+      "floor_ok": "the line is the ocean's waterline across the whole width, the scene itself, with nothing falling onto a floor"
+    },
+    {
+      "prompt": "The brown whirlpool turns faster and narrows into its funnel; the camera is pulled down through the funnel, which narrows to one thin smooth stream of cold brew. Below it stands a clear glass full of clear ice, still empty of coffee. The stream pours into the glass and the coffee rises slowly from the bottom up through the ice, the glass filling once and staying full; the coffee never drains or clears, white milk curls through it in soft ribbons.",
+      "word": "POUR: the whirlpool pouring out as one stream into the glass of ice",
+      "name": "K4t",
+      "end": "gen/world/J3t.png",
+      "start_seen": "K3t-last.png looked at full size: before the pour, the brown ocean filling the lower two thirds edge to edge, cream above, nothing cut off",
+      "frame": "tall phone picture: from the brown whirlpool large in the middle, down its funnel to one thin stream above the whole tall glass of clear ice, the glass whole in frame, filling from the bottom up",
+      "floor_ok": "the line is the ocean's waterline across the whole width, the scene itself, with nothing falling onto a floor",
+      "remade": "13 Nov: K4t-a.mp4 had the glass full of coffee as the funnel landed, then clear ice, then filling again (coffee vanished); the step now has the stream narrow above an empty glass of ice first",
+      "eye_ok": "13 Nov, 15 frames a second from 1.3 to 2.3 s and 2.5 a second over the whole clip: one dive down the funnel, out above the glass and down to it, no cut; the glass of clear ice fills once from the bottom and stays full; the flagged RUSH is the spinning coffee filling the whole frame; slowed 1.5 times from K4t-raw.mp4"
+    },
+    {
+      "prompt": "The camera slowly pulls back and away from the glass of iced coffee with milk, revealing the table around it: the milk carafe, the caramel and vanilla syrup bottles, the large glass coffee dispenser on its white stand, the stacks of clear cups and the black straws, on a sunlit terrace.",
+      "word": "SERVE: the camera pulls back from the glass to their whole coffee bar, the serving table",
+      "name": "J4t",
+      "end": "gen/world/bar-end-t.png",
+      "start_seen": "the start is K4t's last frame, checked after K4t is made: before the pull back, the whole glass of iced coffee on its table",
+      "frame": "tall phone picture: from the whole glass large in the frame, pulling back to their whole coffee bar at the bottom of the frame with the pale columns above",
+      "floor_ok": "the line is the table the glass stands on, the coffee bar's own table that the pull back reveals, planned, nothing falls onto it"
+    }
+  ]
+}

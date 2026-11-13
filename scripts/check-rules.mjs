@@ -30,6 +30,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { newerRules } from './rule-dates.mjs';
+import { contradicted } from './site-has.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const CHECKLIST = path.join(ROOT, 'docs', 'rules-checklist.md');
@@ -144,6 +145,9 @@ const rulesTime = dated(rulesFile);
 // a merge or a fresh checkout writes RULES.md and the pages in the same instant, a few ms apart in no set order
 // (1 Nov 2026, merging every branch onto main): within 2 s is the same moment, not an edit after the rules
 if (newest.t > rulesTime + 2000) problems.push(`RULES.md is older than ${path.relative(dir, newest.f)} (changed ${new Date(newest.t).toISOString().replace('T', ' ').slice(0, 19)}, RULES.md ${new Date(rulesTime).toISOString().replace('T', ' ').slice(0, 19)}): look at every rule again against the current site, then save RULES.md`);
+
+// a rule left out as "not on this site (film: no)" while the files show one was skipped, not n/a (10 Nov 2026)
+for (const w of contradicted(dir, fs.readFileSync(rulesFile, 'utf8'))) problems.unshift(w);   // first, so it is never cut off the list
 
 const name = path.basename(dir);
 console.log(`${name}: ${items.length} rules in the checklist`);

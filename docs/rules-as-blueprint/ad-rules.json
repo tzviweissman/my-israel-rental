@@ -1,0 +1,833 @@
+{
+ "about": "The ad rules register (Tzvi, 12 Nov 2026: rules as a building blueprint, the same as the page rules). One record per ad rule in docs/ad-rules-checklist.md, in checklist order: how it is made right while building (KIT shared ad code in AdMaker, AdStudio or a shared ad-kit module, GEN a script that makes it from the blueprint answers, ASK one blueprint question answered before making, OWNER a fact only the business owner can give, EYE the final look), what builds it today or the part still to build, and what confirms it. status built = the code or script already makes it right while the ad is made; planned = still to build, so today a check or a look catches it after (retried true marks build, check, retry rules). A new ad rule is added here with its building part the same day (check-rule-homes).",
+ "rules": [
+  {
+   "id": "A0.1",
+   "rule": "One job: a gain, a question or a real offer, never two",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "to build: ad-brief.json field 'job' (gain, question or offer), refused if empty or two",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A0.2",
+   "rule": "One-second test: a stranger knows what is offered and where",
+   "how": [
+    "ASK",
+    "EYE"
+   ],
+   "built_by": "to build: ad-brief 'A stranger reads:' line (same field as A2.10), filled before any picture",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A9g.1",
+   "rule": "Starts from a named ad that already works",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "to build: ad-brief 'source_ad' must be a file in docs/inspo/pinterest-ads-2026-11-02, checked on write",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A9e.2",
+   "rule": "One sentence: what the picture says, the words finish",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "to build: ad-brief 'picture_says' and 'words_finish' fields, both required",
+   "confirmed_by": "LOOK (cover test)",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A9e.3",
+   "rule": "The idea named by kind, not a photo with a headline",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "to build: ad-brief 'kind' picked from the ad-vs-library.py kind list, weak kinds refused up front",
+   "confirmed_by": "ad-vs-library.py",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A9f.1",
+   "rule": "The angle named (moment, reader, trade-off, want, day, review)",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "to build: ad-brief 'angle' picked from a fixed list",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A9g.9",
+   "rule": "Looks different from the business's last ads",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "to build: ad-history.mjs lists the business's past ads (design, colour, layout) beside the new brief; AdMaker START_LOOK and FAMILIES already rotate looks",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A9g.10",
+   "rule": "Gallery of one business looks varied; each starts on its own product",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker START_LOOK, FAMILIES and THEMED give each layout its own look",
+   "confirmed_by": "check-ad-designs measure variety",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A2.1",
+   "rule": "Headline is the biggest words and what the eye lands on",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "to build: shared headline() in ad-kit that sets size from the words and is always the largest text on the canvas; AdStudio headline() and AdMaker draw functions each do it separately",
+   "confirmed_by": "LOOK (squint test), ad_vs_pros.py",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A2.2",
+   "rule": "At most about 8 words, never cut with an ellipsis",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "to build: ad-copy-lint in the AdMaker words panel and the headline generator; AdMaker only warns on long headlines (headlineWords)",
+   "confirmed_by": "LOOK",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A2.3",
+   "rule": "Who or where plus what, most concrete fact first",
+   "how": [
+    "GEN",
+    "ASK"
+   ],
+   "built_by": "to build: headline generator that takes who, where, what and fact from the listing record in ad-brief",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A2.4",
+   "rule": "In the reader's own words, from a real review when there is one",
+   "how": [
+    "GEN",
+    "ASK"
+   ],
+   "built_by": "to build: headline generator seeded from the listing's real reviews (ad.reviews is already loaded in AdMaker)",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A2.5",
+   "rule": "What it gets them, not the name again",
+   "how": [
+    "GEN",
+    "ASK"
+   ],
+   "built_by": "to build: five-headline generator (A2.11) requires a 'gets them' line per headline",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A2.6",
+   "rule": "Words a ten-year-old follows",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "to build: ad-copy-lint with a reading-level check and banned power-word list",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A2.7",
+   "rule": "No long dash, no exclamation in the headline, no unstated praise",
+   "how": [
+    "GEN",
+    "KIT"
+   ],
+   "built_by": "to build: ad-copy-lint run on every words field in AdMaker and AdStudio and in gen scripts; no such check in the drawing code today",
+   "confirmed_by": "check-ad-designs measure words",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A2.8",
+   "rule": "Hebrew in the plural, never to one man or woman",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "to build: ad-copy-lint Hebrew rule (flags singular second-person forms) and a plural-first Hebrew prompt",
+   "confirmed_by": "LOOK (Hebrew read)",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A2.9",
+   "rule": "Caption: who or where, one or two facts, one invitation, no hashtags or signature",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "to build: caption builder from ad-brief; AdMaker withCaption joins headline and points but does not lint hashtags",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A2.10",
+   "rule": "Short, intriguing, clear: a stranger gets what is sold in one look",
+   "how": [
+    "ASK",
+    "GEN"
+   ],
+   "built_by": "to build: ad-brief 'A stranger reads:' required before the headline is accepted; the headline generator output includes it",
+   "confirmed_by": "LOOK",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A2.11",
+   "rule": "Five headlines, numbered, each failure struck, then cut",
+   "how": [
+    "GEN",
+    "ASK"
+   ],
+   "built_by": "to build: headline-five.mjs writes 5 numbered headlines, a strike table with fixed failure letters a to f and 'Chosen: N', stored in ad-brief",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A3.1",
+   "rule": "One huge subject on one quiet ground, two or three colours",
+   "how": [
+    "GEN",
+    "KIT"
+   ],
+   "built_by": "to build: ad-layout-sketch presets with the subject box at half width or more on one ground; AdMaker drawShoot, drawGiant and drawBehind already place one big product",
+   "confirmed_by": "ad_vs_pros.py, LOOK",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A3.2",
+   "rule": "Rental or place: only the owner's real photos",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "to build: ad-brief 'picture sources' list; AdMaker should refuse any generated image for property targets",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A3.3",
+   "rule": "Generated product picture keeps the real product, rebuilt around its real photo",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "to build: docs/ads/gen/lib prompt builder that always passes the real photo as image 1 and writes the full reference scene (la-cholent-status/gen.py does it by hand)",
+   "confirmed_by": "LOOK beside the real photo",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A3.4",
+   "rule": "Other shape than the screen: extend the background, never crop",
+   "how": [
+    "GEN",
+    "KIT"
+   ],
+   "built_by": "scripts/ad-fit-picture.py extends the plain wall and table in the picture's own colours and refuses to shrink; in-app photoInBox with sideColour and edgeColour",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A3.5",
+   "rule": "Sharp, bright, one colour that stands out on a white and a dark feed",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "AdMaker vividColour and measureVivid pick the accent from the photo; sharpness from sharpCanvas",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A3.6",
+   "rule": "A hand holding, offering or reaching in where it helps",
+   "how": [
+    "ASK",
+    "GEN"
+   ],
+   "built_by": "to build: ad-brief 'hand: yes or no and why', and the prompt builder adds it to the layout sketch",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A3.7",
+   "rule": "No words drawn into a generated picture; words typed on top",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "AdMaker draws every word as its own canvas layer over the picture; to build: prompt builder appends a fixed 'no text in the picture' line",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A3.8",
+   "rule": "Borrow another brand's idea only, never its marks or product",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "to build: ad-brief 'borrowed from' states the idea only; the prompt builder never passes a reference ad image",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A3.9",
+   "rule": "Picture fills the ad edge to edge, laid with ad-fit-picture",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "scripts/ad-fit-picture.py (full width, refuses to shrink); in-app photoInBox and fitIn",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A3.10",
+   "rule": "Product shot styled like a pro shoot, with named props",
+   "how": [
+    "ASK",
+    "GEN"
+   ],
+   "built_by": "to build: ad-brief 'props' list (name and why) that the prompt builder turns into side props and a rich surface",
+   "confirmed_by": "ad_vs_pros.py, LOOK",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A3.11",
+   "rule": "Layout drawn first and given to the reference-image model",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "scripts/ad-layout-sketch.py and the ad-gate hook, which refuses a gen script until stages 1 to 4 are answered",
+   "confirmed_by": "ad-gate hook",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A3.12",
+   "rule": "A screen in an ad is the real site or dashboard from the test account",
+   "how": [
+    "GEN",
+    "ASK"
+   ],
+   "built_by": "to build: ad-screen-capture.mjs captures a named page at the screen's shape from the local test account (?as=owner, sample data)",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A4.1",
+   "rule": "At most three points, each one fact",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "to build: points field capped at 3 in the AdMaker words panel and in ad-copy-lint",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A4.2",
+   "rule": "One price, the price of the thing in the picture",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker adIssues(words, item) flags any price in the words that is not the featured item's, shown live in the panel as the owner types",
+   "confirmed_by": "check-ad-designs measure price",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A4.3",
+   "rule": "Struck-through price only when real",
+   "how": [
+    "OWNER",
+    "KIT"
+   ],
+   "built_by": "to build: ad-facts.json (real separate prices, past prices) from the listing; the deal text built only from it, never typed free",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A4.4",
+   "rule": "Review is real, public, 4 or 5 stars, the reviewer's words",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "to build: review picker listing only the listing's public reviews rated 4 or 5, cut by trimming only; AdMaker drawReview takes ad.reviews from the server",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A4.5",
+   "rule": "Press or partner logos only if real, four at most",
+   "how": [
+    "OWNER",
+    "KIT"
+   ],
+   "built_by": "to build: ad-facts.json 'press' list from the owner; the component refuses a fifth",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A4.6",
+   "rule": "The business's own real logo on every ad, clear of the phone's top bar",
+   "how": [
+    "KIT",
+    "OWNER"
+   ],
+   "built_by": "AdMaker extras() places the listing's logo on every design (part 'logo', white tile for see-through logos); AdStudio uses a fixed site LOGO, to build: the same extras() in AdStudio",
+   "confirmed_by": "check-ad-designs measure logo",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A1.3",
+   "rule": "One action: short link and QR last on the eye's path",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker drawFooter, footBand, qrTile and linkPiece draw link and QR in every design",
+   "confirmed_by": "check-ad-designs measure link",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A5.1",
+   "rule": "Nothing invented: number, feature, review, person, view, distance",
+   "how": [
+    "OWNER",
+    "GEN"
+   ],
+   "built_by": "to build: ad-facts.json from the listing and owner; copy lint refuses a number or claim word with no source field",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A5.2",
+   "rule": "No scarcity or urgency unless real, with dates",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "to build: ad-copy-lint banned urgency words unless ad-facts has a dated offer",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A5.3",
+   "rule": "No fake screenshot of a conversation that did not happen",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "to build: ad-brief 'who speaks' must be the product, a search box, switches or the reader's list; chat and post designs refuse invented speakers",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A5.4",
+   "rule": "No drawn @brand, no as-seen-in, no generated person as customer",
+   "how": [
+    "GEN",
+    "ASK"
+   ],
+   "built_by": "to build: prompt builder negative list and ad-copy-lint for '@' and 'as seen'",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A5.5",
+   "rule": "Comparison with a kind of thing, never a named rival",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "to build: ad-copy-lint checks words against a rival-name list per category; versus design takes two kinds from ad-brief",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A5.6",
+   "rule": "No 'owners' wording; rentals lead; 'Add your business, free'",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "AdMaker site-ad cta uses the 'Add your business, free' string; to build: ad-copy-lint bans the word 'owners' in ad copy",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A8.1",
+   "rule": "Square, feed and story each drawn, not resized",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker FORMATS and per-format draw; AdStudio SHAPES post and status",
+   "confirmed_by": "check-ad-designs measure shapes",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A8.2",
+   "rule": "No text under 30px at 1080 wide",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "to build: one shared text() in ad-kit with a hard 30px floor (today only the phone fonts and linkPiece clamp to 30)",
+   "confirmed_by": "check-ad-designs measure text-size",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A8.3",
+   "rule": "Nothing cut off: every line inside the picture",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker wrap(ctx, text, width, maxLines) and part() with minScale shrink text into its box; to build: AdStudio to use the same",
+   "confirmed_by": "check-ad-designs measure text-inside",
+   "retried": true,
+   "status": "built"
+  },
+  {
+   "id": "A8.4",
+   "rule": "Story keeps top 220px and bottom 230px clear",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker begin() top 220 and footBand safe 230; AdStudio topOf and footTopOf",
+   "confirmed_by": "check-ad-designs measure story-safe",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A8.5",
+   "rule": "Words over a photo cover at most 40%, never the subject",
+   "how": [
+    "GEN",
+    "KIT"
+   ],
+   "built_by": "to build: ad-layout-sketch text boxes capped at 40% of the picture and clear of the subject box; AdMaker has no cap",
+   "confirmed_by": "LOOK, ad_vs_pros.py",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A8.6",
+   "rule": "QR at least 150px, dark on white, short link whole beside it, no drag can break it",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker QR floor of 150, qrTile white tile, linkPiece and linkLines print the whole link, part() minScale 150/QR on drag",
+   "confirmed_by": "check-ad-designs measure qr",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A8.7",
+   "rule": "Hebrew and English: right-aligned, QR to the left, fonts with the letters",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker rtl flag (qx = rtl ? PAD : ...), headFont and bodyFont swap to Frank Ruhl Libre and Assistant, dirOf per line",
+   "confirmed_by": "check-ad-designs measure languages",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A8.8",
+   "rule": "Words readable on their background, 3:1 for large text",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker inkOnCol, lightGround and fg() pick ink from the ground's luminance; pillOn for the price",
+   "confirmed_by": "check-ad-designs measure colour, lostWords",
+   "retried": true,
+   "status": "built"
+  },
+  {
+   "id": "A8.9",
+   "rule": "Picture leaving the site is drawn at 2160 wide from the best photo",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "utils/sharpCanvas sharpCanvas(target, scale) and bestPhoto(src) used by AdMaker and AdStudio",
+   "confirmed_by": "check-ad-designs measure sharp",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A9.1",
+   "rule": "Drawn and looked at on the real business, at phone size, beside the reference",
+   "how": [
+    "EYE",
+    "GEN"
+   ],
+   "built_by": "to build: ad-gen-runner writes a contact sheet (ad, its source ad, phone-size frame) automatically",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A9.2",
+   "rule": "Would it stop you? One sentence of what is surprising",
+   "how": [
+    "ASK",
+    "EYE"
+   ],
+   "built_by": "to build: ad-brief 'surprise' field, required",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A9.3",
+   "rule": "Owner can change every word and the price stays right",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker words panel edits every field; adIssues keeps the price tied to the featured item",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A9.4",
+   "rule": "Cost read from the API before generating, spend reported",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "to build: ad-gen-runner reads the credit price from the API first, stops above a cap, appends the spend to ad-brief",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A9.5",
+   "rule": "Never bland: beside the pro ads, five yes or no",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "scripts/ad_vs_pros.py makes the sheet; to build: ad-gen-runner runs it after every picture and gives no 'shown' link on any no",
+   "confirmed_by": "ad_vs_pros.py, LOOK",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A9.6",
+   "rule": "Added copies of the product match the real photo",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "scripts/product-match-sheet.py compares piece by piece; to build: the prompt builder writes the product traits into the prompt from ad-brief",
+   "confirmed_by": "product-match-sheet.py, LOOK",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A9.7",
+   "rule": "A 5, or not shown: beside four 5/5 library ads of its kind",
+   "how": [
+    "ASK",
+    "GEN"
+   ],
+   "built_by": "scripts/ad-vs-library.py refuses weak kinds; to build: ad-brief 'kind' chosen at stage 1 so the refusal happens before a picture is paid for",
+   "confirmed_by": "ad-vs-library.py",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A11.1",
+   "rule": "One idea you get in a second",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "to build: ad-brief 'idea' (same field as A9e.3), required",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A11.2",
+   "rule": "Words and picture interlock (word behind the subject, or subject inside letters)",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "AdMaker drawBehind puts the cut-out product in front of the word; to build: layout-sketch preset 'word behind' for generated pictures",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A11.3",
+   "rule": "One colour world from the product's own colour, one accent",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker vividColour, lookOf and LOOKS take colour from the photo; colAccent still falls back to stock yellow #FFD600, to build: take the accent from the product",
+   "confirmed_by": "LOOK",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A11.4",
+   "rule": "A frozen moment, true to the product",
+   "how": [
+    "ASK",
+    "GEN"
+   ],
+   "built_by": "to build: ad-brief 'moment' field and a prompt-builder line tied to the real cause",
+   "confirmed_by": "LOOK",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A11.5",
+   "rule": "Light that shapes: one strong side or back light",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "to build: prompt builder fixed light clause (one side or back light, fall to dark); AdMaker paintGround and paintGrain give only a ground",
+   "confirmed_by": "LOOK",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A11.6",
+   "rule": "Picture, headline and name carry it; link, code and price small",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker footBand and cornerFoot keep link, QR and price in the foot at fixed sizes; to build: one size table in ad-kit",
+   "confirmed_by": "ad_vs_pros.py, LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A11.7",
+   "rule": "Headline 2 to 5 spoken words, big, in two voices",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "to build: headline generator limit of 5 words and a two-voice style (keyLine and stripLine in AdMaker already do bold key word plus line)",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A11.8",
+   "rule": "The product is the hero, half the width or more, on its set",
+   "how": [
+    "GEN",
+    "KIT"
+   ],
+   "built_by": "to build: ad-layout-sketch preset with the product box at 50 percent width or more; AdMaker drawShoot and drawGiant do it for cut-outs",
+   "confirmed_by": "ad_vs_pros.py, LOOK",
+   "retried": true,
+   "status": "planned"
+  },
+  {
+   "id": "A10.1",
+   "rule": "Moving ad ends on the same picture as the still",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker moving export draws the same design as the still; its last frame is the still (comment at line 3735)",
+   "confirmed_by": "check-ad-designs measure moving",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A10.2",
+   "rule": "First frame is already an ad, never an empty ground",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker hookCard() with HOOK = 1 second, key word large on the ad's colour",
+   "confirmed_by": "check-ad-designs measure moving",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A10.3",
+   "rule": "One big word, move, hold 1.5s still, QR still over 3s",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker MOVE_ENDS 3.6s of 6.5s, part() delay table (qr appears at 1.55s), pieceMove",
+   "confirmed_by": "check-ad-designs measure moving",
+   "retried": false,
+   "status": "built"
+  },
+  {
+   "id": "A10.4",
+   "rule": "MP4 H.264 at full 1080 width, about 6 seconds, readable without sound",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "AdMaker VIDEO_SECONDS = 6.5 and File 'ad-<format>.mp4' (video/mp4)",
+   "confirmed_by": "check-ad-designs measure moving",
+   "retried": false,
+   "status": "built"
+  }
+ ]
+}

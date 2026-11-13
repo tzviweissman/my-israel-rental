@@ -1,0 +1,3141 @@
+{
+ "about": "The rules register (Tzvi, 12 Nov 2026: rules as a building blueprint). One record per rule: how it is built (KIT starter code, GEN a script from the blueprint answers, ASK one blueprint question, OWNER the owner message, EYE the final review), what builds it, what confirms it. status built = a starter part does it today; planned = still to build. A new rule is added here with its building part the same day (check-rule-homes).",
+ "rules": [
+  {
+   "id": "R0b.1",
+   "rule": "Real slug from the live record",
+   "how": [
+    "ASK",
+    "GEN"
+   ],
+   "built_by": "site.json slug read from record.json by fetch_business; Site(slug) and publish take it",
+   "confirmed_by": "LOOK -> confirm only (G1 asserts slug equals record)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R0b.3",
+   "rule": "Prices and currency match owner menu; real menu loaded in shop with fixed ids",
+   "how": [
+    "OWNER",
+    "GEN"
+   ],
+   "built_by": "load_products.py from record/flyer into catalog.js and prices.json; owner confirms menu",
+   "confirmed_by": "check-site SAVE -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R2.1",
+   "rule": "Only facts the owner or record gave",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G3 copy-lint: every number, since, claim word in copy.json must cite a record field or owner answer",
+   "confirmed_by": "LOOK (stays: one final read)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R2.2",
+   "rule": "Owner asked only about own business, never how we build",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G2 owner-questions generator from a fixed template; skips what the record answers",
+   "confirmed_by": "LOOK -> confirm only (lint on message-to-owner.md)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R2.3",
+   "rule": "Message has 5-8 FAQ questions from real details plus worry/first-days/photo questions",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G2 builds them from record fields and the spec",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.1",
+   "rule": "Every claim has proof (kosher, licensed, reviews, years, best, 24/7)",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G3 claim table: each trigger word needs a record field or the build refuses the line",
+   "confirmed_by": "LOOK -> confirm only (G3 lint)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.2",
+   "rule": "No urgency or scarcity",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G3 banned-phrase list on copy.json; kit never emits counters or countdowns",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.3",
+   "rule": "No generic sentences (welcome to, one-stop shop, Hebrew equivalents)",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G3 banned-phrase list EN+HE",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.4",
+   "rule": "No exclamation marks, long dashes, capitals",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "sitekit.guard: no long dash or exclamation mark",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
+   "id": "R3.5",
+   "rule": "Headline or line names something they sell in listing words",
+   "how": [
+    "ASK",
+    "GEN"
+   ],
+   "built_by": "Blueprint question: headline words from listing names; G3 asserts h1 shares a word with a listing name",
+   "confirmed_by": "LOOK (stays: first screen)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.6",
+   "rule": "Everything in the page language; Hebrew written, RTL checked",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "K16 kit.lang Hebrew twin from copy.json (he block required); dir=rtl and Hebrew font swap in site.css; G3 flags Latin words in Hebrew",
+   "confirmed_by": "check-hebrew-pages + LOOK (stays: Hebrew read)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.7",
+   "rule": "Nothing faked: no FAQ/reviews/placeholders until real",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "kit.faq/gallery/reviews render hidden until real data (already); G3 refuses lorem and coming soon",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.8",
+   "rule": "No logo walls, As-seen-on, laurels, invented badges, fake stars",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "No such component in the kit; badge only from an owner flag; G3 lint",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.9",
+   "rule": "Page repeats the promise that brought the visitor",
+   "how": [
+    "OWNER",
+    "ASK"
+   ],
+   "built_by": "Question: the owner's flyer/ad line; hero h1/line built from it",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.10",
+   "rule": "At most two strengths, each with proof",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question picks two strengths from the record; kit.facts caps facts at 3 and strengths at 2",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R5.1",
+   "rule": "Their words first, specific; no line a competitor could print",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G3 copy pass seeded from listing text; generic-phrase lint",
+   "confirmed_by": "LOOK (stays: one read aloud)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R5.2",
+   "rule": "Professional voice, no teasing or slang",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G3 copy-pass prompt carries the voice rules; banned word list",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R5.3",
+   "rule": "Short labels are full phrases",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G3 lint: badge/tag strings need 3+ words and a fact",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R5.4",
+   "rule": "Visitor is you, business is we; never they/them about itself",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G3 lint for they/them/their in all strings incl. alt, errors, footers",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R5b.2",
+   "rule": "One button one label everywhere (header, hero, sections, bar, footer)",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "Site.cta is the only source; kit.button() takes no label; header, bar, footer, close, hero all read Site.cta; build asserts no other main-button text",
+   "confirmed_by": "check-menu + LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R5b.8",
+   "rule": "Finish/closing line names what the customer gains; no stray or/prefer",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G3 bans done/complete in closing strings; or/prefer lint",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.11",
+   "rule": "Headline says what customer gets; order follows visitor questions; prices before enquiry form",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "K7 section-order template (what, trust, cost, action) per category; kit refuses a form before a price block",
+   "confirmed_by": "LOOK (stays: read top to bottom)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3o.4",
+   "rule": "Every contact labelled by what it does; owner said which number takes what",
+   "how": [
+    "KIT",
+    "OWNER"
+   ],
+   "built_by": "kit.Contact kinds already label; owner question in G2 gives the kind per number",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3e.22",
+   "rule": "Owner visible as a person: name, real photo, direct WhatsApp",
+   "how": [
+    "ASK",
+    "OWNER",
+    "KIT"
+   ],
+   "built_by": "Question: owner photo and name; kit.maker() block right after the opening",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.19",
+   "rule": "Same promise/photos on link preview, home, shop; every page own title, description, og",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "K1 Site.write requires per-page title, desc, og; promise line from spec; og image built from hero",
+   "confirmed_by": "check-web-basics -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R6.1",
+   "rule": "Category playbook lead block first, must-haves present",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: category (3t); K7 loads that category's block order from playbooks.md as JSON",
+   "confirmed_by": "check-site CATEGORY + LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R4.1",
+   "rule": "Missing data reads as deliberate (Ask for a quote), listed as a gap",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "kit.price(None) renders Ask for a quote; G2 lists gaps in OWNER-QUESTIONS",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3g.13",
+   "rule": "First screen: picture, 2-5 word headline, one short line, one button",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.opening_slides: headline 2 to 5 words",
+   "confirmed_by": "check-site OPENING + LOOK -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3g.18",
+   "rule": "First screen shows what the business offers; offers meta lists the kinds",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: kinds of offer; K2 requires h1 to name each kind and writes meta offers",
+   "confirmed_by": "check-says-offer -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3b.1",
+   "rule": "First screen answers what, where, trust, next",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K2 slots: what (h1), where (line), trust (facts), next (button); all required args",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3b.2",
+   "rule": "Proof touches main button; kosher band after opening; certificate stated at most twice",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "K2 puts btn-facts under the button; kit.band('kosher') once after opening; count asserted",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3b.3",
+   "rule": "One solid action per screen; header button outline when hero has solid",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "site.css: .top .btn-line always outline, .btn only in hero/sections; Site.write asserts one .btn per section",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.20",
+   "rule": "Scroll opening 60 fps, >=3 screens, product on plain ground, whole, first screen first",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "slides.js: at least 3 screens of scroll",
+   "confirmed_by": "check-opening-scroll -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3h.21",
+   "rule": "Effects never too much: <=3 holds, each <=1.5 screens, nothing between phone visitor and order",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K3 and kit.hold() register holds; Site.write counts them and refuses more",
+   "confirmed_by": "check-one-scroll -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.22",
+   "rule": "Storyboard sheet of rough drawings approved before any still",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G6 storyboard.py writes the sheet from the concept ideas; gate blocks stills until pick is recorded in film-brief.md",
+   "confirmed_by": "LOOK (stays: Tzvi's pick)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.23",
+   "rule": "Every clip passes check-clip; brief has How it really happens and Key moment",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "clipchain.py: check-clip on every clip, the chain stops on a fail",
+   "confirmed_by": "check-clip (per clip) -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3h.24",
+   "rule": "Scroll film is real video tied to the scroll within 0.4 s, no freezes",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "slides.js: video led by the scroll, keyframe clips (clipchain.py encode)",
+   "confirmed_by": "check-film-video -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3h.25",
+   "rule": "Nothing covers a scroll film while it plays (3% max)",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.opening_slides + slides.js: words leave as the film starts, phone bar waits",
+   "confirmed_by": "check-film-clear -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3aa.1",
+   "rule": "The whole screen moves as the journey, never a small change on a still",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "kit.opening_slides + slides.js: every slide is a full-screen clip or photo pushed up whole",
+   "confirmed_by": "LOOK",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3aa.2",
+   "rule": "One continuous story, no cuts or fades, one named join",
+   "how": [
+    "KIT",
+    "GEN",
+    "ASK"
+   ],
+   "built_by": "clipchain.py + slides.js: each clip starts on the last frame of the one before, slides push and never fade; to build: blueprint asks \"- join:\"",
+   "confirmed_by": "check-clip FADE + LOOK",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3aa.3",
+   "rule": "One ground and one light through the film",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "clipchain.py: the chain.json world line on every prompt",
+   "confirmed_by": "LOOK",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3aa.4",
+   "rule": "The same objects from first frame to last",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "clipchain.py: each clip made from the last frame of the one before",
+   "confirmed_by": "LOOK",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3aa.5",
+   "rule": "One or two huge words per step in the clear space",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.opening_slides: one word and one short line per slide",
+   "confirmed_by": "LOOK",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
+   "id": "R3aa.6",
+   "rule": "One large subject, each step held about a screen, 3 to 5 steps",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "slides.js: hold and push per slide, at least 3 screens",
+   "confirmed_by": "LOOK",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
+   "id": "R3aa.7",
+   "rule": "Pinterest searched on every build, saved, named in REFERENCES.md",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "to build: the blueprint sources stage asks for the Pinterest search and its saved pictures",
+   "confirmed_by": "LOOK",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3aa.8",
+   "rule": "Each film step the right distance: object whole and large on a plain ground",
+   "how": [
+    "GEN",
+    "ASK"
+   ],
+   "built_by": "clipchain.py: refuses a chain.json step without a frame line and adds it to the prompt",
+   "confirmed_by": "LOOK at laptop and phone",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3aa.9",
+   "rule": "The step word huge and interlocked with the object, in the still",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "to build: the layout sketch with the word and the object, given to the reference model for each still",
+   "confirmed_by": "LOOK",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3aa.10",
+   "rule": "One step shows the product taken apart",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "to build: the blueprint film stage asks which part of the product opens up",
+   "confirmed_by": "LOOK",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3aa.11",
+   "rule": "The film floods into the next section, which is the shop",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "to build: kit.opening_slides end into a shop block with the items round the product",
+   "confirmed_by": "LOOK",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3aa.12",
+   "rule": "One palette, props from their world, a little life in every scene",
+   "how": [
+    "ASK",
+    "GEN"
+   ],
+   "built_by": "to build: the blueprint asks for the props and the small movement per step; chain.json carries them",
+   "confirmed_by": "LOOK",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3aa.13",
+   "rule": "Approval pictures as a laptop frame beside a phone frame",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "gen/pour_sketch.py in gremier-coffee draws each scene at both sizes; to build: the same as a starter part",
+   "confirmed_by": "LOOK",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3aa.14",
+   "rule": "A phone never gets a cut-down film",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "clipchain.py encode: the whole width padded on the ground, or the step's own tall clip; starter site.css shows it whole",
+   "confirmed_by": "LOOK on a phone",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3aa.15",
+   "rule": "Keep the reveal for the end",
+   "how": [
+    "ASK",
+    "GEN"
+   ],
+   "built_by": "to build: the blueprint film stage asks what the pull-back reveals and the still before it is written without it",
+   "confirmed_by": "LOOK",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3aa.16",
+   "rule": "Words make way for the picture",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "slides.js on-last and at-end classes + starter site.css: closing card after the last picture lands, hides the chap; phone chap above the film",
+   "confirmed_by": "LOOK",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3aa.17",
+   "rule": "A join on the same picture carries on in place",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.opening_slides marks chained clips data-same + slides.js: no push between them",
+   "confirmed_by": "LOOK",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3aa.18",
+   "rule": "Added shows in the basket button and the phone bar",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "starter site.js siteToast (status only) + catalog.js site:added and barBtn: header button and phone bar",
+   "confirmed_by": "LOOK",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3aa.19",
+   "rule": "Every number from its live source",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "shopkit.catalog_js was_of and prices_json + catalog.js window.MIR_PRICES and paint()",
+   "confirmed_by": "LOOK: change a price locally",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3aa.20",
+   "rule": "The words fit the scene",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "starter clipchain.py make refuses a step without a word line",
+   "confirmed_by": "LOOK: each step's word beside its frames",
+   "status": "built"
+  },
+  {
+   "id": "R3aa.21",
+   "rule": "Look at the start picture before any clip",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "starter clipchain.py make refuses a new clip without a start_seen line",
+   "confirmed_by": "LOOK: each start still edge by edge",
+   "status": "built"
+  },
+  {
+   "id": "R3aa.22",
+   "rule": "The start picture is the before",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "starter clipchain.py make refuses a start_seen without what the start shows before the action",
+   "confirmed_by": "LOOK: each start still",
+   "status": "built"
+  },
+  {
+   "id": "R3aa.23",
+   "rule": "Nothing under a fall",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "starter clipchain.py make: floor_line() refuses a start picture with a straight line across the whole width unless a floor_ok line says why",
+   "confirmed_by": "LOOK: the clips' frames",
+   "status": "built"
+  },
+  {
+   "id": "R3aa.24",
+   "rule": "The phone is planned with the film",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "starter clipchain.py make refuses a chain.json with no phone_plan",
+   "confirmed_by": "LOOK: chain.json",
+   "status": "built"
+  },
+  {
+   "id": "R3aa.25",
+   "rule": "Starter defaults: plain links in ink, jump targets clear of the menu bar",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "starter site.css p a:not([class]) and [id] scroll-margin-top",
+   "confirmed_by": "LOOK: a text link and a jump link",
+   "status": "built"
+  },
+  {
+   "id": "R3aa.26",
+   "rule": "Phones are always asked before any generation",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "film-gate refuses paid video without a Phones asked line quoting Tzvi; clipchain.py make refuses a phone_plan without his quoted answer",
+   "confirmed_by": "LOOK: the brief's Phones asked line and phone_plan",
+   "status": "built"
+  },
+  {
+   "id": "R3bb.1",
+   "rule": "Pick at least three small touches from 3bb, named in CONCEPT.md",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "scripts/blueprint.mjs asks it at the concept stage; to build: starter parts for the code-only touches (progress line, footer fill, price highlight, chapter counter, tag pill, corner join card)",
+   "confirmed_by": "LOOK",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.1",
+   "rule": "Home opens on full-screen picture/film (>=70%), an event from their own thing",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "K2/K3 stage is 100svh full-bleed by construction; Question: which event (from G9 idea list)",
+   "confirmed_by": "check-site OPENING + LOOK (event stays)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3n.1",
+   "rule": "Strongest real photo fills half the first screen on laptop and phone",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "K2 picture slot >=60% area; G5 picks the highest-resolution photo; Question: which photo",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3n.2",
+   "rule": "One signature moment only this business could have",
+   "how": [
+    "ASK",
+    "EYE"
+   ],
+   "built_by": "Blueprint question (one line plus why no other business); G9 idea log",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3n.3",
+   "rule": "Visitor's choice changes the page, not one picture",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "K10 kit.choice(target=hero) updates hero, colour var, order; Question: what is the choice",
+   "confirmed_by": "check-motion + LOOK -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3n.4",
+   "rule": "Side by side with closest reference, ours not weaker",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G10 makes the side-by-side sheet of our first screen vs the saved reference",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3n.5",
+   "rule": "One-sentence test: you land and X happens, about the business",
+   "how": [
+    "ASK",
+    "EYE"
+   ],
+   "built_by": "Blueprint question: write the sentence; G9 rejects decoration verbs",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3g.15",
+   "rule": "Opening at full quality; no flyer crop; no fake premises",
+   "how": [
+    "GEN",
+    "KIT"
+   ],
+   "built_by": "G5 refuses a hero source under 1600 px and extends or regenerates; K6 never shows a photo over 1.35x",
+   "confirmed_by": "check-fits -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.2",
+   "rule": "Film goes from where product comes from to real product and button, every step true",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G6 brief object list and story; G7 final frame = owner photo",
+   "confirmed_by": "LOOK (stays: walk film)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.3",
+   "rule": "Film full screen, crisp, near-lossless, never masked",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K3 canvas/video cover 100svh, encode crf fixed, no mask CSS exists",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.5",
+   "rule": "Chapter lines 2-6 words, small, at an edge, <=third height, edge shade only",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "K3 .chap slot fixed to an edge with shade; G3 word count 2-6",
+   "confirmed_by": "readable + check-film-clear -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.7",
+   "rule": "Film seams checked; a jumping clip regenerated",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G7 compares last frame of clip n with first of n+1 (difference score) and flags a jump",
+   "confirmed_by": "LOOK -> confirm only (G7 numeric)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.8",
+   "rule": "Section after a lit film changes mood boldly",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "K7 next section takes the contrasting ground token from BRAND.md",
+   "confirmed_by": "LOOK (stays: tiny)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.11",
+   "rule": "Film and stills bright (thirds 33, whole 22, avg 30), subject brightest",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G7 brightness.py gate per still/clip; prompt template adds bright-light words",
+   "confirmed_by": "brightness.py -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.13",
+   "rule": "One cause one motion; passes a 4 fps watch",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G6 brief forces cause+effect in one clip; G7 writes the 4 fps sheet",
+   "confirmed_by": "LOOK (stays: watch sheet)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.14",
+   "rule": "Product recognisable through the effect; phone frame widens",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G7 product-match sheet (product-match-sheet.py) per clip",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.18",
+   "rule": "Film physically possible: every object listed with source and end",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "clipchain.py: each clip starts on the last frame of the one before",
+   "confirmed_by": "LOOK (stays: object by object at 8 fps)",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3h.19",
+   "rule": "Generate once: possible story chosen, frame 1/mid/last written, max two tries",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "clipchain.py: the story is the chain.json steps",
+   "confirmed_by": "LOOK -> confirm only (G7 log)",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3h.17",
+   "rule": "Words and film take turns; giant name on plain ground",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K3 stage states: words, film, words (never together); giant-name slot on a plain layer",
+   "confirmed_by": "readable -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3x.5",
+   "rule": "Following light only for dark-world business, off button, phone sweep",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: dark world?; kit.css light piece carries off button and reduced-motion",
+   "confirmed_by": "LOOK (stays; mostly n/a)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3z.2",
+   "rule": "First screen has three layers: photo, film or shape, words, button in front",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K2 z-layer structure (photo, shape, words, button with the only shadow)",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3z.6",
+   "rule": "h1/line holds the search words for the business and its place",
+   "how": [
+    "ASK",
+    "GEN"
+   ],
+   "built_by": "Blueprint plan line names search words; G3 asserts h1/line contains them",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.12",
+   "rule": "Every page has hero, features (one item per product with price), CTA section near end with proof",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K7 page templates per category always emit hero, items, closing band (Site.footer close already)",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3c.1",
+   "rule": "References first: 3-5 real screens with sources in CONCEPT.md",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G12 source log writes REFERENCES.md and CONCEPT.md skeleton from each Mobbin/21st/Inspo search made",
+   "confirmed_by": "check-concept/check-references -> confirm only; LOOK (stays: pick)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3g.17",
+   "rule": "Every piece from a fresh search for this business, nothing reused from last two pages",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G12 logs each search and G9 compares chosen effects with last two sites' fingerprints before build",
+   "confirmed_by": "check-concept + prints -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3g.19",
+   "rule": "Shops: main buttons in the product's own colour, 4.5:1, 3:1 from ground",
+   "how": [
+    "GEN",
+    "KIT"
+   ],
+   "built_by": "G4 samples product photo, picks colour passing both contrasts, writes --btn token and meta product-colour",
+   "confirmed_by": "check-button-colour -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R0b.4i",
+   "rule": "Opening ideas from saved sources, none a kind another site uses",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G9 draws ideas from docs/inspo with pictures and filters kinds in motions.json",
+   "confirmed_by": "check-ideas -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3c.2",
+   "rule": "No AI default look (cream+serif+italic, purple gradient, three identical cards...)",
+   "how": [
+    "GEN",
+    "KIT"
+   ],
+   "built_by": "G4 palette/fonts picked from logo+photos and checked against banned combos; kit has no default gradient/frosted",
+   "confirmed_by": "LOOK (stays: whole page)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3g.1",
+   "rule": "Style sheet in CONCEPT.md before building; every section follows it",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G4 writes tokens to BRAND.md AND site.css :root from one file; sections only use var()",
+   "confirmed_by": "LOOK -> confirm only (computed-style diff)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3g.3",
+   "rule": "Accent for main button only; prices in ink, bold and large; one emphasised word per screen",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "site.css: --accent used only by .btn; .pr rule is ink/bold/large; kit.price emits .pr",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3g.7",
+   "rule": "At most one closing signature, not in the order path",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: signature or none; Site.close_extra is the only slot",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3g.11",
+   "rule": "Fonts from approved Latin+Hebrew list",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G4 picks only from reference/design-rules.md list (pairs with Hebrew twin)",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3p.3",
+   "rule": "Not alike: no shared heading face, colours, design differs on 4 of 6",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G9/G4 pre-check fingerprints.json and offer only unused fonts/colours/effects before any CSS",
+   "confirmed_by": "check-fingerprints -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3p.5",
+   "rule": "One small touch only this business would have",
+   "how": [
+    "ASK",
+    "EYE"
+   ],
+   "built_by": "Question: the touch (from product/tagline/craft); recorded in CONCEPT.md",
+   "confirmed_by": "check-concept + LOOK (stays: works)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3q.1",
+   "rule": "CONCEPT.md complete: 3 ideas citing pictures, Own idea, five wow answers, effects line, Not alike",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G12/G9 write CONCEPT.md from a template with every required line as a fillable field",
+   "confirmed_by": "check-concept -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R5a.7",
+   "rule": "One signature idea and one peak per page; not carried over",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: the signature; K7 allows one signature slot per page",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R9.1",
+   "rule": "Signature section only when own photos support it",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "Question: which photos support it; blueprint n/a otherwise",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3f.2",
+   "rule": "Effect budget filled: one signature, >=3 accents, quiet touches, on captured frames",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G9 effect-budget table in CONCEPT.md; G10 captures frames at 0/25/50/75/100%",
+   "confirmed_by": "LOOK (stays: frames)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3m.1",
+   "rule": "Gallery place on every page; priced products inside data-mir-catalog",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.shop_page: data-mir-catalog with templates",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
+   "id": "R3m.3",
+   "rule": "Owner-changed details in fixed places with length limits",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.hours(), kit.areas(), kit.faq() with max length data attrs (faq exists)",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3k.1",
+   "rule": "Menu and order are ONE page; old addresses forward",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "Site.pages shape asserted; G1 writes redirect stubs for menu/order html",
+   "confirmed_by": "LOOK -> confirm only (check-menu)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3k.2",
+   "rule": "One identical menu bar on every page; phone Menu/Close closes on Escape",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "Site.header + site.js already do this",
+   "confirmed_by": "check-menu -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3k.4",
+   "rule": "Shared site.css/site.js; section class names never reused for shared state",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "starter ships both; shared state uses .shown/.on; a lint in Site.write rejects page CSS selectors .open/.in outside kit",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R8a.1",
+   "rule": "Nothing left over from 21st/generated components",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G3 scans html for external hosts, scripts, demo text before write",
+   "confirmed_by": "LOOK -> confirm only (grep)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3b.4",
+   "rule": "With few photos facts carry the page; place: hours and where first",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: photo count; K7 picks facts-led template under 4 photos",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3c.3",
+   "rule": "Proof sits where the worry is, beside the button or price",
+   "how": [
+    "OWNER",
+    "KIT"
+   ],
+   "built_by": "Question: owner's worries (G2); kit.proof(worry, near=button) slot",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3c.8",
+   "rule": "What happens after the order stated first, if owner told us",
+   "how": [
+    "OWNER",
+    "KIT"
+   ],
+   "built_by": "Question to owner; Site.ordering footer part and order done screen read it",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3e.10",
+   "rule": "Cards have one reading order; long names truncate; icon on solid circle",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K11 kit.items card markup and CSS fixed (name largest, one fact, price)",
+   "confirmed_by": "site ALIGN -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3e.14",
+   "rule": "One body family, three weights, <=6 sizes, 4 px grid",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "site.css scales --t-1..--t5 and --s1..--s10 (exist); lint rejects non-scale font-size/gap in page CSS",
+   "confirmed_by": "check-web-basics SCALE -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3c.9",
+   "rule": "One radius, one icon set, one shadow, no gradients, no decorative arrows",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "site.css --r and --shadow tokens only; lucide helper kit.icon(); lint bans linear-gradient with two colours",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.4",
+   "rule": "One left edge for headings, text, buttons",
+   "how": [
+    "KIT"
+   ],
+   "built_by": ".wrap and grid utilities; page CSS lint rejects negative margins",
+   "confirmed_by": "site ALIGN -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.6",
+   "rule": "Same-job controls look the same",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "only .btn/.btn-line/.btn-sm exist; kit.button() sizes fixed",
+   "confirmed_by": "site ALIGN -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.7",
+   "rule": "Sentence case, pale dividers, no Price: labels, line-height 1.5-1.6",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "site.css body line-height 1.6; kit.price has no label; lint on uppercase text-transform for buttons",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.9",
+   "rule": "One colour per meaning (kosher tag same everywhere)",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.tag(kind) one style per kind",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.12",
+   "rule": "Maker and real work right after opening, one real photo in use",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: which photo; kit.maker() placed by K7 right after opening",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.14",
+   "rule": "Real numbers shown big (3x body) with one-line label",
+   "how": [
+    "KIT",
+    "OWNER"
+   ],
+   "built_by": "kit.stat(value,label) at --t5; values only from record or owner answer (G3)",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.11",
+   "rule": "One true sentence beside price says why it costs that",
+   "how": [
+    "OWNER",
+    "KIT"
+   ],
+   "built_by": "Question per product; kit.items slot .why required when price shown",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R5b.6",
+   "rule": "No scroll cues, counters, label above every section",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "No such component in the kit; lint rejects .caps kicker on every section",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.13",
+   "rule": "Structure: no doubled contact/facts/gallery; no two dividers; gallery >=3",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "Site.write asserts one contact block, one facts line, gallery needs >=3 photos else hidden",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3a.1",
+   "rule": "Rendered at six sizes, each language, every screen looked at",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G10 renders contact sheets at six sizes in one command (screenshot.mjs exists)",
+   "confirmed_by": "LOOK (stays: look at the sheets)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3r.1",
+   "rule": "Every script run on every page",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "check-build already runs every check on every page; G1 lists pages from Site.pages",
+   "confirmed_by": "check-build -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3r.2",
+   "rule": "Someone who did not build the page reviewed it",
+   "how": [
+    "EYE"
+   ],
+   "built_by": "Reviewer opens page-review-checklist against G10 sheets",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3g.12",
+   "rule": "Real test through every form and order button to a test business",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "kit.shop_page: test hooks always there",
+   "confirmed_by": "check-site FLOW/SAVE -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R0b.12",
+   "rule": "Pages-list preview clip shows current version",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "publish-page records preview clip after publish",
+   "confirmed_by": "check-showcase-previews -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3x.1",
+   "rule": "Product to turn made from owner photo via API and compared",
+   "how": [
+    "ASK",
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "Question: used?; G7 turn model + side-by-side sheet; kit.turn() component",
+   "confirmed_by": "LOOK (stays; n/a mostly)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3x.2",
+   "rule": "Counted number real, counts once, in page text",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.stat(count=True) puts value in text, JS only animates",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3x.3",
+   "rule": "Tabs change one panel in place, same spots",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K10 kit.tabs() fixed panel geometry",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3x.4",
+   "rule": "Two or more sizes/packages each a card with same measures in same order",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "K11 kit.sizes(items) one card shape; Question: sizes and servings",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3x.11",
+   "rule": "Product-to-turn suitability, candidates from four angles, touch-action pan-y",
+   "how": [
+    "ASK",
+    "GEN"
+   ],
+   "built_by": "G7 turn pipeline; kit.turn() sets pan-y",
+   "confirmed_by": "LOOK (stays; n/a mostly)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3z.1",
+   "rule": "One card hangs over the edge of next section on home page, whole on phone",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "kit.overlap_card() component; Question: which card",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3z.5",
+   "rule": "Dark site has one light section joined by a clean edge",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: dark ground?; K7 inserts light section token",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R8.1",
+   "rule": "Set of images reads as one shoot",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G5 generates whole set in one pass from one preamble; G10 contact sheet at rendered size",
+   "confirmed_by": "LOOK (stays: compare sheet)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R8.6",
+   "rule": "Main product pictures are hero shots, product exactly theirs",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G6 still-brief template (8 points, plinth, props from business) and G7 product-match sheet vs owner photo",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R8.8",
+   "rule": "Each product picture a full scene, props same places per card",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G6 one layout sketch (ad-layout-sketch style) for whole set fed to reference model",
+   "confirmed_by": "LOOK -> confirm only (sheet)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R8.9",
+   "rule": "Owner photo only on the item it shows",
+   "how": [
+    "OWNER",
+    "ASK"
+   ],
+   "built_by": "Question per photo (G2); G5 maps photo to item id in catalog.js",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R8.7",
+   "rule": "Every paid generation had a brief first, crop-based, compared beside the photo",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G6 brief generator prerequisite of G7 (film-gate hook exists); side-by-side sheet auto-made",
+   "confirmed_by": "film-gate hook -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R8.2",
+   "rule": "Set from owner photos first, else whole set in one pass; no mixed cut-outs",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G5 sourcing order encoded; mixed sources refused",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3p.7",
+   "rule": "Similar items shown the same way",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K11 kit.items one template for all items; hover behaviour set once on the list",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3p.8",
+   "rule": "Optional: touch on every button of that job",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "site.css .btn touch defined once (fingerprint choice) and applies to all .btn",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.12",
+   "rule": "One look per product everywhere, cut from one master",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G5 master-per-item folder; every appearance cropped from master by script; G10 appearance sheet",
+   "confirmed_by": "LOOK (stays: two that could pass for different)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3h.10",
+   "rule": "Choosing an option changes picture, words, button; one photo per option",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "K10 kit.choice binds picture+words+button; images preloaded and decoded before swap",
+   "confirmed_by": "check-motion -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3g.14",
+   "rule": "One colour grade across all images and clips",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G5 applies one grade LUT to every asset",
+   "confirmed_by": "LOOK -> confirm only (sheet)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3o.1",
+   "rule": "Generated food in motion only in the opening film; elsewhere real photo",
+   "how": [
+    "ASK",
+    "GEN"
+   ],
+   "built_by": "G5 asset routing: food stills outside the film are owner photos only; generation limited to film folder",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3o.2",
+   "rule": "Generated liquid opaque, satin, specks, not glass or neon",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G6 prompt preamble (real-looking-sauce-prompts) + negative list",
+   "confirmed_by": "LOOK (stays: frames)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3o.3",
+   "rule": "Product colours look true, no cast",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G6 negative prompt (no orange glow, no colour cast); G7 samples product colour vs photo and flags drift",
+   "confirmed_by": "LOOK -> confirm only (numeric delta)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3o.6",
+   "rule": "One photo per kind from all owner photos, duplicates skipped",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G5 numbered sheet, perceptual-hash dedupe, kind labels",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R8.3",
+   "rule": "Generated media only of real items; no text baked in; no non-kosher; owner approved",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G6 negative prompt (no text, no labels, no logos); G7 OCR check on every still for text",
+   "confirmed_by": "LOOK (stays: owner approval)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R8.4",
+   "rule": "Moving real material is a generated clip, not SVG/CSS; reduced motion shows still",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G6 routes any such motion to a clip brief; K3 still poster",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3c.13",
+   "rule": "Nothing cut off at any size",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "site.css overflow-safe sections (min-height/auto), data-clip-ok only in kit.pin",
+   "confirmed_by": "clipped -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3c.14",
+   "rule": "Cut-out is one subject, no fringe",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G5 cutout.py --check as a pipeline step",
+   "confirmed_by": "cutout.py -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R5b.3",
+   "rule": "Text over imagery: soft edge shade, contrast, <=40% of opening on a phone",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "starter .over: tight shade, phone width of its words",
+   "confirmed_by": "readable + check-photo-clear -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3e.8",
+   "rule": "Words >=12px (14px sentences on phone), 4.5:1 contrast",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "starter site.css: --t-1 is 14 px",
+   "confirmed_by": "readable -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3s.24",
+   "rule": "Media light and sized: <=600 KB, width/height, poster, nothing hidden",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "sitekit.guard: every picture sized",
+   "confirmed_by": "site MEDIA -> confirm only",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
+   "id": "R3p.6",
+   "rule": "Fits one screen at six sizes; photo <1.35x; extended not cropped",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "starter site.css: section padding by screen height",
+   "confirmed_by": "check-fits -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3o.5",
+   "rule": "Special characters render in the font used for them",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.price wraps symbol in body face; site.css subsets Latin+Hebrew families",
+   "confirmed_by": "site GLYPH -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3x.7",
+   "rule": "BRAND.md written before any picture; the site uses it",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G4 writes BRAND.md first and generates the :root block from it",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3z.4",
+   "rule": "No dark layer over a whole photo; shade only behind words where measured",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K12 shade only in the text slot; no full-photo overlay class exists",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3z.7",
+   "rule": "Card pictures without owner photos made as one set from a saved site grid",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G5/G6 set generation takes a screenshot reference path",
+   "confirmed_by": "LOOK -> confirm only; n/a often",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3c.5",
+   "rule": "Choices are tiles, never a dropdown; Most popular only if owner says",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K10 kit.choice renders radio tiles; no select helper; badge only from owner flag",
+   "confirmed_by": "LOOK -> confirm only (grep select)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3c.6",
+   "rule": "Button says what happens next with a real number; never Submit/Buy now",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "kit.card: Add says what it adds",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
+   "id": "R3c.7",
+   "rule": "Offers contained: real end date for timed, standing discounts need none",
+   "how": [
+    "OWNER",
+    "KIT"
+   ],
+   "built_by": "Question: any offers and end dates (G2); kit.offer(end=) refuses a timed offer with no date",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3j.1",
+   "rule": "Guarantee beside button in owner's words with limit",
+   "how": [
+    "OWNER",
+    "KIT"
+   ],
+   "built_by": "Question (G2); kit.guarantee() slot next to button; absent if not given",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3j.2",
+   "rule": "One relevant add-on with Add and No thanks, not pre-ticked",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "kit.shop_page addon=: one add-on with No thanks",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
+   "id": "R3j.3",
+   "rule": "Free taster/consultation the owner offers is headline offer beside button",
+   "how": [
+    "OWNER",
+    "KIT"
+   ],
+   "built_by": "Question; K2 button-adjacent offer slot",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3j.4",
+   "rule": "Group discounts only when owner offers, said once near price",
+   "how": [
+    "OWNER",
+    "KIT"
+   ],
+   "built_by": "Question; kit.offer(kind=standing)",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3j.5",
+   "rule": "Come-back features only if real",
+   "how": [
+    "OWNER",
+    "KIT"
+   ],
+   "built_by": "Question; kit.stampcard()/Reorder only when switched on",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3j.6",
+   "rule": "Natural pick among three sizes shown; no invented option",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: which size is the natural pick; kit.sizes marks it only on owner say",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3j.7",
+   "rule": "No fake was price; no .90/.99 changes",
+   "how": [
+    "GEN",
+    "KIT"
+   ],
+   "built_by": "G8 prices.json has was only when typed from a real old price; kit.deal refuses a was with no source",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3j.8",
+   "rule": "Saving only true like for like, per-unit table, vs cheapest",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G8 builds per-unit table from prices.json and flags any bigger option not cheaper per unit than every smaller one",
+   "confirmed_by": "LOOK -> confirm only (G8 table)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3j.9",
+   "rule": "Lone saving not shown; each small group shows its own",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G8 groups items by family and only emits savings inside groups",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3j.10",
+   "rule": "Saving as percentage badge, rounded down, real separate price struck through",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.price_row: percent off with the real old price",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
+   "id": "R3j.11",
+   "rule": "Combined service and basket package prompts when real",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K4 basket rule engine from G8 groups (Switch to package line)",
+   "confirmed_by": "LOOK -> confirm only (build a basket)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3j.12",
+   "rule": "Owner's savings claim contradicted by prices not printed",
+   "how": [
+    "GEN",
+    "OWNER"
+   ],
+   "built_by": "G8 compares owner claim to table, adds a question to G2",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3j.13",
+   "rule": "Every saving vs the smallest size bought as many times",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G8 computes against smallest size only",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3j.14",
+   "rule": "Every price from the listing: prices.json, MIR_PRICES",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "G8 writes prices.json; K4/K9 read window.MIR_PRICES; no price literals in generated html (lint)",
+   "confirmed_by": "LOOK -> confirm only (change a price test)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.14",
+   "rule": "Loud prices only when prices exist; none on premium/quote business",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: priced or quote; kit.price(None) switches style",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3z.3",
+   "rule": "Taste of at most three questions ends on a real answer and price",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: needed?; kit.taste() component; n/a with one product",
+   "confirmed_by": "LOOK (stays; n/a often)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3k.7",
+   "rule": "Order in three steps with bar, totals beside, Back, browser back, per-step checks",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.shop_page + shop.js: three steps beside the order",
+   "confirmed_by": "check-site FLOW -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3k.8",
+   "rule": "Every basket line has a 40px remove button",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "shop.js: remove button on every line",
+   "confirmed_by": "check-site TAP -> confirm only",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
+   "id": "R3k.6",
+   "rule": "Basket lives between pages; Add opens order page",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "site.js siteBasket plus kit data-add handler moved into starter (Gremier gc.js did by hand)",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3k.9",
+   "rule": "Order POSTed to MyIsraelRental before WhatsApp; products are listing products",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "shop.js: saved before WhatsApp",
+   "confirmed_by": "check-site SAVE -> confirm only",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
+   "id": "R3k.10",
+   "rule": "Order form arrives filled in: first possible day, qty 1, common choice",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: lead time/closures (from record); K4 prefill from spec",
+   "confirmed_by": "check-prefill -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3.15",
+   "rule": "Brief's action has a place to do it",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: the one action; K7 template includes that block (shop, book, contact, hours)",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R7.1",
+   "rule": "Hand build picks one direction and says why in CONCEPT.md",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G9 CONCEPT.md template has Pick and Reason fields",
+   "confirmed_by": "check-concept -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R8.5",
+   "rule": "Main button goes to quickest route to a finished order",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: order route; Site.cta is set to it",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R0b.13",
+   "rule": "Order saves with tracking link before WhatsApp; reaches owner complete",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K4 does POST then tracking link in the message",
+   "confirmed_by": "LOOK -> confirm only (test order)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3l.1",
+   "rule": "Owner asked what a customer can choose and how many per item family",
+   "how": [
+    "OWNER"
+   ],
+   "built_by": "G2 asks per similar-item family",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3l.2",
+   "rule": "Each item says what it allows, same words on tile, order line, message",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K11 one allows string from catalog used by card, basket, message",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3l.3",
+   "rule": "Choices belong to item; limits grey out; cannot send without required choice",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K4/K10 options UI from catalog.allows",
+   "confirmed_by": "LOOK -> confirm only (order each package)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3l.4",
+   "rule": "Three or more alike items compared at a glance",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.compare(items) table of differing fields",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3l.6",
+   "rule": "Picture is of item as sold now",
+   "how": [
+    "OWNER",
+    "GEN"
+   ],
+   "built_by": "G5 maps photo to item; unknown look gets no picture",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3l.7",
+   "rule": "Each item readable alone",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G3 lint: item description must name contents and choices",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3e.9",
+   "rule": "Buttons rest/hover/pressed/disabled; fields focus/error; confirmations",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "starter site.css: hover and press on every control",
+   "confirmed_by": "check-site STATE/FLOW -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3e.19",
+   "rule": "Every flow has a visible end screen",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K4 done screen; lists end",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.16",
+   "rule": "Fewer choices first: plain question before long list",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "K4 step 1 asks one question; Question: the question",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.18",
+   "rule": "Not available shows nearest alternative; choice lists have a way out",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K10 always appends None/Other; out-of-stock shows next item",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.25",
+   "rule": "Form sends nothing when empty; filled sends WhatsApp with total",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K4",
+   "confirmed_by": "check-site FLOW -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3x.9",
+   "rule": "Request-type form builds a plain summary beside it",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: shop or request; kit.request_form() with live summary",
+   "confirmed_by": "LOOK -> confirm only; n/a for shops",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3x.10",
+   "rule": "Total stays in view beside form on laptop; total above send on phone",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K4 sticky summary (site.css .sum already) plus phone total line",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3x.14",
+   "rule": "Gift card section on order page",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "SITE.gift_section()+gift.js (exists); Site.order_page() includes it",
+   "confirmed_by": "check-web-basics GIFT -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3f.1",
+   "rule": "Scroll effect plays while subject wholly on screen",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K3/kit.hold() stage geometry uses min(100svh, content) and starts when all in view",
+   "confirmed_by": "LOOK (stays: frames at 5 stops)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3f.8",
+   "rule": "Scroll-tied effect finishes mid-screen",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.scroll_tied() sets finish point 40%",
+   "confirmed_by": "scroll-finish -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3f.9",
+   "rule": "Stacked list on a phone runs item by item at 80% down",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.css list-in rule",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3f.5",
+   "rule": "Widths in em/rem never ch; shimmer is overlay",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "site.css lint rejects ch and background-clip",
+   "confirmed_by": "LOOK -> confirm only (grep)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3f.4",
+   "rule": "Logo motif never on the logo that has it",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "Question: logo motif; G9 excludes it",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3g.4",
+   "rule": "Every motion has one job; loops start/end same frame; list rows 100 ms; menu hover <300 ms",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "site.css motion tokens (--dur-fast 160, --dur 300, stagger 100) and loops only from G7 seamless encode",
+   "confirmed_by": "LOOK (stays: judgement)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3e.16",
+   "rule": "No linear easing; transitions <0.5 s",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "tokens only --out; lint rejects linear and durations >500 ms",
+   "confirmed_by": "LOOK -> confirm only (grep)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3e.17",
+   "rule": "Carousel shows sliver, buttons; sheet closes by swipe and button",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.carousel() and kit.sheet() (Gremier shop sheet uses dialog)",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3e.18",
+   "rule": "Ambient background video locked, ~6 s seamless loop, poster",
+   "how": [
+    "GEN",
+    "KIT"
+   ],
+   "built_by": "G7 loop encode; kit.ambient() with poster and reduced-motion still",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3a.2",
+   "rule": "Nothing moves without a reason; no text re-wrap while container animates",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "kit components animate transform/opacity only; text widths fixed",
+   "confirmed_by": "LOOK (stays: mid-transition frames)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3a.3",
+   "rule": "Overlays placed by measurement inside the media's element",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K14 kit.pin() places by data-x/data-y percent inside the media element",
+   "confirmed_by": "overlay-truth -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3a.4",
+   "rule": "Held section designed to fit 1280x650; order section never held",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.hold() stage height = min(100svh, content) and refuses to wrap #order",
+   "confirmed_by": "cutoff -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3a.5",
+   "rule": "Pinning yes, taking scroll speed no; no parallax on phones; reduced motion still",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "slides.js: reduced motion shows the last slide",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
+   "id": "R3s.2",
+   "rule": "Nothing jumps: late photos fade into reserved space; choosing never moves layout",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K6 every photo in aspect-ratio slot with width/height; K10 preloads and decodes next option before swap (Gremier home.js did by hand)",
+   "confirmed_by": "site SHIFT + motion -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.1",
+   "rule": "Everything pressable answers within 100 ms with hover and pressed state",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "starter site.css: hover and press on every control",
+   "confirmed_by": "site STATE -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3s.8",
+   "rule": "Buttons over a photo sit in a soft container",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K12 .over .btn has container token",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.10",
+   "rule": "Picture appears the moment a thing is named",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K11 card and K10 tile always carry photo; preloaded",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.27",
+   "rule": "Same thing same place across states",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K10/K4 states share one grid with fixed top; heading never inside changing block",
+   "confirmed_by": "LOOK (stays: step through)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.29",
+   "rule": "No button wraps; repeated buttons same height",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "site.css .btn white-space: nowrap plus min-height; text beside gives way via flex-shrink",
+   "confirmed_by": "check-same-button -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.30",
+   "rule": "Cards side by side: words and buttons one colour or a mirrored pattern",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "order the card grounds dark, light, dark (or all one tone) so text and buttons read white, ink, white",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.28",
+   "rule": "No blank screen anywhere in scroll",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "K7 section min content check; G10 scroll-stop contact sheet lists empty stops",
+   "confirmed_by": "check-blank -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3i.3",
+   "rule": "Live readout shows only a true fact",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.readout() takes record fields only",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.21",
+   "rule": "No script/console errors, 404s, dead links",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G1 asset manifest: build.py fails if an href/src does not exist on disk",
+   "confirmed_by": "site BROKEN -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3x.6",
+   "rule": "At most one word-by-word sentence; site before had none",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.words() registers use; G9 checks previous fingerprint",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3x.12",
+   "rule": "Progress line only on pages of six screens or more",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.progress() self-hides under six screens",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3b.6",
+   "rule": "On a phone action pinned to bottom with price/proof; waits until after first screen",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "Site bar + site.js frame() (exists); film-aware version (Gremier gc.js in-film) moves into starter",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3f.7",
+   "rule": "Bottom bar fits at 360 px: label shrinks, button never",
+   "how": [
+    "KIT"
+   ],
+   "built_by": ".bar .p flex-shrink; .bar .btn flex:none nowrap",
+   "confirmed_by": "LOOK -> confirm only (360x640)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3a.6",
+   "rule": "Fixed bar never covers content; room kept at end",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "body --pad-bar (exists)",
+   "confirmed_by": "site PHONE -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.22",
+   "rule": "Tap targets >=40 px, no two overlap",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "site.css min-height 44 on .btn-line/.chip/.menu-btn and gap tokens; kit.items buttons 44",
+   "confirmed_by": "site TAP -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.23",
+   "rule": "No sideways scroll on phone",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "html overflow-x clip; images max-width; kit grids minmax(0,1fr)",
+   "confirmed_by": "site PHONE -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.26",
+   "rule": "No words on words anywhere, pinned scenes included",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K12/K3 slots are grid cells, never overlapping absolutes; chapter slot and headline slot never share a cell",
+   "confirmed_by": "check-overlap -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3t.1",
+   "rule": "Site declares category and follows its row of 3t",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Question: category; Site.category writes meta site-category and picks K7 template and tokens",
+   "confirmed_by": "check-site CATEGORY + LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3t.2",
+   "rule": "Shops: price and Add in first two screens; cards complete",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.card: photo, name, size, price, Add",
+   "confirmed_by": "check-site BUY -> confirm only",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
+   "id": "R3t.3",
+   "rule": "Trainer: a third of sections are picture",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K7 trainer template ratio",
+   "confirmed_by": "check-site WORLDS -> confirm only; n/a for most",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3t.4",
+   "rule": "Real footer on every page, identical",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "Site.full_footer (exists)",
+   "confirmed_by": "check-footer -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3a.7",
+   "rule": "Every state checked on the device that shows it",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G10 uses touch emulation runner for phone sheets",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3a.8",
+   "rule": "A dotted line of items never wraps",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.facts: every item its own dot",
+   "confirmed_by": "LOOK -> confirm only (360x640)",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3u.2",
+   "rule": "Closed day or over-limit quantity gets one plain line and a button",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "K4 closed-day/limit line from spec closures and limits; Question: closed days and max qty",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3u.3",
+   "rule": "Price per portion beside each size when owner gave servings",
+   "how": [
+    "OWNER",
+    "KIT"
+   ],
+   "built_by": "Question: servings (G2); kit.sizes computes floor(price/servings)",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3u.5",
+   "rule": "Home with no scroll film: first screen arrives in order, 1.5 s, once",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "K2 data-arrive pieces from kit.css/kit.js built into opening; all visible without JS",
+   "confirmed_by": "check-arrival -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3u.6",
+   "rule": "Depth on laptops: pieces move at own speeds with mouse only",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "kit [data-depth] gated to hover:hover; Question: pieces",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3u.7",
+   "rule": "At most one rotating word from real occasions",
+   "how": [
+    "KIT",
+    "OWNER"
+   ],
+   "built_by": "kit.rot(words) full list for screen readers; words from record",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3u.8",
+   "rule": "Tilted label is this site's own shape in fingerprints.json",
+   "how": [
+    "ASK",
+    "GEN"
+   ],
+   "built_by": "G9 picks unused label shape",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3u.9",
+   "rule": "Questions are rounded cards on details with + to x",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.faq details.faq-q (exists)",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3u.10",
+   "rule": "Two or more places: list beside a map with numbered pins",
+   "how": [
+    "KIT",
+    "OWNER"
+   ],
+   "built_by": "kit.map(places) in site colours; Question: places",
+   "confirmed_by": "LOOK -> confirm only; n/a mostly",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3u.11",
+   "rule": "Page passed checks with a still where film goes before film went in",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "check-build runs on still-poster build first; G7 swaps film in after",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3u.12",
+   "rule": "Moving pieces not in the kit tried on a test page first",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit/test.html; new pieces added to kit only after test",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3u.13",
+   "rule": "report.md ends with Not done yet and For your call",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G11 gen-report.mjs writes both headings from open blueprint lines",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3u.14",
+   "rule": "copy-pass.md holds shorter version of long lines",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G3 flags lines >20 words / paragraphs >3 lines and asks one LLM pass for short versions; build uses shorter",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3w.1",
+   "rule": "Generated food shot has a real cause, one event 2-4 s, nothing floats in",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G6 shot template (cause, event, end stays); G7 check-clip VANISH/APPEAR",
+   "confirmed_by": "LOOK (stays: 4 fps sheet)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3w.2",
+   "rule": "Generated liquids and steam look real",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G6 prompt preamble opaque/satin/thin wisps from behind + negative list",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3w.3",
+   "rule": "Generated food lit from side and behind; pour stays sharp",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G6 lighting preamble; G7 sharpness on paused fastest frame",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3w.4",
+   "rule": "Start and end pictures right first; one clip at full quality; simple motion in code",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G6 clip plan fields (stills, edges, credits, in code, trim); G7 get_cost before each call and logs tries",
+   "confirmed_by": "LOOK -> confirm only (G7 log)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3w.5",
+   "rule": "No bite/chew/tear in motion unless approved",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "G6 banned-action list in prompts",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3w.6",
+   "rule": "Scroll film scrub ends where clip motion ends; last hold short",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "K3 data-end from check-clip figure written by G7 into the markup",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3w.7",
+   "rule": "Generated places and materials look photographed",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "G6 Looks-real section requires a named real photograph; G10 full-size crop beside it",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3v.1",
+   "rule": "Full footer same on every page",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "Site.full_footer (exists)",
+   "confirmed_by": "check-footer -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3v.2",
+   "rule": "Menu bar lists the site's pages, same on every page",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "Site.header (exists)",
+   "confirmed_by": "check-menu -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3v.6",
+   "rule": "Sections of different heights; never three in a row the same",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "K7 kit.section(size s/m/l) and G9 layout plan assigns sizes before build; Site.write asserts none three same",
+   "confirmed_by": "check-heights -> confirm only",
+   "gremier_retry": true,
+   "status": "planned"
+  },
+  {
+   "id": "R3v.7",
+   "rule": "Layouts chosen by what business has; never same twice in a row",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "K7 layout from kit.css (bento, zigzag, callouts...) assigned by G9 with no repeat",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3v.8",
+   "rule": "3v effects chosen for this business, each with phone and reduced-motion version",
+   "how": [
+    "KIT",
+    "GEN"
+   ],
+   "built_by": "kit.css pieces already carry phone/reduced versions; G9 compares with previous site's set",
+   "confirmed_by": "LOOK -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3v.14",
+   "rule": "Three true facts under main button on home page (btn-facts)",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "kit.facts: one to three facts",
+   "confirmed_by": "check-facts -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3x.8",
+   "rule": "Web basics on every page: skip link, one h1, focus, labels, lazy, title 60, desc 155, og, JSON-LD",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "sitekit.guard: title 60, description 155, one h1, far pictures lazy",
+   "confirmed_by": "check-web-basics -> confirm only",
+   "gremier_retry": true,
+   "status": "built"
+  },
+  {
+   "id": "R3x.13",
+   "rule": "One type scale and one spacing scale",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "site.css tokens exist; lint rejects off-scale values in page CSS (Gremier relied on a human)",
+   "confirmed_by": "check-web-basics SCALE -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3r.3",
+   "rule": "check-rules passes after last edit; fix checked on its screen",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "blueprint --rules writes RULES.md; check-build runs once",
+   "confirmed_by": "check-rules (final)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3r.4",
+   "rule": "A rule Tzvi pointed out twice has a script or line the same day",
+   "how": [
+    "EYE"
+   ],
+   "built_by": "Process rule; lives in checklist upkeep (check-rule-homes)",
+   "confirmed_by": "LOOK (stays)",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ab.1",
+   "rule": "Every h1 to h3 says what the visitor gets, never only a section label",
+   "how": [
+    "ASK",
+    "EYE"
+   ],
+   "built_by": "Blueprint section plan names each heading as a benefit; check-headings.mjs refuses a bare label",
+   "confirmed_by": "check-headings -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ab.2",
+   "rule": "Reviews stacked and open on a phone, never a swiping row, ribbon or fold-out",
+   "how": [
+    "EYE"
+   ],
+   "built_by": "No starter part yet; the builder lays reviews out stacked",
+   "confirmed_by": "check-reviews-open -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ab.3",
+   "rule": "Each review shows a first name and where it was left, with a link",
+   "how": [
+    "OWNER",
+    "EYE"
+   ],
+   "built_by": "Owner message asks for each review's name, source and link",
+   "confirmed_by": "LOOK",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ab.4",
+   "rule": "A real rating shows score, count and source on the first screen",
+   "how": [
+    "ASK",
+    "EYE"
+   ],
+   "built_by": "Blueprint asks whether a real rating exists and its source",
+   "confirmed_by": "LOOK",
+   "gremier_retry": false,
+   "status": "planned"
+  }
+ ]
+}

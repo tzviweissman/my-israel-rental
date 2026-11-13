@@ -41,7 +41,7 @@ if (staged.includes('docs/page-generation-rules.md')) {
   if (c.status !== 0) { console.error(`Commit refused: ${c.stdout}`); process.exit(1); }
 }
 // every rule has its home: a section of the short file a build reads, and a numbered section for each ad step (10 Nov 2026)
-if (staged.some((f) => /^(docs\/(page-generation-rules|rules-checklist|static-ad-rules|ad-rules-checklist)\.md|\.claude\/skills\/build-business-page\/(SKILL|reference\/rules-digest)\.md|scripts\/check-rule-homes\.mjs)$/.test(f))) {
+if (staged.some((f) => /^(docs\/(page-generation-rules|rules-checklist|static-ad-rules|ad-rules-checklist)\.md|\.claude\/skills\/build-business-page\/(SKILL|reference\/rules-digest)\.md|scripts\/check-rule-homes\.mjs|docs\/rules-as-blueprint\/(ad-)?rules\.json)$/.test(f))) {
   const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-rule-homes.mjs')], { cwd: ROOT, encoding: 'utf8' });
   if (c.status !== 0) { console.error(`Commit refused: ${c.stdout}`); process.exit(1); }
 }

@@ -1140,6 +1140,37 @@ films at their own brightness, a shade only behind words where contrast needs it
 section, joined by a clean edge (3z.5). The h1 or the line under it uses the words a customer searches for (3z.6).
 Card pictures without owner photos are made as one set from a real site's grid (3z.7).
 
+## 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+
+Full text: reference/full-rules.md section 3aa; frames in docs/inspo/videos-2026-11-12. A scroll opening moves the
+whole screen as the product's journey, never a small change on a still (3aa.1). One continuous story, no cuts or
+fades, joined one named way (`- join:` in CONCEPT.md: slides, camera through a medium, layered world, a guide that
+stays, a morph, or a growing layout); clips chained last frame to first (3aa.2). One ground and one light (3aa.3), the
+same objects throughout (3aa.4), one or two huge words per step in the clear space (3aa.5), one large subject, each
+step held about a screen, three to five steps (3aa.6). Pinterest searched on every build, beside our library (3aa.7).
+Each step the right distance: the object whole and large on a plain ground, a `frame` line per step (3aa.8). The step's word huge and interlocked with the object, drawn into the still (3aa.9). One step shows the product taken apart (3aa.10). The last step floods into the next section, which is the shop with the items round the product (3aa.11). One palette, props from their world, a little life in every scene (3aa.12). Every picture for approval as a laptop frame beside a phone frame (3aa.13); a phone never gets a cut-down film (3aa.14). Model: docs/inspo/pinterest-coffee-2026-11-11 (POUR / PLAY). An option among the opening ideas, never a rule: the product's own journey, the visitor riding with it as if they were it (Gremier's grounds into waves, whirlpool, out of the tap, pull back to the bar). Or the viewer in the world: the visitor is a customer inside the real place, one eye-height camera (walk in, sit, be handed the cup), the world answers the pointer a little, the order button appears as the thing is handed over; their people only with the owner's yes. The small touches: keep the reveal for the end (3aa.15); words make way for the picture (3aa.16); a join on the same picture carries on in place (3aa.17); Added shows in the basket button and phone bar (3aa.18); every number from its live source (3aa.19). Every word names what happens in its own scene, never a later step's (GRIND by the beans, COLD at the cold water), a `word` line per chain.json step (3aa.20). Look at each start picture edge by edge before sending it, nothing the film is about cut off, a `start_seen` line per step (3aa.21). The start still is the moment before the action (the grinder whole before it opens), and start_seen says so (3aa.22). No floor the model slipped in under anything still falling: clipchain refuses a start picture with a straight line across the width unless `floor_ok` says why; still prompts end "an endless plain ground, no table, floor, shelf or horizon". A planned floor is welcome: one scene's floor becoming the next one's ceiling, its own step with a `floor_ok` line (3aa.23). chain.json's `phone_plan` is decided before any clip (3aa.24). Plain links in ink, underlined; jump targets clear of the menu bar, in starter site.css (3aa.25). Ask Tzvi how phones get the film (tall clips at their cost, or whole width free) before any paid still or clip, his words quoted in the brief's "Phones asked:" line and in phone_plan; the film gate and clipchain refuse without it (3aa.26).
+Built by kit.opening_slides, slides.js and clipchain.py.
+
+## 3bb. Small touches (Tzvi, 12 Nov 2026)
+
+Full text: reference/full-rules.md section 3bb; the 29 touches with their pictures in
+docs/inspo/subtle-touches-2026-11-12.md. Each new site picks at least three that fit its category and story, names them
+on a `- touches:` line in CONCEPT.md, never the same three as the site before; only true facts in them; never added to a
+site already live. Among them: the ground colour travelling with the product, a thin progress line with a live number,
+a line that draws itself, one section flipping light to dark, the footer headline filling in, a highlight behind a price
+on hover, one signature button shape, cookie words in the brand's voice, a chapter counter in the corner, a small tag on
+the product picture, a small join card in the corner, who models the size. From Pinterest (docs/inspo/pinterest-touches-2026-11-12): the product as a letter of the word, the product handled
+not placed (a lid lifts, a grinder opens), its world around it, something alive (a pulsing jellyfish, an opening
+flower), each choice bringing its own colour and pieces, moving in to the detail the words name, ending on how it arrives.
+
+## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+
+Full text: reference/full-rules.md section 3ab; notes in docs/inspo/videos-2026-11-12-landing-pages. Every h1 to h3
+says what the visitor gets, never only a section label like "How it works" or "Our services" (3ab.1,
+check-headings.mjs). Reviews stacked and open on a phone, never a swiping row, ribbon or fold-out (3ab.2,
+check-reviews-open.mjs). Each review shows the first name and where it was left, with a link (3ab.3). A real rating
+shows score, count and source on the first screen (3ab.4, how 3c.2 is done for a rating).
+
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 
 Full text: `reference/design-rules.md`. The rules both builders share are

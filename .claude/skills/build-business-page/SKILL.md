@@ -49,7 +49,10 @@ always with `?as=owner`, never a sign-in.
    List every live-site write the build needs in the same message. Start
    building the moment it goes out; no placeholders on the page (§0b.2a).
 4. **Blueprint.** `node scripts/blueprint.mjs <build>` writes BLUEPRINT.md;
-   plan each stage (`--check <build> <stage>`) before building it (§0b).
+   answer "This site has" (`--has film=yes|no <build>`: a "no" takes the 17
+   video-only rules out, unread, and the files are checked for video later);
+   then plan each stage (`--check <build> <stage>`) before building it (§0b).
+   Every rule left in the stages is read and planned; none is skipped.
 5. **Sources, then ideas.** `REFERENCES.md` and `node scripts/check-references.mjs <build>`;
    then `IDEAS.md` (two saved pictures per idea, a kind no other site used) and
    `node scripts/check-ideas.mjs <build>`. Both pass before any idea is shown

@@ -17,6 +17,11 @@
  *                                                      its plan, n/a = n/a), so check-rules needs no second pass
  *   node scripts/blueprint.mjs --update <build>        adds rules added to the checklist since, keeping plans
  *   node scripts/blueprint.mjs --order                 every checklist section has a stage (run by the commit check)
+ *   node scripts/blueprint.mjs --has film=no <build>   answers "This site has": the rules tagged when:film leave the
+ *                                                      stages and are listed once as "n/a: not on this site (film: no)",
+ *                                                      so they are not read (Tzvi, 10 Nov 2026); film=yes brings them
+ *                                                      back. --done, --rules and check-rules fail if the site's files
+ *                                                      show the thing anyway (scripts/site-has.mjs)
  *
  * A line looks like:
  *   - [ ] R3v.14 Three true facts ... (check: check-facts)
@@ -26,7 +31,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { newerRules } from './rule-dates.mjs';
+import { WHEN, contradicted } from './site-has.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const CHECKLIST = path.join(ROOT, 'docs', 'rules-checklist.md');
@@ -36,8 +41,8 @@ const ORDER = ['1', '4', '2', '3', '8c', '5', '6', '7', '8', '8b', '9'];
 const STAGE_NAMES = { '1': 'Facts and words', '4': 'Photos and media', '2': 'Opening', '3': 'Sections', '8c': 'Site structure (menu, footer, facts, layouts)', '5': 'Prices and savings', '6': 'Order and booking flow', '7': 'Motion', '8': 'Phone', '8b': 'Order details and report', '9': 'Finish' };
 
 const args = process.argv.slice(2);
-const mode = (['--check', '--done', '--rules', '--update'].find((m) => args.includes(m)) || '--write').slice(2);
-const rest = args.filter((a) => !a.startsWith('--'));
+const mode = (['--check', '--done', '--rules', '--update', '--has'].find((m) => args.includes(m)) || '--write').slice(2);
+const rest = args.filter((a) => !a.startsWith('--') && !/^[a-z]+=/.test(a));
 // --order: only check that every checklist section has a place in the build order (the commit check runs it
 // whenever the checklist changes; 4 Nov 2026 a new section "8d" left every build without a blueprint)
 const target = args.includes('--order') ? ROOT : rest[0];
@@ -54,11 +59,15 @@ for (const line of fs.readFileSync(CHECKLIST, 'utf8').split(/\r?\n/)) {
   if (/^##\s/.test(line)) { sec = ''; continue; }
   const m = ID.exec(line); if (!m || !sec) continue;
   const parts = m[2].split('|').map((s) => s.trim());
-  items.push({ id: m[1], rule: parts[0], how: parts.slice(2).join(' | '), sec });
+  const how = parts.slice(2).join(' | ');
+  items.push({ id: m[1], rule: parts[0], how, sec, when: (/\bwhen:([a-z]+)/.exec(how) || [])[1] });
 }
 const stages = ORDER.filter((s) => items.some((i) => i.sec === s)).map((s, k) => ({ n: k + 1, sec: s, name: STAGE_NAMES[s] || s, items: items.filter((i) => i.sec === s) }));
 const missingSec = [...new Set(items.map((i) => i.sec))].filter((s) => !ORDER.includes(s));
 if (missingSec.length) { console.error(`checklist sections not placed in the build order: ${missingSec.join(', ')} (add them to ORDER in scripts/blueprint.mjs)`); process.exit(2); }
+// a when: tag must be a thing site-has.mjs can prove, or a rule would be dropped with nothing checking it
+const badWhen = items.filter((i) => i.when && !(i.when in WHEN)).map((i) => `${i.id} when:${i.when}`);
+if (badWhen.length) { console.error(`when: tags site-has.mjs cannot check: ${badWhen.join(', ')} (known: ${Object.keys(WHEN).join(', ')})`); process.exit(2); }
 if (args.includes('--order')) { console.log(`blueprint: all ${items.length} checklist rules have a build stage`); process.exit(0); }
 
 // what the business record already decides (src/record.json from fetch_business.py)
@@ -93,30 +102,83 @@ function prefill() {
   return out;
 }
 
+// rules the starter already builds (docs/rules-as-blueprint/rules.json, status "built"): when this build uses every part
+// named in built_by, the rule is ticked with that part as its plan, so it is built once and never checked-and-retried.
+function builtByStarter() {
+  const out = new Map();
+  let reg = [];
+  try { reg = JSON.parse(fs.readFileSync(path.join(ROOT, 'docs', 'rules-as-blueprint', 'rules.json'), 'utf8')).rules || []; } catch { return out; }
+  const read = (f) => { try { return fs.readFileSync(path.join(dir, f), 'utf8'); } catch { return ''; } };
+  let src = '';
+  try { for (const f of fs.readdirSync(path.join(dir, 'gen'))) if (f.endsWith('.py')) src += read(path.join('gen', f)); } catch { /* no gen folder */ }
+  const usesKit = /\bsitekit\b/.test(src);
+  const has = (part) => {
+    part = part.trim();
+    if (/^sitekit\.guard|^starter\b/.test(part)) return usesKit;
+    const k = /^kit\.(\w+)/.exec(part);
+    if (k) return usesKit && [k[1], ...({ card: ["shop_page"], price_row: ["shop_page", "card"], facts: ["opening_slides"] }[k[1]] || [])].some((f) => src.includes(f + "("));   // parts that call each other
+    if (part === 'clipchain.py') return fs.existsSync(path.join(dir, 'gen', 'chain.json'));
+    if (/^\w+\.js$/.test(part)) return fs.existsSync(path.join(dir, part));
+    return false;
+  };
+  for (const r of reg) {
+    if (r.status !== 'built' || !r.built_by) continue;
+    const parts = r.built_by.split(':')[0].split('+').map((x) => x.replace(/\s*\(.*$/, '').replace(/\s+\w+=$/, ''));
+    if (parts.every(has)) out.set(r.id, `built by the starter: ${r.built_by}; confirm: ${r.confirmed_by || 'look once'}`);
+  }
+  return out;
+}
+
+// "This site has": one answer per WHEN key ('' until answered); a "no" drops that thing's rules from the stages
+const NOT_HERE = (k) => `n/a: not on this site (${k}: no)`;
+const readHas = () => {
+  const has = Object.fromEntries(Object.keys(WHEN).map((k) => [k, '']));
+  if (!fs.existsSync(file)) return has;
+  for (const line of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
+    const m = /^- ([a-z]+): (yes|no)\b/.exec(line);
+    if (m && m[1] in has) has[m[1]] = m[2];
+  }
+  return has;
+};
+const dropped = (it, has) => !!(it.when && has[it.when] === 'no');
 const read = () => {
   const plans = new Map(); let cur = null;
   for (const line of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
-    const m = /^- \[( |x|X)\] (R[0-9][0-9a-z]*\.[0-9]+)\b/.exec(line);
+    const d = /^- \[-\] (R[0-9][0-9a-z]*\.[0-9]+) \(([a-z]+): no\)/.exec(line);
+    if (d) { plans.set(d[1], { done: false, plan: NOT_HERE(d[2]) }); cur = null; continue; }
+    const m =/^- \[( |x|X)\] (R[0-9][0-9a-z]*\.[0-9]+)\b/.exec(line);
     if (m) { cur = m[2]; plans.set(cur, { done: m[1] !== ' ', plan: '' }); continue; }
     const p = /^\s+plan:\s*(.*)$/.exec(line);
     if (p && cur) plans.get(cur).plan = p[1].trim();
   }
   return plans;
 };
-const write = (plans) => {
+const write = (plans, has = readHas()) => {
   const name = path.basename(dir);
   const out = [`# Blueprint: ${name}`, '',
     'Every rule of docs/rules-checklist.md, in the order the site is built. Before building a stage, write the plan for',
     'each of its lines (what this site will do for that rule, or `n/a: <why the site has no such thing>`), then',
     `\`node scripts/blueprint.mjs --check ${name} <stage>\`. Tick [x] as each is built. RULES.md is written from this`,
-    `file (\`--rules\`); the scripts named in a line confirm it at publish.`, ''];
+    `file (\`--rules\`); the scripts named in a line confirm it at publish.`, '',
+    '## This site has', '',
+    `Answer each before stage 1: \`node scripts/blueprint.mjs --has <thing>=yes|no ${name}\`. A "no" moves that thing's rules`,
+    'out of the stages (listed once at the end, not read); the files are checked for it at --done, --rules and check-rules.', ''];
+  for (const [k, w] of Object.entries(WHEN)) out.push(`- ${k}: ${has[k] || '(not answered)'}  ${w.ask}`);
+  out.push('');
   for (const s of stages) {
     out.push(`## Stage ${s.n}. ${s.name}`, '');
     for (const it of s.items) {
+      if (dropped(it, has)) continue;
       const p = plans.get(it.id) || { done: false, plan: '' };
       const check = /script:\s*([a-z-]+)/i.exec(it.how);
       out.push(`- [${p.done ? 'x' : ' '}] ${it.id} ${it.rule}${check ? ` (check: ${check[1]})` : ''}`, `  plan: ${p.plan}`);
     }
+    out.push('');
+  }
+  const gone = items.filter((it) => dropped(it, has));
+  if (gone.length) {
+    out.push('## Not on this site', '', `${gone.length} rules for things this site does not have, n/a without being read:`, '');
+    for (const it of gone) out.push(`- [-] ${it.id} (${it.when}: no)`);
     out.push('');
   }
   fs.writeFileSync(file, out.join('\n'));
@@ -129,11 +191,14 @@ const na = (p) => /^n\/a\b/i.test(p.plan || '');
 if (mode === 'write' || mode === 'update') {
   if (mode === 'write' && fs.existsSync(file) && !args.includes('--force')) { console.error(`${file} exists; use --update to add new rules, or --force to start again`); process.exit(2); }
   const plans = mode === 'update' && fs.existsSync(file) ? read() : new Map();
-  const pre = prefill();
-  for (const it of items) if (!plans.has(it.id)) plans.set(it.id, { done: false, plan: pre.get(it.id) || '' });
-  write(plans);
+  const pre = prefill(), built = builtByStarter();
+  for (const it of items) if (!plans.has(it.id)) plans.set(it.id, { done: built.has(it.id), plan: built.get(it.id) || pre.get(it.id) || '' });
+  for (const [id, plan] of built) { const p = plans.get(id); if (p && !p.done && !planned(p)) plans.set(id, { done: true, plan }); }
+  const has = readHas();
+  for (const it of items) if (dropped(it, has)) plans.set(it.id, { done: false, plan: NOT_HERE(it.when) });
+  write(plans, has);
   const filled = items.filter((i) => planned(plans.get(i.id))).length;
-  console.log(`wrote ${path.relative(ROOT, file)}: ${items.length} rules in ${stages.length} stages, ${filled} already planned from the record`);
+  console.log(`wrote ${path.relative(ROOT, file)}: ${items.length} rules in ${stages.length} stages, ${filled} already planned from the record, ${built.size} built by the starter and ticked`);
   process.exit(0);
 }
 
@@ -142,6 +207,31 @@ const plans = read();
 const missing = items.filter((i) => !plans.has(i.id)).map((i) => i.id);
 if (missing.length) { console.error(`BLUEPRINT.md lacks ${missing.length} newer rule(s): ${missing.slice(0, 10).join(' ')}; run --update`); process.exit(1); }
 
+if (mode === 'has') {
+  const has = readHas();
+  for (const a of args.filter((x) => /^[a-z]+=/.test(x))) {
+    const [k, v] = a.split('=');
+    if (!(k in WHEN) || !/^(yes|no)$/.test(v)) { console.error(`--has takes ${Object.keys(WHEN).map((x) => `${x}=yes|no`).join(', ')}`); process.exit(2); }
+    const hit = v === 'no' && WHEN[k].find(dir);
+    if (hit) { console.error(`${k}=no, but ${hit} has one: the answer is yes`); process.exit(1); }
+    has[k] = v;
+    for (const it of items.filter((i) => i.when === k)) {
+      if (v === 'no') plans.set(it.id, { done: false, plan: NOT_HERE(k) });
+      else if (plans.get(it.id)?.plan === NOT_HERE(k)) plans.set(it.id, { done: false, plan: '' });
+    }
+  }
+  write(plans, has);
+  const gone = items.filter((it) => dropped(it, has)).length;
+  console.log(`This site has: ${Object.entries(has).map(([k, v]) => `${k} ${v || '(not answered)'}`).join(', ')}; ${gone} rule(s) not on this site`);
+  process.exit(0);
+}
+{
+  // every answer given before a stage is planned, and none the files contradict before it is finished or written to RULES.md
+  const has = readHas(), open = Object.keys(has).filter((k) => !has[k]);
+  if (open.length && ['check', 'done', 'rules'].includes(mode)) { console.log(`answer "This site has" first: node scripts/blueprint.mjs --has ${open.map((k) => `${k}=yes|no`).join(' ')} ${path.basename(dir)}`); process.exit(1); }
+  const wrong = contradicted(dir, fs.readFileSync(file, 'utf8'));
+  if (wrong.length && ['done', 'rules'].includes(mode)) { for (const w of wrong) console.log(w); process.exit(1); }
+}
 if (mode === 'check') {
   const upto = Number(rest[1] || stages.length);
   const open = stages.filter((s) => s.n <= upto).flatMap((s) => s.items.filter((i) => !planned(plans.get(i.id))).map((i) => `stage ${s.n} ${i.id}: ${i.rule.slice(0, 80)}`));
@@ -156,12 +246,8 @@ if (mode === 'done') {
 if (mode === 'rules') {
   const lines = [`# Rules for ${path.basename(dir)}, written from BLUEPRINT.md (scripts/blueprint.mjs --rules)`, ''];
   let open = 0;
-  // a rule made after the site first went live and not built yet is left out, so check-rules spares it (rule-dates.mjs);
-  // writing it as todo would hold the site to it (Gifted Israel, 10 Nov 2026)
-  const newer = newerRules(ROOT, dir);
   for (const it of items) {
     const p = plans.get(it.id);
-    if (newer.has(it.id) && !na(p) && !(p.done && planned(p))) continue;
     if (na(p)) lines.push(`${it.id} ${p.plan.replace(/^n\/a\s*:?\s*/i, 'n/a: ')}`);
     else if (p.done && planned(p)) lines.push(`${it.id} pass: built to the blueprint: ${p.plan}`);
     else { lines.push(`${it.id} todo`); open++; }

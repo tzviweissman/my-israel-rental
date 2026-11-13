@@ -1,0 +1,98 @@
+{
+ "business": {
+  "_id": "48abdcc9-5e80-4626-a9f3-dacb91123c58",
+  "owner_user_id": "ebe0df42-31f9-4f5d-8242-3a44bee24028",
+  "name": "Gremier Coffee",
+  "name_he": null,
+  "name_en": null,
+  "source_lang": null,
+  "slug": "gremier-coffee",
+  "logo_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794257427/myisraelrental/qcahtce5pq5aws8jmnux.jpg",
+  "description": "Gremier Coffee specializes in premium, handcrafted cold brew coffee, offering a unique and refreshing coffee experience for any occasion. We provide beautifully arranged cold brew coffee bars for events, including weddings, bar mitzvahs, kiddushim, corporate events, and private parties. We also offer a selection of bottled cold brew coffees and specialty syrups, bringing rich, smooth, café-quality coffee to every experience.",
+  "description_he": "",
+  "description_en": null,
+  "categories": [],
+  "areas": [
+   "jerusalem"
+  ],
+  "serves_nationwide": true,
+  "verified": false,
+  "verified_at": null,
+  "hours": null,
+  "languages": [],
+  "founded_year": null,
+  "delivery_note": null,
+  "lead_time": null,
+  "payment_note": "Website gremiercoffee.co.il",
+  "kosher_certification": null,
+  "license_number": null,
+  "cover_url": null,
+  "accent": "stone",
+  "payment_links": [],
+  "active": true,
+  "created_at": "2026-11-09T20:54:18.994762+00:00",
+  "updated_at": "2026-11-09T20:55:56.863073+00:00",
+  "custom_domain": {
+   "domain": "gremiercoffee.co.il",
+   "status": "setting_up",
+   "records": [],
+   "added_at": "2026-11-09T22:54:49+02:00"
+  },
+  "custom_domain_host": "gremiercoffee.co.il",
+  "by_appointment": false,
+  "shabbat_closing": false
+ },
+ "listings": [
+  {
+   "_id": "bb714c5a-f354-4fda-8f82-441e68b13067",
+   "provider_user_id": "ebe0df42-31f9-4f5d-8242-3a44bee24028",
+   "provider_id": "14d2d8e6-7c66-455f-ad16-c1d9f89d30f7",
+   "business_id": "48abdcc9-5e80-4626-a9f3-dacb91123c58",
+   "title": "Cold Brew Coffee by Gremier Coffee Co.",
+   "title_he": "קולד ברו קפה מאת Gremier Coffee Co.",
+   "title_en": null,
+   "source_lang": "en",
+   "category": "shops-products",
+   "subcategory": null,
+   "description": "Gremier Coffee specializes in premium, handcrafted cold brew coffee, offering a unique and refreshing coffee experience for any occasion. We provide beautifully arranged cold brew coffee bars for events, including weddings, bar mitzvahs, kiddushim, corporate events, and private parties. We also offer a selection of bottled cold brew coffees and specialty syrups, bringing rich, smooth, café-quality coffee to every experience.",
+   "description_he": "גרמייר קופי מתמחה בקולד ברו פרימיום עשוי בעבודת יד, ומציעה חוויית קפה ייחודית ומרעננת לכל אירוע. אנו מספקים בארים מעוצבים ומרשימים של קולד ברו לאירועים מכל הסוגים – חתונות, בר מצוות, קידושים, אירועי חברה ומסיבות פרטיות. בנוסף, אנו מציעים מבחר של בקבוקי קולד ברו וסירופים מיוחדים, ומביאים קפה עשיר וחלק באיכות בית קפה לכל חוויה.",
+   "description_en": null,
+   "gig_type": "deliverable",
+   "tiers": [
+    {
+     "name": "Coffee bar for events",
+     "price": 349.0,
+     "currency": "ILS",
+     "delivery_days": 1,
+     "duration_minutes": null,
+     "description": "",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794257627/myisraelrental/paumdbqjigg40ijeyxov.jpg"
+     ]
+    }
+   ],
+   "products": [],
+   "weekly_availability": null,
+   "slot_duration_minutes": null,
+   "team": [],
+   "rebook_after_weeks": null,
+   "enable_date_booking": true,
+   "gallery": [],
+   "booking_mode": "whatsapp",
+   "whatsapp_confirmed": true,
+   "contact_email": "gremiercoffee@gmail.com",
+   "whatsapp": "+972552703413",
+   "area": "Jerusalem",
+   "faqs": [],
+   "discount": null,
+   "status": "published",
+   "created_at": "2026-11-09T20:54:19.950972+00:00",
+   "updated_at": "2026-11-09T20:54:19.950972+00:00",
+   "geocode_miss": false,
+   "geocoded_at": 1794257660.4165194,
+   "lat": 31.7788472,
+   "lng": 35.2257856
+  }
+ ]
+}

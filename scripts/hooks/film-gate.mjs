@@ -15,6 +15,9 @@
 //      size (rule 3w.15; Tzvi, 5 Nov 2026, RBS Cleaning: "the scene and the stone look kind of fake").
 //   6. "## Clip plan" (rule 3w.10.5; Tzvi, 10 Nov 2026: stop remaking clips from mistakes): each clip's start and end
 //      stills by file (they must exist), edges, same item, one change, credits, what is in code, what gets trimmed.
+//   7. "Phones asked:" with Tzvi's own answer in quotes (rule 3aa.26; Tzvi, 13 Nov 2026, after Gremier's phones got the
+//      wide film on cream "for now" without asking, then needed five more clips: "make a rule so phones are always asked
+//      before generating"): tall 9:16 clips for phones, at what cost, or the whole width on the ground.
 // Watches: Higgsfield generate_video / generate_video_batch (a price check with get_cost passes),
 // and Bash commands that run a gen/*.py script calling a video model (Higgsfield API, kie.ai).
 // Prints the refusal reason for the model; never blocks anything else.
@@ -59,8 +62,9 @@ process.stdin.on('end', () => {
       const looks = (t.split(/^##+\s*Looks real.*$/im)[1] || '').split(/^##\s/m)[0];
       const hasLooks = /https?:\/\/|docs\/inspo\//.test(looks);
       const plan = clipPlan(t, b, gen);
-      seen.push(`${path.basename(b)}/gen/${f}: object list ${hasList ? 'yes' : 'MISSING'}, how it really happens (with its source) ${hasReal ? 'yes' : 'MISSING'}, key moment ${hasKey ? 'yes' : 'MISSING'}, looks real (with the real photograph) ${hasLooks ? 'yes' : 'MISSING'}, clip plan ${plan || 'yes'}, approval ${hasYes ? 'yes' : 'MISSING'}`);
-      if (hasList && hasReal && hasKey && hasLooks && !plan && hasYes) ok.push(p);
+      const hasPhone = /^Phones asked:.*["“][^"”]{2,}["”]/im.test(t);
+      seen.push(`${path.basename(b)}/gen/${f}: object list ${hasList ? 'yes' : 'MISSING'}, how it really happens (with its source) ${hasReal ? 'yes' : 'MISSING'}, key moment ${hasKey ? 'yes' : 'MISSING'}, looks real (with the real photograph) ${hasLooks ? 'yes' : 'MISSING'}, clip plan ${plan || 'yes'}, phones asked (his words in quotes) ${hasPhone ? 'yes' : 'MISSING'}, approval ${hasYes ? 'yes' : 'MISSING'}`);
+      if (hasList && hasReal && hasKey && hasLooks && !plan && hasPhone && hasYes) ok.push(p);
     }
   }
   if (ok.length) process.exit(0);
@@ -72,6 +76,7 @@ process.stdin.on('end', () => {
     + 'and a "## Clip plan" section (rule 3w.10.5) naming the start and end stills by file (already made), and saying: edges clean, '
     + 'same item as the real photo (count, colour, size, words), one change between the stills, the get_cost credits, what is done in code, '
     + 'and what gets trimmed or dissolved if a clip is nearly right; '
+    + 'a line "Phones asked: <date>, Tzvi: \"<his answer>\"" (rule 3aa.26: ask him before any clip whether phones get tall 9:16 clips, with their get_cost credits, or the whole width on the ground), '
     + 'show Tzvi the steps and the object list, and only after his yes add the line "Approved by Tzvi: <date and his words>". '
     + (seen.length ? `Briefs found this week: ${seen.join('; ')}.` : 'No brief changed in the last 7 days was found.');
   process.stdout.write(JSON.stringify({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: reason } }));

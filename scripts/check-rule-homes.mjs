@@ -41,6 +41,25 @@ for (const l of read('docs/rules-checklist.md').split('\n')) {
   // the builder reads a blueprint step, then opens its section in the short file: it must be there (or named as full-rulebook only)
   for (const id of ids) if (full.has(id) && !digest.has(id) && !onlyFull.has(id)) bad.push(`${m[1]}: its section ${id} is not in rules-digest.md, so a build cannot find it`);
 }
+// the rules register (Tzvi, 12 Nov 2026: rules as a building blueprint, "i want all the rules to work this way"): every
+// checklist rule has a record saying how it is built (KIT, GEN, ASK, OWNER, EYE) and by what. A rule that is only checked
+// after the build is refused here, so a new rule arrives with its building part, never as one more check to retry.
+{
+  const HOW = new Set(['KIT', 'GEN', 'ASK', 'OWNER', 'EYE']);
+  let reg = [];
+  try { reg = JSON.parse(read('docs/rules-as-blueprint/rules.json')).rules || []; } catch (e) { bad.push(`docs/rules-as-blueprint/rules.json: cannot be read (${e.message})`); }
+  const byId = new Map(reg.map((r) => [r.id, r]));
+  const checklist = [...read('docs/rules-checklist.md').matchAll(/^(R[0-9][0-9a-z]*\.[0-9]+[a-z]?)\s*\|/gm)].map((m) => m[1]);
+  for (const id of checklist) {
+    const r = byId.get(id);
+    if (!r) { bad.push(`${id}: not in docs/rules-as-blueprint/rules.json; add its record (how it is built, built_by, confirmed_by, status)`); continue; }
+    const how = [].concat(r.how || []);
+    if (!how.length || how.some((h) => !HOW.has(h))) bad.push(`${id}: register "how" must be KIT, GEN, ASK, OWNER or EYE (has ${JSON.stringify(r.how)})`);
+    if (!String(r.built_by || '').trim()) bad.push(`${id}: register names no building part (built_by): which starter part, generator or blueprint question makes it right`);
+    if (!['built', 'planned'].includes(r.status)) bad.push(`${id}: register status must be built or planned`);
+  }
+  for (const r of reg) if (!checklist.includes(r.id)) bad.push(`register ${r.id}: no line in docs/rules-checklist.md`);
+}
 for (const m of read(`${SKILL}/SKILL.md`).matchAll(/§([0-9]+[a-z]*)/g)) {
   if (!digest.has(m[1])) bad.push(`SKILL.md points to §${m[1]}, which rules-digest.md does not have`);
 }
@@ -60,6 +79,25 @@ for (const l of read('docs/ad-rules-checklist.md').split('\n')) {
   const ids = [...src.matchAll(/(?:^|[\s,])([0-9]+[a-z]*)(?:\.[0-9a-z]+)*(?=[\s,]|$)/g)].map((x) => top(x[1]));
   if (!ids.length) bad.push(`${m[1]}: names no section of static-ad-rules.md it comes from`);
   for (const id of ids) if (!adHeads.has(id)) bad.push(`${m[1]}: comes from section ${id}, which static-ad-rules.md does not have`);
+}
+
+// the ad rules register, the same way (Tzvi, 12 Nov 2026: "the same rule blueprint exactly like we did for the page
+// builder for the ad builder"): every ad step has a record naming the part that builds it
+{
+  const HOW = new Set(['KIT', 'GEN', 'ASK', 'OWNER', 'EYE']);
+  let reg = [];
+  try { reg = JSON.parse(read('docs/rules-as-blueprint/ad-rules.json')).rules || []; } catch (e) { bad.push(`docs/rules-as-blueprint/ad-rules.json: cannot be read (${e.message})`); }
+  const byId = new Map(reg.map((r) => [r.id, r]));
+  const steps = [...read('docs/ad-rules-checklist.md').matchAll(/^(A[0-9][0-9a-z]*\.[0-9]+)\s*\|/gm)].map((m) => m[1]);
+  for (const id of steps) {
+    const r = byId.get(id);
+    if (!r) { bad.push(`${id}: not in docs/rules-as-blueprint/ad-rules.json; add its record (how it is built, built_by, confirmed_by, status)`); continue; }
+    const how = [].concat(r.how || []);
+    if (!how.length || how.some((h) => !HOW.has(h))) bad.push(`${id}: ad register "how" must be KIT, GEN, ASK, OWNER or EYE (has ${JSON.stringify(r.how)})`);
+    if (!String(r.built_by || '').trim()) bad.push(`${id}: ad register names no building part (built_by)`);
+    if (!['built', 'planned'].includes(r.status)) bad.push(`${id}: ad register status must be built or planned`);
+  }
+  for (const r of reg) if (!steps.includes(r.id)) bad.push(`ad register ${r.id}: no line in docs/ad-rules-checklist.md`);
 }
 
 if (bad.length) {

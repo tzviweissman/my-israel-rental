@@ -1,0 +1,12 @@
+{
+  "ground": "#F6EEE3",
+  "world": "One continuous shot: the camera moves smoothly and slowly straight DOWN the whole time, no cuts, no fades. A plain warm cream background all around, soft daylight from the left, a light oak table far below. Real photographed coffee: opaque deep brown, real ice, never glassy, no glow. Nothing appears from nowhere or vanishes. No hands, people, text or logos.",
+  "first": "gen/world/w1.png",
+  "steps": [
+    {"name": "W1", "prompt": "Coffee beans keep pouring from above into the clear hopper of this black grinder floating in the air. The camera travels slowly down the grinder to its spout at the bottom, where fine dark coffee powder begins to stream out in one soft stream and falls straight down."},
+    {"name": "W2", "prompt": "The camera keeps travelling down with the falling stream of fine coffee powder, down to one tall clear glass jar of cold water and ice standing on the oak table below. The powder falls into the water, dark brown clouds of coffee bloom and curl through it like ink, and the water slowly turns to deep dark cold brew."},
+    {"name": "W3", "prompt": "The same tall glass of iced coffee stays in the middle of the picture; the coffee keeps darkening until it is evenly deep cold brew; then cold milk pours into it from above out of the top edge of the picture and curls down through the dark coffee in soft white ribbons. The camera moves very slightly closer and slightly down."}
+  ],
+  "end_still": "assets/open-wide.webp",
+  "crop": [0.5, 0.5, 0.5, 0.62]
+}

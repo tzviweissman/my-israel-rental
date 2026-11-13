@@ -11,7 +11,8 @@ const b = await chromium.launch();
 let bad = 0;
 for (const [w, h] of sizes) {
   const p = await (await b.newContext({ viewport: { width: w, height: h } })).newPage();
-  await p.goto(url, { waitUntil: 'networkidle' });
+  // a scroll film's video keeps its download open, so the page never goes quiet: wait for load, then up to 8 s of quiet (11 Nov 2026)
+  await p.goto(url, { waitUntil: 'load' }); await p.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
   await p.evaluate(() => document.fonts.ready);
   const max = await p.evaluate(() => document.documentElement.scrollHeight - innerHeight);
   const found = new Set();

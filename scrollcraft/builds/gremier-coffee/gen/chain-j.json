@@ -1,0 +1,30 @@
+{
+  "ground": "#F6EEE3",
+  "world": "One continuous shot, no cuts, no fades: the camera moves smoothly and slowly the whole time, as if riding with the coffee. Soft warm daylight from the left, a plain warm cream ground. Real photographed materials: matte black metal, clear glass, clear water, real ice, real coffee, opaque deep brown, never glassy, no glow. Nothing appears from nowhere or vanishes. No hands, no people, no new text or logos.",
+  "first": "gen/world/j1.png",
+  "steps": [
+    {
+      "name": "J1",
+      "end": "gen/world/j2.png",
+      "frame": "at the start the whole taken-apart grinder large in the middle inside the huge word COLD; at the end gentle waves of clear water fill the whole frame edge to edge",
+      "prompt": "Beans keep pouring into the hopper of the taken-apart black grinder and fine coffee grounds stream out of its bottom. The camera slowly follows the falling grounds straight down, the grinder and the word rising up out of the top of the picture, down until gentle waves of clear cold water fill the whole picture, where the grounds land in the middle of the waves.",
+      "eye_ok": "12 Nov, 6 frames a second from 4.0 to 6.6 s: the camera keeps coming down smoothly; the flagged RUSH is the water rippling across the whole frame, every pixel changing, not a camera jump"
+    },
+    {
+      "name": "J2",
+      "frame": "waves filling the whole frame edge to edge, seen close from just above, no glass, no edge, no wall",
+      "prompt": "The grounds keep landing and sink into the clear water in curling brown clouds, like ink. The brown spreads from the middle through all the waves until all the water is deep brown cold brew, and the brown waves slowly begin to turn round the middle into a whirlpool. The camera slowly lowers toward the water."
+    },
+    {
+      "name": "J3",
+      "frame": "the whirlpool large in the middle, then one stream of cold brew and the whole glass of ice below it in frame",
+      "prompt": "The brown cold brew whirlpool turns faster and narrows into its funnel; the camera follows the funnel down as it becomes one smooth stream of cold brew pouring down into a clear glass full of ice, where white milk is curling through the coffee in soft ribbons."
+    },
+    {
+      "name": "J4",
+      "end": "gen/world/bar-end.png",
+      "frame": "from the whole glass of iced coffee with milk large in the frame, pulling back to the whole coffee bar table with everything on it in view",
+      "prompt": "The camera slowly pulls back and away from the glass of iced coffee with milk, revealing the table around it: the milk carafe, the caramel and vanilla syrup bottles, the large glass coffee dispenser on its white stand, the stacks of clear cups and the black straws, on a sunlit terrace."
+    }
+  ]
+}
