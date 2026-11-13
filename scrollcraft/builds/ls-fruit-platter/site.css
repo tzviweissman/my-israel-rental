@@ -483,3 +483,8 @@ section.rest { padding-block: clamp(1.6rem, 6svh, 3.5rem); }
   .foot.full { opacity: 1; }
   .film-copy .btn-facts { margin-top: 1rem; color: #FFEDE4; text-shadow: 0 1px 10px rgb(0 0 0 / .55); }
   .btn-facts .sym { font-family: inherit; font-weight: inherit; font-size: 1em; vertical-align: 0; margin: 0; }
+
+/* order form: iPhone zooms into any field under 16px, and a grid cell must be allowed to shrink so fields never overlap */
+#form input, #form select, #form textarea, .fld { font-size: 16px; }
+.form > *, .form .card, .form .card > div, .sum { min-width: 0; }
+.sent.bad { font-weight: 700; }

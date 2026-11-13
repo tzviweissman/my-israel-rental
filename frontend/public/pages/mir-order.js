@@ -10,6 +10,7 @@
  *   - texts on (data-texts on this script, from the business's switch): no WhatsApp. The order is saved, then the customer
  *     goes to the tracking page; the words on the form stop promising WhatsApp. A save that failed still opens WhatsApp,
  *     so an order is never lost.
+ *   - texts on: a small "Have questions? Message us on WhatsApp" under the send button, from the page's own WhatsApp link.
  *   - texts off, on a phone: the WhatsApp app, not the web page in a new tab.
  *
  * The pages open a blank tab inside the tap and fill it once the order is saved, so window.open and fetch are the two
@@ -157,9 +158,26 @@
       if (v !== n.nodeValue) n.nodeValue = v;
     }
   }
+  // texts on: the order no longer opens WhatsApp, so a customer with a question gets a small link to ask there
+  // (Tzvi, 13 Nov 2026: "if someone has a question they still need a way to text"). The number is the page's own
+  // WhatsApp link; a page with none gets no line.
+  function ask() {
+    var m = null;
+    [].some.call(document.querySelectorAll('a[href*="wa.me/"]'), function (l) { return (m = /wa\.me\/(\d+)/.exec(l.getAttribute('href'))); });
+    var send = [].slice.call(document.querySelectorAll('form button[type=submit], ' + SEND)).filter(function (e) { return e.id !== 'placeBar'; })[0];
+    if (!m || !send || document.querySelector('.mir-ask')) return;
+    var p = line('mir-ask', 'opacity:.8;font-weight:400;margin-top:10px;width:100%;flex-basis:100%;grid-column:1/-1', he() ? 'יש שאלות? ' : 'Have questions? ');
+    var a = document.createElement('a');
+    a.href = 'https://wa.me/' + m[1]; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = he() ? 'כתבו לנו בוואטסאפ' : 'Message us on WhatsApp';
+    a.style.cssText = 'color:inherit;text-decoration:underline;font:inherit;font-size:inherit !important;letter-spacing:inherit';
+    p.appendChild(a);
+    send.parentNode.insertBefore(p, send.nextSibling);
+  }
   function start() {
     mount();
     if (!TEXTS) return;
+    ask();
     reword(document.body);
     new MutationObserver(function (list) {
       list.forEach(function (m) { reword(m.target.nodeType === 3 ? m.target.parentNode : m.target); });

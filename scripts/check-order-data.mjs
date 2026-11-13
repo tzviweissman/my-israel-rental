@@ -62,6 +62,8 @@ async function fill(p) {
     const vis = (e) => { const r = e.getBoundingClientRect(); const s = getComputedStyle(e); return r.width > 0 && r.height > 0 && s.visibility !== 'hidden'; };
     const set = (e, v) => { const d = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(e), 'value'); d.set.call(e, v); e.dispatchEvent(new Event('input', { bubbles: true })); e.dispatchEvent(new Event('change', { bubbles: true })); };
     const tomorrow = new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10);
+    // a basket that opens empty: press its "Add ..." button once, as a customer would (LS Fruit Platter's "Add a Small")
+    if (!window.__practiceAdded) { const a = [...document.querySelectorAll('button')].find((b) => vis(b) && /^\s*add\b/i.test(b.textContent || '')); if (a) { a.click(); window.__practiceAdded = 1; } }
     for (const e of document.querySelectorAll('input, textarea')) {
       if (!vis(e) || e.value || e.readOnly || e.disabled) continue;
       const k = `${e.type} ${e.id} ${e.name} ${e.autocomplete} ${e.placeholder}`.toLowerCase();
@@ -73,7 +75,8 @@ async function fill(p) {
       else if (e.type === 'number') set(e, e.min || '1');
       else if (/addr|street/.test(k)) set(e, '1 Practice Street');
       else if (/name/.test(k)) set(e, 'Practice Order');
-      else if (e.required) set(e, 'Practice');
+      else if (/time/.test(k)) set(e, '12:00');
+      else if (e.required || e.tagName !== 'TEXTAREA') set(e, 'Practice');
     }
     for (const e of document.querySelectorAll('input[type=checkbox][required]')) if (!e.checked) e.click();
     const send = [...document.querySelectorAll('form button[type=submit], form input[type=submit], a#order, #place, #place2, #placeBar, #send, [data-order-send]')].filter(vis)[0];
@@ -83,6 +86,7 @@ async function fill(p) {
   });
 }
 
+let caught = [], refuse = false;
 // Every choice on the form, as steps of one change each.
 async function choices(p) {
   return p.evaluate(() => {
@@ -95,10 +99,22 @@ async function choices(p) {
   });
 }
 
+// Press send; a form in steps ("Continue to when and where", LS Fruit Platter) is filled and pressed again, up to
+// three steps, until an order is sent.
+async function press(p) {
+  for (let k = 0; k < 4; k++) {
+    await p.click('[data-practice-send]', { timeout: 3000 }).catch(() => {});
+    await p.waitForTimeout(1500);
+    if (caught.length) return;
+    await p.evaluate(() => document.querySelectorAll('[data-practice-send]').forEach((e) => e.removeAttribute('data-practice-send')));
+    if (!(await fill(p))) return;
+  }
+}
+
 for (const url of urls) {
   const where = url.replace(/^https?:\/\/[^/]+/, '') || '/';
   const p = await ctx.newPage();
-  let caught = [], refuse = false;
+  refuse = false;
   await p.route(SEND_RE, async (route) => {
     const path = route.request().url().replace(/^.*?\/api\//, '').replace(/\?.*$/, '');
     const body = route.request().postData() || '{}';
@@ -126,11 +142,10 @@ for (const url of urls) {
       else await p.click(sel, { timeout: 3000 }).catch(() => {});
       await p.waitForTimeout(300);
     }
-    if (!(await fill(p))) { if (!ALL || step.kind !== 'as it opens') problems.push(`${where}: no send button found, so no order could be tried (mark it data-order-send)`); else console.log(`${where}: no order form on this page`); break; }
+    if (!(await fill(p))) { if (step.kind !== 'as it opens') problems.push(`${where}: no send button found, so no order could be tried (mark it data-order-send)`); else console.log(`${where}: no order form on this page`); break; }
     const shown = await p.evaluate(() => { const e = document.querySelector('[data-order-total]'); return e ? (e.getAttribute('data-order-total') || e.textContent) : null; });
     caught = [];
-    await p.click('[data-practice-send]', { timeout: 3000 }).catch(() => {});
-    await p.waitForTimeout(1500);
+    await press(p);
     if (!caught.length) { if (step.kind === 'as it opens') problems.push(`${where}: pressing send sent no order to the dashboard (a check on the page stopped it, or the page only opens WhatsApp)`); continue; }
     for (const c of caught) {
       const r = c.res, say = `${where} [${step.label}]`;
@@ -154,8 +169,7 @@ for (const url of urls) {
   if (await fill(p)) {
     refuse = true; caught = [];
     const before = await p.evaluate(() => document.body.innerText);
-    await p.click('[data-practice-send]', { timeout: 3000 }).catch(() => {});
-    await p.waitForTimeout(1500);
+    await press(p);
     const after = await p.evaluate(() => document.body.innerText);
     const told = after !== before && /practice refusal|not (go through|saved|sent)|did not|didn.t|try again|went wrong|לא נשמר|נסו שוב/i.test(after);
     if (caught.length && !told) problems.push(`${where}: when the dashboard refuses the order, the page says nothing (the customer thinks it went through)`);
