@@ -24,12 +24,14 @@ document.body.classList.remove('no-js');
 
   // the phone bar shows after the first screen and hides at the order form (#order or #book)
   var top = document.getElementById('top'), bar = document.getElementById('bar'), form = document.getElementById('order') || document.getElementById('book'), tick = 0;
+  var shop = !!document.getElementById('cat');
   function frame() {
     tick = 0;
-    var vh = innerHeight;
+    var vh = innerHeight, has = document.body.classList.contains('has-basket');
     top.classList.toggle('solid', scrollY > 10);
-    // once something is in the basket the bar stays, as the phone's way to the basket (review 12 Nov, Gremier)
-    if (bar) bar.classList.toggle('on', (scrollY > vh * .5 || document.body.classList.contains('has-basket')) && (!form || form.getBoundingClientRect().top > vh * .75));
+    // once something is in the basket the bar stays, as the phone's way to the basket (review 12 Nov, Gremier).
+    // On the shop page it shows only then: an empty basket bar there says nothing (shop research, 13 Nov 2026).
+    if (bar) bar.classList.toggle('on', (has || (!shop && scrollY > vh * .5)) && (!form || form.getBoundingClientRect().top > vh * .75));
   }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();

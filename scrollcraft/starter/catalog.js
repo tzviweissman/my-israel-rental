@@ -66,9 +66,14 @@
     var bar = document.getElementById('bar'), p = bar && bar.querySelector('.p'), go = bar && bar.querySelector('.btn');
     if (p && !p.dataset.was) { p.dataset.was = p.innerHTML; go.dataset.was = go.textContent; go.dataset.href = go.getAttribute('href'); }
     if (p && !bar.classList.contains('just')) {
-      if (n) { p.innerHTML = '<b>Basket, ' + n + '</b>' + CAT.money(tot); go.textContent = 'Basket'; go.setAttribute('href', 'shop.html#order'); }
-      else { p.innerHTML = p.dataset.was; go.textContent = go.dataset.was; go.setAttribute('href', go.dataset.href); }
+      // "2 items · ₪140 · View basket", as the food apps people already order from (shop research, 13 Nov 2026)
+      var he = (document.documentElement.lang || '').indexOf('he') === 0;
+      if (n) {
+        p.innerHTML = '<b>' + (he ? (n === 1 ? 'פריט אחד' : n + ' פריטים') : n + (n === 1 ? ' item' : ' items')) + '</b>' + CAT.money(tot);
+        go.textContent = he ? 'לסל' : 'View basket'; go.setAttribute('href', 'shop.html#order');
+      } else { p.innerHTML = p.dataset.was; go.textContent = go.dataset.was; go.setAttribute('href', go.dataset.href); }
     }
+    dispatchEvent(new Event('scroll'));   // site.js shows or hides the bar for the new basket
   }
   // "Added: <name>" shows for a moment in the basket button and the phone bar, never over the page
   var tAdd = 0;
