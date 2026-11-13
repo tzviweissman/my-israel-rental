@@ -8,6 +8,12 @@ stop. The link is the draft id: unguessable, so it is the only key needed.
 
 Nothing here creates an account or a listing. Publishing still needs the
 account, and deletes the draft.
+
+The reminder goes to whatever address was typed, unconfirmed, on purpose
+(Tzvi, 12 Nov 2026: "do it for any email they put in"). The 9 Nov code review
+flagged it as mail to strangers; the limits are one email per address on a draft, ten
+drafts a day per visitor, and an email that says it can be ignored. Audits:
+this is decided, do not report it again.
 """
 from __future__ import annotations
 

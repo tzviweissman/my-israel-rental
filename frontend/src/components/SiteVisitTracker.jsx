@@ -14,8 +14,7 @@
  */
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { API } from '../lib/apiBase';
-import { getVisitorId } from '../utils/visitorId';
+import { tapOf, send } from '../utils/tapKind';
 
 // The last page counted, at module level so it survives a remount. React's
 // development mode runs every effect twice on start-up, and a re-render or
@@ -24,20 +23,50 @@ import { getVisitorId } from '../utils/visitorId';
 // repeats are dropped.
 let lastCounted = null;
 
+// Which part of the site a path is (Tzvi, 12 Nov 2026: "everything we can should be tracked"). Only these names
+// are sent, never the path itself: some paths carry a signing link or a staff key. Kept in step with SECTIONS in
+// backend/routes/site_visits.py. First match wins; a path that matches none is counted for the site only.
+const SECTION_RULES = [
+  [/^\/(home)?$/, 'home'],
+  [/^\/(stays|properties\/)/, 'stays'],
+  [/^\/(property|sublease)\//, 'listing'],
+  [/^\/(businesses|services)\/(jobs|post-job)/, 'jobs'],
+  [/^\/(businesses\/add|services\/create-gig)/, 'add_business'],
+  [/^\/(businesses|services)\/?$/, 'businesses'],
+  [/^\/(businesses|services\/gig)\/[^/]+$/, 'business_service'],
+  [/^\/business\//, 'business_page'],
+  [/^\/restaurants/, 'restaurants'],
+  [/^\/requests\/post/, 'post_request'],
+  [/^\/requests/, 'requests'],
+  [/^\/order\//, 'order'],
+  [/^\/(signup|join|auth\/)/, 'signup'],
+  [/^\/dashboard/, 'dashboard'],
+  [/^\/chat\//, 'chat'],
+  [/^\/(why-list|why-host|for-providers|what-you-can-do|showcase|getting-started|features\/|faq|terms|privacy|contact|join-rules)/, 'info'],
+];
+export const sectionOf = (path) => (SECTION_RULES.find(([re]) => re.test(path)) || [])[1] || '';
+
+
 export default function SiteVisitTracker() {
   const { pathname } = useLocation();
 
   useEffect(() => {
     if (pathname === lastCounted) return;
     lastCounted = pathname;
-    let token = null;
-    try { token = sessionStorage.getItem('token'); } catch { /* private mode */ }
-    const headers = { 'X-Visitor-Id': getVisitorId() || '' };
-    if (token) headers.Authorization = `Bearer ${token}`;
-    try {
-      fetch(`${API}/site/visit`, { method: 'POST', headers, keepalive: true }).catch(() => {});
-    } catch { /* not fatal */ }
+    send('/site/visit', { section: sectionOf(pathname) });
   }, [pathname]);
+
+  // Every button and link pressed (Tzvi, 12 Nov 2026: "Yes, all of it"): the part of the site, the kind and the
+  // words on it (utils/tapKind.js). The server keeps none from the dashboard or chats.
+  useEffect(() => {
+    const onClick = (e) => {
+      const tap = tapOf(e.target);
+      const section = sectionOf(window.location.pathname);
+      if (tap && section && section !== 'dashboard' && section !== 'chat') send('/site/press', { section, ...tap });
+    };
+    document.addEventListener('click', onClick, true);
+    return () => document.removeEventListener('click', onClick, true);
+  }, []);
 
   return null;
 }

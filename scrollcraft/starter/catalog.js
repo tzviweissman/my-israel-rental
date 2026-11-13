@@ -52,11 +52,44 @@
     e.preventDefault(); CAT.add(b.dataset.add, 1);
     b.classList.remove('added'); void b.offsetWidth; b.classList.add('added');
   });
+  // A card's Add becomes − 1 + once that item is in the basket, so nobody adds it twice by mistake (Baymard; shop
+  // research step 2, 13 Nov 2026). Only cards (.pc): the "most popular" and add-on buttons stay plain Adds.
+  var HE = (document.documentElement.lang || '').indexOf('he') === 0;
+  function steppers() {
+    var b = window.siteBasket.get();
+    [].forEach.call(document.querySelectorAll('.pc button[data-add]'), function (btn) {
+      var id = btn.dataset.add, n = +b[id] || 0, st = btn.nextElementSibling;
+      if (!st || !st.classList.contains('pc-step')) {
+        var nm = CAT.label(id);
+        st = document.createElement('span'); st.className = 'step sm pc-step'; st.dataset.k = id; st.hidden = true;
+        st.innerHTML = '<button type="button" data-d="-1"></button><output></output><button type="button" data-d="1"></button>';
+        st.firstChild.setAttribute('aria-label', (HE ? 'אחד פחות: ' : 'One fewer ') + nm); st.firstChild.textContent = '−';
+        st.lastChild.setAttribute('aria-label', (HE ? 'עוד אחד: ' : 'One more ') + nm); st.lastChild.textContent = '+';
+        btn.after(st);
+      }
+      var had = !st.hidden;
+      btn.hidden = n > 0; st.hidden = !n; st.querySelector('output').textContent = n;
+      st.querySelector('output').setAttribute('aria-label', n + (HE ? ' בסל' : ' in your basket'));
+      // focus follows the control that took the button's place
+      if (document.activeElement === btn && n) st.lastChild.focus();
+      if (had && !n && st.contains(document.activeElement)) btn.focus();
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var d = e.target.closest('.pc-step button'); if (!d) return;
+    var id = d.parentNode.dataset.k, b = window.siteBasket.get();
+    b[id] = Math.max(0, Math.min(20, (+b[id] || 0) + (+d.dataset.d)));
+    if (!b[id]) delete b[id];
+    window.siteBasket.set(b);
+    document.dispatchEvent(new Event('site:basket'));   // shop.js redraws the order
+  });
+  CAT.steppers = steppers;   // shop.js calls it after the live catalogue redraws the cards
   // once something is in the basket the menu bar's button goes to it
   function barBtn() {
     var b = window.siteBasket.get(), n = 0; for (var k in b) n += +b[k] || 0;
     var tot = 0; for (var k2 in b) tot += (+b[k2] || 0) * CAT.unit(k2);
     document.body.classList.toggle('has-basket', n > 0);
+    steppers();
     var a = document.querySelector('.top .btn-line');
     if (a && !a.classList.contains('just')) {
       a.firstChild.textContent = n ? 'Basket' : a.dataset.label || 'Shop';   // the count is sitekit's own badge

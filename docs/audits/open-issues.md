@@ -286,3 +286,49 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 ## UI audit of 2 Nov 2026
 - [Low] Chicken Munch home scrolls 7px sideways at 375 (closing block `.go-order`, `site.css:312`). First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
 - [Low] Footer and menu links on the 17 business sites are 19 to 24px tall on phones, under 44px. First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
+
+## Audit merge of 10 Nov 2026 (lines from the audit branches not yet on main, every line kept)
+
+- [Fixed 2 Nov, 26b56084] Orders: the no-login Confirm page looked orders up by an unindexed key (full scan per request).
+- [Fixed 5 Nov, 512b5b07] Ad maker i18n: `ads.weekVisits` and `ads.nudgeVisits` use `{count}` with no plural forms, so the parity check fails. First seen 2026-11-05 (2026-11-05-ui-audit.md). Open. Fixed 8 Nov, 60f3d4aa (names changed to {{n}}). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Fixed 5 Nov, 512b5b0] Visit counters used {{count}} with no plural forms; test-i18n-parity failed (2026-11-05-site-audit.md). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] Ad maker i18n: `ads.weekVisits` and `ads.nudgeVisits` use `{count}` with no plural forms, so the parity check fails. First seen 2026-11-05 (2026-11-05-ui-audit.md). Open. [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] Ads: ads.weekVisits, ads.nudgeVisits, advertising.visits have no plural forms; test-i18n-parity fails. First seen 8 Nov (2026-11-08-ui-audit). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] Ads: ads.weekVisits, ads.nudgeVisits, advertising.visits have no plural forms; test-i18n-parity fails. First seen 8 Nov (2026-11-08-ui-audit). Fixed 8 Nov, 60f3d4aa (names changed to {{n}}). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] Audit sandbox again had no MongoDB or Chromium for the repo's Playwright, so the new business sign-up wizard beyond its first screen and the Finest Cuts clipped/readable checks were not run. First seen 15 Oct, still open (2026-11-10-ui-audit.md).
+- [Low] Backend tests: `test_dropship.py`, `test_jobs_end_to_end.py`, `test_page_products.py` fail to collect in the audit sandbox (pytest_asyncio not installed by audit-setup). First seen 9 Nov 2026 (2026-11-09-site-audit.md).
+- [Low] Bookings: the price used for a code's minimum order comes from the browser (`gigs.py:1357`, `payload.amount`); unconfirmed, needs the API. First seen 6 Nov (2026-11-06-site-audit.md).
+- [Low] Counters `ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits` have no plural forms ("1 visits"); test-i18n-parity fails. First seen 7 Nov (2026-11-07-site-audit.md), introduced 4 Nov a27f0168. [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] Counters `ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits` have no plural forms ("1 visits"); test-i18n-parity fails. First seen 7 Nov (2026-11-07-site-audit.md), introduced 4 Nov a27f0168. Fixed 8 Nov, 60f3d4aa (names changed to {{n}}). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] Find your business on Google: an overnight opening period (Mon 20:00 to Tue 02:00) becomes start 20:00, end 02:00 on Monday (`product_extract.py` `_hours`). First seen 9 Nov 2026 (2026-11-09-site-audit.md).
+- [Low] i18n: three counts without plural forms (`ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits`); test-i18n-parity fails. First seen 6 Nov (2026-11-06-site-audit.md). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Low] i18n: three counts without plural forms (`ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits`); test-i18n-parity fails. First seen 6 Nov (2026-11-06-site-audit.md). Fixed 8 Nov, 60f3d4aa (names changed to {{n}}). [Fixed 10 Nov, d5450913: names changed to {{n}}]
+- [Medium] Audit setup hung over 40 minutes at the dev-server step on 5 Nov, so no build or full suite ran (2026-11-05-site-audit.md).
+- [Medium] Audit setup, 7 Nov: no MongoDB (403), no Chromium, full backend suite cannot run; `pytest_asyncio` and `mongomock_motor` missing from the venv. Still open since 15 Oct.
+- [Medium] Sign-up draft reminder email goes to any address a visitor types (no verification), up to 10 new drafts per day per IP (`signup_drafts.py` save_draft). First seen 9 Nov 2026 (2026-11-09-site-audit.md).
+- [To fix] Audit setup hung over 10 minutes without a database on 8 Nov (dead-ends audit), so no signed-in clicking. First seen 23 Oct (2026-11-08-dead-ends.md).
+
+## Code review of 10 Nov 2026
+- [Low] Weekly "your ad is ready" email: "Stop these emails" has no switch to turn them back on (`ad_emails_off` missing from `EMAIL_SWITCHES` and `EmailSwitches.jsx`). First seen 10 Nov 2026 (2026-11-10-site-audit.md). Open.
+- [Medium] Catalog and ad picture cutting blocked the server for every visitor (~0.4 s a picture, up to 30). First seen 10 Nov 2026 (2026-11-10-site-audit.md). [Fixed 10 Nov, 879d76dc; on this branch fb2b7fa0]
+- [Low] `dashboard.adPicsDone` without plural forms ("with 1 photos"); test-i18n-parity failed. First seen 10 Nov 2026 (2026-11-10-site-audit.md). [Fixed 10 Nov, d10948a5; on this branch 2f994fc4]
+- [Medium] Customer messages: holiday and "been a while" templates could be sent with their [What you offer...] gaps unfilled; `_UNFILLED` matched only "Your"/"שלכם" since 5 Nov. First seen 10 Nov 2026 (2026-11-10-site-audit.md). [Fixed 10 Nov, 965610bd; on this branch 3c9a22fa]
+- [Decision] Weekly ad email will reach every existing business with a product photo and no saved ad on the first weekday morning after deploy. First seen 10 Nov 2026 (2026-11-10-site-audit.md).
+
+## UI audit of 11 Nov 2026
+- [Low] Sign-up: "Your page is 0% ready" sits on a step bar already a third full, so the two progress signals disagree on the first screen (`CreateGig.jsx:1157` and `:1183`). First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
+- [Low] Sign-up: the seven "+ Add ..." shortcut chips are 26px tall, "Start over" 16px and the bare-header language switch 34px, under 44px on phones (`CreateGig.jsx:1198`, `:1176`; `Navigation.js:354`). First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
+- [Low] L.A. Cholent home, 1000x700 window: the kosher line "Kosher, hechsher from Rabbi Weiner" wraps and its second line is cut by the pinned opening (bottom 713px of 700) while the opening holds. First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
+- [Low] Sign-up "your page is live" heading had an exclamation mark (en + he). First seen 11 Nov 2026. [Fixed 11 Nov, 9d2ecd60; on this branch 46fada04]
+
+## Follow-up 11 Nov 2026 (audits of 6 to 11 Nov)
+
+- Fixed, merged to main with this follow-up: visit counters' plural check (`advertising.visits`, `ads.nudgeVisits` read {{n}}; `ads.weekVisits` got plural forms in the locales, so `AdMaker.jsx` stayed untouched); `dashboard.adPicsDone` plural; picture cutting in a thread; holiday and win-back template gaps; "Your page is live" without "!".
+- Fixed 11 Nov (9eb94972): ad emails stop link now has a switch (Ready-made ads, email settings); Google hours past midnight end at 23:59; sign-up bar fills with readiness, not step; sign-up chips, Start over and language switch 44px; sign-up welcome eyebrow readable (was accent on accent).
+- Fixed 11 Nov: `audit-setup.sh` installs pytest-asyncio and mongomock-motor, so the three test files collect.
+- Not a bug: booking discount minimum uses the browser's amount (`gigs.py`, 6 Nov). Hand-built pages send their own composed price, the business sees that price and the discount in the booking message, and no payment is taken, so an inflated amount only fools the customer's own booking. Rejected.
+- Not a bug: `GET /gigs/{id}/code-box` without a rate limit (6 Nov). It returns a yes/no and the pause state only. Rejected.
+- Moot: the weekly ad email going to every owner at once on first deploy (10 Nov). It deployed with main on 10 Nov.
+- Decided 12 Nov (Tzvi: "do it for any email they put in"): the sign-up draft reminder keeps going to any typed address. Closed; noted in `signup_drafts.py` so audits do not re-report it.
+- Left to the L.A. Cholent session: the kosher line is cut by 11px at 1000x700 (11 Nov). Another session was changing that site the same day.
+- Still open, not re-checked: Hadassah Prys phone booking bar over the Day field (9 Nov, unconfirmed); Gifted Israel basket column at the end of the shop (11 Nov, unconfirmed); footer and menu links on business sites under 44px (2 Nov); ad maker close button about 34px (30 Oct, `AdMaker.jsx` needs check-ad-designs with local servers); audit sandbox has no MongoDB or Chromium download (proxy, since 15 Oct).

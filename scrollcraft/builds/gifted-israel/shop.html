@@ -75,7 +75,7 @@
           <div class="card ostep" data-s="2" hidden>
             <h2>Delivery or pickup</h2>
             <div class="ful chips" role="radiogroup" aria-label="Delivery or pickup"><label class="chip"><input type="radio" name="ful" value="delivery" checked>Delivery</label><label class="chip"><input type="radio" name="ful" value="pickup">Pickup</label></div>
-            <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, city"><p class="err" id="e-addr" role="alert"></p><p class="hint">We deliver. We confirm the fee on WhatsApp.</p></div>
+            <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, city"><p class="err" id="e-addr" role="alert"></p><p class="hint" id="h-fee">We deliver. We confirm the fee on WhatsApp.</p></div>
             <div id="w-when"><label class="f" for="when" id="when-l">Delivery day</label><input class="fld" id="when" type="date"><p class="hint" id="h-pick" hidden>We send the pickup address on WhatsApp.</p><p class="err" id="e-when" role="alert"></p><button type="button" class="chip" id="first-day" hidden>Choose the first day</button></div>
           </div>
           <div class="card ostep" data-s="3" hidden>
@@ -90,7 +90,7 @@
           <h3>Your order</h3>
           <ul id="sum-mini"><li><span>Nothing yet</span></li></ul>
           <p class="sum-where" id="sum-where" hidden></p>
-          <div class="total"><span>Total</span><span id="total">₪0</span></div>
+          <div class="total"><span>Total</span><span id="total" data-order-total>₪0</span></div>
           <button class="btn" id="send" type="submit"><span>Continue to delivery or pickup</span></button>
           <button class="back" id="back" type="button" hidden>Back</button>
           <p class="note" id="send-note">Next: delivery or pickup, and the day.</p>

@@ -379,7 +379,7 @@
      After the candlelit opening the page turns bright and warm: one colour room per
      size with its servings and price, the steps, the occasions, the facts, then the order
      dial on the same light ground. The dark is the opening, the dial's face and the footer. */
-  :root { --lt-ground: #FBF3E4; --lt-ink: #1B1612; --lt-soft: #5A4F43; --plum: #34452A; --steel: #2B2623; }
+  :root { --lt-ground: #FBF3E4; --lt-ink: #1B1612; --lt-soft: #5A4F43; --plum: #2A3722; --steel: #38312C; /* equally dark (luminance .033 and .032), so the row reads dark, light, dark, not dark, light, darker (Tzvi, 12 Nov 2026) */ }
   .shop, .how, .occ, #order { --sc-ink: var(--lt-ink); --sc-ink-soft: var(--lt-soft); --sc-accent-text: #7A530F;
     --sc-hairline: color-mix(in oklab, #1B1612 14%, transparent); --sc-hairline-strong: color-mix(in oklab, #1B1612 28%, transparent); color: var(--lt-ink); }
   .shop, .how, #order { background: var(--lt-ground); }
@@ -562,3 +562,82 @@
   .size-pick button span { white-space: nowrap; }
   .said-cont { padding-top: 0; }
   .said-all li { box-shadow: 0 2px 10px rgb(122 83 15 / 0.10); }
+
+/* The saving line is one line on every card, so the struck price, its note and the price sit in the same place on each
+   (Tzvi, 12 Nov 2026: "consistency is key"; it wrapped on the Large card only, at some widths). */
+.room .price .was { flex-wrap: nowrap; white-space: nowrap; }
+/* The size-card pictures are one 21:9 set (gen/cards_set.py): the box takes the picture's own shape at every width, so
+   the slate, the barley and both bones always show and sit in the same place on each card (rule 8, hero shot 9). */
+.room .ph, .room .ph { height: auto !important; aspect-ratio: 21 / 9; }
+
+/* The moving messages on the home page (index.html #said): one row, all ten then their copy, sliding left at an
+   even, slow pace; the edges fade; stops while pointed at or focused; still and scrollable for reduced motion. */
+.said-move { margin-top: clamp(1.5rem, 4svh, 2.5rem); overflow: hidden; width: 100vw; margin-inline: calc(50% - 50vw); padding-block: 8px 18px;
+  position: relative; }
+.said-move::before, .said-move::after { content: ''; position: absolute; inset-block: 0; width: 6%; z-index: 1; pointer-events: none; }
+.said-move::before { left: 0; background: linear-gradient(90deg, var(--lt-ground), transparent); }
+.said-move::after { right: 0; background: linear-gradient(270deg, var(--lt-ground), transparent); }
+.said-list.said-track { display: flex; width: max-content; gap: 14px; margin: 0; padding-inline: var(--sc-gutter); overflow: visible; grid-template-columns: none; align-items: stretch;
+  animation: said-slide 70s linear infinite; animation-play-state: paused; will-change: transform; }
+.said-move.is-on .said-track { animation-play-state: running; }
+.said-track li { flex: none; width: min(22rem, 78vw); }
+.said-move:hover .said-track, .said-move:focus-within .said-track, .said-move.is-on:hover .said-track, .said-move.is-on:focus-within .said-track { animation-play-state: paused; }
+@keyframes said-slide { to { transform: translateX(calc(-50% + var(--sc-gutter) - 7px)); } }
+@media (prefers-reduced-motion: reduce) {
+  .said-list.said-track { animation: none; }
+  .said-move { overflow-x: auto; }
+  .said-track li[aria-hidden="true"] { display: none; }
+}
+
+/* One calm look for the size cards (Tzvi, 12 Nov 2026, after Gremier's shop: "do you think the products would look nicer if
+   it looked more like this instead of different colors", then "yes, one calm look"). Three white cards on the page's
+   cream ground, the same light sand picture behind each tub, ink words and buttons, the saving badge in ink: only the
+   tub and the numbers change from card to card (rules 3s.27, 3s.30). */
+.rooms { width: min(1240px, 100% - 2 * var(--sc-gutter)); margin-inline: auto; gap: clamp(12px, 1.4vw, 20px); padding-bottom: clamp(1.6rem, 5svh, 3.4rem); }
+.room, .room.plum, .room.steel { --c: #fff; --t: var(--lt-ink); border-radius: 22px; box-shadow: 0 1px 2px rgb(60 40 10 / .06), 0 10px 30px rgb(122 83 15 / .08); }
+.room .ph { border-radius: 14px; background: #EFE3CF; }
+.room .ph .tag { background: var(--lt-ink); color: #fff; }
+.room .price .was s { color: var(--lt-soft); }
+.room .what { color: var(--lt-soft); }
+@media (max-width: 860px) { .room .rb { flex: none; } .room .rf { min-height: 0; } }
+
+/* The order page's price row: the note under the price always takes its own line, so a longer note (the Kiddush's)
+   never pushes the saving down and moves the form (check-site SHIFT, 12 Nov 2026). */
+p.price .alt { flex-basis: 100%; max-width: 30rem; }
+p.price .was { white-space: nowrap; }
+/* A short laptop screen (1280x650) still fits the whole size row. */
+@media (max-height: 700px) and (min-width: 861px) {
+  .shop-head { padding-block: .9rem .5rem; }
+  .rooms { padding-bottom: .8rem; }
+  .room { padding: .7rem 1rem; gap: .45rem; }
+  .room .ph { width: 86%; margin-inline: auto; }
+}
+/* The moving cards draw no shadow (a shadow on each of 20 sliding cards cost a slowed phone 80 ms a frame, 12 Nov 2026). */
+.said-track li { box-shadow: none; border: 1px solid rgb(122 83 15 / .14); }
+.said-move { contain: paint; }
+
+  /* One order button everywhere (Tzvi, 12 Nov): the size cards use the same solid gold pill with the dial. */
+  .room .btn { white-space: nowrap; flex: none; }
+  /* Every order button flat and borderless (Tzvi, 12 Nov: "on mobile it looks off"): the shadow showed on the cream
+     sections only, and the form's <button> kept the browser's grey border. */
+  .btn { box-shadow: none; border: 0; }
+
+  /* Order picks and the saved message (12 Nov) */
+  .oform .hint { margin: .3rem 0 0; font-size: var(--sc-t-xs, .8rem); color: var(--lt-muted, #6b5d4f); }
+  .oform .sent { margin: 0 0 1rem; padding: .8rem 1rem; border-radius: 10px; background: #E6F4EA; color: #1d5c37; font-weight: 600; }
+  .oform .sent.bad { background: #FBEAEA; color: #8a1c1c; }
+  .oform .sent a { color: inherit; }
+
+  /* Order form on iPhone (Tzvi, 12 Nov 2026: boxes overlapped and the page zoomed on every tap).
+     Safari zooms into any field under 16px, so every field is 16px; its date field has a built-in minimum width
+     that pushed past its cell, so cells and fields may shrink; and every box is the same 48px tall. */
+  .oform .orow > * { min-width: 0; }
+  .oform input, .oform select, .oform textarea { font-size: 16px; height: 48px; min-height: 48px; min-width: 0; max-width: 100%; box-sizing: border-box; }
+  .oform input[type="date"] { -webkit-appearance: none; appearance: none; display: block; text-align: left; line-height: 46px; }
+  .oform input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+  .oform .qty { height: 48px; min-height: 48px; box-sizing: border-box; }
+  .oform .qty button { min-height: 46px; }
+
+  /* The order form is wider on a laptop, so its picks sit four to a row and the section fits one screen (12 Nov). */
+  @media (min-width: 900px) { .oform { max-width: 60rem; } .oform .orow { grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); } }
+  @media (min-width: 900px) and (max-height: 700px) { .details { padding-top: 2rem; padding-bottom: 2rem; } }

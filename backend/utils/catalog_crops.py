@@ -6,6 +6,7 @@ so small ones are dropped and the owner adds that photo themselves.
 """
 from __future__ import annotations
 
+import asyncio
 import io
 from typing import Any
 
@@ -92,7 +93,8 @@ async def keep(pages: list[bytes], item: dict[str, Any]) -> str | None:
         n = 0
     if not (0 <= n < len(pages)):
         return None
-    jpg = crop(pages[n], item.get("photo_box"))
+    # In a thread: a crop of a phone-sized page takes ~0.4 s, and up to 30 rows would hold every request.
+    jpg = await asyncio.to_thread(crop, pages[n], item.get("photo_box"))
     if not jpg:
         return None
     try:

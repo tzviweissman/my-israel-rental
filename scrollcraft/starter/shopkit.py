@@ -70,6 +70,11 @@ def shop_page(site, items: list[dict], cats: list[str], *, popular: str, wa: str
     owner calls most popular; addon: an item id offered once in the basket (3j.2), with addon_line its short reason."""
     by = {i['id']: i for i in items}
     pop = by[popular]
+    # the layout follows the number of products (shop research, 13 Nov 2026); shop.js keeps it right for the live list
+    size = 'size-s' if len(items) <= 6 else 'size-m' if len(items) <= 40 else 'size-l'
+    he = site.lang.startswith('he')
+    empty = ('הסל עדיין ריק. נוסיף משהו מהחנות, והוא יופיע כאן.', 'לחנות') if he else \
+        ('Your basket is empty. Tap Add on anything above and it shows here.', 'See the shop')
     chips = ''.join(f'<button class="chip" type="button" data-c="{escape(c, True)}">{escape(c)}</button>' for c in cats)
     groups = ''.join(
         f'<div class="grp" data-c="{escape(c, True)}"><h2 data-f="group">{escape(c)}</h2><ul class="cards four" data-f="items">'
@@ -88,7 +93,7 @@ def shop_page(site, items: list[dict], cats: list[str], *, popular: str, wa: str
   <div class="wrap"><p class="st-top"><button class="btn-line" id="st-add" type="button" data-add="{pop['id']}">Add our most popular, {escape(pop['name'])}, {money_html(pop['price'])}</button></p></div>
   <div class="wrap">
     <div class="filters" id="filters" role="group" aria-label="Go to a kind"><div class="chips">{chips}</div></div>
-    <div id="cat" data-mir-catalog data-href="shop.html?add={{name}}" data-other="More from {escape(site.short, True)}" data-out="Out of stock">
+    <div id="cat" class="{size}" data-mir-catalog data-href="shop.html?add={{name}}" data-other="More from {escape(site.short, True)}" data-out="Out of stock">
       <div data-mir-list>{groups}</div>
       <template data-mir-group><div class="grp"><h2 data-f="group"></h2><ul class="cards four" data-f="items"></ul></div></template>
       <template data-mir-item><li class="pc"><a class="pc-a" data-f="link"><span class="pc-ph"><img data-f="img" alt=""></span><span class="pc-t"><b data-f="name"></b><span data-f="price"></span></span></a></li></template>
@@ -111,8 +116,9 @@ def shop_page(site, items: list[dict], cats: list[str], *, popular: str, wa: str
     </div>
   </dialog>
   <form id="form" novalidate>
-  <section class="sec" id="order" aria-labelledby="h-basket" data-wa="{wa}" data-gig="{gig}" data-name="{escape(site.short, True)}" data-addon="{addon}" data-lead-days="{lead_days}">
+  <section class="sec is-empty" id="order" aria-labelledby="h-basket" data-wa="{wa}" data-gig="{gig}" data-name="{escape(site.short, True)}" data-addon="{addon}" data-lead-days="{lead_days}">
     <div class="wrap">
+      <p class="o-empty">{escape(empty[0])} <a class="lnk" href="#cat">{escape(empty[1])}</a></p>
       <ol class="osteps" id="steps" aria-label="Order steps">
         <li class="is-now" aria-current="step"><button type="button" data-go="1">Step 1: Your basket</button></li>
         <li><button type="button" data-go="2">Step 2: Delivery or pickup</button></li>

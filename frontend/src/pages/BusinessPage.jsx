@@ -23,7 +23,8 @@ import { useHandBuilt } from '../utils/handBuiltPages';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { GiftCardPanel } from '../components/marketplace/GiftCardForm';
-import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, Zap, CreditCard, Globe, Users, Gift } from 'lucide-react';
+import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, Zap, CreditCard, Globe, Users, Gift, ArrowLeft } from 'lucide-react';
+import { useReturnDestination } from '../hooks/useBackNavigation';
 import BusyTimes from '../components/business/BusyTimes';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -50,6 +51,7 @@ import { PAGE_SIZE } from '../components/pagebuilder/ServicesBlock';
 import SiteFooter from '../components/common/SiteFooter';
 import { getGigCover } from '../utils/gigAvailability';
 import { visitorHeaders } from '../utils/visitorId';
+import { countBusinessTap } from '../utils/tapKind';
 import BusinessCoverBand, { BusinessLogoMark } from '../components/marketplace/BusinessCoverBand';
 import SafeImage from '../components/common/SafeImage';
 import ConnectButton from '../components/marketplace/ConnectButton';
@@ -69,11 +71,14 @@ import useCoverScrim from '../hooks/useCoverScrim';
  * @param {boolean} preview  true when this is being shown inside the editor
  *   rather than being visited.
  */
+const BACK_PREFIXES = ['/businesses', '/services', '/stays'];
+
 const BusinessPage = ({ business: injected = null, preview = false, pageSlug: previewPage = null, onPagePick = null }) => {
   const { slug, pageSlug: routePage } = useParams();
   // One of the business's extra pages (backend ExtraPage), or the main page.
   const extraSlug = injected ? previewPage : routePage;
   const navigate = useNavigate();
+  const backTo = useReturnDestination(BACK_PREFIXES, '/businesses');
   const { t, i18n } = useTranslation();
   const { token, user } = useContext(AuthContext);
   const [fetched, setFetched] = useState(null);
@@ -382,6 +387,7 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
     biz.serves_nationwide && { key: 'serving', label: t('pageV3.serving', 'Serving'), value: t('serviceArea.chipNationwide', 'All of Israel') },
     biz.by_appointment ? { key: 'hours', label: t('businessPage.hours', 'Hours'), value: t('businessPage.byAppointment', 'By appointment only') }
       : biz.hours && { key: 'hours', label: t('businessPage.hours', 'Hours'), value: biz.hours },
+    biz.address && { key: 'address', label: t('wizard.address', 'Address'), value: biz.address },
     biz.lead_time && { key: 'notice', label: t('businessPage.leadTime', 'Notice needed'), value: biz.lead_time },
     biz.delivery_note && { key: 'delivery', label: t('businessPage.delivery', 'Delivery'), value: biz.delivery_note },
   ].filter(Boolean);
@@ -422,7 +428,10 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)', paddingTop: 'var(--nav-h, 68px)' }}
-      data-testid="business-page">
+      data-testid="business-page"
+      // Every button pressed, for the owner's taps (utils/tapKind.js). Not the owner, an admin or the editor.
+      onClickCapture={preview || user?.role === 'admin' || (user?.id && user.id === biz.owner_user_id)
+        ? undefined : (e) => countBusinessTap(API, biz.slug || biz.id, e)}>
       {/* B2 — the picture a share card shows. Logo first, else the first
           listing's cover, else PageMeta's branded default.
 
@@ -448,6 +457,18 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
           // by default - see utils/businessHost.js.
           canonicalUrl={businessCanonicalUrl(biz.slug, biz.id)}
         />
+      )}
+
+      {/* Back to the list the visitor came from (Tzvi, 12 Nov 2026). Not in the editor, and not on the
+          business's own address, where the page is their site, not one of ours. */}
+      {!preview && !currentBusinessHostSlug() && (
+        <div className="px-4 pt-4">
+          <button type="button" onClick={() => navigate(backTo, { state: { restoreScroll: true } })}
+            className={`${columnWidth} mx-auto text-sm text-gray-600 flex items-center gap-1 hover:text-[var(--brand-primary)]`}
+            data-testid="business-back">
+            <ArrowLeft size={14} className="rtl:rotate-180" /> {t('gigDetail.backToServices', 'Back to businesses')}
+          </button>
+        </div>
       )}
 
       {/* A draft preview link: say so, so nobody takes it for the live page. */}

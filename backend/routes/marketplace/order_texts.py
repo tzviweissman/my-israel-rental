@@ -98,6 +98,14 @@ def texts_on(biz: dict[str, Any]) -> bool:
     return bool(st.get("text_on") or st.get("text_number"))
 
 
+def hears_without_whatsapp(biz: dict[str, Any]) -> bool:
+    """The business hears about a new order from us, by text or by email, so the
+    customer is not also sent on to WhatsApp (Tzvi, 12 Nov 2026: "it shows a
+    link to whatsapp but her automated email or text is on")."""
+    from .order_emails import emails_on
+    return texts_on(biz) or emails_on(biz)
+
+
 def order_no(o: dict[str, Any]) -> str:
     # Orders from before 2 Nov 2026 have no number; the id's tail is stable.
     return f"#{o['order_no']}" if o.get("order_no") else "#" + str(o.get("_id", ""))[-6:].upper()

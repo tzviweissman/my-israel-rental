@@ -30,17 +30,18 @@ rows.
 """
 from __future__ import annotations
 
+import re
 import time
 from datetime import UTC, datetime, timedelta
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Request, Response
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from pydantic import BaseModel, Field
 
 from routes.deps import db, logger
-from utils.auth import optional_user
+from utils.auth import optional_user, verify_token
 from utils.rate_limit import check_rate
-from utils.view_tracking import il_day_of, is_bot as _is_bot_ua
+from utils.view_tracking import il_day_of, il_day_window, is_bot as _is_bot_ua
 
 router = APIRouter()
 
@@ -86,7 +87,48 @@ async def record_site_visit(request: Request, viewer=Depends(optional_user)) -> 
             )
     except Exception:  # noqa: BLE001
         logger.exception("site visit insert failed")
+    # Which part of the site (Tzvi, 12 Nov 2026: "everything we can should be tracked"). Never the path: the browser
+    # sends a section NAME from frontend/src/components/SiteVisitTracker.jsx, and only names in SECTIONS are kept,
+    # so a signing link or a staff key can never land in this table.
+    try:
+        section = str((await request.json()).get("section") or "")
+    except Exception:  # noqa: BLE001 - no body, or not JSON: an old page, counted above only
+        section = ""
+    if section in SECTIONS:
+        try:
+            if visitor:
+                await db[SECTION_COLLECTION].update_one(
+                    {"day": day, "visitor": visitor, "section": section},
+                    {"$setOnInsert": {"first_at": now}, "$inc": {"pageviews": 1}}, upsert=True)
+            else:
+                await db[SECTION_COLLECTION].insert_one(
+                    {"day": day, "visitor": None, "section": section, "first_at": now, "pageviews": 1})
+        except Exception:  # noqa: BLE001
+            logger.exception("section visit insert failed")
     return Response(status_code=204)
+
+
+SECTION_COLLECTION = "section_visits"
+# The names the browser may send, one per kind of page. Kept in step with sectionOf() in SiteVisitTracker.jsx.
+SECTIONS = frozenset({
+    "home", "stays", "listing", "businesses", "business_service", "business_page", "add_business", "jobs",
+    "restaurants", "requests", "post_request", "order", "signup", "dashboard", "info", "chat",
+})
+
+
+async def section_summary(day_keys: list[str] | None) -> list[dict]:
+    """Visitors and pages opened per section, busiest first. Visitors are distinct people across the window, as in
+    site_summary."""
+    match = {} if day_keys is None else {"day": {"$in": day_keys}}
+    out = []
+    async for row in db[SECTION_COLLECTION].aggregate([
+        {"$match": match},
+        {"$group": {"_id": "$section", "pageviews": {"$sum": "$pageviews"}, "named": {"$addToSet": "$visitor"},
+                    "anonymous": {"$sum": {"$cond": [{"$eq": ["$visitor", None]}, 1, 0]}}}},
+    ]):
+        out.append({"section": row["_id"], "pageviews": int(row["pageviews"]),
+                    "visitors": len([v for v in row["named"] if v]) + int(row["anonymous"])})
+    return sorted(out, key=lambda r: -r["visitors"])
 
 
 async def site_summary(day_keys: list[str] | None) -> dict:
@@ -126,6 +168,13 @@ async def ensure_site_visit_indexes() -> None:
         partialFilterExpression={"visitor": {"$type": "string"}}, background=True,
     )
     await db[COLLECTION].create_index("day", background=True)
+    await db[SECTION_COLLECTION].create_index(
+        [("day", 1), ("visitor", 1), ("section", 1)], unique=True,
+        partialFilterExpression={"visitor": {"$type": "string"}}, background=True,
+    )
+    await db[RESTAURANT_TAPS].create_index([("day", 1), ("place_id", 1)], background=True)
+    await db[PRESSES].create_index([("day", 1), ("section", 1)], background=True)
+    await db[STEPS].create_index([("day", 1), ("visitor", 1), ("flow", 1), ("step", 1)], unique=True, background=True)
     await db[SEARCHES].create_index(
         [("day", 1), ("visitor", 1), ("kind", 1), ("area", 1), ("what", 1)],
         unique=True, background=True,
@@ -214,3 +263,236 @@ async def site_demand(response: Response) -> dict:
         _DEMAND_CACHE["at"] = now
     response.headers["Cache-Control"] = "public, max-age=300"
     return _DEMAND_CACHE["data"]
+
+
+# ---------------------------------------------------------------------------
+# The work the site did for businesses lately (Tzvi, 12 Nov 2026, from polsia.com's running "Replying to customer
+# emails..." line): the join page shows it one line at a time. Real rows only, from the texts and emails the site
+# sent (sms_log, email_log) in the last WORK_DAYS days, its automatic "we got your message" replies (away_replies) and the replies it drafted
+# for a customer left waiting (lead_nudges). Nothing that names anyone: the kind of message, text or email, the
+# business's area and when. Fewer than MIN_SHOWN rows in the window and the line is not shown at all.
+# ---------------------------------------------------------------------------
+
+_WORK_CACHE: dict = {"at": 0.0, "data": None}
+WORK_DAYS = 30
+WORK_SHOWN = 12
+
+
+def _work_kind(who: str, kind: str) -> str | None:
+    """What a text or email was, in the few kinds the page names. None: not shown."""
+    kind = kind or ""
+    if "review" in kind:
+        return "review_asked"
+    if "reminder" in kind:
+        return "reminder_sent"
+    if who == "business":
+        return "order_alert" if kind.split("_")[0] in ("order", "booking", "quote") else None
+    if who == "customer":
+        if "declined" in kind:
+            return None
+        return "confirmed" if "confirmed" in kind else "received"
+    return None
+
+
+async def _work_rows() -> list[dict]:
+    since = datetime.now(UTC) - timedelta(days=WORK_DAYS)
+    iso = since.isoformat()
+    rows: list[dict] = []
+    for coll, channel in (("sms_log", "text"), ("email_log", "email")):
+        async for r in db[coll].find({"at": {"$gte": iso}}, {"_id": 0, "who": 1, "kind": 1, "business_id": 1, "at": 1}
+                                     ).sort("at", -1).limit(200):
+            k = _work_kind(r.get("who") or "", r.get("kind") or "")
+            if k:
+                rows.append({"kind": k, "channel": channel, "business_id": r.get("business_id"), "at": r.get("at")})
+    for coll, k in (("away_replies", "auto_reply"), ("lead_nudges", "reply_drafted")):
+        async for r in db[coll].find({}, {"_id": 0, "business_id": 1, "at": 1}).sort("at", -1).limit(100):
+            at = r.get("at")
+            at = at.isoformat() if isinstance(at, datetime) else str(at or "")
+            if at >= iso:
+                rows.append({"kind": k, "channel": "", "business_id": r.get("business_id"), "at": at})
+    rows.sort(key=lambda r: r["at"], reverse=True)
+    return rows
+
+
+@router.get("/site/work")
+async def site_work(response: Response) -> dict:
+    """The latest work done for businesses, anonymised: [{kind, channel, area, at}], newest first. Cached two
+    minutes. Empty when there is too little to show."""
+    now = time.time()
+    if _WORK_CACHE["data"] is None or now - _WORK_CACHE["at"] > 120:
+        rows = await _work_rows()
+        ids = list({r["business_id"] for r in rows[:WORK_SHOWN] if r.get("business_id")})
+        areas: dict = {}
+        if ids:
+            async for b in db.businesses.find({"_id": {"$in": ids}}, {"areas": 1}):
+                areas[b["_id"]] = ((b.get("areas") or [""])[0]) or ""
+        events = [{"kind": r["kind"], "channel": r["channel"], "area": areas.get(r.get("business_id"), ""), "at": r["at"]}
+                  for r in rows[:WORK_SHOWN]]
+        _WORK_CACHE["data"] = {"events": events if len(rows) >= MIN_SHOWN else []}
+        _WORK_CACHE["at"] = now
+    response.headers["Cache-Control"] = "public, max-age=60"
+    return _WORK_CACHE["data"]
+
+
+# ---------------------------------------------------------------------------
+# Restaurant taps (Tzvi, 12 Nov 2026: "i cant see if anyone is using the restaurants"). One row per tap on a
+# restaurant card's Call, WhatsApp, Directions, Website or Order button: which place, which button, the day and the
+# anonymous browser id. Same privacy rule as visits: no IP, no account. The admin Restaurants tab reads it.
+# ---------------------------------------------------------------------------
+
+RESTAURANT_TAPS = "restaurant_taps"
+
+
+class RestaurantTapIn(BaseModel):
+    place_id: str
+    kind: Literal["call", "whatsapp", "directions", "website", "order"]
+
+
+@router.post("/site/restaurant-tap", status_code=204)
+async def record_restaurant_tap(body: RestaurantTapIn, request: Request, viewer=Depends(optional_user)) -> Response:
+    """Note one tap. Always 204, like a visit."""
+    if _is_bot(request) or (viewer or {}).get("role") == "admin":
+        return Response(status_code=204)
+    try:
+        check_rate(request, bucket="restaurant-tap", limit=60, window_seconds=60)
+    except Exception:  # noqa: BLE001 - over the limit: drop it, quietly
+        return Response(status_code=204)
+    now = datetime.now(UTC)
+    visitor = (request.headers.get("X-Visitor-Id") or "").strip()[:_MAX_VISITOR_LEN] or None
+    try:
+        await db[RESTAURANT_TAPS].insert_one({"day": il_day_of(now), "at": now, "place_id": body.place_id[:120],
+                                              "kind": body.kind, "visitor": visitor})
+    except Exception:  # noqa: BLE001
+        logger.exception("restaurant tap insert failed")
+    return Response(status_code=204)
+
+
+async def restaurant_usage(days: int) -> dict:
+    """The restaurants section over the last `days` Israel days: visitors and pages opened, searches, taps by button,
+    and the ten most tapped places with their names."""
+    _, keys = il_day_window(days)
+    pages = next((s for s in await section_summary(keys) if s["section"] == "restaurants"),
+                 {"visitors": 0, "pageviews": 0})
+    by_kind = {r["_id"]: r["n"] for r in await db[RESTAURANT_TAPS].aggregate([
+        {"$match": {"day": {"$in": keys}}}, {"$group": {"_id": "$kind", "n": {"$sum": 1}}}]).to_list(10)}
+    top = await db[RESTAURANT_TAPS].aggregate([
+        {"$match": {"day": {"$in": keys}}},
+        {"$group": {"_id": "$place_id", "n": {"$sum": 1}, "people": {"$addToSet": "$visitor"}}},
+        {"$sort": {"n": -1}}, {"$limit": 10}]).to_list(10)
+    names = {d["place_id"]: (d.get("contact") or {}) for d in await db.restaurants.find(
+        {"place_id": {"$in": [t["_id"] for t in top]}}, {"place_id": 1, "contact.name_en": 1, "contact.name_he": 1}
+    ).to_list(10)}
+    return {
+        "days": days, "visitors": pages["visitors"], "pageviews": pages["pageviews"],
+        "taps": sum(by_kind.values()), "taps_by_kind": by_kind,
+        "top": [{"place_id": t["_id"], "taps": t["n"], "people": len([p for p in t["people"] if p]),
+                 "name": names.get(t["_id"], {}).get("name_en") or names.get(t["_id"], {}).get("name_he") or t["_id"]}
+                for t in top],
+    }
+
+
+@router.get("/admin/site/sections")
+async def admin_sections(days: int = 30, payload: dict = Depends(verify_token)) -> dict:
+    """Each part of the site, busiest first, over the last `days` Israel days (1 = today)."""
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    days = max(1, min(int(days), 365))
+    _, keys = il_day_window(days)
+    first = await db[SECTION_COLLECTION].find_one({}, {"day": 1}, sort=[("day", 1)])
+    return {"days": days, "since": (first or {}).get("day"), "sections": await section_summary(keys),
+            "presses": await press_summary(keys), "steps": await step_summary(keys)}
+
+
+# ---------------------------------------------------------------------------
+# Button presses and form steps across the site (Tzvi, 12 Nov 2026: "Yes, all of it", after the business pages).
+# A press: which part of the site, what kind of button and the words on it (frontend/src/utils/tapKind.js), never
+# the path. Not in the dashboard or chats, whose buttons can carry a customer's name. A step: how far a visitor got
+# in signing up, adding a business or ordering, once per visitor per day per step, so the admin sees where people
+# stop. Same privacy rule as visits: the anonymous browser id, no IP, no account.
+# ---------------------------------------------------------------------------
+
+PRESSES = "site_presses"
+STEPS = "site_steps"
+PRESS_SECTIONS = SECTIONS - {"dashboard", "chat"}
+PRESS_KINDS = Literal["whatsapp", "phone", "email", "directions", "instagram", "facebook", "tiktok", "order", "button"]
+FLOW_STEPS = {
+    "signup": ("open", "details", "done"),
+    "add_business": ("open", "2", "3", "4", "done"),
+    "order": ("open", "basket", "done"),
+}
+
+
+def clean_label(raw: str | None) -> str | None:
+    """The words on a button, at most 40 characters. None when they could be someone's email or phone number."""
+    v = " ".join((raw or "").split())[:40]
+    return None if not v or "@" in v or re.search(r"\d{5,}", v.replace(" ", "").replace("-", "")) else v
+
+
+class PressIn(BaseModel):
+    section: str = Field(max_length=40)
+    kind: PRESS_KINDS
+    label: str | None = Field(None, max_length=80)
+
+
+class StepIn(BaseModel):
+    flow: Literal["signup", "add_business", "order"]
+    step: str = Field(max_length=12)
+
+
+def _counted(request: Request, viewer, bucket: str) -> bool:
+    if _is_bot(request) or (viewer or {}).get("role") == "admin":
+        return False
+    try:
+        check_rate(request, bucket=bucket, limit=150, window_seconds=600)
+    except Exception:  # noqa: BLE001 - over the limit: drop it, quietly
+        return False
+    return True
+
+
+@router.post("/site/press", status_code=204)
+async def record_press(body: PressIn, request: Request, viewer=Depends(optional_user)) -> Response:
+    """Note one button pressed. Always 204, like a visit."""
+    if body.section in PRESS_SECTIONS and _counted(request, viewer, "site-press"):
+        now = datetime.now(UTC)
+        visitor = (request.headers.get("X-Visitor-Id") or "").strip()[:_MAX_VISITOR_LEN] or None
+        try:
+            await db[PRESSES].insert_one({"day": il_day_of(now), "at": now, "section": body.section, "kind": body.kind,
+                                          "label": clean_label(body.label), "visitor": visitor})
+        except Exception:  # noqa: BLE001
+            logger.exception("press insert failed")
+    return Response(status_code=204)
+
+
+@router.post("/site/step", status_code=204)
+async def record_step(body: StepIn, request: Request, viewer=Depends(optional_user)) -> Response:
+    """Note how far someone got in a form. Needs the browser id, or one person could not be told from many."""
+    visitor = (request.headers.get("X-Visitor-Id") or "").strip()[:_MAX_VISITOR_LEN]
+    if visitor and body.step in FLOW_STEPS[body.flow] and _counted(request, viewer, "site-step"):
+        now = datetime.now(UTC)
+        try:
+            await db[STEPS].update_one({"day": il_day_of(now), "visitor": visitor, "flow": body.flow, "step": body.step},
+                                       {"$setOnInsert": {"at": now}}, upsert=True)
+        except Exception:  # noqa: BLE001 - a duplicate race or a lost metric, never an error
+            pass
+    return Response(status_code=204)
+
+
+async def press_summary(day_keys: list[str]) -> list[dict]:
+    """The 40 most pressed buttons over the window: part of the site, kind, words, presses and people."""
+    rows = await db[PRESSES].aggregate([
+        {"$match": {"day": {"$in": day_keys}}},
+        {"$group": {"_id": {"s": "$section", "k": "$kind", "l": "$label"}, "n": {"$sum": 1},
+                    "people": {"$addToSet": "$visitor"}}},
+        {"$sort": {"n": -1}}, {"$limit": 40},
+    ]).to_list(40)
+    return [{"section": r["_id"]["s"], "kind": r["_id"]["k"], "label": r["_id"].get("l"), "presses": r["n"],
+             "people": len([p for p in r["people"] if p])} for r in rows]
+
+
+async def step_summary(day_keys: list[str]) -> dict:
+    """Per form, distinct people who reached each step, in the form's own order."""
+    got = {(r["_id"]["f"], r["_id"]["s"]): len(r["v"]) for r in await db[STEPS].aggregate([
+        {"$match": {"day": {"$in": day_keys}}},
+        {"$group": {"_id": {"f": "$flow", "s": "$step"}, "v": {"$addToSet": "$visitor"}}},
+    ]).to_list(100)}
+    return {flow: [{"step": s, "people": got.get((flow, s), 0)} for s in steps] for flow, steps in FLOW_STEPS.items()}

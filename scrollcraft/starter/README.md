@@ -70,6 +70,17 @@ build that comes out too close to another.
    shop.js), each item's rules (3l), and the deal shown where the owner's
    prices make it real (3j).
 
+   The starter's shop (`shopkit.shop_page()`, `shop.js`, `catalog.js`) lays
+   itself out by the number of products (shop research, 13 Nov 2026): up to 6
+   are big cards, 7 to 40 are rows like the food apps, more than 40 sit two to
+   a row with sort, "hide sold out" and Show more after 24. From 20 products
+   there is a search box; past 4 kinds an "All" button lists every kind with
+   its count; the kinds row stays at the top and lights up where you are. A
+   card's Add turns into − 1 +, the phone bar appears only once something is
+   in the basket, and an empty basket is one line. "Most ordered" shows only
+   when the page carries real order data in `#mir-popular` (nothing supplies it
+   yet). Sites built before this keep their own copies and do not change.
+
 6. **Check in the background, all pages at once**, from the first draft:
    `clipped.mjs` and `readable.mjs` per page, run in parallel. Then the wow
    gate (3n) before anything is shown.

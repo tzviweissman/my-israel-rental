@@ -442,3 +442,8 @@ label.chip { display: inline-flex; align-items: center; position: relative; }
 }
 html:has(.rooms) { scroll-behavior: auto; }
 #who video { height: min(28rem, 50svh); }
+
+/* order form: iPhone zooms into any field under 16px, and a grid cell must be allowed to shrink so fields never overlap */
+#form input, #form select, #form textarea, .fld { font-size: 16px; }
+.form > *, .form .card, .form .card > div, .sum { min-width: 0; }
+.sent.bad { font-weight: 700; }

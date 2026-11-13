@@ -14,7 +14,9 @@ Cards are worked out from what already exists, nothing is copied:
   * quote requests and prices (db.quote_requests): new / quoted / won /
     lost from their status;
   * leads the business adds by hand (db.leads), for a phone call or a
-    walk-in: whatever stage it puts them in.
+    walk-in: whatever stage it puts them in;
+  * emails sent or forwarded to the business's own address
+    (email_inbox.py): "new" until answered, with Claude's draft reply.
 
 The business can move any card. A move is kept with the stage the card
 had when it was moved, and holds until the enquiry itself changes (the
@@ -36,10 +38,11 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from routes.deps import db, verify_token
+from utils.rate_limit import check_rate
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
@@ -131,7 +134,7 @@ async def leads_board(business_id: str, user=Depends(verify_token)):
 
     async for q in db.quote_requests.find({"business_id": business_id, "updated_at": {"$gte": since}}):
         key = f"quote:{q['_id']}"
-        cards[key] = {"key": key, "source": "quote", "name": q.get("name") or "", "phone": q.get("phone"),
+        cards[key] = {"key": key, "source": "quote", "name": q.get("name") or "", "phone": q.get("phone"), "email": q.get("email"),
                       "title": gigs.get(q.get("gig_id"), "") or (q.get("description") or "")[:80],
                       "last_text": (q.get("description") or "")[:140], "created_at": q.get("created_at"),
                       "last_at": q.get("updated_at") or q.get("created_at"),
@@ -140,9 +143,13 @@ async def leads_board(business_id: str, user=Depends(verify_token)):
 
     async for ld in db.leads.find({"business_id": business_id}):
         key = f"lead:{ld['_id']}"
-        cards[key] = {"key": key, "source": "manual", "id": ld["_id"], "name": ld.get("name") or "", "phone": ld.get("phone"),
+        cards[key] = {"key": key, "source": "manual", "id": ld["_id"], "name": ld.get("name") or "", "phone": ld.get("phone"), "email": ld.get("email"),
                       "title": ld.get("note") or "", "last_text": "", "created_at": ld["created_at"],
                       "last_at": ld.get("updated_at") or ld["created_at"], "auto_stage": ld.get("stage", "new")}
+
+    # Emails to the business's own address (email_inbox.py).
+    from .email_inbox import email_cards
+    cards.update(await email_cards(business_id, since))
 
     moves = {m["key"]: m async for m in db.lead_moves.find({"business_id": business_id})}
     closed_cut = (datetime.now(UTC) - timedelta(days=CLOSED_KEEP_DAYS)).isoformat()
@@ -156,8 +163,150 @@ async def leads_board(business_id: str, user=Depends(verify_token)):
             continue
         c.pop("replied", None)
         out.append(c)
+    now_iso = datetime.now(UTC).isoformat()
+    for c in out:
+        c["next"] = next_step(c, now_iso)
     out.sort(key=lambda c: c.get("last_at") or "", reverse=True)
-    return {"stages": list(STAGES), "leads": out, "counts": {s: sum(1 for c in out if c["stage"] == s) for s in STAGES}}
+    # The suggested reply a nudge or the owner asked for (lead_nudge.py).
+    from .lead_nudge import attach_drafts
+    await attach_drafts(business_id, out)
+    return {"stages": list(STAGES), "leads": out, "counts": {s: sum(1 for c in out if c["stage"] == s) for s in STAGES},
+            "found": await found_requests(biz, gigs)}
+
+
+def _days_since(iso: Optional[str], now_iso: str) -> float:
+    try:
+        return (datetime.fromisoformat(now_iso) - datetime.fromisoformat(iso)).total_seconds() / 86400
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def next_step(card: dict[str, Any], now_iso: str) -> Optional[str]:
+    """What the business should do about a card now (the "next best action"
+    of Apollo-style sales tools, Tzvi 12 Nov 2026), or None:
+
+        answer     they asked and are waiting for the business
+        follow_up  a price went out 2+ days ago and nothing came back
+        check_in   the business answered 3+ days ago and it went quiet
+
+    Pure, for tests."""
+    stage, waited = card.get("stage"), _days_since(card.get("last_at"), now_iso)
+    if stage == "new" or (stage == "replied" and card.get("last_from_customer")):
+        return "answer"
+    if stage == "quoted" and waited >= 2:
+        return "follow_up"
+    if stage == "replied" and waited >= 3:
+        return "check_in"
+    return None
+
+
+async def found_requests(biz: dict[str, Any], gigs: dict[str, str]) -> list[dict[str, Any]]:
+    """New leads to go and get: open posts on the Requests board from people
+    looking for what this business does (its categories and its listings'
+    categories), newest first, the business's own area first. Only the public
+    shape (requests._public): no phone, no email; the business answers on the
+    request page, in chat."""
+    from .requests import _poster_identity, _public
+    cats = set(biz.get("categories") or [])
+    if gigs:
+        cats |= {g.get("category") async for g in db.marketplace_gigs.find({"_id": {"$in": list(gigs)}}, {"category": 1}) if g.get("category")}
+    if not cats:
+        return []
+    since = (datetime.now(UTC) - timedelta(days=30)).isoformat()
+    docs = await db.requests.find({"status": "open", "hidden_by_admin": {"$ne": True}, "category": {"$in": list(cats)},
+                                   "post_kind": {"$ne": "have"}, "poster_user_id": {"$ne": biz.get("owner_user_id")},
+                                   "created_at": {"$gte": since}}).sort("created_at", -1).limit(30).to_list(30)
+    areas = {a.lower() for a in (biz.get("areas") or []) if isinstance(a, str)}
+    docs.sort(key=lambda d: (str(d.get("area") or "").lower() not in areas))   # stable: area first, still newest first
+    ids = await _poster_identity([d["poster_user_id"] for d in docs if d.get("poster_user_id")])
+    keep = ("id", "title", "description", "area", "category", "budget_type", "budget_amount", "budget_currency",
+            "preferred_date", "created_at", "poster_display_name", "poster_verified")
+    return [{k: p.get(k) for k in keep} for p in (_public(d, ids.get(d.get("poster_user_id"))) for d in docs[:12])]
+
+
+DraftGoal = Literal["answer", "follow_up", "check_in", "win_back", "introduce"]
+_GOAL_TEXT = {
+    "answer": "Reply to their enquiry: answer what they asked and offer one clear next step (a time, a price, a question that moves it on).",
+    "follow_up": "Follow up on the price that was sent and got no answer. Friendly, no pressure, make it easy to say yes or ask a question.",
+    "check_in": "Check in after the conversation went quiet. Short, helpful, one easy question to restart it.",
+    "win_back": "They decided not to go ahead. Thank them, leave the door open, and offer one reason to come back. No guilt.",
+    "introduce": "They posted publicly that they are looking for this. Introduce the business as the answer to exactly what they asked for, and suggest a next step.",
+}
+_DRAFT_SYSTEM = """You write short, personal messages that a small business owner in Israel copies and sends to one potential customer.
+Rules:
+- Write as the business, in first person ("we" or "I"), warm and human, like a real person typed it. Not salesy, no hype words.
+- Make it specific to what this person asked for. Mention their actual need in the first line.
+- Use ONLY facts from BUSINESS FACTS and the LEAD. Never invent prices, dates, discounts, guarantees or experience.
+- 50 to 110 words. Plain text. No emojis, no hashtags, no long dashes (use a comma or a full stop), no placeholders in brackets.
+- End with one clear, easy next step. Sign off with the business name only, never a person's name.
+Return ONLY JSON: {"subject": "<email subject, under 60 characters>", "body": "<the message>"}"""
+
+
+def parse_draft(raw: str) -> dict[str, str]:
+    """{"subject", "body"} from the model's reply, long dashes swapped for
+    commas (brand/voice.md bans them). Empty when unreadable. Pure, for tests."""
+    import json
+    import re
+    m = re.search(r"\{.*\}", raw or "", re.S)
+    try:
+        d = json.loads(m.group(0)) if m else {}
+    except ValueError:
+        d = {}
+    clean = lambda s: re.sub(r"\s*[—–]\s*", ", ", str(s or "")).strip()  # noqa: E731
+    return {"subject": clean(d.get("subject"))[:120], "body": clean(d.get("body"))[:2000]}
+
+
+class DraftIn(BaseModel):
+    key: Optional[str] = Field(None, max_length=200)
+    request_id: Optional[str] = Field(None, max_length=80)
+    goal: DraftGoal = "answer"
+    lang: Literal["en", "he"] = "en"
+    extra: str = Field("", max_length=300)
+
+
+@router.post("/businesses/{business_id}/leads/write")
+async def draft_message(business_id: str, body: DraftIn, request: Request, user=Depends(verify_token)):
+    """A personal message for one lead, written by Claude from what the
+    business published and what the lead asked, for the owner to read, edit,
+    copy and send themselves. Nothing is sent from here."""
+    biz = await _owned(business_id, user)
+    check_rate(request, bucket="lead-draft-biz-day", limit=80, window_seconds=86400, key_extra=business_id, ip_agnostic=True)
+    if body.request_id:
+        r = await db.requests.find_one({"_id": body.request_id, "status": "open", "hidden_by_admin": {"$ne": True}})
+        if not r:
+            raise HTTPException(status_code=404, detail="That request is no longer open")
+        lead = {"posted_on_requests_board": r.get("title"), "details": (r.get("description") or "")[:800],
+                "area": r.get("area"), "wanted_date": r.get("preferred_date"),
+                "budget": r.get("budget_amount") if r.get("budget_type") == "fixed" else r.get("budget_type")}
+    elif body.key:
+        board = await leads_board(business_id, user)
+        c = next((x for x in board["leads"] if x["key"] == body.key), None)
+        if not c:
+            raise HTTPException(status_code=404, detail="Lead not found")
+        lead = {"name": c.get("name"), "about": c.get("title"), "their_last_message": c.get("last_text"),
+                "stage": c.get("stage"), "price_we_sent_ils": c.get("price"), "last_contact": c.get("last_at")}
+    else:
+        raise HTTPException(status_code=422, detail="Choose a lead")
+
+    from routes.deps import ANTHROPIC_API_KEY
+    from utils.llm import LlmChat, UserMessage
+    from .ask import facts_for
+    if not ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=503, detail="Message writing is not available right now")
+    import json
+    prompt = (f"Write in {'Hebrew' if body.lang == 'he' else 'English'}.\n\nGOAL: {_GOAL_TEXT[body.goal]}\n\n"
+              f"BUSINESS FACTS:\n{await facts_for(biz)}\n\nLEAD:\n{json.dumps(lead, ensure_ascii=False, default=str)}"
+              + (f"\n\nTHE OWNER ALSO WANTS: {body.extra.strip()}" if body.extra.strip() else ""))
+    chat = LlmChat(api_key=ANTHROPIC_API_KEY, session_id=str(uuid.uuid4()), system_message=_DRAFT_SYSTEM)
+    # Sonnet, as in ask.py: Haiku's Hebrew came back with broken words.
+    chat.with_model("anthropic", "claude-sonnet-4-6").with_params(max_tokens=700)
+    try:
+        out = parse_draft(await chat.send_message(UserMessage(text=prompt)))
+    except Exception as exc:  # noqa: BLE001 - the owner can still write it themselves
+        raise HTTPException(status_code=502, detail="Could not write it right now. Try again.") from exc
+    if not out["body"]:
+        raise HTTPException(status_code=502, detail="Could not write it right now. Try again.")
+    return out
 
 
 class MoveIn(BaseModel):
@@ -192,6 +341,7 @@ async def move_lead(business_id: str, body: MoveIn, user=Depends(verify_token)):
 class LeadIn(BaseModel):
     name: str = Field(..., min_length=1, max_length=80)
     phone: Optional[str] = Field(None, max_length=40)
+    email: Optional[str] = Field(None, max_length=120)
     note: str = Field("", max_length=300)
     stage: Stage = "new"
 
@@ -203,6 +353,7 @@ async def add_lead(business_id: str, body: LeadIn, user=Depends(verify_token)):
         raise HTTPException(status_code=400, detail="Up to 1,000 leads you add yourself. Delete some old ones first.")
     now = datetime.now(UTC).isoformat()
     doc = {"_id": str(uuid.uuid4()), "business_id": business_id, "name": body.name.strip(), "phone": (body.phone or "").strip() or None,
+           "email": (body.email or "").strip() or None,
            "note": body.note.strip(), "stage": body.stage, "by": user["user_id"], "created_at": now, "updated_at": now}
     await db.leads.insert_one(doc)
     return {"key": f"lead:{doc['_id']}"}

@@ -22,6 +22,7 @@ import SphereImageGrid from '../ui/img-sphere';
 import useHomeShowcase, { propertyPhoto } from '../home/useHomeShowcase';
 import { getGigCover } from '../../utils/gigAvailability';
 import { sizedImage } from '../../utils/cdnImage';
+import WorkForYou from './WorkForYou';
 
 const WANT = 36;
 
@@ -101,7 +102,7 @@ export default function SignupSphere() {
         </motion.blockquote>
       </div>
 
-      <div ref={boxRef} className="relative z-10 mt-4 flex min-h-[220px] flex-1 items-center justify-center">
+      <div ref={boxRef} className="relative z-10 mt-4 flex min-h-[220px] [@media(max-height:800px)]:min-h-[120px] flex-1 items-center justify-center">
         {loaded && images.length > 0 ? (
           <motion.div
             initial={from({ opacity: 0, scale: 0.9 })}
@@ -125,6 +126,8 @@ export default function SignupSphere() {
           <div className="h-48 w-48 rounded-full border border-[var(--brand-border)]" aria-hidden="true" />
         )}
       </div>
+      {/* What the site does for a business, below the sphere, which shrinks to make room (12 Nov 2026). */}
+      <WorkForYou className="relative z-10 mt-4 max-w-[520px]" />
       </div>
     </div>
   );

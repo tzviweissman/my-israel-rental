@@ -123,10 +123,13 @@ async def email_customer_received(o: dict[str, Any], biz: dict[str, Any]) -> Non
     html = (f"<p>{_esc(line)}</p><p dir='auto'>{_esc_ml(o.get('items') or '')}</p><p>{_esc(facts)}</p>"
             + (note_html(biz) if auto else "")
             + f"<p>{pays} {_esc(pay)}</p>{links}")
+    from .order_explore import email_html as explore_html
+    extra = await explore_html(o, biz, lang)
     name = _biz_name(biz, lang)
     subject = f"ההזמנה שלך {order_no(o)} מ{name}" if he else f"Your order {order_no(o)} from {name}"
     await _email(o["customer_email"], subject, html, tag="order-confirmation",
-                 button=("מעקב אחר ההזמנה" if he else "Follow your order", track_link(o)), lang=lang, log=_log(o, "customer", "order_received"))
+                 button=("מעקב אחר ההזמנה" if he else "Follow your order", track_link(o)), lang=lang, log=_log(o, "customer", "order_received"),
+                 after_button=extra)
 
 
 async def email_customer_decision(o: dict[str, Any], biz: dict[str, Any], confirm: bool) -> None:
@@ -141,11 +144,13 @@ async def email_customer_decision(o: dict[str, Any], biz: dict[str, Any], confir
         subject = f"ההזמנה שלך {no} מ{name} אושרה" if he else f"Your order {no} from {name} is confirmed"
         html = f"<p>{_esc(line)}</p><p dir='auto'>{_esc_ml(o.get('items') or '')}</p>" + note_html(biz)
         button = ("מעקב אחר ההזמנה" if he else "Follow your order", track_link(o))
+        from .order_explore import email_html as explore_html
+        extra = await explore_html(o, biz, lang)
     else:
         subject = f"ההזמנה שלך {no} מ{name}" if he else f"Your order {no} from {name}"
-        html, button = f"<p>{_esc(line)}</p>", None
+        html, button, extra = f"<p>{_esc(line)}</p>", None, ""
     await _email(o["customer_email"], subject, html, tag="order-confirmed" if confirm else "order-declined", button=button,
-                 lang=lang, log=_log(o, "customer", "order_confirmed" if confirm else "order_declined"))
+                 lang=lang, log=_log(o, "customer", "order_confirmed" if confirm else "order_declined"), after_button=extra)
 
 
 async def email_owner_new_booking(gig: dict[str, Any], booking: dict[str, Any], customer_name: str, summary: str) -> None:

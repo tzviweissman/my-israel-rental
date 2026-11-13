@@ -22,6 +22,7 @@ from pydantic import BaseModel, Field
 from pymongo.errors import DuplicateKeyError
 
 from routes.deps import db, verify_token
+from routes.site_visits import restaurant_usage
 from utils.rate_limit import check_rate
 from utils.restaurant_places import CATEGORIES, CITIES, CITY_HE, NEIGHBOURHOODS, REGIONS, SLUG_TO_CITY, city_slug
 
@@ -527,6 +528,8 @@ async def admin_stats(payload: dict = Depends(restaurant_admin)):
         "pending_submissions": await db.restaurant_submissions.count_documents({"status": "pending"}),
         "open_reports": await db.restaurant_reports.count_documents({"status": "open"}),
         "pending_claims": await db.restaurant_claims.count_documents({"status": "pending"}),
+        # Who is using the section (Tzvi, 12 Nov 2026): visits and taps, routes/site_visits.py.
+        "usage": {"7": await restaurant_usage(7), "30": await restaurant_usage(30)},
     }
 
 

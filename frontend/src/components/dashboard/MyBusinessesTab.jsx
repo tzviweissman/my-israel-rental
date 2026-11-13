@@ -475,7 +475,7 @@ export default function MyBusinessesTab({ API, token }) {
                       </button>
                     )}
                     {adSummary[b.id].week_visits > 0 && (
-                      <span data-testid={`business-ad-visits-${b.id}`}>{t('ads.nudgeVisits', 'Visits from your ads this week: {{count}}', { count: adSummary[b.id].week_visits })}</span>
+                      <span data-testid={`business-ad-visits-${b.id}`}>{t('ads.nudgeVisits', 'Visits from your ads this week: {{n}}', { n: adSummary[b.id].week_visits })}</span>
                     )}
                   </div>
                 )}

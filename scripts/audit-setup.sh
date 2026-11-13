@@ -49,7 +49,8 @@ py_setup() {
   python3 -m venv backend/.venv &&
   grep -v -E '^(jq)==' backend/requirements.txt > /tmp/req.txt &&
   backend/.venv/bin/pip install -q --upgrade pip &&
-  backend/.venv/bin/pip install -q -r /tmp/req.txt pytest
+  # pytest-asyncio and mongomock-motor: three test files did not collect without them (audits, 20 Oct to 10 Nov)
+  backend/.venv/bin/pip install -q -r /tmp/req.txt pytest pytest-asyncio==1.4.0 mongomock-motor==0.0.36
 }
 step "backend packages (backend/.venv)" py_setup
 PY="$ROOT/backend/.venv/bin/python"

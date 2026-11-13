@@ -49,6 +49,7 @@ function Editor({ row, onSave, onCancel }) {
 export default function RestaurantsTab({ token }) {
   const auth = { headers: { Authorization: `Bearer ${token}` } };
   const [stats, setStats] = useState(null);
+  const [usageDays, setUsageDays] = useState('7');
   const [subs, setSubs] = useState([]);
   const [rows, setRows] = useState(null);
   const [total, setTotal] = useState(0);
@@ -159,6 +160,52 @@ export default function RestaurantsTab({ token }) {
               <div className="text-2xl font-semibold">{v}</div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Who is using it (Tzvi, 12 Nov 2026: "i cant see if anyone is using the restaraunts"); routes/site_visits.py. */}
+      {stats?.usage && (
+        <div className="rounded-xl border bg-white p-4" style={{ borderColor: BORDER }} data-testid="admin-restaurant-usage">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold">Who is using the restaurants</h3>
+            <div className="flex gap-1">
+              {['7', '30'].map((d) => (
+                <button key={d} type="button" onClick={() => setUsageDays(d)} aria-pressed={usageDays === d}
+                  className="rounded-full border px-3 py-1 text-xs"
+                  style={usageDays === d ? { background: '#000', color: '#fff', borderColor: '#000' } : { borderColor: BORDER }}>
+                  <span dir="ltr">{d} days</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          {(() => {
+            const u = stats.usage[usageDays];
+            const k = u.taps_by_kind || {};
+            return (
+              <>
+                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8" dir="ltr">
+                  {[['People who opened it', u.visitors], ['Pages opened', u.pageviews], ['Taps on a restaurant', u.taps],
+                    ['Call', k.call || 0], ['WhatsApp', k.whatsapp || 0], ['Directions', k.directions || 0],
+                    ['Website', k.website || 0], ['Order', k.order || 0]].map(([label, v]) => (
+                    <div key={label}><div className="text-xs text-gray-500">{label}</div><div className="text-xl font-semibold">{v}</div></div>
+                  ))}
+                </div>
+                {u.top.length > 0 && (
+                  <table className="mt-3 w-full text-sm">
+                    <thead><tr className="text-xs text-gray-500"><th className="text-start">Most tapped</th><th className="text-end">Taps</th><th className="text-end">People</th></tr></thead>
+                    <tbody>
+                      {u.top.map((r) => (
+                        <tr key={r.place_id} className="border-t" style={{ borderColor: BORDER }}>
+                          <td dir="auto">{r.name}</td><td className="text-end font-semibold">{r.taps}</td><td className="text-end">{r.people}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+                <p className="mt-2 text-xs text-gray-500">Counted from 12 Nov 2026. Admins are not counted.</p>
+              </>
+            );
+          })()}
         </div>
       )}
 

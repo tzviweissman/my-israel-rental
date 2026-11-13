@@ -45,7 +45,8 @@ from utils.rate_limit import check_rate
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
 MAX_PRODUCTS = 30
-MAX_TEXT = 8000
+# Room for a website's home page and a few of its own pages (12 Nov 2026).
+MAX_TEXT = 16000
 MAX_PAGES = 6
 
 _SYSTEM = """You read a small business's own price list and return its products as JSON.
@@ -226,6 +227,11 @@ does not say):
   area           the city it serves, in English (e.g. "Jerusalem").
   whatsapp       the phone or WhatsApp number exactly as written.
   contact_email  an email address if one is given.
+  hours          the opening hours exactly as stated, as one short line in the
+                 advert's language ("Sun to Thu 9:00 to 18:00, Fri 9:00 to 13:00"),
+                 at most 200 characters; "" when not given.
+  address        the street address as written (street, number, city); "" when
+                 not given. Never the city alone.
   items          array, at most 15, of what is offered with a price, in the
                  order given: {{"name": string <= 60 chars, "price": number or
                  null, "currency": "ILS" or "USD", "description": string, empty
@@ -323,6 +329,8 @@ async def extract_business(
         "area": s("area", 60),
         "whatsapp": s("whatsapp", 30),
         "contact_email": s("contact_email", 120),
+        "hours": s("hours", 200),
+        "address": s("address", 200),
         "items": items,
     }
     # Where the logo is on the flyer, so the page can cut it out for the logo spot (Tzvi, 7 Nov 2026).
@@ -474,8 +482,13 @@ def _hours(periods: list) -> dict:
         day = _DAY_KEYS[o["day"] % 7]
         if out[day]:
             continue
-        out[day] = [{"start": f"{o.get('hour', 0):02d}:{o.get('minute', 0):02d}",
-                     "end": f"{c.get('hour', 0):02d}:{c.get('minute', 0):02d}"}]
+        start = f"{o.get('hour', 0):02d}:{o.get('minute', 0):02d}"
+        end = f"{c.get('hour', 0):02d}:{c.get('minute', 0):02d}"
+        # Open past midnight (20:00 to 02:00): a window ending before it starts reads as no hours at
+        # all to the slot finder (gigs.py), so the day runs to 23:59 (9 Nov 2026 code review).
+        if c.get("day", o["day"]) != o["day"] or end <= start:
+            end = "23:59"
+        out[day] = [{"start": start, "end": end}]
     return out
 
 
@@ -537,11 +550,9 @@ async def lookup_business_details(request: Request, place_id: str, lang: str = "
 _PAGE_BYTES = 1_500_000
 
 
-async def _public_text(url: str) -> str:
-    """The page's title, description and (for a website) its readable words. Every hop is checked to be a
-    public host before it is fetched; nothing on our own network can be reached through this."""
-    import html as html_mod
-
+async def _fetch(url: str) -> tuple[str, str]:
+    """One public page: (its HTML, the address it ended on). Every hop is checked to be a public host before it
+    is fetched, so nothing on our own network can be reached through this. ("", url) when it cannot be read."""
     import httpx
 
     from utils.helpers import _is_public_ical_url
@@ -549,58 +560,217 @@ async def _public_text(url: str) -> str:
     async with httpx.AsyncClient(timeout=10, follow_redirects=False, headers=headers) as http:
         for _ in range(4):
             if not _is_public_ical_url(url):
-                return ""
+                return "", url
             r = await http.get(url)
             if r.is_redirect and r.headers.get("location"):
                 url = str(r.url.join(r.headers["location"]))
                 continue
             break
         else:
-            return ""
+            return "", url
     if r.status_code >= 400 or "html" not in r.headers.get("content-type", ""):
-        return ""
-    page = r.text[:_PAGE_BYTES]
+        return "", url
+    return r.text[:_PAGE_BYTES], str(r.url)
 
-    def meta(name: str) -> str:
-        m = re.search(r'<meta[^>]+(?:property|name)=["\']' + re.escape(name) + r'["\'][^>]*content=["\']([^"\']*)', page, re.I) \
-            or re.search(r'<meta[^>]+content=["\']([^"\']*)["\'][^>]*(?:property|name)=["\']' + re.escape(name), page, re.I)
-        return html_mod.unescape(m.group(1)).strip() if m else ""
 
+def _meta(page: str, name: str) -> str:
+    import html as html_mod
+    m = re.search(r'<meta[^>]+(?:property|name)=["\']' + re.escape(name) + r'["\'][^>]*content=["\']([^"\']*)', page, re.I) \
+        or re.search(r'<meta[^>]+content=["\']([^"\']*)["\'][^>]*(?:property|name)=["\']' + re.escape(name), page, re.I)
+    return html_mod.unescape(m.group(1)).strip() if m else ""
+
+
+def _words(page: str, limit: int = 6000) -> str:
+    """The page's title, description and readable words."""
+    import html as html_mod
     title = re.search(r"<title[^>]*>(.*?)</title>", page, re.I | re.S)
-    parts = [html_mod.unescape(title.group(1)).strip() if title else "", meta("og:title"), meta("og:description"), meta("description")]
+    parts = [html_mod.unescape(title.group(1)).strip() if title else "", _meta(page, "og:title"),
+             _meta(page, "og:description"), _meta(page, "description")]
     body = re.sub(r"(?is)<(script|style|noscript|svg)[^>]*>.*?</\1>", " ", page)
     body = html_mod.unescape(re.sub(r"(?s)<[^>]+>", " ", body))
-    parts.append(" ".join(body.split())[:6000])
+    parts.append(" ".join(body.split())[:limit])
     seen, out = set(), []
     for p in parts:
         if p and p not in seen:
             seen.add(p)
             out.append(p)
-    # Instagram and Facebook wrap names in invisible direction marks.
-    return re.sub("[‎‏‪-‮]", "", "\n".join(out))[:8000]
+    return re.sub("[‎‏‪-‮]", "", "\n".join(out))[:limit + 2000]
+
+
+async def _public_text(url: str) -> str:
+    page, _ = await _fetch(url)
+    return _words(page) if page else ""
+
+
+# The website's own pages worth reading after its home page (Tzvi, 12 Nov 2026: prices are often on a "Menu" page).
+_SUBPAGE = re.compile(r"menu|price|pricing|product|shop|store|service|treatment|about|contact|hour|order|catalog|"
+                      r"תפריט|מחיר|מוצר|חנות|שירות|טיפול|אודות|עלינו|צור.?קשר|שעות|הזמנ|קטלוג", re.I)
+SUBPAGES = 4
+
+
+def _same_site_links(page: str, base: str) -> list[str]:
+    """Links on the page to the same site whose address or words say menu, prices, products, about or contact."""
+    import html as html_mod
+    from urllib.parse import urljoin, urlparse
+    host = (urlparse(base).hostname or "").lower().removeprefix("www.")
+    home = urlparse(base).path.rstrip("/")
+    out: list[str] = []
+    for m in re.finditer(r"<a\b[^>]*href=[\"']([^\"']+)[\"'][^>]*>(.*?)</a>", page, re.I | re.S):
+        # "/contact#form" is the contact page; a bare "#top" is not a page at all.
+        href, label = html_mod.unescape(m.group(1)).split("#")[0].strip(), re.sub(r"(?s)<[^>]+>", " ", m.group(2))
+        if not href:
+            continue
+        u = urlparse(urljoin(base, href))
+        if u.scheme not in ("http", "https") or (u.hostname or "").lower().removeprefix("www.") != host:
+            continue
+        if re.search(r"\.(pdf|jpe?g|png|webp|gif|zip|mp4)$", u.path, re.I) or u.path.rstrip("/") in ("", home):
+            continue
+        if _SUBPAGE.search(u.path) or _SUBPAGE.search(label):
+            clean_url = f"{u.scheme}://{u.netloc}{u.path}"
+            if clean_url not in out:
+                out.append(clean_url)
+    return out[:SUBPAGES]
+
+
+def _pictures(page: str, base: str) -> dict[str, Any]:
+    """The business's own pictures on a page: its logo (a logo image, else the large site icon), the picture it
+    shows when shared (og:image), and photos from the page. Addresses only; nothing is downloaded here."""
+    import html as html_mod
+    from urllib.parse import urljoin, urlparse
+
+    def ok(src: str) -> str:
+        if not (src or "").strip():
+            return ""
+        url = urljoin(base, html_mod.unescape(src.strip()))
+        u = urlparse(url)
+        if u.scheme not in ("http", "https") or not u.hostname or re.search(r"\.(svg|gif|ico)(\?|$)", u.path, re.I):
+            return ""
+        # The site's own furniture, not its photos: arrows, buttons, backgrounds, badges.
+        if re.search(r"pixel|spacer|blank|tracking|1x1|sprite|placeholder|loader|avatar-default|arrow|btn|button|"
+                     r"[-_/]bg[-_.]|background|badge|stamp|slogan|shape|divider|separator|star|rating|flag|payment|"
+                     r"visa|mastercard|whatsapp|facebook|instagram|tiktok|youtube", url, re.I):
+            return ""
+        return url
+
+    logo = ""
+    for m in re.finditer(r"<img\b[^>]*>", page, re.I):
+        tag = m.group(0)
+        if re.search(r"(?:class|id|alt|src)=[\"'][^\"']*logo", tag, re.I):
+            src = re.search(r"\bsrc=[\"']([^\"']+)", tag, re.I)
+            logo = ok(src.group(1)) if src else ""
+            if logo:
+                break
+    if not logo:
+        icon = re.search(r"<link[^>]+rel=[\"'][^\"']*apple-touch-icon[^\"']*[\"'][^>]*href=[\"']([^\"']+)", page, re.I) \
+            or re.search(r"<link[^>]+href=[\"']([^\"']+)[\"'][^>]*rel=[\"'][^\"']*apple-touch-icon", page, re.I)
+        logo = ok(icon.group(1)) if icon else ""
+    cover = ok(_meta(page, "og:image") or _meta(page, "twitter:image"))
+    photos: list[str] = []
+    for m in re.finditer(r"<img\b[^>]*>", page, re.I):
+        tag = m.group(0)
+        src = re.search(r"\b(?:data-src|src)=[\"']([^\"']+)", tag, re.I)
+        url = ok(src.group(1)) if src else ""
+        w = re.search(r"\bwidth=[\"']?(\d+)", tag, re.I)
+        if not url or url in (logo, cover) or (w and int(w.group(1)) < 200) or re.search(r"logo|icon", tag, re.I):
+            continue
+        if url not in photos:
+            photos.append(url)
+    return {"logo": logo, "cover": cover, "photos": photos[:12]}
+
+
+_NOT_A_SITE = re.compile(r"(^|\.)(instagram|facebook|fb|tiktok|whatsapp|wa|google|apple|cdninstagram|fbcdn|meta|twitter|x|"
+                         r"youtube|youtu|threads)\.(com|me|be|net)$", re.I)
+
+
+def _links_in(text: str) -> list[str]:
+    """Websites named in a bio (a social page's own text): the business's site or its link-in-bio page."""
+    out = []
+    for m in re.finditer(r"(?:https?://)?(?:www\.)?([a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)+)(/[^\s\"'<>)]*)?", text, re.I):
+        host = m.group(1).lower()
+        if _NOT_A_SITE.search(host) or not re.search(r"\.(com|co\.il|co|il|net|org|me|io|shop|store|site|biz|info|ee|link|bio|page)$", host):
+            continue
+        url = f"https://{host}{(m.group(2) or '').rstrip('.,')}"
+        if url not in out:
+            out.append(url)
+    return out[:2]
 
 
 @router.post("/socials/read")
 async def read_socials(request: Request, payload: dict = Body(...), user=Depends(verify_token)):
     """Fill the sign-up from the business's own accounts. Saves nothing; returns the same fields as /ad/extract,
-    plus the tidied links and which of them could be read."""
+    plus the tidied links, which of them could be read, and the pictures found (Tzvi, 12 Nov 2026: "get as much
+    info as possible"): the website's home page and up to SUBPAGES of its menu, prices, about and contact pages;
+    each social page's bio and profile picture, and the website or link-in-bio page its bio names."""
     from utils.social_links import clean
     check_rate(request, bucket=f"socials_read:{user['user_id']}", limit=20, window_seconds=3600)
     links = clean(payload.get("links") or {})
     if not links:
         raise HTTPException(status_code=400, detail="Add your Instagram, Facebook, TikTok or website first.")
-    texts, read = [], []
-    for kind, url in links.items():
+    texts: list[str] = []
+    read: list[str] = []
+    pics: dict[str, Any] = {"logo": "", "cover": "", "photos": [], "profile": ""}
+
+    def take(found: dict[str, Any]) -> None:
+        pics["logo"] = pics["logo"] or found.get("logo") or ""
+        pics["cover"] = pics["cover"] or found.get("cover") or ""
+        for p in found.get("photos") or []:
+            if p not in pics["photos"] and p not in (pics["logo"], pics["cover"]):
+                pics["photos"].append(p)
+
+    async def site(url: str, label: str) -> bool:
+        page, end = await _fetch(url)
+        if not page:
+            return False
+        before = len(texts)
+        words = _words(page)
+        if len(words) > 40:
+            texts.append(f"From their {label} ({end}):\n{words}")
+        take(_pictures(page, end))
+        for sub in _same_site_links(page, end):
+            try:
+                sp, send = await _fetch(sub)
+            except Exception:  # noqa: BLE001 - one page that fails must not stop the rest
+                continue
+            if sp:
+                w = _words(sp, 3000)
+                if len(w) > 40:
+                    texts.append(f"From their {label}, page {send}:\n{w}")
+                take(_pictures(sp, send))
+        return len(texts) > before
+
+    named_sites: list[str] = []
+    for kind in ["website"] + [k for k in links if k != "website"]:
+        if kind not in links:
+            continue
         try:
-            words = await _public_text(url)
+            if kind == "website":
+                if await site(links[kind], "website"):
+                    read.append(kind)
+                continue
+            page, _ = await _fetch(links[kind])
+            if not page:
+                continue
+            # A social page's shared picture is its profile picture: often the logo itself.
+            pics["profile"] = pics["profile"] or _pictures(page, links[kind]).get("cover") or ""
+            words = _words(page)
+            if len(words) > 40:
+                read.append(kind)
+                texts.append(f"From their {kind} ({links[kind]}):\n{words}")
+                named_sites += [u for u in _links_in(_meta(page, "og:description") + " " + words[:3000]) if u not in named_sites]
         except Exception as exc:  # noqa: BLE001 - one closed account must not stop the rest
             logger.info("[socials-read] %s not read: %s", kind, type(exc).__name__)
-            words = ""
-        if len(words) > 40:
-            read.append(kind)
-            texts.append(f"From their {kind} ({url}):\n{words}")
+    # The website a bio names (or its link-in-bio page), when they did not give one.
+    if "website" not in links:
+        for url in named_sites[:1]:
+            try:
+                if await site(url, "website, named in their bio"):
+                    read.append("website")
+                    links["website"] = url
+            except Exception as exc:  # noqa: BLE001
+                logger.info("[socials-read] bio site not read: %s", type(exc).__name__)
+    pictures = {"logo": pics["logo"] or pics["profile"] or None, "cover": pics["cover"] or None, "photos": pics["photos"][:12]}
     if not texts:
-        return {"links": links, "read": [], "fields": None}
+        return {"links": links, "read": [], "fields": None, "pictures": pictures}
     try:
         fields = await extract_business(request, text="\n\n".join(texts)[:MAX_TEXT], file=None, user=user)
     except HTTPException as exc:
@@ -613,4 +783,19 @@ async def read_socials(request: Request, payload: dict = Body(...), user=Depends
         m = re.match(r"\s*([^\n(•|]{2,80}?)\s*(?:\(@|•|\||\n)", texts[0].split(":\n", 1)[-1])
         name = m.group(1).strip() if m else ""
         fields = {"business_name": name} if name and name.lower() not in ("instagram", "facebook", "tiktok") else None
-    return {"links": links, "read": read, "fields": fields}
+    return {"links": links, "read": read, "fields": fields, "pictures": pictures}
+
+
+@router.post("/socials/pictures")
+async def import_pictures(request: Request, payload: dict = Body(...), user=Depends(verify_token)):
+    """The pictures the owner picked from their own site, copied into our storage so the listing never depends on
+    their site staying up. Each address is checked to be a public host first. {urls: [...]} -> {urls: [ours or null]}."""
+    from utils.cloud_storage import mirror_url_to_cloudinary
+    from utils.helpers import _is_public_ical_url
+    check_rate(request, bucket=f"socials_pictures:{user['user_id']}", limit=10, window_seconds=3600)
+    asked = [str(u or "").strip() for u in (payload.get("urls") or [])][:13]
+    out: list[Optional[str]] = []
+    for url in asked:
+        res = await mirror_url_to_cloudinary(url, folder="myisraelrental/from-sites") if url and _is_public_ical_url(url) else None
+        out.append((res or {}).get("url") or None)
+    return {"urls": out}

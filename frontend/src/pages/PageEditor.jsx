@@ -183,10 +183,17 @@ export default function PageEditor() {
   const save = async () => {
     setSaving(true);
     try {
-      const r = await axios.put(`${API}/marketplace/businesses/${businessId}/page-edits`, { edits: hist.now }, auth);
+      // A price changed on the page is set in the listing too (page_edits.py set_listing_prices), so the page, the
+      // dashboard and the order total never disagree.
+      const prices = hist.now.price && Object.keys(hist.now.price).length ? hist.now.price : undefined;
+      const r = await axios.put(`${API}/marketplace/businesses/${businessId}/page-edits`, { edits: hist.now, prices }, auth);
       setSaved(r.data.edits);
       setHist((h) => ({ ...h, now: r.data.edits }));
-      toast.success(t('pageEditor.saved', 'Saved. Your page shows the changes now.'));
+      if (prices) loadLive();
+      const changed = Object.keys(r.data.prices || {});
+      toast.success(changed.length
+        ? t('pageEditor.savedPrices', 'Saved. The new price is in your listing too: {{names}}.', { names: changed.join(', ') })
+        : t('pageEditor.saved', 'Saved. Your page shows the changes now.'));
     } catch (err) {
       toast.error(err.response?.data?.detail || t('pageEditor.saveFailed', 'Could not save. Try again.'));
     } finally {

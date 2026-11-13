@@ -40,14 +40,14 @@ export default function OrderJourney({ status, fulfilment, table }) {
   if (rank === undefined) return null;
   const go = ['wait', 'first', 'second', 'here'][rank];
   const line = {
-    new: t('orderJourney.new', 'Your order is in! Waiting for the store to say yes.'),
-    preparing: t('orderJourney.preparing', 'Great news, they are working on your order!'),
+    new: t('orderJourney.new', 'Your order is in. Waiting for the store to say yes.'),
+    preparing: t('orderJourney.preparing', 'Great news, they are working on your order.'),
     ready: table
-      ? t('orderJourney.readyTable', 'Almost there, it is coming to your table!')
+      ? t('orderJourney.readyTable', 'Almost there, it is coming to your table.')
       : delivery
-        ? t('orderJourney.readyDelivery', 'Packed and getting ready to head your way!')
-        : t('orderJourney.readyPickup', 'It is ready for you. Come and get it!'),
-    done: t('orderJourney.done', 'All done. Enjoy, and thank you for ordering!'),
+        ? t('orderJourney.readyDelivery', 'Packed and getting ready to head your way.')
+        : t('orderJourney.readyPickup', 'It is ready for you. Come and get it.'),
+    done: t('orderJourney.done', 'All done. Enjoy, and thank you for ordering.'),
   }[status];
   const dots = [0, 50, 100];
 

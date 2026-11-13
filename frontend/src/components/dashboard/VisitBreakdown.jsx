@@ -45,6 +45,9 @@ export default function VisitBreakdown({ API, token, everyone = false, className
   ].filter(Boolean);
   const listings = (d.listings || []).map((l) => ({ key: l.id, n: l.n, name: l.name }));
   const nameOf = (id) => listings.find((l) => l.key === id)?.name || id;
+  // Visits sent by the "Keep exploring" links under other businesses' orders (order_explore.py):
+  // the site's own traffic, said in a line of its own so a business sees what listing here brings.
+  const fromOrders = (d.sources || []).find((r) => r.key === 'orders')?.n || 0;
   return (
     <div className={`rounded-xl border p-5 ${className}`} style={{ borderColor: 'var(--brand-border)', background: 'var(--surface, #fff)' }} data-testid="visit-breakdown">
       <h2 className="text-base font-semibold" style={{ color: 'var(--ink)' }}>{t('visits.title', 'Who visits, last {{n}} days', { n: d.days })}</h2>
@@ -52,12 +55,18 @@ export default function VisitBreakdown({ API, token, everyone = false, className
         {t('visits.total', '{{n}} visits', { n: d.visits })}
         {d.since ? ` · ${t('visits.since', 'details counted from {{date}}', { date: new Date(`${d.since}T12:00:00`).toLocaleDateString(i18n.language?.startsWith('he') ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'long' }) })}` : ''}
       </p>
+      {!everyone && fromOrders > 0 && (
+        <p className="mb-4 rounded-lg px-3 py-2 text-sm" style={{ background: 'var(--accent-soft)', color: 'var(--ink)' }} data-testid="visits-from-orders">
+          {t('visits.fromOrders', { count: fromOrders, defaultValue: "{{count}} visits came from other businesses' order pages on MyIsraelRental." })}
+        </p>
+      )}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <Rows title={t('visits.sources', 'Where they came from')} rows={d.sources} label={word('source')} testid="visits-sources" />
         <Rows title={t('visits.devices', 'Phone or laptop')} rows={d.devices} label={word('device')} testid="visits-devices" />
         <Rows title={t('visits.newOrBack', 'New or returning')} rows={whoIs} label={word('who')} testid="visits-who" />
         <Rows title={t('visits.langs', 'Language')} rows={d.langs} label={word('lang')} testid="visits-langs" />
         <Rows title={t('visits.taps', 'Taps on your site')} rows={d.taps} label={word('tap')} testid="visits-taps" />
+        <Rows title={t('visits.buttons', 'Buttons people pressed')} rows={d.buttons} label={(k) => k} testid="visits-buttons" />
         <Rows title={t('visits.pages', 'Busiest pages on your site')} rows={d.pages} label={word('page')} testid="visits-pages" />
         <Rows title={t('visits.listings', 'Most visited')} rows={listings} label={nameOf} testid="visits-listings" />
       </div>

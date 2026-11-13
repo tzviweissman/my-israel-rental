@@ -34,7 +34,7 @@ Two conflicts, settled for the record over the flyer: Large feeds 8-12 (flyer
 says 8-10); size names Medium/Large (flyer says Half/Full). The ₪55/₪85
 own-meat prices are flyer-only and are shown as theirs.
 
-Chat-only (Tzvi, 5 Oct 2026): no phone or email on the page, though the
+Email (Tzvi, 11 Nov 2026): the owner wants their email lacholentisrael@gmail.com as a way of contacting, so it sits beside WhatsApp. Their classic recipe has no beans or potatoes: none on the page. Earlier, chat-only (Tzvi, 5 Oct 2026): no phone or email on the page, though the
 flyers carry both. The one action opens their page on MyIsraelRental, where
 the chat is.
 

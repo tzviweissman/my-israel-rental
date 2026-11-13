@@ -18,8 +18,8 @@
 <meta property="og:title" content="Order · The Brown Box">
 <meta property="og:description" content="Order acai bowls, acai boards, brunch gift boxes, snacks and drinks from The Brown Box, delivered across Jerusalem. Kosher.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="/pages/the-brown-box/assets/og.webp?v=mw6w6o1t">
-<link rel="icon" href="/pages/the-brown-box/assets/logo-192.png?v=mw6w6o1t">
+<meta property="og:image" content="/pages/the-brown-box/assets/og.webp?v=mwevtezm">
+<link rel="icon" href="/pages/the-brown-box/assets/logo-192.png?v=mwevtezm">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bona+Nova:wght@400;700&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
@@ -191,13 +191,18 @@
   .foot .fgrid p.fk { display: flex; gap: .7rem; align-items: center; margin-top: 1rem; font-size: .85rem; max-width: 34ch; }
   .foot .fk img { width: 40px; height: 40px; object-fit: contain; flex: none; background: #fff; border-radius: 8px; padding: 2px; }
   .foot .fbase .fnote { flex-basis: 100%; }
+  /* order form: fields at 16px so iPhones do not zoom in; grid cells may shrink */
+  input, textarea, select, #f input, #f textarea, #f select { font-size: 16px; min-width: 0; }
+  select { width: 100%; min-height: 48px; padding: .7rem .9rem; border: 1px solid var(--line-ivory); border-radius: 12px; background: #fff; color: var(--ink); font-family: var(--font-body); }
+  .cols > *, .fields > *, .fields > * > * { min-width: 0; }
+  .sum .why.bad { color: #FFD2CC; font-weight: 600; }
 </style>
 </head>
 <body>
 
 <header class="bar">
   <div class="wrap">
-    <a class="brand" href="/business/the-brown-box" aria-label="The Brown Box, home"><img src="/pages/the-brown-box/assets/logo.webp?v=mw6w6o1t" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-d5dc6302-0">The Brown Box</span></a>
+    <a class="brand" href="/business/the-brown-box" aria-label="The Brown Box, home"><img src="/pages/the-brown-box/assets/logo.webp?v=mwevtezm" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-d5dc6302-0">The Brown Box</span></a>
     <a class="back" href="/business/the-brown-box#menu"><span class="lg" data-mir-key="t-b87b998b-0">Back to the menu</span><span class="sm" data-mir-key="t-01a6d712-0">Menu</span></a>
   </div>
 </header>
@@ -222,10 +227,12 @@
         <h2 id="s2" data-mir-key="t-fad6f635-0"><span class="n">2</span>Where it is going</h2>
         <p class="hint" data-mir-key="t-50bc4c23-0">We deliver throughout Jerusalem. The fee depends on the location.</p>
         <div class="fields">
-          <div data-need><label for="city" data-mir-key="t-8485b2ae-0">Neighbourhood</label><input id="city" name="city" autocomplete="off"><p class="msg" data-mir-key="t-fb479d73-0">Which neighbourhood of Jerusalem?</p></div>
+          <div id="w-area" hidden><label for="area" data-mir-key="t-74bc1383-0">Area</label><select id="area" name="area"></select></div>
+          <div data-need id="w-hood"><label for="city" data-mir-key="t-8485b2ae-0">Neighbourhood</label><input id="city" name="city" autocomplete="off"><p class="msg" data-mir-key="t-fb479d73-0">Which neighbourhood of Jerusalem?</p></div>
           <div><label for="to" data-mir-key="t-387de8e7-0">Who is it for? <small>(if it is a gift)</small></label><input id="to" name="to" autocomplete="off"></div>
           <div class="full" data-need><label for="addr" data-mir-key="t-db12b167-0">Address</label><input id="addr" name="addr" autocomplete="street-address"><p class="msg" data-mir-key="t-3252eccd-0">Add the street and number.</p></div>
-          <div data-need><label for="when" data-mir-key="t-a0254a34-0">Delivery date</label><input id="when" name="when" type="date"><p class="msg" data-mir-key="t-b60ee01e-0">Pick the day it should arrive.</p></div>
+          <div data-need><label for="when" data-mir-key="t-a0254a34-0">Delivery date</label><input id="when" name="when" type="date"><p class="msg" id="when-msg">Pick the day it should arrive.</p></div>
+          <div id="w-win" hidden><label for="win" data-mir-key="t-82347e01-0">Delivery time</label><select id="win" name="win"></select></div>
           <div><label for="tophone" data-mir-key="t-e7690b7a-0">Their phone <small>(if it is a gift)</small></label><input id="tophone" name="tophone" type="tel" inputmode="tel" autocomplete="off"></div>
           <div class="full"><label for="card" data-mir-key="t-b51ca027-0">Message for the card <small>(optional, for a gift)</small></label><textarea id="card" name="card" maxlength="400"></textarea></div>
         </div>
@@ -247,7 +254,7 @@
       <p class="empty" id="empty">Nothing chosen yet.</p>
       <ul id="lines" aria-live="polite"></ul>
       <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
-      <div class="tot"><span data-mir-key="t-72b404ea-0">Before delivery</span><b id="total">₪0</b></div>
+      <div class="tot"><span data-mir-key="t-72b404ea-0">Before delivery</span><b id="total" data-order-total>₪0</b></div>
       <p class="note" data-mir-key="t-12a092a2-0">Delivery is added on WhatsApp once we know the neighbourhood. You pay us directly, by cash, Zelle, Israeli bank transfer, or credit card with a 4% charge; nothing is paid on this page.</p>
       <a class="btn" id="send" href="#" aria-disabled="true">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
@@ -262,7 +269,7 @@
 
 <footer class="foot full">
   <div class="fgrid">
-    <div class="fbrand"><a class="fname" href="/business/the-brown-box" data-mir-key="t-24c27f66-0">The Brown Box</a><p data-mir-key="t-e9cb1e14-0">Artisanal superfoods, delivered across Jerusalem. A home business.</p><a class="fcta" href="/business/the-brown-box/order?add=Acai%20bowl" data-mir-key="t-f5d5fa6b-0">Order a bowl <svg class="arw" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><p class="fk"><img src="/pages/the-brown-box/assets/hechsher.webp?v=mw6w6o1t" alt="Seal of the Vaad HaKashrus of Rabbi Shmuel Weiner" width="40" height="40" data-mir-key="i-1389c19b-0"><span data-mir-key="t-545eed18-0">Kosher, Vaad HaKashrus of Rabbi Shmuel Weiner, Rav of Khal Zichron Nosson Tzvi.</span></p></div>
+    <div class="fbrand"><a class="fname" href="/business/the-brown-box" data-mir-key="t-24c27f66-0">The Brown Box</a><p data-mir-key="t-e9cb1e14-0">Artisanal superfoods, delivered across Jerusalem. A home business.</p><a class="fcta" href="/business/the-brown-box/order?add=Acai%20bowl" data-mir-key="t-f5d5fa6b-0">Order a bowl <svg class="arw" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><p class="fk"><img src="/pages/the-brown-box/assets/hechsher.webp?v=mwevtezm" alt="Seal of the Vaad HaKashrus of Rabbi Shmuel Weiner" width="40" height="40" data-mir-key="i-1389c19b-0"><span data-mir-key="t-545eed18-0">Kosher, Vaad HaKashrus of Rabbi Shmuel Weiner, Rav of Khal Zichron Nosson Tzvi.</span></p></div>
     <nav aria-label="Pages"><h4 data-mir-key="t-b22a94f3-0">Pages</h4><a href="/business/the-brown-box" data-mir-key="t-fc43c37b-0">Home</a><a href="/business/the-brown-box#bowls" data-mir-key="t-5b61f375-0">Bowls</a><a href="/business/the-brown-box#menu" data-mir-key="t-97f12060-0">Menu</a><a href="/business/the-brown-box#gifts" data-mir-key="t-dcb2a33b-0">Gift boxes</a><a href="/business/the-brown-box/order" data-mir-key="t-af6f86d3-0">Order</a></nav>
     <div><h4 data-mir-key="t-a5c7e5f9-0">Ordering</h4><p data-mir-key="t-4a2e3df1-0">Delivery throughout Jerusalem, the fee confirmed on WhatsApp</p><p data-mir-key="t-368cd0e7-0">Cash, Zelle, Israeli bank transfer, or credit card with a 4% charge</p></div>
     <div><h4 data-mir-key="t-49e826dc-0">Reach us</h4><a href="https://wa.me/972533452048" target="_blank" rel="noopener" data-mir-key="t-63d7704d-0">WhatsApp or call +972 53-345-2048</a><a href="mailto:thebrownboxjlm@gmail.com" data-mir-key="t-50d7c7d2-0">thebrownboxjlm@gmail.com</a><a href="https://www.instagram.com/thebrownbox_jlm/" rel="noopener" target="_blank" data-mir-key="t-559467a3-0">Instagram @thebrownbox_jlm</a></div>
@@ -275,13 +282,28 @@
   <a class="btn" id="send2" href="#" aria-disabled="true"><span style="position:relative" data-mir-key="t-2b634993-0">To delivery</span></a>
 </div>
 
-<script id="fallback-products" type="application/json">[{"name":"Acai bowl","price":60,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/acai-bowl.webp?v=mw6w6o1t","group":"Acai bowls","in_stock":true},{"name":"Mini acai bowls","price":30,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/mini-bowls.webp?v=mw6w6o1t","group":"Acai bowls","in_stock":true},{"name":"Large acai board","price":390,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/large-board.webp?v=mw6w6o1t","group":"Acai boards","in_stock":true},{"name":"Small acai board","price":220,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/small-board.webp?v=mw6w6o1t","group":"Acai boards","in_stock":true},{"name":"Small gift box","price":135,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/small-gift-box.webp?v=mw6w6o1t","group":"Gifting","in_stock":true},{"name":"Large gift box","price":250,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/large-gift-box.webp?v=mw6w6o1t","group":"Gifting","in_stock":true},{"name":"Energy bites","price":50,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/energy-bites.webp?v=mw6w6o1t","group":"Snacks","in_stock":true},{"name":"Super granola","price":40,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/super-granola.webp?v=mw6w6o1t","group":"Snacks","in_stock":true},{"name":"Date snacks","price":55,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/date-snacks.webp?v=mw6w6o1t","group":"Snacks","in_stock":true},{"name":"Oatmeal chocolate chip muffin","price":17,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/oat-muffin.webp?v=mw6w6o1t","group":"Snacks","in_stock":true},{"name":"Blueberry sourdough muffin","price":17,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/blueberry-muffin.webp?v=mw6w6o1t","group":"Snacks","in_stock":true},{"name":"Iced coffee","price":20,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/iced-coffee.webp?v=mw6w6o1t","group":"Drinks","in_stock":true},{"name":"Passion fruit iced tea","price":20,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/passion-tea.webp?v=mw6w6o1t","group":"Drinks","in_stock":true}]</script>
+<script id="fallback-products" type="application/json">[{"name":"Acai bowl","price":60,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/acai-bowl.webp?v=mwevtezm","group":"Acai bowls","in_stock":true},{"name":"Mini acai bowls","price":30,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/mini-bowls.webp?v=mwevtezm","group":"Acai bowls","in_stock":true},{"name":"Large acai board","price":390,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/large-board.webp?v=mwevtezm","group":"Acai boards","in_stock":true},{"name":"Small acai board","price":220,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/small-board.webp?v=mwevtezm","group":"Acai boards","in_stock":true},{"name":"Small gift box","price":135,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/small-gift-box.webp?v=mwevtezm","group":"Gifting","in_stock":true},{"name":"Large gift box","price":250,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/large-gift-box.webp?v=mwevtezm","group":"Gifting","in_stock":true},{"name":"Energy bites","price":50,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/energy-bites.webp?v=mwevtezm","group":"Snacks","in_stock":true},{"name":"Super granola","price":40,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/super-granola.webp?v=mwevtezm","group":"Snacks","in_stock":true},{"name":"Date snacks","price":55,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/date-snacks.webp?v=mwevtezm","group":"Snacks","in_stock":true},{"name":"Oatmeal chocolate chip muffin","price":17,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/oat-muffin.webp?v=mwevtezm","group":"Snacks","in_stock":true},{"name":"Blueberry sourdough muffin","price":17,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/blueberry-muffin.webp?v=mwevtezm","group":"Snacks","in_stock":true},{"name":"Iced coffee","price":20,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/iced-coffee.webp?v=mwevtezm","group":"Drinks","in_stock":true},{"name":"Passion fruit iced tea","price":20,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/passion-tea.webp?v=mwevtezm","group":"Drinks","in_stock":true}]</script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+function boot(LISTING) {
   var WA = '972533452048';
   function read(id) { var e = document.getElementById(id); if (!e) return null; try { return JSON.parse(e.textContent); } catch (x) { return null; } }
   var live = read('mir-live-products');
   var products = (Array.isArray(live) && live.length ? live : read('fallback-products')) || [];
+  var GIG = '5dab5731-bb0b-4830-ba02-0db28178f031';
+  var STORE = { delivery: true, nationwide: false, areas: [{ slug: 'jerusalem', label: 'Jerusalem' }] };
+  if (LISTING && Array.isArray(LISTING.products) && LISTING.products.length) {
+    var mine = {}; products.forEach(function (o) { mine[String(o.name || '').toLowerCase()] = o; });
+    products = LISTING.products.map(function (g) {
+      var o = mine[String(g.name || '').toLowerCase()] || {};
+      return { id: g.id, gig_id: GIG, name: g.name, price: g.price, price_to: g.price_to, price_kind: g.price_kind || 'fixed', currency: String(g.currency || 'ILS').toUpperCase(),
+        image: o.image || g.image || null, group: g.group || o.group || null, in_stock: g.in_stock !== false, options: g.options || [] };
+    });
+    if (LISTING.settings && LISTING.settings.delivery_on === false) STORE.delivery = false;
+    if (LISTING.business) {
+      STORE.nationwide = !!LISTING.business.serves_nationwide;
+      if ((LISTING.business.areas || []).length) STORE.areas = LISTING.business.areas.map(function (a) { return { slug: a.slug, label: a.label || a.slug }; });
+    }
+  } else products.forEach(function (o) { if (o.id) o.gig_id = o.gig_id || GIG; });
 
   var SYM = { USD: '$', ILS: '₪', EUR: '€', GBP: '£' };
   function money(n, cur) { var v = Number(n); return (SYM[cur] || '') + (Number.isInteger(v) ? v : v.toFixed(2)); }
@@ -327,8 +349,16 @@ document.addEventListener('DOMContentLoaded', function () {
   // Bowls and gift boxes: one set of choices per unit, kept when the count
   // changes. Bowl: flavour (build your own +6) and exactly two extras
   // (almond butter +5). Gift box: two muffins.
-  var BOWLS = { classic: 'Classic', tropical: 'Tropical', sunrise: 'Sunrise', superfruit: 'Superfruit', own: 'Build your own (+₪6)' };
-  var EXTRAS = ['Natural peanut butter', 'Silan', 'Honey', 'Pareve chocolate spread', 'Milchig chocolate spread', 'Chia seeds', 'Flax seeds', 'Coconut flakes', 'Almond butter (+₪5)'];
+  // What the extras cost comes from the listing: the Acai bowl's options carry their own price (own 66, almond butter 65, both
+  // 71 when the bowl is 60), so the page shows and sends what the dashboard will save. Without options on the listing
+  // (the listing could not be read, or its options are not set yet) the page falls back to +6 and +5.
+  function optOf(p, id) { return (p.options || []).filter(function (o) { return o.id === id; })[0]; }
+  function bowlProduct() { return products.filter(function (p) { return (p.name || '').toLowerCase() === 'acai bowl'; })[0]; }
+  function optDelta(id, fb) { var b = bowlProduct(), o = b && optOf(b, id); return o && o.price != null ? Number(o.price) - Number(b.price) : fb; }
+  var D_OWN = optDelta('own', 6), D_ALM = optDelta('classic-alm', 5);
+  var BOWLS = { classic: 'Classic', tropical: 'Tropical', sunrise: 'Sunrise', superfruit: 'Superfruit', own: 'Build your own (+₪' + D_OWN + ')' };
+  var EXTRAS = ['Natural peanut butter', 'Silan', 'Honey', 'Pareve chocolate spread', 'Milchig chocolate spread', 'Chia seeds', 'Flax seeds', 'Coconut flakes', 'Almond butter (+₪' + D_ALM + ')'];
+  var ALM = EXTRAS[EXTRAS.length - 1];
   var MUFFINS = ['Oatmeal chocolate chip', 'Blueberry sourdough'];
   var TOPPINGS = ['Banana', 'Green apple', 'Kiwi', 'Frozen blueberry', 'Frozen mango', 'Frozen pineapple', 'Dates', 'Chocolate chips', 'Super granola'];
   var cfg = {};
@@ -344,8 +374,29 @@ document.addEventListener('DOMContentLoaded', function () {
   // what the bowl choices add: build your own +6, almond butter +5, counted per product so each line of the message carries its own
   function extraFor(p) {
     var c = 0;
-    (cfg[p._k] || []).forEach(function (u) { if (u.kind === 'bowl') { if (u.bowl === 'own') c += 6; if (u.ex.indexOf('Almond butter (+₪5)') >= 0) c += 5; } });
+    (cfg[p._k] || []).forEach(function (u) {
+      if (u.kind !== 'bowl') return;
+      var o = optOf(p, optId(p, u));
+      if ((p.options || []).length && o) c += o.price != null ? Number(o.price) - Number(p.price) : 0;
+      else { if (u.bowl === 'own') c += D_OWN; if (u.ex.indexOf(ALM) >= 0) c += D_ALM; }
+    });
     return c;
+  }
+  // the listing option for one bowl or one gift box: bowl flavour with or without almond butter; box muffins
+  var MUF_IDS = ['muf-oat', 'muf-blue', 'muf-both'];
+  function optId(p, u) { return u.kind === 'bowl' ? u.bowl + (u.ex.indexOf(ALM) >= 0 ? '-alm' : '') : MUF_IDS[u.m]; }
+  // the lines of the order: a bowl or box with options goes as one line per choice, so the dashboard shows what was picked
+  function linesOut() {
+    var out = [];
+    chosen().forEach(function (p) {
+      var units = cfg[p._k] || [];
+      if (kindOf(p) && (p.options || []).length) {
+        var by = {}, ids = [];
+        units.forEach(function (u) { var id = optId(p, u); if (!(id in by)) { by[id] = 0; ids.push(id); } by[id] += 1; });
+        ids.forEach(function (id) { out.push({ product_id: p.id, qty: by[id], option_id: id }); });
+      } else out.push({ product_id: p.id, qty: q[p._k] });
+    });
+    return out;
   }
   function extraCost() { var c = 0; products.forEach(function (p) { c += extraFor(p); }); return c; }
   function extraCount(test) { var n = 0; products.forEach(function (p) { (cfg[p._k] || []).forEach(function (u) { if (u.kind === 'bowl' && test(u)) n += 1; }); }); return n; }
@@ -353,8 +404,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var out = [];
     products.forEach(function (p) {
       (cfg[p._k] || []).forEach(function (u, i) {
-        if (u.kind === 'bowl') out.push(p.name + ' ' + (i + 1) + ': ' + BOWLS[u.bowl].replace(' (+₪6)', '') + ' bowl' + (u.bowl === 'own' ? ' (' + (u.top.length === 4 ? u.top.join(', ') : 'toppings not chosen yet') + ')' : '') + (u.ex.length ? ', extras: ' + u.ex.join(' and ').replace(/ \(\+₪5\)/, '') : ', extras: not chosen yet'));
-        else out.push(p.name + ' ' + (i + 1) + ': ' + (u.bowls.length ? u.bowls.map(function (b) { return BOWLS[b].replace(' (+₪6)', '') + ' bowl'; }).join(' and ') + ', ' : '') + 'muffins: ' + (u.muf.length ? (u.muf.length === 2 && u.muf[0] === u.muf[1] ? '2 x ' + u.muf[0] : u.muf.join(' and ')) : 'not chosen yet'));
+        if (u.kind === 'bowl') out.push(p.name + ' ' + (i + 1) + ': ' + BOWLS[u.bowl].replace(/ \(\+₪\d+\)/, '') + ' bowl' + (u.bowl === 'own' ? ' (' + (u.top.length === 4 ? u.top.join(', ') : 'toppings not chosen yet') + ')' : '') + (u.ex.length ? ', extras: ' + u.ex.join(' and ').replace(/ \(\+₪\d+\)/, '') : ', extras: not chosen yet'));
+        else out.push(p.name + ' ' + (i + 1) + ': ' + (u.bowls.length ? u.bowls.map(function (b) { return BOWLS[b].replace(/ \(\+₪\d+\)/, '') + ' bowl'; }).join(' and ') + ', ' : '') + 'muffins: ' + (u.muf.length ? (u.muf.length === 2 && u.muf[0] === u.muf[1] ? '2 x ' + u.muf[0] : u.muf.join(' and ')) : 'not chosen yet'));
       });
     });
     return out;
@@ -462,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function () {
       li.appendChild(rm); lines.appendChild(li);
     });
     // one line for each extra that was actually picked, so the label says what was chosen
-    [['Build your own bowl', 6, function (u) { return u.bowl === 'own'; }], ['Almond butter', 5, function (u) { return u.ex.indexOf('Almond butter (+₪5)') >= 0; }]].forEach(function (x) {
+    [['Build your own bowl', D_OWN, function (u) { return u.bowl === 'own'; }], ['Almond butter', D_ALM, function (u) { return u.ex.indexOf(ALM) >= 0; }]].forEach(function (x) {
       var n = extraCount(x[2]); if (!n) return;
       var xl = document.createElement('li'); var xa = document.createElement('span'); xa.textContent = (n > 1 ? n + ' × ' : '') + x[0];
       var xb = document.createElement('span'); xb.textContent = '+' + money(n * x[1], 'ILS'); xl.appendChild(xa); xl.appendChild(xb); lines.appendChild(xl);
@@ -494,6 +545,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (st > upTo || (only && st !== only)) return;
       if (box.querySelector('input,textarea').value.trim().length === 0) missing.push(box.querySelector('label').textContent.toLowerCase().replace(/\?$/, ''));
     });
+    if (step >= 2 && (!only || only === 2) && dayProblem()) missing.push('a day and time we can deliver');
     return missing;
   }
   function check(show) {
@@ -540,6 +592,18 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   function v(id) { return document.getElementById(id).value.trim(); }
+  // Where it goes: a store that does not ship everywhere takes an area from its list (the server refuses any other) and the
+  // typed neighbourhood or city goes inside the address; a nationwide store takes the typed city as it is.
+  function areaSel() { return document.getElementById('area'); }
+  function areaLabel() { var o = areaSel().selectedOptions[0]; return o ? o.textContent : STORE.areas[0].label; }
+  function citySlug() { return STORE.nationwide ? v('city').slice(0, 80) : (areaSel().value || STORE.areas[0].slug); }
+  function addrOut() { return STORE.nationwide || !v('city') ? v('addr') : v('addr') + ', ' + v('city'); }
+  areaSel().innerHTML = STORE.areas.map(function (a) { return '<option value="' + a.slug + '">' + a.label + '</option>'; }).join('');
+  document.getElementById('w-area').hidden = STORE.nationwide || STORE.areas.length < 2;
+  if (!STORE.delivery) {
+    ['w-hood'].forEach(function (id) { var w = document.getElementById(id); if (w) { w.hidden = true; w.removeAttribute('data-need'); } });
+    var ad = document.getElementById('addr'); if (ad) { var aw = ad.closest('[data-need]'); if (aw) { aw.hidden = true; aw.removeAttribute('data-need'); } }
+  }
   function message() {
     var L = ['Hi, I would like to order:'];
     chosen().forEach(function (p) {
@@ -552,10 +616,11 @@ document.addEventListener('DOMContentLoaded', function () {
     L.push('Total: ' + totals().text + ', plus delivery');
     L.push('');
     if (v('to')) L.push('For: ' + v('to') + (v('tophone') ? ', ' + v('tophone') : ''));
-    L.push('Address: ' + v('addr') + ', ' + v('city') + ', Jerusalem');
+    L.push(STORE.delivery ? 'Address: ' + v('addr') + ', ' + (v('city') ? v('city') + ', ' : '') + areaLabel() : 'Pick-up');
     if (v('when')) {
       var d = new Date(v('when') + 'T12:00:00');
       L.push('Delivery date: ' + d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
+      if (winSel().value) L.push('Time: ' + winSel().value.replace('-', ' to '));
     }
     if (v('card')) L.push('Card message: "' + v('card') + '"');
     if (v('note')) L.push('Also: ' + v('note'));
@@ -579,10 +644,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (v('note')) notes.push(v('note'));
     notes.push('Sent from the order page by WhatsApp');
     var body = {
-      lines: c.map(function (p) { return { product_id: p.id, qty: q[p._k] }; }),
-      fulfilment: 'delivery', date: v('when'), city: v('city').slice(0, 80), address: v('addr'),
+      lines: linesOut(),
+      fulfilment: STORE.delivery ? 'delivery' : 'pickup', date: v('when'),
+      window: winSel().value ? { weekday: new Date(v('when') + 'T12:00:00').getDay(), start: winSel().value.split('-')[0], end: winSel().value.split('-')[1] } : undefined,
       customer_name: v('me'), customer_phone: v('myphone'), notes: notes.join('\n'), discount_code: MirCode.code()
     };
+    if (STORE.delivery) { body.city = citySlug(); body.address = addrOut(); }
     var post = fetch(API + '/marketplace/order-form/' + gig + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     var late = new Promise(function (res) { setTimeout(function () { res(null); }, 5000); });
@@ -608,16 +675,68 @@ document.addEventListener('DOMContentLoaded', function () {
       if (tab) tab.location.href = url; else location.href = url;
       sending = false;
       ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); b.removeAttribute('aria-busy'); }); labels();
-      why.textContent = saved ? 'Sent. Your order is saved, and the tracking link is in the message.' : '';
+      why.classList.toggle('bad', !saved);
+      why.textContent = saved ? 'Sent. Your order is saved, and the tracking link is in the message.' : 'Your order did not save on the site, so it is going to The Brown Box on WhatsApp instead. Please send that message.';
     });
   }
   document.getElementById('send').addEventListener('click', send);
   document.getElementById('send2').addEventListener('click', send);
 
   var when = document.getElementById('when');
-  when.min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k Pre-filled): the first day the page accepts, which is today (it states no lead time or closed days); changeable
-  when.value = when.min;
+  // Time windows, cutoffs and full days come from the listing (GET /order-form). The server refuses an order that breaks
+  // them, so the page offers only what it will take: a day past its cutoff, full, paused or without a window is not accepted.
+  var LS = (LISTING && LISTING.settings) || {}, FULL = (LISTING && LISTING.full) || {}, PAUSE = LISTING && LISTING.paused;
+  var KIND = STORE.delivery ? 'delivery' : 'pickup';
+  var WINS = (KIND === 'delivery' ? LS.delivery_windows : LS.pickup_windows) || [];
+  function winSel() { return document.getElementById('win'); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function ilNow() { var p = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date()); return p.replace(' ', 'T'); }
+  // same rule as past_cutoff in backend/routes/marketplace/orders.py; Israel time as 'YYYY-MM-DDTHH:MM' compares as text
+  function pastCutoff(ds) {
+    var d = new Date(ds + 'T12:00:00'), wd = d.getDay(), now = ilNow(), hit = false;
+    (LS.cutoffs || []).forEach(function (c) {
+      if (c.for_day !== wd) return;
+      var c0 = new Date(d); c0.setDate(c0.getDate() - ((wd - Number(c.closes_day != null ? c.closes_day : wd) + 7) % 7));
+      if (now > ymd(c0) + 'T' + (c.closes_time || '00:00')) hit = true;
+    });
+    return hit;
+  }
+  function dayWins(ds) {
+    var wd = new Date(ds + 'T12:00:00').getDay();
+    return WINS.filter(function (w) { return Number(w.weekday) === wd && (FULL.windows || []).indexOf(ds + 'T' + w.start) < 0; });
+  }
+  function dayWhy(ds) {
+    if (!ds) return 'Pick the day it should arrive.';
+    if (ds < ilNow().slice(0, 10)) return 'That day has passed. Pick another.';
+    if ((FULL.days || []).indexOf(ds) >= 0) return 'That day is full. Pick another day.';
+    if (PAUSE && ((PAUSE.active || (PAUSE.from && ds >= PAUSE.from)) && (!PAUSE.until || ds <= PAUSE.until))) return 'Orders are paused for that day. Pick another.';
+    if (pastCutoff(ds)) return 'Orders for that day have closed. Pick a later day.';
+    var any = WINS.some(function (w) { return Number(w.weekday) === new Date(ds + 'T12:00:00').getDay(); });
+    if (any && !dayWins(ds).length) return 'Every time that day is taken. Pick another day.';
+    if (WINS.length && !any) return 'We do not ' + (KIND === 'delivery' ? 'deliver' : 'do pick-ups') + ' on that day. Pick another.';
+    return '';
+  }
+  function dayProblem() { return dayWhy(when.value) || (winSel().closest('#w-win').hidden ? '' : (winSel().value ? '' : 'time')); }
+  function fillWins() {
+    var ws = dayWhy(when.value) ? [] : dayWins(when.value), sel = winSel(), keep = sel.value;
+    sel.innerHTML = ws.map(function (w) { return '<option value="' + w.start + '-' + w.end + '">' + w.start + ' to ' + w.end + '</option>'; }).join('');
+    if (keep && ws.some(function (w) { return w.start + '-' + w.end === keep; })) sel.value = keep;
+    document.getElementById('w-win').hidden = !ws.length;
+    document.querySelector('#w-win label').textContent = KIND === 'delivery' ? 'Delivery time' : 'Pick-up time';
+    document.getElementById('when-msg').textContent = dayWhy(when.value) || 'Pick the day it should arrive.';
+    document.getElementById('when').closest('[data-need]').classList.toggle('bad', !!dayWhy(when.value));
+  }
+  when.min = ymd(new Date(ilNow().slice(0, 10) + 'T12:00:00'));
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k Pre-filled): the first day the store accepts, with its first time; changeable
+  (function () {
+    var d = new Date(when.min + 'T12:00:00');
+    for (var i = 0; i < 60; i++, d.setDate(d.getDate() + 1)) if (!dayWhy(ymd(d))) { when.value = ymd(d); return; }
+    when.value = when.min;
+  })();
+  fillWins();
+  ['input', 'change'].forEach(function (ev) { when.addEventListener(ev, function () { fillWins(); check(false); }); });
+  winSel().addEventListener('change', function () { check(false); });
 
   update();
   var bowl = new URLSearchParams(location.search).get('bowl');
@@ -627,6 +746,14 @@ document.addEventListener('DOMContentLoaded', function () {
     var p = chosen()[0];
     p._li.scrollIntoView({ block: 'center' });
   }
+}
+// The listing (GET /order-form) is read first: prices, ids, options, delivery and areas come from it. If it does not answer
+// in 3 seconds, or the store says it is not taking orders, the page starts from its own list, as before.
+document.addEventListener('DOMContentLoaded', function () {
+  var GIG0 = '5dab5731-bb0b-4830-ba02-0db28178f031', base = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api', started = false, t;
+  function go(d) { if (started) return; started = true; clearTimeout(t); boot(d); }
+  t = setTimeout(function () { go(null); }, 3000);
+  fetch(base + '/marketplace/order-form/' + GIG0).then(function (r) { return r.ok ? r.json() : null; }).then(go).catch(function () { go(null); });
 });
 </script>
 </body>

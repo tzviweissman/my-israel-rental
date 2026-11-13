@@ -27,7 +27,7 @@ R5.4 pass: facts script found no they, them or their in visible text
 R5b.2 pass: the one main button reads "Order now" on every page and goes to the order page (order.html), because it opens the order page, not a message (Tzvi, 10 Nov 2026: "it says message to order but it takes to the shop page"): the bar, the opening, the three size cards (order.html?size=N preselects the size), the footer button and link, the phone bar, the next-step rows on How it works and Reviews; on the order page the button under the dial says "Order Large, ₪180", and the form button says what it does, "Send my order on WhatsApp"
 R5b.8 pass: the closing line is "A higher standard of flavor." then the button
 R3.11 pass: Home: the pitch, the film, the sizes with prices, three customer messages; How it works: the kit and its steps, the occasions; Reviews: all ten messages; Kosher and delivery: the facts and Rabbi Samuels' line; Order: the dial, then the order form
-R3o.4 n/a: the page shows no phone or email by the owner choice (chat only)
+R3o.4 pass: since 11 Nov 2026 the owner wants their email as a way to reach them: lacholentisrael@gmail.com (from their own flyers) beside WhatsApp in every footer and phone menu
 R3e.22 n/a: owner must send a photo of Rabbi Samuels; the seal and his quoted line are shown
 R3s.19 pass: single page; title, description, og:title, og:description and og:image (the tubs) now all present
 R6.1 pass: the lead block is the product and the price; sizes, kosher, delivery and the order all present
@@ -55,7 +55,7 @@ R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW
 R3h.13 pass: the pot film is one clip showing the lid, steam and the dial together; frames viewed at 20 hours show no heap or vanish
 R3h.14 pass: the pot stays in frame through the whole film at 1440x900, 1280x650 and 390x844
 R3h.17 pass: the page does not use words-and-film turns
-R3h.18 pass: objects in each generated clip, all in frame from the first frame to the last: pot film = the crock pot, its lid, the dial (turns to Low) and steam (rises from the lid and leaves past the top edge); kitchen clip = the counter, beans, barley bag, peelings, onion skins and knife, which stay put (only the light flickers, the water ripples and a drip falls into the bowl); table clip = the Shabbos table and candles, the flames flicker. Nothing appears, changes into something else or vanishes
+R3h.18 pass: objects in each generated clip, all in frame from the first frame to the last: pot film = the crock pot, its lid, the dial (turns to Low) and steam (rises from the lid and leaves past the top edge); kitchen clip = the counter, the bowl of soaking barley, barley bag, marrow bones and beef on butcher paper, onion skins and knife, which stay put (since 11 Nov 2026 made in code from the edited still: a slow push-in and a faint flicker of the light; their classic recipe has no beans or potatoes, so those were taken out); table clip = the Shabbos table and candles, the flames flicker. Nothing appears, changes into something else or vanishes
 
 ## 3. Sections and worlds
 R3.12 pass: dramatic opening, a features section (sizes with price and what is included) on the home page; the order page closes the journey with the dial, the proof facts being on the home page and in its footer
@@ -74,7 +74,7 @@ R9.1 pass: the signature uses their own tubs and a closed slow cooker
 R3f.2 pass: effect budget: one signature (the dial), accents (the split, the pot film, the facts rows); frames captured at three sizes
 R3m.1 pass: data-mir-gallery block present and hidden until photos exist
 R3m.3 pass: hours, areas and FAQ stay in fixed hidden blocks until the owner sends them
-R3k.1 pass: five pages (Tzvi, 6 Nov 2026: "split all 4 into separate pages", and 10 Nov 2026: the menu items are pages, not scrolls): Home (the film, sizes, three messages), How it works (kit, occasions), Reviews, Kosher and delivery, and Order (the dial and the order form); old addresses /business/<slug>#order and #details forward to the Order page by a short script on Home, and index.html#sizes still lands on the sizes. No contact page: the record has one WhatsApp number and no address, email or hours, which the footer shows on every page
+R3k.1 pass: five pages (Tzvi, 6 Nov 2026: "split all 4 into separate pages", and 10 Nov 2026: the menu items are pages, not scrolls): Home (the film, sizes, three messages), How it works (kit, occasions), Reviews, Kosher and delivery, and Order (the dial and the order form); old addresses /business/<slug>#order and #details forward to the Order page by a short script on Home, and index.html#sizes still lands on the sizes. No contact page: the record has one WhatsApp number and no address or hours; their email (from their flyers, wanted by the owner 11 Nov 2026), which the footer shows on every page
 R3k.2 pass: the bar is the same markup on every page: the name to Home, Home, How it works, Reviews, Kosher and delivery, each its own page (Tzvi, 10 Nov 2026: the menu only scrolled down), and the one Order now button with the dial; on Home it waits for the opening film, on the other pages it is on from the start; under 861px the links fold into a Menu button that opens the same list plus Order now and the WhatsApp number
 R3k.4 pass: shared site.css and site.js; section classes are not reused for shared state
 R8a.1 pass: no 21st components or external script hosts; only the Google Fonts stylesheet
@@ -101,7 +101,7 @@ R0b.12 n/a: not published, so there is no pages-list preview clip yet
 
 ## 4. Photos and media
 R8.1 pass: the three size cards show one product hero shot of their own tub in three colours (gold, olive, steel), the same slate block, light and camera; the sizes differ only in their words, because they have no photo of each size (asked in the report)
-R8.6 pass: the size cards are product hero shots edited from their own tub photo: one sealed tub on a slate block, dry beans, barley, a potato and a marrow bone round it (what the label says goes in), one colour story per card, one warm light, still; label read line by line against their photo
+R8.6 pass: the size cards are product hero shots edited from their own tub photo: one sealed tub on a slate block, a raw marrow bone beside it (the label says 1 to 2 marrow bones; beans, barley and a potato were taken out 11 Nov 2026, as their classic recipe has no beans or potatoes), one colour story per card, one warm light, still; label read line by line against their photo. Since 11 Nov 2026 the Large card shows their own Large tub (their photo src/owner-2026-11-11/large-tub.jpg, with the slow cooker liner and "Add 5 cups of water", gen/tub_large.py, label read line by line), and all three shots are widened to 21:9 in code (the wall and table carried out sideways, never cropped, rule 3c.12) so the wide, short cards show the whole slate and bone
 R8.2 pass: their own photograph plus generated scenery stills made earlier; the tub hero shots are edited from their tub photo (Higgsfield nano_banana_2); the steel version's label was put back from the gold one in code (the model wrote 'Stir wall')
 R3p.7 pass: the three sizes are shown the same way and the dial buttons show the three the same way
 R3h.12 pass: the product looks the same everywhere: the same photograph of the four tubs in the opening, the three cards and the how-it-works band
@@ -131,12 +131,12 @@ R3j.3 pass: no taster is shown because none is offered
 R3j.4 n/a: no group discounts; free local delivery on the first order is shown once beside the button (his flyer)
 R3j.5 pass: no come-back feature is shown
 R3j.6 pass: the Large is the default on the dial; no invented option
-R3j.7 pass: the struck ₪200 is two Medium kits at ₪100 each, which feed 8 to 12 like one Large; the card and the dial now say so beside it ("2 Mediums, ₪200"); no .99 endings
-R3j.8 pass: per unit: Medium ₪100 feeds 4 to 6; Large ₪180 feeds 8 to 12 against two Mediums at ₪200 (same servings); the Kiddush is custom
-R3j.9 pass: the one saving is in the Medium and Large group; the Kiddush has none
-R3j.10 pass: 10% off = (200-180)/200 = 10, struck price beside the new price
+R3j.7 pass: each struck price is the Mediums that feed the same: ₪200 is two Mediums (8 to 12, like one Large), ₪400 is four Mediums (16 to 24, like one Kiddush); only the struck price and the percentage are shown, no line naming the Mediums (Tzvi, 12 Nov 2026: "just leave the price slash and the percent off"); no .99 endings
+R3j.8 pass: per unit: Medium ₪100 feeds 4 to 6; Large ₪180 feeds 8 to 12 against two Mediums at ₪200; Kiddush ₪330 feeds 16 to 24 against four Mediums at ₪400 (same servings)
+R3j.9 pass: one saving per size, each against the Mediums that feed the same; worked out in the page from the listing prices (index.html and order.html)
+R3j.10 pass: 10% off = (200-180)/200; 18% off = (400-330)/400 = 17.5, rounded; struck price beside the new price
 R3j.11 n/a: no combined service exists
-R3j.12 pass: the owner made no savings claim; the 10% is derived from two Mediums against one Large
+R3j.12 pass: the owner made no savings claim beyond "XL Kiddush sizes, discount pricing" on her flyer; both savings are derived from the Mediums that feed the same
 R3.14 pass: loud prices only because prices exist (boxes, pans, sizes), none invented
 
 ## 6. Order and booking flow
@@ -200,7 +200,7 @@ R3r.4 pass: the rework itself is Tzvi's correction of 22 Oct (rule 3t); it is in
 R8.7 pass (recorded after the fact): the tub shots (23 Oct) and the scenery stills and clips (5-6 Oct) were made before this rule (24 Oct); gen/tubs-brief.md records the reference, traits kept, what changed, model and job ids, and that the 5-6 Oct prompts and model names were not kept; gen/tubs-compare.jpg is the side-by-side, looked at 25 Oct
 R3h.19 pass (made before the rule (26 Oct); answered from what the briefs and gen/ files show): stills first (pot, scratch, table), then each film from its own still, one action each (the dial turns and steam rises; light flickers and a drip falls; candle flames flicker), the same objects first to last (R3h.18); not met: no written frame plan, and models, prompts and tries were not kept (gen/tubs-brief.md part B)
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
-R3s.27 pass: the chores sit in one fixed list, the knob stays on the dial, and the hours number counts in one place; the opening and the close are different headings, not one repeated thing; stepped through on a 390x844 phone and at 1440x900 on 27 Oct
+R3s.27 pass: the chores sit in one fixed list, the knob stays on the dial, and the hours number counts in one place; the opening and the close are different headings, not one repeated thing; stepped through on a 390x844 phone and at 1440x900 on 27 Oct; since 12 Nov 2026 the size cards run dark, light, dark (Medium olive, Large gold, Kiddush charcoal), so their words and buttons are white, ink, white, a pattern, never two of one and one of the other (Tzvi: "it would be fine if the left and right was white and middle was black")
 R3k.10 pass: the day field defaults to tomorrow (the page accepts from today; no lead time or Shabbos cut-off is stated yet, so the page does not promise same-day; set on load, a picked day is never overwritten); check-prefill clean
 R3u.2 n/a: the page states no closed days, lead time or limit (the form starts on tomorrow; her Shabbos cut-off is asked in message-to-owner.md item 6)
 R3u.3 pass: Medium "Feeds 4 to 6, about ₪16 a person" (₪100 over 6) and Large "Feeds 8 to 12, about ₪15 a person" (₪180 over 12), on the size cards and the dial line, looked at 1440x900; Kiddush has no figure, so the question is message-to-owner.md item 9
@@ -226,3 +226,9 @@ Note, 6 Nov 2026: split into Home and Order (split-four-sites). The lines for th
 Note, 6 Nov 2026: the order form on the Order page carries the discount code box (mir-code.js), and the server adds the phone note, the required email and the texts step (mir-order.js); the phone Menu button was added to both pages. Looked at both pages on phone and laptop; the other rules were not re-read.
 R3s.29 pass: no button breaks onto two lines: the Large card's button did between 1000 and 1350px wide (Tzvi, 10 Nov 2026), buttons are now nowrap and the price beside them gives way; the order page's Kiddush card said "Sized to your guests" on two lines on a phone and now says "Any guest count" on one; check-same-button clean on all five pages at the eight sizes
 R3p.8 pass: the crock-pot dial chip is on every order button: the opening, the three size cards (chip in the card's ink, pointer in its colour), the menu bar, the phone bar, the footer and the next-step rows; it turns OFF to LOW only when pointed at or pressed, no turn under reduced motion; looked at on a phone and a laptop
+
+R3j.13 pass: every saving is against the smallest size, Large = 2 Mediums, Kiddush = 4 Mediums, so it rises with the size (10%, then 18%)
+R3j.14 pass: prices.json names Medium, Large and Extra Large / Kiddush; order.html reads window.MIR_PRICES before its own numbers; both savings are worked out from those prices; checked 12 Nov 2026 with the live listing at 250 and then 330, every place followed
+R8.8 pass: the three card pictures are one 21:9 set from one layout sketch (gen/cards_set.py: one master, the other two edited from it): slate, a dish of pearl barley on a linen napkin and two marrow bones in the same places on every card; the Kiddush tub is visibly bigger on the same slate; the box keeps the picture's 21:9 shape so nothing is cut at any width
+R8.9 pass: the owner's 11 Nov photo is of the Extra Large tub (Tzvi, 12 Nov 2026) and is on the Kiddush card only; Medium and Large show the standard tub from their four-tub photo
+R3s.30 pass: since 12 Nov 2026 the size cards are one calm look: three white cards on the cream ground, the same light sand picture behind each tub, ink words, ink buttons and ink saving badges on all three (all one colour, the first of the two allowed ways)

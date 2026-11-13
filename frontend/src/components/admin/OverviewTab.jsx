@@ -6,6 +6,8 @@ import axios from 'axios';
 import { API } from '../../App';
 import AttentionQueue from './AttentionQueue';
 import DemandByPerson from './DemandByPerson';
+import SiteSections from './SiteSections';
+import GrowthCharts from './GrowthCharts';
 import { formatDate } from '../../utils/formatDate';
 import { formatShownPrice, shownPrice } from '../../utils/listingPrice';
 
@@ -176,8 +178,10 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
         </p>
       )}
 
+      <GrowthCharts token={token} />
       <VisitBreakdown API={API} token={token} everyone className="mb-8" />
       <DemandByPerson token={token} range={range} />
+      <SiteSections token={token} />
 
       {/* --- stock: true right now, whatever the range says --- */}
       <h2 className="text-sm font-bold uppercase tracking-wide mb-3" style={{ color: 'var(--brand-muted)' }}>

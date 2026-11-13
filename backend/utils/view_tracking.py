@@ -116,7 +116,7 @@ def source_of(raw: Optional[str]) -> str:
     v = (raw or "").strip().lower()[:100]
     if v in ("", "direct"):
         return "direct"
-    if v in ("qr", "ad"):
+    if v in ("qr", "ad", "orders"):   # orders: from the "Keep exploring" links under an order (order_explore.py)
         return v
     for mark, word in _SOURCES:
         if mark in v:

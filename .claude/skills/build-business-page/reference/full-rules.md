@@ -2251,33 +2251,6 @@ the blueprint where it cannot, so they are made right, not caught afterwards. No
    `docs/inspo/`, the pictures kept are saved to `docs/inspo/`, and REFERENCES.md says what was taken and why
    (Tzvi, 11 Nov 2026: "Can we use Pinterest always as added inspo").
 
-## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-
-From "I Studied 1000 Landing Pages" (ThrillX; notes and frames in `docs/inspo/videos-2026-11-12-landing-pages/`).
-Most of that video we already ask (3c.2 reassurance and proof beside the button, 3c.3 proof where the worry is, 3t the
-category's familiar layout, the ban on logo walls and invented counts); these four were new. His uplift figures are his
-agency's own and are not repeated anywhere. Not asked of a site published before 12 Nov 2026 (rule-dates.mjs). When
-the scripts first ran, three live sites would fail; they are left as they are unless Tzvi asks: Kasher My BnB ("How it
-works."), Michal Balloons ("מה אנחנו עושים") and L.A. Cholent (its reviews slide past in a moving ribbon).
-
-1. **Headings say the benefit.** A visitor reads only the headings, so each h1 to h3 says what they get on its own: "Hot
-   cholent at your door by Friday noon", not "How it works"; "Three hours from order to your table", not "Our
-   services". A heading that is only a section label ("How it works", "Our services", "About us", "What makes us
-   unique", "Why choose us", "Testimonials", and their Hebrew) is refused. "Questions" and contact headings stay, since
-   people look for them by that name. A small label above a heading may name the section; the heading itself may not.
-   Check: `node scripts/check-headings.mjs <urls>` (GENERIC), list in the script.
-2. **Reviews stay open on a phone.** Real reviews are stacked and fully shown on a phone, never in a swiping row, a
-   moving ribbon or a fold-out ("what is hidden will not get seen"). On a laptop two or three may sit side by side, all
-   visible. Check: `node scripts/check-reviews-open.mjs <urls>` (SWIPE, FOLDED). A page without reviews passes.
-3. **Each review shows who and where.** Beside the words: the person's first name (or what the owner was allowed to
-   show) and where it was left (Google, Facebook, WhatsApp, our site), with a link when the source has one; a photo of
-   the person only when the owner sent one with permission. A review without a name the owner may show is not used. A
-   press mention, if the owner has one, is the outlet's own sentence with its name, never a bare logo (the logo-wall
-   ban stands).
-4. **A real rating near the top.** When the business has a real rating (Google, our reviews), its score, its count and
-   its source sit on the first screen beside the headline or main button ("4.9 on Google, 224 reviews"). This is how 3c.2
-   is done for a rating; with no real rating nothing stands in its place.
-
 Later the same day, Tzvi on Gremier's film: "its so zoomed in i cant see much of whats goin on", then, on our plan of
 a realistic wide shot of their coffee bar, with the whole POUR / PLAY coffee site again (`pour-play-full-sheet.jpg` and
 `pour-play-key-frames.jpg` in `docs/inspo/pinterest-coffee-2026-11-11/`): "this is soooo good ... the idea you just
@@ -2380,6 +2353,33 @@ part where one exists, so it is there without being remembered.
     the line `Phones asked: <date>, Tzvi: "<his answer>"` and the film gate refuses any paid video without it;
     `clipchain.py make` refuses a `phone_plan` that does not quote him. Ask it in the same message as the motion steps
     (3h, confirm motion before generating), so it costs no extra round.
+
+## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+
+From "I Studied 1000 Landing Pages" (ThrillX; notes and frames in `docs/inspo/videos-2026-11-12-landing-pages/`).
+Most of that video we already ask (3c.2 reassurance and proof beside the button, 3c.3 proof where the worry is, 3t the
+category's familiar layout, the ban on logo walls and invented counts); these four were new. His uplift figures are his
+agency's own and are not repeated anywhere. Not asked of a site published before 12 Nov 2026 (rule-dates.mjs). When
+the scripts first ran, three live sites would fail; they are left as they are unless Tzvi asks: Kasher My BnB ("How it
+works."), Michal Balloons ("מה אנחנו עושים") and L.A. Cholent (its reviews slide past in a moving ribbon).
+
+1. **Headings say the benefit.** A visitor reads only the headings, so each h1 to h3 says what they get on its own: "Hot
+   cholent at your door by Friday noon", not "How it works"; "Three hours from order to your table", not "Our
+   services". A heading that is only a section label ("How it works", "Our services", "About us", "What makes us
+   unique", "Why choose us", "Testimonials", and their Hebrew) is refused. "Questions" and contact headings stay, since
+   people look for them by that name. A small label above a heading may name the section; the heading itself may not.
+   Check: `node scripts/check-headings.mjs <urls>` (GENERIC), list in the script.
+2. **Reviews stay open on a phone.** Real reviews are stacked and fully shown on a phone, never in a swiping row, a
+   moving ribbon or a fold-out ("what is hidden will not get seen"). On a laptop two or three may sit side by side, all
+   visible. Check: `node scripts/check-reviews-open.mjs <urls>` (SWIPE, FOLDED). A page without reviews passes.
+3. **Each review shows who and where.** Beside the words: the person's first name (or what the owner was allowed to
+   show) and where it was left (Google, Facebook, WhatsApp, our site), with a link when the source has one; a photo of
+   the person only when the owner sent one with permission. A review without a name the owner may show is not used. A
+   press mention, if the owner has one, is the outlet's own sentence with its name, never a bare logo (the logo-wall
+   ban stands).
+4. **A real rating near the top.** When the business has a real rating (Google, our reviews), its score, its count and
+   its source sit on the first screen beside the headline or main button ("4.9 on Google, 224 reviews"). This is how 3c.2
+   is done for a rating; with no real rating nothing stands in its place.
 
 ## 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
 

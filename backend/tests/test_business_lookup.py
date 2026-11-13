@@ -15,6 +15,12 @@ def test_google_hours_become_one_window_a_day():
     assert out["mon"] == [] and set(out) == {"sun", "mon", "tue", "wed", "thu", "fri", "sat"}
 
 
+def test_hours_past_midnight_run_to_the_end_of_the_day():
+    # 20:00 to 02:00 the next day: an end before the start would read as closed (9 Nov code review)
+    out = _hours([{"open": {"day": 1, "hour": 20}, "close": {"day": 2, "hour": 2}}])
+    assert out["mon"] == [{"start": "20:00", "end": "23:59"}]
+
+
 def test_short_search_costs_nothing():
     assert asyncio.run(lookup_business(None, q="ab")) == {"results": []}
 
