@@ -26,8 +26,10 @@ h1, h2, h3 { font-family: var(--font-head); margin: 0; line-height: 1.04; }
 .wrap { max-width: 74rem; margin: 0 auto; padding-inline: var(--gutter); }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 /* the first Tab stop (rules 3x.8): hidden until a keyboard reaches it */
-.skip { position: absolute; left: -999px; top: .6rem; z-index: 100; padding: .6rem 1rem; background: var(--ink); color: var(--ground); border-radius: 6px; font-weight: 700; }
-.skip:focus { left: .6rem; }
+/* the skip link waits above the page, not off to the left: in Hebrew a page reaches left, and left: -999px made it
+   1,000px wide with the menu bar pushed off screen (shop test, 13 Nov 2026) */
+.skip { position: absolute; inset-inline-start: .6rem; top: .6rem; z-index: 100; padding: .6rem 1rem; background: var(--ink); color: var(--ground); border-radius: 6px; font-weight: 700; transform: translateY(-300%); }
+.skip:focus { transform: none; }
 [hidden] { display: none !important; }
 .sym { font-family: var(--font-body); font-weight: 500; font-size: .62em; margin-right: .08em; vertical-align: .18em; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
@@ -346,3 +348,63 @@ p a:not([class]), li a:not([class]) { color: inherit; text-decoration: underline
 }
 
 .film.slides .slide.early .chap { opacity: 0; }   /* the word waits for its own scene (3aa.20) */
+
+/* ── The shop layout (shop research, 13 Nov 2026). shopkit.shop_page() writes #cat's size; shop.js keeps it right for
+   the live list. size-s: up to 6 products, big cards. size-m: 7 to 40, rows like the food apps (words, then the photo,
+   Add under the price). size-l: more than 40, two to a row, with search, sort and Show more. ── */
+.pc[hidden], .grp[hidden] { display: none; }
+.step button, .chip, .pc .btn-sm { touch-action: manipulation; }
+.pc-step { align-self: flex-start; margin-top: var(--s3); }
+.pc-step output { min-width: 2.4ch; }
+
+/* up to 6: one big card per row on a phone, three across on a laptop */
+.size-s .cards.four { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 760px) { .size-s .cards.four { grid-template-columns: 1fr; gap: var(--s6); } .size-s .pc-t b { min-height: 0; } }
+
+/* 7 to 40: rows, the photo at the end, Add under the words */
+@media (max-width: 760px) {
+  .size-m .cards.four { grid-template-columns: 1fr; gap: 0; }
+  .size-m .pc { display: block; padding: var(--s4) 0; border-bottom: 1px solid var(--line); }
+  .size-m .pc-a { display: grid; grid-template-columns: minmax(0, 1fr) 104px; gap: var(--s4); align-items: start; }
+  .size-m .pc-ph { grid-column: 2; grid-row: 1; aspect-ratio: 1; }
+  .size-m .pc-ph img { object-fit: cover; }
+  .size-m .pc-t { grid-column: 1; grid-row: 1; margin: 0; padding-bottom: 56px; }
+  .size-m .pc-t b, .size-m .pc-t .pr-row { min-height: 0; }
+  .size-m .pc > .btn-sm, .size-m .pc > .pc-step { position: absolute; inset-inline-start: 0; bottom: var(--s4); margin: 0; }
+  .size-m .pc-ph::after { display: none; }
+}
+
+/* the category row, its "All" button, and the kind you are in */
+.filters[hidden] { display: none; }
+.chip.is-on { border-color: var(--ink); background: var(--ink); color: var(--ground); }
+.chip-all { gap: var(--s2); }
+.kinds .sh-in { display: block; padding: var(--s6) var(--gutter) var(--s7); }
+.kinds-l { list-style: none; padding: 0; margin: var(--s5) 0 0; }
+.kinds-l button { display: flex; justify-content: space-between; align-items: center; gap: var(--s4); width: 100%; min-height: 52px; padding: 0 var(--s2);
+  border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--ink); font: 600 var(--t0)/1.3 var(--font-body); text-align: start; cursor: pointer; }
+.kinds-l button[aria-current] { color: var(--accent); }
+.kinds-l .n { color: var(--soft); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+/* search (20 or more), sort and sold out (more than 40) */
+.shop-tools { display: grid; gap: var(--s3); margin-top: var(--s6); max-width: 40rem; }
+.shop-tools + .filters { margin-top: var(--s3); }
+.shop-q, .shop-sort { font-size: 16px; min-height: 48px; width: 100%; }   /* 16px: a phone does not zoom in on it */
+.tools-row { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; }
+.tools-row .shop-sort { width: auto; flex: 1 1 12rem; max-width: 20rem; }
+.no-res { margin: var(--s7) 0 0; font-size: var(--t1); }
+.no-res a { color: var(--accent); }
+.more { display: flex; margin: var(--s7) auto 0; }
+
+/* "Most ordered": one row you swipe */
+.cards.rail { display: flex; overflow-x: auto; gap: var(--s4); scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 2px; }
+.cards.rail .pc { flex: 0 0 min(46%, 15rem); scroll-snap-align: start; }
+.size-m .cards.rail .pc { display: flex; padding: 0; border: 0; }
+.size-m .cards.rail .pc-a { display: block; }
+.size-m .cards.rail .pc-ph { aspect-ratio: 3 / 2; }
+.size-m .cards.rail .pc-t { padding-bottom: 0; margin-top: var(--s3); }
+.size-m .cards.rail .pc > .btn-sm, .size-m .cards.rail .pc > .pc-step { position: static; margin-top: var(--s3); }
+
+/* an empty basket is one line; the steps come once something is in it */
+.o-empty { display: none; }
+body:not(.no-js) #order.is-empty .o-empty { display: block; font-size: var(--t1); color: var(--soft); }
+body:not(.no-js) #order.is-empty .osteps, body:not(.no-js) #order.is-empty .form { display: none; }
