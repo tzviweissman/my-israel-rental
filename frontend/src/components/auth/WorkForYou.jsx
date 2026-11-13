@@ -58,7 +58,8 @@ function LiveLine() {
   const words = e ? (WORDS[e.kind] || {}) : {};
   const key = e ? (e.channel in words ? e.channel : Object.keys(words)[0]) : '';
   const line = e && key !== undefined
-    ? [t(`workForYou.event.${e.kind}${key ? `_${key}` : ''}`, words[key]), e.area ? areaLabel(e.area, t) : '', ago(e.at, lang)].filter(Boolean).join(' · ')
+    // One middle dot a line at most (brand/voice.md): the event, then "area, when".
+    ? [t(`workForYou.event.${e.kind}${key ? `_${key}` : ''}`, words[key]), [e.area ? areaLabel(e.area, t) : '', ago(e.at, lang)].filter(Boolean).join(', ')].join(' · ')
     : '';
   // Typed out one letter at a time, held, then the next event. Still for anyone who asked for less motion.
   useEffect(() => {
