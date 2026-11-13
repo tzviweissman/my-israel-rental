@@ -316,8 +316,8 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - [Decision] Weekly ad email will reach every existing business with a product photo and no saved ad on the first weekday morning after deploy. First seen 10 Nov 2026 (2026-11-10-site-audit.md).
 
 ## UI audit of 11 Nov 2026
-- [Low] Sign-up: "Your page is 0% ready" sits on a step bar already a third full, so the two progress signals disagree on the first screen (`CreateGig.jsx:1157` and `:1183`). First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
-- [Low] Sign-up: the seven "+ Add ..." shortcut chips are 26px tall, "Start over" 16px and the bare-header language switch 34px, under 44px on phones (`CreateGig.jsx:1198`, `:1176`; `Navigation.js:354`). First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
+- [Low] Sign-up: "Your page is 0% ready" sits on a step bar already a third full, so the two progress signals disagree on the first screen (`CreateGig.jsx:1157` and `:1183`). First seen 11 Nov 2026 (2026-11-11-ui-audit.md). [Fixed 11 Nov, 94740084]
+- [Low] Sign-up: the seven "+ Add ..." shortcut chips are 26px tall, "Start over" 16px and the bare-header language switch 34px, under 44px on phones (`CreateGig.jsx:1198`, `:1176`; `Navigation.js:354`). First seen 11 Nov 2026 (2026-11-11-ui-audit.md). [Fixed 11 Nov, 94740084]
 - [Low] L.A. Cholent home, 1000x700 window: the kosher line "Kosher, hechsher from Rabbi Weiner" wraps and its second line is cut by the pinned opening (bottom 713px of 700) while the opening holds. First seen 11 Nov 2026 (2026-11-11-ui-audit.md).
 - [Low] Sign-up "your page is live" heading had an exclamation mark (en + he). First seen 11 Nov 2026. [Fixed 11 Nov, 9d2ecd60; on this branch 46fada04]
 
@@ -332,3 +332,38 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - Decided 12 Nov (Tzvi: "do it for any email they put in"): the sign-up draft reminder keeps going to any typed address. Closed; noted in `signup_drafts.py` so audits do not re-report it.
 - Left to the L.A. Cholent session: the kosher line is cut by 11px at 1000x700 (11 Nov). Another session was changing that site the same day.
 - Still open, not re-checked: Hadassah Prys phone booking bar over the Day field (9 Nov, unconfirmed); Gifted Israel basket column at the end of the shop (11 Nov, unconfirmed); footer and menu links on business sites under 44px (2 Nov); ad maker close button about 34px (30 Oct, `AdMaker.jsx` needs check-ad-designs with local servers); audit sandbox has no MongoDB or Chromium download (proxy, since 15 Oct).
+
+## Code review of 11 Nov 2026
+- [Medium] Leads board / business email: an email whose AI reading never runs (the server restarts or deploys between receiving it and reading it) stays "pending" for good and never appears on the leads board or in a nudge; nothing retries it (`email_inbox.py` `receive`, `email_cards`). First seen 11 Nov (2026-11-11-site-audit.md).
+- [Low] Backend tests: `mongomock_motor` and `pytest_asyncio` are not in requirements, so the new `test_email_inbox.py` (and the three older files) cannot collect on a fresh install. First seen 20 Oct; now 4 files (2026-11-11-site-audit.md). [Partly fixed 11 Nov, bbea0462: audit-setup.sh installs both; still not in requirements.txt]
+- [Fixed 11 Nov, 68ce50f5; on this branch fae1e96c] Socials reader: the website lookup at sign-up blocked the whole server while DNS resolved (2.01 s stall with a slow domain). [Superseded: 68ce50f5 dropped in the 13 Nov merge (the function it changed was split into `_fetch` on 12 Nov); fixed by 67b4f998, audit merge 13 Nov]
+- [Fixed 11 Nov, d9e5be86; on this branch 6fe9f6a8] Socials reader: a website's whole page was read into memory before it was cut to 1.5 MB (60 MB held for a 60 MB page). [Superseded: d9e5be86 dropped in the 13 Nov merge; fixed by 67b4f998, audit merge 13 Nov]
+- [Fixed 11 Nov, 087ca753; on this branch d9211791] Order and booking emails ended their first line with the text's "Your tracking link:" / "Details:" pointing at nothing. [Merged 13 Nov, bf88427e]
+- Still open on main, fixed on audit branches: `ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits` (d5450913) and `dashboard.adPicsDone` (d10948a5) plural sets; test-i18n-parity still fails on main for these 4. [Fixed, merged to main with the 11 Nov follow-up, 162b4996]
+
+## UI audit of 12 Nov 2026
+- [Medium] Business sites, phones: the "Back to businesses" pill sits over the in-page "Order Large" button on L.A. Cholent's order page; `lift()` only clears fixed bars (`mir-back.js:26`). First seen 12 Nov 2026 (2026-11-12-ui-audit.md).
+- [Low] Business sites: "Back to businesses" pill is 26px tall, under 44px (`mir-back.js:23`); size needs Tzvi's decision ("block less"). First seen 12 Nov 2026 (2026-11-12-ui-audit.md).
+- [Low] M and N Jewelry home: "Scroll to see the stone" scroll hint (`m-and-n-jewelry/index.html:39`, `build.py:100`), against rule 5b.6; RULES.md marks it passed. First seen 12 Nov 2026 (2026-11-12-ui-audit.md).
+- [Medium] M and N Jewelry home: opening film frozen on 48% of frames (`check-film-video`), RULES.md R3h.24 marks it passed; blocks any republish of the site. First seen 12 Nov 2026 (2026-11-12-ui-audit.md).
+- [Low] Dashboard leads settings, order texts panel and overview: new controls at 36 to 40px (`LeadsSettings.jsx:23,71,80,108`, `TextNotificationsPanel.jsx:152,188,199`, `OverviewTab.jsx:193`). First seen 12 Nov 2026 (2026-11-12-ui-audit.md).
+- (info, audit tooling) The repo's Playwright runs if `/opt/pw-browsers/chromium_headless_shell-1243` is linked as `-1234` (and `chromium-1243` as `-1234`). 12 Nov 2026.
+
+## Code review of 12 Nov 2026
+- [Low] Discount codes: the new practice order (`POST /order-form/{gig}/orders?dry_run=true`, no sign-in) checks a code and answers which ones are real at 400 tries per 10 minutes per address, against 30 on the code box; a business's own word codes ("SUMMER10") can be guessed that way. Fix: also apply the `discount_check` limit when `dry_run` carries a code (`orders.py:2515`). First seen 12 Nov 2026 (2026-11-12-site-audit.md). Report only (discounts).
+- [Medium] Sign-up website reader blocked the whole server on a slow domain and read whole pages into memory: last night's fixes (68ce50f5, d9e5be86) never reached main and 508a81d made it fetch up to six pages per site. First seen 11 Nov; came back 12 Nov (2026-11-12-site-audit.md). [Fixed 12 Nov, d69087db, on claude/exciting-bell-jpiuoz; the old fix on claude/audit-merge-4mafu8 will conflict with main and should be dropped in favour of this one] [Merged 13 Nov, 67b4f998; the 11 Nov fixes were dropped]
+- [Medium] Designed-page menus (Finest Cuts, mir-catalog.js): products lost their description and products saved before ids existed lost their order id, so they dropped off the Finest Cuts menu; 5ebe10b8 undid that part of 5dee7ca8 unnoticed. First seen 12 Nov 2026 (2026-11-12-site-audit.md). [Fixed 12 Nov, 777b4185, on claude/exciting-bell-jpiuoz] [Merged 13 Nov, 7f6497af]
+- Still open: unread business emails never reaching the leads board (11 Nov); `mongomock_motor` and `pytest_asyncio` not in requirements (20 Oct); audit sandbox has no MongoDB or Chromium download (15 Oct).
+
+## UI audit of 13 Nov 2026
+- [Medium] L.A. Cholent order form: with WhatsApp off, a second tap on "Order now" after the thank-you message posts the same order again (button stays live, form kept); `la-cholent/order.html:288`. First seen 13 Nov 2026 (2026-11-13-ui-audit.md).
+- [Low] L.A. Cholent order form: "Without our meat" cut to "Without our mea" at 360 to 390 wide (`la-cholent/order.html:84`, needs ~175px, has 153 to 168). Wording is the business's; decision for Tzvi. First seen 13 Nov 2026 (2026-11-13-ui-audit.md).
+- [Low] Join page live line: Hebrew time showed "לפני שעתיים (2)". First seen 13 Nov 2026. [Fixed 13 Nov, d57be103; merged 13 Nov, 5731da71]
+- [Low] Join page live line: two middle dots a line. First seen 13 Nov 2026. [Fixed 13 Nov, ab80b9e7; merged 13 Nov, aefbfc8f]
+- [Low] Leads board: new shared button style 36px (`LeadsBoard.jsx:27`). First seen 13 Nov 2026. [Fixed 13 Nov, cf317b24; merged 13 Nov, 28922c5a]
+- [Low] My jobs tab: Hebrew relative time shows "(1)"/"(2)" after the word (`MyJobsTab.jsx:58`, same ICU quirk). First seen 13 Nov 2026 (2026-11-13-ui-audit.md).
+
+## Code review of 13 Nov 2026
+- [Medium] Starter shop (`scrollcraft/starter/shop.js:117`, copied into Gremier Coffee's `shop.js:109`): a delivery order is sent without the delivery area, so for any business that does not serve the whole country the server refuses it ("This store does not deliver there") and the shop still says "Thanks", opens WhatsApp and the order never reaches the dashboard; the total also leaves out the delivery fee the server adds. The same bug fixed per site on 13 Nov (Brown Box, Gift Boutique, Gifted Israel, LS Fruit Platter). First seen 13 Nov 2026 (2026-11-13-site-audit.md).
+- Still open: the 12 Nov fixes (website reader, designed-page menus) are on `claude/audit-merge-21qocb` (67b4f998, 7f6497af), not yet on main; practice-order discount checks (12 Nov); unread business emails never reaching the leads board (11 Nov); `mongomock_motor`/`pytest_asyncio` not in requirements (20 Oct); audit sandbox has no MongoDB or Chromium download (15 Oct).
+- (info, audit tooling) `audit-setup.sh` no longer leaves a `backend/.env` here: pytest needs `MONGO_URL`, `DB_NAME` and `JWT_SECRET` set by hand (dummy values, no database needed for the mongomock tests), and `npx craco build` printed "could not determine executable"; `./node_modules/.bin/craco build` works. 13 Nov 2026.
