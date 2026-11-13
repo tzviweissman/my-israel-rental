@@ -394,6 +394,6 @@
   }
   window.SHOP = { showAll: showAll, refresh: start };
   start();
-  // the live catalogue (mir-catalog.js, at the end of <body>) may redraw the cards after this
-  addEventListener('DOMContentLoaded', function () { if ($$('.grp:not(.grp-pop) .pc').some(function (pc) { return !pc.dataset.o; })) start(); });
+  // the live catalogue (mir-catalog.js) and the real "Most ordered" (#mir-popular) come at the end of <body>, after this
+  addEventListener('DOMContentLoaded', start);
 })();

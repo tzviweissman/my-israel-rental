@@ -23,7 +23,8 @@ from __future__ import annotations
 import asyncio
 import os
 import re
-from datetime import UTC, date, datetime
+from collections import Counter
+from datetime import UTC, date, datetime, timedelta
 from zoneinfo import ZoneInfo
 from html import escape
 from html.parser import HTMLParser
@@ -286,6 +287,33 @@ async def set_listing_prices(biz_id: str, prices: dict[str, float]) -> dict[str,
     return done
 
 
+MOST_ORDERED_MIN = 3     # ordered in at least this many orders to count as "most ordered"
+MOST_ORDERED_SHOW = 3    # and at least this many such products, or the row is not shown
+
+
+def rank_most_ordered(orders: list[list[dict[str, Any]]], names: dict[str, str]) -> list[str]:
+    """The names of the products in the most orders, from real orders only (shop research, 13 Nov 2026: the starter
+    shop's "Most ordered" row, frontend/server.js #mir-popular). One order counts once per product, whatever the
+    quantity, so one big order cannot make a product "most ordered". Empty unless at least MOST_ORDERED_SHOW products
+    were each in MOST_ORDERED_MIN orders: a row of one is not a pattern, and the page then shows no row at all."""
+    count: Counter = Counter()
+    for lines in orders:
+        count.update({ln.get("product_id") for ln in lines or [] if ln.get("product_id") in names})
+    top = [pid for pid, n in count.most_common() if n >= MOST_ORDERED_MIN][:8]
+    return [names[pid] for pid in top] if len(top) >= MOST_ORDERED_SHOW else []
+
+
+async def most_ordered(biz_id: str, products: list[dict[str, Any]]) -> list[str]:
+    names = {p["id"]: p["name"] for p in products if p.get("id") and p.get("in_stock")}
+    if len(names) < MOST_ORDERED_SHOW:
+        return []
+    since = (datetime.now(ZoneInfo("Asia/Jerusalem")) - timedelta(days=183)).replace(microsecond=0).isoformat()   # as orders.py _now_iso
+    orders = [o.get("lines") async for o in db.store_orders.find(
+        {"business_id": biz_id, "created_at": {"$gte": since}, "status": {"$nin": ["cancelled", "failed"]}},
+        {"lines": 1}).sort("created_at", -1).limit(3000)]
+    return rank_most_ordered(orders, names)
+
+
 @router.get("/business/{slug_or_id}/page-edits")
 async def get_page_edits(slug_or_id: str):
     """The saved edits, public: they are what the live page shows anyway."""
@@ -347,6 +375,8 @@ async def get_page_edits(slug_or_id: str):
         "updated_at": doc.get("updated_at"),
         "prices": prices,
         "products": products,
+        # the products in the most real orders, for a designed shop's "Most ordered" row (empty: no row)
+        "popular": await most_ordered(biz["_id"], products) if products else [],
         "gallery": doc.get("gallery") or [],
         # questions and answers added through "Ask for a change" (page_requests.py)
         "faq": doc.get("faq") or [],

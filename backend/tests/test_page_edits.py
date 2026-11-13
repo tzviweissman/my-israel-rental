@@ -131,3 +131,21 @@ def test_what_changed_lists_each_kind():
     lines = what_changed({}, {"text": {"t-ab12cd34-0": "New <b>store</b>"}, "items": {"t-ab12cd34-0": [{"k": "t-ab12cd34-0"}, {"from": "t-ab12cd34-0"}]}})
     assert lines[0] == "Words changed to: New  store" and "1 added" in lines[1]
     assert what_changed({"text": {"a": "x"}}, {"text": {"a": "x"}}) == []
+
+
+def test_most_ordered_counts_orders_not_quantities():
+    from routes.marketplace.page_edits import rank_most_ordered
+    names = {"a": "Classic", "b": "House", "c": "Decaf", "d": "Latte"}
+    orders = [[{"product_id": "a", "qty": 1}, {"product_id": "b", "qty": 1}]] * 3 \
+        + [[{"product_id": "c", "qty": 1}]] * 4 + [[{"product_id": "d", "qty": 50}]] * 2
+    # d is in only 2 orders, however many were bought; c is in the most orders, so it is first
+    assert rank_most_ordered(orders, names) == ["Decaf", "Classic", "House"]
+
+
+def test_most_ordered_needs_a_pattern():
+    from routes.marketplace.page_edits import rank_most_ordered
+    names = {"a": "Classic", "b": "House", "x": "Gone"}
+    two = [[{"product_id": "a"}, {"product_id": "b"}]] * 5
+    assert rank_most_ordered(two, names) == []   # only two products: no row
+    sold = [[{"product_id": "a"}, {"product_id": "b"}, {"product_id": "x"}]] * 5
+    assert rank_most_ordered(sold, {"a": "Classic", "b": "House"}) == []   # an unknown or sold-out product never counts

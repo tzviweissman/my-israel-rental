@@ -542,6 +542,12 @@ async function sendHandBuilt(req, res, slug, file) {
     const json = JSON.stringify(data.products).replace(/</g, '\\u003c');
     html = html.replace(/<\/body>/i, `<script id="mir-live-products" type="application/json">${json}</script><script src="/pages/mir-catalog.js?v=${EDITOR_STAMP}"></script></body>`);
   }
+  // A shop that asks for it ([data-mir-popular], the starter shop's #cat) gets the products in the most real orders, for
+  // its "Most ordered" row (backend page_edits.py most_ordered; empty until there are enough orders, and then no row).
+  if (data && Array.isArray(data.popular) && data.popular.length >= 3 && /data-mir-popular/.test(html)) {
+    const json = JSON.stringify(data.popular).replace(/</g, '\\u003c');
+    html = html.replace(/<\/body>/i, `<script id="mir-popular" type="application/json">${json}</script></body>`);
+  }
   // "Back to businesses" for a visitor who came from our own pages (Tzvi, 12 Nov 2026); never in the editor.
   if (!editor) html = html.replace(/<\/body>/i, `<script src="/pages/mir-back.js?v=${EDITOR_STAMP}"></script></body>`);
   // A visit, counted for the owner's sales summary (backend page_edits.py designed_site_visit): the browser's
