@@ -79,7 +79,7 @@ async function fill(p) {
       else if (e.required || e.tagName !== 'TEXTAREA') set(e, 'Practice');
     }
     for (const e of document.querySelectorAll('input[type=checkbox][required]')) if (!e.checked) e.click();
-    const send = [...document.querySelectorAll('form button[type=submit], form input[type=submit], a#order, #place, #place2, #placeBar, #send, [data-order-send]')].filter(vis)[0];
+    const send = [...document.querySelectorAll('form button[type=submit], form input[type=submit], a#order, #place, #place2, #placeBar, #send, #send2, [data-order-send]')].filter(vis)[0];
     if (!send) return null;
     send.setAttribute('data-practice-send', '1');
     return true;
@@ -115,6 +115,14 @@ for (const url of urls) {
   const where = url.replace(/^https?:\/\/[^/]+/, '') || '/';
   const p = await ctx.newPage();
   refuse = false;
+  // A page served from this computer (a publish) reads its listing from localhost:8001; it is read from the live server
+  // instead, so the products are there to order. Anything other than a read is dropped, never sent on.
+  await p.route(/^http:\/\/(localhost|127\.0\.0\.1):8001\/api\//, async (route) => {
+    if (route.request().method() !== 'GET') return route.abort();
+    const r = await fetch(API + route.request().url().replace(/^.*?:8001\/api/, '')).catch(() => null);
+    if (!r) return route.abort();
+    return route.fulfill({ status: r.status, contentType: r.headers.get('content-type') || 'application/json', body: Buffer.from(await r.arrayBuffer()) });
+  });
   await p.route(SEND_RE, async (route) => {
     const path = route.request().url().replace(/^.*?\/api\//, '').replace(/\?.*$/, '');
     const body = route.request().postData() || '{}';
@@ -123,31 +131,44 @@ for (const url of urls) {
     caught.push({ path, sent: JSON.parse(body), res });
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'practice', track_url: 'about:blank', track_token: 'practice' }) });
   });
-  await p.addInitScript(() => { window.open = () => ({ location: {}, close() {}, document: { write() {} } }); });
+  await p.addInitScript(() => { window.open = (u) => { if (/wa.me|whatsapp/.test(u || "")) window.__practiceWa = 1; return { location: { set href(v) { if (/wa.me|whatsapp/.test(v)) window.__practiceWa = 1; } }, close() {}, document: { write() {} } }; }; });
   let toWa = false;   // a refused order that goes on to WhatsApp is not lost (mir-order.js: a failed save opens WhatsApp)
   await p.route(/wa\.me|api\.whatsapp\.com|whatsapp:\/\//, (r) => { toWa = true; return r.abort(); });
   await p.goto(url, { waitUntil: 'networkidle' }).catch(() => {});
   await p.waitForTimeout(1200);
   const steps = [{ kind: 'as it opens', label: 'as it opens' }, ...(await choices(p))];
   let base = null;   // what the page sends as it opens, to see what each choice changes
+  // an order that cannot go as it opens (a bowl needs its flavour picked first, The Brown Box) is fine when a choice sends it
+  let anySent = false, stopped = "";
   // a choice whose only change to the order is in the typed notes: the dashboard has it as words, not a pick or a price
   const strip = (b) => { const { notes, extra_items, message, guest_name, contact_email, contact_phone, customer_name, customer_phone, customer_email, date, ...rest } = b || {}; return JSON.stringify(rest); };
 
-  for (const step of steps) {
+  // the page fresh, with one choice made
+  const open = async (step) => {
+    await p.goto(url, { waitUntil: 'networkidle' }).catch(() => {});
+    await p.waitForTimeout(800);
     if (step.kind !== 'as it opens') {
-      await p.goto(url, { waitUntil: 'networkidle' }).catch(() => {});
-      await p.waitForTimeout(800);
       await choices(p);
       const sel = step.kind === 'select' ? `[data-practice-sel="${step.i}"]` : step.kind === 'pick' ? `[data-practice-pick="${step.i}"]` : `[data-practice-plus="${step.i}"]`;
       if (step.kind === 'select') await p.selectOption(sel, step.value).catch(() => {});
       else await p.click(sel, { timeout: 3000 }).catch(() => {});
       await p.waitForTimeout(300);
     }
+  };
+  let okStep = null;   // the first way an order went through, used again for the refusal
+  for (const step of steps) {
+    if (step.kind !== 'as it opens') await open(step);
     if (!(await fill(p))) { if (step.kind !== 'as it opens') problems.push(`${where}: no send button found, so no order could be tried (mark it data-order-send)`); else console.log(`${where}: no order form on this page`); break; }
     const shown = await p.evaluate(() => { const e = document.querySelector('[data-order-total]'); return e ? (e.getAttribute('data-order-total') || e.textContent) : null; });
     caught = [];
     await press(p);
-    if (!caught.length) { if (step.kind === 'as it opens') problems.push(`${where}: pressing send sent no order to the dashboard (a check on the page stopped it, or the page only opens WhatsApp)`); continue; }
+    if (!caught.length) {
+      // what the page says stopped it: the visible messages next to fields, so the cause is in the report
+      const said = await p.evaluate(() => [...document.querySelectorAll('.msg, .err, .error, [role=alert], .bad, .mir-err')].filter((e) => e.offsetParent && e.textContent.trim()).map((e) => e.textContent.trim().replace(/\s+/g, ' ').slice(0, 60)).slice(0, 3).join(' | '));
+      if (step.kind === 'as it opens') stopped = (`${where}: pressing send sent no order to the dashboard (a check on the page stopped it, or the page only opens WhatsApp)${said ? `; the page says: ${said}` : ''}`);
+      continue;
+    }
+    anySent = true; okStep = okStep || step;
     for (const c of caught) {
       const r = c.res, say = `${where} [${step.label}]`;
       if (step.kind === 'as it opens') base = c.sent;
@@ -164,14 +185,16 @@ for (const url of urls) {
     }
   }
 
+  if (!anySent && stopped) problems.push(stopped);
+
   // a refused order must be told to the customer
-  await p.goto(url, { waitUntil: 'networkidle' }).catch(() => {});
-  await p.waitForTimeout(800);
-  if (await fill(p)) {
+  if (okStep) await open(okStep);
+  if (okStep && await fill(p)) {
     refuse = true; caught = []; toWa = false;
     const before = await p.evaluate(() => document.body.innerText);
     await press(p);
     const after = await p.evaluate(() => document.body.innerText);
+    if (await p.evaluate(() => window.__practiceWa).catch(() => false)) toWa = true;
     const told = toWa || after !== before && /practice refusal|not (go through|saved|sent)|did not|didn.t|try again|went wrong|לא נשמר|נסו שוב/i.test(after);
     if (caught.length && !told) problems.push(`${where}: when the dashboard refuses the order, the page says nothing (the customer thinks it went through)`);
     refuse = false;

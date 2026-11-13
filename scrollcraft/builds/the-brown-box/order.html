@@ -646,7 +646,7 @@ function boot(LISTING) {
     var body = {
       lines: linesOut(),
       fulfilment: STORE.delivery ? 'delivery' : 'pickup', date: v('when'),
-      window: winSel().value ? { start: winSel().value.split('-')[0], end: winSel().value.split('-')[1] } : undefined,
+      window: winSel().value ? { weekday: new Date(v('when') + 'T12:00:00').getDay(), start: winSel().value.split('-')[0], end: winSel().value.split('-')[1] } : undefined,
       customer_name: v('me'), customer_phone: v('myphone'), notes: notes.join('\n'), discount_code: MirCode.code()
     };
     if (STORE.delivery) { body.city = citySlug(); body.address = addrOut(); }
