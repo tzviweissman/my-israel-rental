@@ -54,7 +54,8 @@
           <div class="fld full" id="w-time" role="group" aria-labelledby="l-time"><span class="lab" id="l-time">Start time</span><div class="opts" id="times"><p class="hint">Choose a day first.</p></div><span class="err" id="e-time"></span></div>
           <div class="fld" id="w-ph"><label for="ph">Phone</label><input id="ph" type="tel" inputmode="tel" autocomplete="tel"><span class="err" id="e-ph"></span></div>
           <style>#mir-code{grid-column:1/-1}#mir-code:empty{display:none}</style><div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
-          <div class="act"><button class="btn" type="submit" id="send"><span id="send-l">Send on WhatsApp</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+          <div class="act"><p class="save-fail" id="save-fail" role="alert" hidden>Your request did not go through and was not saved. WhatsApp is open with it written out, so please press send there.</p>
+          <button class="btn" type="submit" id="send"><span id="send-l">Send on WhatsApp</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
           <p class="fine full" id="fine">Saved with Michal on MyIsraelRental, then WhatsApp opens with your request written out.</p>
         </form>
     </div>
@@ -160,6 +161,7 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentEl
       .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('booking not saved', r.status, t); return null; }); })
       .catch(function (err) { console.warn('booking not saved', err); return null; });
     Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      var sf = document.getElementById('save-fail'); if (sf) sf.hidden = !!saved; 
       if (saved && saved.track_path) text += '\n\nFollow the booking: https://myisraelrental.com' + saved.track_path;
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;

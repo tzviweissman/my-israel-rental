@@ -211,3 +211,7 @@ Note, 6 Nov 2026: split into Home, Ways to train and Book (split-four-sites). Th
 Note, 6 Nov 2026: a discount code box added to the booking form (mir-code.js, Tzvi: a code must work on a service as on a product). It shows only when the business has a code, so with none the page looks as before. With a code, the total and the WhatsApp message show the lower price. Nothing else on the page changed.
 
 Note, 6 Nov 2026: the empty code box takes no room on the form, so the Book section still fits the screen at 1280x650 when a business has no code.
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
