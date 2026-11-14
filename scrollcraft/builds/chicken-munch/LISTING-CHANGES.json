@@ -1,0 +1,20 @@
+{
+  "gig_id": "d574d800-2e8a-41ce-ae28-f6f03fd6329a",
+  "products": [
+    {
+      "id": "cm913tray001",
+      "options": [
+        { "id": "classic", "name": "Classic American Crunch", "price": null },
+        { "id": "hot-poppers", "name": "Original Hot Poppers", "price": null },
+        { "id": "shnitzel", "name": "Shnitzel Bites", "price": null },
+        { "id": "fruity", "name": "Fruity Chicken", "price": null },
+        { "id": "cornflake", "name": "Crispy Cornflake", "price": null },
+        { "id": "rice-krispie", "name": "Rice Krispie", "price": null },
+        { "id": "pretzel", "name": "Pretzel", "price": null },
+        { "id": "wings", "name": "Buffalo Wings", "price": null }
+      ]
+    }
+  ],
+  "new_products": [],
+  "reason": "The 9x13 pan is one kind of chicken, so the kind is a real choice the dashboard should show. Boxes (up to 4 to 6 kinds) and the Roaster (up to 3) mix several kinds and sauces at the same price, which one option per line cannot hold, so those stay in the order notes. Option ids match KIND_IDS in order.html."
+}

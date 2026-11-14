@@ -5,14 +5,23 @@
 <meta name="site-category" content="food-shop">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Order · Chicken Munch</title>
-<meta name="description" content="Order Chicken Munch: Munch boxes from $69, pans from ₪275 ($85). Pick your chicken and sauces and send it on WhatsApp.">
+<meta name="description" content="Order Chicken Munch: Munch boxes from $69, pans from ₪275. Pick your chicken and sauces and send it on WhatsApp.">
 <meta property="og:title" content="Order · Chicken Munch">
-<meta property="og:description" content="Order Chicken Munch: Munch boxes from $69, pans from ₪275 ($85). Pick your chicken and sauces and send it on WhatsApp.">
+<meta property="og:description" content="Order Chicken Munch: Munch boxes from $69, pans from ₪275. Pick your chicken and sauces and send it on WhatsApp.">
 <meta property="og:image" content="https://myisraelrental.com/pages/chicken-munch/assets/box-dark.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700;800&family=Heebo:wght@400;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site.css">
+<style>
+  /* phone and other fields at 16px so iPhones do not zoom in; grid cells may shrink */
+  .fld, input[type=tel].fld, input[type=date].fld { font-size: 16px; min-width: 0; }
+  .form > *, .card, .sum { min-width: 0; }
+  .sent { margin: .8rem 0 0; padding: .7rem .9rem; border-radius: 12px; border: 1.5px solid var(--line); font-size: var(--t2); line-height: 1.4; }
+  .sent.bad { border-color: var(--red); color: #FF8A8A; }
+  .sent a { color: inherit; text-decoration: underline; }
+  .total #total { text-align: right; }
+</style>
 </head>
 <body class="no-js" data-page="order">
 <header class="top" id="top">
@@ -40,13 +49,14 @@
             <div id="lines-box"></div>
             <h4>By the pan</h4>
             <div id="lines-pan"></div>
-            <div class="suggest" id="suggest" hidden><p>Add a 9x13 rice? <span>₪75, goes well with a pan</span></p><div class="acts"><button class="btn-line" type="button" id="sug-add">Add rice</button><button class="linkish" type="button" id="sug-no">No thanks</button></div></div>
+            <div class="suggest" id="suggest" hidden><p>Add a 9x13 rice? <span><span id="sug-price">₪75</span>, goes well with a pan</span></p><div class="acts"><button class="btn-line" type="button" id="sug-add">Add rice</button><button class="linkish" type="button" id="sug-no">No thanks</button></div></div>
             <p class="err" id="e-items"></p>
           </div>
           <div class="card" id="c-2" hidden>
             <h3>When and where</h3>
             <p class="deliv">Delivery in central Jerusalem is ₪30 to ₪50, depending on where. We confirm it with you on WhatsApp.</p>
-            <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p></div>
+            <div id="w-city" hidden><label class="f" for="city">Area</label><select class="fld" id="city"></select></div>
+            <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"> <p class="err" id="e-addr"></p></div>
             <div id="w-when"><label class="f" for="when">Which day</label><input class="fld" id="when" type="date"><p class="err" id="e-when"></p></div>
           </div>
           <div class="card" id="c-3" hidden>
@@ -63,6 +73,7 @@
           <ul id="sum-list"><li><span>Nothing yet</span></li></ul>
           <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
           <div class="total"><span>Total</span><span id="total">0</span></div>
+          <p class="sent" id="o-sent" role="status" hidden></p>
           <button class="btn" id="send" type="submit"><span>Send my order on WhatsApp</span></button>
           <p class="note">Opens WhatsApp with your order written out, to send to Chicken Munch.</p>
         </aside>
@@ -81,14 +92,14 @@
   <div class="fgrid">
     <div class="fbrand"><a class="fname" href="index.html">Chicken Munch</a><p>Kosher American fried chicken in Jerusalem. Now taking Shabbos orders.</p><a class="fcta" href="order.html">Order now <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a></div>
     <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="menu.html">Menu</a><a href="order.html">Order</a><a href="contact.html">Contact</a></nav>
-    <div><h4>Ordering</h4><p>Munch boxes from $69</p><p>Pans from ₪275 or $85</p><p>Delivery in central Jerusalem, ₪30 to ₪50</p><p>Hechsher of Rav Akiva Dershowitz</p></div>
+    <div><h4>Ordering</h4><p>Munch boxes from $69</p><p>Pans from ₪275</p><p>Delivery in central Jerusalem, ₪30 to ₪50</p><p>Hechsher of Rav Akiva Dershowitz</p></div>
     <div><h4>Reach us</h4><a href="https://wa.me/972553316975" target="_blank" rel="noopener">WhatsApp 055-331-6975</a><a href="tel:+19294748871">From the US, call 929-474-8871</a><a href="mailto:chickenmunch26@gmail.com">chickenmunch26@gmail.com</a></div>
   </div>
   <div class="fbase"><span>© 2026 Chicken Munch.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
 </footer>
 
 <div class="bar" id="bar" aria-hidden="true">
-  <p class="p"><b>From $69</b>Boxes, or pans from ₪275 ($85)</p>
+  <p class="p"><b>From $69</b>Boxes, or pans from ₪275</p>
   <a class="btn" href="order.html" tabindex="-1">Order now</a>
 </div>
 
@@ -96,19 +107,20 @@
 <script>
 (function () {
   // ── the order: saved to his shop first (a tracking link), then WhatsApp.
-  // Boxes are in dollars and pans in shekels; the shop keeps one currency per
-  // order, so an order with both is sent on WhatsApp without being saved.
+  // Each price shows in the currency the business set on the listing (boxes in dollars, pans in shekels, no
+  // conversion). The shop keeps one currency per order, so a basket with both is saved as one order per currency.
   // The owner (19 Oct 2026): kinds of chicken are chosen per box (up to the
   // box's number) and in the Roaster (up to 3, the owner, 19 Oct 2026); a 9x13 pan is one kind; sauces come
   // with the boxes. Delivery in central Jerusalem is ₪30 to ₪50 by where.
   var WA = '972553316975', GIG = 'd574d800-2e8a-41ce-ae28-f6f03fd6329a';
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  // built-in prices are the fallback only; the listing (GET /order-form) replaces them as soon as it answers
   var ITEMS = {
     mini: ['Mini Munch Box', 69, 'USD', 'cmminibox001', 'box', 'Feeds 3 to 4'],
     grand: ['Grand Munch Box', 140, 'USD', 'cmgrandbox01', 'box', 'Feeds 8 to 10'],
     supreme: ['Supreme Munch Box', 220, 'USD', 'cmsuprbox001', 'box', 'Feeds 16'],
-    pan913: ['9x13 pan', 275, 'ILS', 'cm913tray001', 'pan', 'Feeds 6 to 8', 85],  // the owner's dollar price too (21 Oct 2026)
-    roaster: ['Roaster', 650, 'ILS', 'cmgastro0001', 'pan', 'Feeds 18 to 20', 210],
+    pan913: ['9x13 pan', 275, 'ILS', 'cm913tray001', 'pan', 'Feeds 6 to 8'],
+    roaster: ['Roaster', 650, 'ILS', 'cmgastro0001', 'pan', 'Feeds 18 to 20'],
     rice: ['9x13 rice', 75, 'ILS', 'cm913rice001', 'pan', '']
   };
   // [kinds of chicken allowed, sauces allowed]; 0 = none to choose
@@ -120,6 +132,10 @@
   var SERVES = { mini: 4, grand: 10, supreme: 16, pan913: 8, roaster: 20 };
   function perPerson(k) { return SERVES[k] ? ' · about ' + money(Math.floor(ITEMS[k][1] / SERVES[k]), ITEMS[k][2]) + ' a person' : ''; }
   var STYLES = ['Classic American Crunch', 'Original Hot Poppers', 'Shnitzel Bites', 'Fruity Chicken', 'Crispy Cornflake', 'Rice Krispie', 'Pretzel', 'Buffalo Wings'];
+  // the pan's one kind of chicken is a listing option (price null = the pan's own price); boxes and the roaster mix kinds, which
+  // changes no price, so those stay in the order notes
+  var KIND_IDS = ['classic', 'hot-poppers', 'shnitzel', 'fruity', 'cornflake', 'rice-krispie', 'pretzel', 'wings'];
+  var HAS_OPTS = {}, deliveryOn = true, areas = [{ slug: 'jerusalem', label: 'Jerusalem' }];
   var SAUCES = ['Garlic Mayo', 'Sweet BBQ', 'Honey Mustard', 'Spicy Mayo', 'Buffalo'];
   var DELIVERY = 'Delivery ₪30 to ₪50';
   var q = {}, saved = window.cmBasket.get(), want = new URLSearchParams(location.search).get('add');
@@ -127,8 +143,8 @@
   if (want && ITEMS[want] && !q[want]) q[want] = 1;
   if (want) history.replaceState(null, '', location.pathname);
   function money(n, cur) { return (cur === 'USD' ? '$' : '₪') + n.toLocaleString('en-US'); }
-  // a pan shows its dollar price beside the shekel one: ₪275 ($85)
-  function priceOf(k, n) { var it = ITEMS[k]; return money(n * it[1], it[2]) + (it[6] ? ' ($' + (n * it[6]).toLocaleString('en-US') + ')' : ''); }
+  function priceOf(k, n) { var it = ITEMS[k]; return money(n * it[1], it[2]); }
+  function lineText(k) { var it = ITEMS[k]; return priceOf(k, 1) + (it[5] ? ' · ' + it[5] : '') + perPerson(k); }
 
   function chipSet(k, list, max, kind) {
     var single = max === 1, name = k + '-' + kind;
@@ -139,7 +155,7 @@
   Object.keys(ITEMS).forEach(function (k) {
     var it = ITEMS[k], c = CHOICE[k], d = document.createElement('div');
     d.className = 'line'; d.dataset.k = k;
-    d.innerHTML = '<div><div class="nm">' + it[0] + '</div><div class="pr">' + priceOf(k, 1) + (it[5] ? ' · ' + it[5] : '') + perPerson(k) + '</div>' + (ALLOWS[k] ? '<div class="allows' + (CHOICE[k][0] === 1 ? ' one' : '') + '">' + ALLOWS[k] + '</div>' : '') + '</div>' +
+    d.innerHTML = '<div><div class="nm">' + it[0] + '</div><div class="pr">' + lineText(k) + '</div>' + (ALLOWS[k] ? '<div class="allows' + (CHOICE[k][0] === 1 ? ' one' : '') + '">' + ALLOWS[k] + '</div>' : '') + '</div>' +
       '<div class="ctl"><div class="step"><button type="button" data-d="-1" aria-label="One fewer ' + it[0] + '">−</button><output>0</output><button type="button" data-d="1" aria-label="One more ' + it[0] + '">+</button></div><button type="button" class="rm" data-rm="1" aria-label="Remove ' + it[0] + ' from the basket" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v6M14 10v6"/></svg></button></div>';
     var host = document.getElementById(it[4] === 'box' ? 'lines-box' : 'lines-pan');
     host.appendChild(d);
@@ -164,9 +180,9 @@
     });
   });
   function totals() { var t = { USD: 0, ILS: 0 }; for (var k in q) t[ITEMS[k][2]] += q[k] * ITEMS[k][1]; return t; }
-  function totalText() { var t = totals(), p = []; if (MirCode.code() && !(t.USD && t.ILS)) { var c1 = t.USD ? 'USD' : 'ILS'; return money(MirCode.after(t[c1]), c1); } if (t.USD) p.push(money(t.USD, 'USD')); if (t.ILS) p.push(money(t.ILS, 'ILS')); var s = p.join(' + ') || '0';
-    if (t.ILS) { var d = 0; for (var k in q) if (q[k]) d += q[k] * (ITEMS[k][6] || (ITEMS[k][2] === 'USD' ? ITEMS[k][1] : 0)); s += ' (or $' + d.toLocaleString('en-US') + ' all in dollars)'; }
-    return s; }
+  function both() { var t = totals(); return t.USD > 0 && t.ILS > 0; }
+  function curs() { var t = totals(); return ['USD', 'ILS'].filter(function (c) { return t[c] > 0; }); }
+  function totalText() { var t = totals(), c = curs(); if (!c.length) return '0'; if (c.length === 1 && MirCode.code()) return money(MirCode.after(t[c[0]]), c[0]); return c.map(function (x) { return money(t[x], x); }).join(' + '); }
   var send = document.getElementById('send'), noRice = false;
   document.getElementById('sug-add').addEventListener('click', function () { q.rice = 1; update(); check(false); });
   document.getElementById('sug-no').addEventListener('click', function () { noRice = true; update(); });
@@ -175,9 +191,11 @@
     [].forEach.call(document.querySelectorAll('.line'), function (l) { l.querySelector('output').textContent = q[l.dataset.k]; l.querySelector('.rm').hidden = !q[l.dataset.k]; });
     [].forEach.call(document.querySelectorAll('.opts'), function (o) { o.hidden = !q[o.dataset.k]; });
     var html = ''; for (var k in q) if (q[k]) html += '<li><span>' + q[k] + ' × ' + ITEMS[k][0] + '</span><span>' + priceOf(k, q[k]) + '</span></li>';
-    if (html) html += '<li><span>' + DELIVERY + '</span><span>by where</span></li>';
+    if (html && deliveryOn) html += '<li><span>' + DELIVERY + '</span><span>by where</span></li>';
+    if (html && both()) html += '<li><span>Two currencies, so two orders</span><span>sent together</span></li>';
     document.getElementById('sum-list').innerHTML = html || '<li><span>Nothing yet</span></li>';
-    document.getElementById('total').textContent = totalText() !== '0' ? totalText() + ' + delivery' : '0';
+    var tc = curs(), tt = totals(), tb = document.getElementById('total');
+    tb.innerHTML = tc.length ? tc.map(function (c) { var n = tc.length === 1 && MirCode.code() ? MirCode.after(tt[c]) : tt[c]; return (both() ? '<span class="ordn">Order ' + (c === 'USD' ? 1 : 2) + ': </span>' : '') + '<span data-order-total data-currency="' + c + '">' + money(n, c) + '</span>'; }).join('') + (deliveryOn ? '<span class="dnote"> + delivery</span>' : '') : '0';
     send.firstElementChild.textContent = step < 3 ? NEXT[step] : totalText() !== '0' ? 'Send my order on WhatsApp, ' + totalText() : 'Send my order on WhatsApp';
     var b = {}; for (var k2 in q) if (q[k2]) b[k2] = q[k2]; window.cmBasket.set(b);
     // one real add-on, only with a pan, and only until it is added or turned down
@@ -196,7 +214,7 @@
       e = q[k] && !picked(k, 'kind').length ? (CHOICE[k][0] === 1 ? 'Pick the kind of chicken for the ' : 'Pick your kinds of chicken for the ') + ITEMS[k][0] : '';
       if (e) ok = false; if (show || !e) mark('o-' + k, e);
     });
-    if (on(2)) { e = v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
+    if (on(2)) { e = !deliveryOn || v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
     e = v('when') ? '' : 'Choose the day'; if (e) ok = false; if (show || !e) mark('when', e); }
     if (on(3)) { e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
     e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number we can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e); }
@@ -224,14 +242,52 @@
   addEventListener('popstate', function () { var m = /order-(\d)/.exec(location.hash); go(m ? +m[1] : 1, false); });
   document.getElementById('back').addEventListener('click', function () { history.back(); });
   var sending = false;
-  function save(notes) {
-    var t = totals(); if (t.USD && t.ILS) return Promise.resolve(null);
-    var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: ITEMS[k][3], qty: q[k] });
-    var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: ls, fulfilment: 'delivery', city: 'jerusalem', address: v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes, discount_code: MirCode.code() }) })
+  // One order per currency, one after the other (the shop keeps one currency per order). Each answers with its own saved
+  // order or null; the page says which ones were not saved.
+  function post(keys, notes, code) {
+    var ls = keys.map(function (k) { var l = { product_id: ITEMS[k][3], qty: q[k] };
+      if (k === 'pan913' && HAS_OPTS[k]) { var kind = picked(k, 'kind')[0]; l.option_id = KIND_IDS[STYLES.indexOf(kind)]; }
+      return l; });
+    var body = { lines: ls, fulfilment: deliveryOn ? 'delivery' : 'pickup', date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes, discount_code: code };
+    if (deliveryOn) { body.city = chosenCity(); body.address = v('addr'); }
+    var p = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
-    return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
+    return Promise.race([p, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
   }
+  function save(notesFor) {
+    var out = [], chain = Promise.resolve();
+    curs().forEach(function (c) {
+      var keys = Object.keys(q).filter(function (k) { return q[k] && ITEMS[k][2] === c; });
+      chain = chain.then(function () { return post(keys, notesFor(keys, c), curs().length === 1 ? MirCode.code() : null); }).then(function (r) { out.push({ cur: c, total: totals()[c], saved: r }); });
+    });
+    return chain.then(function () { return out; });
+  }
+  function chosenCity() { var c = document.getElementById('city'); return c && c.value || areas[0].slug; }
+  function fillCity() {
+    var c = document.getElementById('city');
+    c.innerHTML = areas.map(function (a) { return '<option value="' + a.slug + '">' + a.label + '</option>'; }).join('');
+    document.getElementById('w-city').hidden = areas.length < 2 || !deliveryOn;
+    document.getElementById('w-addr').hidden = !deliveryOn;
+    document.getElementById('c-2').querySelector('.deliv').hidden = !deliveryOn;
+  }
+  // Prices, currencies, the pan's kinds, delivery and areas come from the listing; the built-in numbers above are the fallback.
+  fetch(API + '/marketplace/order-form/' + GIG).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+    if (!d) return;
+    (d.products || []).forEach(function (p) {
+      Object.keys(ITEMS).forEach(function (k) {
+        if (ITEMS[k][3] !== p.id) return;
+        if (p.price != null) ITEMS[k][1] = Number(p.price);
+        if (p.currency) ITEMS[k][2] = String(p.currency).toUpperCase();
+        HAS_OPTS[k] = !!(p.options && p.options.length);
+      });
+    });
+    if (d.settings && d.settings.delivery_on === false) deliveryOn = false;
+    var as = (d.business && d.business.areas) || [];
+    if (as.length) areas = as.map(function (a) { return { slug: a.slug, label: a.label || a.slug }; });
+    [].forEach.call(document.querySelectorAll('.line'), function (l) { l.querySelector('.pr').textContent = lineText(l.dataset.k); });
+    document.getElementById('sug-price').textContent = money(ITEMS.rice[1], ITEMS.rice[2]);
+    fillCity(); update();
+  }).catch(function () {});
   MirCode.mount({ api: API, gig: GIG, goods: function () { var t = totals(); return t.USD + t.ILS; }, money: function (n) { var t = totals(); return t.USD && t.ILS ? '' : money(n, t.USD ? 'USD' : 'ILS'); }, phone: 'ph', field: 'fld', onChange: update });
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -245,23 +301,30 @@
       if (described(k).length) notesOut.push(ITEMS[k][0] + ': ' + described(k).join('; '));
     }
     if (v('note')) lines.push('Notes: ' + v('note'));
-    if (MirCode.code()) lines.push(MirCode.text(totals().USD + totals().ILS));
-    lines.push('Total: ' + totalText() + ' + delivery (₪30 to ₪50, by where)');
-    lines.push('Deliver to: ' + v('addr'));
+    if (MirCode.code() && !both()) lines.push(MirCode.text(totals().USD + totals().ILS));
+    lines.push('Total: ' + totalText() + (both() ? ' (two orders, one per currency)' : '') + (deliveryOn ? ' + delivery (₪30 to ₪50, by where)' : ''));
+    lines.push(deliveryOn ? 'Deliver to: ' + v('addr') + (areas.length > 1 ? ', ' + areas.filter(function (a) { return a.slug === chosenCity(); })[0].label : '') : 'Pick-up');
     lines.push('For: ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
     lines.push('Name: ' + v('me') + ', ' + v('ph'));
-    var notes = notesOut.concat([v('note'), 'Delivery fee ₪30 to ₪50, confirmed on WhatsApp', 'Sent from the Chicken Munch page by WhatsApp']).filter(Boolean).join('\n');
+    function notesFor(keys, c) {
+      var mine = keys.map(function (k) { return ITEMS[k][0] + ': ' + described(k).join('; '); }).filter(function (x) { return /: ./.test(x); });
+      return mine.concat([v('note'), both() ? 'Two currencies, so this is the ' + c + ' part of a basket sent as two orders' : '', deliveryOn ? 'Delivery fee ₪30 to ₪50, confirmed on WhatsApp' : '', 'Sent from the Chicken Munch page by WhatsApp']).filter(Boolean).join('\n');
+    }
     sending = true; send.setAttribute('aria-busy', 'true');
     var label = send.firstElementChild.textContent; send.firstElementChild.textContent = 'Sending';
+    var box = document.getElementById('o-sent'); box.hidden = true; box.classList.remove('bad');
     var tab = window.open('', '_blank');
-    save(notes).then(function (saved) {
-      var text = lines.join('\n');
-      if (saved && saved.track_url) text += '\n\nFollow the order: ' + saved.track_url;
+    save(notesFor).then(function (res) {
+      var text = lines.join('\n'), bad = res.filter(function (r) { return !r.saved; });
+      res.forEach(function (r) { if (r.saved && r.saved.track_url) text += '\n\nFollow the ' + (res.length > 1 ? r.cur + ' ' : '') + 'order: ' + r.saved.track_url; });
+      box.hidden = false; box.classList.toggle('bad', !!bad.length);
+      box.textContent = bad.length ? (res.length > 1 && bad.length < res.length ? 'Part of your order (' + bad.map(function (r) { return money(r.total, r.cur); }).join(', ') + ')' : 'Your order') + ' was not saved on the site, so it is going to Chicken Munch on WhatsApp instead. Please send that message.' : 'Your order is saved' + (res.length > 1 ? ' as ' + res.length + ' orders, one per currency' : '') + '. Now send it on WhatsApp.';
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
       sending = false; send.removeAttribute('aria-busy'); send.firstElementChild.textContent = label;
     });
   });
+  fillCity();
   go(1, false);
 })();
 </script>
