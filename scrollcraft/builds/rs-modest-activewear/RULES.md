@@ -218,3 +218,7 @@ R3v.1 pass: full footer on index, shop and contact (who we are, Pages, Visit wit
 R3v.2 pass: the menu bar lists Home, Shop and Contact on every page, no jumps; looked at all three pages
 R3v.14 pass: three facts under "Shop the skirt, ₪320" on the first screen (built-in leggings, collect from the store, send your order on WhatsApp), from the shop page's own collecting step and listing title; the price is the button's own label
 <!-- 6 Nov 2026: the only change is the discount code box on the order form (public/pages/mir-code.js, Tzvi: American Crust's first-time code had nowhere to be typed). Looked at the form with the box and a test order on phone and laptop; the rest of the site is unchanged, so the other rules were not re-read. -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->

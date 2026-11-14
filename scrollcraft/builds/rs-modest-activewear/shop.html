@@ -92,7 +92,7 @@
           <ul class="sum-mini" id="sum-mini"><li><span>Nothing yet</span></li></ul>
           <p class="sum-where" id="sum-where" hidden></p>
           <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
-          <div class="total"><span>Total</span><span id="total">₪0</span></div>
+          <div class="total"><span>Total</span><span id="total" data-order-total>₪0</span></div>
           <button class="btn" id="send" type="submit"><span>Continue to collecting</span></button>
           <button class="back" id="back" type="button" hidden>Back</button>
           <p class="note" id="send-note">Next: collect from the store or delivery.</p>
@@ -194,7 +194,7 @@
     window.siteBasket.set(qty ? { skirt: qty } : {});
     var bar = document.querySelector('#bar .p'), barBtn = document.querySelector('#bar .btn');
     if (barBtn) { barBtn.textContent = 'Basket'; barBtn.setAttribute('href', '#order'); }
-    if (bar) bar.innerHTML = qty ? '<b>Basket, ₪' + total() + '</b>' + qty + (qty === 1 ? ' skirt' : ' skirts') : '<b>₪320</b>Premium Modest Sports Skirt';
+    if (bar) bar.innerHTML = qty ? '<b>Basket, ₪' + total() + '</b>' + qty + (qty === 1 ? ' skirt' : ' skirts') : '<b>₪' + PRICE + '</b>' + NAME;
     stIn.textContent = qty ? 'In your basket: ' + qty + (qty === 1 ? ' skirt' : ' skirts') + '. You write your size and colour in the note there.' : 'You write your size and colour in the note in your basket.';
     drawStep();
   }
@@ -263,7 +263,7 @@
     out.push(how === 'collect' ? 'Collect from the store at King George 31' : 'Deliver to: ' + v('addr'));
     out.push('For: ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
     out.push('Name: ' + v('me') + ', ' + v('ph'));
-    var notes = ['Size and colour: ' + v('sc'), v('note'), 'Sent from the RS Modest Activewear page by WhatsApp'].filter(Boolean).join('\n');
+    var notes = ['Size and colour: ' + v('sc'), how === 'deliver' ? 'Delivery address: ' + v('addr') : '', v('note'), 'Sent from the RS Modest Activewear page by WhatsApp'].filter(Boolean).join('\n');
     sending = true; send.setAttribute('aria-busy', 'true');
     var label = send.firstElementChild.textContent; send.firstElementChild.textContent = 'Sending';
     var tab = window.open('', '_blank');
@@ -273,13 +273,21 @@
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
       sending = false; send.removeAttribute('aria-busy'); send.firstElementChild.textContent = label;
-      var first = v('me').split(/\s+/)[0], sent = $('sent'); sent.textContent = 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false;
+      var first = v('me').split(/\s+/)[0], sent = $('sent'); sent.classList.toggle('save-fail', !saved); sent.textContent = saved ? 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.' : 'Your order did not go through and was not saved. WhatsApp is open with it written out, so please press send there so we get it.'; sent.hidden = false;
     });
   });
   addEventListener('popstate', function () { var m = /#order-(\d)/.exec(location.hash); go(m ? +m[1] : 1, false); });
   $('back').addEventListener('click', function () { history.back(); });
   $('steps').addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
   label(); update();
+  // the product, its name and price come from her listing; the built-in values above are the fallback if it cannot be reached
+  fetch(API + '/marketplace/order-form/' + GIG).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    var ps = (j && j.products) || [], p = ps.filter(function (x) { return x.id === PID; })[0] || ps[0];
+    if (!p || !(+p.price > 0)) return;
+    PID = p.id; PRICE = +p.price; NAME = p.name || NAME;
+    var pt = document.querySelector('.ptag'); if (pt) pt.innerHTML = '<span class="sym">₪</span>' + PRICE;
+    label(); update();
+  }).catch(function () {});
   var m0 = /#order-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
 })();
 </script>
