@@ -52,8 +52,8 @@
     var fs = el('fieldset'); fs.appendChild(el('legend', null, T.amount));
     var tiles = el('div', { 'class': 'gift-tiles' }); fs.appendChild(tiles); form.appendChild(fs);
     var chosen = d.amounts[Math.min(1, d.amounts.length - 1)], otherWrap = field('gift-other', T.other, { type: 'number', inputmode: 'numeric', min: d.min, max: d.max, placeholder: T.range(d.min, d.max, sym) });
-    otherWrap.hidden = true; fs.appendChild(otherWrap);
-    var other = otherWrap.querySelector('input'), send;
+    otherWrap.classList.add('off'); fs.appendChild(otherWrap);  // kept in place, not hidden, so choosing it moves nothing (rules 3s)
+    var other = otherWrap.querySelector('input'), send; other.disabled = true;
     function value() { return chosen === 'other' ? Number(other.value) : chosen; }
     function valid() { var v = value(); return v >= d.min && v <= d.max; }
     function label() { send.textContent = valid() ? T.send(sym + Math.round(value())) : T.sendPlain; }
@@ -62,7 +62,7 @@
       b.addEventListener('click', function () {
         chosen = v;
         [].forEach.call(tiles.children, function (t) { t.setAttribute('aria-pressed', String(t === b)); });
-        otherWrap.hidden = v !== 'other'; other.required = v === 'other'; if (v === 'other') other.focus();
+        otherWrap.classList.toggle('off', v !== 'other'); other.disabled = v !== 'other'; other.required = v === 'other'; if (v === 'other') other.focus();
         label();
       });
       tiles.appendChild(b);
@@ -77,7 +77,7 @@
     [[false, T.elseOne], [true, T.self]].forEach(function (o) {
       var b = el('button', { type: 'button', 'aria-pressed': String(o[0] === forSelf) }, o[1]);
       b.addEventListener('click', function () {
-        forSelf = o[0]; to.hidden = forSelf; form.querySelector('#gift-to-name').required = !forSelf;
+        forSelf = o[0]; to.classList.toggle('off', forSelf); [].forEach.call(to.querySelectorAll('input, textarea'), function (i) { i.disabled = forSelf; }); form.querySelector('#gift-to-name').required = !forSelf;
         [].forEach.call(sw.children, function (x) { x.setAttribute('aria-pressed', String(x === b)); });
       });
       sw.appendChild(b);

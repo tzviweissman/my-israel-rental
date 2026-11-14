@@ -125,6 +125,13 @@ textarea.fld { min-height: 88px; resize: vertical; }
 .gift-switch button[aria-pressed="true"] { background: var(--ink); color: var(--ground); }
 .gift-to { display: grid; gap: var(--s3); }
 .gift-to[hidden] { display: none; }
+.gift-field.off { visibility: hidden; }
+.gift-to.off { opacity: .35; }
+.gift-tile, .gift-switch button { transition: border-color .2s, background-color .2s, transform .12s; }
+.gift-tile:hover { border-color: var(--ink); }
+.gift-switch button:hover { color: var(--ink); background: var(--line); }
+.gift-switch button[aria-pressed="true"]:hover { background: var(--ink); color: var(--ground); opacity: .85; }
+.gift-tile:active, .gift-switch button:active { transform: scale(.97); }
 .gift-field { display: grid; gap: var(--s1); }
 .gift-field[hidden] { display: none; }
 .gift-field label { font-weight: 700; }
@@ -334,3 +341,8 @@ section.book-sec { padding-top: var(--s6); }
   .sum .total { margin-bottom: var(--s2); padding-top: var(--s2); }
   .status { min-height: 0; margin-top: var(--s2); } .status:empty { display: none; }
 }
+
+/* booking forms: 16px so phones do not zoom on focus, grid cells may shrink below their content; a failed save is red */
+.fld, .gift-field input, .gift-field textarea { font-size: 16px; }
+form [class*="grid"] > *, form .opts > *, form .times > *, .form > *, .cols > * { min-width: 0; }
+.status.is-fail { color: #B3261E; }

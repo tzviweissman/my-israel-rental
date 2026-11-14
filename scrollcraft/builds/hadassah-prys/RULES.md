@@ -228,3 +228,11 @@ R3x.8 pass: built to the blueprint: sitekit writes the skip link, live basket co
 R3x.13 pass: built to the blueprint: every text size from the starter scale --t-1..--t5 and every gap from --s1..--s10, written into BRAND.md; nothing sized in between
 R3r.3 pass: built to the blueprint: check-build passed on every page after the last edit
 R3r.4 n/a: Tzvi has not had to point anything out twice on this site
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->

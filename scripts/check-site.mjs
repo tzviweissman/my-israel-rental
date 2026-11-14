@@ -182,7 +182,7 @@ for (const url of urls) {
     for (let i = 0; i < Math.min(n, 8); i++) {
       const moved = await page.evaluate(async (i) => {
         document.documentElement.style.scrollBehavior = 'auto';
-        const b = document.querySelector(`[data-site-c="${i}"]`); const own = b.closest('section') || document.body;
+        const b = document.querySelector(`[data-site-c="${i}"]`); if (!b) return null; const own = b.closest('section') || document.body;
         const after = [...document.querySelectorAll('section')].filter((s) => s !== own && (own.compareDocumentPosition(s) & Node.DOCUMENT_POSITION_FOLLOWING));
         const before = after.map((s) => s.getBoundingClientRect().top + scrollY);
         b.click(); await new Promise((r) => setTimeout(r, 1400));
@@ -337,7 +337,7 @@ for (const url of urls) {
       for (let stepN = 0; stepN < 4; stepN++) {
       await page.evaluate((first) => {
         const clickFirst = (sel) => { const e = document.querySelector(sel); if (e) e.click(); };
-        if (first) { clickFirst('#st-add'); clickFirst('#svcs input'); }
+        if (first) { if (document.querySelector('#st-add')) clickFirst('#st-add'); else { const a = [...document.querySelectorAll('button')].find((b) => b.offsetParent !== null && (/^\s*add\b/i.test(b.textContent) || /^one more\b/i.test(b.getAttribute('aria-label') || ''))); if (a) a.click(); } clickFirst('#svcs input'); }  // a shop with a delivery minimum needs something in the basket (Bake Away, 14 Nov 2026)
         const groups = {}; for (const r of document.querySelectorAll('form input[type=radio]')) if (!groups[r.name] && r.offsetParent !== null && r.name !== 'pack') { groups[r.name] = 1; r.click(); }
         // choices made with checkboxes (Chicken Munch's kinds of chicken): tick the first visible one of each group none of which is ticked
         const boxes = {}; for (const c of document.querySelectorAll('form input[type=checkbox]')) { if (c.offsetParent === null) continue; const g = c.name || (c.closest('fieldset, [role=group]') || {}).id || 'x'; (boxes[g] = boxes[g] || []).push(c); }

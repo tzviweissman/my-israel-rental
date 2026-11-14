@@ -105,7 +105,7 @@
     if (!check(true, 1)) { go(1, true); check(true, 1); return; }
     if (!check(true, 3)) { var b2 = document.querySelector('.bad .fld'); if (b2) b2.focus(); return; }
     var text = 'Hi Hadassah, I would like to book:\n' + summary() + '\nPrice on your listing: ₪' + PRICE;
-    phase = 'open'; $('send').setAttribute('aria-busy', 'true'); $('status').textContent = 'Saving your request…';
+    phase = 'open'; $('send').setAttribute('aria-busy', 'true'); $('status').classList.remove('is-fail'); $('status').textContent = 'Saving your request…';
     var tab = window.open('', '_blank');  // opened now so the pop-up blocker allows it; filled once the request is saved
     var post = fetch(API + '/marketplace/gigs/' + GIG + '/book', { method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ tier_name: TIER, preferred_date: v('day'), time_slot: time, guest_name: v('me'), contact_phone: v('ph'), message: summary(), lang: 'en' }) })
@@ -116,7 +116,7 @@
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
       phase = 'done'; $('send').removeAttribute('aria-busy');
-      $('status').textContent = saved ? 'Sent. Your request is saved and WhatsApp is open with it written out.' : 'WhatsApp is open with your request written out.';
+      $('status').classList.toggle('is-fail', !saved); $('status').textContent = saved ? 'Sent. Your request is saved and WhatsApp is open with it written out.' : 'Your request did not go through and was not saved. WhatsApp is open with it written out, so please press send there.';
       update(); setTimeout(function () { phase = ''; update(); }, 2500);
     });
   });
