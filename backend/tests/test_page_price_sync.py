@@ -34,3 +34,23 @@ def test_price_goes_to_own_listing_only():
             await db.marketplace_gigs.delete_many({"_id": {"$in": [g["_id"] for g in gigs]}})
 
     asyncio.run(run())
+
+
+def test_catalog_products_keep_order_id_and_description(monkeypatch):
+    """A designed page's menu (Finest Cuts shop.js, mir-catalog.js) needs each product's order id, idx:N for one
+    saved before ids existed, and its description. 5dee7ca8 added both; 5ebe10b8 dropped them unnoticed."""
+    mm = pytest.importorskip("mongomock_motor")
+    mdb = mm.AsyncMongoMockClient()["t"]
+    from routes.marketplace import businesses
+    monkeypatch.setattr(page_edits, "db", mdb)
+    monkeypatch.setattr(businesses, "db", mdb)
+
+    async def run():
+        await mdb.businesses.insert_one({"_id": "b1", "slug": "menu-test", "name": "Menu", "owner_user_id": "u1"})
+        await mdb.marketplace_gigs.insert_one({"_id": "g1", "business_id": "b1", "status": "published", "gig_type": "store",
+                                               "products": [{"name": "Feast", "price": 215, "description": " XL board "},
+                                                            {"id": "p2", "name": "Wings", "price": 60}]})
+        out = await page_edits.get_page_edits("menu-test")
+        return [(p["id"], p.get("description")) for p in out["products"]]
+
+    assert asyncio.run(run()) == [("idx:0", "XL board"), ("p2", None)]
