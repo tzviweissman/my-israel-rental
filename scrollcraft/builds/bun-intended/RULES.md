@@ -225,3 +225,9 @@ Note, 6 Nov 2026 (later): the Order and Prices headlines are h1 and keep the edi
 <!-- 6 Nov 2026: the only change is the discount code box on the order form (public/pages/mir-code.js, Tzvi: American Crust's first-time code had nowhere to be typed). Looked at the form with the box and a test order on phone and laptop; the rest of the site is unchanged, so the other rules were not re-read. -->
 
 <!-- 6 Nov 2026: the order form is on the Order page (order.html) and carries the discount code box (mir-code.js, main 9f905cf0); the server adds the phone note, required email and texts step (mir-order.js). Looked at the form on phone and laptop with a test order; the other rules were not re-read. -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->

@@ -8,11 +8,22 @@
 <meta name="description" content="Build your box of 4 or 8 homemade cinnamon buns: classic cinnamon, espresso, Lotus or chocolate. Pareve. Pick-up in Ramat Eshkol, Jerusalem. Send the order on WhatsApp.">
 <meta property="og:title" content="Build your box · Bun Intended">
 <meta property="og:description" content="Build your box of 4 or 8 homemade cinnamon buns and send the order on WhatsApp. Pareve. Ramat Eshkol, Jerusalem.">
-<meta property="og:image" content="/pages/aidy-yaniv/assets/boxes.webp?v=mw4o1k6v">
+<meta property="og:image" content="/pages/aidy-yaniv/assets/boxes.webp?v=mwgqopg5">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Allura&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/aidy-yaniv/site.css?v=mw4o1k6v">
+<link rel="stylesheet" href="/pages/aidy-yaniv/site.css?v=mwgqopg5">
+<style>
+  /* order form: fields at 16px so iPhones do not zoom in; grid cells may shrink */
+  .when input, .when select, .who input, .who select { font-size: 16px; min-width: 0; }
+  .build-grid > *, .who label { min-width: 0; }
+  /* the store is not taking orders (GET /order-form answered 404, or orders are paused): the builder is replaced by a message */
+  .build.is-closed .choices, .build.is-closed .when, .build.is-closed .total, .build.is-closed #note, .build.is-closed #oerr, .build.is-closed .sub { display: none; }
+  .closed-note { margin: 18px 0 0; padding: 18px 20px; border: 1.5px solid var(--line); border-radius: 16px; background: #fff; }
+  .closed-note[hidden] { display: none; }
+  .closed-note b { display: block; font: 600 1.25rem/1.25 var(--head, 'Cormorant Garamond', serif); margin-bottom: 6px; }
+  .closed-note p { margin: 0 0 6px; }
+</style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -47,6 +58,7 @@
       <div>
         <h1 id="bh" data-mir-key="t-549a331c-0">Build your box</h1>
         <p class="sub" data-mir-key="t-94f13d36-0">Choose a box and a flavour.</p>
+        <div class="closed-note" id="closed-note" role="status" hidden><b data-mir-key="t-c7ea174b-0">Bun Intended is not taking orders right now.</b><p data-mir-key="t-e3ab1d17-0">Please check back soon. You can still call or text <a href="tel:+972553321956">055-332-1956</a> to ask when the next bake is.</p></div>
 
         <div class="choices size" role="group" aria-label="Box size">
           <button type="button" class="choice" data-size="4" aria-pressed="true"><span data-mir-key="t-9be94f2c-0">4 piece box<small>from ₪55</small></span></button>
@@ -71,6 +83,7 @@
           <label><input id="ph" type="tel" autocomplete="tel" maxlength="30" aria-label="Your phone" placeholder="Your phone"></label>
         </div>
         <div class="when who" id="addrw">
+          <label id="areaw" hidden><select id="area" aria-label="Delivery area"></select></label>
           <label><input id="addr" autocomplete="street-address" maxlength="160" aria-label="Delivery address" placeholder="Delivery address: street, number, neighbourhood"></label>
         </div>
         <p class="note" id="oerr" role="alert" style="color:#9b2c1d"></p>
@@ -115,7 +128,7 @@
   <div class="wrap legal fbase"><span data-mir-key="t-38cd1851-0">© 2026 Bun Intended.</span><span data-mir-key="t-69529cb0-0">Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
 </footer>
 
-<script src="/pages/aidy-yaniv/site.js?v=mw4o1k6v"></script>
+<script src="/pages/aidy-yaniv/site.js?v=mwgqopg5"></script>
 <script>
 (function () {
   // Their price list, as printed on it.
@@ -126,7 +139,10 @@
   var PID = { cinnamon: { 4: '3e8fc7b11ba5', 8: '496133c34c8d' }, espresso: { 4: 'a2411e518cfd', 8: 'add54923e23e' },
     lotus: { 4: '1fe757edcd3c', 8: '14b2e1b51020' }, chocolate: { 4: '1a0afd77ecca', 8: 'a9f847b52153' }, mix: { 8: '0b0622aa4198' } };
   var waText = '', waNotes = '';
-  var F = BUN.F, MIX8 = BUN.MIX8, SW = BUN.SW, cheaperPair = BUN.cheaperPair;
+  var STORE = { delivery: true, areas: [{ slug: 'jerusalem', label: 'Jerusalem' }] }, HAS_PAIR = false;
+  var F = BUN.F, MIX8 = BUN.MIX8, SW = BUN.SW, cheaperPair = BUN.cheaperPair;  // their printed price list: the fallback, replaced by the listing below
+  // The mix's two flavours are a real choice, so each pair is an option of the mix product: ids like cinnamon-espresso, in the list's order.
+  function pairId() { return F.filter(function (x) { return state.picks.indexOf(x.id) > -1; }).map(function (x) { return x.id; }).join('-'); }
   var state = { size: 4, mix: false, picks: ['cinnamon'], qty: 1, ful: 'pickup' };
   var $ = function (s) { return document.querySelector(s); };
 
@@ -145,11 +161,11 @@
   // faded at the edges so it sits on the paper with no box. The jug that dips
   // into the top of some clips fades out with the top edge.
   function bun(c) {
-    return '<img class="bunimg" src="/pages/aidy-yaniv/assets/bun-' + c + '.webp?v=mw4o1k6v" alt="" width="720" height="720" loading="lazy" decoding="async">';
+    return '<img class="bunimg" src="/pages/aidy-yaniv/assets/bun-' + c + '.webp?v=mwgqopg5" alt="" width="720" height="720" loading="lazy" decoding="async">';
   }
   function stage(c, anim) {
-    if (!anim) return '<img class="pour" src="/pages/aidy-yaniv/assets/pour-' + c + '-end.webp?v=mw4o1k6v" alt="" width="640" height="640" decoding="async">';
-    return '<video class="pour" src="/pages/aidy-yaniv/assets/pour-' + c + '.mp4?v=mw4o1k6v" poster="/pages/aidy-yaniv/assets/pour-bare.webp?v=mw4o1k6v" width="640" height="640" muted playsinline autoplay preload="auto" aria-hidden="true"></video>';
+    if (!anim) return '<img class="pour" src="/pages/aidy-yaniv/assets/pour-' + c + '-end.webp?v=mwgqopg5" alt="" width="640" height="640" decoding="async">';
+    return '<video class="pour" src="/pages/aidy-yaniv/assets/pour-' + c + '.mp4?v=mwgqopg5" poster="/pages/aidy-yaniv/assets/pour-bare.webp?v=mwgqopg5" width="640" height="640" muted playsinline autoplay preload="auto" aria-hidden="true"></video>';
   }
   // The first time the box comes into view, the chosen flavour is poured on,
   // so the pour is seen without having to pick anything first.
@@ -210,7 +226,7 @@
     var p = price(), n = names(), q = state.qty, w = was(), save = w > p ? (w - p) * q : 0, tot = MirCode.after(p * q), buns = state.size * q;
     var each = (tot / buns); each = each % 1 ? each.toFixed(2) : String(each);
     var chip = save ? '<span class="chip">' + Math.floor(save * 100 / (w * q)) + '% off</span>' : '';  /* percent off, rounded down (Tzvi, 22 Oct 2026) */
-    $('#sum').innerHTML = '<span class="pp">₪' + tot + (save ? '<s>₪' + (w * q) + '</s>' : '') + '</span><small class="u">' + chip + '₪' + each + ' a bun</small><small class="n">' + (save ? chip : buns + ' buns') + '</small>';
+    $('#sum').innerHTML = '<span class="pp"><span data-order-total>₪' + tot + '</span>' + (save ? '<s>₪' + (w * q) + '</s>' : '') + '</span><small class="u">' + chip + '₪' + each + ' a bun</small><small class="n">' + (save ? chip : buns + ' buns') + '</small>';
     document.querySelectorAll('[data-px]').forEach(function (x) { x.textContent = ', ₪' + tot; });
     $('#qty').textContent = q; $('#qm').disabled = q <= 1; $('#qp').disabled = q >= 9;
     document.querySelectorAll('[data-ful]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-ful') === state.ful)); });
@@ -244,7 +260,7 @@
     var what = q > 1 ? q + ' x ' + state.size + ' piece boxes' : (state.size === 8 ? 'an ' : 'a ') + state.size + ' piece box';
     var text = 'Hi Bun Intended, I\'d like to order ' + what + ': '
       + (state.mix ? '2 flavour mix, ' + n.join(' and ') : n[0]) + ' (₪' + tot + (q > 1 ? ' for ' + q : '') + ').' + (MirCode.code() ? ' ' + MirCode.text(p * q) + '.' : '')
-      + (when ? ' For ' + when + '.' : '') + (state.ful === 'delivery' ? ' Delivery to ' + ($('#addr').value.trim() || '(address)') + '.' : ' Pick-up in Ramat Eshkol.')
+      + (when ? ' For ' + when + '.' : '') + (state.ful === 'delivery' ? ' Delivery to ' + ($('#addr').value.trim() || '(address)') + (STORE.areas.length > 1 ? ', ' + $('#area').selectedOptions[0].textContent : '') + '.' : ' Pick-up in Ramat Eshkol.')
       + ($('#me').value.trim() ? ' Name: ' + $('#me').value.trim() + ', ' + $('#ph').value.trim() + '.' : '');
     waText = text;
     waNotes = (state.mix ? '2 flavour mix: ' + n.join(' and ') + '\n' : '') + 'Sent from the Bun Intended page by WhatsApp';
@@ -277,7 +293,23 @@
   });
   $('#date').addEventListener('change', paint);
   ['me', 'ph', 'addr'].forEach(function (id) { $('#' + id).addEventListener('input', function () { $('#oerr').textContent = ''; paint(); }); });
-  var today = new Date(); $('#date').min = today.toISOString().slice(0, 10);
+  $('#area').innerHTML = STORE.areas.map(function (a) { return '<option value="' + a.slug + '">' + a.label + '</option>'; }).join('');
+  function ymd(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  var today = new Date(); $('#date').min = ymd(today);
+  // the form arrives filled in (rules 3k Pre-filled): tomorrow, or the first day after it that is not past its cutoff; changeable
+  function prefillDate(cutoffs) {
+    var d = new Date(); d.setHours(12, 0, 0, 0);
+    for (var i = 0; i < 30; i++) {
+      d.setDate(d.getDate() + 1);
+      var wd = d.getDay(), shut = (cutoffs || []).some(function (c) {
+        var c0 = new Date(d); c0.setDate(c0.getDate() - ((wd - Number(c.closes_day != null ? c.closes_day : wd) + 7) % 7));
+        return c.for_day === wd && ymd(new Date()) + 'T' + ('0' + new Date().getHours()).slice(-2) + ':' + ('0' + new Date().getMinutes()).slice(-2) > ymd(c0) + 'T' + (c.closes_time || '00:00');
+      });
+      if (!shut) break;
+    }
+    $('#date').value = ymd(d); paint();
+  }
+  prefillDate();
 
   // The send button: "Opening WhatsApp", then a tick (21st Interactive Hover Button).
   MirCode.mount({ api: API, gig: GIG, goods: function () { return price() * state.qty; }, phone: 'ph', onChange: paint });
@@ -297,8 +329,9 @@
     // the WhatsApp tab opens now, inside the tap, so pop-up blockers allow it; it is filled once the order is saved
     var tab = window.open('', '_blank');
     var pid = (state.mix ? PID.mix : PID[state.picks[0]])[state.size];
-    var body = { lines: [{ product_id: pid, qty: state.qty }], fulfilment: state.ful, date: v('date'), customer_name: v('me'), customer_phone: v('ph'), notes: waNotes, discount_code: MirCode.code() };
-    if (state.ful === 'delivery') { body.city = 'jerusalem'; body.address = v('addr'); }
+    var ln = { product_id: pid, qty: state.qty }; if (state.mix && HAS_PAIR) ln.option_id = pairId();
+    var body = { lines: [ln], fulfilment: state.ful, date: v('date'), customer_name: v('me'), customer_phone: v('ph'), notes: waNotes, discount_code: MirCode.code() };
+    if (state.ful === 'delivery') { body.city = $('#area').value || STORE.areas[0].slug; body.address = v('addr'); }
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('Order not saved', r.status, t); return null; }); })
       .catch(function (er) { console.warn('Order not saved', er); return null; });
@@ -306,6 +339,7 @@
       var text = waText + (saved && saved.track_url ? '\n\nFollow the order: ' + saved.track_url : '');
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
+      $('#oerr').textContent = saved ? '' : 'Your order did not save on the site, so it is going to Bun Intended on WhatsApp instead. Please send that message.';
       a.classList.remove('is-busy'); a.classList.add('is-done');
       setTimeout(function () { a.classList.remove('is-done'); }, 2500);
     });
@@ -320,6 +354,42 @@
   })();
 
   paint();
+
+  // ── the listing (GET /order-form) decides: prices, product ids, the mix's options, delivery, areas, and whether the shop takes
+  // orders at all. When the store is not taking orders the builder is replaced by a plain message, so nobody fills in an order
+  // that cannot be saved. If the listing cannot be read (offline, slow), the page keeps the printed list above.
+  function closedNow() { $('#closed-note').hidden = false; document.querySelector('.build').classList.add('is-closed'); }
+  var ctl = window.AbortController ? new AbortController() : null, tmo = setTimeout(function () { if (ctl) ctl.abort(); }, 4000);
+  fetch(API + '/marketplace/order-form/' + GIG, ctl ? { signal: ctl.signal } : undefined).then(function (r) { clearTimeout(tmo); return r.status === 404 ? 'closed' : r.ok ? r.json() : null; }).then(function (d) {
+    if (d === 'closed') return closedNow();
+    if (!d) return;
+    if (d.paused && d.paused.active) return closedNow();
+    var by = {}; (d.products || []).forEach(function (g) { by[(g.name || '').toLowerCase()] = g; });
+    F.forEach(function (f) {
+      [4, 8].forEach(function (n) {
+        var g = by[(f.name + ', ' + n + ' piece box').toLowerCase()];
+        if (!g) return; f['p' + n] = Number(g.price); PID[f.id][n] = g.id;
+      });
+    });
+    var mx = by['2 flavour mix, 8 piece box'];
+    if (mx) { MIX8 = Number(mx.price); PID.mix[8] = mx.id; HAS_PAIR = !!(mx.options && mx.options.length); }
+    BUN.MIX8 = MIX8;
+    var mp = fHost.querySelector('[data-mix] .pr'); if (mp) mp.textContent = '₪' + MIX8;
+    if (d.settings && d.settings.cutoffs && d.settings.cutoffs.length) prefillDate(d.settings.cutoffs);
+    if (d.settings && d.settings.delivery_on === false) { STORE.delivery = false; state.ful = 'pickup'; var db = document.querySelector('[data-ful="delivery"]'); if (db) db.hidden = true; }
+    var as = (d.business && d.business.areas) || [];
+    if (as.length) STORE.areas = as.map(function (a) { return { slug: a.slug, label: a.label || a.slug }; });
+    $('#area').innerHTML = STORE.areas.map(function (a) { return '<option value="' + a.slug + '">' + a.label + '</option>'; }).join('');
+    $('#areaw').hidden = STORE.areas.length < 2;
+    // the size buttons' own words
+    var p4 = Math.min.apply(null, F.map(function (f) { return f.p4; })), p8 = Math.min.apply(null, F.map(function (f) { return f.p8; }));
+    var off = Math.max.apply(null, F.map(function (f) { return Math.floor((2 * f.p4 - f.p8) * 100 / (2 * f.p4)); }));
+    var b4 = document.querySelector('.choice[data-size="4"] small'), b8 = document.querySelector('.choice[data-size="8"] small'), c8 = document.querySelector('.choice[data-size="8"] .chip');
+    if (b4) b4.textContent = 'from ₪' + p4;
+    if (b8) b8.innerHTML = '<s>₪' + 2 * p4 + '</s> from ₪' + p8;
+    if (c8) { if (off > 0) c8.textContent = 'Up to ' + off + '% off'; else c8.remove(); }
+    paint();
+  }).catch(function () { clearTimeout(tmo); });
 })();
 </script>
 </body>

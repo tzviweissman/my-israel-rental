@@ -1,0 +1,42 @@
+{
+  "gig_id": "c42107a6-615e-45dc-8e87-7164a1cd6a87",
+  "products": [
+    {
+      "id": "0b0622aa4198",
+      "options": [
+        {
+          "id": "cinnamon-espresso",
+          "name": "Classic cinnamon + Espresso",
+          "price": null
+        },
+        {
+          "id": "cinnamon-lotus",
+          "name": "Classic cinnamon + Lotus",
+          "price": null
+        },
+        {
+          "id": "cinnamon-chocolate",
+          "name": "Classic cinnamon + Chocolate",
+          "price": null
+        },
+        {
+          "id": "espresso-lotus",
+          "name": "Espresso + Lotus",
+          "price": null
+        },
+        {
+          "id": "espresso-chocolate",
+          "name": "Espresso + Chocolate",
+          "price": null
+        },
+        {
+          "id": "lotus-chocolate",
+          "name": "Lotus + Chocolate",
+          "price": null
+        }
+      ]
+    }
+  ],
+  "new_products": [],
+  "reason": "The 2 flavour mix box is half one flavour, half another, which is a real choice the dashboard should show, so each of the six pairs is an option at the mix's own price (option ids are the two flavour ids in list order, as order.html builds them). Every other box is one flavour and already has its own product. Separately: the listing GET currently answers 'This store is not taking orders' (the business is switched off); order.html now shows a not-taking-orders message until the business is switched back on."
+}
