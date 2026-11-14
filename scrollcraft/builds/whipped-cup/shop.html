@@ -14,6 +14,12 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,500..700,100;1,9..144,500,100&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@400;500;700&display=swap&text=%E2%82%AA" rel="stylesheet">  <!-- only ₪, which the site's own fonts do not have (scripts/check-site.mjs GLYPH) -->
 <link rel="stylesheet" href="site.css">
+<style>
+  /* form fields at 16px so iPhones do not zoom in; grid cells may shrink */
+  .fld, input[type=tel].fld, input[type=date].fld { font-size: 16px; min-width: 0; }
+  .form > *, .card, .sum { min-width: 0; }
+  .sent.bad { color: #B3261E; }
+</style>
 </head>
 <body class="no-js" data-page="shop">
 <header class="top" id="top">
@@ -90,6 +96,7 @@
           <div class="card ostep" data-s="2" hidden>
             <h2>Delivery</h2>
             <p class="deliv">Delivered fresh to your door.</p>
+            <div id="w-city" hidden><label class="f" for="city">Area</label><select class="fld" id="city"></select></div>
             <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p></div>
             <div id="w-when"><label class="f" for="when">First delivery day</label><input class="fld" id="when" type="date"><p class="err" id="e-when"></p></div>
           </div>
@@ -106,7 +113,7 @@
           <ul id="sum-mini"><li><span>Nothing yet</span></li></ul>
           <p class="sum-where" id="sum-where" hidden></p>
           <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
-          <div class="total"><span>Total</span><span id="total">₪0</span></div>
+          <div class="total"><span>Total</span><span id="total" data-order-total>₪0</span></div>
           <button class="btn" id="send" type="submit"><span>Continue to delivery</span></button>
           <button class="back" id="back" type="button" hidden>Back</button>
           <p class="note" id="send-note">Next: where and when we deliver.</p>
@@ -170,6 +177,12 @@
   if (PACKS[qs.get('pack')]) pack = qs.get('pack');
   if (qs.toString()) history.replaceState(null, '', location.pathname);
   var mixQ = { classic: 0, caramel: 0, vanilla: 0 }, oneFlav = '';
+  // The built-in prices above are only the fallback: the listing (GET /order-form) replaces them as soon as it answers, so the
+  // page shows and sends the prices set in the dashboard. One Flavour's flavour is a listing option (ids classic, caramel, vanilla);
+  // the Duo and the Bundle mix flavours at one price, so their mix stays in the order notes.
+  var HAS_OPT = {}, deliveryOn = true, areas = [{ slug: 'jerusalem', label: 'Jerusalem' }];
+  function minJar() { return Math.min(JARS.classic[1], JARS.caramel[1], JARS.vanilla[1]); }
+  function maxJar() { return Math.max(JARS.classic[1], JARS.caramel[1], JARS.vanilla[1]); }
 
   // ── the stage: one flavour at a time, big (Tzvi's product pages, 20 Oct 2026, inspo
   // product-pages-2026-10-20: one product per screen, the choice recolours it, quantity and the
@@ -224,7 +237,7 @@
   // what a package saves against the same jars bought one by one, from her own prices (Tzvi, 20 Oct
   // 2026: "people feel like they are getting a deal ... it should show what they save"). Honest: the
   // range is real, "up to" is its top, and the price a jar is the package price divided by its jars.
-  function singles(k) { var p = PACKS[k]; if (p.mode === 'fixed') return [40 + 48 + 48 + 40, 40 + 48 + 48 + 48]; return [p.jars * 40, p.jars * 48]; }
+  function singles(k) { var p = PACKS[k], all = JARS.classic[1] + JARS.caramel[1] + JARS.vanilla[1]; if (p.mode === 'fixed') return [all + minJar(), all + maxJar()]; return [p.jars * minJar(), p.jars * maxJar()]; }
   // shown the way shops show a deal (Tzvi, 20 Oct 2026, from the strawberry video: the original price
   // with a slash through it next to the price, and a short badge, not a sentence). The jars bought one
   // by one at the lowest single price, so the saving is always true whatever the flavours.
@@ -234,10 +247,13 @@
   // 75 / 2 = 37.50 a jar, a smaller pack, so a % off here would be false against a cheaper way to buy.
   function was(k) { return k === 'assorted' ? 0 : singles(k)[0]; }
   function pct(k) { return Math.floor((was(k) - PACKS[k].price) * 100 / was(k)); }  // percent off, rounded down
-  plans.innerHTML = Object.keys(PACKS).map(function (k) {
+  function drawPlans() {
+    if (mix && mix.parentNode === plans) document.querySelector('.nopack').after(mix);  // the choices live inside a plan; keep them while it is redrawn
+    plans.innerHTML = Object.keys(PACKS).map(function (k) {
     var p = PACKS[k];
     return '<label class="plan' + (k === 'bundle' ? ' lead' : '') + '"><input type="radio" name="pack" value="' + k + '"><span class="box">' + (k === 'bundle' ? '<span class="tab">Best value</span>' : '') + '<span><b>' + p.name + '</b><br><span class="pr">' + p.meta + ' · ' + perJar(p) + '</span></span><span class="p">' + (was(k) ? '<s class="was" aria-label="instead of ₪' + was(k) + '">₪' + was(k) + '</s> ' : '') + '₪' + p.price + '</span><span class="allows">' + p.allows + '</span>' + (was(k) ? '<span class="save-b" data-save="' + pct(k) + '% off">' + pct(k) + '% off</span>' : '') + '</span></label>';
   }).join('');
+  }
   function choosePack(v) { pack = v; mixQ = { classic: 0, caramel: 0, vanilla: 0 }; oneFlav = ''; drawMix(); update(); check(false);
     if (v) say(PACKS[v].name + ' in your basket');
     if (!mix.hidden) mix.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
@@ -245,6 +261,7 @@
   document.getElementById('nopack').addEventListener('click', function () { if (pack) choosePack(''); });
 
   var mix = document.getElementById('mix'), mixH = document.getElementById('mix-h'), mixLeft = document.getElementById('mix-left'), mixBody = document.getElementById('mix-body');
+  drawPlans();
   function mixSum() { return mixQ.classic + mixQ.caramel + mixQ.vanilla; }
   function drawMix() {
     var p = PACKS[pack]; mix.hidden = !p; if (!p) return;
@@ -299,21 +316,21 @@
     var sw = '';
     var extra = '';
     if (!pack) {
-      if (jn === 2 && cost > 75) sw = 'duo';
-      else if (jn === 4 && kinds.length === 1 && cost > 148) sw = 'one';
-      else if (jn === 4 && kinds.length === 3 && cost > 155) sw = 'assorted';
-      else if (jn === 6 && cost > 220) sw = 'bundle';
-      else if (jn === 5 && cost > 220) { sw = 'bundle'; extra = ' and a 6th jar'; }  // one more jar, for less
+      if (jn === 2 && cost > PACKS.duo.price) sw = 'duo';
+      else if (jn === 4 && kinds.length === 1 && cost > PACKS.one.price) sw = 'one';
+      else if (jn === 4 && kinds.length === 3 && cost > PACKS.assorted.price) sw = 'assorted';
+      else if (jn === 6 && cost > PACKS.bundle.price) sw = 'bundle';
+      else if (jn === 5 && cost > PACKS.bundle.price) { sw = 'bundle'; extra = ' and a 6th jar'; }  // one more jar, for less
     }
     deal.hidden = !sw;
     // the deal shown, not described (old price struck through)
-    if (sw) { deal.dataset.pack = sw; deal.querySelector('span').innerHTML = extra ? 'Make it 6 jars: Cloud Bundle <s>₪' + cost + '</s> ₪220' : 'As the ' + PACKS[sw].name + ': <s>₪' + cost + '</s> ₪' + PACKS[sw].price + ' <span class="save-b">' + Math.floor((cost - PACKS[sw].price) * 100 / cost) + '% off</span>'; }  // same jars, so a true percent; the 6th-jar case adds a jar, so it names no percent
+    if (sw) { deal.dataset.pack = sw; deal.querySelector('span').innerHTML = extra ? 'Make it 6 jars: Cloud Bundle <s>₪' + cost + '</s> ₪' + PACKS.bundle.price : 'As the ' + PACKS[sw].name + ': <s>₪' + cost + '</s> ₪' + PACKS[sw].price + ' <span class="save-b">' + Math.floor((cost - PACKS[sw].price) * 100 / cost) + '% off</span>'; }  // same jars, so a true percent; the 6th-jar case adds a jar, so it names no percent
     document.getElementById('total').textContent = '₪' + total();
     drawStep();
     var b = { jars: {} }; for (var k2 in q) if (q[k2]) b.jars[k2] = q[k2]; if (pack) b.pack = pack; window.twcBasket.set(b);
     var bar = document.querySelector('#bar .p'), jarsN = 0; for (var k3 in q) jarsN += q[k3];
     var barBtn = document.querySelector('#bar .btn'); if (barBtn) { barBtn.textContent = 'Basket'; barBtn.setAttribute('href', '#order'); }
-    if (bar) bar.innerHTML = goods() ? '<b>Basket, ₪' + total() + '</b>' + (jarsN ? jarsN + ' jar' + (jarsN > 1 ? 's' : '') : '') + (pack ? (jarsN ? ' and ' : '') + PACKS[pack].name : '') : '<b>From ₪40 a jar</b>Each jar makes 3 to 4 coffees';
+    if (bar) bar.innerHTML = goods() ? '<b>Basket, ₪' + total() + '</b>' + (jarsN ? jarsN + ' jar' + (jarsN > 1 ? 's' : '') : '') + (pack ? (jarsN ? ' and ' : '') + PACKS[pack].name : '') : '<b>From ₪' + minJar() + ' a jar</b>Each jar makes 3 to 4 coffees';
   }
   function v(id) { return document.getElementById(id).value.trim(); }
   function mark(id, msg) { var w = document.getElementById('w-' + id) || document.getElementById('c-' + id); if (w) w.classList.toggle('bad', !!msg); document.getElementById('e-' + id).textContent = msg || ''; }
@@ -324,7 +341,7 @@
     if (!e && p && p.mode === 'one' && !oneFlav) e = 'Pick the flavour for One Flavour';
     if (e) ok = false; if (show || !e) mark('items', e);
     if (upto < 2) return ok;
-    e = v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
+    e = !deliveryOn || v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
     e = v('when') ? '' : 'Choose the day'; if (e) ok = false; if (show || !e) mark('when', e);
     if (upto < 3) return ok;
     e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
@@ -351,19 +368,20 @@
     if (v('note')) out.push('Notes: ' + v('note'));
     if (MirCode.code()) out.push(MirCode.text(goods()));
     out.push('Total: ₪' + total());
-    out.push('Deliver to: ' + v('addr'));
+    out.push(deliveryOn ? 'Deliver to: ' + v('addr') + (areas.length > 1 ? ', ' + document.getElementById('city').selectedOptions[0].textContent : '') : 'Pick-up');
     out.push('First delivery: ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
     out.push('Name: ' + v('me') + ', ' + v('ph'));
     var ls = []; for (var k5 in q) if (q[k5]) ls.push({ product_id: PID[k5], qty: q[k5] });
-    if (PACKS[pack]) ls.push({ product_id: PID[pack], qty: 1 });
+    if (PACKS[pack]) { var ln = { product_id: PID[pack], qty: 1 }; if (pack === 'one' && HAS_OPT.one) ln.option_id = oneFlav; ls.push(ln); }
     var notes = [PACKS[pack] ? PACKS[pack].name + ': ' + packDesc() : '', v('note'), 'Sent from The Whipped Cup page by WhatsApp'].filter(Boolean).join('\n');
     var sending = send.getAttribute('aria-busy') === 'true'; if (sending) return;
     send.setAttribute('aria-busy', 'true');
     var label = send.firstElementChild.textContent; send.firstElementChild.textContent = 'Sending';
     // the WhatsApp tab opens now, inside the tap, so pop-up blockers allow it; it is filled once the order is saved
     var tab = window.open('', '_blank');
-    var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: ls, fulfilment: 'delivery', city: 'jerusalem', address: v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes, discount_code: MirCode.code() }) })
+    var body = { lines: ls, fulfilment: deliveryOn ? 'delivery' : 'pickup', date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes, discount_code: MirCode.code() };
+    if (deliveryOn) { body.city = document.getElementById('city').value || areas[0].slug; body.address = v('addr'); }
+    var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('Order not saved', r.status, t); return null; }); })
       .catch(function (err) { console.warn('Order not saved', err); return null; });
     Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
@@ -372,7 +390,9 @@
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
       send.removeAttribute('aria-busy'); send.firstElementChild.textContent = label;
-      var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.textContent = 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false;
+      var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.classList.toggle('bad', !saved);
+      sent.textContent = saved ? 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.' : 'Your order was not saved on the site, so it is going to The Whipped Cup on WhatsApp instead. Please send that message there.';
+      sent.hidden = false;
     });
   });
   document.getElementById('deal').querySelector('button').addEventListener('click', function () {
@@ -408,6 +428,30 @@
   addEventListener('popstate', function () { var m = /#order-(\d)/.exec(location.hash); go(m ? +m[1] : 1, false); });
   document.getElementById('back').addEventListener('click', function () { history.back(); });
   document.getElementById('steps').addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
+  function fillCity() {
+    var c = document.getElementById('city'); c.innerHTML = areas.map(function (a) { return '<option value="' + a.slug + '">' + a.label + '</option>'; }).join('');
+    document.getElementById('w-city').hidden = areas.length < 2 || !deliveryOn; document.getElementById('w-addr').hidden = !deliveryOn;
+    document.querySelector('.ostep[data-s="2"] .deliv').textContent = deliveryOn ? 'Delivered fresh to your door.' : 'Pick-up only for now.';
+  }
+  function paintPrices() {
+    [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.querySelector('span').innerHTML = '<b>' + JARS[b.dataset.flav][0] + '</b>₪' + JARS[b.dataset.flav][1]; });
+    document.getElementById('st-price').textContent = '₪' + JARS[sel][1]; document.getElementById('st-pc').textContent = 'about ₪' + Math.floor(JARS[sel][1] / 4) + ' a coffee';
+    label(); drawPlans(); drawMix(); update();
+  }
+  fetch(API + '/marketplace/order-form/' + GIG).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+    if (!d) return;
+    (d.products || []).forEach(function (p) {
+      Object.keys(PID).forEach(function (k) {
+        if (PID[k] !== p.id) return;
+        if (p.price != null) { if (JARS[k]) JARS[k][1] = Number(p.price); else PACKS[k].price = Number(p.price); }
+        HAS_OPT[k] = !!(p.options && p.options.length);
+      });
+    });
+    if (d.settings && d.settings.delivery_on === false) deliveryOn = false;
+    var as = (d.business && d.business.areas) || []; if (as.length) areas = as.map(function (a) { return { slug: a.slug, label: a.label || a.slug }; });
+    fillCity(); paintPrices();
+  }).catch(function () {});
+  fillCity();
   show(JARS[qs.get('jar')] ? qs.get('jar') : 'classic');
   drawMix(); update();
   var m0 = /#order-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);

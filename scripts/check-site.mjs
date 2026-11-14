@@ -41,12 +41,26 @@ let warnedApi = false;
 const fails = [];
 const fail = (url, kind, msg) => { fails.push(1); console.log(`${kind.padEnd(6)} ${msg}  (${url.replace(/\?.*$/, '')})`); };
 const browser = await chromium.launch();
+// A page served from this computer reads its listing from localhost:8001, which is usually not running here; its
+// reads are answered from the live site so the products are there (bake-away's basket opened empty and the flow
+// test hit the delivery minimum, 14 Nov 2026). Anything other than a read goes on to whatever handles it.
+const LIVE_API = (process.env.ORDER_API || 'https://www.myisraelrental.com/api').replace(/\/$/, '');
+async function livePage(o) {
+  const pg = await browser.newPage(o);
+  await pg.route(/^http:\/\/(localhost|127\.0\.0\.1):8001\/api\//, async (route) => {
+    if (route.request().method() !== 'GET') return route.fallback();
+    const r = await fetch(LIVE_API + route.request().url().replace(/^.*?:8001\/api/, '')).catch(() => null);
+    if (!r || r.status >= 400) return route.abort();   // as before: a read the live site cannot answer is a local API that is down
+    return route.fulfill({ status: r.status, contentType: r.headers.get('content-type') || 'application/json', body: Buffer.from(await r.arrayBuffer()) });
+  });
+  return pg;
+}
 
 for (const url of urls) {
   const origin = new URL(url).origin;
   // ── broken things, layout shift after load, media sizes, glyphs (laptop) ──
   {
-    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const page = await livePage({ viewport: { width: 1440, height: 900 } });
     const big = [];
     page.on('pageerror', (e) => fail(url, 'BROKEN', `script error: ${e.message}`));
     // A built page calls the local API (localhost:8001) only when served on this computer; the live site uses /api.
@@ -162,7 +176,7 @@ for (const url of urls) {
   }
   // ── choices must not move the sections after them ──
   {
-    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const page = await livePage({ viewport: { width: 1440, height: 900 } });
     await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(1500);
     const n = await page.evaluate(() => { const bs = [...document.querySelectorAll('button[aria-pressed], label.opt, label.plan')]; bs.forEach((b, i) => b.setAttribute('data-site-c', i)); return bs.length; });
     for (let i = 0; i < Math.min(n, 8); i++) {
@@ -182,7 +196,7 @@ for (const url of urls) {
   }
   // ── phone: sideways scroll, tap sizes, overlaps, the bottom bar at the end ──
   for (const [w, h] of [[390, 844], [360, 640]]) {
-    const page = await browser.newPage({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
+    const page = await livePage({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
     await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(1200);
     const r = await page.evaluate(async () => {
       const out = [];
@@ -306,7 +320,7 @@ for (const url of urls) {
   }
   // ── the order or booking flow, if the page has one ──
   {
-    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const page = await livePage({ viewport: { width: 1280, height: 900 } });
     // SAVE (page rules 3k; Tzvi, 22 Oct 2026): every order is saved to MyIsraelRental before WhatsApp opens.
     // Record every POST the page makes, and when the WhatsApp tab is opened.
     await page.addInitScript(() => { window.__posts = []; const f0 = window.fetch; window.fetch = function (u, o) { try { if (o && /post/i.test(o.method || '')) window.__posts.push({ u: String(u && u.url || u), t: performance.now(), b: typeof o.body === 'string' ? o.body : '' }); } catch (e) { /* none */ } return f0.apply(this, arguments); }; const x0 = XMLHttpRequest.prototype.open; XMLHttpRequest.prototype.open = function (m, u) { if (/post/i.test(m)) window.__posts.push({ u: String(u), t: performance.now() }); return x0.apply(this, arguments); }; });

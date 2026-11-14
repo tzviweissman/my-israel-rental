@@ -289,11 +289,11 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
         data-testid="gig-booking-form"
       >
         <h3 className="text-lg font-bold" dir="auto">
-          {t('gigDetail.requestTier', {
+          {Number(tier.price) > 0 ? t('gigDetail.requestTier', {
             defaultValue: 'Request "{{tier}}" - ₪{{price}}',
             tier: tier.name,
             price: tier.price.toLocaleString(),
-          })}
+          }) : tier.name}
         </h3>
         {slot && (
           <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }} data-testid="gig-booking-when">
@@ -1425,7 +1425,7 @@ export const TierList = ({ tiers, selected, onSelect, isAppointment, testidPrefi
               </span>
             )}
           </span>
-          <span className="font-bold text-gray-900">{sym}{Number(tt.price).toLocaleString()}</span>
+          <span className="font-bold text-gray-900">{Number(tt.price) > 0 ? `${sym}${Number(tt.price).toLocaleString()}` : t('priceKind.onRequest', 'Price on request')}</span>
         </div>
         {isAppointment && tt.duration_minutes && (
           <p className="text-xs text-gray-500 mt-1 flex items-center gap-1"><Clock size={11} /> {t('services.durationMinutes', { defaultValue: '{{n}} min', n: tt.duration_minutes })}</p>

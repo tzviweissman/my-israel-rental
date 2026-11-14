@@ -1,0 +1,15 @@
+{
+  "gig_id": "cbf185df-6652-4fc4-bd2d-0954b4d13731",
+  "products": [
+    {
+      "id": "565d11aa4f12",
+      "options": [
+        { "id": "classic", "name": "Classic Cloud", "price": null },
+        { "id": "caramel", "name": "Caramel Cloud", "price": null },
+        { "id": "vanilla", "name": "Vanilla Cloud", "price": null }
+      ]
+    }
+  ],
+  "new_products": [],
+  "reason": "One Flavour is a pack of 4 jars of ONE flavour, so the flavour is a real choice the dashboard should show. The Try It Duo and Cloud Bundle let the customer mix any flavours at one fixed price, and Assorted is always the mix of all three, so for those the flavour mix does not change the price and stays in the order notes (one option per line cannot hold a mix)."
+}

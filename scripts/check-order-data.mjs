@@ -45,7 +45,7 @@ if (ALL) {
   }
 }
 if (!urls.length) { console.error('usage: check-order-data.mjs <page urls> | --all'); process.exit(2); }
-const SEND_RE = /\/(marketplace\/order-form\/[^/]+\/orders|gigs\/[^/]+\/book)(\?|$)/;
+const SEND_RE = /\/(marketplace\/order-form\/[^/]+\/orders|gigs\/[^/]+\/book|gigs\/[^/]+\/quote-requests)(\?|$)/;
 const problems = [];
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -81,6 +81,13 @@ async function fill(p) {
       else if (e.required || e.tagName !== 'TEXTAREA') set(e, 'Practice');
     }
     for (const e of document.querySelectorAll('input[type=checkbox][required]')) if (!e.checked) e.click();
+    // a package that says "Choose 6 more jars" (Whipped Cup's Cloud Bundle): press the first "One more" beside it that many times
+    for (const m of document.querySelectorAll('p, span, div, output')) {
+      const n = vis(m) && m.children.length === 0 && /^\s*choose (\d+) more\b/i.exec(m.textContent || '');
+      if (!n) continue;
+      let box = m.parentElement; while (box && !box.querySelector('button[aria-label^="One more"]')) box = box.parentElement;
+      for (let i = 0; box && i < +n[1]; i++) { const b = [...box.querySelectorAll('button[aria-label^="One more"]')].find((b) => !b.disabled && vis(b)); if (b) b.click(); }
+    }
     // a choice nobody has made yet (what would you like, a time, how many rooms): take the first, as a customer would
     for (const s of document.querySelectorAll('select')) if (vis(s) && !s.value) { const o = [...s.options].find((o) => o.value && !o.disabled); if (o) set(s, o.value); }
     const groups = {};
@@ -94,8 +101,19 @@ async function fill(p) {
       const r = rs.find((r) => !r.disabled && vis(r.closest('label') || r));
       if (r) (r.closest('label') || r).click();
     }
-    const send = [...document.querySelectorAll('form button[type=submit], form input[type=submit], a#order, #place, #place2, #placeBar, #send, #send2, [data-order-send]')].filter((e) => vis(e) && !/^(text|tel|email|date|time|number|textarea|select-one)$/.test(e.type))[0];   // Hadassah's #place is the venue box
+    const send = [...document.querySelectorAll('form button[type=submit], form input[type=submit], a#order, #place, #place2, #placeBar, #send, #send2, [data-order-send], button#next, a#go, a#go2')].filter((e) => vis(e) && !/^(text|tel|email|date|time|number|textarea|select-one)$/.test(e.type))[0];   // Hadassah's #place is the venue box
     if (!send) return null;
+    // a send that waits for a pick (KasherMyBnB's Continue, until a service is chosen): press the first pick button in a
+    // row where none is pressed, as a customer would
+    // and when the page asks "Choose a start time", every such row still empty
+    const asks = [...document.querySelectorAll('.err, .error, [role=alert], .msg, .bad')].some((e) => vis(e) && /^\s*choose\b/i.test(e.textContent || ''));
+    if (send.getAttribute('aria-disabled') === 'true' || send.disabled || asks) {
+      const rows = new Set([...document.querySelectorAll('button[aria-pressed="false"]')].filter(vis).map((b) => b.parentElement));
+      for (const row of rows) if (!row.querySelector('[aria-pressed="true"]')) { const b = [...row.querySelectorAll('button[aria-pressed="false"]')].find(vis); if (b) b.click(); if (!asks) break; }
+    }
+    // a booking over several pages (KasherMyBnB: book, book-details, book-review) goes on by its "Continue" link; served
+    // from this computer, its /business/<slug>/<page> link is the <page>.html beside it
+    if (/^go2?$/.test(send.id) && !location.pathname.startsWith('/business/')) send.setAttribute('href', send.getAttribute('href').replace(/^\/business\/[^/]+\/([^/?#]+)$/, '$1.html'));
     send.setAttribute('data-practice-send', '1');
     return true;
   });
@@ -144,7 +162,9 @@ for (const url of urls) {
     const path = route.request().url().replace(/^.*?\/api\//, '').replace(/\?.*$/, '');
     const body = route.request().postData() || '{}';
     if (refuse) { caught.push({ refused: true }); return route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ detail: 'Practice refusal' }) }); }
-    const res = await practice(path, body);
+    // a quote request (Michal Balloons) has no price and the server has no practice mode for it: it is stopped here,
+    // never sent, and only its being sent is checked
+    const res = /quote-requests$/.test(path) ? { ok: true, status: 200, body: { quote: true, id: 'practice' } } : await practice(path, body);
     caught.push({ path, sent: JSON.parse(body), res });
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'practice', track_url: 'about:blank', track_token: 'practice' }) });
   });
@@ -197,6 +217,7 @@ for (const url of urls) {
       // Shabbat and holidays the server takes no orders at all: that is the hour, not the page (14 Nov 2026, a Saturday)
       if (!r.ok && /Closed for .*Orders open again/i.test(JSON.stringify(r.body && r.body.detail || ''))) { closedNow = closedNow || `${where}: not tested, the server takes no orders now (${r.body.detail}); run this again after`; continue; }
       if (!r.ok) { problems.push(`${say}: the dashboard would refuse it: ${r.body && r.body.detail ? JSON.stringify(r.body.detail) : r.status}`); continue; }
+      if (r.body.quote) continue;
       if (r.body.tier_name !== undefined) {   // a booking
         if (!r.body.tier_found) problems.push(`${say}: books "${r.body.tier_name}", a service the listing does not have`);
         // a whole number of the listing's price is hours of an hourly service (Noa Levi, 160 an hour, two hours at least)
