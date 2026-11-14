@@ -8,18 +8,18 @@
 <meta name="description" content="בקשה להצעת מחיר לעיצוב בלונים בירושלים והסביבה, בתיאום מראש. בחרו מה צריך, והפרטים מגיעים אלינו בוואטסאפ.">
 <meta property="og:title" content="לבקש הצעת מחיר · מיכל בלונס">
 <meta property="og:description" content="בקשה להצעת מחיר לעיצוב בלונים בירושלים והסביבה, בתיאום מראש. בחרו מה צריך, והפרטים מגיעים אלינו בוואטסאפ.">
-<link rel="icon" href="/pages/michal-balloons/assets/balloon.webp?v=mw4kh9bk">
+<link rel="icon" href="/pages/michal-balloons/assets/balloon.webp?v=mwger2ak">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/michal-balloons/site.css?v=mw4kh9bk">
+<link rel="stylesheet" href="/pages/michal-balloons/site.css?v=mwger2ak">
 <script>document.documentElement.classList.add('js');document.documentElement.dataset.titleEn="Ask for a quote · Michal Balloons";</script>
 </head>
 <body>
 
 <header class="bar">
   <div class="wrap">
-    <a class="brand" href="/business/michal-balloons" aria-label="מיכל בלונס, לראש העמוד" data-en-label="Michal Balloons, back to the top"><img src="/pages/michal-balloons/assets/logo-mark.webp?v=mw4kh9bk" alt="" width="695" height="298" data-mir-key="i-d07f1aaa-0"></a>
+    <a class="brand" href="/business/michal-balloons" aria-label="מיכל בלונס, לראש העמוד" data-en-label="Michal Balloons, back to the top"><img src="/pages/michal-balloons/assets/logo-mark.webp?v=mwger2ak" alt="" width="695" height="298" data-mir-key="i-d07f1aaa-0"></a>
     <nav class="nav" aria-label="דפי האתר" data-en-label="Pages of the site">
       <a class="link" href="/business/michal-balloons#make" data-en="What we make" data-mir-key="t-ff5af1bd-0">מה אנחנו עושים</a>
       <a class="link" href="/business/michal-balloons#booth" data-en="Photo station" data-mir-key="t-2cd4f76d-0">עמדת צילום</a>
@@ -78,6 +78,7 @@
         <div class="send">
           <button type="button" class="ghost" id="back" hidden></button>
           <button type="button" class="btn" id="next"></button>
+          <p class="save-fail" id="save-fail" role="alert" hidden></p>
           <a class="btn" id="send" href="https://wa.me/972527644973" target="_blank" rel="noopener" hidden>
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
             <span data-en="Send my request on WhatsApp" data-mir-key="t-bb5037a5-0">שליחת הבקשה שלי בוואטסאפ</span>
@@ -114,7 +115,7 @@
   <div class="fbase"><span data-en="© 2026 Michal Balloons. Since 2024." data-mir-key="t-67e1a8ee-0">© 2026 מיכל בלונס. מאז 2024.</span><span data-en-html="Listed on &lt;a href=&quot;https://myisraelrental.com/&quot;&gt;MyIsraelRental&lt;/a&gt;, free to list, no commission · &lt;a href=&quot;https://myisraelrental.com/privacy&quot;&gt;Privacy&lt;/a&gt;" data-mir-key="t-f781fef7-0">רשומים ב-<a href="https://myisraelrental.com/">MyIsraelRental</a>, רישום חינם, בלי עמלה · <a href="https://myisraelrental.com/privacy">פרטיות</a></span></div>
 </footer>
 
-<script src="/pages/michal-balloons/site.js?v=mw4kh9bk"></script>
+<script src="/pages/michal-balloons/site.js?v=mwger2ak"></script>
 <script>
 (function () {
   var EN = false;
@@ -188,6 +189,7 @@
       .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('request not saved', r.status, t); return null; }); })
       .catch(function (err) { console.warn('request not saved', err); return null; });
     Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      var sf = document.getElementById('save-fail'); sf.textContent = EN ? 'Your request did not go through and was not saved. WhatsApp is open with it written out, so please press send there.' : 'הבקשה לא נשמרה (לא עברה). וואטסאפ נפתח עם הבקשה כתובה, אז שלחו אותה משם.'; sf.hidden = !!saved;
       if (saved && saved.track_path) text += '\n\n' + (EN ? 'Follow the request: ' : 'מעקב אחר הבקשה: ') + 'https://myisraelrental.com' + saved.track_path;
       var url = 'https://wa.me/972527644973?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;

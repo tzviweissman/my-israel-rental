@@ -204,3 +204,7 @@ R3v.14 pass: Jerusalem and the area, By appointment, Bank transfer or Bit (the p
 
 Note, 6 Nov 2026: split into Home, Our work and Ask for a quote (split-four-sites). The lines for the buttons, pages, menu bar, footer and quote flow were rewritten for it; the opening, the quote card behaviour and the look are unchanged.
 Note: the two page headings moved from h2 to h1 keep the owner-edit keys they had before the split (data-mir-key written in the source); rules re-read against the final files.
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->

@@ -366,3 +366,9 @@
   .bar.is-open .mpanel { display: block; }
   @media (max-width: 820px) { .mbtn { display: inline-flex; align-items: center; } .nav a.ghost { display: none; } }
   .galact { background: var(--cream-2); display: flex; justify-content: center; padding: clamp(1.6rem, 5svh, 3rem) var(--gutter); }
+
+/* booking and order forms: 16px so phones do not zoom on focus; grid cells may shrink below their content; a failed save is said out loud */
+form input:not([type="radio"]):not([type="checkbox"]), form select, form textarea { font-size: 16px !important; }
+.form > *, .lay > *, .opts > *, .times > *, .pair > *, .st-grid > *, .req > *, .row2 > *, .cols4 > *, .col4 > *, .stepbar > *, .sum > *, .cgrid > * { min-width: 0; }
+.save-fail { margin: 0 0 .85rem; padding: .8rem 1rem; border-radius: 12px; background: #fdecea; color: #8a1c14; font-weight: 600; line-height: 1.4; }
+.save-fail[hidden] { display: none; }

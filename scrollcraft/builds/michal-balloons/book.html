@@ -78,6 +78,7 @@
         <div class="send">
           <button type="button" class="ghost" id="back" hidden></button>
           <button type="button" class="btn" id="next"></button>
+          <p class="save-fail" id="save-fail" role="alert" hidden></p>
           <a class="btn" id="send" href="https://wa.me/972527644973" target="_blank" rel="noopener" hidden>
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
             <span data-en="Send my request on WhatsApp">שליחת הבקשה שלי בוואטסאפ</span>
@@ -188,6 +189,7 @@
       .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('request not saved', r.status, t); return null; }); })
       .catch(function (err) { console.warn('request not saved', err); return null; });
     Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      var sf = document.getElementById('save-fail'); sf.textContent = EN ? 'Your request did not go through and was not saved. WhatsApp is open with it written out, so please press send there.' : 'הבקשה לא נשמרה (לא עברה). וואטסאפ נפתח עם הבקשה כתובה, אז שלחו אותה משם.'; sf.hidden = !!saved;
       if (saved && saved.track_path) text += '\n\n' + (EN ? 'Follow the request: ' : 'מעקב אחר הבקשה: ') + 'https://myisraelrental.com' + saved.track_path;
       var url = 'https://wa.me/972527644973?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
