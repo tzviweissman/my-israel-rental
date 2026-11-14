@@ -340,3 +340,8 @@ label.opt input { accent-color: var(--night); width: 20px; height: 20px; }
 .btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: .9rem 0 0; padding: 0; list-style: none; font: 600 .95rem/1.35 var(--font-body); color: var(--cream); width: 100%; }
 .btn-facts li::before { content: ''; display: inline-block; width: .4em; height: .4em; border-radius: 50%; background: var(--mustard); vertical-align: middle; margin-inline-end: .45em; margin-bottom: .15em; }
 .btn-facts .sym { font-size: 1em; vertical-align: 0; margin: 0; padding: 0; }
+
+/* order form: iPhone zooms into any field under 16px, and a grid cell must be allowed to shrink so fields never overlap */
+#form input, #form select, #form textarea, .fld { font-size: 16px; }
+.form > *, .form .card, .form .card > div, .sum { min-width: 0; }
+.sent.bad { font-weight: 700; }

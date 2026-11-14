@@ -220,3 +220,9 @@ R3v.1 pass: full footer on index, shop and contact (who we are with an Order lin
 R3v.2 pass: the menu bar on all three pages lists Home, Shop, Contact, no jumps; unchanged by this pass; check-menu passes
 R3v.14 pass: Dough from ₪27, Delivery ₪25 in Ramat Eshkol, Cash or Zelle (from the shop and contact pages' own text; the old two-price line became the first fact); check-facts passes
 <!-- 6 Nov 2026: the only change is the discount code box on the order form (public/pages/mir-code.js, Tzvi: American Crust's first-time code had nowhere to be typed). Looked at the form with the box and a test order on phone and laptop; the rest of the site is unchanged, so the other rules were not re-read. -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->

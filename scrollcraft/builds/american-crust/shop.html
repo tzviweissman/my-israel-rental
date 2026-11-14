@@ -75,8 +75,8 @@
           </div>
           <div class="card ostep" data-s="2" hidden>
             <h2>Delivery or pickup</h2>
-            <div class="ful" role="radiogroup" aria-label="Delivery or pickup"><label class="opt"><input type="radio" name="ful" value="delivery" checked>Delivery, ₪25</label><label class="opt"><input type="radio" name="ful" value="pickup">Pickup in Sanhedria</label></div>
-            <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p><label class="opt far"><input type="checkbox" id="far">My address is further away (Ramot, RBS or elsewhere)</label><p class="hint">Delivery ₪25 in Ramat Eshkol and surrounding areas. Further away, the fee depends on where: we confirm it on WhatsApp.</p></div>
+            <div class="ful" role="radiogroup" aria-label="Delivery or pickup"><label class="opt"><input type="radio" name="ful" value="delivery" checked>Delivery<span id="l-fee">, ₪25</span></label><label class="opt"><input type="radio" name="ful" value="pickup">Pickup in Sanhedria</label></div>
+            <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p><label class="opt far"><input type="checkbox" id="far">My address is further away (Ramot, RBS or elsewhere)</label><p class="hint" id="h-fee">Delivery ₪25. If you are further away, tick the box: we confirm any change to the fee on WhatsApp.</p></div>
             <div id="w-when"><label class="f" for="when" id="when-l">Delivery day</label><input class="fld" id="when" type="date"><p class="hint" id="h-pick" hidden>We send you the exact address on WhatsApp.</p><p class="hint" id="h-when">Closed for Shabbat and holidays: those days cannot be chosen.</p><p class="err" id="e-when"></p><button type="button" class="nxt" id="nxt" hidden></button></div>
           </div>
           <div class="card ostep" data-s="3" hidden>
@@ -93,7 +93,7 @@
           <ul id="sum-mini"><li><span>Nothing yet</span></li></ul>
           <p class="sum-where" id="sum-where" hidden></p>
           <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
-          <div class="total"><span>Total</span><span id="total">₪0</span></div>
+          <div class="total"><span>Total</span><span id="total" data-order-total>₪0</span></div>
           <button class="btn" id="send" type="submit"><span>Continue to delivery</span></button>
           <button class="back" id="back" type="button" hidden>Back</button>
           <p class="note" id="send-note">Next: how you get it and the day.</p>
@@ -170,12 +170,19 @@
     var a = n; q[sel] = Math.min(20, q[sel] + n); n = 1; update(); check(false); label();
     window.siteToast('Added: ' + a + ' × ' + P[sel].name); stAdd.classList.add('added'); setTimeout(function () { stAdd.classList.remove('added'); }, 900);
   });
-  // Tzvi 22 Oct: delivery is 25 shekels in Ramat Eshkol and surrounding areas, and the server adds it to every delivery order; further away the fee is confirmed on WhatsApp
-  var DEL = 25, farEl = document.getElementById('far');
+  // The listing (GET /order-form) is the price list: product prices and the delivery fee come from it, and the total shown is the
+  // total the server saves (goods, less a code, plus the fee). The server adds the same fee to every delivery order, wherever in
+  // the area, so "further away" is only a note for them to confirm; it never changes the total. FALLBACK is used only when the
+  // listing does not answer.
+  var LIVE = null, FALLBACK = { delivery_fee: 25 }, farEl = document.getElementById('far');
+  function st() { return LIVE ? (LIVE.settings || {}) : FALLBACK; }
   function far() { return farEl.checked; }
   function pick() { return document.querySelector('input[name=ful]:checked').value === 'pickup'; }
-  function fee() { return goods() && !pick() && !far() ? DEL : 0; }
+  function fee() { if (!goods() || pick()) return 0; var s = st(); if (s.free_over && total() >= Number(s.free_over)) return 0; return Number(s.delivery_fee || 0); }
+  function feeSaid() { var s = st(); return fee() ? money(fee()) : (s.delivery_fee != null || (s.free_over && total() >= Number(s.free_over))) ? 'free' : 'confirmed on WhatsApp'; }
   function grand() { return total() + fee(); }
+  // the city the server wants: none for a business that serves the whole country, else the one area it lists
+  function cityOut() { if (pick()) return undefined; var b = LIVE && LIVE.business; if (!b) return 'jerusalem'; return b.serves_nationwide ? undefined : (b.areas[0] || {}).slug; }
   function total() { return MirCode.after(goods()); }
   function goods() { var t = 0; for (var k in q) t += q[k] * P[k].price; return t; }
   function bakes() {
@@ -194,9 +201,12 @@
     document.getElementById('sum-list').innerHTML = html || '<li><span>Your basket is empty. Pick a dough above.</span></li>';
     document.getElementById('sum-mini').innerHTML = mini || '<li><span>Nothing yet</span></li>';
     var bk = bakes(), bel = document.getElementById('bakes'); bel.hidden = !bk; document.getElementById('bakes-t').textContent = bk;
-    if (goods() && !pick()) mini += far() ? '<li><span>Delivery</span><span>fee confirmed on WhatsApp</span></li>' : '<li><span>Delivery</span><span>' + money(DEL) + '</span></li>';
+    if (goods() && !pick()) mini += '<li><span>Delivery</span><span>' + feeSaid() + (far() && fee() ? ', we confirm any change' : '') + '</span></li>';
     document.getElementById('sum-mini').innerHTML = mini || '<li><span>Nothing yet</span></li>';
     document.getElementById('total').textContent = money(grand());
+    var fs = st().delivery_fee != null ? money(Number(st().delivery_fee)) : '';
+    document.getElementById('l-fee').textContent = fs ? ', ' + fs : '';
+    document.getElementById('h-fee').textContent = (fs ? 'Delivery ' + fs + (st().free_over ? ', free over ' + money(Number(st().free_over)) : '') + '. ' : 'We confirm the delivery fee on WhatsApp. ') + 'If you are further away, tick the box: we confirm any change to the fee on WhatsApp.';
     var s = {}; for (var k2 in q) if (q[k2]) s[k2] = q[k2]; window.siteBasket.set(s);
     var bar = document.querySelector('#bar .p'), cnt = q.bagel + q.pizza;
     if (bar) bar.innerHTML = goods() ? '<b>Basket, ' + money(total()) + '</b>' + cnt + ' dough' + (cnt > 1 ? 's' : '') : '<b>From ₪27</b>American bagel and pizza dough';
@@ -210,7 +220,11 @@
   // if they cannot be loaded, Saturdays are still refused.
   var closures = [];
   function loadClosures() { loaded = true; fetch(API + '/marketplace/order-form/' + GIG).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-    var sc = j && j.business && j.business.shabbat_closing; closures = (sc && sc.closures) || []; prefill(); check(false); drawStep();
+    if (!j) return;
+    LIVE = j;
+    (j.products || []).forEach(function (p) { for (var k in P) if (P[k].id === p.id && p.price != null) P[k].price = Number(p.price); });
+    document.getElementById('st-price').innerHTML = '<span class="sym">₪</span>' + P[sel].price;
+    var sc = j.business && j.business.shabbat_closing; closures = (sc && sc.closures) || []; prefill(); label(); update(); check(false); drawStep();
   }).catch(function () {}); }
   var loaded = false;   // fetched the first time the delivery step opens
   function closedDay(iso) {
@@ -258,7 +272,7 @@
   function save(notes) {
     var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: P[k].id, qty: q[k] });
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: ls, fulfilment: pick() ? 'pickup' : 'delivery', city: pick() ? undefined : 'jerusalem', address: pick() ? undefined : v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes, discount_code: MirCode.code() }) })
+      body: JSON.stringify({ lines: ls, fulfilment: pick() ? 'pickup' : 'delivery', city: cityOut(), address: pick() ? undefined : v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes, discount_code: MirCode.code() }) })
       .then(function (r) { return r.json().then(function (j) { return r.ok ? j : { error: (typeof j.detail === 'string' && j.detail) || 'It could not be saved.' }; }, function () { return r.ok ? null : { error: 'It could not be saved.' }; }); }).catch(function () { return null; });
     return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
   }
@@ -273,18 +287,19 @@
     if (v('note')) out.push('Notes: ' + v('note'));
     if (MirCode.code()) out.push(MirCode.text(goods()));
     if (pick()) { out.push('Total: ' + money(grand())); out.push('Pickup in Sanhedria (please send me the exact address)'); out.push('Pickup day: ' + dayName({ weekday: 'long', day: 'numeric', month: 'long' })); }
-    else { if (far()) { out.push('Delivery: fee confirmed on WhatsApp (further away)'); out.push('Total: ' + money(total()) + ' plus delivery'); } else { out.push('Delivery: ' + money(DEL)); out.push('Total: ' + money(grand())); }
+    else { out.push('Delivery: ' + feeSaid() + (far() ? ' (my address is further away: please confirm the fee)' : '')); out.push('Total: ' + money(grand()) + (fee() ? '' : ' plus delivery'));
     out.push('Delivery to: ' + v('addr')); out.push('Delivery day: ' + dayName({ weekday: 'long', day: 'numeric', month: 'long' })); }
     out.push('Name: ' + v('me') + ', ' + v('ph'));
-    var text = out.join('\n'), notes = [v('note'), 'Sent from the American Crust page by WhatsApp'].filter(Boolean).join('\n');
+    var text = out.join('\n'), notes = [far() && !pick() ? 'Further away than the usual delivery area: please confirm the delivery fee.' : '', v('note'), 'Sent from the American Crust page by WhatsApp'].filter(Boolean).join('\n');
     sending = true; send.setAttribute('aria-busy', 'true');
     var tab = window.open('', '_blank');
     save(notes).then(function (saved) {   // saved first (rules 3k); if saving fails WhatsApp still opens
+      var failed = !saved || !!saved.error;
       if (saved && saved.track_url) text += '\n\nFollow the order: ' + saved.track_url;
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
       sending = false; send.removeAttribute('aria-busy');
-      var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.textContent = 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.' + (saved && saved.error ? ' It was not saved on the site: ' + saved.error : ''); sent.hidden = false;
+      var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.textContent = failed ? 'Your order did not go through on the site (it was not saved' + (saved && saved.error ? ': ' + saved.error : '') + '). It is open in WhatsApp instead: please send that message so we get it.' : 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false; sent.setAttribute('role', failed ? 'alert' : 'status'); sent.classList.toggle('bad', failed);
     });
   });
   document.getElementById('sum-list').addEventListener('click', function (e) {
@@ -315,7 +330,7 @@
   document.getElementById('back').addEventListener('click', function () { history.back(); });
   document.getElementById('steps').addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
   var qs = new URLSearchParams(location.search);
-  show(P[qs.get('dough')] ? qs.get('dough') : 'bagel'); update();
+  show(P[qs.get('dough')] ? qs.get('dough') : 'bagel'); update(); loadClosures();
   var m0 = /#order-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
 })();
 </script>
