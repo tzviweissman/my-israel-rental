@@ -15,7 +15,8 @@
  *   - the page has no data-order-total, so what the customer was shown cannot be compared
  *   - a booking's price differs from the listing's price for that service, or names a service the listing lacks
  *   - an order refused by the server leaves no message on the page (one more press, answered with a refusal)
- *   - a choice changes nothing in the order but its typed notes (the dashboard gets words, not a pick or its price)
+ *   - a choice changes nothing in an order but its typed notes (the dashboard gets words, not a pick or its price);
+ *     a booking has no field for a free pick, so there its message is right
  *   - the form could not be sent at all (no send button found, or nothing was sent)
  *
  *   node scripts/check-order-data.mjs <order or booking page urls>        exit 1 when it fails
@@ -63,7 +64,8 @@ async function fill(p) {
     const set = (e, v) => { const d = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(e), 'value'); d.set.call(e, v); e.dispatchEvent(new Event('input', { bubbles: true })); e.dispatchEvent(new Event('change', { bubbles: true })); };
     const tomorrow = new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10);
     // a basket that opens empty: press its "Add ..." button once, as a customer would (LS Fruit Platter's "Add a Small")
-    if (!window.__practiceAdded) { const a = [...document.querySelectorAll('button')].find((b) => vis(b) && /^\s*add\b/i.test(b.textContent || '')); if (a) { a.click(); window.__practiceAdded = 1; } }
+    // or, with no such button, its first "One more ..." (Chicken Munch's boxes)
+    if (!window.__practiceAdded) { const bs = [...document.querySelectorAll('button')].filter(vis); const a = bs.find((b) => /^\s*add\b/i.test(b.textContent || '')) || bs.find((b) => /^one more\b/i.test(b.getAttribute('aria-label') || '')); if (a) { a.click(); window.__practiceAdded = 1; } }
     for (const e of document.querySelectorAll('input, textarea')) {
       if (!vis(e) || e.value || e.readOnly || e.disabled) continue;
       const k = `${e.type} ${e.id} ${e.name} ${e.autocomplete} ${e.placeholder}`.toLowerCase();
@@ -79,21 +81,36 @@ async function fill(p) {
       else if (e.required || e.tagName !== 'TEXTAREA') set(e, 'Practice');
     }
     for (const e of document.querySelectorAll('input[type=checkbox][required]')) if (!e.checked) e.click();
-    const send = [...document.querySelectorAll('form button[type=submit], form input[type=submit], a#order, #place, #place2, #placeBar, #send, #send2, [data-order-send]')].filter(vis)[0];
+    // a choice nobody has made yet (what would you like, a time, how many rooms): take the first, as a customer would
+    for (const s of document.querySelectorAll('select')) if (vis(s) && !s.value) { const o = [...s.options].find((o) => o.value && !o.disabled); if (o) set(s, o.value); }
+    const groups = {};
+    for (const r of document.querySelectorAll('input[type=radio]')) if (r.name) (groups[r.name] = groups[r.name] || []).push(r);
+    // a set of tick boxes where none is ticked (Chicken Munch's kinds of chicken): tick the first; a lone box is left alone
+    const sets = new Map();
+    for (const c of document.querySelectorAll('input[type=checkbox]')) { const k = c.name || c.parentElement.parentElement; sets.set(k, [...(sets.get(k) || []), c]); }
+    for (const cs of sets.values()) if (cs.length > 1 && !cs.some((c) => c.checked)) { const c = cs.find((c) => !c.disabled && vis(c.closest('label') || c)); if (c) (c.closest('label') || c).click(); }
+    for (const rs of Object.values(groups)) {
+      if (rs.some((r) => r.checked)) continue;
+      const r = rs.find((r) => !r.disabled && vis(r.closest('label') || r));
+      if (r) (r.closest('label') || r).click();
+    }
+    const send = [...document.querySelectorAll('form button[type=submit], form input[type=submit], a#order, #place, #place2, #placeBar, #send, #send2, [data-order-send]')].filter((e) => vis(e) && !/^(text|tel|email|date|time|number|textarea|select-one)$/.test(e.type))[0];   // Hadassah's #place is the venue box
     if (!send) return null;
     send.setAttribute('data-practice-send', '1');
     return true;
   });
 }
 
-let caught = [], refuse = false;
+let caught = [], refuse = false, closedNow = '';
 // Every choice on the form, as steps of one change each.
 async function choices(p) {
   return p.evaluate(() => {
     const vis = (e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
     const out = [];
     document.querySelectorAll('select').forEach((s, i) => { if (!vis(s)) return; s.setAttribute('data-practice-sel', i); [...s.options].forEach((o, j) => { if (j !== s.selectedIndex && !o.disabled && o.value !== '') out.push({ kind: 'select', i, value: o.value, label: `${s.id || s.name || 'choice'} = ${o.textContent.trim()}` }); }); });
-    document.querySelectorAll('button[aria-pressed="false"], [role=radio][aria-checked="false"], input[type=radio]:not(:checked)').forEach((b, i) => { if (!vis(b) && b.type !== 'radio') return; b.setAttribute('data-practice-pick', i); out.push({ kind: 'pick', i, label: (b.textContent || b.value || b.getAttribute('aria-label') || '').trim().replace(/\s+/g, ' ').slice(0, 40) }); });
+    // at most three picks from one set of radio buttons: a row of twenty start times is the same choice twenty times
+    const per = {};
+    document.querySelectorAll('button[aria-pressed="false"], [role=radio][aria-checked="false"], input[type=radio]:not(:checked)').forEach((b, i) => { if (!vis(b) && b.type !== 'radio') return; if (b.name && (per[b.name] = (per[b.name] || 0) + 1) > 3) return; b.setAttribute('data-practice-pick', i); out.push({ kind: 'pick', i, label: (b.textContent || b.value || b.getAttribute('aria-label') || '').trim().replace(/\s+/g, ' ').slice(0, 40) }); });
     document.querySelectorAll('button').forEach((b, i) => { const t = (b.textContent || '').trim(), a = b.getAttribute('aria-label') || ''; if (vis(b) && (t === '+' || /more|add one|increase/i.test(a))) { b.setAttribute('data-practice-plus', i); out.push({ kind: 'plus', i, label: `+ ${(b.closest('[role=group],.qty,.of,label') || b.parentElement).getAttribute('aria-label') || a || 'more'}` }); } });
     return out;
   });
@@ -159,7 +176,9 @@ for (const url of urls) {
   for (const step of steps) {
     if (step.kind !== 'as it opens') await open(step);
     if (!(await fill(p))) { if (step.kind !== 'as it opens') problems.push(`${where}: no send button found, so no order could be tried (mark it data-order-send)`); else console.log(`${where}: no order form on this page`); break; }
-    const shown = await p.evaluate(() => { const e = document.querySelector('[data-order-total]'); return e ? (e.getAttribute('data-order-total') || e.textContent) : null; });
+    // a basket in two currencies is two orders with a total each (Chicken Munch): each order is matched to its own currency's
+    const totalsShown = await p.evaluate(() => [...document.querySelectorAll('[data-order-total]')].map((e) => ({ cur: e.getAttribute('data-currency'), v: e.getAttribute('data-order-total') || e.textContent })));
+    const shownFor = (cur) => ((totalsShown.find((t) => t.cur && t.cur === cur) || totalsShown[0]) || {}).v ?? null;
     caught = [];
     await press(p);
     if (!caught.length) {
@@ -172,14 +191,20 @@ for (const url of urls) {
     for (const c of caught) {
       const r = c.res, say = `${where} [${step.label}]`;
       if (step.kind === 'as it opens') base = c.sent;
-      else if (base && step.kind !== 'plus' && strip(c.sent) === strip(base) && (c.sent.notes !== base.notes || c.sent.extra_items !== base.extra_items || c.sent.message !== base.message))
+      // a booking has no field for a free pick (Elisheva's nail colour): its message is where it belongs
+      else if (base && step.kind !== 'plus' && !/\/book$/.test(c.path || '') && strip(c.sent) === strip(base) && (c.sent.notes !== base.notes || c.sent.extra_items !== base.extra_items || c.sent.message !== base.message))
         problems.push(`${say}: this choice reaches the dashboard only as typed notes (make it a product, an option or a service on the listing)`);
+      // Shabbat and holidays the server takes no orders at all: that is the hour, not the page (14 Nov 2026, a Saturday)
+      if (!r.ok && /Closed for .*Orders open again/i.test(JSON.stringify(r.body && r.body.detail || ''))) { closedNow = closedNow || `${where}: not tested, the server takes no orders now (${r.body.detail}); run this again after`; continue; }
       if (!r.ok) { problems.push(`${say}: the dashboard would refuse it: ${r.body && r.body.detail ? JSON.stringify(r.body.detail) : r.status}`); continue; }
       if (r.body.tier_name !== undefined) {   // a booking
         if (!r.body.tier_found) problems.push(`${say}: books "${r.body.tier_name}", a service the listing does not have`);
-        else if (r.body.tier_price != null && r.body.price != null && Math.abs(r.body.tier_price - r.body.price) > 0.01) problems.push(`${say}: saved at ${r.body.price}, the listing's price is ${r.body.tier_price}`);
+        // a whole number of the listing's price is hours of an hourly service (Noa Levi, 160 an hour, two hours at least)
+        // ponytail: any whole multiple passes, so three hours priced as four would too
+        else if (r.body.tier_price != null && r.body.price != null && !(r.body.tier_price > 0 && r.body.price > 0 && Math.abs(r.body.price / r.body.tier_price - Math.round(r.body.price / r.body.tier_price)) < 1e-6)) problems.push(`${say}: saved at ${r.body.price}, the listing's price is ${r.body.tier_price}`);
         continue;
       }
+      const shown = shownFor(r.body.currency);
       if (shown == null) problems.push(`${say}: the page has no total marked data-order-total, so what the customer saw cannot be compared (server total ${r.body.total} ${r.body.currency})`);
       else if (money(shown) != null && r.body.total != null && Math.abs(money(shown) - r.body.total) > 0.01) problems.push(`${say}: the page shows ${String(shown).trim()}, the dashboard would save ${r.body.total} ${r.body.currency}`);
     }
@@ -203,5 +228,6 @@ for (const url of urls) {
   console.log(`checked ${where}`);
 }
 await browser.close();
+if (closedNow) console.log("note: " + closedNow);
 if (problems.length) { console.log(`\nOrders that would not reach the dashboard as the customer saw them (${problems.length}):\n  ` + problems.join('\n  ')); process.exit(1); }
 console.log('every practice order would be saved as the customer saw it');

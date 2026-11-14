@@ -31,6 +31,7 @@
         <p class="sub">Your booking goes to KasherMyBnb on WhatsApp, written out. Press send there.</p>
         <dl class="facts" id="rev"></dl>
         <div class="next">
+          <p class="save-fail" id="save-fail" role="alert" hidden>Your booking did not go through to the booking list (not saved). Your order is in the WhatsApp message, so please press send there and we will confirm it.</p>
           <a class="btn" href="#" id="send" target="_blank" rel="noopener"><span class="lb">Send on WhatsApp,&nbsp;<span data-total>$0</span></span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
           <a class="back" href="book-details.html">Back</a>
         </div>
@@ -98,10 +99,12 @@
       // the WhatsApp tab opens first so the pop-up blocker allows it; it is filled once the booking is saved
       var tab = window.open('', '_blank');
       if (MirCode.code()) { o.code = MirCode.code(); o.codeText = MirCode.text(KMB.total(o)); o.after = MirCode.after(KMB.total(o)); }
-      KMB.submit(o).then(function (track) {
-        if (track) { o.track = track; KMB.save(o); }
+      KMB.submit(o).then(function (res) {
+        if (res.track) { o.track = res.track; KMB.save(o); }
         var url = KMB.waLink(o);
         if (tab) tab.location.href = url; else location.href = url;
+        // a failed save is said out loud: the page stays so the customer sees it, WhatsApp still carries the order
+        if (res.failed) { var f = document.getElementById('save-fail'); f.hidden = false; f.scrollIntoView({ block: 'center' }); a.dataset.busy = ''; return; }
         setTimeout(function () { location.href = 'book-sent.html'; }, 600);
       });
     });

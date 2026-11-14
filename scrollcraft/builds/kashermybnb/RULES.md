@@ -221,3 +221,7 @@ R3v.14 pass: under the Book a kashering button on the first screen: Whole kitche
 Note, 1 Nov 2026: the arrow after the footer button was removed (its font has no arrow; check-site GLYPH). No rule answer changes.
 
 Note, 6 Nov 2026: a discount code box added to the booking form (mir-code.js, Tzvi: a code must work on a service as on a product). It shows only when the business has a code, so with none the page looks as before. With a code, the total and the WhatsApp message show the lower price. Nothing else on the page changed.
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->

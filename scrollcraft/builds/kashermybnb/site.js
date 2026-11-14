@@ -98,14 +98,32 @@
   // Saved on MyIsraelRental before WhatsApp opens (page rules 3k). The start times are the ones in their listing
   // (Sunday to Friday evenings, 18:00 to 23:00), and the booking is made on the tier the visitor chose.
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api', GIG = 'd2a374fd-a0cd-49ca-9c8d-f7ff258b838c';
-  var TIER = { kitchen: 'Kashering Kitchen', pots: 'Kashering of Pots, Cutlery & Utensils' };
+  var TIER = { kitchen: 'Kashering Kitchen', pots: 'Kashering of Pots, Cutlery & Utensils', oven: 'Oven cleaning and kashering', pan: 'New frying pan' };
+  // The listing is what is saved. Only the tiers that exist on it are booked, one booking per tier chosen, and
+  // no amount is sent (the saved price is the tier's price). Anything chosen that the listing has no tier for yet
+  // (the oven and the pan, see LISTING-CHANGES.json) is written out in the message of the first booking.
+  function listed() {
+    return fetch(API + '/marketplace/gigs/' + GIG).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (g) { var t = g && g.tiers && g.tiers.map(function (x) { return x.name; }); return t && t.length ? t : [TIER.kitchen, TIER.pots]; })
+      .catch(function () { return [TIER.kitchen, TIER.pots]; });
+  }
+  // resolves { track, failed }: failed is true when any booking did not save (the page then says so)
   function submit(o) {
-    var post = fetch(API + '/marketplace/gigs/' + GIG + '/book', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ tier_name: o.kitchen ? TIER.kitchen : TIER.pots, preferred_date: o.date, time_slot: o.time, guest_name: o.name, contact_phone: o.phone, message: message({ ...o, codeText: '', after: null }).split('\n').slice(1).join('\n'), lang: 'en', amount: total(o), discount_code: o.code || null }) })
-      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('booking not saved', r.status, t); return null; }); })
-      .catch(function (err) { console.warn('booking not saved', err); return null; })
-      .then(function (j) { return j && j.track_path ? 'https://myisraelrental.com' + j.track_path : ''; });
-    return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(''); }, 5000); })]);
+    var full = message({ ...o, codeText: '', after: null }).split('\n').slice(1).join('\n');
+    var save = listed().then(function (names) {
+      var ls = lines(o), jobs = [], extra = [];
+      ls.forEach(function (x) { if (names.indexOf(TIER[x[2]]) >= 0) jobs.push(x); else extra.push(x[0] + ' (' + money(x[1]) + ')'); });
+      if (!jobs.length) return { track: '', failed: true };
+      return Promise.all(jobs.map(function (x, i) {
+        var msg = i === 0 ? full + (extra.length ? '\nAlso asked for, price to confirm: ' + extra.join(', ') : '')
+          : 'Part of the same order as the first booking. Asked for: ' + x[0];
+        return fetch(API + '/marketplace/gigs/' + GIG + '/book', { method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ tier_name: TIER[x[2]], preferred_date: o.date, time_slot: o.time, guest_name: o.name, contact_phone: o.phone, message: msg, lang: 'en', discount_code: i === 0 ? (o.code || null) : null }) })
+          .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('booking not saved', r.status, t); return null; }); })
+          .catch(function (err) { console.warn('booking not saved', err); return null; });
+      })).then(function (res) { return { track: res[0] && res[0].track_path ? 'https://myisraelrental.com' + res[0].track_path : '', failed: res.some(function (j) { return !j; }) }; });
+    });
+    return Promise.race([save, new Promise(function (res) { setTimeout(function () { res({ track: '', failed: true }); }, 5000); })]);
   }
   function waLink(o) { return 'https://wa.me/' + WA + '?text=' + encodeURIComponent(message(o)); }
 

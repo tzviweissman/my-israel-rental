@@ -330,3 +330,8 @@ a.extra:hover { border-color: var(--sc-accent); }
 .foot.full .fbase { max-width: 74rem; margin-top: clamp(2rem, 5vw, 3rem); padding-top: 1.2rem; border-top: 1px solid rgb(255 255 255 / 0.2); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 1.5rem; font-size: 0.82rem; color: rgb(255 255 255 / 0.7); }
 .foot.full .fbase a { color: rgb(255 255 255 / 0.9); }
 @media (max-width: 860px) { .foot.full .fgrid { grid-template-columns: 1fr 1fr; } .foot.full .fbrand { grid-column: 1 / -1; } }
+
+/* booking forms: 16px so phones do not zoom on focus, grid cells may shrink below their content */
+.field input, .field textarea { font-size: 16px; }
+.cols > *, .pick > *, .split > * { min-width: 0; }
+.save-fail { margin: 0 0 0.85rem; padding: 0.8rem 1rem; border-radius: 12px; background: #fdecea; color: #8a1c14; font-weight: 600; }

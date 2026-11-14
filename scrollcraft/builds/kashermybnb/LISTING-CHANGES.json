@@ -1,0 +1,8 @@
+{
+  "gig_id": "d2a374fd-a0cd-49ca-9c8d-f7ff258b838c",
+  "new_tiers": [
+    { "name": "Oven cleaning and kashering", "price": 40, "currency": "USD" },
+    { "name": "New frying pan", "price": 15, "currency": "USD" }
+  ],
+  "reason": "The booking page offers an oven add-on ($40) and a new frying pan ($15 each) that the listing does not have. Until these tiers exist the page saves only the listed tiers (Kashering Kitchen, Kashering of Pots, Cutlery & Utensils) and writes the extras in the booking message with the price to confirm. Once the tiers exist with exactly these names, the page books each as its own tier, so the saved prices add up to what the customer saw. A frying pan chosen more than once is one booking per pan type: ask the owner whether to list a per-pan tier or keep the quantity in the message."
+}
