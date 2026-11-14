@@ -121,10 +121,11 @@
       body: JSON.stringify({ tier_name: k === 'basic' ? 'Basic home clean' : 'Free quote', preferred_date: v('day'), guest_name: v('me'), contact_phone: v('ph'), message: para, lang: 'en', discount_code: MirCode.code() || undefined }) })
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      var sf = document.getElementById('save-fail'); if (sf) sf.hidden = !!saved;
       if (saved && saved.track_path) text += '\n\nFollow the request: https://myisraelrental.com' + saved.track_path;
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
-      $('status').textContent = 'Sent. Press send in WhatsApp and we will reply with your quote.';
+      $('status').textContent = saved ? 'Sent. Press send in WhatsApp and we will reply with your quote.' : '';
       phase = ''; $('send').setAttribute('aria-busy', 'false');
     });
   });

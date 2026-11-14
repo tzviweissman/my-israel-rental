@@ -1,0 +1,10 @@
+{
+  "gig_id": "32f63e57-42b7-48c3-ba9a-d8e16dbae6e1",
+  "products": [],
+  "new_products": [],
+  "new_tiers": [
+    { "name": "Free quote", "price": 0, "currency": "ILS", "delivery_days": null, "duration_minutes": null,
+      "description": "Regular or deep cleaning: Daniel sees the home and gives the price.", "features": [], "images": [] }
+  ],
+  "reason": "book.html books regular and deep cleaning as \"Free quote\" (priced after a visit), which the listing did not have, so the dashboard saved a service it could not match. Price 0 means priced later, as the booking route reads it."
+}

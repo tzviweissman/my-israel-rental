@@ -29,3 +29,5 @@ idea was written or any credit spent.
 - videos-2026-11-07: six pro-site videos and the PULP smoothie motion study (read 8 Nov 2026 when the branch was merged): one unbroken scroll film whose last frame is the page, which the squeegee film already does; options only, nothing changed
 - videos-2026-11-06: five design videos (read 8 Nov 2026 when the branch was merged): the cheap-feel checklist is for forms and dashboards and video made in code; not applied here, nothing made a rule
 - ad-videos-2026-11-07: five static-ad videos (read 8 Nov 2026 when the branch was merged): ads, not sites; for a later flyer, nothing for the site
+- videos-2026-11-12: read 13 Nov 2026. Two videos about static ads; they are for the ad maker, not this site. This change is only the order form.
+- videos-2026-11-12-landing-pages: read 13 Nov 2026. Its lessons became rules 3ab (headings that say the benefit, reviews open on a phone, the real rating on the first screen), which came after this site first went live and wait for its next redesign. This change is only the order form.

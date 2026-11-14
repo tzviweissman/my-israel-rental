@@ -237,3 +237,11 @@ R3x.8 pass: built to the blueprint: skip link, one h1, focus rings, labelled fie
 R3x.13 pass: built to the blueprint: every size a --t step and every gap an --s step; check-web-basics passes
 R3r.3 pass: built to the blueprint: check-rules passes after the last edit
 R3r.4 n/a: nothing pointed out twice on this site yet
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->

@@ -61,7 +61,8 @@
         <p class="pr"><b>Basic home clean <span class="sym">₪</span>400</b>. Every other clean gets a free quote.</p>
         <p class="total" id="total-line">Basic home clean <b><span class="sym">₪</span>400</b></p>
         <p class="status" id="status" role="status" aria-live="polite"></p>
-        <button class="btn" id="send" type="submit"><span id="send-l">Next: where and when</span></button>
+        <p class="save-fail" id="save-fail" role="alert" hidden>Your request did not go through and was not saved. WhatsApp is open with it written out, so please press send there.</p>
+          <button class="btn" id="send" type="submit"><span id="send-l">Next: where and when</span></button>
         <button class="back" id="back" type="button" hidden>Back</button>
         <p class="note" id="send-note">Nothing to pay on this page.</p>
       </aside>
@@ -222,10 +223,11 @@
       body: JSON.stringify({ tier_name: k === 'basic' ? 'Basic home clean' : 'Free quote', preferred_date: v('day'), guest_name: v('me'), contact_phone: v('ph'), message: para, lang: 'en', discount_code: MirCode.code() || undefined }) })
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      var sf = document.getElementById('save-fail'); if (sf) sf.hidden = !!saved;
       if (saved && saved.track_path) text += '\n\nFollow the request: https://myisraelrental.com' + saved.track_path;
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
-      $('status').textContent = 'Sent. Press send in WhatsApp and we will reply with your quote.';
+      $('status').textContent = saved ? 'Sent. Press send in WhatsApp and we will reply with your quote.' : '';
       phase = ''; $('send').setAttribute('aria-busy', 'false');
     });
   });

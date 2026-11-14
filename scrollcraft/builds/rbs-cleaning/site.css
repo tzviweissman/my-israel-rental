@@ -321,3 +321,9 @@ label.f { font-weight: 700; margin: var(--s5) 0 var(--s2); }
 }
 
 .btn { white-space: nowrap; }   /* 3s.29: a button never breaks onto two lines */
+
+/* booking and order forms: 16px so phones do not zoom on focus; grid cells may shrink below their content; a failed save is said out loud */
+form input:not([type="radio"]):not([type="checkbox"]), form select, form textarea { font-size: 16px !important; }
+.form > *, .lay > *, .opts > *, .times > *, .pair > *, .st-grid > *, .req > *, .row2 > *, .cols4 > *, .col4 > *, .stepbar > *, .sum > *, .cgrid > * { min-width: 0; }
+.save-fail { margin: 0 0 .85rem; padding: .8rem 1rem; border-radius: 12px; background: #fdecea; color: #8a1c14; font-weight: 600; line-height: 1.4; }
+.save-fail[hidden] { display: none; }
