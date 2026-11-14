@@ -72,6 +72,7 @@
           <div class="total"><span>Total</span><span id="total">₪0</span></div>
           <p class="assure">Nothing to pay on this page. We confirm your time on WhatsApp.</p>
           <div class="toast" id="toast" role="status" aria-live="polite" hidden><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg><p><b>Session written out</b>Press send in WhatsApp and we will confirm your time.</p></div>
+          <p class="save-fail" id="save-fail" role="alert" hidden>Your booking did not go through and was not saved. WhatsApp is open with it written out, so please press send there.</p>
           <button class="btn" id="send" type="submit" style="width:100%"><span id="send-l">Continue to your details</span></button>
           <button class="back" id="back" type="button">Back</button>
           <p class="note" id="send-note">Next: your name and phone.</p>
@@ -234,6 +235,7 @@
       .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('booking not saved', r.status, t); return null; }); })
       .catch(function (err) { console.warn('booking not saved', err); return null; });
     Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      var sf = document.getElementById('save-fail'); if (sf) sf.hidden = !!saved; 
       if (saved && saved.track_path) text += '\n\nFollow the booking: https://myisraelrental.com' + saved.track_path;
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;

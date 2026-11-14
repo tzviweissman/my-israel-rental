@@ -378,3 +378,9 @@ section.after { padding: calc(var(--top-h) + clamp(.8rem, 3svh, 2rem)) 0 3rem; }
 .btn-facts .sym { font-size: 1em; vertical-align: 0; margin: 0; padding: 0; }
 .foot .fgrid a.fname { font-weight: 500; letter-spacing: 0; }
 .foot .fgrid .sym { display: inline; }.hs-copy .btn-facts { color: var(--ground); margin-top: 1rem; }
+
+/* booking and order forms: 16px so phones do not zoom on focus; grid cells may shrink below their content; a failed save is said out loud */
+form input:not([type="radio"]):not([type="checkbox"]), form select, form textarea { font-size: 16px !important; }
+.form > *, .lay > *, .opts > *, .times > *, .pair > *, .st-grid > *, .req > *, .row2 > *, .cols4 > *, .col4 > *, .stepbar > *, .sum > *, .cgrid > * { min-width: 0; }
+.save-fail { margin: 0 0 .85rem; padding: .8rem 1rem; border-radius: 12px; background: #fdecea; color: #8a1c14; font-weight: 600; line-height: 1.4; }
+.save-fail[hidden] { display: none; }
