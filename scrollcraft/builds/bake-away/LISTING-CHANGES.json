@@ -1,0 +1,132 @@
+{
+  "gig_id": "4bfcede3-77c9-4a4a-8848-99afc8f55970",
+  "products": [
+    {
+      "id": "badoughnut01",
+      "options": [
+        {
+          "id": "milky-p05",
+          "name": "Milky, White, milk choc lines",
+          "price": null
+        },
+        {
+          "id": "milky-p06",
+          "name": "Milky, Milk choc, crushed topping",
+          "price": null
+        },
+        {
+          "id": "milky-p07",
+          "name": "Milky, Choc, caramel, white lines",
+          "price": null
+        },
+        {
+          "id": "milky-p08",
+          "name": "Milky, White, choc and pearls",
+          "price": null
+        },
+        {
+          "id": "milky-p11",
+          "name": "Milky, Choc glaze, rainbow sprinkles",
+          "price": null
+        },
+        {
+          "id": "milky-p12",
+          "name": "Milky, White glaze, cookie crumbs",
+          "price": null
+        },
+        {
+          "id": "milky-p13",
+          "name": "Milky, Pink glaze, sprinkles",
+          "price": null
+        },
+        {
+          "id": "milky-p14",
+          "name": "Milky, Choc glaze, crunchy topping",
+          "price": null
+        },
+        {
+          "id": "parve-p05",
+          "name": "Parve, White, milk choc lines",
+          "price": null
+        },
+        {
+          "id": "parve-p06",
+          "name": "Parve, Milk choc, crushed topping",
+          "price": null
+        },
+        {
+          "id": "parve-p07",
+          "name": "Parve, Choc, caramel, white lines",
+          "price": null
+        },
+        {
+          "id": "parve-p08",
+          "name": "Parve, White, choc and pearls",
+          "price": null
+        },
+        {
+          "id": "parve-p11",
+          "name": "Parve, Choc glaze, rainbow sprinkles",
+          "price": null
+        },
+        {
+          "id": "parve-p12",
+          "name": "Parve, White glaze, cookie crumbs",
+          "price": null
+        },
+        {
+          "id": "parve-p13",
+          "name": "Parve, Pink glaze, sprinkles",
+          "price": null
+        },
+        {
+          "id": "parve-p14",
+          "name": "Parve, Choc glaze, crunchy topping",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "bacreamdn001",
+      "options": [
+        {
+          "id": "jam",
+          "name": "Jam and cream",
+          "price": null
+        },
+        {
+          "id": "plain",
+          "name": "Cream",
+          "price": null
+        },
+        {
+          "id": "choc",
+          "name": "Chocolate cream",
+          "price": null
+        }
+      ]
+    },
+    {
+      "id": "bacake000001",
+      "options": [
+        {
+          "id": "marble",
+          "name": "Marble",
+          "price": null
+        },
+        {
+          "id": "honey",
+          "name": "Honey",
+          "price": null
+        },
+        {
+          "id": "mocca",
+          "name": "Mocca",
+          "price": null
+        }
+      ]
+    }
+  ],
+  "new_products": [],
+  "reason": "The doughnut kind and flavour, the cream doughnut filling and the cake flavour were only typed into the order notes. The page now sends each as option_id (doughnut: kind-flavourcode, e.g. milky-p05; cream: jam/plain/choc; cake: marble/honey/mocca) so the dashboard line shows the pick. Names are the ones on the shop page, shortened to 40 characters. Option price null means the product price. Until these are added the page still works: a product with no options ignores option_id."
+}

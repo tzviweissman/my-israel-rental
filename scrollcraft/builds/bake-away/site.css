@@ -373,3 +373,8 @@ label.opt input { accent-color: var(--ivory); width: 20px; height: 20px; }
 .btn-facts li::before { content: ''; width: .4em; height: .4em; border-radius: 50%; background: var(--accent); }
 .btn-facts li::before { display: inline-block; vertical-align: middle; margin-inline-end: .45em; margin-bottom: .15em; }
 .btn-facts .sym { font-size: 1em; vertical-align: 0; margin: 0; padding: 0; }
+
+/* order form: iPhone zooms into any field under 16px, and a grid cell must be allowed to shrink so fields never overlap */
+#form input, #form select, #form textarea, .fld { font-size: 16px; }
+.form > *, .form .card, .form .card > div, .sum { min-width: 0; }
+.sent.bad { font-weight: 700; }

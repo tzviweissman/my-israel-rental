@@ -23,3 +23,11 @@ paid for. Tzvi: "did you look through all our inspo sources". Second pass below,
 - bar-breaking-2026-11-02: (read 2 Nov 2026) bars broken by hand and AI chocolate adverts, made for Krysp; nothing in a doughnut shop breaks, so nothing is taken.
 - videos-2026-11-04: (noted 6 Nov 2026) newer than this site, and the only change since is the discount code box, so nothing here was taken from it
 - ad-videos-2026-11-04: (noted 6 Nov 2026) about ads, newer than this site; the only change since is the discount code box, so nothing here was taken from it
+- ad-videos-2026-11-07: read 13 Nov 2026. Five videos about how professionals make static ads; they are for the ad maker, not this site. This change is only the order form.
+- pro-references: read 13 Nov 2026. The professional ads every ad of ours is put beside (rule A9.5); they are for ads, not this site. This change is only the order form.
+- videos-2026-11-06: read 13 Nov 2026. Five site videos with a cheap-feel checklist; none of it was made a rule, so nothing applies here. This change is only the order form.
+- videos-2026-11-07: read 13 Nov 2026. Six pro-site videos; Tzvi ruled they are options for new sites only, never applied to live sites. This change is only the order form.
+- videos-2026-11-08: read 13 Nov 2026. Bramble and three more; options for new sites only (Tzvi). Its product-coloured button is rule 3g.19, which came after this site first went live. This change is only the order form.
+- videos-2026-11-10: read 13 Nov 2026. The token and prompting videos are about how we work; the three site-build videos became rules 3z, which came after this site first went live and wait for its next redesign. This change is only the order form.
+- videos-2026-11-12: read 13 Nov 2026. Two videos about static ads; they are for the ad maker, not this site. This change is only the order form.
+- videos-2026-11-12-landing-pages: read 13 Nov 2026. Its lessons became rules 3ab (headings that say the benefit, reviews open on a phone, the real rating on the first screen), which came after this site first went live and wait for its next redesign. This change is only the order form.

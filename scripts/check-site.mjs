@@ -337,7 +337,9 @@ for (const url of urls) {
       for (let stepN = 0; stepN < 4; stepN++) {
       await page.evaluate((first) => {
         const clickFirst = (sel) => { const e = document.querySelector(sel); if (e) e.click(); };
-        if (first) { if (document.querySelector('#st-add')) clickFirst('#st-add'); else { const a = [...document.querySelectorAll('button')].find((b) => b.offsetParent !== null && (/^\s*add\b/i.test(b.textContent) || /^one more\b/i.test(b.getAttribute('aria-label') || ''))); if (a) a.click(); } clickFirst('#svcs input'); }  // a shop with a delivery minimum needs something in the basket (Bake Away, 14 Nov 2026)
+        // a shop with a delivery minimum needs enough in the basket: add twice (Bake Away, 14 Nov 2026: one ₪16 doughnut is under its ₪20 minimum)
+        if (first) for (let n = 0; n < 2; n++) { if (document.querySelector('#st-add')) clickFirst('#st-add'); else { const a = [...document.querySelectorAll('button')].find((b) => b.offsetParent !== null && (/^\s*add\b/i.test(b.textContent) || /^one more\b/i.test(b.getAttribute('aria-label') || ''))); if (a) a.click(); } }
+        if (first) clickFirst('#svcs input');
         const groups = {}; for (const r of document.querySelectorAll('form input[type=radio]')) if (!groups[r.name] && r.offsetParent !== null && r.name !== 'pack') { groups[r.name] = 1; r.click(); }
         // choices made with checkboxes (Chicken Munch's kinds of chicken): tick the first visible one of each group none of which is ticked
         const boxes = {}; for (const c of document.querySelectorAll('form input[type=checkbox]')) { if (c.offsetParent === null) continue; const g = c.name || (c.closest('fieldset, [role=group]') || {}).id || 'x'; (boxes[g] = boxes[g] || []).push(c); }

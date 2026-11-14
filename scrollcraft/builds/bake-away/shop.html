@@ -67,7 +67,7 @@
           <div class="card ostep" data-s="2" hidden>
             <h2>Delivery or pickup</h2>
             <div class="ful" role="radiogroup" aria-label="Delivery or pickup"><label class="opt"><input type="radio" name="ful" value="delivery" checked>Delivery</label><label class="opt"><input type="radio" name="ful" value="pickup">Pickup</label></div>
-            <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p><p class="hint">We deliver in Jerusalem and more. We confirm the fee on WhatsApp.</p></div>
+            <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p><p class="hint" id="h-fee">We deliver in Jerusalem and more. We confirm the fee on WhatsApp.</p></div>
             <div id="w-when"><label class="f" for="when" id="when-l">Delivery day</label><input class="fld" id="when" type="date"><p class="hint" id="h-pick" hidden>We send the pickup address on WhatsApp.</p><p class="hint" id="h-when">We bake to order: choose a day at least 24 hours ahead. Closed for Shabbat and holidays: those days cannot be chosen.</p><p class="err" id="e-when"></p><button type="button" class="nxt" id="nxt" hidden></button></div>
           </div>
           <div class="card ostep" data-s="3" hidden>
@@ -84,7 +84,7 @@
           <ul id="sum-mini"><li><span>Nothing yet</span></li></ul>
           <p class="sum-where" id="sum-where" hidden></p>
           <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
-          <div class="total"><span>Total</span><span id="total">₪0</span></div>
+          <div class="total"><span>Total</span><span id="total" data-order-total>₪0</span></div>
           <button class="btn" id="send" type="submit"><span>Continue to delivery</span></button>
           <button class="back" id="back" type="button" hidden>Back</button>
           <p class="note" id="send-note">Next: how you get it and the day.</p>
@@ -192,10 +192,21 @@
     var a = n, k = key(); q[k] = Math.min(20, (q[k] || 0) + n); n = 1; update(); check(false); label();
     window.siteToast('Added: ' + a + ' × ' + BA.label(k)); stAdd.classList.add('added'); setTimeout(function () { stAdd.classList.remove('added'); }, 900);
   });
-  // delivery is in Jerusalem and more and its fee is not known, so it is confirmed on WhatsApp and never added to the total
+  // The listing (GET /order-form) is the price list: product prices, the delivery fee and the minimum order all come from it,
+  // and the total shown is the total the server saves (goods, less a code, plus the fee). The numbers in FALLBACK are used
+  // only when the listing does not answer.
+  var LIVE = null, FALLBACK = { delivery_fee: 35, min_order: 20 };
+  function st() { return LIVE ? (LIVE.settings || {}) : FALLBACK; }
   function pickup() { return document.querySelector('input[name=ful]:checked').value === 'pickup'; }
   function total() { return MirCode.after(goods()); }
   function goods() { var t = 0; for (var k in q) t += q[k] * BA.unit(k); return t; }
+  function fee() { if (pickup() || !goods()) return 0; var s = st(); if (s.free_over && total() >= Number(s.free_over)) return 0; return Number(s.delivery_fee || 0); }
+  function feeSaid() { var s = st(); return fee() ? money(fee()) : (s.delivery_fee != null || (s.free_over && total() >= Number(s.free_over))) ? 'free' : 'confirmed on WhatsApp'; }
+  function grand() { return total() + fee(); }
+  // the city the server wants: none for a business that serves the whole country, else the one area it lists
+  function cityOut() { if (pickup()) return undefined; var b = LIVE && LIVE.business; if (!b) return 'jerusalem'; return b.serves_nationwide ? undefined : (b.areas[0] || {}).slug; }
+  // each pick is a real option on the listing's product, so the dashboard shows the flavour, not only a note
+  function optId(k) { var p = k.split('~'); return p[0] === 'dn' ? p[1] + '-' + p[2] : (p[0] === 'cream' || p[0] === 'cakes') ? p[1] : undefined; }
   var send = document.getElementById('send');
   function update() {
     MirCode.refresh();
@@ -206,9 +217,10 @@
       mini += '<li><span>' + q[k] + ' × ' + nm + '</span><span>' + money(q[k] * BA.unit(k)) + '</span></li>';
     }
     document.getElementById('sum-list').innerHTML = html || '<li><span>Your basket is empty. Pick a bake above.</span></li>';
-    if (goods() && !pickup()) mini += '<li><span>Delivery</span><span>fee confirmed on WhatsApp</span></li>';
+    if (goods() && !pickup()) mini += '<li><span>Delivery</span><span>' + feeSaid() + '</span></li>';
     document.getElementById('sum-mini').innerHTML = mini || '<li><span>Nothing yet</span></li>';
-    document.getElementById('total').textContent = money(total());
+    document.getElementById('total').textContent = money(grand());
+    document.getElementById('h-fee').textContent = 'We deliver in Jerusalem and more. ' + (st().delivery_fee != null ? 'Delivery is ' + money(Number(st().delivery_fee)) + (st().free_over ? ', free over ' + money(Number(st().free_over)) : '') + '.' : 'We confirm the fee on WhatsApp.');
     var s = {}; for (var k2 in q) if (q[k2]) s[k2] = q[k2]; window.siteBasket.set(s);
     var bb = document.querySelector('#bar .btn'); if (bb) { bb.textContent = 'Order'; bb.setAttribute('href', '#order'); }
     drawStep();
@@ -219,7 +231,11 @@
   // are refused here. The closures come from the order form; if they cannot be loaded, Saturdays are still refused.
   var closures = [], loaded = false;
   function loadClosures() { loaded = true; fetch(API + '/marketplace/order-form/' + GIG).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-    var sc = j && j.business && j.business.shabbat_closing; closures = (sc && sc.closures) || []; prefill(); check(false); drawStep();
+    if (!j) return;
+    LIVE = j;
+    (j.products || []).forEach(function (p) { for (var k in PID) if (PID[k] === p.id && p.price != null && BA.ITEMS[k]) BA.ITEMS[k].price = Number(p.price); });
+    document.getElementById('st-price').innerHTML = '<span class="sym">₪</span>' + BA.ITEMS[sel].price;
+    var sc = j.business && j.business.shabbat_closing; closures = (sc && sc.closures) || []; prefill(); label(); update(); check(false); drawStep();
   }).catch(function () {}); }
   function closedDay(iso) {
     if (!iso) return false;
@@ -249,7 +265,7 @@
     var ok = true, e; upto = upto || 3;
     e = goods() ? '' : 'Add a bake to your basket'; if (e) ok = false; if (show || !e) mark('items', e);
     if (upto < 2) return ok;
-    e = pickup() || v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
+    e = pickup() ? '' : !v('addr') ? 'Where should we deliver?' : st().min_order && goods() < Number(st().min_order) ? 'Delivery needs an order of at least ' + money(Number(st().min_order)) + '. Add something, or choose pickup.' : ''; if (e) ok = false; if (show || !e) mark('addr', e);
     e = !v('when') ? 'Choose the day' : v('when') < minDay ? 'We bake to order, so we need 24 hours.' + sayNext(nextOpen(addDay(minDay, -1))) : closedDay(v('when')) ? 'We are closed for Shabbat and holidays.' + sayNext(nextOpen(v('when'))) : ''; if (e) ok = false; if (show || !e || closedDay(v('when')) || (v('when') && v('when') < minDay)) mark('when', e);
     var nb = document.getElementById('nxt'), nn = v('when') && (v('when') < minDay || closedDay(v('when'))) ? nextOpen(v('when') < minDay ? addDay(minDay, -1) : v('when')) : ''; nb.hidden = !nn; document.getElementById('h-when').hidden = !!nn; if (nn) { nb.dataset.d = nn; nb.textContent = 'Choose ' + nice(nn, { weekday: 'long' }); }
     if (upto < 3) return ok;
@@ -265,10 +281,10 @@
   var sending = false;
   function itemised() { var out = []; for (var k in q) if (q[k]) out.push('• ' + q[k] + ' × ' + BA.label(k) + ' (' + money(q[k] * BA.unit(k)) + ')'); return out; }
   function save(notes) {
-    var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: PID[k.split('~')[0]], qty: q[k] });
+    var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: PID[k.split('~')[0]], qty: q[k], option_id: optId(k) });
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: ls, fulfilment: pickup() ? 'pickup' : 'delivery', city: pickup() ? undefined : 'jerusalem', address: pickup() ? undefined : v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes, discount_code: MirCode.code() }) })
-      .then(function (r) { return r.json().then(function (j) { return r.ok ? j : null; }, function () { return null; }); }).catch(function () { return null; });
+      body: JSON.stringify({ lines: ls, fulfilment: pickup() ? 'pickup' : 'delivery', city: cityOut(), address: pickup() ? undefined : v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes, discount_code: MirCode.code() }) })
+      .then(function (r) { return r.json().then(function (j) { return r.ok ? j : { error: (typeof j.detail === 'string' && j.detail) || 'It could not be saved.' }; }, function () { return r.ok ? null : { error: 'It could not be saved.' }; }); }).catch(function () { return null; });
     return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
   }
   MirCode.mount({ api: API, gig: GIG, goods: goods, phone: 'ph', field: 'fld', onChange: function () { update(); drawStep(); } });
@@ -280,7 +296,8 @@
     var out = ['Hi Bake away, I would like to order:'].concat(itemised());
     if (v('note')) out.push('Notes: ' + v('note'));
     if (MirCode.code()) out.push(MirCode.text(goods()));
-    out.push('Total: ' + money(total()) + (pickup() ? '' : ' (delivery fee to be confirmed)'));
+    if (!pickup()) out.push('Delivery: ' + feeSaid());
+    out.push('Total: ' + money(grand()) + (!pickup() && !fee() && feeSaid() !== 'free' ? ' plus delivery' : ''));
     if (pickup()) { out.push('Pickup (please send me the address)'); out.push('Pickup day: ' + dayName({ weekday: 'long', day: 'numeric', month: 'long' })); }
     else { out.push('Delivery to: ' + v('addr')); out.push('Delivery day: ' + dayName({ weekday: 'long', day: 'numeric', month: 'long' })); }
     out.push('Name: ' + v('me') + ', ' + v('ph'));
@@ -288,11 +305,12 @@
     sending = true; send.setAttribute('aria-busy', 'true');
     var tab = window.open('', '_blank');
     save(notes).then(function (saved) {   // saved first (rules 3k); if saving fails WhatsApp still opens
+      var failed = !saved || !!saved.error;
       if (saved && saved.track_url) text += '\n\nFollow the order: ' + saved.track_url;
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
       sending = false; send.removeAttribute('aria-busy');
-      var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.textContent = 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false;
+      var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.textContent = failed ? 'Your order did not go through on the site (it was not saved' + (saved && saved.error ? ': ' + saved.error : '') + '). It is open in WhatsApp instead: please send that message so we get it.' : 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false; sent.setAttribute('role', failed ? 'alert' : 'status'); sent.classList.toggle('bad', failed);
     });
   });
   document.getElementById('sum-list').addEventListener('click', function (e) {
@@ -307,7 +325,7 @@
     [].forEach.call(document.querySelectorAll('#steps li'), function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
     var pk = pickup(); document.getElementById('w-addr').hidden = pk; document.getElementById('h-pick').hidden = !pk; document.getElementById('when-l').textContent = pk ? 'Pickup day' : 'Delivery day';
     var day = v('when') ? dayName({ weekday: 'long' }) : '';
-    send.lastElementChild.textContent = step < 3 ? STEP_BTN[step] : (goods() ? (day ? 'Send on WhatsApp for ' + day : 'Send order on WhatsApp') + ', ' + money(total()) : 'Send order on WhatsApp');
+    send.lastElementChild.textContent = step < 3 ? STEP_BTN[step] : (goods() ? (day ? 'Send on WhatsApp for ' + day : 'Send order on WhatsApp') + ', ' + money(grand()) : 'Send order on WhatsApp');
     send.classList.toggle('idle', !check(false, step));
     document.getElementById('send-note').textContent = STEP_NOTE[step];
     document.getElementById('back').hidden = step === 1;
@@ -323,7 +341,7 @@
   document.getElementById('back').addEventListener('click', function () { history.back(); });
   document.getElementById('steps').addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
   var qs = new URLSearchParams(location.search);
-  show(INFO[qs.get('item')] ? qs.get('item') : 'dn'); update();
+  show(INFO[qs.get('item')] ? qs.get('item') : 'dn'); update(); loadClosures();
   var m0 = /#order-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
 })();
 </script>
