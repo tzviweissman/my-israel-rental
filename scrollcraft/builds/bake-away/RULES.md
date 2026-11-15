@@ -234,3 +234,7 @@ R3v.14 pass: From ₪16 a doughnut, Delivery in Jerusalem, Cash, bit or bank tra
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
 
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+<!-- 13 Nov 2026: the shop page only: every bake (the picker) at the top on a phone, Add turns into - n + on the product, the phone bar only once something is in the basket, an empty basket is one line, a Most ordered row only from real orders. Prices, words and every other page unchanged; re-read against the shop page on phone and laptop, and the page checks are run on it. -->
+<!-- 14 Nov 2026: the "Added" pop-up is heard by screen readers but not shown: on a phone it covered the page heading; the - n + on the product and the basket bar show the add. Nothing else changed. -->
+
+<!-- 15 Nov 2026: shop layout merged onto the new order form (fee and minimum from the listing); rules looked at again. -->

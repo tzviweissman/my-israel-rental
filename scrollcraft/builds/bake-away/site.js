@@ -42,7 +42,9 @@ document.body.classList.remove('no-js');
     var s = totals(b), c = document.getElementById('count');
     if (c) { c.hidden = !s.n; c.textContent = s.n; c.setAttribute('aria-label', s.n + ' in your order'); }
     var bp = document.querySelector('#bar .p');
-    if (bp) bp.innerHTML = s.n ? '<b>Basket, ' + money(s.t) + '</b>' + s.n + (s.n > 1 ? ' items' : ' item') : '<b>From ₪16</b>Doughnuts, cakes, challah and more';
+    document.body.classList.toggle('has-basket', s.n > 0);
+    // the shop page says it as the food apps do ("2 items, ₪98, View basket"); the other pages keep their bar
+    if (bp) bp.innerHTML = s.n ? (document.body.dataset.page === 'shop' ? '<b>' + s.n + (s.n > 1 ? ' items' : ' item') + '</b>' + money(s.t) : '<b>Basket, ' + money(s.t) + '</b>' + s.n + (s.n > 1 ? ' items' : ' item')) : '<b>From ₪16</b>Doughnuts, cakes, challah and more';
   }
   showCount(window.siteBasket.get());
 
@@ -61,7 +63,9 @@ document.body.classList.remove('no-js');
     var vh = innerHeight;
     top.classList.toggle('solid', scrollY > 10);
     var busy = hideWhile.some(function (e) { var r = e.getBoundingClientRect(); return r.top < vh * .6 && r.bottom > vh * .4; });
-    if (bar) bar.classList.toggle('on', scrollY > vh * .5 && !busy && (!form || form.getBoundingClientRect().top > vh * .75) && (!cl || cl.getBoundingClientRect().top > vh));
+    // the shop page: the bar shows only once something is in the basket (never an empty one), and steps aside at the order form and the closing band
+    if (bar && document.body.dataset.page === 'shop') bar.classList.toggle('on', document.body.classList.contains('has-basket') && (!form || form.getBoundingClientRect().top > vh * .75) && (!cl || cl.getBoundingClientRect().top > vh));
+    else if (bar) bar.classList.toggle('on', scrollY > vh * .5 && !busy && (!form || form.getBoundingClientRect().top > vh * .75) && (!cl || cl.getBoundingClientRect().top > vh));
   }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();

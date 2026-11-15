@@ -378,3 +378,27 @@ label.opt input { accent-color: var(--ivory); width: 20px; height: 20px; }
 #form input, #form select, #form textarea, .fld { font-size: 16px; }
 .form > *, .form .card, .form .card > div, .sum { min-width: 0; }
 .sent.bad { font-weight: 700; }
+/* The shop layout (13 Nov 2026): every bake first on a phone, Add turns into - n +, an empty basket is one line, Most ordered only from real orders */
+.btn[hidden], .step[hidden] { display: none; }
+.btn, .step button, .chipb, .seg button, .fl button { touch-action: manipulation; }
+.ctl .step output { min-width: 2.4ch; text-align: center; }
+.st-buy .ctl { display: inline-flex; }
+.st-buy .step { min-width: 9.5rem; justify-content: space-between; }
+.pop[hidden] { display: none; }
+.pop-h { margin: 0 0 .4rem; font-size: .875rem; letter-spacing: .14em; text-transform: uppercase; color: var(--soft); font-weight: 600; }
+.pop-r { display: flex; gap: .5rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 2px; max-width: 34rem; }
+.pop-t { flex: none; display: inline-flex; align-items: center; gap: .5rem; padding: 0 1rem 0 .4rem; scroll-snap-align: start; white-space: nowrap; }
+.pop-t img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: var(--deep); }
+@media (max-width: 860px) {
+  .pop { order: -1; } .pop-r { max-width: none; }
+  .st-pick { order: 0; justify-self: start; justify-content: flex-start; gap: .4rem; max-width: none; margin: 0; }
+  .st-pick button { padding: 0 .85rem; }
+  .st-ph { width: min(100%, 34svh, 440px); }
+}
+.o-empty { display: none; }
+body:not(.no-js) #order.is-empty .o-empty { display: block; margin: 0; font-size: 1.125rem; color: var(--soft); }
+body:not(.no-js) #order.is-empty .osteps, body:not(.no-js) #order.is-empty .form { display: none; }
+body:not(.no-js) section.sec#order.is-empty { padding-block: 1.4rem; }
+#order { scroll-margin-top: var(--top-h); }
+
+.toast, .toast.show { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; padding: 0 !important; border: 0 !important; transform: none !important; }   /* heard, not shown: it covered the page heading on a phone; the − n + on the product and the basket bar show the add */
