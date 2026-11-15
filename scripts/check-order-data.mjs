@@ -173,7 +173,8 @@ for (const url of urls) {
   await p.route(/wa\.me|api\.whatsapp\.com|whatsapp:\/\//, (r) => { toWa = true; return r.abort(); });
   await p.goto(url, { waitUntil: 'networkidle' }).catch(() => {});
   await p.waitForTimeout(1200);
-  const steps = [{ kind: 'as it opens', label: 'as it opens' }, ...(await choices(p))];
+  // a page that forwards on load (a listing id to its hand-built page) destroys the first read: wait and read again
+  const steps = [{ kind: 'as it opens', label: 'as it opens' }, ...(await choices(p).catch(async () => { await p.waitForLoadState('networkidle').catch(() => {}); await p.waitForTimeout(1500); return choices(p); }))];
   let base = null;   // what the page sends as it opens, to see what each choice changes
   // an order that cannot go as it opens (a bowl needs its flavour picked first, The Brown Box) is fine when a choice sends it
   let anySent = false, stopped = "";
