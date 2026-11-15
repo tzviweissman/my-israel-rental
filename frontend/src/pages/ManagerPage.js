@@ -11,6 +11,7 @@ import { getCoverImage } from '../utils/coverImage';
 import { sizedImage, srcSet } from '../utils/cdnImage';
 import { areaLabel, areaGroupKey, sameArea } from '../utils/areaNames';
 import { saveReturnPath } from '../hooks/useBackNavigation';
+import NotFound from './NotFound';
 
 // No `storage`: discontinued (CLAUDE.md). This is a public manager page, so
 // the tab was advertising a category to renters. Any storage listing a
@@ -96,8 +97,13 @@ const ManagerPage = () => {
       setData(response.data);
     } catch (error) {
       console.error('Failed to fetch manager data', error);
+      // An unknown id is a 404 from the API; without this the page said
+      // "Loading..." for ever (dead-ends audit, 15 Nov 2026).
+      if (error?.response?.status === 404) setData(false);
     }
   };
+
+  if (data === false) return <NotFound />;
 
   if (!data) {
     return (
