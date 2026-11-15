@@ -41,17 +41,23 @@
       what: p.description && p.description.length > 12 ? p.description : k.what
     });
   }
+  var STORE = '7ced3a9e-8683-4297-931d-0e37d4ff895b';
   function form() {
     try {
       var c = JSON.parse(sessionStorage.getItem(FORM) || 'null');
       if (c && Date.now() - c.at < 5 * 60 * 1000) return Promise.resolve(c.form);
     } catch (e) { /* fetch it */ }
-    return fetch(API + '/marketplace/business/' + SLUG).then(function (r) { return r.json(); }).then(function (d) {
-      var gigs = d.listings || d.gigs || [];
-      var store = gigs.filter(function (g) { return g.gig_type === 'store'; })[0] || gigs[0];
-      if (!store) throw new Error('no store listing');
-      return fetch(API + '/marketplace/order-form/' + store.id).then(function (r) { return r.json(); });
-    }).then(function (f) {
+    // the store listing's id, so the boards need one request, not two, and arrive before anyone taps (check-site SHIFT,
+    // 15 Nov 2026); if that listing is ever replaced, the business's own list finds the new one
+    var lookup = function () {
+      return fetch(API + '/marketplace/business/' + SLUG).then(function (r) { return r.json(); }).then(function (d) {
+        var gigs = d.listings || d.gigs || [];
+        var store = gigs.filter(function (g) { return g.gig_type === 'store'; })[0] || gigs[0];
+        if (!store) throw new Error('no store listing');
+        return fetch(API + '/marketplace/order-form/' + store.id).then(function (r) { return r.json(); });
+      });
+    };
+    return fetch(API + '/marketplace/order-form/' + STORE).then(function (r) { return r.ok ? r.json() : lookup(); }, lookup).then(function (f) {
       f.products = (f.products || []).filter(function (p) { return p.in_stock !== false; }).map(tidy);
       var ways = ((f.business || {}).payment_note || 'card, Zelle, bank transfer').split(/,|·/).map(function (s) { return s.replace(/\s+/g, ' ').trim().replace(/zelle/i, 'Zelle'); }).filter(Boolean);
       f.ways = ways;
@@ -112,6 +118,9 @@
   function paintCart(o) {
     var n = count(o);
     document.querySelectorAll('[data-count]').forEach(function (b) { b.textContent = n; b.hidden = !n; });
+    // an empty basket is one line and nothing else: no steps, no total, no Continue (shop research, 13 Nov 2026)
+    document.body.classList.toggle('is-empty', !n);
+    document.querySelectorAll('.dock small').forEach(function (s) { s.textContent = n + (n === 1 ? ' item' : ' items') + ' · total'; });
   }
   var toastT = 0;
   function toast(msg, href, label) {

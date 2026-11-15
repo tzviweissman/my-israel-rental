@@ -394,3 +394,14 @@ img { display: block; max-width: 100%; }
 .foot2.full .fbase { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; padding-top: 1.2rem; border-top: 1px solid rgb(255 255 255 / .18); font-size: .82rem; color: rgb(255 255 255 / .72); }
 .foot2.full .fbase a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 860px) { .foot2.full .fgrid { grid-template-columns: 1fr 1fr; } .foot2.full .fbrand { grid-column: 1 / -1; } }
+
+/* the shop layout (13 Nov 2026): an empty basket is one line; the steps, the total and Continue come once a board is in it */
+.o-empty { display: none; margin: 0 0 1rem; color: var(--soft); }
+body.is-empty .o-empty { display: block; }
+body.is-empty .steps, body.is-empty .dock, body.is-empty .summary .who, body.is-empty .summary .lines, body.is-empty .summary .total { display: none; }
+.pick, .stepper button, .cta, .chip, .ghost, .bottle .tg, .rm { touch-action: manipulation; }
+body.is-empty .pane .next .cta { display: none; }
+.pick { min-height: 44px; }
+
+/* the boards come from the listing: while they load, the grid holds a tall space so nothing under it moves into view (check-site SHIFT, 15 Nov 2026) */
+.grid-boards > li:only-child:not([data-line]) { min-height: 150svh; }

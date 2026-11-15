@@ -141,7 +141,7 @@ R3j.12 n/a: no guarantee, add-on offer, taster, discount, saving, struck price o
 R3.14 pass: loud prices are shown because prices exist and the business sells by price list
 
 ## 6. Order and booking flow
-R3k.7 pass: Step 1 Your boards, Step 2 When and where, Step 3 Your details, with the Step bar and the total beside every step; check-site FLOW path walked in the order screenshots
+R3k.7 pass: Step 1 Your boards, Step 2 When and where, Step 3 Your details, with the Step bar and the total beside every step once a board is in the basket (13 Nov 2026: an empty basket shows one line, no steps, total, Continue or phone bar); check-site FLOW path walked in the order screenshots
 R3k.8 pass: every basket line has a remove button (order.html screenshot shows the bin beside the stepper)
 R3k.6 pass: Add on boards.html puts the board in and the order page shows it (screenshot)
 R3.15 pass: the brief asks visitors to order; the order flow exists, delivery and notice are on the facts strip
@@ -223,3 +223,9 @@ R3v.14 pass: under the Order a board button on the opening: From $75 a board (Mi
 
 Note, 1 Nov 2026: the arrow after the footer button was removed (its font has no arrow; check-site GLYPH). No rule answer changes.
 <!-- 6 Nov 2026: the only change is the discount code box on the order form (public/pages/mir-code.js, Tzvi: American Crust's first-time code had nowhere to be typed). Looked at the form with the box and a test order on phone and laptop; the rest of the site is unchanged, so the other rules were not re-read. -->
+
+<!-- 14 Nov 2026: the basket total is marked data-order-total on the order pages, so the order check compares what the customer sees with what the dashboard saves. Nothing else changed. -->
+
+<!-- 15 Nov 2026: the boards page reads the store listing by its id (one request, not two) and keeps a tall space while the boards load, so nothing below jumps into view when they arrive (check-site SHIFT). Nothing else changed. -->
+
+<!-- 15 Nov 2026: the total on the details page is marked data-order-total too. -->
