@@ -257,6 +257,18 @@
   select { width: 100%; min-height: 48px; padding: .7rem .9rem; border: 1px solid var(--line-ivory); border-radius: 12px; background: #fff; color: var(--ink); font-family: var(--font-body); }
   .cols > *, .fields > *, .fields > * > * { min-width: 0; }
   .sum .why.bad { color: #FFD2CC; font-weight: 600; }
+  /* shop layout, 14 Nov 2026 */
+  .dock[hidden], .pop[hidden], .sum-empty-hide[hidden] { display: none !important; }
+  #next1 { display: none; }
+  @media (max-width: 900px) { main { padding-bottom: 5rem; } body.s1 .sum #next1 { display: inline-flex; } }
+  .pop { margin-top: .4rem; }
+  .pop h3 { margin: .8rem 0 .5rem; color: var(--gold-ink); }
+  .items.rail { display: flex; gap: .55rem; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: .4rem; scrollbar-width: none; }
+  .items.rail::-webkit-scrollbar { display: none; }
+  .items.rail li { flex: 0 0 min(82%, 18rem); scroll-snap-align: start; }
+  .sum.is-empty > :not(.empty):not(#mir-code):not(script) { display: none !important; }
+  .sum.is-empty #mir-code { display: none; }
+  .toast, .toast.on { position: absolute; left: 0; top: 0; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; translate: none; opacity: 1; box-shadow: none; }
 </style>
 </head>
 <body>
@@ -274,7 +286,7 @@
   </div>
 </header>
 
-<main data-mir-catalog>
+<main data-mir-catalog data-mir-popular>
   <div class="wrap head">
     <h1>Order a gift</h1>
     <p>Choose your gifts and tell us where they are going. The button sends it all to us on WhatsApp, and we confirm the order and the delivery fee with you there.</p>
@@ -287,6 +299,7 @@
         <h2 id="s1"><span class="n">1</span>Your gifts</h2>
         <p class="hint">Prices in US dollars, as in our catalogue.</p>
         <div class="find"><input type="search" id="q" placeholder="Search gifts" aria-label="Search gifts" autocomplete="off"><div class="pills" id="pills" role="group" aria-label="Choose a group of gifts"></div></div>
+        <div class="pop" id="pop" hidden><h3>Most ordered</h3><ul class="items rail" id="poplist"></ul></div>
         <div id="gifts"></div>
         <div id="which" class="which" hidden data-need><label for="whichin" id="whichl"></label><input id="whichin" name="which" autocomplete="off" maxlength="120"><p class="msg">Tell us which one you want.</p></div><p class="none" id="none" hidden>No gift matches that. Message us on WhatsApp and we will help.</p>
       </section>
@@ -315,14 +328,15 @@
       </section>
     </form>
 
-    <aside class="sum" aria-labelledby="sumh">
+    <aside class="sum is-empty" id="sum" aria-labelledby="sumh">
       <h2 id="sumh">Your order</h2>
-      <p class="empty" id="empty">No gifts chosen yet.</p>
+      <p class="empty" id="empty">Your basket is empty. Tap Add on any gift and it shows here.</p>
       <ul id="lines" aria-live="polite"></ul>
       <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
       <div class="tot"><span>Gifts</span><b id="total" data-order-total>$0</b></div>
       <p class="note">Delivery is added on WhatsApp once we know the city. You pay us directly; nothing is paid on this page.</p>
       <p class="reassure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Nothing is paid on this page. We confirm the delivery fee with you on WhatsApp first.</span></p>
+      <button type="button" class="btn" id="next1" data-order-send aria-disabled="true"><span style="position:relative">Continue</span></button>
       <a class="btn" id="send" href="#" aria-disabled="true">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
         <span style="position:relative">Send on WhatsApp</span>
@@ -346,8 +360,8 @@
   <div class="fbase"><span>© 2026 The Gift Boutique. Since 2025.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
 </footer>
 
-<div class="dock order-bar" id="dock">
-  <div><small>Gifts, before delivery</small><b id="dtotal">$0</b></div>
+<div class="dock order-bar" id="dock" hidden>
+  <div><small id="dcount">Gifts, before delivery</small><b id="dtotal">$0</b></div>
   <a class="btn" id="send2" href="#" aria-disabled="true"><span style="position:relative">Send on WhatsApp</span></a>
 </div>
 
@@ -398,7 +412,10 @@ function boot(LISTING) {
   order.forEach(function (g) {
     var h = document.createElement('h3'); h.className = 'grp'; h.textContent = g; host.appendChild(h);
     var ul = document.createElement('ul'); ul.className = 'items'; host.appendChild(ul);
-    groups[g].forEach(function (p) {
+    groups[g].forEach(function (p) { mk(p, ul); });
+  });
+  function mk(p, ul) {
+    {
       var li = document.createElement('li'); li.dataset.k = p._k;
       var ph = document.createElement('span'); ph.className = 'ph';
       if (p.image) { var im = document.createElement('img'); im.src = p.image; im.alt = ''; im.loading = 'lazy'; im.width = 64; im.height = 64; ph.appendChild(im); }
@@ -410,9 +427,23 @@ function boot(LISTING) {
       if (!p.in_stock) { li.classList.add('is-out'); }
       li.appendChild(ph); li.appendChild(mid); li.appendChild(ctl);
       ul.appendChild(li);
-      p._li = li; p._ctl = ctl;
+      p._cs = (p._cs || []).concat([{ ctl: ctl, li: li }]);
+      return li;
+    }
+  }
+
+  // "Most ordered": only when the shop's real orders name 3 or more of these gifts (#mir-popular), never typed in
+  var popEl = document.getElementById('pop');
+  (function () {
+    var list = read('mir-popular'), seen = {}, picks = [];
+    (Array.isArray(list) ? list : []).forEach(function (n) {
+      var p = products.filter(function (x) { return x.in_stock && String(x.name).toLowerCase() === String(n).toLowerCase(); })[0];
+      if (p && !seen[p._k]) { seen[p._k] = 1; picks.push(p); }
     });
-  });
+    if (picks.length < 3) return;
+    picks.slice(0, 8).forEach(function (p) { mk(p, document.getElementById('poplist')); });
+    popEl.hidden = false;
+  })();
 
   // find a gift: one group at a time, or search across all of them
   var pills = document.getElementById('pills'), qin = document.getElementById('q'), curG = 0;
@@ -431,6 +462,7 @@ function boot(LISTING) {
     });
     [].forEach.call(pills.children, function (b, i) { b.setAttribute('aria-pressed', !term && i === curG ? 'true' : 'false'); });
     document.getElementById('none').hidden = any;
+    popEl.style.display = term ? 'none' : '';
   }
   order.forEach(function (g, i) {
     var b = document.createElement('button'); b.type = 'button'; b.textContent = g;
@@ -441,8 +473,9 @@ function boot(LISTING) {
   if (add) { products.forEach(function (p) { if (q[p._k] != null) curG = order.indexOf(p.group || 'More gifts'); }); }
   applyFilter();
 
-  function drawCtl(p) {
-    var ctl = p._ctl; ctl.textContent = '';
+  function drawCtl(p) { p._cs.forEach(function (c) { drawCtlIn(p, c.ctl, c.li); }); }
+  function drawCtlIn(p, ctl, li) {
+    ctl.textContent = '';
     if (!p.in_stock) return;
     if (p.price_kind === 'quote') {
       // priced on request: asked for on the business page, never added to this order
@@ -454,11 +487,11 @@ function boot(LISTING) {
       return;
     }
     var n = q[p._k] || 0;
-    p._li.classList.toggle('has', n > 0);
+    li.classList.toggle('has', n > 0);
     if (!n) {
       var a = document.createElement('button'); a.type = 'button'; a.className = 'add'; a.textContent = 'Add';
       a.setAttribute('aria-label', 'Add to order, ' + p.name);
-      a.onclick = function () { q[p._k] = 1; toast('Added: ' + p.name); update(); var m = p._ctl.querySelector('[data-plus]'); if (m) m.focus(); };
+      a.onclick = function () { q[p._k] = 1; toast('Added: ' + p.name); update(); var m = ctl.querySelector('[data-plus]'); if (m) m.focus(); };
       ctl.appendChild(a); return;
     }
     var box = document.createElement('div'); box.className = 'qty';
@@ -467,7 +500,7 @@ function boot(LISTING) {
     var plus = document.createElement('button'); plus.type = 'button'; plus.textContent = '+'; plus.dataset.plus = ''; plus.setAttribute('aria-label', 'One more ' + p.name);
     plus.disabled = n >= 20;
     minus.onclick = function () { q[p._k] = n - 1; if (!q[p._k]) delete q[p._k]; update(); };
-    plus.onclick = function () { q[p._k] = n + 1; update(); var m = p._ctl.querySelector('[data-plus]'); if (m) m.focus(); };
+    plus.onclick = function () { q[p._k] = n + 1; update(); var m = ctl.querySelector('[data-plus]'); if (m) m.focus(); };
     box.appendChild(minus); box.appendChild(out); box.appendChild(plus); ctl.appendChild(box);
   }
 
@@ -492,6 +525,8 @@ function boot(LISTING) {
     lines.textContent = '';
     var c = chosen();
     empty.hidden = c.length > 0;
+    document.getElementById('sum').classList.toggle('is-empty', !c.length);
+    document.getElementById('prog').hidden = !c.length;
     var rg = c.filter(function (p) { return (p.price_kind === 'from' || p.price_to != null && Number(p.price_to) > Number(p.price)); });
     document.getElementById('which').hidden = !rg.length;
     if (rg.length) document.getElementById('whichl').textContent = 'Which one? ' + rg.map(function (p) { return p.name + ' is ' + priceText(p); }).join('; ') + '. Write which one you want.';
@@ -510,7 +545,8 @@ function boot(LISTING) {
     var nn = c.reduce(function (a, p) { return a + q[p._k]; }, 0), cn = document.getElementById('ncount'); cn.textContent = nn; cn.hidden = !nn;
     document.getElementById('total').textContent = t;
     document.getElementById('dtotal').textContent = t;
-    check(false); paintBtn();
+    document.getElementById('dcount').textContent = nn + (nn === 1 ? ' item' : ' items');
+    check(false); paintBtn(); dockShow();
   }
 
   // what is still missing, said plainly; nothing is red until they try to send
@@ -534,7 +570,7 @@ function boot(LISTING) {
   function check(show) {
     var missing = stepMissing(stepNo, show);
     var ready = !missing.length;
-    ['send', 'send2'].forEach(function (id) { document.getElementById(id).setAttribute('aria-disabled', ready ? 'false' : 'true'); });
+    ['send', 'send2', 'next1'].forEach(function (id) { document.getElementById(id).setAttribute('aria-disabled', ready ? 'false' : 'true'); });
     why.textContent = ready ? '' : (show ? 'Still needed: ' + missing.join(', ') + '.' : '');
     return ready;
   }
@@ -542,17 +578,25 @@ function boot(LISTING) {
   function paintBtn() {
     var t = totals().text;
     var l = stepNo < 3 ? LAB[stepNo] : 'Send my order on WhatsApp, ' + t;
-    var l2 = stepNo < 3 ? 'Continue' : 'Send my order, ' + t;
+    var l2 = stepNo === 1 ? 'View basket' : stepNo < 3 ? 'Continue' : 'Send my order, ' + t;
     if (!sending) { document.getElementById('send').lastElementChild.textContent = l; document.getElementById('send2').lastElementChild.textContent = l2; }
     document.getElementById('back').hidden = stepNo === 1;
     document.querySelector('#send svg').style.display = stepNo < 3 ? 'none' : '';
   }
+  // the phone bar exists only once something is in the basket; on step 1 it steps aside while the summary is in view
+  function dockShow() {
+    var show = chosen().length > 0, aside = document.getElementById('sum');
+    if (show && stepNo === 1) { var r = aside.getBoundingClientRect(); if (r.top < innerHeight - 100 && r.bottom > 0) show = false; }
+    document.getElementById('dock').hidden = !show;
+  }
+  var sTick = 0;
+  window.addEventListener('scroll', function () { if (!sTick) sTick = requestAnimationFrame(function () { sTick = 0; dockShow(); }); }, { passive: true });
   function setStep(n, push) {
-    stepNo = n;
+    stepNo = n; document.body.classList.toggle('s1', n === 1);
     document.querySelectorAll('.step').forEach(function (e) { e.hidden = Number(e.dataset.step) !== n; });
     [].forEach.call(document.getElementById('prog').children, function (li, i) { li.className = i + 1 === n ? 'on' : i + 1 < n ? 'done' : ''; if (i + 1 === n) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
     if (push) { history.pushState({ s: n }, '', '#order-' + n); window.scrollTo({ top: 0 }); }
-    check(false); paintBtn();
+    check(false); paintBtn(); dockShow();
   }
   window.addEventListener('popstate', function () { var m = /order-(\d)/.exec(location.hash); setStep(m ? Number(m[1]) : 1, false); });
   document.getElementById('back').addEventListener('click', function () { history.back(); });
@@ -622,6 +666,7 @@ function boot(LISTING) {
   function send(e) {
     e.preventDefault();
     if (sending) return;
+    if (stepNo === 1 && e.currentTarget && e.currentTarget.id === 'send2' && chosen().length) { var sm = document.getElementById('sum'); sm.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     if (!check(true)) {
       var first = document.querySelector('.bad input, .bad textarea');
       if (first) first.focus();
@@ -647,6 +692,7 @@ function boot(LISTING) {
   }
   document.getElementById('send').addEventListener('click', send);
   document.getElementById('send2').addEventListener('click', send);
+  document.getElementById('next1').addEventListener('click', send);
 
   var when = document.getElementById('when');
   when.min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
