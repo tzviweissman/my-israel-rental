@@ -29,7 +29,7 @@
   /* --x is the scratch side's share of the screen, in percent: 50 at the
      open, 62 as the list piles up, 0 when their side wins. Both sides are
      full-size layers clipped at the divider, so nothing animates width. */
-  #split { --x: 50; --dim: 0; }
+  #split { --x: 0; --dim: 1; --gone: 1; --pot: 1; }
   #split [data-sc-stage] { overflow: hidden; background: var(--sc-canvas); }
   .side { position: absolute; inset: 0; }
   .side--scratch { background: color-mix(in oklab, var(--cold), var(--sc-canvas) calc(var(--dim) * 100%)); color: var(--cold-ink); clip-path: inset(0 calc(100% - var(--x) * 1%) 0 0); z-index: 2; }
@@ -102,9 +102,11 @@
   .hours { display: flex; align-items: baseline; gap: var(--sc-3); margin: 0; color: var(--sc-accent); }
   .hours .sc-nums { font-family: var(--sc-font-display); font-weight: 200; font-size: var(--s6); line-height: 0.85; font-variant-numeric: tabular-nums; }
   .hours span:last-child { font: 600 var(--sc-t-base)/1.3 var(--sc-font-text); color: var(--sc-ink-soft); text-transform: uppercase; letter-spacing: 0.14em; }
-  .peak h2 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.98; margin: var(--sc-5) 0 0; }
+  .peak h1 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.98; margin: var(--sc-5) 0 0; }
   .peak .seal-words { margin: var(--sc-5) 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-lg); }
   .peak .seal-words .script { font-size: var(--s4); }
+  .peak .btn { margin-top: var(--sc-5); }
+  .peak .proofline { align-items: flex-start; }
 
   /* the divider: labels for both sides, and the knob */
   .divider { position: absolute; top: 0; bottom: 0; left: calc(var(--x) * 1%); width: 0; z-index: 5; pointer-events: none; }
@@ -179,7 +181,7 @@
     .steps li { font-size: var(--sc-t-sm); }
     .steps b { font-size: var(--sc-t-lg); }
     .theirs-copy .btn { margin-top: var(--sc-4); }
-    .peak h2 { font-size: var(--s5); }
+    .peak h1 { font-size: var(--s5); }
     .hours .sc-nums { font-size: var(--s6); }
   }
 
@@ -224,9 +226,9 @@
     .pot-frame { top: 0; translate: none;
       -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%); mask-image: linear-gradient(180deg, #000 70%, transparent 100%); }
     .hours .sc-nums { font-size: var(--s6); }
-    .peak h2 { font-size: var(--sc-t-2xl); margin-top: var(--sc-3); }
+    .peak h1 { font-size: var(--sc-t-2xl); margin-top: var(--sc-3); }
     .peak .seal-words { margin-top: var(--sc-3); font-size: var(--sc-t-base); }
-    .peak { width: auto; right: var(--sc-gutter); bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+    .peak { width: auto; right: var(--sc-gutter); bottom: calc(1.6rem + env(safe-area-inset-bottom)); }  /* no bar under the opening since 15 Nov 2026 */
     .proof { grid-template-columns: 1fr; }
     .order { grid-template-columns: 1fr; gap: var(--sc-5); }
     .dial { width: min(15rem, 62vw); }
@@ -305,7 +307,7 @@
   .reassure svg { width: 18px; height: 18px; fill: none; stroke: var(--sc-accent); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
   .act { margin-top: var(--sc-3); }
   /* the opening's height is set by script after load; this holds the same space from the first paint so nothing below jumps */
-  #split { height: 700vh; }
+  #split { height: 300vh; }
   .pick { display: none; }
   .order-stage { padding-top: clamp(3.5rem, 8svh, 5rem); }
   .order h2 { font-size: var(--s5); white-space: nowrap; }

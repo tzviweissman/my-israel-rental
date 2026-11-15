@@ -1,7 +1,7 @@
 <!doctype html>
 <!--
-  L.A. Cholent by Rabbi Samuels. Split stage: cholent from scratch against
-  their kit, held side by side until their side wins the screen. See BRIEF.md.
+  L.A. Cholent by Rabbi Samuels. Opens on the slow cooker counting the hours on low
+  (the owner's choice, 15 Nov 2026; the from-scratch split is gone). See BRIEF.md.
   Every fact, price and quoted line is theirs (our record and their own
   flyers). Generated images are setting and props only: the from-scratch
   kitchen and a closed slow cooker. Engine untouched; the split, the knob,
@@ -42,84 +42,25 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
 
 <main id="top">
 
-  <!-- ONE split stage. Phases on act progress p:
-       (on the old 7-screen scale; frame() maps the 5.5-screen act onto it)
-       0.00-0.10 the two worlds at 50/50 (greet)
-       0.10-0.42 the chores pile up, the scratch side widens to 62%
-       0.42-0.52 authored silence: the scratch side drains, their one line
-       0.50-0.64 the collapse: the divider runs to the edge, the knob to Low
-       0.57-1.00 THE PEAK: the clip, the knob on the dial, 20 hours. The counter
-                 is on screen at 0 before it counts (rule: a running element
-                 is seen from its start); the line arrives only after the
-                 opening words have gone, never over them. -->
-  <section id="split" data-sc-act="pin" data-sc-span="5.5">
+  <!-- The opening (Tzvi, 15 Nov 2026: the owner likes the screen that counts the hours on low and wants it
+       first; the "Cholent from scratch" split before it is gone). The slow cooker fills the screen, its dial
+       turns from Off to Low, and the hours count to 20 over the first screen of scroll. -->
+  <section id="split" data-sc-act="pin" data-sc-span="3">
     <div data-sc-stage>
-
       <div class="side side--theirs">
-        <img class="theirs-photo" src="assets/tubs.webp" width="1600" height="1067"
-             alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps.">
         <div class="pot-frame" aria-hidden="true">
           <img src="assets/pot.webp" width="1920" height="1080" alt="">
           <video id="pot" poster="assets/pot.webp" muted playsinline preload="auto"></video>
           <svg class="knob knob-pot" id="knob-pot" viewBox="-30 -30 260 260"></svg>
         </div>
-        <div class="theirs-shade" aria-hidden="true"></div>
-
-        <div class="theirs-copy" data-sc-cue="0 0.547 0 0.04">
-          <div class="lockup">
-            <span class="script">Rabbi Samuels' Famous</span>
-            <h1>L<span class="dot">.</span>A<span class="dot">.</span> Cholent</h1>
-            <p class="tag">Our raw ingredients, ready for your crock pot. Add water and it cooks itself.</p>
-          </div>
-          <ol class="steps" data-sc-cue="0.204 0.509 0.04 0.03">
-            <li><b>1</b><span>Select your cholent size.</span></li>
-            <li><b>2</b><span>Place raw LA Cholent kit in your crock pot and add water.</span></li>
-            <li><b>3</b><span>Cook on low for about 20 hours.</span></li>
-          </ol>
+        <div class="peak">
+          <p class="hours"><span class="sc-nums" id="hours">0</span><span>hours on low,<br>while you do Shabbos</span></p>
+          <h1>Lid on. Low.<br>Go light the candles.</h1>
+          <p class="seal-words"><span class="script">Convenient and consistent.</span><br>A higher standard of flavor.</p>
           <a class="btn" href="order.html">Order now<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
           <ul class="proofline btn-facts"><li>From ₪100</li><li>Kosher, hechsher from Rabbi Weiner</li><li>Made in Jerusalem, delivered across Israel</li></ul>
         </div>
-
-        <p class="alone" data-sc-cue="0.55 0.72 0.02 0.03">Just throw our raw ingredients into your crock pot, add water, and enjoy.
-          <cite>Rabbi Samuels, L.A. Cholent</cite></p>
-
-        <div class="peak" data-sc-cue="0.725 1 0.04 0">
-          <p class="hours"><span class="sc-nums" id="hours">0</span><span>hours on low,<br>while you do Shabbos</span></p>
-          <h2>Lid on. Low.<br>Go light the candles.</h2>
-          <p class="seal-words"><span class="script">Convenient and consistent.</span><br>A higher standard of flavor.</p>
-        </div>
       </div>
-
-      <div class="side side--scratch" aria-label="Cholent from scratch">
-        <img class="scratch-photo" src="assets/scratch.webp" width="1248" height="1664"
-             alt="A cluttered kitchen counter late at night: barley soaking in a steel bowl, more spilling from a paper bag, raw marrow bones and beef on butcher paper, onion skins and a knife.">
-        <video class="scratch-photo" id="scratch-clip" poster="assets/scratch.webp" muted playsinline preload="auto" aria-hidden="true"></video>
-        <div class="scratch-wash" aria-hidden="true"></div>
-        <div class="scratch-copy">
-          <h2>Cholent<br>from scratch</h2>
-          <p class="lede">Thursday night, with hours of preparation still ahead.</p>
-          <ul class="chores">
-            <li>Buy the barley and the meat</li>
-            <li>Rinse the barley</li>
-            <li>Find good marrow bones</li>
-            <li>Chop the onions</li>
-            <li>Brown the meat</li>
-            <li>Layer it all in the pot</li>
-            <li>Balance the seasoning</li>
-            <li>Measure the water</li>
-            <li>Scrub the pots</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="divider" aria-hidden="true">
-        <div class="labels"><span>From scratch</span><span>L.A. Cholent</span></div>
-        <div class="knob-wrap">
-          <svg class="knob" id="knob" viewBox="-30 -30 260 260">
-          </svg>
-        </div>
-      </div>
-
     </div>
   </section>
 
@@ -243,13 +184,9 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
   var ease = function (t) { return 1 - Math.pow(1 - t, 3); };
 
   var POT_MARKS = [['OFF', -100], ['LOW', -35], ['HIGH', 35], ['WARM', 100]];
-  buildKnob(document.getElementById('knob'), POT_MARKS);
-  buildKnob(document.getElementById('knob-pot'), POT_MARKS);
-
-  /* ---- the split, driven off the act's own --sc-p ---------------------- */
+  var knobPot = document.getElementById('knob-pot');
+  buildKnob(knobPot, POT_MARKS);
   var act = document.getElementById('split');
-  var knob = document.getElementById('knob');
-  var chores = act.querySelectorAll('.chores li');
   var hours = document.getElementById('hours');
 
   // A clip scrubbed by the scroll: the playhead walks toward its target one
@@ -270,36 +207,27 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
     return c;
   }
   var pot = scrubber(document.getElementById('pot'), 'assets/pot.mp4', 'assets/pot-m.mp4');
-  var kitchen = scrubber(document.getElementById('scratch-clip'), 'assets/scratch.mp4', 'assets/scratch-m.mp4');
   var video = pot.el;
-  // The stand-in picture is the clip's own first frame, so nothing jumps when it starts. With motion off
-  // no clip plays, so the sharper upscaled still is shown instead.
-  if (reduce) document.querySelector('img.scratch-photo').src = 'assets/scratch-hd.webp';
 
-  var last = -1, knobScale = 1;
   var topbar = document.getElementById('topbar'), buybar = document.getElementById('buybar'), closeSec = document.getElementById('closing');
-  var peakEl = document.querySelector('.peak');
+  var peakEl = document.querySelector('.peak'), potFrame = document.querySelector('.pot-frame');
   function measurePeak() {
-    var f = document.querySelector('.pot-frame');
-    // their tubs fill the room between the divider and their words (rules 5b.3)
-    act.style.setProperty('--copy-h', document.querySelector('.theirs-copy').offsetHeight + 'px');
+    var f = potFrame;
     if (!phone.matches) { f.style.width = f.style.height = f.style.left = ''; return; }
-    // The space above the words and the order bar; the picture keeps 16:9,
+    // The space above the words; the picture keeps 16:9,
     // fills the screen's width, and puts the pot (70% across) in the middle
     // without ever leaving a gap at either edge.
-    var avail = Math.max(innerHeight * 0.3, innerHeight - (peakEl.offsetHeight + 88 + 24));
+    var avail = Math.max(innerHeight * 0.3, innerHeight - (peakEl.offsetHeight + 26 + 24));
     var W = Math.max(innerWidth, avail * 16 / 9);
     var left = Math.min(0, Math.max(innerWidth - W, innerWidth / 2 - 0.70 * W));
     f.style.width = W + 'px'; f.style.height = (W * 9 / 16) + 'px'; f.style.left = left + 'px';
   }
   measurePeak(); addEventListener('resize', measurePeak); document.fonts.ready.then(measurePeak);
-  var knobWrap = document.querySelector('.knob-wrap'), potFrame = document.querySelector('.pot-frame'), divider = document.querySelector('.divider');
   // Where the slow cooker's dial sits in the 16:9 frame (x, y, diameter, as
-  // fractions). The clip was steadied on the dial frame by frame (a circle
-  // finder on all 145 frames), so the dial never moves and neither does this.
-  var DIAL_AT = [0.6547, 0.7463, 0.0834];
-  function dialAt() { return DIAL_AT; }
-  var knobPot = document.getElementById('knob-pot');
+  // fractions). The clip was steadied on the dial frame by frame, so the dial never moves.
+  setCss(potFrame, '--dx', '0.6547'); setCss(potFrame, '--dy', '0.7463'); setCss(potFrame, '--dd', '0.0834'); setCss(potFrame, '--landed', 1);
+  // The top bar, with the name and the order button, is there from the first screen.
+  topbar.classList.add('is-on'); topbar.querySelectorAll('a, button').forEach(function (a) { a.tabIndex = 0; });
   // The phone bar steps aside while a price or button of the page sits in the strip it covers.
   var BAR_THINGS = '.room .price, .room .btn-line, .size-pick button, .price .now, .btn, .btn-line';
   function shown(el) {
@@ -318,81 +246,36 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
     });
   }
   function frame() {
-    // The act is 5.5 screens (Tzvi, 10 Nov 2026: the counting screen took 2.5 screens of scroll, at most 1).
-    // The phases below are written on the old 7-screen act; up to the collapse (0.64) they keep their pace,
-    // and everything after it, the clip and the 20 hours, is squeezed into the last screen.
-    var pn = parseFloat(act.style.getPropertyValue('--sc-p')) || 0, K = 7 / 5.5, B = 0.64 * K;
-    var p = pn <= B ? pn / K : 0.64 + (pn - B) * 0.36 / (1 - B);
-    if (true) {
-      last = p;
-      var grow = ease(span(p, 0.10, 0.42));
-      var col = ease(span(p, 0.50, 0.64));
-      // A phone stacks the halves, and their half needs the room for its copy.
-      var base = phone.matches ? 38 : 50, more = phone.matches ? 8 : 12;
-      setCss(act, '--x', ((base + more * grow) * (1 - col)).toFixed(3));
-      setCss(act, '--dim', span(p, 0.42, 0.50).toFixed(3));
-      setCss(act, '--gone', span(p, 0.56, 0.64).toFixed(3));
-      setCss(act, '--pot', span(p, 0.55, 0.62).toFixed(3));
-      // The knob creeps from Off toward Low while the argument runs, and
-      // clicks onto Low once their side has the screen.
-      var on = col > 0.97;
-      var ang = on ? -35 : -100 + 50 * span(p, 0.04, 0.6);
-      setCss(knob, '--a', ang + 'deg');
-      knob.classList.toggle('is-on', on);
-      // The knob rides the divider, then at the collapse it flies onto the
-      // slow cooker's own dial in the frame and shrinks to its size: the
-      // dial on the page IS the pot's dial. Its face fades so only the
-      // grip and the printed settings sit on the steel.
-      var land = ease(span(p, 0.52, 0.66));
-      var kw = knobWrap.getBoundingClientRect(), fr = potFrame.getBoundingClientRect();
-      var home = divider.getBoundingClientRect();
-      var hx = phone.matches ? innerWidth - 20 - (kw.width / knobScale) / 2 : home.left;
-      // Measured from the divider every frame, so the knob stays on the dial
-      // while the whole stage slides in and out, not only while it is pinned.
-      var hy = phone.matches ? home.top : home.top + home.height / 2;
-      var ct = pot.ready && video.duration ? video.currentTime / video.duration : 0;
-      var D = dialAt(ct);
-      setCss(potFrame, '--dx', D[0].toFixed(4));
-      setCss(potFrame, '--dy', D[1].toFixed(4));
-      setCss(potFrame, '--dd', D[2].toFixed(4));
-      var tx = fr.left + fr.width * D[0], ty = fr.top + fr.height * D[1];
-      var tScale = (fr.width * D[2]) / (kw.width / knobScale || 1) / 0.48;
-      knobScale = 1 + (tScale - 1) * land;
-      setCss(knobWrap, 'transform', 'translate(' + ((tx - hx) * land).toFixed(1) + 'px,' + ((ty - hy) * land).toFixed(1) + 'px) scale(' + knobScale.toFixed(3) + ')');
-      setCss(knob, '--face', (1 - land).toFixed(3));
-      // Landed: hand over to the knob inside the frame, which scrolls with it.
-      var landed = land > 0.995 ? 1 : 0;
-      // On a phone the knob would sit on the chores list, so it arrives in
-      // the pause, when the list has gone, and flies to the pot from there.
-      var show = phone.matches ? span(p, 0.42, 0.48) : 1;
-      setCss(knobWrap, 'opacity', (1 - landed) * show);
-      setCss(potFrame, '--landed', landed);
-      setCss(knobPot, '--a', ang + 'deg');
-      knobPot.classList.toggle('is-on', on);
-      chores.forEach(function (li, i) { li.classList.toggle('on', p > 0.11 + i * 0.033); });
-      var h = span(p, 0.64, 0.92);
-      var hv = String(Math.round(20 * h)); if (hours.textContent !== hv) hours.textContent = hv;   // a new text every frame meant a layout every frame
-      if (pot.ready) pot.target = span(p, 0.54, 1) * (video.duration || 0);
-      if (kitchen.ready) kitchen.target = span(p, 0, 0.42) * (kitchen.el.duration || 0);
-    }
-    pot.step(); kitchen.step();
-    // The phone bar: on once the opening button has faded, off over the close.
+    // The act is 3 screens tall, 2 of scroll: the dial clicks onto Low, then the hours count to 20 within the
+    // first screen (Tzvi, 10 Nov 2026: the counting took 2.5 screens, at most 1), then the words hold.
+    queued = false;
+    var p = reduce ? 1 : (parseFloat(act.style.getPropertyValue('--sc-p')) || 0);
+    var on = p >= 0.1;
+    setCss(knobPot, '--a', (on ? -35 : -100 + 65 * span(p, 0, 0.1)) + 'deg');
+    knobPot.classList.toggle('is-on', on);
+    var hv = String(Math.round(20 * ease(span(p, 0.1, 0.5)))); if (hours.textContent !== hv) hours.textContent = hv;   // a new text every frame meant a layout every frame
+    if (pot.ready) pot.target = span(p, 0, 0.5) * (video.duration || 0);
+    pot.step();
+    // The phone bar: on once the opening (with its own Order now) has scrolled away, off over the close.
     var orderTop = closeSec.getBoundingClientRect().top;
-    var barOn = phone.matches && p > 0.43 && orderTop > innerHeight * 0.6 && !underBar();
+    var barOn = phone.matches && act.getBoundingClientRect().bottom < innerHeight && orderTop > innerHeight * 0.6 && !underBar();
     if (barOn !== buybar.classList.contains('is-on')) {
       buybar.classList.toggle('is-on', barOn);
       buybar.setAttribute('aria-hidden', barOn ? 'false' : 'true');
       buybar.querySelector('a').tabIndex = barOn ? 0 : -1;
     }
-    var tOn = p > 0.56;
-    if (tOn !== topbar.classList.contains('is-on')) {
-      topbar.classList.toggle('is-on', tOn);
-      topbar.querySelectorAll('a, button').forEach(function (a) { a.tabIndex = tOn ? 0 : -1; });
-      if (!tOn && window.siteMenu) window.siteMenu(false);
-    }
-    requestAnimationFrame(frame);
+    // drawn only while something moves: the clip still walking to its frame keeps it going (check-speed BUSY)
+    // and so does the engine easing --sc-p toward the scroll after the wheel stops
+    if (p !== lastP || (pot.ready && Math.abs(video.currentTime - pot.target) > 0.02)) kick();
+    lastP = p;
   }
-  requestAnimationFrame(frame);
+  var queued = false, lastP = -1;
+  function kick() { if (!queued) { queued = true; requestAnimationFrame(frame); } }
+  // the engine writes the act's progress after the scroll: draw when it does, and on scroll for the bar
+  new MutationObserver(kick).observe(act, { attributes: true, attributeFilter: ['style'] });
+  addEventListener('scroll', kick, { passive: true }); addEventListener('resize', kick);
+  video.addEventListener('loadeddata', kick); video.addEventListener('seeked', kick);
+  kick();
 }());
 </script>
 </body>

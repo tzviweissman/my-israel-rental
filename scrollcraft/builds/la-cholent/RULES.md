@@ -24,7 +24,7 @@ R5.1 pass: read aloud as Rabbi Samuels
 R5.2 pass: calm voice, no jokes
 R5.3 pass: "Kosher, hechsher from Rabbi Weiner", "Made in Jerusalem, delivered across Israel"
 R5.4 pass: facts script found no they, them or their in visible text
-R5b.2 pass: the one main button reads "Order now" on every page and goes to the order page (order.html), because it opens the order page, not a message (Tzvi, 10 Nov 2026: "it says message to order but it takes to the shop page"): the bar, the opening, the three size cards (order.html?size=N preselects the size), the footer button and link, the phone bar, the next-step rows on How it works and Reviews; on the order page the button under the dial says "Order Large, ₪180", and the form button says what it does, "Send my order on WhatsApp"
+R5b.2 pass: the one main button reads "Order now" on every page and goes to the order page (order.html), because it opens the order page, not a message (Tzvi, 10 Nov 2026: "it says message to order but it takes to the shop page"): the bar, the three size cards (order.html?size=N preselects the size), the footer button and link, the phone bar, the next-step rows on How it works and Reviews; on the order page the button under the dial says "Order Large, ₪180", and the form button says what it does, "Send my order on WhatsApp"
 R5b.8 pass: the closing line is "A higher standard of flavor." then the button
 R3.11 pass: Home: the pitch, the film, the sizes with prices, three customer messages; How it works: the kit and its steps, the occasions; Reviews: all ten messages; Kosher and delivery: the facts and Rabbi Samuels' line; Order: the dial, then the order form
 R3o.4 pass: since 11 Nov 2026 the owner wants their email as a way to reach them: lacholentisrael@gmail.com (from their own flyers) beside WhatsApp in every footer and phone menu
@@ -34,24 +34,24 @@ R6.1 pass: the lead block is the product and the price; sizes, kosher, delivery 
 R4.1 pass: nothing missing is faked; the Heimish recipe marked coming soon on the flyer is left out
 
 ## 2. Opening
-R3g.13 pass: first screen at 1440x900 and 390x844: their tubs photo, the headline L.A. Cholent beside the opposite world "Cholent from scratch", one line, the price and kosher line under the one button; the steps arrive later on scroll
-R3b.1 pass: the opening says what it is (cholent kit), where (Jerusalem, all Israel), kosher, and the button
-R3b.2 pass: "From ₪100" and "Kosher, hechsher from Rabbi Weiner" sit under the button in the opening; the kosher sentence appears in the opening proofline and the facts rows
-R3b.3 pass: one solid gold button per screen; card buttons are outline; the bar button is solid only after the opening
-R3h.1 pass: check-site OPENING passed; the split, the kitchen clip and the pot film play as you scroll
+R3g.13 pass: first screen at 1440x900 and 390x844 (the owner's choice, Tzvi 15 Nov 2026: she likes the screen that counts the hours on low and wants it first; the from-scratch split and the tubs opening are gone): the slow cooker, the hours counter, "Lid on. Low. Go light the candles." and her two lines; the bar with the name L.A. Cholent and Order now from the first screen, and on a phone the bar with From ₪100 and Order now
+R3b.1 pass: the opening shows a slow cooker, 20 hours on low for Shabbos, the name in the top bar and the Order now button (the owner's choice, Tzvi 15 Nov 2026: she likes the screen that counts the hours on low and wants it first; the from-scratch split and the tubs opening are gone); what the kit is, kosher and delivery follow in the sizes right after
+R3b.2 pass: "From ₪100", "Kosher, hechsher from Rabbi Weiner" and "Made in Jerusalem, delivered across Israel" sit under the Order now button in the opening (on a phone too; the phone bar with From ₪100 comes in once the opening has scrolled away), 15 Nov 2026
+R3b.3 pass: one solid gold button per screen: the bar's Order now on the opening; card buttons are outline
+R3h.1 pass: the opening is the pot film played by the scroll: the dial turns from Off to Low and the hours count to 20 within the first screen (the owner's choice, Tzvi 15 Nov 2026: she likes the screen that counts the hours on low and wants it first; the from-scratch split and the tubs opening are gone)
 R3n.1 pass: their four tubs fill their half of the first screen at 1440x900; on a phone their half is the lower half
 R3n.2 pass: the crock-pot dial that rotates from Off to Low and then becomes the size picker; only a crock-pot cholent could have it
 R3n.3 pass: the dial changes the size, who it feeds, the price and the order button words (check-motion: 2 choices tapped, smooth)
 R3n.4 pass: first screens put next to Qissa and Best Bean Best Cup in docs/inspo/awwwards-anatomy-2026-10-22/food; ours is not plainly weaker
-R3n.5 pass: you land between a messy scratch kitchen and their tubs, scroll, and the pot clicks to Low
+R3n.5 pass: you land on the slow cooker; scroll and its dial clicks to Low and the hours count to 20
 R3g.15 pass: the generated stills are scenery and props only (kitchen, closed slow cooker, table); the only cholent shown is their own photograph; check-fits found nothing over 1.35x
-R3h.2 pass: frames at 0, 20, 40, 55, 70, 85 and 100 percent of the opening at three sizes: scratch kitchen, then their side wins to the dark, then their pot and the counter, every step true
+R3h.2 pass: frames at 0, half, one, two and three screens on an iPhone (WebKit) and at 1440x900, 15 Nov 2026: the pot, the dial on Low, 0 to 20 hours, then the sizes; every step true
 R3h.3 pass: the pot film and the kitchen clip fill the screen at 1440x900 and 1280x650, crisp, not in a column; on a phone the film shows full width
 R3h.5 pass: the chapter lines (Lid on. Low. Go light the candles.) sit at the left edge on the dark ground, small beside the pot, not over the action
-R3h.7 pass: looked at the frames either side of the kitchen-to-pot join (40 to 55 percent): the scratch side dims to a dark kitchen (never plain black), then the pot appears; no jump
+R3h.7 n/a: one clip in the opening since 15 Nov 2026 (the kitchen-to-pot join is gone)
 R3h.8 pass: the section after the film changes boldly: a bright cream shop of three colour rooms
 R3h.11 pass (Tzvi's decision): brightness.py re-run 25 Oct: pot.mp4 and pot-m.mp4 whole 9 middle 14, scratch.mp4 and scratch-m.mp4 whole 30 middle 29, under the rule's 22 and 33; Tzvi chose to keep the candlelit films dark (22 Oct, docs/site-reviews/2026-10-22/decisions.md point 2, confirmed again 25 Oct, decision 4); a gamma of 2 had made the pot film milky grey; the table film and its stills were brightened on 10 Nov 2026 (Tzvi: "this picture looks too dark and dreary"; ffmpeg gamma 1.75 with a warm shift, no new generation), brightness.py now 37, bright enough; the pot and kitchen films stay as he chose
-R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 7.0 screens on both, 60 fps (median 16.7 ms, 0.7% of frames over 50 ms on a laptop); their own ingredients and slow cooker on their own dark kitchen, never on another cholent photo; tubs, pot and words whole; the first screen's tubs and pot load first (the dark films are Tzvi's decision, R3h.11)
+R3h.20 pass: 15 Nov 2026: the pinned opening is 3 screens tall (the SLOW minimum), drawn only while the scroll moves it (check-speed BUSY), the hours count within the first (Tzvi, 10 Nov: at most 1 screen); one scrubbed clip and no split left to repaint; the pot and words whole on both sizes
 R3h.13 pass: the pot film is one clip showing the lid, steam and the dial together; frames viewed at 20 hours show no heap or vanish
 R3h.14 pass: the pot stays in frame through the whole film at 1440x900, 1280x650 and 390x844
 R3h.17 pass: the page does not use words-and-film turns
@@ -71,7 +71,7 @@ R3p.5 pass: CONCEPT.md touch line: the crock-pot dial that turns to the size; it
 R3q.1 pass: node scripts/check-concept.mjs reports ready (25 Oct), every part including Not alike
 R5a.7 pass: one signature (the dial), one peak (the pot clicks to Low); the ending resolves on the order
 R9.1 pass: the signature uses their own tubs and a closed slow cooker
-R3f.2 pass: effect budget: one signature (the dial), accents (the split, the pot film, the facts rows); frames captured at three sizes
+R3f.2 pass: effect budget: one signature (the dial), one accent (the pot film and its counter), the facts rows
 R3m.1 pass: data-mir-gallery block present and hidden until photos exist
 R3m.3 pass: hours, areas and FAQ stay in fixed hidden blocks until the owner sends them
 R3k.1 pass: five pages (Tzvi, 6 Nov 2026: "split all 4 into separate pages", and 10 Nov 2026: the menu items are pages, not scrolls): Home (the film, sizes, three messages), How it works (kit, occasions), Reviews, Kosher and delivery, and Order (the dial and the order form); old addresses /business/<slug>#order and #details forward to the Order page by a short script on Home, and index.html#sizes still lands on the sizes. No contact page: the record has one WhatsApp number and no address or hours; their email (from their flyers, wanted by the owner 11 Nov 2026), which the footer shows on every page
@@ -79,7 +79,7 @@ R3k.2 pass: the bar is the same markup on every page: the name to Home, Home, Ho
 R3k.4 pass: shared site.css and site.js; section classes are not reused for shared state
 R8a.1 pass: no 21st components or external script hosts; only the Google Fonts stylesheet
 R3b.4 pass: facts rows carry the page
-R3c.3 pass: the kosher worry is answered in the opening proofline and the facts rows
+R3c.3 pass: the kosher worry is answered in the facts rows, the sizes and the footer
 R3c.8 n/a: the owner has not told us what happens after the message (asked in message-to-owner.md question 5)
 R3e.10 pass: each card has name, feeds, what is in it and the price large, built as photo, text, price row so the three cards line up (looked at at 1440x900 and 390x844); check-site ALIGN passed
 R3e.14 pass: six text sizes as CSS variables on :root (--s1 13px, --s2 15px, --s3 body, --s4 titles and prices, --s5 section headings, --s6 the opening name, the hours and the big price); the eight --sc-t-* sizes of the scroll engine are folded into them and every font-size in the page reads one of them; computed sizes counted at 1440x900, 1280x650 and 390x844: six each. Cost: section headings and card prices top out smaller than before (3.6rem against 4.6 and 3.4), and the price beside the dial is one size on a phone
@@ -88,7 +88,7 @@ R3s.4 pass: check-site ALIGN passed
 R3s.6 pass: check-site ALIGN passed; Add buttons are all the same outline pill
 R3s.7 pass: buttons in sentence case, pale dividers, body line height 1.5 or more
 R3s.9 pass: one meaning per colour: gold is the action, plum and steel are product rooms
-R3s.12 n/a: owner must send a photo of Rabbi Samuels or his kitchen; the real tubs come right after the opening
+R3s.12 n/a: owner must send a photo of Rabbi Samuels or his kitchen; the real tubs come in the sizes right after the opening
 R3s.14 n/a: the owner has given no counts; only prices are shown big
 R3s.11 n/a: owner must tell us why a kit costs what it costs (asked in message-to-owner.md, question 4)
 R5b.6 pass: no scroll cues, no 01/06 counters, no label above each section
@@ -104,7 +104,7 @@ R8.1 pass: the three size cards show one product hero shot of their own tub in t
 R8.6 pass: the size cards are product hero shots edited from their own tub photo: one sealed tub on a slate block, a raw marrow bone beside it (the label says 1 to 2 marrow bones; beans, barley and a potato were taken out 11 Nov 2026, as their classic recipe has no beans or potatoes), one colour story per card, one warm light, still; label read line by line against their photo. Since 11 Nov 2026 the Large card shows their own Large tub (their photo src/owner-2026-11-11/large-tub.jpg, with the slow cooker liner and "Add 5 cups of water", gen/tub_large.py, label read line by line), and all three shots are widened to 21:9 in code (the wall and table carried out sideways, never cropped, rule 3c.12) so the wide, short cards show the whole slate and bone
 R8.2 pass: their own photograph plus generated scenery stills made earlier; the tub hero shots are edited from their tub photo (Higgsfield nano_banana_2); the steel version's label was put back from the gold one in code (the model wrote 'Stir wall')
 R3p.7 pass: the three sizes are shown the same way and the dial buttons show the three the same way
-R3h.12 pass: the product looks the same everywhere: the same photograph of the four tubs in the opening, the three cards and the how-it-works band
+R3h.12 pass: the product looks the same everywhere: the same tub in the three size cards and the how-it-works band
 R3h.10 pass: choosing a size on the dial or a card changes its name, feeds, price and button words (check-motion: 2 choices tapped, smooth); one photograph for all sizes (see R8.1)
 R3g.14 n/a: owner must send a matching photo set; their tubs photo and the generated scenery stills have different grades: listed in the report
 R3o.1 pass: no food in motion; the only cholent shown is their own photograph; the scratch kitchen is scenery
@@ -113,11 +113,11 @@ R3o.3 pass: the tubs look true on the cream and colour grounds
 R3o.6 pass: one photo of the tubs from src; the flyers are not shown as photos
 R8.3 pass: generated media is scenery and their own tub; no person, no premises, no text but their own label; Tzvi approved 22 Oct; the owner sees them before anything goes live
 R8.4 pass: the clips (kitchen scratch, pot, table) are generated clips in the earlier build; reduced motion shows the still
-R3c.13 pass: check-fits found nothing cut; check-site found nothing cut; framing (26 Oct 2026): the kitchen photo is no wider than the scratch side gets (a square at most), and on a phone the tubs sit whole at their own shape: check-fits framing passes at all six sizes
+R3c.13 pass: check-fits found nothing cut; the pot frame keeps 16:9 and fills the width on a phone with the pot in the middle
 R3c.14 n/a: there are no cut-outs on the page
-R5b.3 pass: words on pictures sit on a darkened photo with white or gold letters (the opening) and cards put words on solid colour; looked at in the 1440x900 and 390x844 screenshots; no frosted glass; on a phone the kitchen starts under its words instead of under a wash, and the tubs stand whole at full light above their words, no shade over them (28 Oct 2026; check-photo-clear: 4% covered, was 89%)
+R5b.3 pass: the opening words sit on the dark lower part of the pot film in white and gold; cards put words on solid colour; no frosted glass; 15 Nov 2026 the tubs photo and kitchen left the opening
 R3e.8 pass: readable.mjs hung on this scroll page after 300 s again, so the earlier contrast script over every text on a solid ground (sizes, steps, occasions, facts, order; no word under 4.5:1, or 3:1 for large) is carried over and was not re-run after the type sizes changed (colours did not change); the opening and film words were looked at in the frames at 1440x900
-R3s.24 pass: photos are light and sized, every img has width and height, the clip has a poster; check-site MEDIA reports four opening texts hidden with motion off, but that is a limit of the check: they are visible at the top with motion off (opacity 1, checked) and are cued out on purpose when scrolling hands the stage to the pot
+R3s.24 pass: photos are light and sized, every img has width and height, the clip has a poster; with motion off the still pot and the words show, the hours at 20
 R3p.6 pass: check-fits passed at 1280x650, 1440x900, 1536x753, 1920x1080, 390x844 and 360x640
 R3o.5 pass: check-site GLYPH found no unrendered character
 
@@ -172,17 +172,17 @@ R3e.17 pass: the page has no carousel or bottom sheet
 R3e.18 pass: the clips are scrubbed by scroll or loop inside a picture, not an ambient background
 R3a.2 pass: viewed the frames at the middle of the kitchen-to-pot transition at 1440x900 every 100 to 200px: the quiet moment keeps the dimmed kitchen on the left instead of a black half, and no step looks unfinished
 R3a.3 pass: the dial on the pot is placed on the clip frame by measurement (BRIEF round 2) and the frames at 70 to 100 percent show it on the pot dial at three sizes
-R3a.4 pass: the opening is designed to fit 1280x650 (frames viewed at that size); the order section is not held
+R3a.4 pass: the opening fits 1280x650 (the pot frame covers the screen, the words sit at its foot); the order section is not held
 R3a.5 pass: reduced motion shows stills (the page checks matchMedia); no parallax on phones
 R3s.2 pass: check-site SHIFT and check-motion passed (no jump, no flash)
 R3s.1 pass: check-site STATE passed
-R3s.8 pass: the opening button sits in the gold pill on a dark photo
+R3s.8 pass: the opening's button is in the bar on a solid ground
 R3s.10 pass: the product picture is there as the name is read
 R3i.3 pass: the hours counter on the pot clip is the true 20 hours of cooking
 R3s.21 pass: check-site BROKEN found no script errors, console errors, 404s or dead links
 
 ## 8. Phone
-R3b.6 pass: phone buy bar pinned with "From ₪100" and the button once the opening button is gone, stepping aside while a price or button is in its strip
+R3b.6 pass: phone buy bar pinned with "From ₪100" and the button once the opening, which has its own Order now, has scrolled away, stepping aside while a price or button is in its strip, off over the close
 R3f.7 pass: the bar fits at 360 wide (check-fits passed)
 R3a.6 pass: the phone bar steps aside while any price or button is in the strip it covers; stepped the scroll in 100px stops on touch-emulated 390x844 and 360x640 over the whole page: no price or button was ever under the bar
 R3s.22 pass: check-site TAP passed
@@ -234,3 +234,9 @@ R8.9 pass: the owner's 11 Nov photo is of the Extra Large tub (Tzvi, 12 Nov 2026
 R3s.30 pass: since 12 Nov 2026 the size cards are one calm look: three white cards on the cream ground, the same light sand picture behind each tub, ink words, ink buttons and ink saving badges on all three (all one colour, the first of the two allowed ways)
 
 <!-- 15 Nov 2026, shop layout (Tzvi approved it for every custom site): on order.html the Order now button is now Add, which turns into - n + on the size and on each extra (meat, marrow bones by the pound); the basket starts empty, the form (Your order) waits for the first item, an empty basket is one line, and the phone basket bar ("2 items · ₪X · View basket") shows only once something is in it. Kinds row, search, sort and Most ordered skipped: five products. Prices, option picks, discount code, saving lines, order saving and the WhatsApp fallback are unchanged. -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->

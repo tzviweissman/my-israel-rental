@@ -108,8 +108,18 @@ const CHECK_ONLY = process.argv.includes('--check');
   });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const base = `http://127.0.0.1:${server.address().port}/`;
-  const pages = fs.readdirSync(SRC).filter((f) => f.endsWith('.html') && !SKIP_HTML.test(f)).map((f) => base + f);
-  const run = (script) => new Promise((r) => { let out = ''; const c = spawn(process.execPath, [path.join(ROOT, 'scripts', script), ...pages], { cwd: ROOT });
+  const allPages = fs.readdirSync(SRC).filter((f) => f.endsWith('.html') && !SKIP_HTML.test(f));
+  // Only what changed is checked again (Tzvi, 15 Nov 2026: "only check what is applicable like whatever was changed or
+  // updated"; a total marker on Michal Simkin's booking page failed newer timing checks on her untouched home page).
+  // A page of a site already live is checked when its own file, or a file it loads (style, script, picture), differs
+  // from the last commit, which is the last publish (the commit check keeps the two the same). A new site, or
+  // --all, checks every page. The order check and the rules list still run on every publish.
+  const { changedPages } = await import('./changed-pages.mjs');
+  const changed = isNew || process.argv.includes('--all') ? allPages : changedPages(ROOT, SRC, allPages);
+  for (const f of allPages) if (!changed.includes(f)) console.log(`${f}: unchanged since it went live, its checks are not run again (--all runs them)`);
+  const pages = changed.map((f) => base + f);
+  const sitePages = allPages.map((f) => base + f);
+  const run = (script) => new Promise((r) => { let out = ''; const c = spawn(process.execPath, [path.join(ROOT, 'scripts', script), ...(script === 'check-order-data.mjs' ? sitePages : pages)], { cwd: ROOT });
     c.stdout.on('data', (d) => { out += d; }); c.stderr.on('data', (d) => { out += d; }); c.on('exit', (code) => r({ code, out })); });
   // one after another (check-motion times frames, so it must not share the machine), never stopping early
   const results = [];
@@ -155,6 +165,7 @@ const CHECK_ONLY = process.argv.includes('--check');
     ['check-form-fields.mjs', 'has form fields that overlap or make an iPhone zoom in'],
     ['check-order-data.mjs', 'sends orders the dashboard would refuse or save differently from what the customer saw']]) {
     if (rule && newer.has(rule)) { console.log(`${script}: not run, rule ${rule} was added after this site was made`); continue; }
+    if (!pages.length && script !== 'check-order-data.mjs') continue;
     let r = await run(script);
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }
     results.push({ why, ...r });

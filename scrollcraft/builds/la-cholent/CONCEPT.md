@@ -4,6 +4,8 @@ Category: food-shop
 
 Reworked 22 Oct 2026 to rule 3t. The candlelit split opening and the crock-pot dial are kept. Everything after the opening used to be dark picture screens (Moto Card's look); it is now a bright shop: one colour room per size with servings and price, the three steps, the occasions, the facts, then the dial order on the same light ground. See BRIEF.md for the facts and the first design.
 
+15 Nov 2026 (the owner's choice, through Tzvi): the split opening is gone. The page now opens on the slow cooker counting the hours on low, the screen she liked; the tubs come in the sizes right after.
+
 ## Ideas
 - **A colour room per size** (docs/inspo/awwwards-anatomy-2026-10-22/food/bestbean-colour-per-product.webp): each coffee is a full-height panel on its own colour with name and a plus button. For them: Medium, Large and Kiddush are three rooms (gold, plum, steel) with feeds, price and an Order button that turns the dial to that size. Replaced 12 Nov 2026 by one calm look (Tzvi, after Gremier's shop): three white cards on the cream ground, one light sand picture behind each tub, so only the tub and the numbers change.
 - **The kit as the product on a flat colour, facts in small type** (docs/inspo/awwwards-anatomy-2026-10-22/food/agrumea.webp): Agrumea shows the jar with ingredients and a short taste line in small print. For them: their four tubs on a calm ground with the three flyer steps and "each tub yields about 3 to 4 pounds" as the small print.
@@ -16,11 +18,11 @@ Reworked 22 Oct 2026 to rule 3t. The candlelit split opening and the crock-pot d
 The shop rooms straight after the opening, with the dial as the one control at the end. A visitor sees the price and "Message to order" on the first screen, the three sizes and prices as soon as the film ends, and can turn the dial from any card. It is theirs because the dial, the tubs and every price and line are theirs.
 
 ## Wow gate
-1. Strongest real photo, big: their four tubs fill their half of the first screen.
+1. Strongest real photo, big: their tub fills each size card right after the opening (since 15 Nov 2026 the first screen is the slow cooker, the owner's choice).
 2. Signature moment from their own thing: the pot clicks to Low and twenty hours pass; at the end the same knob is the size picker.
 3. The choice changes the page: the size changes the dial, who it feeds, the price and the words on the order button.
 4. Side by side: Best Bean Best Cup and Agrumea (pictures above); ours is the same colour rooms and small print, with their tubs. Sources (recorded 25 Oct): closest Mobbin reference https://mobbin.com/sites/sections/a935259d-7fd8-4c7d-ab87-089e2cee1e5c; Inspo docs/inspo/awwwards-anatomy-2026-10-22/food/bestbean-colour-per-product.webp.
-5. One sentence: you land between a messy scratch kitchen and their tubs, scroll and the cholent cooks itself, then turn a crock-pot knob to pick a size.
+5. One sentence: you land on a slow cooker, scroll and its dial clicks to Low while the hours count to 20, then pick a size.
 
 ## Effects
 - button: gold pill with the dial icon, outline pill on the cards, from the Qissa gold pill (docs/inspo/awwwards-anatomy-2026-10-22/food/qissa-menu-list.webp)
