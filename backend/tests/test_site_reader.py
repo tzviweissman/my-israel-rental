@@ -53,3 +53,13 @@ def test_each_product_gets_only_its_own_photos():
     assert _ld_products(page, "https://s.com/p") == [{"name": "Family Board", "photos": ["https://s.com/img/f1.jpg", "https://cdn.x.com/f2.jpg"]}]
     lab = _labelled_photos('<img src="/i/c.jpg" alt="Classic"><h3>Classic Board</h3>180<img src="/logo.png" class="logo">', "https://s.com/")
     assert len(lab) == 1 and "Classic Board 180" in lab[0][1]
+
+
+def test_shop_list_photos_stay_on_their_product():
+    """A product with no real name (an entity like &nbsp;) is dropped without moving the next product's photos."""
+    from routes.marketplace.product_extract import _clean_catalog
+    rows = [{"name": "&nbsp;", "price": "1", "photos": ["https://c.com/a.jpg"]},
+            {"name": "Cheese Board", "price": "180", "photos": ["https://c.com/x1.jpg"]},
+            {"name": "Fruit Board", "price": "150", "photos": ["https://c.com/x2.jpg"]}]
+    assert [(r["name"], r["photos"]) for r in _clean_catalog(rows, "https://s.com/")] == [
+        ("Cheese Board", ["https://c.com/x1.jpg"]), ("Fruit Board", ["https://c.com/x2.jpg"])]
