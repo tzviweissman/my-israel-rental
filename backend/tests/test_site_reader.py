@@ -38,3 +38,18 @@ def test_no_pictures_is_none_not_the_page():
 def test_site_in_a_bio():
     assert _links_in("Fresh bread daily. Order: noabakery.co.il or wa.me/97250 · instagram.com/x") == ["https://noabakery.co.il"]
     assert _links_in("linktr.ee/noabakery") == ["https://linktr.ee/noabakery"]
+
+
+def test_each_product_gets_only_its_own_photos():
+    """Tzvi, 15 Nov 2026: the right photos on the right product, and all of them."""
+    from routes.marketplace.product_extract import _assign_photos, _labelled_photos, _ld_products, _same_name
+    items = [{"name": "A"}, {"name": "B"}, {"name": "C"}]
+    _assign_photos(items, [[1, 2, 3], [3, 4], ["5", 99, None]], [f"u{i}" for i in range(1, 6)])
+    # several photos for one product; a photo two products claim goes to neither; numbers not on the list ignored
+    assert [i["photos"] for i in items] == [["u1", "u2"], ["u4"], ["u5"]]
+    assert _same_name("Classic Board", "The Classic Board - serves 6") and not _same_name("Kid", "Kids board")
+    page = ('<script type="application/ld+json">{"@graph":[{"@type":"Product","name":"Family Board",'
+            '"image":["/img/f1.jpg","https://cdn.x.com/f2.jpg"]}]}</script>')
+    assert _ld_products(page, "https://s.com/p") == [{"name": "Family Board", "photos": ["https://s.com/img/f1.jpg", "https://cdn.x.com/f2.jpg"]}]
+    lab = _labelled_photos('<img src="/i/c.jpg" alt="Classic"><h3>Classic Board</h3>180<img src="/logo.png" class="logo">', "https://s.com/")
+    assert len(lab) == 1 and "Classic Board 180" in lab[0][1]

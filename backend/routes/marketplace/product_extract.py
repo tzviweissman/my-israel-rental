@@ -48,6 +48,9 @@ MAX_PRODUCTS = 30
 # Room for a website's home page and a few of its own pages (12 Nov 2026).
 MAX_TEXT = 16000
 MAX_PAGES = 6
+PHOTOS_PER_ITEM = 8
+PHOTO_COPIES = 120  # photos copied in one read, all products together
+SITE_TEXT = 24000  # a website and its pages: the products are often past the first few thousand characters
 
 _SYSTEM = """You read a small business's own price list and return its products as JSON.
 
@@ -273,13 +276,31 @@ async def extract_business(
         images.append((file.content_type or "image/jpeg", content))
     if not text and not images:
         raise HTTPException(status_code=400, detail="Paste your ad or add a photo of your flyer first.")
+    return await _read_ad(text, images, user)
 
+
+# A website's photos, numbered, each with its alt text and the words beside it (Tzvi, 15 Nov 2026: "the
+# correct pics for the right product, and all of a product's pics on that one product").
+_PHOTOS_RULE = """
+
+The input ends with PHOTOS: the website's photos, numbered, each with its alt text, file name and the words
+printed beside it. Give each item an extra key "photos": an array of the numbers of EVERY photo that is of
+THAT item (a product often has several: the front, a close-up, the open box), judged by the alt text, the
+file name and the words beside it. [] when none is clearly that item. Never a logo, a banner, a photo of
+several items together, or a photo you are not sure of: a missing photo is fine, a wrong one is not."""
+
+
+async def _read_ad(text: str, images: list, user: dict, photos: Optional[list[str]] = None,
+                   max_items: int = 15) -> dict:
+    """The advert reader. With `photos` (website photo addresses, numbered from 1 in the text), each item
+    comes back with "photos": the addresses of its own photos, never one another item also claimed."""
     from utils.llm import LlmChat, UserMessage
     from .shared import CATEGORIES
     slugs = {c["slug"] for c in CATEGORIES}
     chat = LlmChat(
         api_key=ANTHROPIC_API_KEY, session_id=str(uuid.uuid4()),
-        system_message=_BUSINESS_SYSTEM.format(categories=_category_menu()),
+        system_message=_BUSINESS_SYSTEM.format(categories=_category_menu()).replace("at most 15", f"at most {max_items}")
+        + (_PHOTOS_RULE if photos else ""),
     )
     chat.with_model("anthropic", "claude-sonnet-4-6")
     try:
@@ -305,13 +326,16 @@ async def extract_business(
         return str(data.get(key) or "").strip()[:n]
 
     # The same row rules as the price-list reader, then the one extra field.
-    items = _rows(json.dumps({"products": (data.get("items") or [])[:15]}))
-    for row, src in zip(items, [i for i in (data.get("items") or []) if isinstance(i, dict) and str(i.get("name") or "").strip()]):
+    items = _rows(json.dumps({"products": (data.get("items") or [])[:max_items]}))
+    srcs = [i for i in (data.get("items") or []) if isinstance(i, dict) and str(i.get("name") or "").strip()]
+    for row, src in zip(items, srcs):
         try:
             d = int(src.get("duration_minutes") or 0)
         except (TypeError, ValueError):
             d = 0
         row["duration_minutes"] = d if 5 <= d <= 600 else None
+    if photos:
+        _assign_photos(items, [src.get("photos") for src in srcs], photos)
     gig_type = s("gig_type", 20)
     # The name already has its own box; a title that repeats it says nothing more.
     title, name = re.sub(r"\s*[–—]\s*", ", ", s("title", 70)), s("business_name", 80)
@@ -344,6 +368,28 @@ async def extract_business(
     out["logo_box"] = box
     logger.info("[business-extract] user=%s items=%d image=%s logo=%s", user["user_id"], len(items), bool(images), bool(box))
     return out
+
+
+def _assign_photos(items: list[dict], claims: list, photos: list[str]) -> None:
+    """Each item's "photos" from the numbers the reader gave it. Only numbers from our own list (the model never
+    hands us an address to fetch), and a photo two items both claim goes to neither: it is not clearly either."""
+    nums: list[list[int]] = []
+    for c in claims + [None] * (len(items) - len(claims)):
+        got = []
+        for n in (c if isinstance(c, list) else []):
+            try:
+                n = int(n)
+            except (TypeError, ValueError):
+                continue
+            if 1 <= n <= len(photos) and n not in got:
+                got.append(n)
+        nums.append(got)
+    count: dict[int, int] = {}
+    for got in nums:
+        for n in got:
+            count[n] = count.get(n, 0) + 1
+    for row, got in zip(items, nums):
+        row["photos"] = [photos[n - 1] for n in got if count[n] == 1][:PHOTOS_PER_ITEM]
 
 
 def _category_menu() -> str:
@@ -632,14 +678,12 @@ def _same_site_links(page: str, base: str) -> list[str]:
     return out[:SUBPAGES]
 
 
-def _pictures(page: str, base: str) -> dict[str, Any]:
-    """The business's own pictures on a page: its logo (a logo image, else the large site icon), the picture it
-    shows when shared (og:image), and photos from the page. Addresses only; nothing is downloaded here."""
+def _ok_picture(src: str, base: str) -> str:
+    """The picture's full address, or "" when it is the site's furniture rather than a photo."""
     import html as html_mod
     from urllib.parse import urljoin, urlparse
-
-    def ok(src: str) -> str:
-        if not (src or "").strip():
+    if True:
+        if not (src or "").strip() or "{" in src:
             return ""
         url = urljoin(base, html_mod.unescape(src.strip()))
         u = urlparse(url)
@@ -651,6 +695,13 @@ def _pictures(page: str, base: str) -> dict[str, Any]:
                      r"visa|mastercard|whatsapp|facebook|instagram|tiktok|youtube", url, re.I):
             return ""
         return url
+
+
+def _pictures(page: str, base: str) -> dict[str, Any]:
+    """The business's own pictures on a page: its logo (a logo image, else the large site icon), the picture it
+    shows when shared (og:image), and photos from the page. Addresses only; nothing is downloaded here."""
+    def ok(src: str) -> str:
+        return _ok_picture(src, base)
 
     logo = ""
     for m in re.finditer(r"<img\b[^>]*>", page, re.I):
@@ -676,6 +727,122 @@ def _pictures(page: str, base: str) -> dict[str, Any]:
         if url not in photos:
             photos.append(url)
     return {"logo": logo, "cover": cover, "photos": photos[:12]}
+
+
+def _labelled_photos(page: str, base: str) -> list[tuple[str, str]]:
+    """Every photo on the page with what says which product it is: its alt text, its file name and the words
+    printed just after it (a shop's card puts the name and price under the photo)."""
+    import html as html_mod
+    from urllib.parse import urlparse
+    out: list[tuple[str, str]] = []
+    for m in re.finditer(r"<img\b[^>]*>", page, re.I):
+        tag = m.group(0)
+        src = re.search(r"\b(?:data-src|data-lazy-src|src)=[\"']([^\"']+)", tag, re.I)
+        url = _ok_picture(src.group(1), base) if src else ""
+        w = re.search(r"\bwidth=[\"']?(\d+)", tag, re.I)
+        if not url or (w and int(w.group(1)) < 200) or re.search(r"logo|icon", tag, re.I) or url in [u for u, _ in out]:
+            continue
+        alt = re.search(r"\balt=[\"']([^\"']*)", tag, re.I)
+        after = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", page[m.end():m.end() + 1500])
+        after = " ".join(html_mod.unescape(re.sub(r"(?s)<[^>]+>", " ", after)).split())[:90]
+        name = urlparse(url).path.rsplit("/", 1)[-1][:60]
+        out.append((url, f"alt: {html_mod.unescape(alt.group(1)).strip()[:80] if alt else ''} | file: {name} | beside it: {after}"))
+    return out
+
+
+def _ld_products(page: str, base: str) -> list[dict[str, Any]]:
+    """Products the page itself declares (schema.org Product, which most shop builders write on each product's
+    page): the name and that product's own photos, exactly as the shop set them."""
+    found: list[dict[str, Any]] = []
+
+    def walk(x: Any) -> None:
+        if isinstance(x, list):
+            for y in x:
+                walk(y)
+        elif isinstance(x, dict):
+            kind = x.get("@type")
+            if (kind == "Product" or (isinstance(kind, list) and "Product" in kind)) and x.get("name"):
+                imgs = x.get("image") or []
+                imgs = [imgs] if isinstance(imgs, (str, dict)) else imgs
+                urls = [_ok_picture(i.get("url", "") if isinstance(i, dict) else str(i), base) for i in imgs]
+                found.append({"name": str(x["name"]).strip(), "photos": [u for u in urls if u]})
+            for y in x.values():
+                if isinstance(y, (list, dict)):
+                    walk(y)
+    for m in re.finditer(r"<script[^>]+application/ld\+json[^>]*>(.*?)</script>", page, re.I | re.S):
+        try:
+            walk(json.loads(m.group(1).strip()))
+        except (json.JSONDecodeError, ValueError):
+            continue
+    return found
+
+
+async def _fetch_json(url: str) -> Any:
+    """A public JSON address (a shop's own product list), or None. Same public-host check as _fetch."""
+    import httpx
+
+    from utils.helpers import _is_public_ical_url
+    if not _is_public_ical_url(url):
+        return None
+    try:
+        async with httpx.AsyncClient(timeout=10, follow_redirects=False,
+                                     headers={"User-Agent": "Mozilla/5.0 (compatible; MyIsraelRentalBot/1.0)"}) as http:
+            r = await http.get(url)
+        if r.status_code != 200:
+            return None
+        return r.json()
+    except Exception:  # noqa: BLE001 - not a shop that publishes one
+        return None
+
+
+async def _shop_catalog(base: str) -> list[dict[str, Any]]:
+    """The whole product list a Shopify or WooCommerce shop publishes, with each product's own photos: exact,
+    so nothing has to be matched. [] for any other site."""
+    from urllib.parse import urlparse
+    root = f"{urlparse(base).scheme}://{urlparse(base).netloc}"
+    rows: list[dict[str, Any]] = []
+    data = await _fetch_json(root + "/products.json?limit=250")
+    if isinstance(data, dict) and isinstance(data.get("products"), list):
+        cart = await _fetch_json(root + "/cart.js")
+        cur = str(cart.get("currency") or "ILS").upper() if isinstance(cart, dict) else "ILS"
+        for p in data["products"]:
+            v = (p.get("variants") or [{}])[0]
+            rows.append({"name": p.get("title"), "price": v.get("price"), "currency": cur,
+                         "description": p.get("body_html") or "",
+                         "photos": [i.get("src") for i in p.get("images") or [] if i.get("src")]})
+        return _clean_catalog(rows, base)
+    data = await _fetch_json(root + "/wp-json/wc/store/v1/products?per_page=100")
+    if isinstance(data, list):
+        for p in data:
+            pr = p.get("prices") or {}
+            try:
+                price = int(pr.get("price")) / (10 ** int(pr.get("currency_minor_unit") or 0))
+            except (TypeError, ValueError):
+                price = None
+            rows.append({"name": p.get("name"), "price": price, "currency": pr.get("currency_code") or "ILS",
+                         "description": p.get("short_description") or p.get("description") or "",
+                         "photos": [i.get("src") for i in p.get("images") or [] if i.get("src")]})
+    return _clean_catalog(rows, base)
+
+
+def _clean_catalog(rows: list[dict[str, Any]], base: str) -> list[dict[str, Any]]:
+    """A shop's own list as form rows: the same row rules as the readers, each with its own photos."""
+    import html as html_mod
+    rows = [r for r in rows if isinstance(r.get("name"), str) and r["name"].strip()]
+    out = _rows(json.dumps({"products": [{
+        **r, "name": html_mod.unescape(r["name"]),
+        "description": " ".join(html_mod.unescape(re.sub(r"(?s)<[^>]+>", " ", str(r.get("description") or ""))).split()),
+    } for r in rows]}))
+    for row, r in zip(out, rows):
+        row["photos"] = [u for u in (_ok_picture(x, base) for x in r["photos"]) if u][:PHOTOS_PER_ITEM]
+        row["duration_minutes"] = None
+    return out
+
+
+def _same_name(a: str, b: str) -> bool:
+    """The same product named twice ("Classic Board" and "The Classic Board - 6 people")."""
+    a, b = (" ".join(re.sub(r"[^\w\s]", " ", x.lower()).split()) for x in (a, b))
+    return bool(a and b) and (a == b or (min(len(a), len(b)) >= 5 and (a in b or b in a)))
 
 
 _NOT_A_SITE = re.compile(r"(^|\.)(instagram|facebook|fb|tiktok|whatsapp|wa|google|apple|cdninstagram|fbcdn|meta|twitter|x|"
@@ -709,6 +876,14 @@ async def read_socials(request: Request, payload: dict = Body(...), user=Depends
     texts: list[str] = []
     read: list[str] = []
     pics: dict[str, Any] = {"logo": "", "cover": "", "photos": [], "profile": ""}
+    labelled: list[tuple[str, str]] = []  # every photo with what says whose it is, for matching to products
+    declared: list[dict[str, Any]] = []  # products the pages declare, with their own photos
+    catalog: list[dict[str, Any]] = []  # a shop's whole published product list
+
+    def learn(page: str, base: str) -> None:
+        take(_pictures(page, base))
+        labelled.extend(p for p in _labelled_photos(page, base) if p[0] not in [u for u, _ in labelled])
+        declared.extend(_ld_products(page, base))
 
     def take(found: dict[str, Any]) -> None:
         pics["logo"] = pics["logo"] or found.get("logo") or ""
@@ -725,17 +900,19 @@ async def read_socials(request: Request, payload: dict = Body(...), user=Depends
         words = _words(page)
         if len(words) > 40:
             texts.append(f"From their {label} ({end}):\n{words}")
-        take(_pictures(page, end))
+        learn(page, end)
+        if not catalog:
+            catalog.extend(await _shop_catalog(end))
         for sub in _same_site_links(page, end):
             try:
                 sp, send = await _fetch(sub)
             except Exception:  # noqa: BLE001 - one page that fails must not stop the rest
                 continue
             if sp:
-                w = _words(sp, 3000)
+                w = _words(sp, 6000)
                 if len(w) > 40:
                     texts.append(f"From their {label}, page {send}:\n{w}")
-                take(_pictures(sp, send))
+                learn(sp, send)
         return len(texts) > before
 
     named_sites: list[str] = []
@@ -771,8 +948,13 @@ async def read_socials(request: Request, payload: dict = Body(...), user=Depends
     pictures = {"logo": pics["logo"] or pics["profile"] or None, "cover": pics["cover"] or None, "photos": pics["photos"][:12]}
     if not texts:
         return {"links": links, "read": [], "fields": None, "pictures": pictures}
+    if not ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=503, detail="This is not switched on here. Fill in the form by hand for now.")
+    labelled = labelled[:80]
+    listing = ("\n\nPHOTOS:\n" + "\n".join(f"{i}. {lab}" for i, (_, lab) in enumerate(labelled, 1))) if labelled else ""
     try:
-        fields = await extract_business(request, text="\n\n".join(texts)[:MAX_TEXT], file=None, user=user)
+        fields = await _read_ad("\n\n".join(texts)[:SITE_TEXT] + listing, [], user,
+                                photos=[u for u, _ in labelled] or None, max_items=MAX_PRODUCTS)
     except HTTPException as exc:
         # Read, but nothing in it for the form (a bare bio): the links are still kept.
         if exc.status_code != 502:
@@ -783,7 +965,31 @@ async def read_socials(request: Request, payload: dict = Body(...), user=Depends
         m = re.match(r"\s*([^\n(•|]{2,80}?)\s*(?:\(@|•|\||\n)", texts[0].split(":\n", 1)[-1])
         name = m.group(1).strip() if m else ""
         fields = {"business_name": name} if name and name.lower() not in ("instagram", "facebook", "tiktok") else None
+    if fields is not None:
+        await _product_photos(fields, catalog, declared)
     return {"links": links, "read": read, "fields": fields, "pictures": pictures}
+
+
+async def _product_photos(fields: dict, catalog: list[dict[str, Any]], declared: list[dict[str, Any]]) -> None:
+    """Each product's own photos, all of them, copied into our storage (Tzvi, 15 Nov 2026). Most exact first:
+    a shop's own product list replaces the read items outright (every product, its own photos, nothing guessed);
+    a product the site declares on its own page gives that product its photos; the reader's match is the rest."""
+    import asyncio
+
+    from utils.cloud_storage import mirror_url_to_cloudinary
+    items = fields.get("items") or []
+    if catalog and fields.get("gig_type") == "store":
+        items = fields["items"] = catalog[:MAX_PRODUCTS]
+    for row in items:
+        exact = next((d for d in declared if d["photos"] and _same_name(d["name"], row["name"])), None)
+        if exact and not catalog:
+            row["photos"] = exact["photos"][:PHOTOS_PER_ITEM]
+    wanted = list(dict.fromkeys(u for row in items for u in row.get("photos") or []))[:PHOTO_COPIES]
+    copies = await asyncio.gather(*[mirror_url_to_cloudinary(u, folder="myisraelrental/from-sites") for u in wanted])
+    ours = {u: (c or {}).get("url") for u, c in zip(wanted, copies)}
+    for row in items:
+        row["images"] = [ours[u] for u in row.pop("photos", None) or [] if ours.get(u)]
+        row["image"] = (row["images"] or [None])[0]
 
 
 @router.post("/socials/pictures")

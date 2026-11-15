@@ -630,13 +630,15 @@ const CreateGig = () => {
       if (type === 'store') {
         next.tiers = [];
         next.products = items.length
-          ? items.map((r) => ({ ...emptyProduct(r.currency), name: r.name, price: price(r), description: r.description || '' }))
+          // Each product's own photos, all of them, as the site reader matched them (Tzvi, 15 Nov 2026).
+          ? items.map((r) => ({ ...emptyProduct(r.currency), name: r.name, price: price(r), description: r.description || '', images: r.images || [] }))
           : (f.products.length ? f.products : [emptyProduct()]);
       } else {
         next.products = [];
         next.tiers = items.length
           ? items.map((r) => ({
             ...emptyTierFor(type, r.currency), name: r.name, price: price(r), description: r.description || '',
+            ...((r.images || []).length ? { images: r.images } : {}),
             ...(type === 'appointment' && r.duration_minutes ? { duration_minutes: r.duration_minutes } : {}),
           }))
           : (f.tiers.length ? f.tiers : [emptyTierFor(type)]);
