@@ -777,6 +777,26 @@
    "status": "built"
   },
   {
+   "id": "R3aa.31",
+   "rule": "The brief's Enough line: each cause's amount is enough for its effect",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "scripts/hooks/film-gate.mjs",
+   "confirmed_by": "LOOK: the brief's Enough line",
+   "status": "built"
+  },
+  {
+   "id": "R3aa.32",
+   "rule": "The whole film read in order by someone who did not write the prompts before encoding",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "scrollcraft/starter/clipchain.py story and encode",
+   "confirmed_by": "RUN: clipchain.py encode",
+   "status": "built"
+  },
+  {
    "id": "R3bb.1",
    "rule": "Pick at least three small touches from 3bb, named in CONCEPT.md",
    "how": [

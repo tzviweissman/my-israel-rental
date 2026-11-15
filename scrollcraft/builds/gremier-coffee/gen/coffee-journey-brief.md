@@ -98,3 +98,22 @@ Tzvi 14 Nov: "it shows the coffee dropping twice and theres no whirlpool". K3t k
 - Cost: two clips at 12 credits (get_cost, 15 Nov), 24.
 
 Approved by Tzvi: 15 Nov 2026 ("Yes, remake both", after the two numbered steps for phone slides 3 and 4)
+
+
+## Remake of Grind and Steep, laptop and phone (15 Nov)
+
+Tzvi 15 Nov: "the ground coffee falls twice and the amount of coffee that falls doesnt seem enough to turn all that water to coffee". Looked at 2 frames a second: in K2 and K2t the grounds reach the bottom of the picture, then the camera moves and a second stream starts at the top; one thin trickle meets a whole sea. Steps, as offered and approved:
+1. Starts on the same picture as now: the grinder in the middle, with GRIND around it.
+2. A thick, heavy column of grounds pours out, as wide as the grinder's mouth, the whole time with no gaps.
+3. The camera travels down with it as one unbroken stream from top to bottom, so it never looks like it starts again.
+4. The sea rises into view; the column hits it and a big dark-brown cloud spreads under the surface to both sides.
+5. Next slide: the pour stops within the first second; nothing more falls.
+6. The brown spreads through all the water until the whole sea is deep coffee brown.
+7. The middle begins to swirl and ends on the same whirlpool picture the Pour slide starts from (K3-end.png, K3t-end.png), so Pour and Serve are kept.
+- Objects: the grounds come from the grinder and end in the sea (they dissolve into the brown); the brown comes from the grounds; nothing else enters.
+- How it really happens: a big dose of grounds poured in one go sinks and clouds the water; colour spreads by mixing; turning water forms a whirlpool.
+- Key moment: the torrent landing and the brown cloud reaching both sides, the join between Grind and Steep.
+- Cost: four clips at 12 credits (get_cost, 15 Nov), 48.
+
+Approved by Tzvi: 15 Nov 2026 ("Yes, remake them", after the seven numbered steps for the Grind and Steep slides)
+- Enough: one torrent of grounds as wide as the burrs, pouring the whole Grind clip without a gap, lands as a brown cloud that already reaches both sides of the picture (o2.png, o2t.png) before Steep turns the whole sea brown; a sprinkle or a thin trickle could not brown a sea (rule 3aa.31).

@@ -136,10 +136,12 @@ R3aa.23 | No floor the model slipped in under anything that keeps falling (clipc
 R3aa.24 | chain.json has a phone_plan, decided before any clip | 3aa.24 | LOOK: chain.json; n/a with no film when:film
 R3aa.25 | Plain links in the site's ink and underlined; link targets clear of the menu bar | 3aa.25 | LOOK: a text link and a jump link at laptop and phone size
 R3aa.26 | Tzvi was asked how phones get the film before any paid generation; his words quoted | 3aa.26 | LOOK: the brief's Phones asked line and phone_plan; n/a with no film when:film
-R3aa.27 | Each clip's last frame looked at, an end_seen line per step; a step that did not happen remade | 3aa.27 | LOOK: chain.json end_seen lines; n/a with no film when:film
+R3aa.27 | Each clip lands on a planned end still made first (or an end_free reason); its last frame looked at, an end_seen line per step; a step that did not happen remade | 3aa.27 | LOOK: chain.json end_seen lines; n/a with no film when:film
 R3aa.28 | Each step says what still moves in its start and when it stops (carries) | 3aa.28 | LOOK: chain.json carries lines; n/a with no film when:film
 R3aa.29 | The opening's first event plays on arrival (opening_slides intro, or 0 when already still) | 3aa.29 | RUN: check-iphone (INTRO, FROZEN); n/a with no film when:film
 R3aa.30 | Every page passes check-iphone: no script error, nothing wider than the screen, the film moves | 3aa.30 | RUN: check-iphone
+R3aa.31 | The brief has an Enough line: each cause's amount and why it is enough for its effect | 3aa.31 | LOOK: the brief's Enough line; n/a with no film when:film
+R3aa.32 | The whole film read in order by someone who did not write the prompts; story_seen matches the clips | 3aa.32 | RUN: clipchain.py encode (refuses without it); n/a with no film when:film
 R3bb.1 | A new site picks at least three small touches from 3bb that fit its category and story, named on a "- touches:" line in CONCEPT.md, not the same three as the site built before; each shows only true facts | 3bb | LOOK: CONCEPT.md touches line and each touch on the site
 R3h.1 | The home page opens on a full-screen picture or film (at least 70% picture) and it is an event from their own thing (a film, or an event built in code), proposed with the first build, never after | 3h.1, 3n | script: site OPENING (home page) plus LOOK to confirm it is an event, not a drift
 R3n.1 | The owner's strongest real photo fills at least half the first screen on a laptop and on a phone, not a small card or cut-out shape | 3n.1 | LOOK: first screen at 1440x900 and 390x844

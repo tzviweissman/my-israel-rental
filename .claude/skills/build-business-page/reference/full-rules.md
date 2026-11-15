@@ -2406,9 +2406,11 @@ part where one exists, so it is there without being remembered.
     smoothly, passed by eye, and never turned the sea brown or made the whirlpool. Before the next clip is paid for, the
     last one's final frame (`<name>-last.png`) is looked at full size and the step gets an `end_seen` line saying what it
     shows against its `frame` line ("the whole brown whirlpool in the middle, edge to edge"). If the step did not happen,
-    that clip is remade, never patched by the next. A step whose end is the story's key moment (the whirlpool, the full
-    glass) also gets a planned end still (`end` in chain.json), so the model has to land there. `clipchain.py make`
-    refuses the next clip without the line; `make --dry` runs every check and stops before paying.
+    that clip is remade, never patched by the next. Every new clip also lands on a planned end still (`end` in
+    chain.json), made first and looked at full size, so the model has to land there (Tzvi, 15 Nov 2026: "if you had a
+    reference to create off of would that help prevent mistakes?"; the Grind clip remade without one lost the ocean and
+    became a thin sheet of water on cream). Only a step that may truly end anywhere says why in an `end_free` line.
+    `clipchain.py make` refuses the next clip without these; `make --dry` runs every check and stops before paying.
 28. **What is moving at a join stops in its own clip** (same day: slide 2 ended mid-pour, so the next clip poured on and the
     drop was seen twice). A chained clip starts on the last frame of the one before, so whatever is still moving there (a
     falling stream, a turning whirl) carries on unless the step says when it stops. Each new step has a `carries` line:
@@ -2426,6 +2428,21 @@ part where one exists, so it is there without being remembered.
     iPhone 13 and fails on a script error, a page wider than the screen, an opening with no `data-intro`, or a first clip
     that should play on arrival and has not moved after 4 s. It runs in check-build and publish-page. Tried on all 25
     builds, 15 Nov 2026: only Bake Away fails (16 px wider than the screen), shown to Tzvi, not changed.
+
+31. **The cause is big enough for what it does** (Tzvi, 15 Nov 2026, Gremier: "the amount of coffee that falls doesnt
+    seem enough to turn all that water to coffee"). 3h.18 lists where each object comes from and ends; it never asked how
+    much of it there is, so one thin trickle of grounds turned a whole sea brown and every check passed. The brief has a
+    line `Enough: <each cause, its amount, and why that much does what the step shows>` ("a torrent as wide as the
+    burrs, pouring the whole clip, and a brown cloud reaching both sides before the sea turns"), and the prompt says the
+    amount in those words. The film gate refuses a paid clip until the brief has it.
+32. **The whole film is watched as one story before it reaches the page** (same day: the grounds still fell twice, over
+    the join from Grind to Cold, after every clip had passed on its own). Each check looked at one clip; nobody read the
+    film in order the way a visitor sees it. `clipchain.py story` puts every clip in order on one sheet
+    (`gen/world/story.jpg`, laptop and phone rows, 2 frames a second); someone who did not write the prompts (a Sonnet
+    reviewer) reads it beside the approved numbered steps and writes what happens: each event, in order, how many
+    times. Every step's event happens once, nothing falls or starts again over a join, and each cause is enough for its
+    effect (31). The answer goes in chain.json as `story_seen` with the clips' fingerprint, so a remade clip needs a new
+    reading; `clipchain.py encode` refuses until it matches.
 
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
 

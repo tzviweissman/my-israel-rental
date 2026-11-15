@@ -13,7 +13,10 @@ slide push, never by a fade.
     python ../../starter/clipchain.py make --dry  every check, then stops before the first paid clip
     Each step not yet made has "carries" (what still moves in its start and when it stops, or "nothing"; 3aa.28); before
     the next clip is paid for, the last one made has "end_seen" (what its last frame shows, looked at; 3aa.27).
-    python ../../starter/clipchain.py encode    assets/film/s<n>-d.mp4 / -m.mp4 and posters, every frame a keyframe
+    python ../../starter/clipchain.py story     gen/world/story.jpg: every clip in order, laptop and phone, 2 frames a
+                                                second, and the clips' fingerprint for the "story_seen" line (3aa.32)
+    python ../../starter/clipchain.py encode    assets/film/s<n>-d.mp4 / -m.mp4 and posters, every frame a keyframe;
+                                                refused until "story_seen" matches the clips as they are now (3aa.32)
 
 Run from the build folder with the backend venv python. Paid generation also needs gen/*-brief.md (film-gate)."""
 import json
@@ -89,6 +92,16 @@ def make():
     bad = [st['name'] for st in SPEC['steps'] if not (W / f"{st['name']}.mp4").exists() and 'before' not in str(st.get('start_seen', '')).lower()]
     if bad:
         sys.exit(f'chain.json steps {bad}: start_seen does not say what the start shows "before" the action of its step (3aa.22)')
+    # every new clip lands on a planned end picture (rules 3aa.27; Gremier 15 Nov: the Grind clip remade without one lost the
+    # ocean, a thin sheet of water on cream; with o2.png, made first and looked at, it had to land there)
+    bad = [st['name'] for st in SPEC['steps'] if not (W / f"{st['name']}.mp4").exists()
+           and not st.get('end') and len(str(st.get('end_free', '')).split()) < 8]
+    if bad:
+        sys.exit(f'chain.json steps {bad} have no "end": make the picture the clip must land on first (a still, looked at full size), '
+                 'or say in an "end_free" line why this clip may end anywhere (3aa.27)')
+    missing = [st['end'] for st in SPEC['steps'] if not (W / f"{st['name']}.mp4").exists() and st.get('end') and not Path(st['end']).exists()]
+    if missing:
+        sys.exit(f'end pictures not made yet: {missing} (3aa.27)')
     # what is still moving carries on into the next clip (rules 3aa.28; Gremier 14 Nov: the grounds kept falling through the
     # whole phone Steep clip, so the drop was seen twice): each new step says what is moving in its start and by when it stops
     bad = [st['name'] for st in SPEC['steps'] if not (W / f"{st['name']}.mp4").exists()
@@ -144,7 +157,50 @@ def make():
     print('chain made')
 
 
+def clips():
+    """Every clip the film plays, in order: each step's clip, then its phone clip."""
+    out = []
+    for step in SPEC['steps']:
+        out.append(W / f"{step['name']}.mp4")
+        if step.get('phone'): out.append(Path(step['phone']))
+    return out
+
+
+def fingerprint():
+    import hashlib
+    return hashlib.sha1('|'.join(f'{c.name}:{c.stat().st_size}' for c in clips()).encode()).hexdigest()[:12]
+
+
+def story():
+    """The whole film as one story (rules 3aa.32; Gremier 15 Nov: each clip passed alone, and the grounds still fell twice
+    across a join and a thin trickle browned a whole sea). One row per clip, in the order the visitor sees them, 2 frames
+    a second, laptop rows then phone rows; read by someone who did not write the prompts."""
+    # the laptop film in order, then the phone film in order
+    rows, order = [], [W / f"{s['name']}.mp4" for s in SPEC['steps']] + [Path(s['phone']) for s in SPEC['steps'] if s.get('phone')]
+    for c in order:
+        r = W / f'story-{c.stem}.jpg'
+        sh('ffmpeg', '-v', 'error', '-y', '-i', str(c), '-vf', 'fps=2,scale=-2:220,tile=13x1', '-frames:v', '1', str(r))
+        rows.append(r)
+    from PIL import Image
+    ims = [Image.open(r) for r in rows]
+    sheet = Image.new('RGB', (max(i.width for i in ims), sum(i.height + 8 for i in ims)), 'white')
+    y = 0
+    for i in ims:
+        sheet.paste(i, (0, y)); y += i.height + 8
+    sheet.save(W / 'story.jpg', quality=82)
+    for r in rows: r.unlink()
+    print(f'{W / "story.jpg"}: rows in order', ', '.join(c.stem for c in order))
+    print(f'fingerprint {fingerprint()}: a reviewer who did not write the prompts reads the sheet beside the approved steps')
+    print('and writes "story_seen": {"clips": "<fingerprint>", "by": "<who>", "seen": "<each event, in order, how many times>"}')
+
+
 def encode():
+    # the whole film watched as one story before it reaches the page (rules 3aa.32)
+    st = SPEC.get('story_seen') or {}
+    if st.get('clips') != fingerprint() or len(str(st.get('seen', '')).split()) < 20 or not str(st.get('by', '')).strip():
+        sys.exit(f'chain.json has no "story_seen" for the clips as they are now (fingerprint {fingerprint()}): run clipchain.py story, '
+                 'have someone who did not write the prompts read gen/world/story.jpg beside the approved steps, every event once '
+                 'and in order, the cause big enough for what it does, and write what they saw (3aa.32)')
     for n, step in enumerate(SPEC['steps'], 1):
         clip = W / f"{step['name']}.mp4"
         d, m = OUT / f's{n}-d.mp4', OUT / f's{n}-m.mp4'
@@ -169,4 +225,4 @@ def encode():
     print('encoded', len(SPEC['steps']), 'clips', '+ end still' if SPEC.get('end_still') else '')
 
 
-{'make': make, 'encode': encode}[sys.argv[1]]()
+{'make': make, 'story': story, 'encode': encode}[sys.argv[1]]()

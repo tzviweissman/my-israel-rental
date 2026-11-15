@@ -63,6 +63,31 @@ SHOTS['J3t'] = (['J3t-layout.png', 'J3-last.png'], "Real photograph. The same ta
                 "pale table, the same warm wall and low sunlight from the left; a thin stream of cold brew falls into it from the top of the frame. "
                 "The whole glass large in the frame, nothing cut off. Real materials, opaque coffee, never glassy, no glow. No text, no logos." + TALL)
 
+# the Grind clip's planned end (15 Nov 2026, remake: one thick torrent, enough to brown the sea; rules 3aa.27, 3aa.31):
+# the same ocean as o1, the torrent landing and a brown cloud reaching both sides
+SHOTS['o2'] = (['o1.png', 'K2-last.png'],
+               "Real photograph, 16:9, soft warm daylight from the left. Exactly the same wavy ocean, camera height, light and plain "
+               "warm cream (#F6EEE3) ground above as the first picture: rolling swells of cold blue-grey water across the whole "
+               "width, the nearest swell large in the lower part of the frame, the crests a wavy line across the middle, no sky, "
+               "no horizon line of land, no glass, no wall. Into the middle of the waves pours one thick heavy column of fine "
+               "dark coffee grounds, as thick as in the second picture, from the top edge of the frame without a gap. Where it "
+               "lands, a huge dark brown cloud of coffee billows through the water under the surface, spreading left and right "
+               "until it reaches both sides of the frame, the swells above it turning brown. Real materials, opaque coffee, "
+               "never glassy, no glow. No text, no letters, no logos, no people.")
+SHOTS['o2t'] = (['o1t.png', 'o2.png'], SHOTS['o2'][1].replace('16:9', '9:16').replace('the first picture', 'the first picture, and the torrent and brown cloud of the second picture')
+                .replace('across the middle', 'about a third of the way down the frame') + TALL +
+                " The waves fill the lower two thirds of the frame, the brown cloud filling them from side to side.")
+
+# their bar photo extended tall for real (15 Nov 2026): the 10 Nov tall version was the padded canvas only blurred, smeared
+# stripes the phone film ended on; the reference model paints the top, then extend_photo.py paste puts their pixels back
+SHOTS['bar-fillt'] = (['../ext/canvas-tall.png'],
+    "Real photograph, 9:16. The lower part of this picture is a real photo of a coffee bar table on a sunlit terrace: keep "
+    "it exactly as it is, every object, label and colour unchanged and in the same place, the same size. Only replace the "
+    "smeared, blurred stripes in the upper part with what is really above that table: the same pale stone colonnade, its "
+    "tall columns running up out of the top of the frame, the same warm low sun from the right, soft green trees between "
+    "the columns, a little soft sky, slightly out of focus like the background of the photo. No new objects, no people, no "
+    "text, no logos.")
+
 
 def jpg(p: Path) -> Path:
     out = W / f'{p.stem}-src.jpg'

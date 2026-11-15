@@ -39,6 +39,14 @@ process.stdin.on('end', () => {
     builds = buildsUnder(ev.cwd || process.cwd());
   } else if (tool === 'Bash' || tool === 'PowerShell') {
     const cmd = String(ti.command || '');
+    // the starter's clip chain, run from a build folder (15 Nov 2026: `clipchain.py make` paid for clips and this gate never
+    // saw it, because the command names no build path); a --dry run pays nothing
+    if (/clipchain\.py['"]?\s+make\b/.test(cmd) && !/--dry\b/.test(cmd)) {
+      const cd = cmd.match(/\bcd\s+["']?([^"'&;]+?)["']?\s*(?:&&|;)/);
+      const dir = cd ? resolveFrom(ev.cwd, cd[1].trim().replace(/^\/([a-z])\//i, '$1:/')) : (ev.cwd || process.cwd());
+      const b = dir.split(String.fromCharCode(92)).join("/").match(/^.*scrollcraft\/builds\/[^/]+/);
+      builds = b ? [b[0]] : buildsUnder(dir);
+    } else {
     const m = cmd.match(/[^\s"']*scrollcraft[\\/]builds[\\/]([^\\/\s"']+)[\\/]gen[\\/][^\s"']+\.py/);
     if (!m) process.exit(0);
     const script = resolveFrom(ev.cwd, m[0]);
@@ -46,6 +54,7 @@ process.stdin.on('end', () => {
     try { src = fs.readFileSync(script, 'utf8'); } catch { process.exit(0); }
     if (!/(image|text)-to-video|video\/|kling|seedance|minimax|hailuo|veo/i.test(src)) process.exit(0);   // a still, not a film
     builds = [path.dirname(path.dirname(script))];
+    }
   } else process.exit(0);
 
   const ok = [], seen = [];
@@ -63,8 +72,10 @@ process.stdin.on('end', () => {
       const hasLooks = /https?:\/\/|docs\/inspo\//.test(looks);
       const plan = clipPlan(t, b, gen);
       const hasPhone = /^Phones asked:.*["“][^"”]{2,}["”]/im.test(t);
-      seen.push(`${path.basename(b)}/gen/${f}: object list ${hasList ? 'yes' : 'MISSING'}, how it really happens (with its source) ${hasReal ? 'yes' : 'MISSING'}, key moment ${hasKey ? 'yes' : 'MISSING'}, looks real (with the real photograph) ${hasLooks ? 'yes' : 'MISSING'}, clip plan ${plan || 'yes'}, phones asked (his words in quotes) ${hasPhone ? 'yes' : 'MISSING'}, approval ${hasYes ? 'yes' : 'MISSING'}`);
-      if (hasList && hasReal && hasKey && hasLooks && !plan && hasPhone && hasYes) ok.push(p);
+      // the cause is big enough for its effect (rules 3aa.31, Gremier 15 Nov: a thin trickle of grounds browned a whole sea)
+      const hasEnough = /^\s*-?\s*Enough:\s*\S.{20,}/im.test(t);
+      seen.push(`${path.basename(b)}/gen/${f}: object list ${hasList ? 'yes' : 'MISSING'}, how it really happens (with its source) ${hasReal ? 'yes' : 'MISSING'}, key moment ${hasKey ? 'yes' : 'MISSING'}, looks real (with the real photograph) ${hasLooks ? 'yes' : 'MISSING'}, clip plan ${plan || 'yes'}, phones asked (his words in quotes) ${hasPhone ? 'yes' : 'MISSING'}, enough line ${hasEnough ? 'yes' : 'MISSING'}, approval ${hasYes ? 'yes' : 'MISSING'}`);
+      if (hasList && hasReal && hasKey && hasLooks && !plan && hasPhone && hasEnough && hasYes) ok.push(p);
     }
   }
   if (ok.length) process.exit(0);
@@ -77,6 +88,7 @@ process.stdin.on('end', () => {
     + 'same item as the real photo (count, colour, size, words), one change between the stills, the get_cost credits, what is done in code, '
     + 'and what gets trimmed or dissolved if a clip is nearly right; '
     + 'a line "Phones asked: <date>, Tzvi: \"<his answer>\"" (rule 3aa.26: ask him before any clip whether phones get tall 9:16 clips, with their get_cost credits, or the whole width on the ground), '
+    + 'a line "Enough: <each cause, its amount, and why that much does what the step shows>" (rule 3aa.31: a thin trickle cannot brown a sea), '
     + 'show Tzvi the steps and the object list, and only after his yes add the line "Approved by Tzvi: <date and his words>". '
     + (seen.length ? `Briefs found this week: ${seen.join('; ')}.` : 'No brief changed in the last 7 days was found.');
   process.stdout.write(JSON.stringify({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: reason } }));
