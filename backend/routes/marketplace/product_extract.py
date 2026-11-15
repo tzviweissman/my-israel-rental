@@ -49,7 +49,9 @@ MAX_PRODUCTS = 30
 MAX_TEXT = 16000
 MAX_PAGES = 6
 PHOTOS_PER_ITEM = 8
-PHOTO_COPIES = 120  # photos copied in one read, all products together
+# A shop's own list is exact, so more of it is kept than a reader's guess (Burnt Meatboards has 38).
+SHOP_PRODUCTS = 100
+PHOTO_COPIES = 300  # photos copied in one read, all products together
 SITE_TEXT = 24000  # a website and its pages: the products are often past the first few thousand characters
 
 _SYSTEM = """You read a small business's own price list and return its products as JSON.
@@ -86,7 +88,7 @@ Rules that matter more than completeness:
 Reply with the JSON object and nothing else."""
 
 
-def _rows(raw: str) -> list[dict[str, Any]]:
+def _rows(raw: str, limit: int = MAX_PRODUCTS) -> list[dict[str, Any]]:
     """The model's reply as rows we would accept from a form. Anything that
     is not a usable product is dropped rather than repaired: this output is
     about to be shown to the owner as their own data."""
@@ -105,7 +107,7 @@ def _rows(raw: str) -> list[dict[str, Any]]:
         raise HTTPException(status_code=502, detail="Could not read that. Try a clearer picture, or type the list.") from exc
 
     out: list[dict[str, Any]] = []
-    for item in (data.get("products") or [])[:MAX_PRODUCTS]:
+    for item in (data.get("products") or [])[:limit]:
         if not isinstance(item, dict):
             continue
         name = str(item.get("name") or "").strip()[:60]
@@ -803,8 +805,10 @@ async def _shop_catalog(base: str) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     data = await _fetch_json(root + "/products.json?limit=250")
     if isinstance(data, dict) and isinstance(data.get("products"), list):
-        cart = await _fetch_json(root + "/cart.js")
-        cur = str(cart.get("currency") or "ILS").upper() if isinstance(cart, dict) else "ILS"
+        # The shop's own currency (meta.json), not cart.js: that one follows the visitor's country, so the
+        # same shop read as USD once and ILS the next time (Burnt Meatboards, 15 Nov 2026).
+        meta = await _fetch_json(root + "/meta.json")
+        cur = str(meta.get("currency") or "ILS").upper() if isinstance(meta, dict) else "ILS"
         for p in data["products"]:
             v = (p.get("variants") or [{}])[0]
             rows.append({"name": p.get("title"), "price": v.get("price"), "currency": cur,
@@ -832,9 +836,11 @@ def _clean_catalog(rows: list[dict[str, Any]], base: str) -> list[dict[str, Any]
     out = _rows(json.dumps({"products": [{
         **r, "name": html_mod.unescape(r["name"]),
         "description": " ".join(html_mod.unescape(re.sub(r"(?s)<[^>]+>", " ", str(r.get("description") or ""))).split()),
-    } for r in rows]}))
+    } for r in rows]}), limit=SHOP_PRODUCTS)
     for row, r in zip(out, rows):
-        row["photos"] = [u for u in (_ok_picture(x, base) for x in r["photos"]) if u][:PHOTOS_PER_ITEM]
+        # The shop set these as this product's photos, so the site-furniture filter is not applied: it read
+        # "WhatsApp_Image_...jpg" as a WhatsApp button and dropped five of Burnt Meatboards' photos.
+        row["photos"] = [x for x in r["photos"] if isinstance(x, str) and x.startswith(("https://", "http://"))][:PHOTOS_PER_ITEM]
         row["duration_minutes"] = None
     return out
 
@@ -979,7 +985,7 @@ async def _product_photos(fields: dict, catalog: list[dict[str, Any]], declared:
     from utils.cloud_storage import mirror_url_to_cloudinary
     items = fields.get("items") or []
     if catalog and fields.get("gig_type") == "store":
-        items = fields["items"] = catalog[:MAX_PRODUCTS]
+        items = fields["items"] = catalog[:SHOP_PRODUCTS]
     for row in items:
         exact = next((d for d in declared if d["photos"] and _same_name(d["name"], row["name"])), None)
         if exact and not catalog:
