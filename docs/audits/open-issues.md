@@ -404,8 +404,8 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 
 ## UI audit of 15 Nov 2026
 
-- [Medium] Chicken Munch order page: with both currencies in the basket the total reads "Order 1: $1,1190rder 2: ₪1,075" (`join('')`, `scrollcraft/builds/chicken-munch/order.html:198`, from b48f7f4). First seen 15 Nov 2026 (2026-11-15-ui-audit.md). FIX_CM
-- [Low] The Whipped Cup shop: the "not saved" warning shows on the green success band (`.sent.bad` changes only the colour, `shop.html:21`). First seen 15 Nov 2026 (2026-11-15-ui-audit.md). FIX_WC
+- [Medium] Chicken Munch order page: with both currencies in the basket the total reads "Order 1: $1,1190rder 2: ₪1,075" (`join('')`, `scrollcraft/builds/chicken-munch/order.html:198`, from b48f7f4). First seen 15 Nov 2026 (2026-11-15-ui-audit.md). Fix ready, not applied: docs/audits/2026-11-15-ui-audit-fixes.patch.
+- [Low] The Whipped Cup shop: the "not saved" warning shows on the green success band (`.sent.bad` changes only the colour, `shop.html:21`). First seen 15 Nov 2026 (2026-11-15-ui-audit.md). Fix ready in the same patch.
 - [Low] Hadassah Prys booking: the button says "Sent" for 2.5s after a failed save, over the red "did not go through" line (`hadassah-prys/book.js:54,118`). First seen 15 Nov 2026 (2026-11-15-ui-audit.md).
 - [Low] Sales summary, each item: order buttons 40px tall (`ItemSales.jsx:129`). First seen 15 Nov 2026. [Fixed 15 Nov, 7e244012, on claude/sweet-knuth-jagjtb]
 - [Low] Sales summary, each item: en dash for an empty margin or profit (`ItemSales.jsx:154,156`). First seen 15 Nov 2026. [Fixed 15 Nov, b8c8bed3, on claude/sweet-knuth-jagjtb]
