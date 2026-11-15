@@ -594,6 +594,7 @@ async def lookup_business_details(request: Request, place_id: str, lang: str = "
 # so what comes back is whatever is public; the owner checks it either way.
 # ---------------------------------------------------------------------------
 _PAGE_BYTES = 1_500_000
+_JSON_BYTES = 5_000_000  # a shop's published product list (250 Shopify products with descriptions run to a few MB)
 
 
 async def _fetch(url: str) -> tuple[str, str]:
@@ -779,18 +780,28 @@ def _ld_products(page: str, base: str) -> list[dict[str, Any]]:
 
 async def _fetch_json(url: str) -> Any:
     """A public JSON address (a shop's own product list), or None. Same public-host check as _fetch."""
+    import asyncio
+
     import httpx
 
     from utils.helpers import _is_public_ical_url
-    if not _is_public_ical_url(url):
+    # The check resolves the host with a blocking DNS lookup: off the event loop, or one slow domain stalls every
+    # request on the server (the same fix as _fetch, 12 Nov 2026 code review; found again here 15 Nov).
+    if not await asyncio.to_thread(_is_public_ical_url, url):
         return None
     try:
         async with httpx.AsyncClient(timeout=10, follow_redirects=False,
                                      headers={"User-Agent": "Mozilla/5.0 (compatible; MyIsraelRentalBot/1.0)"}) as http:
-            r = await http.get(url)
-        if r.status_code != 200:
-            return None
-        return r.json()
+            async with http.stream("GET", url) as r:
+                if r.status_code != 200:
+                    return None
+                # At most _JSON_BYTES is read: a huge or endless reply must not fill the server's memory.
+                buf = bytearray()
+                async for chunk in r.aiter_bytes():
+                    buf += chunk
+                    if len(buf) > _JSON_BYTES:
+                        return None
+        return json.loads(bytes(buf))
     except Exception:  # noqa: BLE001 - not a shop that publishes one
         return None
 
