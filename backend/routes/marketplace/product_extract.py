@@ -1042,7 +1042,9 @@ def _shop_facts(fields: dict, meta: dict) -> None:
 def _clean_catalog(rows: list[dict[str, Any]], base: str) -> list[dict[str, Any]]:
     """A shop's own list as form rows: the same row rules as the readers, each with its own photos."""
     import html as html_mod
-    rows = [r for r in rows if isinstance(r.get("name"), str) and r["name"].strip()]
+    # the same test _rows drops a row by (the name as read, stripped), or _rows drops one this keeps and every later
+    # product gets the photos of the one before it (15 Nov 2026 code review)
+    rows = [r for r in rows if isinstance(r.get("name"), str) and html_mod.unescape(r["name"]).strip()]
     out = _rows(json.dumps({"products": [{
         **r, "name": html_mod.unescape(r["name"]), "description": "",  # the whole text is set below
     } for r in rows]}), limit=SHOP_PRODUCTS)

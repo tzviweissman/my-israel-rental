@@ -286,3 +286,13 @@ def test_woocommerce_variations_are_sizes():
                                        {"name": "Large", "price": 90.0, "in_stock": True}]
     assert rows["Cake"]["price"] == 90 and rows["Cake"]["in_stock"] is True
     assert rows["Card"]["options"] == [] and rows["Card"]["price"] == 10
+
+
+def test_shop_list_photos_stay_on_their_product():
+    """A product with no real name (an entity like &nbsp;) is dropped without moving the next product's photos."""
+    from routes.marketplace.product_extract import _clean_catalog
+    rows = [{"name": "&nbsp;", "price": "1", "photos": ["https://c.com/a.jpg"]},
+            {"name": "Cheese Board", "price": "180", "photos": ["https://c.com/x1.jpg"]},
+            {"name": "Fruit Board", "price": "150", "photos": ["https://c.com/x2.jpg"]}]
+    assert [(r["name"], r["photos"]) for r in _clean_catalog(rows, "https://s.com/")] == [
+        ("Cheese Board", ["https://c.com/x1.jpg"]), ("Fruit Board", ["https://c.com/x2.jpg"])]
