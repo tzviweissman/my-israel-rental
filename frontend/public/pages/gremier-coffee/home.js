@@ -1,4 +1,4 @@
-// Gremier Coffee home: the coffee bar's place choice (the opening film is film.js).
+// Gremier Coffee home: the coffee bar's place choice (the opening film is slides.js).
 (function () {
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
