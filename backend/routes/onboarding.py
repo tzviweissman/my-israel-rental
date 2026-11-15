@@ -278,7 +278,8 @@ async def _property_items(uid: str, user_doc: dict[str, Any]) -> list[dict[str, 
             # unreachable for every owner on the site.
             "endowed": False,
             "done": bool(user_whatsapp(user_doc)),
-            "href": "/dashboard?tab=settings",
+            # `section=whatsapp` opens Settings at the field, not at the top.
+            "href": "/dashboard?tab=settings&section=whatsapp",
         },
         {
             "id": "prop.share",
