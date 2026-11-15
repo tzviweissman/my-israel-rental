@@ -11,12 +11,17 @@
  * came back). Up to 6 pages of a catalog at once; each item's picture is cut
  * out of the page when it is big enough (10 Nov 2026). `onPhotos` is
  * optional: a service's list has no "one photo each" button.
+ *
+ * A catalog for one time of year (Tzvi, 15 Nov 2026: "a Chanukah catalog"): with `seasonal` (a store), a tick
+ * opens a name and two dates; everything read or added in this box then joins that kind and is on sale only
+ * between those dates (backend seasonal.py hides it outside them). It is handed to the parent as the second
+ * argument, `onPhotos(files, season)` / `onExtract({ ... }, season)`; null when not ticked.
  */
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Camera, FileText, ImagePlus, Loader2 } from 'lucide-react';
 
-export default function QuickProductAdd({ onPhotos, onExtract, bulkPhotos, extracting, testid = 'wizard-products' }) {
+export default function QuickProductAdd({ onPhotos, onExtract, bulkPhotos, extracting, seasonal = false, testid = 'wizard-products' }) {
   const { t } = useTranslation();
   // The paste box, closed until asked for. Open by default it would read
   // as the main way in, and for a business with three products the rows
@@ -25,7 +30,11 @@ export default function QuickProductAdd({ onPhotos, onExtract, bulkPhotos, extra
   const [pasted, setPasted] = useState('');
   const bulkRef = useRef(null);
   const listShotRef = useRef(null);
-  const busy = bulkPhotos || extracting;
+  const [season, setSeason] = useState({ on: false, name: '', from: '', until: '' });
+  const seasonOf = () => (seasonal && season.on ? season : null);
+  // dates are needed for it to mean anything; a name alone would just be a kind
+  const seasonBad = seasonal && season.on && (!season.from || !season.until || season.until < season.from);
+  const busy = bulkPhotos || extracting || seasonBad;
   const btn = 'inline-flex items-center gap-1.5 px-3 min-h-[40px] rounded-lg border border-gray-300 bg-white text-sm font-semibold disabled:opacity-50';
 
   return (
@@ -33,6 +42,39 @@ export default function QuickProductAdd({ onPhotos, onExtract, bulkPhotos, extra
       <p className="text-[11px] font-semibold text-gray-600">
         {t('wizard.quickTitle', 'Have a lot to add?')}
       </p>
+      {seasonal && (
+        <div className="space-y-2" data-testid={`${testid}-season`}>
+          <label className="flex items-center gap-2 min-h-[40px] text-sm cursor-pointer">
+            <input type="checkbox" className="w-5 h-5" checked={season.on} onChange={(e) => setSeason({ ...season, on: e.target.checked })}
+              data-testid={`${testid}-season-on`} />
+            {t('wizard.seasonOn', 'This is a catalog for one time of year, like Chanukah')}
+          </label>
+          {season.on && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <label className="text-xs text-gray-600">{t('wizard.seasonName', 'Name')}
+                <input type="text" dir="auto" value={season.name} maxLength={40} onChange={(e) => setSeason({ ...season, name: e.target.value })}
+                  placeholder={t('wizard.seasonNamePh', 'Chanukah')} className="mt-1 w-full px-3 min-h-[40px] rounded-lg border border-gray-300 text-base"
+                  data-testid={`${testid}-season-name`} />
+              </label>
+              <label className="text-xs text-gray-600">{t('editListing.seasonFrom', 'On sale from')}
+                <input type="date" value={season.from} onChange={(e) => setSeason({ ...season, from: e.target.value })}
+                  className="mt-1 w-full px-3 min-h-[40px] rounded-lg border border-gray-300 text-base" data-testid={`${testid}-season-from`} />
+              </label>
+              <label className="text-xs text-gray-600">{t('wizard.seasonUntil', 'Last day to order')}
+                <input type="date" value={season.until} min={season.from || undefined} onChange={(e) => setSeason({ ...season, until: e.target.value })}
+                  className="mt-1 w-full px-3 min-h-[40px] rounded-lg border border-gray-300 text-base" data-testid={`${testid}-season-until`} />
+              </label>
+            </div>
+          )}
+          {season.on && (
+            <p className="text-[11px] text-gray-500">
+              {seasonBad
+                ? t('wizard.seasonNeedDates', 'Choose both dates first.')
+                : t('wizard.seasonNote', 'Everything you add below joins this catalog. Customers see it only between these dates; you always see it here, ready for next year.')}
+            </p>
+          )}
+        </div>
+      )}
       <div className="flex flex-wrap gap-2">
         {onPhotos && (
           <>
@@ -42,7 +84,7 @@ export default function QuickProductAdd({ onPhotos, onExtract, bulkPhotos, extra
               {t('wizard.photosAsProducts', 'Add photos, one product each')}
             </button>
             <input ref={bulkRef} type="file" accept="image/*" multiple className="hidden"
-              onChange={(e) => { onPhotos(e.target.files); e.target.value = ''; }}
+              onChange={(e) => { onPhotos(e.target.files, seasonOf()); e.target.value = ''; }}
               data-testid={`${testid}-photos-input`} />
           </>
         )}
@@ -59,7 +101,7 @@ export default function QuickProductAdd({ onPhotos, onExtract, bulkPhotos, extra
           {t('wizard.shotOfCatalog', 'Photos of your catalog, menu or price list')}
         </button>
         <input ref={listShotRef} type="file" accept="image/*" multiple className="hidden"
-          onChange={(e) => { const f = Array.from(e.target.files || []).slice(0, 6); e.target.value = ''; if (f.length) onExtract({ files: f }); }}
+          onChange={(e) => { const f = Array.from(e.target.files || []).slice(0, 6); e.target.value = ''; if (f.length) onExtract({ files: f }, seasonOf()); }}
           data-testid={`${testid}-shot-input`} />
       </div>
 
@@ -70,7 +112,7 @@ export default function QuickProductAdd({ onPhotos, onExtract, bulkPhotos, extra
             className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
             data-testid={`${testid}-paste`} />
           <button type="button" disabled={busy || !pasted.trim()}
-            onClick={async () => { if (await onExtract({ text: pasted.trim() })) { setPasted(''); setPasteOpen(false); } }}
+            onClick={async () => { if (await onExtract({ text: pasted.trim() }, seasonOf())) { setPasted(''); setPasteOpen(false); } }}
             className="inline-flex items-center gap-1.5 px-4 min-h-[40px] rounded-lg text-sm font-semibold text-white disabled:opacity-50"
             style={{ background: 'var(--brand-primary)' }} data-testid={`${testid}-paste-read`}>
             {extracting && <Loader2 size={14} className="animate-spin" />}

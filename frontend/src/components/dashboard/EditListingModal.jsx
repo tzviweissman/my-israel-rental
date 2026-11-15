@@ -198,7 +198,9 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
   const showFrom = (i) => setTimeout(() => {
     document.querySelector(`[data-testid="edit-listing-option-${i}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, 50);
-  const addProductsFromPhotos = async (files) => {
+  // a seasonal catalog (QuickProductAdd): its name becomes the products' kind, its dates their sale dates
+  const seasonPatch = (s) => (s ? { ...(s.name.trim() ? { group: s.name.trim() } : {}), available_from: s.from, available_until: s.until } : {});
+  const addProductsFromPhotos = async (files, season = null) => {
     const chosen = Array.from(files || []).filter((f) => f.type.startsWith('image/'));
     if (!chosen.length) return;
     setBulkPhotos(true);
@@ -215,14 +217,14 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       }
       if (!urls.length) return;
       const at = options.length;
-      setOptions((prev) => [...prev, ...urls.map((u) => newProduct(prev, { photos: [u] }))]);
+      setOptions((prev) => [...prev, ...urls.map((u) => newProduct(prev, { photos: [u], ...seasonPatch(season) }))]);
       showFrom(at);
       toast.success(t('wizard.photosBecameProducts', { count: urls.length, defaultValue: '{{count}} products added. Now name them and set a price.' }));
     } catch (err) {
       toast.error(err.message || t('wizard.uploadFailed', 'Upload failed'));
     } finally { setBulkPhotos(false); }
   };
-  const extractProducts = async ({ text, files = [] }) => {
+  const extractProducts = async ({ text, files = [] }, season = null) => {
     setExtracting(true);
     try {
       const body = new FormData();
@@ -246,7 +248,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
           currency: r.currency || prev[prev.length - 1]?.currency || 'ILS',
           photos: r.image ? [r.image] : [],
         };
-        return isStore ? newProduct(prev, row) : row;
+        return isStore ? newProduct(prev, { ...row, ...seasonPatch(season) }) : row;
       })]);
       showFrom(at);
       toast.success(t('wizard.extractDone', { count: rows.length, defaultValue: '{{count}} products read. Check them, then add a photo to each.' }));
@@ -854,7 +856,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                 : t('editListing.options', 'Services and prices')}
             </p>
             <QuickProductAdd onPhotos={isStore ? addProductsFromPhotos : null} onExtract={extractProducts}
-              bulkPhotos={bulkPhotos} extracting={extracting} testid="edit-listing-products" />
+              bulkPhotos={bulkPhotos} extracting={extracting} seasonal={isStore} testid="edit-listing-products" />
 
             {options.map((o, i) => (
               <div key={i} className="rounded-xl border p-3 space-y-3" style={{ borderColor: 'var(--brand-border)' }} data-testid={`edit-listing-option-${i}`}>
