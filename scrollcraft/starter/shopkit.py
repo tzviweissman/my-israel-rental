@@ -90,7 +90,7 @@ def shop_page(site, items: list[dict], cats: list[str], *, popular: str, wa: str
               <span class="addon-b"><button class="btn btn-sm" type="button" data-add="{a['id']}" aria-label="Add {escape(a['name'], True)}">Add</button><button class="btn-line" type="button" id="addon-no">No thanks</button></span>
             </div>'''
     return f'''{site.page_head(title_html, lede)}
-  <div class="wrap"><p class="st-top"><button class="btn-line" id="st-add" type="button" data-add="{pop['id']}">Add our most popular, {escape(pop['name'])}, {money_html(pop['price'])}</button></p></div>
+  <div class="wrap"><p class="st-top">Our most popular: <button class="btn-line" id="st-add" type="button" data-add="{pop['id']}">Add {escape(pop['name'])}, {money_html(pop['price'])}</button></p></div>
   <div class="wrap">
     <div class="filters" id="filters" role="group" aria-label="Go to a kind"><div class="chips">{chips}</div></div>
     <div id="cat" class="{size}" data-mir-popular data-mir-catalog data-href="shop.html?add={{name}}" data-other="More from {escape(site.short, True)}" data-out="Out of stock">
@@ -149,8 +149,8 @@ def shop_page(site, items: list[dict], cats: list[str], *, popular: str, wa: str
           <h3>Your order</h3>
           <ul id="sum-mini"><li><span>Nothing yet</span></li></ul>
           <p class="sum-where" id="sum-where" hidden></p>
-          <div class="total"><span>Total</span><span id="total">0</span></div>
-          <button class="btn" id="send" type="submit"><span>Continue to delivery or pickup</span></button>
+          <div class="total"><span>Total</span><span id="total" data-order-total>0</span></div>
+          <button class="btn" id="send" type="submit"><span>Next: delivery or pickup</span></button>
           <button class="back" id="back" type="button" hidden>Back</button>
           <p class="note" id="send-note">Next: delivery or pickup, and the day.</p>
           <p class="sent" id="sent" role="status" hidden></p>

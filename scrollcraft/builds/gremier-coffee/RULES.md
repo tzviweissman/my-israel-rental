@@ -62,7 +62,7 @@ R3z.6 pass: built to the blueprint: the h1 says cold brew and coffee bars; the l
 R3.12 pass: built to the blueprint: hero, features (one card per product with price and what is in it), call to action (delivery card and closing band), FAQ place, footer
 R3c.1 pass: built to the blueprint: references kept with links in REFERENCES.md and CONCEPT.md (Blue Bottle, Onyx, Fellow, Mooala on Inspo; Assembly Coffee and Escape Cafe on Mobbin); one direction chosen with its reason
 R3g.17 pass: built to the blueprint: every effect has its source in CONCEPT.md Effects: 21st Liquid Button, Mobbin Escape Cafe, docs/inspo bestbean colour per product, effects library L4
-R3g.19 pass: built to the blueprint: the main buttons are the cold brew colour #3B0A02 from their Classic photo (meta product-colour, BRAND.md)
+R3g.19 pass: built to the blueprint: the main buttons are the cold brew colour #3B0A02, taken from the brew in their House Blend jug photo (meta product-colour data-from assets/p/jug-house.webp, 15 Nov: their Classic bottle photo held under 1% of it); check-button-colour passes on phone and laptop
 R3c.2 pass: built to the blueprint: not the AI look: no italic word, no gradient, no three identical cards in a row; Noto Serif and IBM Plex Sans; cream is the colour of their own photos' wall
 R3g.1 pass: built to the blueprint: style sheet in CONCEPT.md before building
 R3g.3 pass: built to the blueprint: the accent is only on the main buttons and the closing band; prices bold in ink

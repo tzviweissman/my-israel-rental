@@ -137,7 +137,7 @@
     var r = e.target.closest('button[data-rm]'); if (r) { q[r.dataset.rm] = 0; update(); check(false); return; }
     var b = e.target.closest('button[data-k]'); if (!b) return; q[b.dataset.k] = Math.max(0, Math.min(20, q[b.dataset.k] + (+b.dataset.d))); update(); check(false);
   });
-  var STEP_BTN = ['', 'Continue to delivery or pickup', 'Continue to your details', ''],
+  var STEP_BTN = ['', 'Next: delivery or pickup', 'Continue to your details', ''],
     STEP_NOTE = ['', 'Next: delivery or pickup, and the day.', 'Next: your name and phone.', 'Opens WhatsApp with your order written out, to send to ' + NAME + '.'];
   function drawStep() {
     [].forEach.call(document.querySelectorAll('.ostep'), function (el) { el.hidden = +el.dataset.s !== step; });

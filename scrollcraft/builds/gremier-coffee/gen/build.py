@@ -59,7 +59,7 @@ def head_extra(html, home=False):
                         '<meta name="site-category" content="food-shop">\n<link rel="icon" href="assets/logo.webp" type="image/webp">\n<link rel="preconnect" href="https://fonts.googleapis.com">', 1)
     if home:   # what we offer, two kinds (3g.18), and where the button colour is in their own product (3g.19, BRAND.md)
         html = html.replace('<meta name="site-category" content="food-shop">', '<meta name="site-category" content="food-shop">\n<meta name="offers" content="cold brew|coffee bar">\n'
-                            '<meta name="product-colour" content="#3B0A02" data-from="assets/p/classic.webp">', 1)
+                            '<meta name="product-colour" content="#3B0A02" data-from="assets/p/jug-house.webp">', 1)
     return html.replace(' <span class="arw" aria-hidden="true">→</span>', '').replace('Gremier Coffee Co..', 'Gremier Coffee Co.')
 
 
