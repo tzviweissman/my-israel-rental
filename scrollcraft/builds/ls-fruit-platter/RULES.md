@@ -143,7 +143,7 @@ R3.14 pass: prices are loud because prices exist; this is a priced shop
 
 ## 6. Order and booking flow
 R3k.7 pass: check-site FLOW: Step 1 basket, Step 2 when and where, Step 3 details; the three step buttons have a pointer cursor, hover, pressed and focus states and a later step can be tapped (it goes as far as the filled-in steps allow and shows what is missing); Back button; browser back goes back a step; total beside each step
-R3k.8 pass: every basket line has a 40 px remove button
+R3k.8 pass: every basket line has a 40 px remove button; looked again 13 Nov 2026 after the shop layout change: the quantity buttons are 44 px, the empty basket is one line, and the phone bar on the shop shows only once something is in the basket
 R3k.9 pass: the Send button POSTs to /api/marketplace/order-form/cbf66136-.../orders (platter product ids 55113012e889 etc. from the 22 Oct add_site_products run; the time goes in notes) while a blank WhatsApp tab is already open, then fills the tab with the message and the tracking link; a failed POST still opens WhatsApp. Intercepted a full order in Playwright (fulfilment delivery, city jerusalem, address, date, name, phone, notes match WebsiteOrderIn); check-site SAVE and FLOW pass; nothing sent to the live site. Live saving also needs the listing converted to a store (convert_to_store in site_products_plan.json) and whether she delivers: listed in the reply
 R3k.10 pass: check-prefill clean: the day field opens on tomorrow (same-day is question 14 to her), changeable; quantity 1
 R3k.6 pass: Add on a home card opens shop.html#order with that size already in the basket (add=1)
@@ -185,7 +185,7 @@ R3i.3 n/a: no scroll readout on this site
 R3s.21 pass: check-site BROKEN clean on every page
 
 ## 8. Phone
-R3b.6 pass: the phone bar "From 300, Four platter sizes" with the Order button from after the first screen; 360x640 looked at
+R3b.6 pass: looked again 13 Nov 2026 (shop layout: on the shop page the bar appears only with something in the basket, as "N items, price, View basket"; the four size tiles come first on a phone); the phone bar "From 300, Four platter sizes" with the Order button from after the first screen; 360x640 looked at
 R3f.7 pass: the bottom bar fits at 360x640
 R3a.6 pass: check-site PHONE clean; room kept for the bar
 R3s.22 pass: check-site TAP clean on every page

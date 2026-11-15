@@ -6,14 +6,16 @@ document.body.classList.remove('no-js');
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   window.siteBasket = {
     get: function () { try { return JSON.parse(localStorage.getItem(BASKET_KEY)) || {}; } catch (e) { return {}; } },
-    set: function (b) { try { localStorage.setItem(BASKET_KEY, JSON.stringify(b)); } catch (e) {} showCount(b); }
+    set: function (b) { try { localStorage.setItem(BASKET_KEY, JSON.stringify(b)); } catch (e) {} showCount(b); hasBasket(b); }
   };
   function showCount(b) {
     var n = 0; for (var k in b) n += +b[k] || 0;
     var c = document.getElementById('count'); if (!c) return;
     c.hidden = !n; c.textContent = n; c.setAttribute('aria-label', n + ' in your order');
   }
-  showCount(window.siteBasket.get());
+  // the shop page's phone bar shows only once something is in the basket (shop rollout, 13 Nov 2026)
+  function hasBasket(b) { var n = 0; for (var k in b) n += +b[k] || 0; document.body.classList.toggle('has-basket', n > 0); setTimeout(function () { dispatchEvent(new Event('scroll')); }, 0); }
+  showCount(window.siteBasket.get()); hasBasket(window.siteBasket.get());
 
   var nav = document.getElementById('nav'), btn = document.getElementById('menu-btn');
   function setMenu(open) { nav.classList.toggle('shown', open); btn.setAttribute('aria-expanded', open); btn.textContent = open ? 'Close' : 'Menu'; }
@@ -32,7 +34,9 @@ document.body.classList.remove('no-js');
     top.classList.toggle('solid', scrollY > 10);
     sfill.style.clipPath = 'inset(0 ' + (100 - Math.max(0, Math.min(1, max > 0 ? scrollY / max : 0)) * 100).toFixed(2) + '% 0 0)';
     var heroDone = !hero || hero.getBoundingClientRect().bottom < vh * .9;
-    if (bar) bar.classList.toggle('on', scrollY > vh * .5 && heroDone && (!form || form.getBoundingClientRect().top > vh * .75));
+    var shop = !!document.getElementById('st-add'), has = document.body.classList.contains('has-basket');
+    // on the shop page the bar is the basket: it shows only once something is in it
+    if (bar) bar.classList.toggle('on', (shop ? has : scrollY > vh * .5 && heroDone) && (!form || form.getBoundingClientRect().top > vh * .75));
   }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   addEventListener('resize', frame);

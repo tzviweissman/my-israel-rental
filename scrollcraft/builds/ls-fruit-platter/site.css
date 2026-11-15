@@ -488,3 +488,34 @@ section.rest { padding-block: clamp(1.6rem, 6svh, 3.5rem); }
 #form input, #form select, #form textarea, .fld { font-size: 16px; }
 .form > *, .form .card, .form .card > div, .sum { min-width: 0; }
 .sent.bad { font-weight: 700; }
+
+/* ── The shop layout (shop rollout, 13 Nov 2026): the four sizes first on a phone, Add becomes − n + in the basket,
+   an empty basket is one line, the phone bar is the basket ── */
+.st-buy[hidden], .st-have[hidden] { display: none; }
+.st-have { display: flex; align-items: center; gap: .8rem; margin: .9rem 0 .4rem; }
+.st-hv { font-weight: 600; color: var(--leaf); }
+.step button, .st-pick button, .btn { touch-action: manipulation; }
+.step button { width: 44px; height: 44px; }
+.step.sm button { width: 44px; height: 44px; }
+.o-empty { display: none; }
+body:not(.no-js) #order.is-empty .o-empty { display: block; font-size: 1.05rem; color: var(--soft); margin: 0; }
+body:not(.no-js) #order.is-empty .osteps, body:not(.no-js) #order.is-empty .form { display: none; }
+body:not(.no-js) section#order.is-empty { padding-block: clamp(1.6rem, 4vw, 2.6rem); }
+@media (max-width: 860px) {
+  /* the four sizes come first, in one row; the photo is smaller under them, then the name, price and Add */
+  .st-grid { gap: .7rem; }
+  .st-info { display: contents; }
+  .st-pick { order: 1; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .4rem; }
+  .st-ph { order: 2; width: min(100%, 300px, 36svh); }
+  .st-info > :not(.st-pick) { order: 3; }
+  .st-pick img { aspect-ratio: 1; }
+  .st-pick span.t { padding: .25rem .3rem .35rem; }
+  .st-pick b { font-size: clamp(.78rem, 3.3vw, 1rem); white-space: normal; line-height: 1.05; }
+  .st-pick i { font-size: .85rem; }
+  .st-pick .ring { width: 18px; height: 18px; top: 4px; right: 4px; } .st-pick .ring svg { width: 18px; height: 18px; }
+  .st-info .kick { margin: .2rem 0 0; }
+  .st-info h1 { font-size: 3rem; white-space: normal; }
+  .st-price { font-size: 2.2rem; margin: 0; }
+  .facts { display: none; }
+}
+.toast { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; padding: 0 !important; border: 0 !important; }   /* heard, not shown: it covered the size tiles; the − n + and the bar confirm an add */
