@@ -38,7 +38,7 @@ R3g.13 pass: first screen at 1440x900 and 390x844 (the owner's choice, Tzvi 15 N
 R3b.1 pass: the opening shows a slow cooker, 20 hours on low for Shabbos, the name in the top bar and the Order now button (the owner's choice, Tzvi 15 Nov 2026: she likes the screen that counts the hours on low and wants it first; the from-scratch split and the tubs opening are gone); what the kit is, kosher and delivery follow in the sizes right after
 R3b.2 pass: "From ₪100", "Kosher, hechsher from Rabbi Weiner" and "Made in Jerusalem, delivered across Israel" sit under the Order now button in the opening (on a phone too; the phone bar with From ₪100 comes in once the opening has scrolled away), 15 Nov 2026
 R3b.3 pass: one solid gold button per screen: the bar's Order now on the opening; card buttons are outline
-R3h.1 pass: the opening is the pot film played by the scroll: the dial turns from Off to Low and the hours count to 20 within the first screen (the owner's choice, Tzvi 15 Nov 2026: she likes the screen that counts the hours on low and wants it first; the from-scratch split and the tubs opening are gone)
+R3h.1 pass: on a phone it plays by itself (Tzvi, 15 Nov 2026); the opening is the pot film played by the scroll: the dial turns from Off to Low and the hours count to 20 within the first screen (the owner's choice, Tzvi 15 Nov 2026: she likes the screen that counts the hours on low and wants it first; the from-scratch split and the tubs opening are gone)
 R3n.1 pass: their four tubs fill their half of the first screen at 1440x900; on a phone their half is the lower half
 R3n.2 pass: the crock-pot dial that rotates from Off to Low and then becomes the size picker; only a crock-pot cholent could have it
 R3n.3 pass: the dial changes the size, who it feeds, the price and the order button words (check-motion: 2 choices tapped, smooth)
@@ -51,7 +51,7 @@ R3h.5 pass: the chapter lines (Lid on. Low. Go light the candles.) sit at the le
 R3h.7 n/a: one clip in the opening since 15 Nov 2026 (the kitchen-to-pot join is gone)
 R3h.8 pass: the section after the film changes boldly: a bright cream shop of three colour rooms
 R3h.11 pass (Tzvi's decision): brightness.py re-run 25 Oct: pot.mp4 and pot-m.mp4 whole 9 middle 14, scratch.mp4 and scratch-m.mp4 whole 30 middle 29, under the rule's 22 and 33; Tzvi chose to keep the candlelit films dark (22 Oct, docs/site-reviews/2026-10-22/decisions.md point 2, confirmed again 25 Oct, decision 4); a gamma of 2 had made the pot film milky grey; the table film and its stills were brightened on 10 Nov 2026 (Tzvi: "this picture looks too dark and dreary"; ffmpeg gamma 1.75 with a warm shift, no new generation), brightness.py now 37, bright enough; the pot and kitchen films stay as he chose
-R3h.20 pass: 15 Nov 2026: the pinned opening is 3 screens tall (the SLOW minimum), drawn only while the scroll moves it (check-speed BUSY), the hours count within the first (Tzvi, 10 Nov: at most 1 screen); one scrubbed clip and no split left to repaint; the pot and words whole on both sizes
+R3h.20 pass: on a phone (860px or less) the opening holds no scroll and plays by itself, the dial to Low and 0 to 20 hours over 3.5 s (Tzvi, 15 Nov 2026); on a laptop: 15 Nov 2026: the pinned opening is 3 screens tall (the SLOW minimum), drawn only while the scroll moves it (check-speed BUSY), the hours count within the first (Tzvi, 10 Nov: at most 1 screen); one scrubbed clip and no split left to repaint; the pot and words whole on both sizes
 R3h.13 pass: the pot film is one clip showing the lid, steam and the dial together; frames viewed at 20 hours show no heap or vanish
 R3h.14 pass: the pot stays in frame through the whole film at 1440x900, 1280x650 and 390x844
 R3h.17 pass: the page does not use words-and-film turns
@@ -234,6 +234,8 @@ R8.9 pass: the owner's 11 Nov photo is of the Extra Large tub (Tzvi, 12 Nov 2026
 R3s.30 pass: since 12 Nov 2026 the size cards are one calm look: three white cards on the cream ground, the same light sand picture behind each tub, ink words, ink buttons and ink saving badges on all three (all one colour, the first of the two allowed ways)
 
 <!-- 15 Nov 2026, shop layout (Tzvi approved it for every custom site): on order.html the Order now button is now Add, which turns into - n + on the size and on each extra (meat, marrow bones by the pound); the basket starts empty, the form (Your order) waits for the first item, an empty basket is one line, and the phone basket bar ("2 items · ₪X · View basket") shows only once something is in it. Kinds row, search, sort and Most ordered skipped: five products. Prices, option picks, discount code, saving lines, order saving and the WhatsApp fallback are unchanged. -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
 
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
 

@@ -308,6 +308,7 @@
   .act { margin-top: var(--sc-3); }
   /* the opening's height is set by script after load; this holds the same space from the first paint so nothing below jumps */
   #split { height: 300vh; }
+  @media (max-width: 860px) { #split { height: 100svh !important; } }  /* a phone's opening is one screen and holds no scroll (the engine writes its own height) */
   .pick { display: none; }
   .order-stage { padding-top: clamp(3.5rem, 8svh, 5rem); }
   .order h2 { font-size: var(--s5); white-space: nowrap; }

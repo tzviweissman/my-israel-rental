@@ -148,7 +148,11 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
 
 <script src="site.js"></script>
 <script src="scrollcraft.js"></script>
-<script>ScrollCraft.mount(document.body);</script>
+<script>
+/* On a phone the opening does not hold the scroll: the dial turns and the hours count by themselves (Tzvi, 15 Nov 2026). */
+if (matchMedia('(max-width: 860px)').matches) document.getElementById('split').setAttribute('data-sc-span', '0.001');
+ScrollCraft.mount(document.body);
+</script>
 <script>
 /* The moving messages run only while on screen (check-speed BUSY: an animation out of sight still costs a phone). */
 (function () {
@@ -249,7 +253,8 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
     // The act is 3 screens tall, 2 of scroll: the dial clicks onto Low, then the hours count to 20 within the
     // first screen (Tzvi, 10 Nov 2026: the counting took 2.5 screens, at most 1), then the words hold.
     queued = false;
-    var p = reduce ? 1 : (parseFloat(act.style.getPropertyValue('--sc-p')) || 0);
+    // a phone plays it on a clock (3.5 s, from shortly after load); a laptop follows the scroll
+    var p = reduce ? 1 : phone.matches ? 0.5 * span(performance.now(), autoFrom, autoFrom + 3500) : (parseFloat(act.style.getPropertyValue('--sc-p')) || 0);
     var on = p >= 0.1;
     setCss(knobPot, '--a', (on ? -35 : -100 + 65 * span(p, 0, 0.1)) + 'deg');
     knobPot.classList.toggle('is-on', on);
@@ -269,7 +274,7 @@ if (/^#(order|details)$/.test(location.hash)) location.replace('order.html' + lo
     if (p !== lastP || (pot.ready && Math.abs(video.currentTime - pot.target) > 0.02)) kick();
     lastP = p;
   }
-  var queued = false, lastP = -1;
+  var queued = false, lastP = -1, autoFrom = performance.now() + 500;
   function kick() { if (!queued) { queued = true; requestAnimationFrame(frame); } }
   // the engine writes the act's progress after the scroll: draw when it does, and on scroll for the bar
   new MutationObserver(kick).observe(act, { attributes: true, attributeFilter: ['style'] });
