@@ -210,7 +210,7 @@ SHOP = f'''{SITE.page_head('The collection', f'{COUNT} pieces from the Waterdale
   <div class="wrap"><p style="margin:var(--s5) 0 0"><button class="btn-line" id="st-add" type="button">Add the Diamond Menorah, {money(M['price'])}</button></p></div>
   <div class="wrap">
     <div class="filters" id="filters" role="group" aria-label="Go to a category"><div class="chips">{CHIPS}</div></div>
-    <div id="cat" data-mir-catalog data-href="shop.html?add={{name}}" data-other="More gifts" data-out="Out of stock">
+    <div id="cat" class="size-l" data-mir-popular data-mir-catalog data-href="shop.html?add={{name}}" data-other="More gifts" data-out="Out of stock">
       <div data-mir-list>{''.join(group(c) for c in ORDER)}</div>
       <template data-mir-group><div class="grp"><h2 data-f="group"></h2><ul class="cards" data-f="items"></ul></div></template>
       <template data-mir-item><li class="pc"><a class="pc-a" data-f="link"><span class="pc-ph"><img data-f="img" alt=""></span><span class="pc-t"><b data-f="name"></b><span data-f="price"></span></span></a></li></template>
@@ -235,8 +235,9 @@ SHOP = f'''{SITE.page_head('The collection', f'{COUNT} pieces from the Waterdale
     </div>
   </dialog>
   <form id="form" novalidate>
-  <section class="sec" id="order" aria-labelledby="h-basket">
+  <section class="sec is-empty" id="order" aria-labelledby="h-basket" data-wa="972553311744" data-name="Gifted Israel">
     <div class="wrap">
+      <p class="o-empty">Your basket is empty. Tap Add on anything above and it shows here.</p>
       <ol class="osteps" id="steps" aria-label="Order steps">
         <li class="is-now" aria-current="step"><button type="button" data-go="1">Step 1: Your basket</button></li>
         <li><button type="button" data-go="2">Step 2: Delivery or pickup</button></li>
@@ -246,7 +247,7 @@ SHOP = f'''{SITE.page_head('The collection', f'{COUNT} pieces from the Waterdale
         <div>
           <div class="card ostep" data-s="1">
             <h2 id="h-basket">Your basket</h2>
-            <ul class="blist" id="sum-list"><li><span>Your basket is empty. Tap a piece above to add it.</span></li></ul>
+            <ul class="blist" id="sum-list"><li><span>Your basket is empty. Tap Add on anything above and it shows here.</span></li></ul>
             <p class="err" id="e-items" role="alert"></p>
           </div>
           <div class="card ostep" data-s="2" hidden>

@@ -12,7 +12,6 @@
   var filters = document.getElementById('filters');
   function groupOf(c) { return [].slice.call(document.querySelectorAll('#cat .grp')).filter(function (g) { return (g.querySelector('h2') || {}).textContent === c; })[0]; }
   function jump(c, smooth) { var g = groupOf(c); if (g) g.scrollIntoView({ block: 'start', behavior: smooth && !matchMedia('(prefers-reduced-motion: reduce)').matches ? 'smooth' : 'auto' }); }
-  filters.addEventListener('click', function (e) { var b = e.target.closest('.chip'); if (b) jump(b.dataset.c, true); });
 
   // ── the product sheet ──
   var sheet = document.getElementById('sheet'), cur = null, n = 1;
@@ -131,6 +130,8 @@
     document.getElementById('sum-mini').innerHTML = mini || '<li><span>Nothing yet</span></li>';
     document.getElementById('total').textContent = money(grand());
     var s = {}; for (var k2 in q) if (q[k2]) s[k2] = q[k2]; window.siteBasket.set(s);
+    document.getElementById('order').classList.toggle('is-empty', !total());   // an empty basket is one line
+    steppers();
     drawStep();
   }
   function v(id) { return document.getElementById(id).value.trim(); }
@@ -217,9 +218,249 @@
   document.getElementById('steps').addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
 
   var qs = new URLSearchParams(location.search);
-  if (qs.get('c')) addEventListener('load', function () { jump(qs.get('c'), false); });
+  if (qs.get('c')) addEventListener('load', function () { showAll(); jump(qs.get('c'), false); });
   update(); loadLive();
   var m0 = /#order-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
   var pick = by[qs.get('p')] || byName[(qs.get('add') || '').toLowerCase()];
   if (pick) open(pick);
+
+
+  var CAT = GI, cat = document.getElementById('cat');
+  var T = function (en) { return en; };
+  var ORD = document.getElementById('order').dataset, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var STEP = 24, limit = STEP, query = '', hideOut = false;
+  var $$ = function (sel, root) { return [].slice.call((root || cat).querySelectorAll(sel)); };
+  var groups = function () { return $$('.grp:not(.grp-pop)'); };
+  var gName = function (g) { return g.dataset.c || ((g.querySelector('h2') || {}).textContent || '').trim(); };
+  function itemOf(pc) {
+    var a = pc.querySelector('[data-id]'), b = pc.querySelector('[data-add]');
+    var id = (a && a.dataset.id) || (b && b.dataset.add);
+    return (id && CAT.by[id]) || byName[((pc.querySelector('[data-f="name"]') || {}).textContent || '').trim().toLowerCase()];
+  }
+  function isOut(pc) { var it = itemOf(pc); return pc.classList.contains('is-out') || !!(it && it.out); }
+
+  // the live catalogue (mir-catalog.js) draws cards from its template, which has no "+": give each one back. A piece with a
+  // finish or a nusach to choose opens the sheet instead of adding straight away.
+  function choose(it) { return !!(it.finish.length || it.nusach); }
+  function arm() {
+    $$('.grp:not(.grp-pop) .pc').forEach(function (pc, i) {
+      var it = itemOf(pc); if (!it) return;
+      var a = pc.querySelector('.pc-a'); if (a && !a.dataset.id) a.dataset.id = it.id;
+      if (!pc.dataset.o) pc.dataset.o = i;
+      if (pc.querySelector('.pc-q') || isOut(pc)) return;
+      var w = document.createElement('span'); w.className = 'pc-q';
+      w.innerHTML = '<button class="pc-add" type="button" data-q="1">+</button><span class="step pc-step" hidden><button type="button" data-d="-1">\u2212</button><output></output><button type="button" data-d="1">+</button></span>';
+      var add = w.firstChild, st = w.lastChild;
+      add.setAttribute('aria-label', (choose(it) ? 'Choose a finish for ' : 'Add ') + it.name + ', ' + money(it.price));
+      st.firstChild.setAttribute('aria-label', 'One fewer ' + it.name); st.lastChild.setAttribute('aria-label', 'One more ' + it.name);
+      pc.appendChild(w);
+    });
+  }
+  // \u2212 n + in place of the "+" once a plain piece is in the basket; back to 0 brings the "+" back
+  function steppers() {
+    [].forEach.call(document.querySelectorAll('.pc-q'), function (w) {
+      var it = itemOf(w.parentNode); if (!it) return;
+      var add = w.firstChild, st = w.lastChild, n = choose(it) ? 0 : (+window.siteBasket.get()[GI.key(it.id)] || 0), had = !st.hidden;
+      var had2 = document.activeElement === add;
+      add.hidden = n > 0; st.hidden = !n; st.querySelector('output').textContent = n;
+      st.querySelector('output').setAttribute('aria-label', n + ' in your basket');
+      if (had2 && n) st.lastChild.focus();
+      if (had && !n && st.contains(document.activeElement)) add.focus();
+    });
+  }
+  cat.addEventListener('click', function (e) {
+    var b = e.target.closest('.pc-q button'); if (!b) return;
+    var it = itemOf(b.closest('.pc')); if (!it) return;
+    if (b.dataset.q) {
+      if (choose(it)) { open(it); return; }
+      var k = GI.key(it.id); GI.add(k, 1); q[k] = window.siteBasket.get()[k]; update(); return;
+    }
+    var k2 = GI.key(it.id); q[k2] = Math.max(0, Math.min(20, (q[k2] || 0) + (+b.dataset.d))); update();
+  });
+  function sizeIt() {
+    var n = $$('.grp:not(.grp-pop) .pc').length;
+    cat.classList.remove('size-s', 'size-m', 'size-l');
+    cat.classList.add(n <= 6 ? 'size-s' : n <= 40 ? 'size-m' : 'size-l');
+    // one kind, or a handful of products: no category row
+    filters.hidden = groups().length < 2 || n <= 6;
+    return n;
+  }
+
+  // ── the category row: one line that stays at the top and lights up the kind you are looking at ──
+  var chips = filters.querySelector('.chips');
+  function drawChips() {
+    var gs = groups();
+    chips.innerHTML = '';
+    if (gs.length > 4) {
+      var all = document.createElement('button'); all.className = 'chip chip-all'; all.type = 'button';
+      all.setAttribute('aria-haspopup', 'dialog');
+      all.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span></span>';
+      all.lastChild.textContent = T('All', 'הכל'); all.setAttribute('aria-label', T('All kinds', 'כל הסוגים'));
+      chips.appendChild(all);
+    }
+    gs.forEach(function (g) {
+      var c = document.createElement('button'); c.className = 'chip'; c.type = 'button'; c.dataset.c = gName(g); c.textContent = gName(g);
+      chips.appendChild(c);
+    });
+  }
+  var lit = null;
+  function light() {
+    if (filters.hidden) return;
+    var line = filters.getBoundingClientRect().bottom + 12, now = null;
+    groups().forEach(function (g) { if (!g.hidden && g.getBoundingClientRect().top <= line) now = g; });
+    if (!now) now = groups().filter(function (g) { return !g.hidden; })[0];
+    var name = now ? gName(now) : null; if (name === lit) return; lit = name;
+    $$('.chip[data-c]', chips).forEach(function (c) {
+      var on = c.dataset.c === name; c.classList.toggle('is-on', on);
+      if (!on) { c.removeAttribute('aria-current'); return; }
+      c.setAttribute('aria-current', 'true');
+      // keep it in sight inside the row, without moving the page
+      var r = c.getBoundingClientRect(), box = chips.getBoundingClientRect();
+      if (r.left < box.left + 8) chips.scrollBy({ left: r.left - box.left - 24, behavior: reduce ? 'auto' : 'smooth' });
+      else if (r.right > box.right - 8) chips.scrollBy({ left: r.right - box.right + 24, behavior: reduce ? 'auto' : 'smooth' });
+    });
+  }
+  var tick = 0;
+  addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(function () { tick = 0; light(); }); }, { passive: true });
+
+  // ── "All": every kind, with how many it has ──
+  var kinds = document.createElement('dialog'); kinds.className = 'sheet kinds'; kinds.setAttribute('aria-labelledby', 'kinds-h');
+  kinds.innerHTML = '<span class="grab" aria-hidden="true"></span><button class="sh-close" type="button">×</button><div class="sh-in"><h2 id="kinds-h"></h2><ul class="kinds-l"></ul></div>';
+  kinds.querySelector('h2').textContent = T('Everything in the shop', 'כל מה שיש בחנות');
+  kinds.querySelector('.sh-close').setAttribute('aria-label', T('Close', 'סגירה'));
+  document.body.appendChild(kinds);
+  function openKinds() {
+    var ul = kinds.querySelector('.kinds-l'); ul.innerHTML = '';
+    groups().forEach(function (g) {
+      var li = document.createElement('li'), b = document.createElement('button'), n = $$('.pc', g).length;
+      b.type = 'button'; b.dataset.c = gName(g); b.innerHTML = '<span></span><span class="n"></span>';
+      b.firstChild.textContent = gName(g); b.lastChild.textContent = n;
+      b.setAttribute('aria-label', gName(g) + ', ' + n + T(' items', ' פריטים'));
+      if (gName(g) === lit) b.setAttribute('aria-current', 'true');
+      li.appendChild(b); ul.appendChild(li);
+    });
+    kinds.showModal(); document.body.style.overflow = 'hidden';
+  }
+  kinds.addEventListener('close', function () { document.body.style.overflow = ''; });
+  kinds.addEventListener('click', function (e) {
+    if (e.target === kinds || e.target.closest('.sh-close')) { kinds.close(); return; }
+    var b = e.target.closest('button[data-c]'); if (!b) return;
+    kinds.close(); goKind(b.dataset.c);
+  });
+  filters.addEventListener('click', function (e) { if (e.target.closest('.chip-all')) { openKinds(); return; } var c = e.target.closest('.chip[data-c]'); if (c) goKind(c.dataset.c); });
+  function goKind(name) {
+    showAll();
+    var g = groups().filter(function (x) { return gName(x) === name; })[0];
+    if (g) g.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' });
+  }
+
+  // ── search, sort, sold out and Show more ──
+  var tools = document.createElement('div'); tools.className = 'shop-tools';
+  var none = document.createElement('p'); none.className = 'no-res'; none.setAttribute('role', 'status'); none.hidden = true;
+  var more = document.createElement('button'); more.className = 'btn-line more'; more.type = 'button'; more.hidden = true;
+  function buildTools(n) {
+    tools.innerHTML = '';
+    if (n >= 20) {
+      var lab = document.createElement('label'); lab.className = 'sr-only'; lab.htmlFor = 'shop-q'; lab.textContent = T('Search the shop', 'חיפוש בחנות');
+      var inp = document.createElement('input'); inp.type = 'search'; inp.id = 'shop-q'; inp.className = 'fld shop-q'; inp.autocomplete = 'off';
+      inp.placeholder = T('Search ' + n + ' items', 'חיפוש ב-' + n + ' פריטים'); inp.setAttribute('enterkeyhint', 'search');
+      inp.value = query;
+      inp.addEventListener('input', function () { query = inp.value.trim().toLowerCase(); apply(); });
+      inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); inp.blur(); } });
+      tools.append(lab, inp);
+    }
+    if (n > 40) {
+      var row = document.createElement('div'); row.className = 'tools-row';
+      var sl = document.createElement('label'); sl.className = 'sr-only'; sl.htmlFor = 'shop-sort'; sl.textContent = T('Sort', 'מיון');
+      var sel = document.createElement('select'); sel.id = 'shop-sort'; sel.className = 'fld shop-sort';
+      [['', T('Our order', 'הסדר שלנו')], ['up', T('Price, low to high', 'מחיר, מהנמוך לגבוה')], ['down', T('Price, high to low', 'מחיר, מהגבוה לנמוך')]]
+        .forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; sel.appendChild(op); });
+      sel.addEventListener('change', function () { sortBy(sel.value); });
+      row.append(sl, sel);
+      if ($$('.pc').some(isOut)) {
+        var ch = document.createElement('label'); ch.className = 'chip';
+        ch.innerHTML = '<input type="checkbox" id="shop-out"><span></span>'; ch.lastChild.textContent = T('Hide sold out', 'בלי מה שאזל');
+        ch.firstChild.checked = hideOut;
+        ch.firstChild.addEventListener('change', function (e) { hideOut = e.target.checked; apply(); });
+        row.appendChild(ch);
+      }
+      tools.appendChild(row);
+    }
+    if (tools.childNodes.length) filters.before(tools); else tools.remove();
+  }
+  function priceOf(pc) { var it = itemOf(pc); return it ? it.price : 0; }
+  function sortBy(how) {
+    $$('.grp:not(.grp-pop) ul').forEach(function (ul) {
+      var cs = $$('.pc', ul);
+      cs.sort(function (a, b) { return how === 'up' ? priceOf(a) - priceOf(b) : how === 'down' ? priceOf(b) - priceOf(a) : a.dataset.o - b.dataset.o; });
+      cs.forEach(function (c) { ul.appendChild(c); });
+    });
+    apply();
+  }
+  function showAll() { if (limit !== Infinity) { limit = Infinity; apply(); } }
+  function apply() {
+    var big = cat.classList.contains('size-l'), cap = big && !query ? limit : Infinity, shown = 0, matched = 0;
+    groups().forEach(function (g) {
+      var vis = 0;
+      $$('.pc', g).forEach(function (pc) {
+        var it = itemOf(pc), text = ((pc.textContent || '') + ' ' + (it ? it.desc || '' : '')).toLowerCase();
+        var ok = (!query || text.indexOf(query) >= 0) && !(hideOut && isOut(pc));
+        if (ok) { matched++; if (++shown > cap) ok = false; }
+        pc.hidden = !ok; if (ok) vis++;
+      });
+      g.hidden = !vis;
+    });
+    var pop = cat.querySelector('.grp-pop'); if (pop) pop.hidden = !!query || hideOut;
+    var left = matched - Math.min(matched, cap);
+    more.hidden = !left; more.textContent = T('Show more (' + left + ' more)', 'להציג עוד (' + left + ')');
+    none.hidden = matched > 0;
+    if (!matched) {
+      none.textContent = T('Nothing matches “' + query + '”. ', 'לא מצאנו “' + query + '”. ');
+      var wa = document.createElement('a'); wa.href = 'https://wa.me/' + ORD.wa + '?text=' + encodeURIComponent(T('Hi, do you have ', 'היי, יש לכם ') + query + '?');
+      wa.target = '_blank'; wa.rel = 'noopener'; wa.textContent = T('Ask ' + ORD.name + ' on WhatsApp', 'לשאול את ' + ORD.name + ' בוואטסאפ');
+      none.appendChild(wa);
+    }
+    lit = null; light();
+  }
+  more.addEventListener('click', function () {
+    var first = $$('.grp:not(.grp-pop) .pc').filter(function (pc) { return pc.hidden; })[0];
+    limit += STEP; apply();
+    var f = first && first.querySelector('.pc-a'); if (f) f.focus({ preventScroll: true });
+  });
+
+  // ── "Most ordered", from real orders only ──
+  function popular() {
+    var old = cat.querySelector('.grp-pop'); if (old) old.remove();
+    if (cat.classList.contains('size-s')) return;
+    var list; try { list = JSON.parse((document.getElementById('mir-popular') || {}).textContent || '[]'); } catch (e) { list = []; }
+    var seen = {}, picks = [];
+    (Array.isArray(list) ? list : []).forEach(function (k) {
+      var it = CAT.by[k] || byName[String(k).toLowerCase()]; if (!it || seen[it.id]) return;
+      var pc = $$('.grp:not(.grp-pop) .pc').filter(function (c) { var x = itemOf(c); return x && x.id === it.id && !isOut(c); })[0];
+      if (pc) { seen[it.id] = 1; picks.push(pc); }
+    });
+    if (picks.length < 3) return;
+    var g = document.createElement('div'); g.className = 'grp grp-pop';
+    g.innerHTML = '<h2></h2><ul class="cards rail"></ul>'; g.firstChild.textContent = T('Most ordered', 'הכי מוזמנים');
+    picks.slice(0, 8).forEach(function (pc) {
+      var c = pc.cloneNode(true); c.hidden = false; c.removeAttribute('data-o');
+      [].forEach.call(c.querySelectorAll('[id]'), function (x) { x.removeAttribute('id'); });
+      g.lastChild.appendChild(c);
+    });
+    (cat.querySelector('[data-mir-list]') || cat).prepend(g);
+  }
+
+  function start() {
+    arm();
+    var n = sizeIt();
+    drawChips(); buildTools(n); popular();
+    steppers();
+    var last = groups().pop();
+    if (last) { last.after(none); none.after(more); }
+    apply();
+  }
+  window.SHOP = { showAll: showAll, refresh: start };
+  start();
+  // the live catalogue (mir-catalog.js) and the real "Most ordered" (#mir-popular) come at the end of <body>, after this
+  addEventListener('DOMContentLoaded', start);
 })();

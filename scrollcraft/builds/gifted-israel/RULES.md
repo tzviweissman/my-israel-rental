@@ -234,3 +234,4 @@ R3r.3 pass: built to the blueprint: check-rules run after the last edit
 R3r.4 n/a: nothing Tzvi has had to point out twice on this site
 
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+<!-- 13 Nov 2026: the shop layout on the shop page (Tzvi: "Yes, all of them"): one row of the seven kinds that stays at the top and lights the kind in view, an All sheet with how many each has, search (16px, a WhatsApp ask when nothing is found), sort, Hide sold out, Show more after 24, Add turns into - n +, the phone bar only once something is in the basket, an empty basket is one line, and a Most ordered row only from real orders. Prices, words and the home and contact pages are unchanged; re-read against the shop page on phone and laptop, and the page checks (check-site, check-fits, check-order-data) are run on it. -->

@@ -447,3 +447,47 @@ html:has(.rooms) { scroll-behavior: auto; }
 #form input, #form select, #form textarea, .fld { font-size: 16px; }
 .form > *, .form .card, .form .card > div, .sum { min-width: 0; }
 .sent.bad { font-weight: 700; }
+/* ── The shop layout (13 Nov 2026): kinds row that lights up, All sheet, search, sort, Show more, "+" on each card,
+   Most ordered, an empty basket as one line. 161 pieces: two to a row, so the cards keep the grid and only gain a "+". ── */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.pc[hidden], .grp[hidden], .filters[hidden] { display: none; }
+.step button, .chip, .pc-q button { touch-action: manipulation; }
+#cat .pc { position: relative; container-type: inline-size; }
+.pc-q { position: absolute; inset-inline-end: var(--s2); top: calc(100cqw - 52px); z-index: 2; }
+.pc-q .pc-add { width: 44px; height: 44px; border: 0; border-radius: var(--r); background: var(--accent); color: var(--accent-ink); font: 400 1.6rem/1 var(--font-body); cursor: pointer; box-shadow: 0 2px 10px rgba(31, 27, 26, .25); }
+.pc-q .pc-add:hover { filter: brightness(1.12); }
+.pc-q .pc-add:focus-visible, .pc-q .step button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.pc-q .step { background: var(--ground); box-shadow: 0 2px 10px rgba(31, 27, 26, .25); }
+.pc-q .step output { min-width: 2.2ch; }
+.pc-q[hidden], .pc-q .pc-add[hidden], .pc-q .step[hidden] { display: none; }
+.pc-q .step { display: inline-flex; }
+.pc-q .step[hidden] { display: none; }
+
+.chip.is-on { border-color: var(--ink); background: var(--ink); color: var(--ground); }
+.chip.is-on:hover { opacity: .86; }   /* the lit kind still answers the pointer */
+.chip:active { transform: translateY(1px); }
+.chip-all { gap: var(--s2); }
+.kinds .sh-in { display: block; padding: var(--s6) var(--gutter) var(--s7); }
+.kinds { width: min(30rem, 100vw - 2 * var(--gutter)); }
+@media (max-width: 760px) { .kinds { width: 100vw; } }
+.kinds-l { list-style: none; padding: 0; margin: var(--s5) 0 0; }
+.kinds-l button { display: flex; justify-content: space-between; align-items: center; gap: var(--s4); width: 100%; min-height: 52px; padding: 0 var(--s2);
+  border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--ink); font: 700 var(--t0)/1.3 var(--font-body); text-align: start; cursor: pointer; }
+.kinds-l button[aria-current] { color: var(--accent); }
+.kinds-l .n { color: var(--soft); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+.shop-tools { display: grid; gap: var(--s3); margin-top: var(--s6); max-width: 40rem; }
+.shop-tools + .filters { margin-top: var(--s3); }
+.shop-q, .shop-sort { font-size: 16px; min-height: 48px; width: 100%; }
+.tools-row { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; }
+.tools-row .shop-sort { width: auto; flex: 1 1 12rem; max-width: 20rem; }
+.no-res { margin: var(--s7) 0 0; font-size: var(--t1); }
+.no-res a { color: var(--accent); }
+.more { display: flex; margin: var(--s7) auto 0; }
+
+.cards.rail { display: flex; overflow-x: auto; gap: var(--s4); scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 2px; }
+.cards.rail .pc { flex: 0 0 min(46%, 15rem); scroll-snap-align: start; }
+
+.o-empty { display: none; }
+body:not(.no-js) #order.is-empty .o-empty { display: block; font-size: var(--t1); color: var(--soft); margin: 0; }
+body:not(.no-js) #order.is-empty .osteps, body:not(.no-js) #order.is-empty .form { display: none; }

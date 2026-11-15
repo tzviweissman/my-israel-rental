@@ -23,13 +23,33 @@
     window.siteToast('Added: ' + GI.label(key));
   };
 
-  // once something is in the basket the menu bar's button goes to it
+  // once something is in the basket the menu bar's button goes to it, and the phone bar becomes the basket:
+  // "2 items · ₪140 · View basket" (shop research, 13 Nov 2026). Empty, it shows nothing on the shop page.
   function barBtn() {
-    var b = window.siteBasket.get(), n = 0; for (var k in b) n += +b[k] || 0;
-    var a = document.querySelector('.top .btn-line'); if (!a) return;
-    a.firstChild.textContent = n ? 'Basket' : 'Shop the collection';
-    a.setAttribute('href', n ? 'shop.html#order' : 'shop.html');
+    var b = window.siteBasket.get(), n = 0, tot = 0; for (var k in b) { n += +b[k] || 0; tot += (+b[k] || 0) * GI.unit(k); }
+    document.body.classList.toggle('has-basket', n > 0);
+    var a = document.querySelector('.top .btn-line');
+    if (a && !a.classList.contains('just')) {
+      a.firstChild.textContent = n ? 'Basket' : 'Shop the collection';
+      a.setAttribute('href', n ? 'shop.html#order' : 'shop.html');
+    }
+    var bar = document.getElementById('bar'), p = bar && bar.querySelector('.p'), go = bar && bar.querySelector('.btn');
+    if (p && !p.dataset.was) { p.dataset.was = p.innerHTML; go.dataset.was = go.textContent; go.dataset.href = go.getAttribute('href'); }
+    if (p && !bar.classList.contains('just')) {
+      if (n) { p.innerHTML = '<b>' + n + (n === 1 ? ' item' : ' items') + '</b>' + GI.money(tot); go.textContent = 'View basket'; go.setAttribute('href', 'shop.html#order'); }
+      else { p.innerHTML = p.dataset.was; go.textContent = go.dataset.was; go.setAttribute('href', go.dataset.href); }
+    }
+    dispatchEvent(new Event('scroll'));   // site.js shows or hides the bar for the new basket
   }
+  // "Added: <name>" shows for a moment in the basket button and the phone bar, never over the page
+  var tAdd = 0;
+  document.addEventListener('site:added', function (e) {
+    var a = document.querySelector('.top .btn-line'), bar = document.getElementById('bar'), p = bar && bar.querySelector('.p');
+    if (a) { a.classList.add('just'); a.firstChild.textContent = 'Added ✓'; }
+    if (p) { bar.classList.add('just'); p.innerHTML = '<b>Added</b>' + String(e.detail).replace(/^Added: /, '').replace(/</g, '&lt;'); }
+    clearTimeout(tAdd);
+    tAdd = setTimeout(function () { if (a) a.classList.remove('just'); if (bar) bar.classList.remove('just'); barBtn(); }, 1600);
+  });
   var set0 = window.siteBasket.set; window.siteBasket.set = function (b) { set0(b); barBtn(); }; barBtn();
 
   // the phone bar steps aside at the closing band, which has its own button
