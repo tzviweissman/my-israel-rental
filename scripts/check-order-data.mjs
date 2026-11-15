@@ -96,6 +96,13 @@ async function fill(p) {
     const sets = new Map();
     for (const c of document.querySelectorAll('input[type=checkbox]')) { const k = c.name || c.parentElement.parentElement; sets.set(k, [...(sets.get(k) || []), c]); }
     for (const cs of sets.values()) if (cs.length > 1 && !cs.some((c) => c.checked)) { const c = cs.find((c) => !c.disabled && vis(c.closest('label') || c)); if (c) (c.closest('label') || c).click(); }
+    // a row of choice buttons where none is pressed (The Brown Box's bowl flavour, shown once the bowl is added): press
+    // the first; a row that re-draws itself on a press is looked up again each time
+    for (let k = 0; k < 8; k++) {
+      const row = [...new Set([...document.querySelectorAll('button[aria-pressed="false"]')].map((b) => b.parentElement))].find((r) => vis(r) && !r.querySelector('button[aria-pressed="true"]'));
+      const b = row && [...row.querySelectorAll('button[aria-pressed="false"]')].find((b) => !b.disabled && vis(b));
+      if (!b) break; b.click();
+    }
     for (const rs of Object.values(groups)) {
       if (rs.some((r) => r.checked)) continue;
       const r = rs.find((r) => !r.disabled && vis(r.closest('label') || r));

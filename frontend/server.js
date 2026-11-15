@@ -517,7 +517,7 @@ async function sendHandBuilt(req, res, slug, file) {
   if (data && data.prices) html = html.replace(/<head>/i, `<head><script>window.MIR_PRICES=${JSON.stringify(data.prices).replace(/</g, '\\u003c')};</script>`);
   // A form of the page's own gets what the standard order page has (public/pages/mir-order.js).
   if (!editor && /type="tel"|window\.open\(''/.test(html)) {
-    html = html.replace(/<\/body>/i, `<script src="/pages/mir-order.js?v=${EDITOR_STAMP}"${data && data.texts_on ? ' data-texts="1"' : ''}></script></body>`);
+    html = html.replace(/<\/body>/i, `<script src="/pages/mir-order.js?v=${EDITOR_STAMP}"${data && data.texts_on ? ' data-texts="1"' : ''}${data && Number(data.free_over) > 0 ? ` data-free-over="${Number(data.free_over)}"` : ''}></script></body>`);
   }
   // The business's notice (dashboard, "Notice at the top"; the API sends it only between its dates), on every page of
   // the site, in a corner where no design's own bar sits; closed for the visit with its button.

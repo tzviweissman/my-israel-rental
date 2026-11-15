@@ -333,6 +333,9 @@ for (const url of urls) {
       const empty = await page.evaluate(() => ({ sent: window.__sent, errors: [...document.querySelectorAll('.err, [role=alert]')].filter((e) => e.textContent.trim()).length }));
       if (empty.sent) fail(url, 'FLOW', 'the form sends with nothing filled in');
       else if (!empty.errors) fail(url, 'FLOW', 'sending an empty form shows no message saying what is missing');
+      // sent: a WhatsApp message, or, on a shop whose order texts are on (gig.whatsapp false, L.A. Cholent), a saved order and
+      // no WhatsApp at all (15 Nov 2026); check-order-data compares that order with the page's total
+      const went = () => page.evaluate(() => !!window.__sent || (window.__posts || []).some((p) => /order-form\/[0-9a-f-]{36}\/orders/.test(p.u)));
       // an order in steps (page rules 3k.1): fill what each step shows, press its button, up to 4 steps
       for (let stepN = 0; stepN < 4; stepN++) {
       await page.evaluate((first) => {
@@ -357,12 +360,13 @@ for (const url of urls) {
       await page.waitForTimeout(200);
       await page.evaluate(() => { const s = document.querySelector('form button[type=submit]') || document.querySelector('#send'); s && s.click(); });
       for (let w = 0; w < 14 && !(await page.evaluate(() => !!window.__sent)); w++) await page.waitForTimeout(500);  // a page may save the order first (up to a few seconds)
-      if (await page.evaluate(() => !!window.__sent)) break;
+      if (await went()) break;
       }
       const res = await page.evaluate(() => ({ sent: decodeURIComponent((window.__sent.split('text=')[1] || '')), total: (document.querySelector('#total') || {}).textContent || '', errs: [...document.querySelectorAll('.err')].map((e) => e.textContent.trim()).filter(Boolean) }));
-      if (!res.sent) fail(url, 'FLOW', `filled in, the form sends nothing${res.errs.length ? ` (it says: ${res.errs.join('; ')})` : ''}`);
-      else if (res.total && !res.sent.replace(/\s/g, '').includes(res.total.replace(/\s/g, ''))) fail(url, 'FLOW', `the message does not carry the total the page shows (${res.total})`);
-      else if (!/wa\.me|whatsapp/i.test(res.sent + '') && !res.sent) fail(url, 'FLOW', 'no WhatsApp message');
+      const savedOnly = !res.sent && await went();
+      if (!res.sent && !savedOnly) fail(url, 'FLOW', `filled in, the form sends nothing${res.errs.length ? ` (it says: ${res.errs.join('; ')})` : ''}`);
+      else if (res.sent && res.total && !res.sent.replace(/\s/g, '').includes(res.total.replace(/\s/g, ''))) fail(url, 'FLOW', `the message does not carry the total the page shows (${res.total})`);
+      else if (!savedOnly && !/wa\.me|whatsapp/i.test(res.sent + '') && !res.sent) fail(url, 'FLOW', 'no WhatsApp message');
       if (res.sent) {
         const saved = await page.evaluate(() => (window.__posts || []).some((p) => /\/api\//.test(p.u) && /order|book|quote|enquir|request/i.test(p.u) && p.t <= (window.__sentAt || Infinity)));
         if (!saved) fail(url, 'SAVE', 'the order goes straight to WhatsApp without being saved to MyIsraelRental first (POST it through the order form, then open WhatsApp; rules 3k)');

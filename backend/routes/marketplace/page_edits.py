@@ -371,6 +371,8 @@ async def get_page_edits(slug_or_id: str):
     return {
         # Whether the designed page's order form skips WhatsApp (public/pages/mir-order.js).
         "texts_on": hears_without_whatsapp(biz),
+        # free delivery from this much: the designed page's bar under its total (public/pages/mir-order.js); None: no bar
+        "free_over": (biz.get("order_settings") or {}).get("free_over"),
         "edits": doc.get("edits") or {"text": {}, "img": {}, "style": {}},
         "updated_at": doc.get("updated_at"),
         "prices": prices,

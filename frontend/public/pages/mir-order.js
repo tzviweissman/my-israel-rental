@@ -174,7 +174,40 @@
     p.appendChild(a);
     send.parentNode.insertBefore(p, send.nextSibling);
   }
+  // ── free delivery (Tzvi, 15 Nov 2026): a shop with "free delivery over" set (data-free-over on this script, from its
+  // order settings) gets a thin bar under its order total, "₪X more for free delivery", then "Free delivery". A shop
+  // without it gets nothing. The server waives the fee from that amount (orders.py), so this only says what it does.
+  // ponytail: reads the page's own total ([data-order-total]), which on a few pages already includes the fee; shown
+  // under the basket total only, not in each design's phone bar.
+  function freeBar() {
+    var over = Number(script && script.dataset.freeOver), tot = document.querySelector('[data-order-total]');
+    if (!(over > 0) || !tot || document.querySelector('.mir-free')) return;
+    var row = tot.parentElement && tot.parentElement !== document.body ? tot.parentElement : tot;
+    var box = document.createElement('div'); box.className = 'mir-free'; box.setAttribute('role', 'status');
+    box.style.cssText = 'display:none;margin:8px 0 4px;font-size:13px !important;line-height:1.4;font-weight:500;text-align:start;grid-column:1/-1;flex-basis:100%;width:100%';
+    // the bar in the text's own colour: a faint track and a solid fill, so it fits any design
+    var say = document.createElement('div'), wrap = document.createElement('div'), track = document.createElement('div'), fill = document.createElement('div');
+    wrap.style.cssText = 'position:relative;height:6px;margin-top:5px';
+    track.style.cssText = 'position:absolute;inset:0;border-radius:99px;background:currentColor;opacity:.18';
+    fill.style.cssText = 'position:absolute;inset:0 auto 0 0;border-radius:99px;background:currentColor;transition:width .3s ease';
+    wrap.appendChild(track); wrap.appendChild(fill); box.appendChild(say); box.appendChild(wrap);
+    row.parentNode.insertBefore(box, row.nextSibling);
+    function draw() {
+      var text = tot.getAttribute('data-order-total') || tot.textContent || '';
+      var goods = parseFloat(text.replace(/[^\d.]/g, '')) || 0, sym = (text.match(/[₪$€£]/) || ['₪'])[0];
+      if (!goods) { box.style.display = 'none'; return; }
+      box.style.display = 'block';
+      var left = Math.ceil((over - goods) * 100) / 100;
+      say.textContent = left > 0
+        ? (he() ? 'עוד ' + sym + left + ' למשלוח חינם' : sym + left + ' more for free delivery')
+        : (he() ? 'משלוח חינם' : 'Free delivery');
+      fill.style.width = Math.min(100, goods / over * 100) + '%';
+    }
+    draw();
+    new MutationObserver(draw).observe(tot, { childList: true, characterData: true, subtree: true, attributes: true });
+  }
   function start() {
+    freeBar();
     mount();
     if (!TEXTS) return;
     ask();
