@@ -76,7 +76,7 @@ R3f.2 pass: film (signature), topping drift, reveals, the order dock
 R3m.1 pass: grepped the html: the gallery and list places exist where the owner can fill them
 R3m.3 n/a: the owner gave no hours, fees or guarantee, so there are no such places
 R3k.1 pass: the menu and the order are one order page; the home page menu adds to it
-R3k.2 pass: one bar on both pages: name, Bowls, Menu, Gift boxes and the Order button; on a phone the dock carries the button
+R3k.2 pass: one bar on both pages: name, Bowls, Menu, Gift boxes and the Order button; on a phone the dock carries the button, and on the order page it shows only once something is in the basket (13 Nov 2026: 2 items, the total and To delivery; the count and total link to the order summary)
 R3k.4 n/a: the Brown Box predates the shared site.css: one page with its own inline css and a separate order page
 R8a.1 pass: view source: font stylesheet only; no demo text
 R3b.4 pass: facts carry the menu
@@ -170,11 +170,11 @@ R3g.4 pass: each motion has one job (confirm, reveal, guide); no linear easing; 
 R3e.16 pass: grepped css and js: no linear easing outside the loading bar; transitions under 0.5 s
 R3e.17 n/a: no carousel and no bottom sheet on this site
 R3e.18 n/a: no ambient background video
-R3a.2 pass: mid-transition frames of the menu tabs looked at; nothing unfinished; each section is one row of cards of the same height, so a short section (the two acai bowls) is not followed by a hole
+R3a.2 pass: 13 Nov 2026: the menu is one list in its sections with a row of kinds that stays under the bar and lights up the kind in view (no tabs that swap content), scrolled it at 390x844 and 1280x800: nothing unfinished, no hole after a short section
 R3a.3 n/a: no label is placed on a spot in a photo
 R3a.4 pass: cutoff clean at the six sizes on both pages; the film stage is held and fits; the order page is never held
 R3a.5 pass: no parallax on phones; reduced motion shows a still
-R3s.2 pass: check-site SHIFT clean (the document keeps the same height under every menu tab, measured at 390 and 1440 wide) and check-motion has no JUMP or FLASH, including two quick taps
+R3s.2 pass: check-site SHIFT clean (13 Nov 2026: the menu no longer swaps under tabs, all kinds are in one list, so the document keeps one height; the row of kinds only scrolls to a kind) and check-motion has no JUMP or FLASH, including two quick taps
 R3s.1 pass: check-site STATE clean
 R3s.8 pass: over the opening photo the buttons are solid cream on a soft edge shade; looked at on the light and dark frames
 R3s.10 pass: every item is named beside its photo
@@ -182,7 +182,7 @@ R3i.3 n/a: no scroll readout on this site
 R3s.21 pass: check-site BROKEN clean on every page; 27 Oct: the order page's spare menu photos (shown when the menu cannot be fetched) now point to the page's own folder, so they load wherever the page is served (two came up 404 in the publish check)
 
 ## 8. Phone
-R3b.6 pass: the phone dock carries the price and the button after the film; 360x640 looked at
+R3b.6 pass: the phone dock carries the item count, the total and the button, only once something is in the basket (13 Nov 2026); 360x640 looked at
 R3f.7 pass: the dock fits at 360x640
 R3a.6 pass: check-site PHONE clean
 R3s.22 pass: check-site TAP clean on every page

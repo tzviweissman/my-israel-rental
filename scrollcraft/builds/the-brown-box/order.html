@@ -196,9 +196,54 @@
   select { width: 100%; min-height: 48px; padding: .7rem .9rem; border: 1px solid var(--line-ivory); border-radius: 12px; background: #fff; color: var(--ink); font-family: var(--font-body); }
   .cols > *, .fields > *, .fields > * > * { min-width: 0; }
   .sum .why.bad { color: #FFD2CC; font-weight: 600; }
+
+  /* the shop layout (13 Nov 2026): kinds row that stays under the menu bar and lights up where you are, an "All" sheet, a Most ordered
+     row, rows tight enough that the whole menu is about two phone screens, and an empty basket that is one line */
+  .add, .qty button, .cats button, .dock .btn, .sum li .rm, .cfg button.c, .kinds button { touch-action: manipulation; }
+  #gifts .grp { display: block; margin: 1.2rem 0 .3rem; scroll-margin-top: calc(var(--bar-h) + 4.6rem); }
+  #gifts .grp:first-child, #gifts .pop + .grp { margin-top: 1.1rem; }
+  .cats { position: sticky; top: var(--bar-h); z-index: 40; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: .8rem 0 0; padding: .6rem 0; background: var(--ivory); border-bottom: 1px solid var(--line-ivory); }
+  .cats::-webkit-scrollbar { display: none; }
+  .cats button { flex: none; white-space: nowrap; }
+  .cats button.all { display: inline-flex; align-items: center; gap: .45rem; }
+  .pop { margin: 1.2rem 0 0; }
+  .pop h3 { font: 600 1rem/1.25 var(--font-head); letter-spacing: .02em; color: var(--gold-ink); margin: 0 0 .6rem; }
+  .pop ul { list-style: none; margin: 0; padding: 0 0 2px; display: flex; gap: .8rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .pop li { flex: 0 0 min(46%, 11.5rem); scroll-snap-align: start; display: grid; gap: .4rem; align-content: start; padding: .6rem; background: #fff; border: 1px solid var(--line-ivory); border-radius: 14px; }
+  .pop .ph { display: block; width: min(100%, 8rem); aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: #fff; justify-self: center; }
+  .pop .ph img { width: 100%; height: 100%; object-fit: cover; }
+  .pop b { font-weight: 500; line-height: 1.25; }
+  .pop .pr { font-weight: 600; font-size: .95rem; }
+  .sum.is-empty > :not(#empty) { display: none; }
+  .sum.is-empty { padding: 1.1rem 1.5rem; }
+  .sum.is-empty .empty { margin: 0; }
+  body.is-empty .stepbar, body.is-empty .dock { display: none; }
+  .dock .info { color: inherit; text-decoration: none; min-height: 44px; display: block; }
+  .cats button[aria-current="true"] { background: var(--night); border-color: var(--night); color: #fff; }
+  .cats button[aria-current="true"]:hover { background: var(--ink); }
+  dialog.kinds { width: min(26rem, 100vw - 2 * var(--gutter)); max-width: none; max-height: 85svh; padding: 1.4rem 1.2rem 1rem; border: 0; border-radius: 20px; background: var(--ivory); color: var(--ink); box-shadow: var(--shadow); overflow: auto; }
+  dialog.kinds::backdrop { background: rgb(26 15 8 / .55); }
+  dialog.kinds h2 { font-size: 1.25rem; padding-inline-end: 3rem; }
+  dialog.kinds .kc { position: absolute; top: .6rem; inset-inline-end: .6rem; width: 44px; height: 44px; border: 0; border-radius: 50%; background: none; color: var(--ink); font-size: 1.6rem; line-height: 1; cursor: pointer; }
+  dialog.kinds ul { list-style: none; margin: .8rem 0 0; padding: 0; }
+  dialog.kinds li button { display: flex; justify-content: space-between; align-items: center; gap: 1rem; width: 100%; min-height: 52px; padding: 0 .3rem; border: 0; border-bottom: 1px solid var(--line-ivory); background: none; color: var(--ink); font: 500 1rem/1.3 var(--font-body); text-align: start; cursor: pointer; }
+  dialog.kinds li button[aria-current] { color: var(--gold-ink); font-weight: 700; }
+  dialog.kinds li .n { color: var(--soft); font-weight: 400; font-variant-numeric: tabular-nums; }
+  @media (max-width: 900px) {
+    .cats { margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); }
+    .head { padding-block: 1rem 0; } .head h1 { font-size: 1.8rem; } .head p { font-size: .88rem; line-height: 1.45; margin-top: .3rem; }
+    #gifts .grp { font-size: .92rem; margin: .8rem 0 .15rem; } .step > h2 { font-size: 1.15rem; } .step > h2 .n { width: 1.7rem; height: 1.7rem; font-size: .9rem; }
+    .cats { margin-top: .5rem; padding-block: .45rem; }
+    .stepbar { margin: .8rem 0 .2rem; }
+    .step > p.hint { font-size: .9rem; margin-top: .3rem; }
+    .items li { grid-template-columns: 56px minmax(0, 1fr) auto; gap: .75rem; padding: .55rem 0; }
+    .items .ph { width: 56px; height: 56px; }
+    body.is-empty main { padding-bottom: 2rem; }
+    dialog.kinds { width: 100vw; max-width: 100vw; margin: auto 0 0; border-radius: 20px 20px 0 0; padding-bottom: calc(1rem + env(safe-area-inset-bottom)); }
+  }
 </style>
 </head>
-<body>
+<body class="s1 is-empty">
 
 <header class="bar">
   <div class="wrap">
@@ -207,7 +252,7 @@
   </div>
 </header>
 
-<main data-mir-catalog>
+<main data-mir-catalog data-mir-popular>
   <div class="wrap head">
     <h1>Order</h1>
     <p>Choose from the menu and tell us where it is going. The button sends it all to us on WhatsApp, and we confirm the order and the delivery fee with you there.</p>
@@ -251,7 +296,7 @@
 
     <aside class="sum" aria-labelledby="sumh">
       <h2 id="sumh">Your order</h2>
-      <p class="empty" id="empty">Nothing chosen yet.</p>
+      <p class="empty" id="empty">Your basket is empty. Tap Add on anything above and it shows here.</p>
       <ul id="lines" aria-live="polite"></ul>
       <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
       <div class="tot"><span>Before delivery</span><b id="total" data-order-total>₪0</b></div>
@@ -278,7 +323,7 @@
 </footer>
 
 <div class="dock order-bar" id="dock">
-  <div><small>Before delivery</small><b id="dtotal">₪0</b></div>
+  <a class="info" href="#sumh" aria-label="View basket"><small id="dsmall">Before delivery</small><b id="dtotal">₪0</b></a>
   <a class="btn" id="send2" href="#" aria-disabled="true"><span style="position:relative">To delivery</span></a>
 </div>
 
@@ -345,6 +390,30 @@ function boot(LISTING) {
       p._li = li; p._ctl = ctl;
     });
   });
+
+  // "Most ordered": a swipeable row at the top, only from real orders (#mir-popular, written by the server from the
+  // shop's order history: 3 or more names that match a product); never typed in here.
+  (function () {
+    var list = read('mir-popular'); if (!Array.isArray(list)) return;
+    var seen = {}, picks = [];
+    list.forEach(function (k) {
+      var p = products.filter(function (x) { return x.id === k || String(x.name || '').toLowerCase() === String(k).toLowerCase(); })[0];
+      if (p && !seen[p._k] && p.in_stock && p.price_kind !== 'quote') { seen[p._k] = 1; picks.push(p); }
+    });
+    if (picks.length < 3) return;
+    var sec = document.createElement('section'); sec.className = 'pop'; sec.setAttribute('aria-labelledby', 'pop-h');
+    sec.innerHTML = '<h3 id="pop-h">Most ordered</h3><ul></ul>';
+    picks.slice(0, 8).forEach(function (p) {
+      var li = document.createElement('li');
+      var ph = document.createElement('span'); ph.className = 'ph';
+      if (p.image) { var im = document.createElement('img'); im.src = p.image; im.alt = ''; im.loading = 'lazy'; im.width = 160; im.height = 120; ph.appendChild(im); }
+      var b = document.createElement('b'); b.textContent = p.name;
+      var pr = document.createElement('span'); pr.className = 'pr'; pr.textContent = priceText(p);
+      var ctl = document.createElement('div'); p._pctl = ctl;
+      li.appendChild(ph); li.appendChild(b); li.appendChild(pr); li.appendChild(ctl); sec.lastChild.appendChild(li);
+    });
+    host.insertBefore(sec, host.firstChild);
+  })();
 
   // Bowls and gift boxes: one set of choices per unit, kept when the count
   // changes. Bowl: flavour (build your own +6) and exactly two extras
@@ -448,7 +517,12 @@ function boot(LISTING) {
 
   function drawCtl(p) {
     sync(p); drawCfg(p);
-    var ctl = p._ctl; ctl.textContent = '';
+    fillCtl(p, p._ctl);
+    if (p._pctl) fillCtl(p, p._pctl);
+  }
+  function fillCtl(p, ctl) {
+    var hadQty = ctl.contains(document.activeElement) && !document.activeElement.classList.contains('add');
+    ctl.textContent = '';
     if (!p.in_stock) return;
     if (p.price_kind === 'quote') {
       // priced on request: asked for on the business page, never added to this order
@@ -464,8 +538,8 @@ function boot(LISTING) {
     if (!n) {
       var a = document.createElement('button'); a.type = 'button'; a.className = 'add'; a.textContent = 'Add';
       a.setAttribute('aria-label', 'Add ' + p.name);
-      a.onclick = function () { q[p._k] = min(p); update(); var m = p._ctl.querySelector('[data-plus]'); if (m) m.focus(); };
-      ctl.appendChild(a); return;
+      a.onclick = function () { q[p._k] = min(p); update(); var m = ctl.querySelector('[data-plus]'); if (m) m.focus(); if (ctl !== p._ctl && kindOf(p)) p._li.scrollIntoView({ block: 'center', behavior: 'smooth' }); };
+      ctl.appendChild(a); if (hadQty) a.focus(); return;
     }
     var box = document.createElement('div'); box.className = 'qty';
     var minus = document.createElement('button'); minus.type = 'button'; minus.textContent = '−'; minus.setAttribute('aria-label', 'One fewer ' + p.name);
@@ -473,7 +547,7 @@ function boot(LISTING) {
     var plus = document.createElement('button'); plus.type = 'button'; plus.textContent = '+'; plus.dataset.plus = ''; plus.setAttribute('aria-label', 'One more ' + p.name);
     plus.disabled = n >= 40;
     minus.onclick = function () { q[p._k] = n - 1 < min(p) ? 0 : n - 1; if (!q[p._k]) delete q[p._k]; update(); };
-    plus.onclick = function () { q[p._k] = n + 1; update(); var m = p._ctl.querySelector('[data-plus]'); if (m) m.focus(); };
+    plus.onclick = function () { q[p._k] = n + 1; update(); var m = ctl.querySelector('[data-plus]'); if (m) m.focus(); };
     box.appendChild(minus); box.appendChild(out); box.appendChild(plus); ctl.appendChild(box);
   }
 
@@ -500,6 +574,10 @@ function boot(LISTING) {
     lines.textContent = '';
     var c = chosen();
     empty.hidden = c.length > 0;
+    document.body.classList.toggle('is-empty', !c.length);
+    document.querySelector('.sum').classList.toggle('is-empty', !c.length);
+    var cnt = 0; c.forEach(function (p) { cnt += q[p._k]; });
+    document.getElementById('dsmall').textContent = cnt + (cnt === 1 ? ' item' : ' items') + ' · before delivery';
     c.forEach(function (p) {
       var li = document.createElement('li');
       var l = document.createElement('div'); l.className = 'l';
@@ -521,6 +599,7 @@ function boot(LISTING) {
     var t = totals().text;
     document.getElementById('total').textContent = t;
     document.getElementById('dtotal').textContent = t;
+    document.querySelector('.dock .info').setAttribute('aria-label', document.getElementById('dsmall').textContent.replace(' · before delivery', '') + ', ' + t + ' before delivery, view basket');
     if (typeof drawCats === 'function') drawCats();
     check(false);
   }
@@ -561,7 +640,7 @@ function boot(LISTING) {
     return ready;
   }
   function setStep(n, fromPop) {
-    step = n;
+    step = n; document.body.classList.toggle('s1', n === 1);
     document.querySelectorAll('section.step').forEach(function (s) { s.hidden = +s.dataset.s !== n; });
     document.querySelectorAll('.stepbar li').forEach(function (li, i) { li.classList.toggle('on', i < n); });
     document.getElementById('stepnow').textContent = 'Step ' + n + ' of 3: ' + NAMES[n - 1];
@@ -576,17 +655,56 @@ function boot(LISTING) {
   // the menu, one section at a time
   var cats = document.getElementById('cats'), heads = [].slice.call(document.querySelectorAll('#gifts .grp'));
   function drawCats() {
-    [].forEach.call(cats.children, function (b) {
+    [].forEach.call(cats.querySelectorAll('button[data-g]'), function (b) {
       var n = 0; products.forEach(function (p) { if (q[p._k] > 0 && (p.group || 'More from The Brown Box') === b.dataset.g) n += 1; });
       var c = b.querySelector('.n'); if (c) c.remove();
       if (n) { c = document.createElement('span'); c.className = 'n'; c.textContent = n; b.appendChild(c); }
     });
   }
-  function showCat(i) { heads.forEach(function (h, j) { h.nextElementSibling.hidden = j !== i; }); [].forEach.call(cats.children, function (b, j) { b.setAttribute('aria-pressed', j === i ? 'true' : 'false'); }); }
-  heads.forEach(function (h, i) { var b = document.createElement('button'); b.type = 'button'; b.dataset.g = h.textContent; b.appendChild(document.createTextNode(h.textContent)); b.onclick = function () { showCat(i); }; cats.appendChild(b); });
-  var firstCat = 0;
-  products.forEach(function (p) { if (add && q[p._k] > 0) heads.forEach(function (h, i) { if (h.textContent === (p.group || 'More from The Brown Box')) firstCat = i; }); });
-  showCat(firstCat);
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, lit = -1;
+  function goCat(i) { heads[i].scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' }); }
+  // more than four kinds: "All" first, a sheet listing every kind and how many it has
+  var kd = null;
+  if (heads.length > 4) {
+    var all = document.createElement('button'); all.type = 'button'; all.className = 'all'; all.setAttribute('aria-haspopup', 'dialog'); all.setAttribute('aria-label', 'All kinds');
+    all.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>All';
+    cats.appendChild(all);
+    kd = document.createElement('dialog'); kd.className = 'kinds'; kd.setAttribute('aria-labelledby', 'kinds-h');
+    kd.innerHTML = '<button class="kc" type="button" aria-label="Close">×</button><h2 id="kinds-h">Everything on the menu</h2><ul></ul>';
+    document.body.appendChild(kd);
+    all.onclick = function () {
+      var ul = kd.querySelector('ul'); ul.innerHTML = '';
+      heads.forEach(function (h, i) {
+        var n = groups[h.textContent] ? groups[h.textContent].length : 0, li = document.createElement('li'), b = document.createElement('button');
+        b.type = 'button'; b.dataset.i = i; b.innerHTML = '<span></span><span class="n"></span>'; b.firstChild.textContent = h.textContent; b.lastChild.textContent = n;
+        b.setAttribute('aria-label', h.textContent + ', ' + n + (n === 1 ? ' item' : ' items')); if (i === lit) b.setAttribute('aria-current', 'true');
+        li.appendChild(b); ul.appendChild(li);
+      });
+      kd.showModal(); document.body.style.overflow = 'hidden';
+    };
+    kd.addEventListener('close', function () { document.body.style.overflow = ''; });
+    kd.addEventListener('click', function (e) {
+      if (e.target === kd || e.target.closest('.kc')) { kd.close(); return; }
+      var b = e.target.closest('button[data-i]'); if (!b) return; kd.close(); goCat(+b.dataset.i);
+    });
+  }
+  heads.forEach(function (h, i) { var b = document.createElement('button'); b.type = 'button'; b.dataset.g = h.textContent; b.appendChild(document.createTextNode(h.textContent)); b.onclick = function () { goCat(i); }; cats.appendChild(b); });
+  // the row lights up the kind in view and keeps it in sight
+  function light() {
+    if (cats.offsetParent === null) return;
+    var line = cats.getBoundingClientRect().bottom + 48, now = 0;
+    heads.forEach(function (h, j) { if (h.getBoundingClientRect().top <= line) now = j; });
+    if (now === lit) return; lit = now;
+    [].forEach.call(cats.querySelectorAll('button[data-g]'), function (b, j) {
+      if (j !== now) { b.removeAttribute('aria-current'); return; }
+      b.setAttribute('aria-current', 'true');
+      var r = b.getBoundingClientRect(), box = cats.getBoundingClientRect();
+      if (r.left < box.left + 8) cats.scrollBy({ left: r.left - box.left - 24, behavior: reduce ? 'auto' : 'smooth' });
+      else if (r.right > box.right - 8) cats.scrollBy({ left: r.right - box.right + 24, behavior: reduce ? 'auto' : 'smooth' });
+    });
+  }
+  var tick = 0; addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(function () { tick = 0; light(); }); }, { passive: true });
+  light();
   document.querySelectorAll('[data-need] input').forEach(function (i) {
     i.addEventListener('input', function () { i.closest('[data-need]').classList.remove('bad'); check(false); });
   });
