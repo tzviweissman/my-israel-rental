@@ -149,7 +149,8 @@
   }
   .card {
     position: absolute; inset: 0; border-radius: 14px; overflow: hidden;
-    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    /* a thin light edge, no blurred shadow: eight moving shadowed photos held the opening at 30 fps (15 Nov 2026) */
+    outline: 1px solid rgba(255, 255, 255, 0.12);
     background: var(--navy-2); will-change: transform, opacity; opacity: 0;
     transform: translate3d(40vw, 50vh, 0) rotate(28deg);
   }

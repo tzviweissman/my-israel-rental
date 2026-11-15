@@ -87,6 +87,14 @@
   /* The bundle is the one to weigh the singles against, so it stands apart. */
   .pick.bundle { grid-column: 1 / -1; grid-template-columns: 1fr auto; align-items: center; column-gap: 1rem; border-color: var(--rose-gold); }
   .pick.bundle .what { grid-column: 1; }
+  /* every card answers the pointer, the chosen one and the bundle too (their own border colours outrank .pick:hover) */
+  .pick:hover { box-shadow: 0 8px 20px -10px rgba(14, 31, 57, 0.3); }
+  .pick[aria-pressed="true"]:hover { box-shadow: 0 0 0 1px var(--navy) inset, 0 8px 20px -10px rgba(14, 31, 57, 0.3); }
+  /* the picks arrive from the API: keep their room so nothing below jumps (measured 501px laptop, 710px phone) */
+  #groups:empty { min-height: 500px; }
+  @media (max-width: 560px) { #groups:empty { min-height: 710px; } }
+  /* a short laptop screen (650px) holds the whole first step */
+  @media (min-width: 561px) and (max-height: 760px) { section.step { padding-block: 0.8rem; } .group { margin-bottom: 0.7rem; } .pick { padding: 0.7rem 0.9rem; gap: 0.2rem; } .picks { gap: 0.5rem; } section.step > p.lead { margin-bottom: 0.8rem; } #groups:empty { min-height: 460px; } }
   @media (max-width: 560px) { .pick.bundle { grid-template-columns: 1fr; } }
   .pick .name { font-family: var(--font-head); font-size: 1.15rem; line-height: 1.2; }
   .pick .price { font-weight: 800; font-size: 1.15rem; color: var(--navy); }
@@ -182,7 +190,7 @@
 </head>
 <body data-step="1">
 <nav class="nav" aria-label="Book">
-  <a class="nav__mark" href="/business/michal-simkin"><img src="/pages/michal-simkin/assets/mark.jpg?v=mw4i9qwr" alt="" width="96" height="96" data-mir-key="i-70d395cc-0"> Michal Simkin</a>
+  <a class="nav__mark" href="/business/michal-simkin"><img src="/pages/michal-simkin/assets/mark.jpg?v=mwiasjpf" alt="" width="96" height="96" data-mir-key="i-70d395cc-0"> Michal Simkin</a>
   <div class="nav__links"><a href="/business/michal-simkin#consult" data-mir-key="t-e277af9d-0">The consult</a><a href="/business/michal-simkin#same" data-mir-key="t-85225267-0">In their words</a><a href="/business/michal-simkin#academy" data-mir-key="t-fde3bf82-0">Courses</a><a href="/business/michal-simkin/book" aria-current="page" data-mir-key="t-3c02b9cf-0">Book</a></div>
 </nav>
 
@@ -206,12 +214,12 @@
         <p class="err" id="errWhat"></p>
       </section>
       <div class="gallery" aria-label="Her clients">
-        <figure class="lead"><img src="/pages/michal-simkin/assets/client-1.jpg?v=mw4i9qwr" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling" style="object-fit: cover" data-mir-key="i-3bbf0edf-0"></figure>
+        <figure class="lead"><img src="/pages/michal-simkin/assets/client-1.jpg?v=mwiasjpf" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling" style="object-fit: cover" data-mir-key="i-3bbf0edf-0"></figure>
         <div class="more">
-          <figure><img src="/pages/michal-simkin/assets/client-2.jpg?v=mw4i9qwr" width="720" height="960" alt="A client in a soft shoulder-length brown wig" loading="lazy" data-mir-key="i-3c3f9c4c-0"></figure>
-          <figure><img src="/pages/michal-simkin/assets/client-3.jpg?v=mw4i9qwr" width="720" height="960" alt="A client in a long wavy light-brown wig" loading="lazy" data-mir-key="i-d7f10817-0"></figure>
-          <figure><img src="/pages/michal-simkin/assets/client-6.jpg?v=mw4i9qwr" width="720" height="960" alt="A client in a long wavy honey-brown wig" loading="lazy" data-mir-key="i-cb17fbe5-0"></figure>
-          <figure><img src="/pages/michal-simkin/assets/client-7.jpg?v=mw4i9qwr" width="720" height="960" alt="A client smiling in a shoulder-length dark wig" loading="lazy" data-mir-key="i-46fbc92a-0"></figure>
+          <figure><img src="/pages/michal-simkin/assets/client-2.jpg?v=mwiasjpf" width="720" height="960" alt="A client in a soft shoulder-length brown wig" loading="lazy" data-mir-key="i-3c3f9c4c-0"></figure>
+          <figure><img src="/pages/michal-simkin/assets/client-3.jpg?v=mwiasjpf" width="720" height="960" alt="A client in a long wavy light-brown wig" loading="lazy" data-mir-key="i-d7f10817-0"></figure>
+          <figure><img src="/pages/michal-simkin/assets/client-6.jpg?v=mwiasjpf" width="720" height="960" alt="A client in a long wavy honey-brown wig" loading="lazy" data-mir-key="i-cb17fbe5-0"></figure>
+          <figure><img src="/pages/michal-simkin/assets/client-7.jpg?v=mwiasjpf" width="720" height="960" alt="A client smiling in a shoulder-length dark wig" loading="lazy" data-mir-key="i-46fbc92a-0"></figure>
         </div>
         <figcaption data-mir-key="t-237fd175-0">Our clients, from our website.</figcaption>
       </div>
@@ -248,16 +256,16 @@
         <ul class="lines" id="lines"><li data-mir-key="t-71f210ae-0">Nothing chosen yet.</li></ul>
         <p class="contents" id="contents" hidden></p>
         <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
-        <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><b id="total">₪0</b></div>
+        <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><b id="total" data-order-total>₪0</b></div>
         <button type="button" class="cta" id="place" disabled>Request the time</button>
         <p class="assure" data-mir-key="t-6fd44a79-0"><b>Nothing is paid here.</b> We confirm the time with you, and you pay us directly.</p>
       </div>
       <div class="card" aria-label="What clients say">
         <h2 data-mir-key="t-5102e93b-0">In their words</h2>
         <div style="display:grid;gap:.9rem">
-          <figure class="voice"><img src="/pages/michal-simkin/assets/yael.jpg?v=mw4i9qwr" width="88" height="88" alt="" data-mir-key="i-c7ecbdcd-0"><figcaption><p data-mir-key="t-cef544f8-0">"She had a ton of options and she tried so many on me, giving her honest opinion, with no pressure to buy. Its not surprising that 2 years later I still love the wig I got."<b>Yael Stoolback</b></p></figcaption></figure>
-          <figure class="voice"><img src="/pages/michal-simkin/assets/debbie.jpg?v=mw4i9qwr" width="88" height="88" alt="" data-mir-key="i-0479194e-0"><figcaption><p data-mir-key="t-a3aae529-0">"Immediately, she saw the problems and brought the sheitl back to life. Now, I love it."<b>Debbie Burack</b></p></figcaption></figure>
-          <figure class="voice"><img src="/pages/michal-simkin/assets/miriam.jpg?v=mw4i9qwr" width="88" height="88" alt="" data-mir-key="i-beac240f-0"><figcaption><p data-mir-key="t-ebaa2600-0">"Something I actually think is cute, light, and works amazingly for me."<b>Miriam Campbell</b></p></figcaption></figure>
+          <figure class="voice"><img src="/pages/michal-simkin/assets/yael.jpg?v=mwiasjpf" width="88" height="88" alt="" data-mir-key="i-c7ecbdcd-0"><figcaption><p data-mir-key="t-cef544f8-0">"She had a ton of options and she tried so many on me, giving her honest opinion, with no pressure to buy. Its not surprising that 2 years later I still love the wig I got."<b>Yael Stoolback</b></p></figcaption></figure>
+          <figure class="voice"><img src="/pages/michal-simkin/assets/debbie.jpg?v=mwiasjpf" width="88" height="88" alt="" data-mir-key="i-0479194e-0"><figcaption><p data-mir-key="t-a3aae529-0">"Immediately, she saw the problems and brought the sheitl back to life. Now, I love it."<b>Debbie Burack</b></p></figcaption></figure>
+          <figure class="voice"><img src="/pages/michal-simkin/assets/miriam.jpg?v=mwiasjpf" width="88" height="88" alt="" data-mir-key="i-beac240f-0"><figcaption><p data-mir-key="t-ebaa2600-0">"Something I actually think is cute, light, and works amazingly for me."<b>Miriam Campbell</b></p></figcaption></figure>
         </div>
       </div>
     </aside>

@@ -39,7 +39,7 @@ R3b.1 pass: first screen answers what (wigs), where (Bet Shemesh in the bar), wh
 R3b.2 pass: the consultation price and hours sit in the bar beside the button; no kosher claim
 R3b.3 pass: header button and fixed bar carry the same action; Meet and closing sections each one solid button; looked at while scrolling
 R3h.1 pass: check-site OPENING and looked at it (25 Oct): full-screen picture of her own salon wall and shelf under her navy, and her clients are dealt onto a stack on it as you scroll
-R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop and a phone (was shorter), 60 fps (median 16.7 ms, no frame over 50 ms) after the deck stopped repainting landed cards, the top bar lost its blur and the still grain stopped covering four screens; her clients are dealt onto her own salon wall and glass shelf, empty, under her navy (edited from her photo, gen/ground-brief.md), never onto more client photos; cards whole; the wall loads first
+R3h.20 pass: 15 Nov the cards lost their blurred shadow (a thin light edge instead), which held the opening at 30 fps; measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop and a phone (was shorter), 60 fps (median 16.7 ms, no frame over 50 ms) after the deck stopped repainting landed cards, the top bar lost its blur and the still grain stopped covering four screens; her clients are dealt onto her own salon wall and glass shelf, empty, under her navy (edited from her photo, gen/ground-brief.md), never onto more client photos; cards whole; the wall loads first
 R3n.1 pass: first screen 1440x900 and 390x844: her clients photos fill the whole first screen behind the stack
 R3n.2 pass: signature: the words clients used about their old wig are struck through and the words they used after replace them, from her eight real reviews; no other salon has these quotations
 R3n.3 n/a: the page offers no choice that changes it; the booking page choices are plain tiles
@@ -175,8 +175,8 @@ R3a.2 pass: 22 Oct review fix: the strike section was re-timed (its cues and pai
 R3a.3 n/a: nothing is placed on a spot in a photo
 R3a.4 n/a: needs Tzvi: cutoff.mjs on the home page reports the struck-words section sticking out of its held stage at every size, and clipped.mjs reports the pinned stage sliding 73 to 97 px under the fixed header at scroll 0; both come from the held-section design of the 8 Sep brief and an attempt to fix them was undone
 R3a.5 pass: the css has a reduced-motion block that shows every card and word; no parallax on phones
-R3s.2 pass: check-site SHIFT and check-motion on index and book: nothing jumps, choices switch smoothly
-R3s.1 pass: check-site STATE on index and book: every control has hover and pressed; 22 Oct: the pick tiles, choice chips, back button and nav links of book.html got explicit hover and pressed states, the main buttons got pressed
+R3s.2 pass: check-site SHIFT and check-motion on index and book: nothing jumps, choices switch smoothly; 15 Nov book.html keeps the room for its picks while they load (it moved 0.11)
+R3s.1 pass: check-site STATE on index and book: every control has hover and pressed; 15 Nov the chosen pick and the bundle got a hover lift (their own borders hid the old one); 22 Oct: the pick tiles, choice chips, back button and nav links of book.html got explicit hover and pressed states, the main buttons got pressed
 R3s.8 pass: the bar and closing buttons sit on solid grounds, not on photos
 R3s.10 n/a: no thing is named to show a picture
 R3i.3 n/a: no live readout
@@ -217,3 +217,7 @@ R3v.1 pass: full footer on index and book (who we are, Pages, Visit, Reach us, b
 R3v.2 pass: the site is Home plus its booking page, so the menu bar keeps its jumps on the home page and the book page lists Home sections plus Book (3v.2); unchanged
 R3v.14 pass: three facts under a "Book a consultation" button added to the first screen (consultation ₪100, Sun to Thu 10 to 2 by appointment, Bet Shemesh), all from her record and the page's own bar line
 <!-- 6 Nov 2026: the only change is the discount code box on the order form (public/pages/mir-code.js, Tzvi: American Crust's first-time code had nowhere to be typed). Looked at the form with the box and a test order on phone and laptop; the rest of the site is unchanged, so the other rules were not re-read. -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
