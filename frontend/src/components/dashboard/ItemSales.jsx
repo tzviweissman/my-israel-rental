@@ -151,9 +151,9 @@ export default function ItemSales({ API, auth, businessId, params, periodKey, t,
                 <Stat label={t('items.orders', 'Orders')} value={r.orders} />
                 <Stat label={t('items.sales', 'Sales')} value={money(r.revenue, r.currency)} />
                 <Stat label={t('items.margin', 'Margin each')}
-                  value={r.margin == null ? '–' : `${r.margin < 0 ? '-' : ''}${money(Math.abs(r.margin), r.currency)} (${r.margin_pct}%)`}
+                  value={r.margin == null ? '-' : `${r.margin < 0 ? '-' : ''}${money(Math.abs(r.margin), r.currency)} (${r.margin_pct}%)`}
                   tone={r.margin != null && r.margin < 0 ? 'var(--error-text)' : undefined} />
-                <Stat label={t('items.profit', 'Profit')} value={r.profit == null ? '–' : `${r.profit < 0 ? '-' : ''}${money(Math.abs(r.profit), r.currency)}`}
+                <Stat label={t('items.profit', 'Profit')} value={r.profit == null ? '-' : `${r.profit < 0 ? '-' : ''}${money(Math.abs(r.profit), r.currency)}`}
                   tone={r.profit != null && r.profit < 0 ? 'var(--error-text)' : undefined} />
               </div>
               {r.listed && r.price ? <CostInput r={r} onSave={save} t={t} /> : <span />}
