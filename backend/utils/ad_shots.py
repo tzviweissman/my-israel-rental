@@ -81,13 +81,21 @@ def look_for(kind: str, occasion: str) -> dict[str, str]:
     return OCCASIONS.get(occasion) or KINDS.get(kind) or KINDS["studio"]
 
 
+_CAMERA = (
+    # The library's 5/5 ads look up at their subject from close in; ours came back shot from above like a menu
+    # photo (Tzvi, 15 Nov 2026: "more wow like our inspo").
+    "The camera is low, almost at table height, close in and looking slightly up at the product, with a 50mm "
+    "lens, so it towers in the frame; the background falls softly out of focus. Never shot from above. "
+)
+
+
 def prompt_for(what: str, kind: str, occasion: str, shape: str) -> str:
     look = look_for(kind, occasion)
     tall = shape == "story"
     return (
         f"Product photograph for an advert. Image 1 is the real product: {what}. Image 2 is the empty set. "
         "Photograph exactly the product from image 1 standing on the table of image 2, as a real advertising hero "
-        "shot made on that table: camera close and low, the product big, filling about "
+        f"shot made on that table. {_CAMERA}The product is big, filling about "
         f"{'85' if tall else '75'} percent of the picture's width in the lower part of the picture, nothing of it "
         "cut off except where it is wider than the picture. A soft contact shadow where it touches the table. "
         "Keep the product identical to image 1: the same shape, colours, toppings, texture, arrangement and count; "
@@ -133,6 +141,7 @@ def prompt_for_idea(idea: str, what: str, kind: str, occasion: str, shape: str) 
         "after it as if it were a monument: one climbing a small wooden ladder leaning against it, two standing on top "
         "of it at work, one carrying a tool across the table, one looking up at it with a hand on the hip. They are "
         "real miniature people photographed with the product, in sharp focus, with real small shadows. "
+        f"{_CAMERA}"
         "Keep the product identical to image 1: the same shape, colours, labels, lids, texture and count; do not add, "
         "remove, open, rearrange or improve anything about it, and nothing spills from it. "
         f"{look['light']} "
@@ -150,7 +159,8 @@ def prompt_for_scene(what: str, shape: str) -> str:
         "as a top advertising photographer would: the same place, the same people, the same objects and the same work "
         "being done, the same number of each. Do not add, remove or replace anything or anyone, and do not change any "
         "face. Only the photography improves: flattering soft light with a warm glow, crisp focus, rich true colours, "
-        "a clean composition with the main subject large in the lower part of the picture. "
+        "a clean composition with the main subject large in the lower part of the picture, the camera close in and "
+        "at eye height or lower, the background softly out of focus. "
         f"The top {'40' if tall else '35'} percent of the picture is calm, darker background for words. "
         "No text, no letters, no logos."
     )

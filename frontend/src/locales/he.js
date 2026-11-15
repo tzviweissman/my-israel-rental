@@ -4692,6 +4692,7 @@ const he = {
         shotMake: "צלמו",
         fullphotoL: "תמונה מלאה",
         giantL: "מילים ענקיות",
+        posterL: "פוסטר",
         splitL: "חצי חצי",
         feastL: "כמה ביחד",
         bgNone: "בלי תמונה",

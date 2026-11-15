@@ -2678,6 +2678,110 @@ function drawGiant(canvas, a) {
   }
 }
 
+// "Poster" (Tzvi, 15 Nov 2026, from the library's 5/5s: DUPLO's CHEESE, 1 DAY LEFT, PROMO SUNDAY): one word as wide
+// as the ad in one heavy face, the product cut out and standing in front of the word's lower half, one flat colour
+// to every edge, and a quiet foot: the code and the link on the ground itself, no white plate.
+function drawPoster(canvas, a) {
+  const { ctx, W, H, body, px, top } = begin(canvas, a.format, a.rtl);
+  const L = lookOf(a.look, a.brand, a.item.cut || a.item.img);
+  ctx.fillStyle = L.bg;
+  paintGround(ctx, W, H);
+  const face = a.rtl ? '"Secular One"' : 'Anton';
+  const M = 36;
+  const QR = 150;
+  const bottom = H - (a.format === 'story' ? 230 : 0) - 40;
+  const footTop = bottom - QR - 20;
+  const head = (a.words.headline || '').trim();
+  const big0 = (a.words.big_word || a.words.key || head.split(/\s+/)[0] || '').trim();
+  const big = a.rtl ? big0 : big0.toUpperCase();
+  // One line, or two when the word is two and they come out bigger stacked.
+  const ws = big.split(/\s+/);
+  const maxH = (footTop - top) * 0.4;
+  const sizeFor = (ls) => {
+    ctx.font = `400 100px ${face}`;
+    const ink = (l) => { ctx.direction = dirOf(l, a.rtl); const m = ctx.measureText(l); return (m.actualBoundingBoxLeft || 0) + (m.actualBoundingBoxRight || m.width); };
+    const wide = Math.max(...ls.map(ink)) / 100;
+    const capK = (ctx.measureText(ls[0]).actualBoundingBoxAscent || 72) / 100;
+    return Math.min((W - M * 2) / wide, maxH / (ls.length * capK * 1.06), H * 0.34);
+  };
+  const options = [[big], ...(ws.length > 1 ? [[ws.slice(0, Math.ceil(ws.length / 2)).join(' '), ws.slice(Math.ceil(ws.length / 2)).join(' ')]] : [])];
+  const lines = options.map((ls) => [ls, sizeFor(ls)]).sort((p, q) => q[1] - p[1])[0][0];
+  const size = Math.floor(sizeFor(lines));
+  ctx.font = `400 ${size}px ${face}`;
+  const capH = ctx.measureText(lines[0]).actualBoundingBoxAscent || size * 0.72;
+  const gap = capH * 0.06;
+  const wordTop = top + px(64);
+  const lastBase = wordTop + capH * lines.length + gap * (lines.length - 1);
+  part(ctx, 'word', [M, wordTop, W - M * 2, lastBase - wordTop], () => {
+    if (!a.rtl && 'letterSpacing' in ctx) ctx.letterSpacing = '0.28em';
+    say(ctx, (a.eyebrow || '').toUpperCase(), W / 2, top + px(26), { size: Math.max(px(28), 32), weight: 700, colour: L.sub, align: 'center', body, rtl: a.rtl, max: W - M * 2 });
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+    ctx.font = `400 ${size}px ${face}`;
+    ctx.fillStyle = L.word;
+    ctx.textAlign = 'center';
+    lines.forEach((l, i) => {
+      ctx.direction = dirOf(l, a.rtl);
+      // The letters' own ink centred, so a face whose letters overhang their advance stays inside.
+      const m = ctx.measureText(l);
+      const shift = ((m.actualBoundingBoxLeft || 0) - (m.actualBoundingBoxRight || 0)) / 2;
+      ctx.fillText(l, W / 2 + shift, wordTop + capH * (i + 1) + gap * i);
+    });
+  });
+  // The headline in the same face, under the product; left out when it is only the word again.
+  const rest = head && head.toUpperCase() !== big0.toUpperCase() ? head : '';
+  ctx.font = `400 ${px(54)}px ${face}`;
+  const sub = rest ? wrap(ctx, rest, W - 128, 2) : [];
+  const subH = sub.length * px(64);
+  // The product's top stands in front of the word's lower half, its foot above the headline.
+  const pTop = lastBase - capH * 0.5;
+  const img = a.item.cut || a.item.img;
+  const [cw, ch] = fitIn(img, W - 120, footTop - 24 - subH - (sub.length ? 24 : 0) - pTop);
+  const cx = (W - cw) / 2;
+  if (a.item.cut) shadowed(ctx, img, cx, pTop, cw, ch);
+  else part(ctx, 'product', [cx, pTop, cw, ch], () => roundedImage(ctx, img, cx, pTop, cw, ch, 24));
+  // Woven, like the library's BASIL and TWIST: the outer letters come back over the product, so it passes behind
+  // them and in front of the middle ones. Not once a piece is dragged or while the moving ad brings them in.
+  const still = !(PARTS && (isMoved('word') || isMoved('product') || (PARTS.anim && PARTS.anim.t < MOVE_ENDS)));
+  if (still && a.item.cut) {
+    ctx.save();
+    ctx.font = `400 ${size}px ${face}`;
+    ctx.fillStyle = L.word;
+    ctx.textAlign = 'center';
+    lines.forEach((l, i) => {
+      if ([...l].length < 3) return;
+      ctx.direction = dirOf(l, a.rtl);
+      const m = ctx.measureText(l);
+      const shift = ((m.actualBoundingBoxLeft || 0) - (m.actualBoundingBoxRight || 0)) / 2;
+      const left = W / 2 + shift - (m.actualBoundingBoxLeft || m.width / 2);
+      const right = W / 2 + shift + (m.actualBoundingBoxRight || m.width / 2);
+      const chars = [...l];
+      const [lc, rc] = ctx.direction === 'rtl' ? [chars[chars.length - 1], chars[0]] : [chars[0], chars[chars.length - 1]];
+      const y = wordTop + capH * (i + 1) + gap * i;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, y - capH - 4, left + ctx.measureText(lc).width, capH + 8);
+      ctx.rect(right - ctx.measureText(rc).width, y - capH - 4, W, capH + 8);
+      ctx.clip();
+      ctx.fillText(l, W / 2 + shift, y);
+      ctx.restore();
+    });
+    ctx.restore();
+  }
+  const r = Math.round(Math.min(100, ch * 0.28));
+  sticker(ctx, { x: a.rtl ? cx + r * 0.6 : cx + cw - r * 0.6, y: pTop + ch - r * 0.7, r, item: a.item, fromWord: a.fromWord, body });
+  if (sub.length) {
+    part(ctx, 'words', [64, pTop + ch + 16, W - 128, subH + 10], () => {
+      ctx.font = `400 ${px(54)}px ${face}`;
+      ctx.fillStyle = L.text;
+      ctx.textAlign = 'center';
+      sub.forEach((l, i) => { ctx.direction = dirOf(l, a.rtl); ctx.fillText(a.rtl ? l : l.toUpperCase(), W / 2, pTop + ch + 16 + px(54) + i * px(64)); });
+    });
+  }
+  ctx.textAlign = a.rtl ? 'right' : 'left';
+  drawFooter(ctx, { W, PAD: 40, QR, rtl: a.rtl, dark: L.text.toUpperCase() === '#FFFFFF', cta: a.cta, shortUrl: a.shortUrl, qr: a.qr, body,
+    px: (n) => n, start: a.rtl ? W - 40 : 40, textW: W - 80, bottom });
+}
+
 // "Half and half" (shop/7a3e4d8e, the pack and the nuts meeting on the line):
 // the ad cut in two colours on a slant, the product standing across the cut.
 function drawSplit(canvas, a) {
@@ -3007,15 +3111,15 @@ const THEMED = { behind: drawBehind, phonepop: drawPhonePop, calling: drawCallin
   notify: drawNotify, search: drawSearch, toggle: drawToggle, checklist: drawChecklist, custom: drawCustom,
   situation: drawSituation, mirror: drawMirror, chat: drawChat, post: drawPost, versus: drawVersus,
   reasons: drawReasons, honest: drawHonest, moment: drawMoment,
-  shoot: drawShoot, fullphoto: drawFullPhoto, giant: drawGiant, split: drawSplit, feast: drawFeast, labels: drawLabels };
+  shoot: drawShoot, fullphoto: drawFullPhoto, giant: drawGiant, poster: drawPoster, split: drawSplit, feast: drawFeast, labels: drawLabels };
 // Each layout opens in its own colour, so the gallery is not one ad repeated
 // (Tzvi, 5 Nov 2026: "all very similar"). The owner's pick then replaces it.
 const START_LOOK = { behind: 'cream', phonepop: 'own', calling: 'night', notify: 'navy', search: 'cream', toggle: 'sun',
   checklist: 'own', situation: 'night', mirror: 'cream', chat: 'navy', post: 'cream', versus: 'sun', reasons: 'own',
-  honest: 'night', moment: 'navy', giant: 'sun', split: 'navy', feast: 'own', labels: 'cream' };
+  honest: 'night', moment: 'navy', giant: 'sun', poster: 'cream', split: 'navy', feast: 'own', labels: 'cream' };
 // The designs in the gallery, by family, most different first.
 const FAMILIES = [
-  ['lead', ['custom', 'shoot', 'fullphoto', 'giant', 'labels', 'split', 'feast', 'behind', 'bigwords', 'torn', 'colour']],
+  ['lead', ['custom', 'poster', 'shoot', 'fullphoto', 'giant', 'labels', 'split', 'feast', 'behind', 'bigwords', 'torn', 'colour']],
   ['screens', ['phonepop', 'calling', 'phone', 'notify', 'search', 'toggle', 'checklist', 'chat', 'post']],
   ['words', ['situation', 'mirror', 'versus', 'reasons', 'honest', 'moment', 'question', 'review', 'note']],
   ['simple', ['clean', 'night', 'grid', 'gallery', 'items', 'native']],
@@ -3046,7 +3150,7 @@ function paintGrain(ctx, W, H) {
 }
 // The designs that are a menu or an order screen: their price is the point, so it shows with the switch off.
 const PRICE_ON = new Set(['items', 'phonepop']);
-const CUT_ONLY = ['behind', 'phonepop', 'calling', 'split', 'feast'];
+const CUT_ONLY = ['poster', 'behind', 'phonepop', 'calling', 'split', 'feast'];
 const COLOUR_FIXED = ['colour', 'bigwords', 'grid', 'torn', 'question', 'phone'];
 const DARK_RGB = { night: [23, 23, 26], navy: [18, 59, 87] };
 // Every word a design writes, where it lands in the ad's own units, so the logo never sits on one (some lines, like
@@ -3496,6 +3600,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     ['shoot', t('ads.shootL', 'Product photo'), !!shotOf(itemFor('shoot'))],
     ['fullphoto', t('ads.fullphotoL', 'Full photo'), !!featured],
     ['giant', t('ads.giantL', 'Giant words'), !!featured],
+    ['poster', t('ads.posterL', 'Poster'), cut],
     ['split', t('ads.splitL', 'Half and half'), cut],
     ['feast', t('ads.feastL', 'Several together'), cutItems.length >= 3],
     ['labels', t('ads.labelsL', 'Labels'), !!featured && (words?.points || []).length >= 2],

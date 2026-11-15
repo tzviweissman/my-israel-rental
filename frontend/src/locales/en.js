@@ -4823,6 +4823,7 @@ const en = {
         shotMake: "Photograph it",
         fullphotoL: "Full photo",
         giantL: "Giant words",
+        posterL: "Poster",
         splitL: "Half and half",
         feastL: "Several together",
         bgNone: "No photo",
