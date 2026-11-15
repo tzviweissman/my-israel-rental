@@ -126,7 +126,7 @@ export default function ItemSales({ API, auth, businessId, params, periodKey, t,
 
       <div className="inline-flex rounded-full border p-0.5 mb-3" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('items.order', 'Order')}>
         {['best', 'slow'].map((k) => (
-          <button key={k} type="button" onClick={() => setOrder(k)} aria-pressed={order === k} className="px-3 min-h-[40px] rounded-full text-xs font-semibold"
+          <button key={k} type="button" onClick={() => setOrder(k)} aria-pressed={order === k} className="px-3 min-h-[44px] rounded-full text-xs font-semibold"
             style={order === k ? { background: 'var(--ink)', color: 'var(--action-ink, #fff)' } : { color: 'var(--brand-muted)' }} data-testid={`items-order-${k}`}>
             {k === 'best' ? t('items.best', 'Best sellers first') : t('items.slow', 'Slowest first')}
           </button>
