@@ -345,3 +345,32 @@ label.opt input { accent-color: var(--night); width: 20px; height: 20px; }
 #form input, #form select, #form textarea, .fld { font-size: 16px; }
 .form > *, .form .card, .form .card > div, .sum { min-width: 0; }
 .sent.bad { font-weight: 700; }
+/* The shop layout (13 Nov 2026): both doughs first, each with its own Add that turns into - n +; an empty basket is one line */
+.btn[hidden], .step[hidden] { display: none; }
+.btn, .step button, .pk-sel { touch-action: manipulation; }
+.pks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; margin: 0 0 1.1rem; max-width: 40rem; }
+.pk { display: flex; flex-direction: column; gap: .5rem; padding: .45rem; border-radius: 22px; border: 2px solid currentColor; transition: background 200ms var(--out), color 200ms var(--out); }
+.pk.is-on { background: var(--cream); color: var(--night); border-color: var(--cream); }
+.pk-sel { display: flex; align-items: center; gap: .6rem; min-height: 56px; padding: 0; border: 0; background: transparent; color: inherit; font: 600 1rem/1.15 var(--font-body); text-align: start; cursor: pointer; }
+.pk-sel img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; flex: none; }
+.pk-sel b { display: block; font: 400 var(--d3)/1.1 var(--font-head); }
+.pk .btn { width: 100%; padding: 0 .8rem; }
+.pk .step { width: 100%; justify-content: space-between; }
+.ctl .step output { flex: 1; }
+.st-buy .step { min-width: 12rem; justify-content: space-between; }
+.stage[data-room="pizza"] .pk.is-on .btn { background: var(--night); color: var(--mustard); } .stage[data-room="pizza"] .pk.is-on .btn .chip::before { color: var(--night); }
+@media (max-width: 860px) { .st-ph { aspect-ratio: 16 / 10; } }
+.o-empty { display: none; }
+body:not(.no-js) #order.is-empty .o-empty { display: block; margin: 0; font-size: 1.125rem; color: var(--soft); }
+body:not(.no-js) #order.is-empty .osteps, body:not(.no-js) #order.is-empty .form { display: none; }
+body:not(.no-js) section.sec#order.is-empty { padding-block: 1.4rem; }
+#order { scroll-margin-top: var(--top-h); }
+.pk-sel:hover { text-decoration: underline; text-underline-offset: .25em; text-decoration-thickness: 2px; } .pk-sel:active { transform: scale(.97); }
+.st-l { display: grid; gap: 1rem; justify-items: center; }
+.st-l .pks { width: 100%; margin: 0; }
+.st-ph { width: min(100%, 480px); }
+@media (min-width: 861px) { .pk { flex-direction: row; align-items: center; } .pk-sel { flex: 1; min-width: 0; } .pk-sel img { display: none; } .pk .ctl { flex: none; width: 7.8rem; } }
+@media (max-width: 860px) { .st-l { display: contents; } .pks { order: -1; margin: 0 0 1.1rem; } .st-ph { width: min(100%, 540px); } }
+.st-l .pks { max-width: 480px; }
+
+.toast, .toast.show { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; padding: 0 !important; border: 0 !important; transform: none !important; }   /* heard, not shown: it covered the page heading on a phone; the − n + on the product and the basket bar show the add */

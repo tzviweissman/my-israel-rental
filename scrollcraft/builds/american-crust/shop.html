@@ -27,12 +27,18 @@
   <form id="form" novalidate>
   <section class="stage" id="doughs" data-room="bagel" aria-labelledby="h-shop">
     <div class="wrap st-grid">
+      <div class="st-l">
       <div class="st-ph">
         <img class="on" data-p="bagel" src="assets/bagel-hero.webp" alt="American style bagel dough: six pre shaped bagels in their tray" width="1200" height="896" fetchpriority="high">
         <img data-p="pizza" src="assets/pizza-hero.webp" alt="Classic American pizza dough in its tub with the American Crust label" width="1200" height="896">
         <img data-p="bagel-use" src="assets/baked-bagels.webp" alt="Everything bagels" width="760" height="760" loading="lazy">
         <img data-p="pizza-use" src="assets/pizza-tubs.webp" alt="Tubs of American Crust pizza dough in rows" width="1024" height="890" loading="lazy">
         <button type="button" class="st-use" id="st-use" aria-label="Show everything bagels"><img id="st-use-img" src="assets/baked-bagels.webp" alt="" width="64" height="64"></button>
+      </div>
+      <div class="pks" role="group" aria-label="Our doughs">
+        <div class="pk is-on" data-p="bagel"><button type="button" class="pk-sel" data-p="bagel" aria-pressed="true"><img src="assets/bagel-hero.webp" alt="" width="52" height="52"><span>Bagel dough<b>₪30</b></span></button><div class="ctl" data-k="bagel"><button class="btn add" type="button" aria-label="Add American style bagel dough"><i class="chip" aria-hidden="true"></i><span>Add</span></button><span class="step" role="group" aria-label="American style bagel dough in your basket" hidden><button type="button" data-d="-1" aria-label="One fewer American style bagel dough">−</button><output>0</output><button type="button" data-d="1" aria-label="One more American style bagel dough">+</button></span></div></div>
+        <div class="pk" data-p="pizza"><button type="button" class="pk-sel" data-p="pizza" aria-pressed="false"><img src="assets/pizza-hero.webp" alt="" width="52" height="52"><span>Pizza dough<b>₪27</b></span></button><div class="ctl" data-k="pizza"><button class="btn add" type="button" aria-label="Add Classic American pizza dough"><i class="chip" aria-hidden="true"></i><span>Add</span></button><span class="step" role="group" aria-label="Classic American pizza dough in your basket" hidden><button type="button" data-d="-1" aria-label="One fewer Classic American pizza dough">−</button><output>0</output><button type="button" data-d="1" aria-label="One more Classic American pizza dough">+</button></span></div></div>
+      </div>
       </div>
       <div class="st-info">
         <p class="kick">Shop · American Crust</p>
@@ -41,24 +47,17 @@
         <p class="st-desc" id="st-desc">Make fresh American tasting bagels straight from your home. Just follow our simple instructions and enjoy.</p>
         <p class="st-makes" id="st-makes">Makes 6 bagels</p>
         <p class="st-price"><span class="pr" id="st-price"><span class="sym">₪</span>30</span></p>
-        <div class="st-buy">
-          <span class="step" role="group" aria-label="How many"><button type="button" data-d="-1" aria-label="One fewer">−</button><output id="st-n">1</output><button type="button" data-d="1" aria-label="One more">+</button></span>
-          <button class="btn" type="button" id="st-add"><i class="chip" aria-hidden="true"></i><span>Add, ₪30</span></button>
-        </div>
-        <p class="st-in" id="st-in" aria-live="polite"></p>
+        <div class="st-buy"><div class="ctl" id="st-ctl" data-k="bagel"><button class="btn add" type="button" id="st-add" aria-label="Add this dough"><i class="chip" aria-hidden="true"></i><span>Add</span></button><span class="step" role="group" aria-label="this dough in your basket" hidden><button type="button" data-d="-1" aria-label="One fewer this dough">−</button><output>0</output><button type="button" data-d="1" aria-label="One more this dough">+</button></span></div></div>
         <ul class="facts st-facts" aria-label="About this dough">
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Pareve, hechsher from Rabbi Akiva Dershowitz</li><li data-for="pizza"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.4 6.8 19.2l1-5.9L3.5 9.2l5.9-.8z"/></svg>Premium quality</li><li data-for="pizza"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9M9.5 4.5L12 7l2.5-2.5M9.5 19.5L12 17l2.5 2.5"/></svg>Fresh and ready to use</li>
         </ul>
-        <div class="st-pick" aria-label="Our doughs">
-          <button type="button" data-p="bagel" aria-pressed="true"><img src="assets/bagel-hero.webp" alt="" width="44" height="44"><span>Bagel dough<br>₪30</span></button>
-          <button type="button" data-p="pizza" aria-pressed="false"><img src="assets/pizza-hero.webp" alt="" width="44" height="44"><span>Pizza dough<br>₪27</span></button>
-        </div>
       </div>
     </div>
   </section>
 
-  <section class="sec" id="order" aria-labelledby="h-basket">
+  <section class="sec is-empty" id="order" aria-label="Your basket">
     <div class="wrap">
+      <p class="o-empty">Your basket is empty. Tap Add on anything above and it shows here.</p>
       <ol class="osteps" id="steps" aria-label="Order steps">
         <li class="is-now" aria-current="step"><button type="button" data-go="1">Step 1: Your basket</button></li>
         <li><button type="button" data-go="2">Step 2: Delivery or pickup</button></li>
@@ -145,30 +144,44 @@
   var saved = window.siteBasket.get(), q = {};
   Object.keys(P).forEach(function (k) { q[k] = Math.max(0, Math.min(20, +saved[k] || 0)); });
   var sel = 'bagel', n = 1, step = 1;
-  var stage = document.getElementById('doughs'), stN = document.getElementById('st-n'), stAdd = document.getElementById('st-add'), stIn = document.getElementById('st-in');
+  var stage = document.getElementById('doughs');
   var useBtn = document.getElementById('st-use'), useImg = document.getElementById('st-use-img'), imgs = stage.querySelectorAll('.st-ph > img[data-p]'), using = false;
   function money(x) { return '₪' + x; }
-  function label() { stAdd.lastElementChild.textContent = 'Add' + (n > 1 ? ' ' + n : '') + ', ' + money(n * P[sel].price); stN.textContent = n; stIn.textContent = q[sel] ? 'In your basket: ' + q[sel] + ' × ' + P[sel].name : ''; }
+  function label() { drawCtls(); }
+  // Add turns into - n + on the product itself once it is in the basket; back to 0 brings Add back, focus follows
+  function drawCtls() {
+    [].forEach.call(document.querySelectorAll('.ctl'), function (c) {
+      var main = c.id === 'st-ctl', k = main ? sel : c.dataset.k, cnt = q[k] || 0, add = c.querySelector('.add'), st = c.querySelector('.step'), had = !st.hidden, ae = document.activeElement, nm = P[k].name;
+      c.dataset.k = k;
+      add.lastElementChild.textContent = main ? 'Add, ' + money(P[k].price) : 'Add'; add.setAttribute('aria-label', 'Add ' + nm + ', ' + money(P[k].price));
+      st.setAttribute('aria-label', nm + ' in your basket'); st.firstChild.setAttribute('aria-label', 'One fewer ' + nm); st.lastChild.setAttribute('aria-label', 'One more ' + nm);
+      var o = st.querySelector('output'); o.textContent = cnt; o.setAttribute('aria-label', cnt + ' in your basket');
+      add.hidden = cnt > 0; st.hidden = !cnt;
+      if (cnt && ae === add) st.lastChild.focus(); else if (!cnt && had && st.contains(ae)) add.focus();
+    });
+  }
   function photo() { var want = using ? P[sel].use : sel; [].forEach.call(imgs, function (i) { i.classList.toggle('on', i.dataset.p === want); }); }
   function show(k) {
-    sel = k; n = 1; using = false; stage.dataset.room = P[k].room; photo();
+    sel = k; using = false; stage.dataset.room = P[k].room; photo();
     useBtn.setAttribute('aria-label', P[k].useLabel); useImg.src = P[k].useImg;
-    [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.p === k ? 'true' : 'false'); });
+    [].forEach.call(stage.querySelectorAll('.pk-sel'), function (b) { b.setAttribute('aria-pressed', b.dataset.p === k ? 'true' : 'false'); b.parentNode.classList.toggle('is-on', b.dataset.p === k); });
     document.getElementById('st-name').textContent = P[k].name; document.getElementById('st-sub').textContent = P[k].sub; document.getElementById('st-desc').textContent = P[k].desc;
     document.getElementById('st-price').innerHTML = '<span class="sym">₪</span>' + P[k].price;
     document.getElementById('st-makes').textContent = P[k].makes;
     [].forEach.call(stage.querySelectorAll('[data-for]'), function (li) { li.style.visibility = li.dataset.for === k ? '' : 'hidden'; li.setAttribute('aria-hidden', li.dataset.for === k ? 'false' : 'true'); });   // hidden, not removed, so the page below never moves   // Premium quality and Fresh and ready to use are on the pizza flyer only
     label();
   }
-  stage.querySelector('.st-pick').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) show(b.dataset.p); });
+  stage.addEventListener('click', function (e) { var b = e.target.closest('.pk-sel'); if (b) show(b.dataset.p); });
   useBtn.addEventListener('click', function () {   // an action button whose label says what happens next (no pressed state)
     using = !using; photo();
     useBtn.setAttribute('aria-label', using ? 'Show the dough' : P[sel].useLabel); useImg.src = using ? (sel === 'bagel' ? 'assets/bagel-hero.webp' : 'assets/pizza-hero.webp') : P[sel].useImg;
   });
-  stage.querySelector('.st-buy .step').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; n = Math.max(1, Math.min(20, n + (+b.dataset.d))); label(); });
-  stAdd.addEventListener('click', function () {
-    var a = n; q[sel] = Math.min(20, q[sel] + n); n = 1; update(); check(false); label();
-    window.siteToast('Added: ' + a + ' × ' + P[sel].name); stAdd.classList.add('added'); setTimeout(function () { stAdd.classList.remove('added'); }, 900);
+  stage.addEventListener('click', function (e) {
+    var c = e.target.closest('.ctl'), b = c && e.target.closest('button'); if (!b) return;
+    var k = c.dataset.k;
+    if (b.classList.contains('add')) { q[k] = Math.min(20, (q[k] || 0) + 1); window.siteToast('Added: 1 × ' + P[k].name); }
+    else q[k] = Math.max(0, Math.min(20, (q[k] || 0) + (+b.dataset.d)));
+    update(); check(false);
   });
   // The listing (GET /order-form) is the price list: product prices and the delivery fee come from it, and the total shown is the
   // total the server saves (goods, less a code, plus the fee). The server adds the same fee to every delivery order, wherever in
@@ -209,9 +222,13 @@
     document.getElementById('h-fee').textContent = (fs ? 'Delivery ' + fs + (st().free_over ? ', free over ' + money(Number(st().free_over)) : '') + '. ' : 'We confirm the delivery fee on WhatsApp. ') + 'If you are further away, tick the box: we confirm any change to the fee on WhatsApp.';
     var s = {}; for (var k2 in q) if (q[k2]) s[k2] = q[k2]; window.siteBasket.set(s);
     var bar = document.querySelector('#bar .p'), cnt = q.bagel + q.pizza;
-    if (bar) bar.innerHTML = goods() ? '<b>Basket, ' + money(total()) + '</b>' + cnt + ' dough' + (cnt > 1 ? 's' : '') : '<b>From ₪27</b>American bagel and pizza dough';
-    var bb = document.querySelector('#bar .btn'); if (bb) { bb.textContent = 'Order'; bb.setAttribute('href', '#order'); }
-    drawStep();
+    // the phone bar on this page shows only once something is in the basket: "2 items, ₪98, View basket"
+    if (bar) bar.innerHTML = '<b>' + cnt + (cnt === 1 ? ' item' : ' items') + '</b>' + money(total());
+    var bb = document.querySelector('#bar .btn'); if (bb) { bb.textContent = 'View basket'; bb.setAttribute('href', '#order'); }
+    document.body.classList.toggle('has-basket', cnt > 0); document.getElementById('order').classList.toggle('is-empty', !cnt);
+    if (!cnt && step > 1) step = 1;
+    drawCtls(); drawStep();
+    dispatchEvent(new Event('scroll'));
   }
   function v(id) { return document.getElementById(id).value.trim(); }
   function mark(id, msg) { var w = document.getElementById('w-' + id) || document.getElementById('c-' + id); if (w) w.classList.toggle('bad', !!msg); document.getElementById('e-' + id).textContent = msg || ''; }
