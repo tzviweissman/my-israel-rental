@@ -641,3 +641,39 @@ p.price .was { white-space: nowrap; }
   /* The order form is wider on a laptop, so its picks sit four to a row and the section fits one screen (12 Nov). */
   @media (min-width: 900px) { .oform { max-width: 60rem; } .oform .orow { grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); } }
   @media (min-width: 900px) and (max-height: 700px) { .details { padding-top: 2rem; padding-bottom: 2rem; } }
+
+/* The shop layout (15 Nov 2026): Add turns into - n + on the product; an empty basket is one line and the form waits for
+   the first item; the phone basket bar shows only once something is in the basket. */
+.btn[hidden], .step[hidden], .shop-bar[hidden], .basket-empty[hidden] { display: none; }
+.addb, .step button { touch-action: manipulation; }
+.step { display: inline-flex; align-items: center; justify-content: space-between; gap: .2rem; min-height: 48px; border: 1.5px solid var(--lt-ink); border-radius: 999px; background: #fff; color: var(--lt-ink); }
+.step button { width: 48px; min-height: 48px; border: 0; background: transparent; color: inherit; font: 500 1.5rem/1 var(--sc-font-text); cursor: pointer; border-radius: 999px; }
+.step button:active { transform: scale(.94); }
+.step output { min-width: 2.2ch; text-align: center; font: 700 1.05rem/1 var(--sc-font-text); }
+.order-page .act .step { min-width: 12rem; }
+/* the extras: one line each, the price beside the name, the control at the end */
+.menu { grid-template-columns: 1fr; }
+.menu .xrow { display: flex; align-items: center; justify-content: space-between; gap: .8rem; min-height: 48px; }
+.menu .xrow i { font-style: normal; color: var(--sc-ink); font-weight: 600; margin-inline-start: .4rem; }
+.menu .xrow .btn { min-height: 44px; padding: 0 1.3rem; font-size: var(--sc-t-sm); }
+.menu .xrow .step { min-width: 9.5rem; min-height: 44px; }
+.menu .xrow .step button { min-height: 44px; width: 44px; }
+.basket-empty { margin: 0 auto; padding-block: 1.6rem; font-size: 1.125rem; color: var(--lt-soft, var(--sc-ink-soft)); text-align: start; }
+.shop-bar { display: none; }
+@media (max-width: 860px) {
+  .shop-bar { position: fixed; inset-inline: 0; bottom: 0; z-index: 70; display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 56px;
+    padding: .7rem var(--sc-gutter) calc(.7rem + env(safe-area-inset-bottom)); background: var(--lt-ink); color: #fff; text-decoration: none; font: 600 var(--sc-t-sm)/1.2 var(--sc-font-text); touch-action: manipulation; }
+  .shop-bar .sb-go { background: var(--sc-accent); color: var(--lt-ink); border-radius: 999px; padding: .75rem 1.2rem; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
+  .shop-bar:not([hidden]) ~ * { scroll-margin-bottom: 5rem; }
+  body.has-basket .closing { padding-bottom: 5rem; }
+}
+#details { scroll-margin-top: 4.5rem; }
+/* laptop: the liner on its own line, the two extras side by side, so the order stage stays within a short screen */
+@media (min-width: 861px) {
+  .menu { grid-template-columns: 1fr 1fr; gap: .1rem 1.2rem; margin-top: .6rem; padding-top: .5rem; }
+  .menu .xrow:first-child { grid-column: 1 / -1; min-height: 28px; }
+  .menu .xrow { min-height: 44px; }
+  .menu .xrow .step { min-width: 8.5rem; }
+}
+.menu .xrow i { white-space: nowrap; }
+@media (min-width: 861px) { .menu .xrow .step { min-width: 7.6rem; } .menu .xrow .step button { width: 40px; } }

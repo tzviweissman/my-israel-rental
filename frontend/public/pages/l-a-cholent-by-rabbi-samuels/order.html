@@ -15,12 +15,12 @@
 <meta property="og:title" content="Order · L.A. Cholent by Rabbi Samuels">
 <meta property="og:description" content="Pick Medium, Large or Kiddush and order. Kosher, Vaad HaKashrus, Rabbi Shmuel Weiner. Made in Jerusalem, delivered across Israel. Free local delivery on your first order.">
 <meta property="og:image" content="https://myisraelrental.com/pages/la-cholent/assets/tubs.webp">
-<link rel="icon" href="/pages/l-a-cholent-by-rabbi-samuels/assets/seal.webp?v=mwe3dkvh">
+<link rel="icon" href="/pages/l-a-cholent-by-rabbi-samuels/assets/seal.webp?v=mwhl0tat">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400&family=Pinyon+Script&family=Figtree:wght@400;500;600;700&family=Heebo:wght@200;300;400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/l-a-cholent-by-rabbi-samuels/scrollcraft.css?v=mwe3dkvh">
-<link rel="stylesheet" href="/pages/l-a-cholent-by-rabbi-samuels/site.css?v=mwe3dkvh">
+<link rel="stylesheet" href="/pages/l-a-cholent-by-rabbi-samuels/scrollcraft.css?v=mwhl0tat">
+<link rel="stylesheet" href="/pages/l-a-cholent-by-rabbi-samuels/site.css?v=mwhl0tat">
 </head>
 <body class="order-page">
 <span data-sc-progress></span>
@@ -56,13 +56,14 @@
           <p class="pick"><span class="size-name" id="size-name">Large</span><span class="feeds" id="feeds">Feeds 8 to 12, about &#8362;15 a person</span></p>
           <p class="price"><span class="now" id="price"><small data-mir-key="t-15892999-0">₪</small>180</span><span class="was" id="was"><s id="was-s">&#8362;200</s><b id="was-off">10% off</b></span><span class="alt" id="alt">₪85 if you add your own meat, or keep it parve.</span></p>
           <div class="menu">
-            <div><span data-mir-key="t-330c32a3-0">Slow cooker liner</span><b data-mir-key="t-93c1a060-0">Free</b></div>
-            <div><span data-mir-key="t-4a0c2813-0">Extra meat</span><b data-mir-key="t-0305277a-0">₪50 / lb</b></div>
-            <div><span data-mir-key="t-f3899d50-0">Marrow bones</span><b data-mir-key="t-7ca60ca9-0">₪40 / lb</b></div>
+            <div class="xrow"><span data-mir-key="t-330c32a3-0">Slow cooker liner</span><b data-mir-key="t-93c1a060-0">Free</b></div>
+            <div class="xrow"><span data-mir-key="t-b4ccc28f-0">Extra meat <i id="p-xmeat">₪50 / lb</i></span><button type="button" class="btn addb" data-k="meat" aria-label="Add extra meat" data-mir-key="t-9ad01aa1-0">Add</button><span class="step" data-k="meat" role="group" aria-label="Pounds of extra meat" hidden><button type="button" data-d="-1" aria-label="One fewer" data-mir-key="t-a4fccb8c-0">&minus;</button><output>0</output><button type="button" data-d="1" aria-label="One more" data-mir-key="t-e67d47d4-0">+</button></span></div>
+            <div class="xrow"><span data-mir-key="t-929fa487-0">Marrow bones <i id="p-xbones">₪40 / lb</i></span><button type="button" class="btn addb" data-k="bones" aria-label="Add marrow bones" data-mir-key="t-9ad01aa1-1">Add</button><span class="step" data-k="bones" role="group" aria-label="Pounds of marrow bones" hidden><button type="button" data-d="-1" aria-label="One fewer" data-mir-key="t-a4fccb8c-1">&minus;</button><output>0</output><button type="button" data-d="1" aria-label="One more" data-mir-key="t-e67d47d4-1">+</button></span></div>
           </div>
           <p class="reassure"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b data-mir-key="t-786d65c6-0">Free local delivery on your first order</b></p>
           <div class="act">
-            <a class="btn" id="order-btn" href="#details"><span id="order-label">Order now, &#8362;180</span><span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
+            <button type="button" class="btn addb" id="st-add" data-k="size"><span id="order-label">Add, &#8362;180</span><span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></button>
+            <span class="step" data-k="size" role="group" aria-label="How many" hidden><button type="button" data-d="-1" aria-label="One fewer" data-mir-key="t-a4fccb8c-2">&minus;</button><output id="o-qty">0</output><button type="button" data-d="1" aria-label="One more" data-mir-key="t-e67d47d4-2">+</button></span>
             <p data-mir-key="t-4c803ceb-0">Delivered across Israel.</p>
           </div>
 </div>
@@ -72,20 +73,16 @@
   </section>
 
   <!-- The order details (rule 3k): saved to the shop first, then WhatsApp. -->
-  <section id="details" class="details" aria-labelledby="details-h">
+  <p class="basket-empty sc-wrap" id="b-empty">Your basket is empty. Tap Add on anything above and it shows here.</p>
+  <section id="details" class="details" aria-labelledby="details-h" hidden>
     <div class="sc-wrap">
       <form class="oform" id="oform" novalidate>
         <h2 id="details-h" data-mir-key="t-0be66db8-0">Your <em>order</em></h2>
         <p class="osum" id="osum"></p>
       <div class="orow">
-        <div class="of"><label for="o-qty" data-mir-key="t-bfce8ae9-0">How many</label><span class="qty" role="group" aria-label="How many"><button type="button" data-d="-1" aria-label="One fewer" data-mir-key="t-a4fccb8c-0">&minus;</button><output id="o-qty">1</output><button type="button" data-d="1" aria-label="One more" data-mir-key="t-e67d47d4-0">+</button></span></div>
         <div class="of"><label for="o-how" data-mir-key="t-919a316a-0">Pick-up or delivery</label><select id="o-how"><option value="pickup">Pick-up</option><option value="delivery">Delivery</option></select></div>
         <div class="of"><label for="o-fl" data-mir-key="t-18b91fe4-0">Flavour</label><select id="o-fl"><option value="orig">Original</option><option value="spicy">Spicy</option><option value="gf">Gluten-Free</option></select></div>
         <div class="of" id="w-meat"><label for="o-meat" data-mir-key="t-ea0cf0d9-0">Meat</label><select id="o-meat"><option value="meat">With our meat</option><option value="own">Without our meat</option></select></div>
-      </div>
-      <div class="orow">
-        <div class="of"><label id="l-xmeat" data-mir-key="t-08aa10f5-0">Extra meat, by the pound</label><span class="qty" role="group" aria-labelledby="l-xmeat" data-x="meat"><button type="button" data-d="-1" aria-label="One pound less" data-mir-key="t-a4fccb8c-1">&minus;</button><output id="o-xmeat">0</output><button type="button" data-d="1" aria-label="One pound more" data-mir-key="t-e67d47d4-1">+</button></span><p class="hint" id="h-xmeat"></p></div>
-        <div class="of"><label id="l-xbones" data-mir-key="t-5b380cc2-0">Marrow bones, by the pound</label><span class="qty" role="group" aria-labelledby="l-xbones" data-x="bones"><button type="button" data-d="-1" aria-label="One pound less" data-mir-key="t-a4fccb8c-2">&minus;</button><output id="o-xbones">0</output><button type="button" data-d="1" aria-label="One pound more" data-mir-key="t-e67d47d4-2">+</button></span><p class="hint" id="h-xbones"></p></div>
       </div>
       <div class="of" id="w-addr" hidden><label for="o-addr" data-mir-key="t-438c5cbe-0">Delivery address</label><input id="o-addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, city"><p class="err" id="e-addr"></p></div>
       <div class="orow">
@@ -105,6 +102,7 @@
   </section>
 
 </main>
+<a class="shop-bar" id="shop-bar" href="#details" hidden><span id="sb-text">1 item</span><span class="sb-go" data-mir-key="t-24fcc59b-0">View basket</span></a>
 
 <footer class="closing" id="closing">
   <div class="sc-wrap">
@@ -121,7 +119,7 @@
 </footer>
 
 <header class="topbar tb-always is-on" id="topbar"><nav class="tb-nav" aria-label="Site menu">
-  <a class="tb-brand" href="/business/l-a-cholent-by-rabbi-samuels"><img src="/pages/l-a-cholent-by-rabbi-samuels/assets/seal.webp?v=mwe3dkvh" width="40" height="40" alt="" data-mir-key="i-933a104e-0"><span data-mir-key="t-113c78f0-0">L.A. Cholent</span></a>
+  <a class="tb-brand" href="/business/l-a-cholent-by-rabbi-samuels"><img src="/pages/l-a-cholent-by-rabbi-samuels/assets/seal.webp?v=mwhl0tat" width="40" height="40" alt="" data-mir-key="i-933a104e-0"><span data-mir-key="t-113c78f0-0">L.A. Cholent</span></a>
   <div class="tb-links"><a href="/business/l-a-cholent-by-rabbi-samuels" data-mir-key="t-fc43c37b-1">Home</a><a href="/business/l-a-cholent-by-rabbi-samuels/how" data-mir-key="t-08745e0f-1">How it works</a><a href="/business/l-a-cholent-by-rabbi-samuels/reviews" data-mir-key="t-28f606d3-1">Reviews</a><a href="/business/l-a-cholent-by-rabbi-samuels/kosher" data-mir-key="t-2143d314-1">Kosher and delivery</a></div>
   <a class="btn" href="/business/l-a-cholent-by-rabbi-samuels/order" aria-current="page" data-mir-key="t-6a348caa-2">Order now<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
 </nav>
@@ -129,8 +127,8 @@
   <div class="mpanel" id="mpanel"><a href="/business/l-a-cholent-by-rabbi-samuels" data-mir-key="t-fc43c37b-2">Home</a><a href="/business/l-a-cholent-by-rabbi-samuels/how" data-mir-key="t-08745e0f-2">How it works</a><a href="/business/l-a-cholent-by-rabbi-samuels/reviews" data-mir-key="t-28f606d3-2">Reviews</a><a href="/business/l-a-cholent-by-rabbi-samuels/kosher" data-mir-key="t-2143d314-2">Kosher and delivery</a><a href="/business/l-a-cholent-by-rabbi-samuels/order" aria-current="page" data-mir-key="t-6a348caa-3">Order now</a><a href="https://wa.me/972553311442" target="_blank" rel="noopener" data-mir-key="t-589a1e95-1">WhatsApp +972 55-331-1442</a><a href="mailto:lacholentisrael@gmail.com" data-mir-key="t-5ef5a7f3-0">Email us</a></div>
 </header>
 
-<script src="/pages/l-a-cholent-by-rabbi-samuels/site.js?v=mwe3dkvh"></script>
-<script src="/pages/l-a-cholent-by-rabbi-samuels/scrollcraft.js?v=mwe3dkvh"></script>
+<script src="/pages/l-a-cholent-by-rabbi-samuels/site.js?v=mwhl0tat"></script>
+<script src="/pages/l-a-cholent-by-rabbi-samuels/scrollcraft.js?v=mwhl0tat"></script>
 <script>ScrollCraft.mount(document.body);</script>
 <script>
 (function () {
@@ -209,7 +207,7 @@
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
   var GIG = '637d78ae-abc0-432d-9506-2a739e320f5e', WA = '972553311442';
   var PIDS = ['fcad3e98c5be', '70887e3339f2', '09a030487819'], NAMES = ['Medium', 'Large', 'Extra Large / Kiddush'];
-  var qty = 1, sending = false;
+  var qty = 0, sending = false;
   // Extras by the pound, flavour and meat are real lines and options, so the order in the dashboard has the price the
   // customer saw (Tzvi, 12 Nov 2026: "la cholent doesnt see a 180 shekel order when really its 85"). Prices and
   // whether to send the customer on to WhatsApp come from the listing (GET /order-form) when it answers.
@@ -220,8 +218,9 @@
   function unit() { var s = sizes[cur]; return window.ownMeat() && s.own ? s.own : s.price; }
   function extras() { return X.meat.n * X.meat.price + X.bones.n * X.bones.price; }
   function goods() { return qty * unit() + extras(); }
+  function items() { return qty + X.meat.n + X.bones.n; }
   function what() { return NAMES[cur] + ' (' + FL[$('o-fl').value] + (window.ownMeat() ? ', own meat or parve' : '') + ')'; }
-  function hints() { $('h-xmeat').textContent = '\u20aa' + X.meat.price + ' a pound'; $('h-xbones').textContent = '\u20aa' + X.bones.price + ' a pound'; }
+  function hints() { $('p-xmeat').textContent = '\u20aa' + X.meat.price + ' / lb'; $('p-xbones').textContent = '\u20aa' + X.bones.price + ' / lb'; }
   fetch(API + '/marketplace/order-form/' + GIG).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
     if (!d) return;
     toWhatsApp = !!(d.gig && d.gig.whatsapp);
@@ -238,17 +237,26 @@
   $('o-when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k.8): tomorrow, changeable; no lead time given yet, so no same-day promise (Shabbos cut-off is question 6 to the owner)
   $('o-when').value = new Date(Date.now() + 864e5 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-  $('oform').querySelectorAll('.qty').forEach(function (box) { box.addEventListener('click', function (e) {
-    var b = e.target.closest('button'), k = box.dataset.x; if (!b) return;
-    if (k) { X[k].n = Math.max(0, Math.min(20, X[k].n + (+b.dataset.d))); $('o-x' + k).textContent = X[k].n; }
-    else { qty = Math.max(1, Math.min(20, qty + (+b.dataset.d))); $('o-qty').textContent = qty; }
-    window.labelOrder();
+  // Add turns into - n + on the product itself; nothing is in the basket until something is added (13 Nov 2026 shop layout)
+  function nOf(k) { return k === 'size' ? qty : X[k].n; }
+  function setN(k, n) { n = Math.max(0, Math.min(20, n)); if (k === 'size') qty = n; else X[k].n = n; }
+  function paint(focusK) {
+    document.querySelectorAll('.addb').forEach(function (a) {
+      var k = a.dataset.k, st = document.querySelector('.step[data-k="' + k + '"]'), n = nOf(k);
+      a.hidden = n > 0; st.hidden = n === 0; st.querySelector('output').textContent = n;
+      if (k === focusK) (n > 0 ? st.lastElementChild : a).focus();
+    });
+  }
+  document.querySelectorAll('.addb').forEach(function (a) { a.addEventListener('click', function () { setN(a.dataset.k, 1); paint(a.dataset.k); window.labelOrder(); }); });
+  document.querySelectorAll('.step').forEach(function (st) { st.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return; var k = st.dataset.k;
+    setN(k, nOf(k) + (+b.dataset.d)); paint(nOf(k) === 0 ? k : null); window.labelOrder();
   }); });
   $('o-meat').addEventListener('change', function () { pick(cur); });
   $('o-fl').addEventListener('change', function () { window.labelOrder(); });
   hints();
   $('o-how').addEventListener('change', function () { $('w-addr').hidden = this.value !== 'delivery'; });
-  function label() { var s = sizes[cur]; $('order-label').textContent = 'Order now, \u20aa' + goods(); }
+  function label() { $('order-label').textContent = 'Add, \u20aa' + unit(); }
   function check(show) {
     var ok = true, e;
     e = v('o-when') ? '' : 'Choose the day'; if (e) ok = false; if (show || !e) mark('when', e);
@@ -261,7 +269,7 @@
   function save(notes) {
     var d = $('o-how').value === 'delivery';
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: [{ product_id: PIDS[cur], qty: qty, option_id: $('o-fl').value + '-' + (window.ownMeat() ? 'own' : 'meat') }].concat(Object.keys(X).filter(function (k) { return X[k].n; }).map(function (k) { return { product_id: X[k].id, qty: X[k].n }; })), fulfilment: d ? 'delivery' : 'pickup', address: d ? v('o-addr') : undefined, date: v('o-when'), customer_name: v('o-me'), customer_phone: v('o-ph'), notes: notes, discount_code: MirCode.code() }) })
+      body: JSON.stringify({ lines: (qty ? [{ product_id: PIDS[cur], qty: qty, option_id: $('o-fl').value + '-' + (window.ownMeat() ? 'own' : 'meat') }] : []).concat(Object.keys(X).filter(function (k) { return X[k].n; }).map(function (k) { return { product_id: X[k].id, qty: X[k].n }; })), fulfilment: d ? 'delivery' : 'pickup', address: d ? v('o-addr') : undefined, date: v('o-when'), customer_name: v('o-me'), customer_phone: v('o-ph'), notes: notes, discount_code: MirCode.code() }) })
       .then(function (r) { if (!r.ok) throw new Error('order not saved: ' + r.status); return r.json(); }).catch(function (err) { console.error(err); return null; });
     return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
   }
@@ -270,7 +278,8 @@
     e.preventDefault();
     if (sending) return;
     if (!check(true)) { var bad = document.querySelector('#oform .bad input'); if (bad) bad.focus(); return; }
-    var s = sizes[cur], d = $('o-how').value === 'delivery', out = ['Hi L.A. Cholent, I would like to order:', '\u2022 ' + qty + ' \u00d7 ' + what() + ' \u20aa' + qty * unit()];
+    var s = sizes[cur], d = $('o-how').value === 'delivery', out = ['Hi L.A. Cholent, I would like to order:'];
+    if (qty) out.push('\u2022 ' + qty + ' \u00d7 ' + what() + ' \u20aa' + qty * unit());
     Object.keys(X).forEach(function (k) { if (X[k].n) out.push('\u2022 ' + X[k].name + ', ' + X[k].n + ' lb \u20aa' + X[k].n * X[k].price); });
     if (v('o-note')) out.push('Notes: ' + v('o-note'));
     if (MirCode.code()) out.push(MirCode.text(goods()));
@@ -300,9 +309,15 @@
       sending = false; btn.removeAttribute('aria-busy'); $('order-send-label').textContent = lab; 
     });
   });
-  function summary() { MirCode.refresh(); var to = MirCode.after(goods()), ex = Object.keys(X).filter(function (k) { return X[k].n; }).map(function (k) { return X[k].n + ' lb ' + X[k].name.toLowerCase(); }); $('osum').textContent = qty + ' \u00d7 ' + what() + (ex.length ? ', ' + ex.join(', ') : '') + ', \u20aa' + to; $('order-send-label').textContent = 'Order now, \u20aa' + to; }
-  window.labelOrder = function () { label(); summary(); };
-  pick(1);
+  function summary() { MirCode.refresh(); var to = MirCode.after(goods()), ex = Object.keys(X).filter(function (k) { return X[k].n; }).map(function (k) { return X[k].n + ' lb ' + X[k].name.toLowerCase(); }); $('osum').textContent = (qty ? qty + ' \u00d7 ' + what() : '') + (ex.length ? (qty ? ', ' : '') + ex.join(', ') : '') + ', \u20aa' + to; $('order-send-label').textContent = 'Order now, \u20aa' + to; }
+  window.labelOrder = function () {
+    label(); summary();
+    var n = items(), has = n > 0, bar = $('shop-bar');
+    $('details').hidden = !has; $('b-empty').hidden = has; bar.hidden = !has;
+    $('sb-text').textContent = n + (n === 1 ? ' item' : ' items') + ' \u00b7 \u20aa' + MirCode.after(goods());
+    document.body.classList.toggle('has-basket', has);
+  };
+  pick(1); paint();
   // a size picked on the home page or in the footer arrives as ?size=0|1|2
   var want = /[?&]size=([0-2])(?:&|$)/.exec(location.search);
   if (want) pick(+want[1]);
