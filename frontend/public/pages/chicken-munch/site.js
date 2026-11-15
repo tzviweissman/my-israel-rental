@@ -35,8 +35,23 @@ document.body.classList.remove('no-js');
     var vh = innerHeight, past = scrollY > vh * .5;
     top.classList.toggle('solid', past);
     // the phone bar steps aside while a price or button of the page is in the strip it covers
-    if (bar) bar.classList.toggle('on', past && (!order || order.getBoundingClientRect().top > vh * .75) && !underBar(vh));
+    if (bar && shopPage) {
+      // the order page: the bar exists only once something is in the basket, and steps aside while the summary is in view (shop rollout, 13 Nov 2026)
+      var sm = document.getElementById('sum'), r = sm && sm.getBoundingClientRect();
+      bar.classList.toggle('on', document.body.classList.contains('has-basket') && !(r && r.top < vh - 80 && r.bottom > 0));
+    } else if (bar) bar.classList.toggle('on', past && (!order || order.getBoundingClientRect().top > vh * .75) && !underBar(vh));
   }
+  var shopPage = document.body.dataset.page === 'order';
+  // the order page calls this with the item count and the total: "2 items · $209 · View basket"
+  window.cmBar = function (n, total) {
+    document.body.classList.toggle('has-basket', n > 0);
+    if (bar && shopPage && n > 0) {
+      bar.querySelector('.p').innerHTML = '<b>' + n + (n === 1 ? ' item' : ' items') + '</b>' + total;
+      var go = bar.querySelector('.btn'); go.textContent = 'View basket'; go.setAttribute('href', '#sum'); go.removeAttribute('tabindex');
+      bar.removeAttribute('aria-hidden');
+    }
+    frame();
+  };
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();
 

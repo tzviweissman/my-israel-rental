@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700;800&family=Heebo:wght@400;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/chicken-munch/site.css?v=mwgre3z7">
+<link rel="stylesheet" href="/pages/chicken-munch/site.css?v=mwgum6ju">
 <style>
   /* phone and other fields at 16px so iPhones do not zoom in; grid cells may shrink */
   .fld, input[type=tel].fld, input[type=date].fld { font-size: 16px; min-width: 0; }
@@ -42,7 +42,7 @@
     <div class="wrap">
       <form class="form" id="form" novalidate>
         <div>
-          <ol class="steps" id="steps" aria-label="Order steps"><li class="on" data-mir-key="t-2f05da50-0">Step 1: Your basket</li><li data-mir-key="t-117a3ecd-0">Step 2: When and where</li><li data-mir-key="t-f0729679-0">Step 3: Your details</li></ol>
+          <ol class="steps" id="steps" aria-label="Order steps" hidden><li class="on" data-mir-key="t-2f05da50-0">Step 1: Your basket</li><li data-mir-key="t-117a3ecd-0">Step 2: When and where</li><li data-mir-key="t-f0729679-0">Step 3: Your details</li></ol>
           <div class="card" id="c-items">
             <h3 data-mir-key="t-2a4b1a43-0">Your basket</h3>
             <h4 data-mir-key="t-33056ea2-0">Premium chicken boxes</h4>
@@ -68,11 +68,12 @@
           </div>
           <div class="stepnav"><button class="btn-line back" type="button" id="back" hidden>Back</button></div>
         </div>
-        <aside class="card sum" aria-live="polite">
+        <aside class="card sum is-empty" id="sum" aria-live="polite">
+          <p class="cm-empty" id="cm-empty" data-mir-key="t-176c7377-0">Your basket is empty. Tap Add on a box or a pan and it shows here.</p>
           <h3 data-mir-key="t-1b40ab81-0">So far</h3>
           <ul id="sum-list"><li><span data-mir-key="t-b1bb775d-0">Nothing yet</span></li></ul>
           <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
-          <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><span id="total">0</span></div>
+          <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><span id="total" data-order-total>0</span></div>
           <p class="sent" id="o-sent" role="status" hidden></p>
           <button class="btn" id="send" type="submit"><span data-mir-key="t-dcd3e841-0">Send my order on WhatsApp</span></button>
           <p class="note" data-mir-key="t-5b8fb678-0">Opens WhatsApp with your order written out, to send to Chicken Munch.</p>
@@ -103,7 +104,7 @@
   <a class="btn" href="/business/chicken-munch/order" tabindex="-1" data-mir-key="t-6a348caa-3">Order now</a>
 </div>
 
-<script src="/pages/chicken-munch/site.js?v=mwgre3z7"></script>
+<script src="/pages/chicken-munch/site.js?v=mwgum6ju"></script>
 <script>
 (function () {
   // ── the order: saved to his shop first (a tracking link), then WhatsApp.
@@ -156,7 +157,7 @@
     var it = ITEMS[k], c = CHOICE[k], d = document.createElement('div');
     d.className = 'line'; d.dataset.k = k;
     d.innerHTML = '<div><div class="nm">' + it[0] + '</div><div class="pr">' + lineText(k) + '</div>' + (ALLOWS[k] ? '<div class="allows' + (CHOICE[k][0] === 1 ? ' one' : '') + '">' + ALLOWS[k] + '</div>' : '') + '</div>' +
-      '<div class="ctl"><div class="step"><button type="button" data-d="-1" aria-label="One fewer ' + it[0] + '">−</button><output>0</output><button type="button" data-d="1" aria-label="One more ' + it[0] + '">+</button></div><button type="button" class="rm" data-rm="1" aria-label="Remove ' + it[0] + ' from the basket" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v6M14 10v6"/></svg></button></div>';
+      '<div class="ctl"><button type="button" class="btn-line addb" data-d="1" aria-label="Add ' + it[0] + ' to the basket">Add</button><div class="step" hidden><button type="button" data-d="-1" aria-label="One fewer ' + it[0] + '">−</button><output>0</output><button type="button" data-d="1" aria-label="One more ' + it[0] + '">+</button></div><button type="button" class="rm" data-rm="1" aria-label="Remove ' + it[0] + ' from the basket" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v6M14 10v6"/></svg></button></div>';
     var host = document.getElementById(it[4] === 'box' ? 'lines-box' : 'lines-pan');
     host.appendChild(d);
     if (c[0]) {
@@ -188,21 +189,29 @@
   document.getElementById('sug-no').addEventListener('click', function () { noRice = true; update(); });
   function update() {
     MirCode.refresh();
-    [].forEach.call(document.querySelectorAll('.line'), function (l) { l.querySelector('output').textContent = q[l.dataset.k]; l.querySelector('.rm').hidden = !q[l.dataset.k]; });
+    [].forEach.call(document.querySelectorAll('.line'), function (l) { var n = q[l.dataset.k]; l.querySelector('output').textContent = n; l.querySelector('.rm').hidden = !n; l.querySelector('.step').hidden = !n; l.querySelector('.addb').hidden = !!n; });
     [].forEach.call(document.querySelectorAll('.opts'), function (o) { o.hidden = !q[o.dataset.k]; });
     var html = ''; for (var k in q) if (q[k]) html += '<li><span>' + q[k] + ' × ' + ITEMS[k][0] + '</span><span>' + priceOf(k, q[k]) + '</span></li>';
     if (html && deliveryOn) html += '<li><span>' + DELIVERY + '</span><span>by where</span></li>';
     if (html && both()) html += '<li><span>Two currencies, so two orders</span><span>sent together</span></li>';
+    var cnt = 0; for (var k3 in q) cnt += q[k3];
+    document.getElementById('steps').hidden = !cnt; document.getElementById('sum').classList.toggle('is-empty', !cnt);
     document.getElementById('sum-list').innerHTML = html || '<li><span>Nothing yet</span></li>';
     var tc = curs(), tt = totals(), tb = document.getElementById('total');
     tb.innerHTML = tc.length ? tc.map(function (c) { var n = tc.length === 1 && MirCode.code() ? MirCode.after(tt[c]) : tt[c]; return (both() ? '<span class="ordn">Order ' + (c === 'USD' ? 1 : 2) + ': </span>' : '') + '<span data-order-total data-currency="' + c + '">' + money(n, c) + '</span>'; }).join('') + (deliveryOn ? '<span class="dnote"> + delivery</span>' : '') : '0';
     send.firstElementChild.textContent = step < 3 ? NEXT[step] : totalText() !== '0' ? 'Send my order on WhatsApp, ' + totalText() : 'Send my order on WhatsApp';
     var b = {}; for (var k2 in q) if (q[k2]) b[k2] = q[k2]; window.cmBasket.set(b);
+    var tb = totals(), bt = tb.USD && tb.ILS ? money(tb.USD, 'USD') + ' + ' + money(tb.ILS, 'ILS') : MirCode.code() ? money(MirCode.after(tb.USD + tb.ILS), tb.USD ? 'USD' : 'ILS') : money(tb.USD + tb.ILS, tb.USD ? 'USD' : 'ILS');
+    cmBar(cnt, bt);
     // one real add-on, only with a pan, and only until it is added or turned down
     document.getElementById('suggest').hidden = !((q.pan913 || q.roaster) && !q.rice && !noRice);
   }
   [].forEach.call(document.querySelectorAll('.line'), function (l) {
-    l.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; q[l.dataset.k] = b.dataset.rm ? 0 : Math.max(0, Math.min(20, q[l.dataset.k] + (+b.dataset.d))); update(); check(false); });
+    l.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; q[l.dataset.k] = b.dataset.rm ? 0 : Math.max(0, Math.min(20, q[l.dataset.k] + (+b.dataset.d))); update(); check(false);
+      // focus follows the control that took the pressed one's place: Add -> the +, back to 0 -> Add
+      var n = q[l.dataset.k], f = n ? l.querySelector('.step button[data-d="1"]') : l.querySelector('.addb');
+      if (f && (!document.activeElement || document.activeElement === document.body || document.activeElement.hidden || b.hidden || b.closest('[hidden]'))) f.focus();
+    });
   });
   function v(id) { return document.getElementById(id).value.trim(); }
   function mark(id, msg) { var w = document.getElementById('w-' + id) || document.getElementById('c-' + id); if (w) w.classList.toggle('bad', !!msg); document.getElementById('e-' + id).textContent = msg || ''; }

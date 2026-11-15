@@ -487,3 +487,16 @@ input[type=date].fld { color-scheme: light; }
 .open-foot .r { flex-direction: column; align-items: flex-end; gap: 14px; }
 .open-foot .r .btn-facts { justify-content: flex-end; max-width: 42rem; }
 @media (max-width: 760px) { .open-foot .r { align-items: flex-start; } .open-foot .r .btn-facts { justify-content: flex-start; } }
+
+/* ── The shop layout on the order page (shop rollout, 13 Nov 2026) ── */
+.line .step[hidden], .line .addb[hidden] { display: none; }
+.line .addb { min-width: 88px; min-height: 44px; touch-action: manipulation; }
+.line .step button, .line .rm, .suggest button { touch-action: manipulation; }
+.line .step button { width: 44px; height: 44px; }
+.line .rm { width: 44px; height: 44px; }
+.cm-empty { display: none; margin: 0; color: var(--soft); }
+.sum.is-empty { background: none; border: 0; padding: 0; }
+.sum.is-empty > :not(.cm-empty) { display: none; }
+.sum.is-empty .cm-empty { display: block; }
+@media (max-width: 860px) { .sum.is-empty { margin-top: 1rem; } }
+.opts .chip span { min-height: 44px; touch-action: manipulation; }
