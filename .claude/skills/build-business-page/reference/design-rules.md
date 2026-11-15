@@ -1,5 +1,21 @@
 # MyIsraelRental — AI Page Builder Design Rules (v3)
 
+<!-- contents: made by scripts/contents.mjs, do not edit by hand -->
+Sections (line each starts on; read with that offset):
+- 27: Part 1 — Non-negotiables (from v2, unchanged)
+- 44: Part 2 — Why pages come out bland (diagnose before you build)
+- 63: Part 3 — Give every business its own identity
+- 124: Part 4 — Hero media: the three tiers
+- 153: Part 5 — Page rhythm and the showstopper
+- 179: Part 6 — Motion and micro-interactions
+- 250: Part 7 — Page recipes by business type
+- 270: Part 8 — Copy
+- 281: Part 9 — Quality gate (score before returning a page)
+- 352: Part 10 — From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 415: Appendix: worked example (L.A. Cholent)
+- 439: Approved fonts (Latin and Hebrew)
+<!-- /contents -->
+
 These are instructions for the AI that builds business and listing pages on MyIsraelRental.
 
 v2 made pages **correct**: real content, one clear action, no duplicates, nothing broken. v3 keeps all of that and adds what v2 was missing: **art direction**. A correct page on a generic template still looks bland. Award-winning pages look like they were designed for one business.

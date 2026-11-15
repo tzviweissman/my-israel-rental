@@ -1,5 +1,38 @@
 # Rules for static ads
 
+<!-- contents: made by scripts/contents.mjs, do not edit by hand -->
+Sections (line each starts on; read with that offset):
+- 62: 0. The one idea
+- 80: 1. Anatomy: three layers, in this order
+- 102: 2. The headline carries the ad
+- 125: 3. The picture
+- 152: 4. The body: points, price, proof
+- 181: 5. Honesty: what an ad may never do
+- 207: 6. Words are kept apart from the picture
+- 222: 7. Variations: test different ideas, not different commas
+- 235: 8. Making it work on a phone
+- 263: 9. What this means for the ad maker
+- 297: 9b. Standing out (12 more videos, 1 Nov 2026)
+- 367: 9c. How ads are worded (12 more videos, 1 Nov 2026)
+- 396: 9d. Ideas, not layouts (1,194 Pinterest ads, 2 Nov 2026)
+- 420: 9e. What the best ads share (second look, 2 Nov 2026)
+- 483: 9f. Three more videos (4 Nov 2026)
+- 544: 9h. What makes it look designed (Tzvi, 6 Nov 2026: "can we make the ads better")
+- 550: 9g. Three more videos: why an ad catches the eye (4 Nov 2026)
+- 595: 10. What to discount from the videos
+- 614: Sources
+- 649: 11. Moving ads (Tzvi, 6 Nov 2026)
+- 657: 12. Never bland (Tzvi, 8 Nov 2026)
+- 665: 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
+- 673: 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
+- 689: 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
+- 701: 16. The headline says the offer (Tzvi, 10 Nov 2026)
+- 711: 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
+- 727: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
+- 739: 19. A 5 every time (Tzvi, 10 Nov 2026)
+- 750: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
+<!-- /contents -->
+
 The rules for every still advert MyIsraelRental makes: the ad maker on the
 dashboard (`frontend/src/components/dashboard/AdMaker.jsx`, words from
 `POST /ads/make` in `backend/routes/short_links.py`), and any ad we design

@@ -1,5 +1,21 @@
 # Rules checklist (one line per rule that can be judged on a finished site)
 
+<!-- contents: made by scripts/contents.mjs, do not edit by hand -->
+Sections (line each starts on; read with that offset):
+- 25: How to use it
+- 70: 1. Facts and words
+- 100: 2. Opening
+- 167: 3. Sections and worlds
+- 222: 4. Photos and media
+- 252: 5. Prices and savings
+- 274: 6. Order and booking flow
+- 300: 7. Motion
+- 328: 8. Phone
+- 343: 8b. From the seven videos, part two (29 Oct 2026)
+- 365: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 376: 9. Finish
+<!-- /contents -->
+
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
 skipped on builds because the doc is ~1,950 lines, briefs cited only some sections and only some
 rules have scripts. Example: rule 8 "a set of images reads as one shoot" was never applied to the

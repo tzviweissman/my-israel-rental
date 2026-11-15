@@ -1,5 +1,53 @@
 # Rules for AI-built pages
 
+<!-- contents: made by scripts/contents.mjs, do not edit by hand -->
+Sections (line each starts on; read with that offset):
+- 109: 1. The job, in one line
+- 114: 2. What the AI gets, and the only facts it may use
+- 147: 3. Hard rules (checked: a page breaking one is thrown away and remade)
+- 184: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
+- 226: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
+- 294: 3b. The category checklist (from the Inspo study)
+- 333: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 466: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 561: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
+- 677: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 742: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 913: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
+- 1209: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 1247: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 1362: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 1441: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 1473: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 1500: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 1546: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 1583: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1655: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1680: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1717: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1826: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
+- 1847: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1918: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+- 2003: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 2113: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 2205: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 2230: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 2270: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 2430: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2457: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2522: 4. What is reported to the owner instead (content gaps)
+- 2531: 5. How to write
+- 2580: 5a. Lessons from the practice pages
+- 2609: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2658: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2675: 6. Playbooks for the most common businesses
+- 2795: 7. Choosing the three options (automatic page builder only)
+- 2819: 8. Photos, video and the tools
+- 3045: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3113: 9. The scroll sections: what the practice pages become
+- 3148: 10. Open decisions (need Tzvi)
+<!-- /contents -->
+
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
 The rulebook the page generator follows when it builds a business page, and the
 automatic check that throws away any page breaking it.

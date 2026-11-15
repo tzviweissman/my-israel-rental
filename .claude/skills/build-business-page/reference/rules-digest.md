@@ -1,5 +1,45 @@
 # Page rules, the short version (read the section a step names)
 
+<!-- contents: made by scripts/contents.mjs, do not edit by hand -->
+Sections (line each starts on; read with that offset):
+- 55: 0. Use the same tools (this is what gives the full capability)
+- 147: 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
+- 214: 1. Facts: only theirs
+- 284: 2. How to write
+- 327: 3. The category checklist (what the best real sites share)
+- 353: 3b. The sections every page has (Tzvi, 6 Oct 2026)
+- 376: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 420: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 455: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 485: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 545: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
+- 615: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 637: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 732: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 795: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 827: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 854: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 894: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 927: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 985: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1009: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1037: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1113: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
+- 1117: 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
+- 1129: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1139: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 1154: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 1165: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 1172: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 1183: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 1194: 3bb. Small touches (Tzvi, 12 Nov 2026)
+- 1206: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1214: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1248: 4. Design and story
+- 1278: 5. Build rules (each one shipped as a defect once)
+- 1301: 6. Look through it, fix it, then show it
+<!-- /contents -->
+
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section numbers are unchanged, so "3g.13", "3h.11" and the like still point to the same text. The full rulebook is `full-rules.md`.
 
 Full rulebook only (read there when a step names them): 3a, 5a, 5b, 5c, 7, 8, 8a, 9, 10.

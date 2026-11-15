@@ -15,6 +15,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const HOME = path.join(os.homedir(), '.claude');
@@ -28,6 +29,8 @@ if (!fs.existsSync(HOME)) { console.log('no ~/.claude on this machine: nothing t
 const differ = [];
 // the full rulebook has one home, docs/page-generation-rules.md; the skill's full-rules.md is only its copy
 // (10 Nov 2026: the hand-kept copy had fallen 300 lines and four sections behind)
+// --sync also refreshes the contents lists first, so a new section is listed in both copies (15 Nov 2026)
+if (sync) spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'contents.mjs')], { cwd: ROOT, stdio: 'inherit' });
 const FULL = path.join(ROOT, 'docs', 'page-generation-rules.md'), FULL_COPY = path.join(PAIRS[0][0], 'reference', 'full-rules.md');
 if (fs.existsSync(FULL) && (!fs.existsSync(FULL_COPY) || text(FULL) !== text(FULL_COPY))) {
   if (sync) { fs.copyFileSync(FULL, FULL_COPY); console.log(`synced ${FULL_COPY}`); }

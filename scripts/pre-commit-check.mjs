@@ -18,6 +18,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { liveHash, readPublished } from './live-hash.mjs';
 import { stagedIsMeasured } from './ad-measured.mjs';
+import { FILES as CONTENTS_FILES } from './contents.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const staged = spawnSync('git', ['diff', '--cached', '--name-only', '--diff-filter=ACMR'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
@@ -47,6 +48,11 @@ for (const f of staged) {
 // a rule changed in the repo copy of the skill or hooks must be changed in the copy sessions load too (1 Nov 2026)
 if (staged.some((f) => /^(\.claude\/skills\/build-business-page|scripts\/hooks)\//.test(f))) {
   const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-rule-copies.mjs')], { cwd: ROOT, encoding: 'utf8' });
+  if (c.status !== 0) { console.error(`Commit refused: ${c.stdout}`); process.exit(1); }
+}
+// each long rule file opens with a contents list that matches its sections (15 Nov 2026)
+if (staged.some((f) => CONTENTS_FILES.includes(f))) {
+  const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'contents.mjs'), '--check'], { cwd: ROOT, encoding: 'utf8' });
   if (c.status !== 0) { console.error(`Commit refused: ${c.stdout}`); process.exit(1); }
 }
 // a rule copied by hand falls behind: the full rulebook is copied into the skill, and both copies must match (10 Nov 2026)
