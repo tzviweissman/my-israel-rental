@@ -131,5 +131,11 @@
     "used_by": [
       "gremier-coffee"
     ]
+  },
+  "recur": {
+    "what": "one visit is set on a weekday of a calendar and repeats itself down the coming weeks; the visitor moves the day or changes how often and every visit moves with it",
+    "used_by": [
+      "clean-plus"
+    ]
   }
 }

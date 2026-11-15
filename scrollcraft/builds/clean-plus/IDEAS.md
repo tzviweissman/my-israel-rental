@@ -1,0 +1,35 @@
+# Clean Plus: opening ideas (scripts/check-ideas.mjs)
+
+No film on this site. Every opening is built in code over one generated still (a bright, tidy Jerusalem
+apartment, no people, never shown as a customer's home). Facts used: the flyer's words and six tiles, and
+the listing's weekly cleaning, 4 hours, ₪325, all around Jerusalem. Only the weekly visit has a price, so
+every other choice says "we'll tell you the price on WhatsApp". Saturday is left off every day picker
+until the owner answers question 6. Nothing here uses a wipe, haze, light pass or before/after line (RBS
+Cleaning), and no sparkles, bubbles, mops or spray bottles.
+
+## A. Own: the visit that repeats
+- motion: recur, one 4-hour visit is set on a weekday of a calendar and repeats itself down the coming weeks; the visitor moves the day or changes how often and every visit moves with it
+- sources: docs/inspo/pinterest-clean-plus-2026-11-15/plan-cards-blue-light.jpg, docs/inspo/videos-2026-11-04/brief-form-live-summary.jpg, docs/inspo/product-pages-2026-10-20/jacket-1-colour-chip-recolours-whole-page.webp
+- why: the flyer's own promise, "Pick the options that fit you and we'll build the right plan", and its first tile, "Weekly visits: every week, every two weeks or just once". A weekly cleaner is not one event, it is the same visit coming back, so the thing that happens on screen is the coming back. One sentence test: you land and a cleaning visit drops onto Tuesday and repeats down the month, then you move it to your own day.
+- steps: 1 the first screen, before any scroll: the apartment picture fills the screen; on the left the flyer's headline "Home cleaning, your way." with "your way." in the royal blue, one line "Weekly visits all around Jerusalem. 4 hours, ₪325." and the WhatsApp button; on the right a white plan board, the brightest thing on screen: a calendar of the next four weeks, days Sunday to Friday across, weeks down, empty. 2 as the page arrives, one royal blue block marked "4 hours" is set on Tuesday of the first week with a small gold mark for booked; then the same block appears on Tuesday of week two, three and four, about 120 ms apart, top to bottom, like a date being repeated; under the board one sentence writes itself: "Every Tuesday, 4 hours, ₪325 a visit." 3 the visitor taps another day: all four blocks slide across together to that day and the sentence changes its day; this is the choice that changes the opening. 4 three pills above the board carry the first tile's own words: "Every week", "Every two weeks", "Just once"; on "Every two weeks" the second and fourth blocks lift off and the other two stay; on "Just once" only the first stays; the sentence follows, and for those two it reads "we'll tell you the price on WhatsApp" since only the weekly price is known. 5 scrolling one screen, the board stays at the side while the flyer's other tiles pass as rows, one tap each: "Same cleaner every week" adds the line "Same cleaner, please" to the board, "Equipment & supplies" adds "Please bring supplies", "Deep cleaning" and "One-time cleaning" change the block's label and turn the pills to "Just once". 6 the board ends on the button "Send my plan on WhatsApp", which opens WhatsApp with the sentence and the added lines already written; on a phone the picture takes the top half, the headline sits on it, and the board comes right under it with a sliver showing on the first screen.
+
+## B. The sentence you finish
+- motion: sentence, the plan is one large sentence across the picture whose blue words the visitor taps to change, and the rest of the sentence rewrites itself around them
+- sources: docs/inspo/awwwards-categories-2026-10-18/kota-studio-1-service-price-rows.webp, docs/inspo/pinterest-clean-plus-2026-11-15/hero-with-quote-card.jpg
+- why: "your way" said literally: the customer writes the plan in plain words, as they would say it to the owner. No form, no grid.
+- steps: 1 the first screen: the apartment picture, and over its calm wall one large navy sentence, "A cleaner comes every week for 4 hours. ₪325 a visit.", with "every week" in royal blue and underlined, and the WhatsApp button under it. 2 as the page arrives, the blue words are typed last, so the eye lands on the part that can change. 3 tapping "every week" opens the first tile's three choices in place, "every week", "every two weeks", "just once"; the picked words drop in and the end of the sentence rewrites: for the two without a known price it becomes "We'll tell you the price on WhatsApp." 4 scrolling, two more short sentences join it from the flyer's tiles, each with one blue choice: "Send the same cleaner each time." and "Bring the equipment and supplies."; the button sends all of it on WhatsApp.
+
+## C. The message that writes itself
+- motion: message, the flyer's six tiles are tapped and a WhatsApp message to Clean Plus is written line by line beside them, ready to send
+- sources: docs/inspo/awwwards-anatomy-2026-10-22/services/trucknroll-contact-quote.webp, docs/inspo/pinterest-clean-plus-2026-11-15/pick-rooms-tiles-generator.jpg
+- why: the flyer's closing line, "Tell us what you need on WhatsApp". The page does the telling for the customer, so the last step is one tap.
+- steps: 1 the first screen: the headline and the line with ₪325 on the left over the picture; on the right the six tiles in the flyer's pale blue, two across, and beside them a single message bubble that already reads "Hi Clean Plus, I'd like home cleaning in Jerusalem." 2 as the page arrives, "Weekly visits" fills royal blue by itself and the bubble types its line: "Weekly visits, 4 hours." 3 each tile the visitor taps fills blue and types its own line into the bubble; tapping it again removes the line. 4 the bubble's send arrow is the main button; it opens WhatsApp with the message as written.
+
+## D. The plan slip
+- motion: print, a plan slip feeds out of the top of a card one line at a time as each option is chosen, and the finished slip is what is sent
+- sources: docs/inspo/pinterest-clean-plus-2026-11-15/services-steps-pricing-column.jpg, docs/inspo/videos-2026-11-04/brief-form-live-summary.jpg
+- why: "we'll build the right plan": the plan is shown being made, a line for each thing the customer picked, with the one real price on it.
+- steps: 1 the first screen: the picture, the headline, the WhatsApp button, and a white slip already showing its first line, "Weekly cleaning, 4 hours, ₪325". 2 as the page arrives, the slip feeds up by one line and stops. 3 each tile picked lower down feeds one more line out: "Every two weeks", "Same cleaner", "Supplies brought". 4 the slip ends with the button "Send this plan on WhatsApp". Weaker than A: a slip looks like a bill, and nothing on it says "weekly".
+
+## Chosen: A
+A, because it is the only one where the event is the service itself, a visit that keeps coming back on the customer's own day, and it shows the flyer's first tile and the one real price on the first screen before any scroll. C's ready-written WhatsApp message is kept as A's last step.

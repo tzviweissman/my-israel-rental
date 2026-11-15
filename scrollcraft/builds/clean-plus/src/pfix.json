@@ -1,0 +1,9 @@
+{
+"R3h.21":"nothing holds the page or follows the scroll; the board sits beside the headline and the options have their own plan line",
+"R3a.4":"nothing is pinned or sticky",
+"R3k.7":"book.html in three steps with a \"Step N: name\" bar (Step 1 Your plan, Step 2 When and where, Step 3 Your details), the plan and price beside every step, Back and browser back, each step checks its own fields",
+"R3k.6":"n/a: no basket; the board and the options carry the chosen plan to book.html (?often=&day=&kind=)",
+"R5b.2":"\"Build your plan\" to book.html in the header, opening, board, options, price card, close band, phone bar and footer",
+"R3o.5":"the ₪ sign set in the system face (system-ui, which has it on every platform) through kit.price and the .sym class",
+"R3g.11":"Plus Jakarta Sans and Public Sans (SIL OFL), English only; the ₪ sign in the system face"
+}

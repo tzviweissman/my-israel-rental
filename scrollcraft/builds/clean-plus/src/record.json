@@ -1,0 +1,137 @@
+{
+ "business": {
+  "_id": "2804c4e6-7fed-49b0-8ecf-7cd3b1c7cc01",
+  "owner_user_id": "90789064-c2ee-437e-bdc7-a08120c21640",
+  "name": "Clean plus",
+  "name_he": null,
+  "name_en": null,
+  "source_lang": null,
+  "slug": "clean-plus",
+  "logo_url": null,
+  "description": "Clean plus is a company that provide weekly cleaning all around Jerusalem ",
+  "description_he": null,
+  "description_en": null,
+  "categories": [],
+  "areas": [
+   "jerusalem"
+  ],
+  "serves_nationwide": false,
+  "verified": false,
+  "verified_at": null,
+  "hours": null,
+  "languages": [],
+  "founded_year": null,
+  "delivery_note": null,
+  "lead_time": null,
+  "payment_note": null,
+  "kosher_certification": null,
+  "license_number": null,
+  "cover_url": null,
+  "accent": "stone",
+  "payment_links": [],
+  "active": true,
+  "created_at": "2026-11-14T20:31:10.682016+00:00",
+  "updated_at": "2026-11-14T20:31:10.682016+00:00",
+  "socials": {
+   "website": "https://cleanplusjerusalem.cc"
+  },
+  "ad_email_at": "2026-11-15 07:35:53.045000"
+ },
+ "listings": [
+  {
+   "_id": "8d8bb8e8-1571-45ce-a6e9-5b177b83561e",
+   "provider_user_id": "90789064-c2ee-437e-bdc7-a08120c21640",
+   "provider_id": "b97fde86-7374-4c16-aa6e-d2ac262935c9",
+   "business_id": "2804c4e6-7fed-49b0-8ecf-7cd3b1c7cc01",
+   "title": "Cleaning service jlm",
+   "title_he": "שירות ניקיון ירושלים",
+   "title_en": null,
+   "source_lang": "en",
+   "category": "cleaning-services",
+   "subcategory": null,
+   "description": "Clean plus is a company that provide weekly cleaning all around Jerusalem ",
+   "description_he": "קלין פלוס היא חברה המספקת ניקיון שבועי בכל רחבי Jerusalem",
+   "description_en": null,
+   "gig_type": "appointment",
+   "tiers": [
+    {
+     "name": "Weekly cleaning 4 hours",
+     "price": 325.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": 60,
+     "description": "",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794688188/myisraelrental/z65fnrkofearwpkmctxf.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1794688188/myisraelrental/mzsqgrf98cmmwcw5czib.jpg"
+     ]
+    }
+   ],
+   "products": [],
+   "weekly_availability": {
+    "mon": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "tue": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "wed": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "thu": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "fri": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "sat": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "sun": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ]
+   },
+   "slot_duration_minutes": 90,
+   "team": [],
+   "rebook_after_weeks": null,
+   "enable_date_booking": false,
+   "gallery": [],
+   "booking_mode": "whatsapp",
+   "whatsapp_confirmed": true,
+   "contact_email": null,
+   "whatsapp": "+972504232291",
+   "area": "Jerusalem ",
+   "faqs": [],
+   "discount": null,
+   "status": "published",
+   "created_at": "2026-11-14T20:31:11.586314+00:00",
+   "updated_at": "2026-11-14T20:31:11.586314+00:00",
+   "geocode_miss": false,
+   "geocoded_at": 1794688272.0500555,
+   "lat": 31.7788472,
+   "lng": 35.2257856
+  }
+ ]
+}
