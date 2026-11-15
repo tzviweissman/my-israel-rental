@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeyRound, EyeOff, Eye, Globe, MessageCircle, Check, Home as HomeIcon, Bell, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
@@ -23,6 +23,14 @@ const SettingsTab = ({ user, token, API, runsBusiness = false }) => {
   // the field shows what we already have on file.
   const [whatsappNumber, setWhatsappNumber] = useState(user?.phone || '');
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+  // The setup checklist's "Choose how people reach you" links here with
+  // ?section=whatsapp; the field sits two screens down, under the email
+  // cards, so open the page at it (dead-ends audit, 15 Nov 2026).
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('section') !== 'whatsapp') return undefined;
+    const id = setTimeout(() => document.getElementById('settings-whatsapp-card')?.scrollIntoView({ block: 'center' }), 400);
+    return () => clearTimeout(id);
+  }, []);
 
   // Owner-only opt-out for the automated 12h chat nudge. Absent field
   // treated as enabled (opt-in-to-quiet) — matches the backend default.
@@ -302,7 +310,7 @@ const SettingsTab = ({ user, token, API, runsBusiness = false }) => {
       {/* WhatsApp number — used for renter-message + contract-signed
           notifications. Same field powers the public profile / email
           signature, so editing here updates both contexts. */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6">
+      <div id="settings-whatsapp-card" className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 rounded-full bg-emerald-50">
             <MessageCircle size={24} className="text-emerald-600" />
