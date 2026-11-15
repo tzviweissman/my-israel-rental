@@ -10,6 +10,9 @@ slide push, never by a fade.
                      ground", "phone": "<optional 9:16 clip>"}, ...], "end_still": "assets/open-wide.webp", "ground": "#F6EEE3"}
 
     python ../../starter/clipchain.py make      the paid clips, in order (HF_KEY from backend/.env.local, never printed)
+    python ../../starter/clipchain.py make --dry  every check, then stops before the first paid clip
+    Each step not yet made has "carries" (what still moves in its start and when it stops, or "nothing"; 3aa.28); before
+    the next clip is paid for, the last one made has "end_seen" (what its last frame shows, looked at; 3aa.27).
     python ../../starter/clipchain.py encode    assets/film/s<n>-d.mp4 / -m.mp4 and posters, every frame a keyframe
 
 Run from the build folder with the backend venv python. Paid generation also needs gen/*-brief.md (film-gate)."""
@@ -22,6 +25,8 @@ from pathlib import Path
 
 ROOT = Path('C:/Users/tzviw/Documents/my-israel-rental')
 # a second chain (the phone's tall clips, "aspect": "9:16") is run as: clipchain.py make gen/chain-tall.json
+DRY = '--dry' in sys.argv
+if DRY: sys.argv.remove('--dry')
 SPEC = json.loads(Path(sys.argv[2] if len(sys.argv) > 2 else 'gen/chain.json').read_text(encoding='utf8'))
 W = Path('gen/world'); W.mkdir(parents=True, exist_ok=True)
 OUT = Path('assets/film'); OUT.mkdir(parents=True, exist_ok=True)
@@ -84,6 +89,12 @@ def make():
     bad = [st['name'] for st in SPEC['steps'] if not (W / f"{st['name']}.mp4").exists() and 'before' not in str(st.get('start_seen', '')).lower()]
     if bad:
         sys.exit(f'chain.json steps {bad}: start_seen does not say what the start shows "before" the action of its step (3aa.22)')
+    # what is still moving carries on into the next clip (rules 3aa.28; Gremier 14 Nov: the grounds kept falling through the
+    # whole phone Steep clip, so the drop was seen twice): each new step says what is moving in its start and by when it stops
+    bad = [st['name'] for st in SPEC['steps'] if not (W / f"{st['name']}.mp4").exists()
+           and str(st.get('carries', '')).strip().lower() != 'nothing' and len(str(st.get('carries', '')).split()) < 5]
+    if bad:
+        sys.exit(f'chain.json steps {bad} have no "carries" line: what is still moving in the start picture and by when it stops in this clip ("the falling grounds: the last lands by 1 s"), or "nothing" (3aa.28)')
     # the phone is planned with the film, not after the review (rules 3aa.24; Gremier's review: each phone screen 60% cream)
     if SPEC.get('aspect') != '9:16' and len(str(SPEC.get('phone_plan', '')).split()) < 6:
         sys.exit('chain.json has no "phone_plan" line: tall 9:16 clips (12 credits each) or the whole width on the ground, and whose choice it was, the owner or Tzvi (3aa.24)')
@@ -95,6 +106,14 @@ def make():
     for step in SPEC['steps']:
         out = W / f"{step['name']}.mp4"
         if not out.exists():
+            # the last clip did what its step promised before the next is paid for (rules 3aa.27; Gremier 14 Nov: the phone
+            # Steep clip moved smoothly, passed, and never made the brown sea or the whirlpool): its last frame was looked at
+            done_before = [st for st in SPEC['steps'][:SPEC['steps'].index(step)] if (W / f"{st['name']}.mp4").exists()]
+            if done_before and len(str(done_before[-1].get('end_seen', '')).split()) < 8:
+                sys.exit(f'{done_before[-1]["name"]}: no "end_seen" line. Look at {prev.name} full size and write what it shows against the frame line of that step '
+                         f'(the whirlpool whole in the middle, the glass full); if the step did not happen, remake it, not the next (3aa.27)')
+            if DRY:
+                print('dry: every check passes; the next paid clip would be', step['name']); return
             # free check before a paid clip (rules 3aa.23, Gremier 12 Nov: a faint floor band in the start became a shelf the
             # camera fell past, 12 credits remade): a straight line across nearly the whole width in the lower half
             y = floor_line(prev)

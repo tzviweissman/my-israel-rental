@@ -732,3 +732,8 @@ section.sec.story { padding-block: clamp(3rem, 18svh - 30px, 10rem); }
   .film.slides .w-end { background: color-mix(in srgb, var(--ground) 92%, transparent); padding: var(--s3) var(--s4); border-radius: var(--r); }
   .film.slides .w-end::before { content: none; }
 }
+/* review 15 Nov: at an iPhone's real height the Grind card covered the falling grounds and the Pour and Serve cards the
+   stream into the glass, all of which fall down the middle; on a phone each card stays in the outer third, its line wrapping */
+@media (max-width: 860px), (max-aspect-ratio: 1/1) { .film.slides .chap { max-width: calc(38vw - var(--gutter)); } }
+/* review 15 Nov: a quick double tap on Add must never zoom an iPhone */
+a, button, .chip { touch-action: manipulation; }

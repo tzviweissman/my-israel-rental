@@ -78,7 +78,8 @@ OPENING = kit.opening_slides(
     ('shop.html', 'Shop cold brew'), [f'{P(49)} a litre bottle', f'Coffee bars from {P(349)}', KOSHER],
     ('assets/01-sunlit-closeup-v3.webp', 1200, 800), 'Stock your fridge.',
     'Beans pour into the grinder, which comes apart in the air; the grounds fall into a wavy ocean of cold water and turn '
-    'it brown, the ocean becomes a whirlpool that pours into a glass of ice and milk, and the camera pulls back to our coffee bar')
+    'it brown, the ocean becomes a whirlpool that pours into a glass of ice and milk, and the camera pulls back to our coffee bar',
+    intro=2.6)   # the beans pour in by themselves as the page opens: the clip's first 2.6 s (Tzvi 14 Nov: "i dont see the beans dropping")
 
 KBAND = f'''  <section class="kband" aria-label="Kosher">
     <div class="wrap"><img src="assets/logo.webp" alt="" width="44" height="44" loading="lazy"><p>Kosher, under Rabbi Shmuel Weiner. Brewed in small batches and bottled fresh.</p></div>

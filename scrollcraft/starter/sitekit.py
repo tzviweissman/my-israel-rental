@@ -305,7 +305,7 @@ def facts(items: list[str]) -> str:
 
 def opening_slides(slides: list[tuple[str, str, str]], h1_html: str, line: str, cta: tuple[str, str],
                    fact_items: list[str], end_photo: tuple[str, int, int], end_title: str, label: str,
-                   hold: float = 1.0, push: float = 0.55) -> str:
+                   hold: float = 1.0, push: float = 0.55, intro: float | None = None) -> str:
     """The opening as connected slides (join method 'slides'; slides.js). slides: [(file stem in assets/film, big word,
     short line)], each with assets/film/<stem>-d.mp4 and -m.mp4 and their -d.webp / -m.webp posters (clip-chain writes
     them). Placement is the part's, so it is right by construction: the headline, line, button and facts on a tight
@@ -327,11 +327,17 @@ def opening_slides(slides: list[tuple[str, str, str]], h1_html: str, line: str, 
     # a clip made from the last frame of the clip before (clipchain) carries on in place: pushing it up would show that
     # one picture twice, leaving and arriving, which reads as a restart (review 12 Nov, Gremier). Only a change of scene
     # (a still, or a clip not chained) is pushed up as a new slide (3aa.2).
+    # the first event is seen, never frozen until a scroll (rules 3aa.29; Gremier 14 Nov 2026: "i dont see the beans
+    # dropping"): intro is the seconds of the first clip that play by themselves as the page opens, chosen per film,
+    # or 0 when the first picture is already a still moment
+    if intro is None:
+        raise BuildError('opening_slides: say intro=<seconds>: how much of the first clip plays by itself on arrival (the beans '
+                         'pouring in), or intro=0 when its first picture is already still (3aa.29)')
     def is_still(sl): return len(sl) > 3 and sl[3]
     items = ''.join(one(sl).replace('<div class="slide"', '<div class="slide" data-same', 1)
                     if k and not is_still(sl) and not is_still(slides[k - 1]) else one(sl)
                     for k, sl in enumerate(slides))
-    return f'''  <section class="film slides" id="film" aria-labelledby="h-open" data-hold="{hold}" data-push="{push}">
+    return f'''  <section class="film slides" id="film" aria-labelledby="h-open" data-hold="{hold}" data-push="{push}" data-intro="{intro}">
     <div class="stage">
       <div class="track" role="img" aria-label="{escape(label, True)}">
 {items}      </div>

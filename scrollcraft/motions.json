@@ -125,5 +125,11 @@
     "used_by": [
       "mn-jewelry"
     ]
+  },
+  "steep": {
+    "what": "time passes over the product until it changes, like coffee steeping from pale to dark (Gremier: the key moment of its cold brew making film)",
+    "used_by": [
+      "gremier-coffee"
+    ]
   }
 }

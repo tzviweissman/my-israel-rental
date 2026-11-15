@@ -2353,6 +2353,31 @@ part where one exists, so it is there without being remembered.
     the line `Phones asked: <date>, Tzvi: "<his answer>"` and the film gate refuses any paid video without it;
     `clipchain.py make` refuses a `phone_plan` that does not quote him. Ask it in the same message as the motion steps
     (3h, confirm motion before generating), so it costs no extra round.
+27. **Each clip did what its step promised** (Tzvi, 14 Nov 2026, Gremier's phone film: "it shows the coffee dropping twice
+    and theres no whirlpool"). check-clip measures smoothness, not whether the step happened: the phone Steep clip moved
+    smoothly, passed by eye, and never turned the sea brown or made the whirlpool. Before the next clip is paid for, the
+    last one's final frame (`<name>-last.png`) is looked at full size and the step gets an `end_seen` line saying what it
+    shows against its `frame` line ("the whole brown whirlpool in the middle, edge to edge"). If the step did not happen,
+    that clip is remade, never patched by the next. A step whose end is the story's key moment (the whirlpool, the full
+    glass) also gets a planned end still (`end` in chain.json), so the model has to land there. `clipchain.py make`
+    refuses the next clip without the line; `make --dry` runs every check and stops before paying.
+28. **What is moving at a join stops in its own clip** (same day: slide 2 ended mid-pour, so the next clip poured on and the
+    drop was seen twice). A chained clip starts on the last frame of the one before, so whatever is still moving there (a
+    falling stream, a turning whirl) carries on unless the step says when it stops. Each new step has a `carries` line:
+    what is still moving in its start picture and by when it stops ("the falling grounds: the last lands by 1 s"), or
+    "nothing"; its prompt says it too. `clipchain.py make` refuses a new step without it.
+29. **The first event plays as the page opens** (Tzvi, 14 Nov 2026: "i dont see the beans dropping"). A scroll-led film
+    stands on its first frame until the visitor scrolls, so an opening that starts with something happening (beans
+    pouring in) showed it frozen in mid-air. `kit.opening_slides(intro=<seconds>)` plays that much of the first clip by
+    itself, muted, then hands over to the scroll from that point (Gremier: 2.6, the beans in and the grinder opening);
+    `intro=0` when the first picture is already a still moment. The starter refuses an opening without `intro`. Never
+    added to a site already live.
+30. **Phones are checked as an iPhone, not only in Chrome** (Tzvi, 14 Nov 2026: "I can't see it on my phone"). The pour
+    played in Chrome and stood still on his iPhone: Safari's engine loads no video data until a video is played, so a film
+    moved only by seeking sits on its first frame. `node scripts/check-iphone.mjs <urls>` opens every page in WebKit as an
+    iPhone 13 and fails on a script error, a page wider than the screen, an opening with no `data-intro`, or a first clip
+    that should play on arrival and has not moved after 4 s. It runs in check-build and publish-page. Tried on all 25
+    builds, 15 Nov 2026: only Bake Away fails (16 px wider than the screen), shown to Tzvi, not changed.
 
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
 

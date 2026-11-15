@@ -16,6 +16,9 @@
     HOLD *= grow; P = P.map(function (x) { return x * grow; });
     var starts = [0]; for (var q = 1; q < N; q++) starts[q] = starts[q - 1] + HOLD + P[q - 1];
     var units = starts[N - 1] + HOLD, still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // data-intro: the seconds of the first clip that play by themselves on arrival (beans pouring in as the page opens), so the
+    // first event is seen, not frozen until a scroll; the scroll then leads from that point (Tzvi 14 Nov 2026, Gremier)
+    var INTRO = 0, SECS = +film.dataset.intro || 0, introT = still || !SECS ? 1 : 0;
     var kind = innerWidth <= 860 || innerWidth <= innerHeight ? 'm' : 'd', bar = document.getElementById('bar');
     slides.forEach(function (s, i) { s.style.top = (i * 100) + '%'; });
     var vids = slides.map(function (s) {
@@ -40,7 +43,8 @@
       var u = still ? units : Math.min(units, Math.max(0, -r.top / Math.max(1, span) * units)), pos = 0, active = 0;
       for (var i = 0; i < N; i++) {
         var start = starts[i];
-        if (u < start + HOLD || i === N - 1) { pos = i; active = i; vids[i].want = Math.min(1, Math.max(0, (u - start) / HOLD)); break; }
+        if (u < start + HOLD || i === N - 1) { pos = i; active = i; vids[i].want = Math.min(1, Math.max(0, (u - start) / HOLD));
+          if (!i) vids[0].want = INTRO * introT + (1 - INTRO * introT) * vids[0].want; break; }
         if (u < start + HOLD + P[i]) { var t = ease((u - start - HOLD) / P[i]); pos = i + t; active = t > .5 ? i + 1 : i; vids[i].want = 1; vids[i + 1].want = 0; break; }
       }
       // slides already passed rest on their last frame, slides still below rest on their first
@@ -56,13 +60,31 @@
       if (vids.some(function (v) { return Math.abs(v.shown - v.want) > 0.002; })) raf = requestAnimationFrame(frame);
     }
     function seek(v) {
-      var el = v.el; if (!el) { v.shown = v.want; return; } var dur = el.duration; if (!dur || el.readyState < 1) return;
+      var el = v.el; if (!el) { v.shown = v.want; return; } if (v.playing) return; var dur = el.duration; if (!dur || el.readyState < 1) return;
       v.shown = v.shown < 0 ? v.want : v.shown + (v.want - v.shown) * 0.22;   // ease toward the scroll: no jolts from a wheel
       if (Math.abs(v.want - v.shown) < 0.002) v.shown = v.want;
       var t = v.shown * (dur - 0.05);
       if (!el.seeking && Math.abs(el.currentTime - t) > 0.004) el.currentTime = t;
     }
     vids.forEach(function (v) { if (v.el) v.el.addEventListener('loadedmetadata', function () { v.shown = -1; if (!raf) raf = requestAnimationFrame(frame); }); });
+    // the intro really plays (muted, inline): a phone loads no video data until it is played, so seeking alone showed a
+    // frozen first frame on an iPhone (Tzvi 14 Nov 2026: "I can't see it on my phone"). It stops at SECS and hands over to
+    // the scroll from there; skipped if the page opened past the film; if play is refused (Low Power Mode) the scroll leads.
+    var v0 = vids[0];
+    if (introT < 1 && v0.el) {
+      var done = function () {
+        if (!v0.playing) return;
+        v0.playing = false; v0.el.pause();
+        var d = v0.el.duration || 1; INTRO = Math.min(0.9, v0.el.currentTime / d); introT = 1; v0.shown = -1; frame();
+      };
+      if (film.getBoundingClientRect().top < -innerHeight * 0.1) introT = 1;
+      else {
+        v0.playing = true;
+        (function watch() { if (!v0.playing) return; if (v0.el.currentTime >= SECS) done(); else requestAnimationFrame(watch); })();
+        addEventListener('scroll', function () { if (v0.playing && film.getBoundingClientRect().top < -innerHeight * 0.05) done(); }, { passive: true });
+        var pr = v0.el.play(); if (pr && pr.catch) pr.catch(function () { v0.playing = false; introT = 1; });
+      }
+    }
     addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(frame); }, { passive: true });
     addEventListener('resize', function () { size(); if (!raf) raf = requestAnimationFrame(frame); });
     size(); frame();

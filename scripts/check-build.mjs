@@ -43,7 +43,7 @@ try {
 const runs = [];
 for (const p of pages) {
   const url = `${base}/${folder}/${p}`;
-  for (const s of ['check-site', 'check-fits', 'check-motion', 'check-speed', 'check-same-place', 'check-one-scroll', 'check-photo-clear', 'check-overlap', 'check-opening-scroll', 'check-blank', 'check-prefill', 'check-arrival']) runs.push([`${s} ${p}`, [path.join(ROOT, 'scripts', `${s}.mjs`), url]]);
+  for (const s of ['check-site', 'check-fits', 'check-motion', 'check-speed', 'check-same-place', 'check-one-scroll', 'check-photo-clear', 'check-overlap', 'check-opening-scroll', 'check-blank', 'check-iphone', 'check-prefill', 'check-arrival']) runs.push([`${s} ${p}`, [path.join(ROOT, 'scripts', `${s}.mjs`), url]]);
   if (fs.existsSync(readable)) runs.push([`readable ${p}`, [readable, url]]);
 }
 // the site-wide checks of rules 3v take every page at once (the same footer and menu on each)

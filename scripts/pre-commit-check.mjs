@@ -22,6 +22,20 @@ import { stagedIsMeasured } from './ad-measured.mjs';
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const staged = spawnSync('git', ['diff', '--cached', '--name-only', '--diff-filter=ACMR'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
 
+// a staged script never leans on a file that was never added (15 Nov 2026: check-rules.mjs went in importing
+// site-has.mjs, which sat untracked for days, and every other copy of the repo broke): its local imports are tracked or staged
+{
+  const tracked = new Set(spawnSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 }).stdout.split('\n'));
+  const missing = [];
+  for (const f of staged.filter((x) => /\.(mjs|js)$/.test(x) && !/^frontend\//.test(x) && fs.existsSync(path.join(ROOT, x)))) {
+    const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    for (const m of src.matchAll(/^\s*(?:import|export)\b[^;\n]*?['"](\.{1,2}\/[^'"]+\.m?js)['"]|\bimport\(\s*['"](\.{1,2}\/[^'"]+\.m?js)['"]\s*\)/gm)) {
+      const dep = path.posix.normalize(path.posix.join(path.posix.dirname(f), m[1] || m[2]));
+      if (!tracked.has(dep) && !staged.includes(dep)) missing.push(`${f} imports ${dep}, which is not in the repo: git add it too`);
+    }
+  }
+  if (missing.length) { console.error(`Commit refused:\n${missing.join('\n')}`); process.exit(1); }
+}
 const builds = new Set(), live = new Set();
 for (const f of staged) {
   let m = f.match(/^scrollcraft\/builds\/([^/]+)\/(.+)$/);

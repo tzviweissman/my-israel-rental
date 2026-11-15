@@ -86,3 +86,15 @@ ocean fills the screen. gen/chain-tall.json: K1t to K4t and J4t, the same prompt
 - Cost: five clips at 12 credits, 60.
 
 Phones asked: 12 Nov, the wide film on cream offered with tall clips at 12 credits each; Tzvi 13 Nov: "do the 60"
+
+
+## Remake of phone slides 3 and 4 (15 Nov)
+
+Tzvi 14 Nov: "it shows the coffee dropping twice and theres no whirlpool". K3t kept the grounds falling the whole clip and never made the whirlpool; K4t's whirl was about a second of blur. Steps, as offered and approved:
+1. STEEP (K3t): the falling stream ends in the first second, the brown spreads swell by swell until the whole sea is cold brew, then it turns into one large whirlpool in the middle.
+2. POUR (K4t): starts on that whirlpool, the camera dives down the funnel, out as one stream into the glass of ice, which fills once; it ends on the same full glass as before (K4t-end.png), so J4t is kept.
+- How it really happens: grounds stop when the stream runs out; brew colour spreads by mixing; a whirlpool forms from turning water and draws down a funnel.
+- Key moment: the whirlpool whole and large in the middle, the join between the two clips.
+- Cost: two clips at 12 credits (get_cost, 15 Nov), 24.
+
+Approved by Tzvi: 15 Nov 2026 ("Yes, remake both", after the two numbered steps for phone slides 3 and 4)

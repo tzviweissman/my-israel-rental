@@ -737,6 +737,46 @@
    "status": "built"
   },
   {
+   "id": "R3aa.27",
+   "rule": "Each clip did what its step promised: end_seen looked at before the next clip",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "clipchain.py make refuses the next clip until the last made step has an end_seen line",
+   "confirmed_by": "LOOK: chain.json end_seen lines",
+   "status": "built"
+  },
+  {
+   "id": "R3aa.28",
+   "rule": "What is moving at a join stops in its own clip: a carries line per new step",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "clipchain.py make refuses a new step without a carries line",
+   "confirmed_by": "LOOK: chain.json carries lines",
+   "status": "built"
+  },
+  {
+   "id": "R3aa.29",
+   "rule": "The opening's first event plays as the page opens",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "kit.opening_slides refuses an opening without intro; slides.js plays that many seconds muted",
+   "confirmed_by": "RUN: check-iphone INTRO and FROZEN",
+   "status": "built"
+  },
+  {
+   "id": "R3aa.30",
+   "rule": "Phones checked as an iPhone in WebKit",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "scripts/check-iphone.mjs in check-build and publish-page",
+   "confirmed_by": "RUN: check-iphone",
+   "status": "built"
+  },
+  {
    "id": "R3bb.1",
    "rule": "Pick at least three small touches from 3bb, named in CONCEPT.md",
    "how": [
