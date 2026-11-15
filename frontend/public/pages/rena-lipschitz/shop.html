@@ -8,12 +8,12 @@
 <meta name="description" content="Classic Cloud ₪40, Caramel Cloud and Vanilla Cloud ₪48 a jar; weekly packages from ₪75. Order on WhatsApp from The Whipped Cup, Ramat Eshkol, Jerusalem.">
 <meta property="og:title" content="Shop · The Whipped Cup">
 <meta property="og:description" content="Classic Cloud ₪40, Caramel Cloud and Vanilla Cloud ₪48 a jar; weekly packages from ₪75. Order on WhatsApp from The Whipped Cup, Ramat Eshkol, Jerusalem.">
-<meta property="og:image" content="/pages/rena-lipschitz/assets/jar-caramel.webp?v=mwgoll9y">
+<meta property="og:image" content="/pages/rena-lipschitz/assets/jar-caramel.webp?v=mwgyjdte">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,500..700,100;1,9..144,500,100&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@400;500;700&display=swap&text=%E2%82%AA" rel="stylesheet">  <!-- only ₪, which the site's own fonts do not have (scripts/check-site.mjs GLYPH) -->
-<link rel="stylesheet" href="/pages/rena-lipschitz/site.css?v=mwgoll9y">
+<link rel="stylesheet" href="/pages/rena-lipschitz/site.css?v=mwgyjdte">
 <style>
   /* form fields at 16px so iPhones do not zoom in; grid cells may shrink */
   .fld, input[type=tel].fld, input[type=date].fld { font-size: 16px; min-width: 0; }
@@ -33,14 +33,18 @@
 </header>
 <main>
   <form id="form" novalidate>
+  <nav class="kinds-row" id="kinds" aria-label="Jump to">
+    <a href="#jars" class="kr is-on" data-kind="jars" aria-current="true" data-mir-key="t-abdac62e-0">Jars</a>
+    <a href="#packs" class="kr" data-kind="packs" data-mir-key="t-2c667ddd-0">Weekly packages</a>
+  </nav>
   <section class="stage" id="jars" data-flav="classic" aria-labelledby="h-shop">
     <div class="wrap st-grid">
       <div class="st-ph">
-        <img class="on" data-flav="classic" src="/pages/rena-lipschitz/assets/jar-classic-hero.webp?v=mwgoll9y" alt="A jar of Classic Cloud on a stone plinth" width="960" height="1192" fetchpriority="high" data-mir-key="i-89e7f7d7-0">
-        <img class="" data-flav="caramel" src="/pages/rena-lipschitz/assets/jar-caramel-hero.webp?v=mwgoll9y" alt="A jar of Caramel Cloud on a stone plinth" width="960" height="1192" data-mir-key="i-c63d00b4-0">
-        <img class="" data-flav="vanilla" src="/pages/rena-lipschitz/assets/jar-vanilla-hero.webp?v=mwgoll9y" alt="A jar of Vanilla Cloud on a stone plinth" width="960" height="1192" data-mir-key="i-0dfeb6ed-0">
-        <img data-flav="use" src="/pages/rena-lipschitz/assets/iced.webp?v=mwgoll9y" alt="An iced whipped coffee in the sun" width="1170" height="1213" data-mir-key="i-0788c3e6-0">
-        <button type="button" class="st-use" id="st-use" aria-pressed="false" aria-label="Show the whipped coffee in a glass"><img src="/pages/rena-lipschitz/assets/iced.webp?v=mwgoll9y" alt="" width="56" height="56" data-mir-key="i-8973b902-0"></button>
+        <img class="on" data-flav="classic" src="/pages/rena-lipschitz/assets/jar-classic-hero.webp?v=mwgyjdte" alt="A jar of Classic Cloud on a stone plinth" width="960" height="1192" fetchpriority="high" data-mir-key="i-89e7f7d7-0">
+        <img class="" data-flav="caramel" src="/pages/rena-lipschitz/assets/jar-caramel-hero.webp?v=mwgyjdte" alt="A jar of Caramel Cloud on a stone plinth" width="960" height="1192" data-mir-key="i-c63d00b4-0">
+        <img class="" data-flav="vanilla" src="/pages/rena-lipschitz/assets/jar-vanilla-hero.webp?v=mwgyjdte" alt="A jar of Vanilla Cloud on a stone plinth" width="960" height="1192" data-mir-key="i-0dfeb6ed-0">
+        <img data-flav="use" src="/pages/rena-lipschitz/assets/iced.webp?v=mwgyjdte" alt="An iced whipped coffee in the sun" width="1170" height="1213" data-mir-key="i-0788c3e6-0">
+        <button type="button" class="st-use" id="st-use" aria-pressed="false" aria-label="Show the whipped coffee in a glass"><img src="/pages/rena-lipschitz/assets/iced.webp?v=mwgyjdte" alt="" width="56" height="56" data-mir-key="i-8973b902-0"></button>
       </div>
       <div class="st-info">
         <p class="kick" data-mir-key="t-40d6d48a-0">Shop · Whipped coffee in a jar</p>
@@ -51,6 +55,10 @@
           <span class="step" role="group" aria-label="How many jars"><button type="button" data-d="-1" aria-label="One fewer" data-mir-key="t-a4fccb8c-0">−</button><output id="st-n">1</output><button type="button" data-d="1" aria-label="One more" data-mir-key="t-e67d47d4-0">+</button></span>
           <button class="btn" type="button" id="st-add"><span data-mir-key="t-827fc389-0">Add a jar, ₪40</span></button>
         </div>
+        <div class="st-have" id="st-have" hidden>
+          <span class="step" role="group" aria-label="Jars in your basket"><button type="button" data-d="-1" aria-label="One fewer" data-mir-key="t-a4fccb8c-1">−</button><output id="st-bn" aria-live="polite">1</output><button type="button" data-d="1" aria-label="One more" data-mir-key="t-e67d47d4-1">+</button></span>
+          <span class="st-hv" data-mir-key="t-21d60fb6-0">in your basket</span>
+        </div>
         <p class="st-in" id="st-in" aria-live="polite"></p>
         <ul class="facts" aria-label="About every jar">
           <li data-mir-key="t-12e9006e-0"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM16 9h1.5a2.5 2.5 0 0 1 0 5H16"/></svg>Makes 3 to 4 coffees</li>
@@ -58,9 +66,9 @@
           <li data-mir-key="t-18a75918-0"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Handcrafted and fresh</li>
         </ul>
         <div class="st-pick" aria-label="Flavours">
-          <button type="button" data-flav="classic" aria-pressed="true"><img src="/pages/rena-lipschitz/assets/jar-classic.webp?v=mwgoll9y" alt="" width="500" height="1111" loading="lazy" data-mir-key="i-ac9af622-0"><span data-mir-key="t-314ebb80-0"><b>Classic Cloud</b>₪40</span></button>
-          <button type="button" data-flav="caramel" aria-pressed="false"><img src="/pages/rena-lipschitz/assets/jar-caramel.webp?v=mwgoll9y" alt="" width="500" height="1111" loading="lazy" data-mir-key="i-bd909943-0"><span data-mir-key="t-b6b22719-0"><b>Caramel Cloud</b>₪48</span></button>
-          <button type="button" data-flav="vanilla" aria-pressed="false"><img src="/pages/rena-lipschitz/assets/jar-vanilla.webp?v=mwgoll9y" alt="" width="500" height="1111" loading="lazy" data-mir-key="i-a1244dbe-0"><span data-mir-key="t-6440543d-0"><b>Vanilla Cloud</b>₪48</span></button>
+          <button type="button" data-flav="classic" aria-pressed="true"><img src="/pages/rena-lipschitz/assets/jar-classic.webp?v=mwgyjdte" alt="" width="500" height="1111" loading="lazy" data-mir-key="i-ac9af622-0"><span data-mir-key="t-314ebb80-0"><b>Classic Cloud</b>₪40</span></button>
+          <button type="button" data-flav="caramel" aria-pressed="false"><img src="/pages/rena-lipschitz/assets/jar-caramel.webp?v=mwgyjdte" alt="" width="500" height="1111" loading="lazy" data-mir-key="i-bd909943-0"><span data-mir-key="t-b6b22719-0"><b>Caramel Cloud</b>₪48</span></button>
+          <button type="button" data-flav="vanilla" aria-pressed="false"><img src="/pages/rena-lipschitz/assets/jar-vanilla.webp?v=mwgyjdte" alt="" width="500" height="1111" loading="lazy" data-mir-key="i-a1244dbe-0"><span data-mir-key="t-6440543d-0"><b>Vanilla Cloud</b>₪48</span></button>
         </div>
       </div>
     </div>
@@ -75,8 +83,9 @@
     </div>
   </section>
 
-  <section class="sec" id="order" aria-labelledby="h-basket">
+  <section class="sec is-empty" id="order" aria-labelledby="h-basket">
     <div class="wrap">
+      <p class="o-empty" data-mir-key="t-c932fb0a-0">Your basket is empty. Tap Add on anything above and it shows here.</p>
       <!-- the order in steps (Tzvi, 20 Oct 2026: "make steps the rule for order pages", like Blazin
            Boards): one question per screen, the order and its total beside every step -->
       <ol class="osteps" id="steps" aria-label="Order steps">
@@ -149,7 +158,7 @@
   <p class="p" data-mir-key="t-7f18bdb4-0"><b>From ₪40 a jar</b>Each jar makes 3 to 4 coffees</p>
   <a class="btn" href="/business/rena-lipschitz/shop" tabindex="-1" data-mir-key="t-e5c8a40f-3">Order your jars</a>
 </div>
-<script src="/pages/rena-lipschitz/site.js?v=mwgoll9y"></script>
+<script src="/pages/rena-lipschitz/site.js?v=mwgyjdte"></script>
 <script>
 (function () {
   var BIN = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -189,9 +198,16 @@
   // total in the button). Choosing another flavour crossfades the jar and tints the stage.
   var stage = document.getElementById('jars'), sel = 'classic', n = 1;
   var DESC = { classic: 'Original whipped coffee', caramel: 'Whipped coffee and caramel', vanilla: 'Whipped coffee and vanilla' };
-  var stN = document.getElementById('st-n'), stAdd = document.getElementById('st-add'), stIn = document.getElementById('st-in');
+  // the kinds row: jump to the jars or the packages, and light up the one in view
+  var kr = [].slice.call(document.querySelectorAll('#kinds .kr')), packsEl = document.getElementById('packs'), krTick = 0;
+  function krFrame() { krTick = 0; var onPacks = packsEl.getBoundingClientRect().top < innerHeight * .5; kr.forEach(function (a) { var on = (a.dataset.kind === 'packs') === onPacks; a.classList.toggle('is-on', on); if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); }); }
+  addEventListener('scroll', function () { if (!krTick) krTick = requestAnimationFrame(krFrame); }, { passive: true }); krFrame();
+  var stBuy = stage.querySelector('.st-buy'), stHave = document.getElementById('st-have'), stBn = document.getElementById('st-bn'), stN = document.getElementById('st-n'), stAdd = document.getElementById('st-add'), stIn = document.getElementById('st-in');
   function label() { stAdd.firstElementChild.textContent = 'Add ' + (n === 1 ? 'a jar' : n + ' jars') + ', ₪' + n * JARS[sel][1]; stN.textContent = n;
-    stIn.textContent = q[sel] ? 'In your basket: ' + q[sel] + ' ' + JARS[sel][0] : ''; }
+    stIn.textContent = q[sel] ? 'In your basket: ' + q[sel] + ' ' + JARS[sel][0] : '';
+    // once it is in the basket, Add turns into − n + on the jar itself (shop rollout, 13 Nov 2026)
+    var has = q[sel] > 0; stBuy.hidden = has; stHave.hidden = !has; stBn.textContent = q[sel]; if (has) stIn.textContent = '';
+    stHave.querySelector('[data-d="-1"]').setAttribute('aria-label', 'One fewer ' + JARS[sel][0]); stHave.querySelector('[data-d="1"]').setAttribute('aria-label', 'One more ' + JARS[sel][0]); }
   // a crossfade for words that change with a choice (check-motion: an instant swap is a JUMP, a fade
   // through blank is a FLASH): the new words fade in while a copy of the old ones fades out on top
   function xfade(el, html) {
@@ -206,7 +222,7 @@
     var next = stage.querySelector('.st-ph > img[data-flav="' + k + '"]');
     var swap = function () { if (sel !== k) return; [].forEach.call(stage.querySelectorAll('.st-ph > img'), function (i) { i.classList.toggle('on', i === next); }); };
     if (next.complete && next.naturalWidth) swap(); else (next.decode ? next.decode() : Promise.reject()).then(swap, swap);
-    useBtn.setAttribute('aria-pressed', 'false'); stage.querySelector('.st-ph').classList.remove('use'); useBtn.setAttribute('aria-label', 'Show the whipped coffee in a glass'); useBtn.firstElementChild.src = '/pages/rena-lipschitz/assets/iced.webp?v=mwgoll9y';
+    useBtn.setAttribute('aria-pressed', 'false'); stage.querySelector('.st-ph').classList.remove('use'); useBtn.setAttribute('aria-label', 'Show the whipped coffee in a glass'); useBtn.firstElementChild.src = '/pages/rena-lipschitz/assets/iced.webp?v=mwgyjdte';
     [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.flav === k ? 'true' : 'false'); });
     xfade(document.getElementById('st-name'), JARS[k][0]); xfade(document.getElementById('st-desc'), DESC[k]);
     xfade(document.getElementById('st-price'), '₪' + JARS[k][1]);
@@ -217,7 +233,13 @@
   stage.querySelector('.st-buy .step').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; n = Math.max(1, Math.min(20, n + (+b.dataset.d))); label(); });
   stAdd.addEventListener('click', function () {
     var addedN = n; q[sel] = Math.min(20, q[sel] + n); n = 1; update(); check(false); label();
-    say('Added: ' + addedN + ' ' + JARS[sel][0]); stAdd.classList.add('added'); setTimeout(function () { stAdd.classList.remove('added'); }, 900);
+    say('Added: ' + addedN + ' ' + JARS[sel][0]);
+    stHave.querySelector('[data-d="1"]').focus({ preventScroll: true });
+  });
+  stHave.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    q[sel] = Math.max(0, Math.min(20, q[sel] + (+b.dataset.d))); n = 1; update(); check(false); label();
+    if (!q[sel]) stAdd.focus({ preventScroll: true });
   });
   // a short note that slides in at the top and leaves by itself (page rules 3s, polish stack)
   var toast = document.createElement('div'), toastT = 0; toast.className = 'toast'; toast.setAttribute('role', 'status');
@@ -229,7 +251,7 @@
     useBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); stage.querySelector('.st-ph').classList.toggle('use', on);
     [].forEach.call(stage.querySelectorAll('.st-ph > img'), function (i) { i.classList.toggle('on', on ? i === useImg : i.dataset.flav === sel); });
     useBtn.setAttribute('aria-label', on ? 'Show the jar' : 'Show the whipped coffee in a glass');
-    useBtn.firstElementChild.src = on ? '/pages/rena-lipschitz/assets/jar-' + sel + '.webp' : '/pages/rena-lipschitz/assets/iced.webp?v=mwgoll9y';
+    useBtn.firstElementChild.src = on ? '/pages/rena-lipschitz/assets/jar-' + sel + '.webp' : '/pages/rena-lipschitz/assets/iced.webp?v=mwgyjdte';
   }
   useBtn.addEventListener('click', function () { setUse(useBtn.getAttribute('aria-pressed') !== 'true'); });
   function perJar(p) { var u = p.price / p.jars; return '₪' + (u % 1 ? u.toFixed(2) : u) + ' a jar'; }
@@ -306,7 +328,8 @@
     [].forEach.call(plans.querySelectorAll('input'), function (i) { i.checked = i.value === pack; });
     var html = ''; for (var k in q) if (q[k]) html += '<li class="bl"><span>' + JARS[k][0] + '<span class="step sm"><button type="button" data-k="' + k + '" data-d="-1" aria-label="One fewer ' + JARS[k][0] + '">−</button><output>' + q[k] + '</output><button type="button" data-k="' + k + '" data-d="1" aria-label="One more ' + JARS[k][0] + '">+</button></span></span><span class="bl-r">₪' + q[k] * JARS[k][1] + '<button type="button" class="rm" data-rm="' + k + '" aria-label="Remove ' + JARS[k][0] + ' from the basket">' + BIN + '</button></span></li>';
     if (PACKS[pack]) html += '<li class="bl"><span>' + PACKS[pack].name + (packDesc() ? ': ' + packDesc() : '') + '</span><span class="bl-r">₪' + PACKS[pack].price + '<button type="button" class="rm" data-rm="pack" aria-label="Remove the ' + PACKS[pack].name + ' from the basket">' + BIN + '</button></span></li>';
-    document.getElementById('sum-list').innerHTML = html || '<li><span>Your basket is empty. Pick a jar or a package above.</span></li>';
+    document.getElementById('sum-list').innerHTML = html || '<li><span>Your basket is empty. Tap Add on anything above and it shows here.</span></li>';
+    document.getElementById('order').classList.toggle('is-empty', !goods());
     [].forEach.call(plans.querySelectorAll('.plan'), function (l) { var sb = l.querySelector('.save-b'); if (!sb) return; sb.textContent = l.querySelector('input').value === pack ? 'In your basket' : sb.dataset.save; });
     var mini = ''; for (var km in q) if (q[km]) mini += '<li><span>' + q[km] + ' × ' + JARS[km][0] + '</span><span>₪' + q[km] * JARS[km][1] + '</span></li>';
     if (PACKS[pack]) mini += '<li><span>' + PACKS[pack].name + '</span><span>₪' + PACKS[pack].price + '</span></li>';
@@ -329,8 +352,11 @@
     drawStep();
     var b = { jars: {} }; for (var k2 in q) if (q[k2]) b.jars[k2] = q[k2]; if (pack) b.pack = pack; window.twcBasket.set(b);
     var bar = document.querySelector('#bar .p'), jarsN = 0; for (var k3 in q) jarsN += q[k3];
-    var barBtn = document.querySelector('#bar .btn'); if (barBtn) { barBtn.textContent = 'Basket'; barBtn.setAttribute('href', '#order'); }
-    if (bar) bar.innerHTML = goods() ? '<b>Basket, ₪' + total() + '</b>' + (jarsN ? jarsN + ' jar' + (jarsN > 1 ? 's' : '') : '') + (pack ? (jarsN ? ' and ' : '') + PACKS[pack].name : '') : '<b>From ₪' + minJar() + ' a jar</b>Each jar makes 3 to 4 coffees';
+    // the phone bar: only once something is in the basket, "2 items, ₪98, View basket" (site.js shows it)
+    var barBtn = document.querySelector('#bar .btn'), barBox = document.getElementById('bar'), items = jarsN + (pack ? 1 : 0);
+    if (barBtn) { barBtn.textContent = goods() ? 'View basket' : 'Order your jars'; barBtn.setAttribute('href', goods() ? '#order' : '#jars'); barBtn.tabIndex = goods() ? 0 : -1; }
+    if (bar) bar.innerHTML = goods() ? '<b>' + items + (items === 1 ? ' item' : ' items') + '</b>₪' + total() : '<b>From ₪' + minJar() + ' a jar</b>Each jar makes 3 to 4 coffees';
+    if (barBox) barBox.setAttribute('aria-hidden', goods() ? 'false' : 'true');
   }
   function v(id) { return document.getElementById(id).value.trim(); }
   function mark(id, msg) { var w = document.getElementById('w-' + id) || document.getElementById('c-' + id); if (w) w.classList.toggle('bad', !!msg); document.getElementById('e-' + id).textContent = msg || ''; }

@@ -6,14 +6,16 @@ document.body.classList.remove('no-js');
   var KEY = 'twc-basket-v1';
   window.twcBasket = {
     get: function () { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } },
-    set: function (b) { try { localStorage.setItem(KEY, JSON.stringify(b)); } catch (e) {} showCount(b); }
+    set: function (b) { try { localStorage.setItem(KEY, JSON.stringify(b)); } catch (e) {} showCount(b); hasBasket(b); }
   };
   function showCount(b) {
     var n = 0; for (var k in (b.jars || {})) n += b.jars[k] || 0; if (b.pack) n += 1;
     var c = document.getElementById('count'); if (!c) return;
     c.hidden = !n; c.textContent = n; c.setAttribute('aria-label', n + ' in your order');
   }
-  showCount(window.twcBasket.get());
+  // the shop page's phone bar shows only once something is in the basket (shop rollout, 13 Nov 2026)
+  function hasBasket(b) { var n = 0; for (var k in (b.jars || {})) n += b.jars[k] || 0; if (b.pack) n += 1; document.body.classList.toggle('has-basket', n > 0); setTimeout(function () { dispatchEvent(new Event('scroll')); }, 0); }
+  showCount(window.twcBasket.get()); hasBasket(window.twcBasket.get());
 
   var nav = document.getElementById('nav'), btn = document.getElementById('menu-btn');
   function setMenu(open) { nav.classList.toggle('shown', open); btn.setAttribute('aria-expanded', open); btn.textContent = open ? 'Close' : 'Menu'; }
@@ -30,7 +32,9 @@ document.body.classList.remove('no-js');
     // closing band, and the order form (the review, 20 Oct 2026: it sat over "Order your jars")
     var open = document.getElementById('open'), close = document.querySelector('.close'), ob = open && open.getBoundingClientRect(), cb = close && close.getBoundingClientRect();
     var busy = (ob && ob.bottom > vh * .4) || (cb && cb.top < vh) || (order && order.getBoundingClientRect().top < vh * .75);
-    if (bar) bar.classList.toggle('on', past && !busy);
+    // on the shop page the bar is the basket: it shows only once something is in it
+    var shop = !!document.getElementById('st-add'), has = document.body.classList.contains('has-basket');
+    if (bar) bar.classList.toggle('on', shop ? has && !(order && order.getBoundingClientRect().top < vh * .75) : past && !busy);
   }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();

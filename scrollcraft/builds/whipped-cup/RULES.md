@@ -141,7 +141,7 @@ R3.14 pass: prices are large but the business has fixed public prices
 
 ## 6. Order and booking flow
 R3k.7 pass: check-site FLOW walks the shop steps: basket, delivery, details; total in the message
-R3k.8 pass: basket lines have a remove button; check-site TAP clean on shop
+R3k.8 pass: basket lines have a remove button; check-site TAP clean on shop; looked again 13 Nov 2026: quantity buttons 44 px, empty basket one line; the total is marked data-order-total and a refused order says so on the page (check-order-data)
 R3k.9 pass: the Send button POSTs to /api/marketplace/order-form/cbf185df-.../orders (product ids a7be8afd6138 etc. from the 22 Oct add_site_products run, jars and the package as lines, the package's flavours in notes) while a blank WhatsApp tab is already open, then fills the tab with the message and the tracking link; a failed POST still opens WhatsApp. Intercepted a full order in Playwright (lines, delivery, city jerusalem, address, date, name, phone, notes all match WebsiteOrderIn); check-site SAVE and FLOW pass; nothing sent to the live site. Live saving also needs the listing converted to a store (convert_to_store in site_products_plan.json) and its areas to include jerusalem: owner/Tzvi decision, listed in the reply
 R3k.6 pass: Add on the home page opens shop.html with the item (shop.js reads ?jar= and ?pack=)
 R3.15 pass: order has the shop; contact has WhatsApp and email; delivery area and hours asked, not shown
@@ -182,7 +182,7 @@ R3i.3 n/a: no live readout on the page
 R3s.21 pass: check-site BROKEN clean on every page
 
 ## 8. Phone
-R3b.6 pass: phone: the bar shows From 40 a jar with Order your jars from after the first screen; 390x844 screenshots
+R3b.6 pass: looked again 13 Nov 2026 (shop layout: on the shop page the bar appears only with something in the basket, as "N items, price, View basket"; the flavours come first on a phone); phone: the bar shows From 40 a jar with Order your jars from after the first screen; 390x844 screenshots
 R3f.7 pass: the bar label wraps at 360 and the button stays whole (check-site TAP and PHONE clean)
 R3a.6 pass: check-site PHONE clean on every page
 R3s.22 pass: check-site TAP clean on every page
@@ -225,3 +225,5 @@ R3v.14 pass: From ₪40 a jar, Delivered to your door, Made in Ramat Eshkol, Jer
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
 
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- 14 Nov 2026: rules looked at again after merging the shop layout onto the new order form (options from the listing); the phone bar keeps the cheapest jar price from the listing. -->
