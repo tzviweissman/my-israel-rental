@@ -158,7 +158,7 @@ R3e.9 pass: check-site STATE and FLOW: hover and pressed answer, focus and error
 R3e.19 pass: finished a test order through check-site FLOW: the Sent message appears and the lists end
 R3s.16 pass: the order opens with the basket, then collecting, then details
 R3s.18 n/a: collection is the only option and no choice list exists
-R3s.25 pass: check-site FLOW: an empty form sends nothing and names what is missing; filled, it makes the WhatsApp message with the total
+R3s.25 pass: check-site FLOW: an empty form sends nothing and names what is missing; filled, it makes the WhatsApp message with the total; the total is marked data-order-total and a refused save says so on the page while WhatsApp still opens (13 Nov 2026)
 
 ## 7. Motion
 R3f.1 pass: the doors play held on a stage that fits 1280x650; captured laptop and phone frames at the start, middle and end
@@ -182,7 +182,7 @@ R3i.3 n/a: no live readout on this site
 R3s.21 pass: check-site BROKEN reports no errors or dead links on any page
 
 ## 8. Phone
-R3b.6 pass: the phone bar appears after the first screen with the price, until the order section; walked 390x844 with touch emulation
+R3b.6 pass: on the home and contact pages the phone bar appears after the first screen with the price, until the order section; on the shop page (13 Nov 2026, shop layout) it appears only once the skirt is in the basket, as 1 item or 2 items with the total and View basket, and an empty basket shows no bar; walked 390x844 with touch emulation
 R3f.7 pass: 360x640 touch emulation: the bar fits (check-site PHONE)
 R3a.6 pass: check-site PHONE reports the bar covers nothing at the end of the page
 R3s.22 pass: check-site TAP reports no tap under 40px
@@ -222,3 +222,4 @@ R3v.14 pass: three facts under "Shop the skirt, ₪320" on the first screen (bui
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
 
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+<!-- 14 Nov 2026: the "Added" pop-up is heard by screen readers but not shown: on a phone it covered the page heading; the - n + on the product and the basket bar show the add. Nothing else changed. -->

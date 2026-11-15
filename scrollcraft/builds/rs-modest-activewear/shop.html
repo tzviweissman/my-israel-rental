@@ -43,6 +43,7 @@
         <div class="st-buy">
           <span class="step" role="group" aria-label="How many skirts"><button type="button" data-d="-1" aria-label="One fewer">−</button><output id="st-n">1</output><button type="button" data-d="1" aria-label="One more">+</button></span>
           <button class="btn" type="button" id="st-add"><span>Add to basket, ₪320</span></button>
+          <span class="step st-q" id="st-q" role="group" aria-label="Skirts in your basket" hidden><button type="button" data-d="-1" aria-label="One fewer skirt">−</button><output id="st-qn" aria-label="in your basket">1</output><button type="button" data-d="1" aria-label="One more skirt">+</button></span>
         </div>
         <p class="st-in" id="st-in" aria-live="polite">You write your size and colour in the note in your basket.</p>
         <ul class="facts" aria-label="About the skirt">
@@ -55,6 +56,7 @@
 
   <section class="order-sec" id="order" aria-labelledby="h-basket">
     <div class="wrap">
+      <p class="o-empty">Your basket is empty. Tap Add to basket on the skirt above and it shows here.</p>
       <ol class="osteps" id="steps" aria-label="Order steps">
         <li class="is-now" aria-current="step"><button type="button" data-go="1">Step 1: Your basket</button></li>
         <li><button type="button" data-go="2">Step 2: Collecting</button></li>
@@ -146,10 +148,10 @@
   }
   document.querySelector('.st-th').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) show(b.dataset.p); });
 
-  var stN = $('st-n'), stAdd = $('st-add'), stIn = $('st-in');
+  var stN = $('st-n'), stAdd = $('st-add'), stIn = $('st-in'), stQ = $('st-q');
   function label() { stAdd.firstElementChild.textContent = 'Add ' + (n === 1 ? 'to basket' : n + ' to basket') + ', ₪' + n * PRICE; stN.textContent = n;
     stIn.textContent = qty ? 'In your basket: ' + qty + (qty === 1 ? ' skirt' : ' skirts') + '. You write your size and colour in the note there.' : 'You write your size and colour in the note in your basket.'; }
-  document.querySelector('.st-buy .step').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; n = Math.max(1, Math.min(MAX, n + (+b.dataset.d))); label(); });
+  document.querySelector('.st-buy .step:not(.st-q)').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; n = Math.max(1, Math.min(MAX, n + (+b.dataset.d))); label(); });
 
   // a short note that slides in at the top and leaves by itself
   var toast = document.createElement('div'), toastT = 0; toast.className = 'toast'; toast.setAttribute('role', 'status');
@@ -175,8 +177,12 @@
     var an = el.animate(kf, { duration: 780, easing: 'linear', fill: 'forwards' });
     an.onfinish = function () { el.remove(); dip(t); };
   }
+  document.querySelector('.st-q').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    qty = Math.max(0, Math.min(MAX, qty + (+b.dataset.d))); update(); check(false); label();
+  });
   stAdd.addEventListener('click', function () {
-    var added = n; qty = Math.min(MAX, qty + n); n = 1; update(); check(false); label(); fly();
+    var added = n; qty = Math.min(MAX, qty + n); n = 1; fly(); update(); check(false); label();
     say('Added: ' + added + ' × ' + NAME);
   });
 
@@ -192,9 +198,19 @@
     $('sum-mini').innerHTML = qty ? '<li><span>' + qty + ' × ' + NAME + '</span><span>₪' + qty * PRICE + '</span></li>' : '<li><span>Nothing yet</span></li>';
     $('total').textContent = '₪' + total();
     window.siteBasket.set(qty ? { skirt: qty } : {});
+    // in the basket, the stage's Add turns into - n +; the steps, the order and Continue come once there is something in it
+    var wasIn = !stQ.hidden, hadAdd = document.activeElement === stAdd, hadQ = stQ.contains(document.activeElement);
+    stAdd.hidden = $('st-n').parentNode.hidden = !!qty; stQ.hidden = !qty; $('st-qn').textContent = qty;
+    if (qty && hadAdd) stQ.lastElementChild.focus();
+    if (wasIn && !qty && hadQ) stAdd.focus();
+    $('order').classList.toggle('is-empty', !qty);
+    if (!qty) step = 1;
+    document.body.classList.toggle('has-basket', !!qty);
+    // the phone bar shows only once something is in the basket: "2 items · ₪640 · View basket"
     var bar = document.querySelector('#bar .p'), barBtn = document.querySelector('#bar .btn');
-    if (barBtn) { barBtn.textContent = 'Basket'; barBtn.setAttribute('href', '#order'); }
-    if (bar) bar.innerHTML = qty ? '<b>Basket, ₪' + total() + '</b>' + qty + (qty === 1 ? ' skirt' : ' skirts') : '<b>₪' + PRICE + '</b>' + NAME;
+    if (barBtn) { barBtn.textContent = 'View basket'; barBtn.setAttribute('href', '#order'); }
+    if (bar) bar.innerHTML = qty ? '<b>' + qty + (qty === 1 ? ' item' : ' items') + '</b>₪' + total() : '<b>Your basket</b>Nothing in it yet';
+    dispatchEvent(new Event('scroll'));
     stIn.textContent = qty ? 'In your basket: ' + qty + (qty === 1 ? ' skirt' : ' skirts') + '. You write your size and colour in the note there.' : 'You write your size and colour in the note in your basket.';
     drawStep();
   }

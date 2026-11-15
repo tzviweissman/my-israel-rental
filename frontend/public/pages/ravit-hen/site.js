@@ -25,12 +25,13 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches && document.querySel
   nav.addEventListener('click', function (e) { if (e.target.closest('a')) setMenu(false); });
 
   // the phone bar shows after the first screen and hides at the order form (#order or #book)
-  var top = document.getElementById('top'), bar = document.getElementById('bar'), form = document.getElementById('order') || document.getElementById('book'), tick = 0;
+  var shop = !!document.getElementById('form'), top = document.getElementById('top'), bar = document.getElementById('bar'), form = document.getElementById('order') || document.getElementById('book'), tick = 0;
   function frame() {
     tick = 0;
-    var vh = innerHeight;
+    var vh = innerHeight, has = document.body.classList.contains('has-basket');
     top.classList.toggle('solid', scrollY > 10);
-    if (bar) bar.classList.toggle('on', scrollY > vh * .5 && (!form || form.getBoundingClientRect().top > vh * .75));
+    // on the shop page the bar shows only once something is in the basket (shop research, 13 Nov 2026)
+    if (bar) bar.classList.toggle('on', (has || (!shop && scrollY > vh * .5)) && (!form || form.getBoundingClientRect().top > vh * .75));
   }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();

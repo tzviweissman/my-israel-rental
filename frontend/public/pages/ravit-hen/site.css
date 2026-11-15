@@ -560,3 +560,12 @@ form input:not([type="radio"]):not([type="checkbox"]), form select, form textare
 .form > *, .lay > *, .opts > *, .times > *, .pair > *, .st-grid > *, .req > *, .row2 > *, .cols4 > *, .col4 > *, .stepbar > *, .sum > *, .cgrid > * { min-width: 0; }
 .save-fail { margin: 0 0 .85rem; padding: .8rem 1rem; border-radius: 12px; background: #fdecea; color: #8a1c14; font-weight: 600; line-height: 1.4; }
 .save-fail[hidden] { display: none; }
+/* the shop layout (13 Nov 2026): the Add turns into - n + once the skirt is in the basket; an empty basket is one line */
+.step button, .btn, .rm, .osteps button { touch-action: manipulation; }
+.st-q { align-self: center; } .st-q output { min-width: 2.6rem; }
+.st-buy [hidden] { display: none !important; }
+.o-empty { display: none; }
+body:not(.no-js) #order.is-empty .o-empty { display: block; margin: 0; font-size: 1.05rem; color: var(--soft); }
+body:not(.no-js) #order.is-empty .osteps, body:not(.no-js) #order.is-empty .form { display: none; }
+
+.toast, .toast.show { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; padding: 0 !important; border: 0 !important; transform: none !important; }   /* heard, not shown: it covered the page heading on a phone; the − n + on the product and the basket bar show the add */
