@@ -34,6 +34,32 @@ the API, `get_cost` first; standing OK to generate what looks significantly
 better than code, spend in the report (§0, §1). Browser pane for previews,
 always with `?as=owner`, never a sign-in.
 
+## Models (Tzvi, 15 Nov 2026)
+
+- **Ideas on Fable.** Steps 5 to 7's ideas (opening ideas, the "Own:" idea,
+  film stories, headlines) are written by one subagent with `model: "fable"`,
+  given the record, the photo sheet, `REFERENCES.md` and the digest's §3g, §3h,
+  §3n and §3t. It writes them; you check them with the step's scripts as usual.
+  This is the one exception to "subagents run on Sonnet".
+- **Building on this session's model** (Opus, medium effort). Searches and the
+  step 11 review stay on Sonnet.
+- **Never switch the model mid-chat.** It pays for the whole chat again and a
+  smaller model loses the bigger one's thinking. A new kind of job gets a
+  handoff and a fresh chat.
+- **A weak result:** fix the brief first, then compare against a reference and
+  list the differences, then one effort level up, then a bigger model at a
+  lower effort.
+
+## Keep going until it passes (/goal)
+
+When the build starts, give Tzvi this one line to paste (fill in the folder
+and slug):
+
+`/goal node scripts/publish-page.mjs <folder> <slug> --check prints "every check passes"; no other site in scrollcraft/builds or frontend/public/pages changed; stop after 25 turns`
+
+The judge reads only the chat. So after each run, put the check's last line in
+your reply, either "every check passes" or the problems it listed.
+
 ## The steps
 
 1. **Fetch the record.** `scrollcraft/starter/fetch_business.py`, real slug from
