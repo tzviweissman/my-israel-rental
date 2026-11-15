@@ -21,7 +21,7 @@
   <a class="mark" href="index.html" aria-label="Finest Cuts, home"><img src="assets/logo.webp" alt="" width="40" height="40"><span>Finest Cuts</span></a>
   <nav class="nav" id="nav" aria-label="Finest Cuts"><a href="index.html">Home</a><a href="shop.html" aria-current="page">Shop</a><a href="contact.html">Contact</a></nav>
   <div class="top-r">
-    <a class="btn-line" href="shop.html?add=feast#order">Order the feast<span class="count" id="count" aria-live="polite" hidden></span></a>
+    <a class="btn-line" href="shop.html?add=feast#order" data-label="Order the feast">Order the feast<span class="count" id="count" aria-live="polite" hidden></span></a>
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
   </div>
 </header>
@@ -35,10 +35,9 @@
         <p class="st-desc">XL chicken board with 4 types of chicken and 3 sauces. Tastefully tender, presented to impress.</p>
         <p class="pr-row"><span class="pr"><span class="sym">$</span>215</span><span class="unit">the XL board</span></p>
         <div class="st-buy">
-          <span class="step" role="group" aria-label="How many"><button type="button" data-d="-1" aria-label="One fewer">−</button><output id="st-n">1</output><button type="button" data-d="1" aria-label="One more">+</button></span>
           <button class="btn" type="button" id="st-add"><span>Add, $215</span></button>
+          <span class="step" id="st-step" role="group" aria-label="Ultimate Feast in your basket" hidden><button type="button" data-d="-1" aria-label="One fewer Ultimate Feast">−</button><output id="st-n" aria-label="0 in your basket">0</output><button type="button" data-d="1" aria-label="One more Ultimate Feast">+</button></span>
         </div>
-        <p class="st-in" id="st-in" aria-live="polite"></p>
         <ul class="st-facts">
           <li>Delivery throughout Jerusalem</li>
           <li>Under the hashgacha of Rabbi Weiner</li>
@@ -68,12 +67,13 @@
     </div>
   </section>
 
-  <section class="sec" id="order" aria-labelledby="h-basket">
+  <section class="sec is-empty" id="order" aria-label="Your basket">
     <div class="wrap">
+      <p class="o-empty">Your basket is empty. Tap Add on anything above and it shows here.</p>
       <ol class="osteps" id="steps" aria-label="Order steps">
-        <li class="is-now" aria-current="step"><button type="button" data-go="1"><img src="assets/cup-a.webp" alt="" width="40" height="40">Step 1: Your basket</button></li>
-        <li><button type="button" data-go="2"><img src="assets/cup-b.webp" alt="" width="40" height="40">Step 2: When and where</button></li>
-        <li><button type="button" data-go="3"><img src="assets/cup-c.webp" alt="" width="40" height="40">Step 3: Your details</button></li>
+        <li class="is-now" aria-current="step"><button type="button" data-go="1"><img loading="lazy" decoding="async" src="assets/cup-a.webp" alt="" width="40" height="40">Step 1: Your basket</button></li>
+        <li><button type="button" data-go="2"><img loading="lazy" decoding="async" src="assets/cup-b.webp" alt="" width="40" height="40">Step 2: When and where</button></li>
+        <li><button type="button" data-go="3"><img loading="lazy" decoding="async" src="assets/cup-c.webp" alt="" width="40" height="40">Step 3: Your details</button></li>
       </ol>
       <div class="form">
         <div>
@@ -108,7 +108,7 @@
           <h3>Your order</h3>
           <ul id="sum-mini"><li><span>Nothing yet</span></li></ul>
           <p class="sum-where" id="sum-where" hidden></p>
-          <div class="total"><span>Total</span><span id="total">$0</span></div>
+          <div class="total"><span>Total</span><span id="total" data-order-total>$0</span></div>
           <button class="btn" id="send" type="submit"><span>Continue to when and where</span></button>
           <button class="back" id="back" type="button" hidden>Back</button>
           <p class="note" id="send-note">Next: the day and the address.</p>

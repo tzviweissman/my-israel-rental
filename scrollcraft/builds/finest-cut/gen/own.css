@@ -253,3 +253,15 @@ section.feast, section.who { padding-block: var(--s7); }
 .fc-grid > .fc:not(:first-child) .ph img, .more .fc-grid > .fc:not(:first-child) .ph img { transform: scale(1.14); }
 .fc.is-out .pr { font: 500 var(--t0)/1.4 var(--font-body); }
 .fc.is-out .btn-line { display: none; }
+
+/* The shop layout (15 Nov 2026): Add turns into - n + on the product; an empty basket is one line; the phone bar only once something is in it */
+.btn[hidden], .step[hidden] { display: none; }
+.btn, .step button { touch-action: manipulation; }
+.st-buy .step { min-width: 9.5rem; justify-content: space-between; }
+.st-buy .step output { flex: 1; }
+.o-empty { display: none; }
+body:not(.no-js) #order.is-empty .o-empty { display: block; margin: 0; font-size: var(--t1); color: var(--soft); }
+body:not(.no-js) #order.is-empty .osteps, body:not(.no-js) #order.is-empty .form { display: none; }
+body:not(.no-js) section.sec#order.is-empty { padding-block: var(--s5); }
+#order { scroll-margin-top: var(--top-h); }
+.toast, .toast.show { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; padding: 0 !important; border: 0 !important; transform: none !important; }   /* heard, not shown: it covered the page heading on a phone; the - n + and the basket bar show the add */

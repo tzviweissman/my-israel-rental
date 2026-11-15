@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function find(k) { return k === 'feast' ? F : ALL.filter(function (p) { return p.name === k; })[0]; }
   function key(p) { return p === F ? 'feast' : p.name; }
   function count() { var c = 0; for (var k in B) c += B[k]; return c; }
-  var qs = new URLSearchParams(location.search), step = 1, n = 1, sending = false;
+  var qs = new URLSearchParams(location.search), step = 1, sending = false;
   var B = {}, saved0 = window.siteBasket.get();   // the basket: key (feast, or the product's name) to how many
   for (var k0 in saved0) { var p0 = find(k0); if (p0 && !p0.out) B[k0] = Math.max(0, Math.min(20, +saved0[k0] || 0)); }
   var a0 = qs.get('add') && find(qs.get('add'));
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (more && ALL.length > 1) more.hidden = false;
   if (qs.get('for') === 'else') document.querySelector('input[name=who][value=else]').checked = true;
 
-  var send = document.getElementById('send'), stN = document.getElementById('st-n'), stAdd = document.getElementById('st-add'), stIn = document.getElementById('st-in');
+  var send = document.getElementById('send'), stN = document.getElementById('st-n'), stAdd = document.getElementById('st-add'), stStep = document.getElementById('st-step');
   var when = document.getElementById('when');
   function $(id) { return document.getElementById(id); }
   function v(id) { return $(id).value.trim(); }
@@ -44,11 +44,20 @@ document.addEventListener('DOMContentLoaded', function () {
   var today = iso(new Date());
   when.min = today; when.value = nextOpen(today);
 
-  function label() { stAdd.lastElementChild.textContent = 'Add' + (n > 1 ? ' ' + n : '') + ', ' + money(n * F.price); stN.textContent = n; stIn.textContent = B.feast ? 'In your basket: ' + B.feast + ' × ' + F.name : ''; }
-  document.querySelector('.st-buy .step').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; n = Math.max(1, Math.min(20, n + (+b.dataset.d))); label(); });
+  // Add turns into - n + on the product once it is in the basket; back to 0 brings Add back, focus follows
+  function label() {
+    var c = B.feast || 0, had = !stStep.hidden, ae = document.activeElement;
+    stAdd.hidden = c > 0; stStep.hidden = !c; stN.textContent = c; stN.setAttribute('aria-label', c + ' in your basket');
+    if (ae === stAdd && c) stStep.lastElementChild.focus();
+    if (had && !c && stStep.contains(ae)) stAdd.focus();
+  }
   stAdd.addEventListener('click', function () {
-    var a = n; B.feast = Math.min(20, (B.feast || 0) + n); n = 1; update(); check(false); label();
-    window.siteToast('Added: ' + a + ' × ' + F.name);
+    B.feast = 1; update(); check(false); label();
+    window.siteToast('Added: 1 × ' + F.name);
+  });
+  stStep.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    B.feast = Math.max(0, Math.min(20, (B.feast || 0) + (+b.dataset.d))); update(); check(false); label();
   });
   // a tile of the menu on this page adds one here instead of reloading the page
   if (more) more.addEventListener('click', function (e) {
@@ -85,9 +94,11 @@ document.addEventListener('DOMContentLoaded', function () {
     $('sum-mini').innerHTML = ls.length ? ls.map(function (p) { return '<li><span>' + B[key(p)] + ' × ' + p.name + '</span><span>' + money(B[key(p)] * p.price) + '</span></li>'; }).join('') : '<li><span>Nothing yet</span></li>';
     $('total').textContent = money(total());
     var keep = {}; ls.forEach(function (p) { keep[key(p)] = B[key(p)]; }); B = keep; window.siteBasket.set(B);
+    // the phone bar on this page shows only once something is in the basket: "2 items · $430 · View basket"
     var bar = document.querySelector('#bar .p'), bb = document.querySelector('#bar .btn');
-    if (bar && c) bar.innerHTML = '<b>Basket, ' + money(total()) + '</b>' + (ls.length === 1 ? c + ' × ' + ls[0].name : c + ' items');
-    if (bb) bb.setAttribute('href', '#order');
+    if (bar) bar.innerHTML = '<b>' + c + (c === 1 ? ' item' : ' items') + '</b>' + money(total());
+    if (bb) { bb.textContent = 'View basket'; bb.setAttribute('href', '#order'); }
+    document.body.classList.toggle('has-basket', c > 0); $('order').classList.toggle('is-empty', !c); dispatchEvent(new Event('scroll'));
     drawStep();
   }
   $('sum-list').addEventListener('click', function (e) {

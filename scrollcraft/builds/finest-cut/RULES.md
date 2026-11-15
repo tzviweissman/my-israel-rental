@@ -228,3 +228,4 @@ R3x.8 pass: built to the blueprint: sitekit writes the skip link, live basket co
 R3x.13 pass: built to the blueprint: every text size from the starter scale --t-1..--t5 and every gap from --s1..--s10, written into BRAND.md; nothing sized in between
 R3r.3 pass: built to the blueprint: publish-page --check run after the last edit
 R3r.4 n/a: Tzvi has pointed out nothing on this site yet
+<!-- 15 Nov 2026: the shop page only: Add turns into - n + on the Ultimate Feast once it is in the basket (the choose-how-many picker before Add is gone), the phone bar shows only once something is in the basket as "2 items, $430, View basket", an empty basket is one line, the total is marked data-order-total, and the "Added" pop-up is heard but not shown. Skipped (one product): kinds row, search, sort, Most ordered. Prices, words and the other pages unchanged; check-order-data passes on the shop page. -->

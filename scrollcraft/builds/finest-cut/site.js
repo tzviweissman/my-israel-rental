@@ -29,7 +29,9 @@ document.body.classList.remove('no-js');
     var vh = innerHeight;
     top.classList.toggle('solid', scrollY > 10);
     var cl = document.querySelector('.close');
-    if (bar) bar.classList.toggle('on', scrollY > vh * .5 && (!form || form.getBoundingClientRect().top > vh * .75) && (!cl || cl.getBoundingClientRect().top > vh * .9));
+    // the shop page: the bar shows only once something is in the basket (never an empty one)
+    if (bar && document.body.dataset.page === 'shop') bar.classList.toggle('on', document.body.classList.contains('has-basket') && (!form || form.getBoundingClientRect().top > vh * .75) && (!cl || cl.getBoundingClientRect().top > vh * .9));
+    else if (bar) bar.classList.toggle('on', scrollY > vh * .5 && (!form || form.getBoundingClientRect().top > vh * .75) && (!cl || cl.getBoundingClientRect().top > vh * .9));
   }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();
