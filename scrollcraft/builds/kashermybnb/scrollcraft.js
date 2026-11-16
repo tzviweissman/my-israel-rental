@@ -333,6 +333,10 @@
         dwell: parseFloat(el.getAttribute('data-sc-dwell')) || 0,
         clipTravel: pinned && el.getAttribute('data-sc-clip-map') === 'travel',
         p: 0, raw: 0, top: 0, height: 0, live: false,
+        // Phone: the opening plays by itself in one screen (rules 3ac.1; Tzvi, 16 Nov 2026: "i thought we dont do scroll
+        // on mobile", then "All sites, as a rule"). The page's first pinned act runs on a clock instead of the scroll,
+        // over about 2 s for each screen it used to own (3 to 7 s), then holds; a laptop still follows the scroll.
+        auto: pinned && !acts.length && !reduce && isMobile() && (parseFloat(el.getAttribute('data-sc-span')) || 1.5) >= 1 ? performance.now() + 400 : 0,
         cues: [], parallax: [], reveals: [], counts: [],
         video: null, seq: null, rail: null
       };
@@ -560,7 +564,8 @@
     function layout() {
       vh = innerHeight; vw = innerWidth;
       acts.forEach(function (a) {
-        if (a.pinned) a.el.style.height = (a.span * 100) + 'vh';
+        if (a.pinned) a.el.style.height = a.auto ? '100svh' : (a.span * 100) + 'vh';
+        if (a.auto) a.el.style.minHeight = '0';   // a page's own min-height for the scroll must not keep it tall
       });
       // The spacer is the whole document flow of a worldflight. Its height is
       // the sum of the leg weights plus one viewport: without that extra screen
@@ -828,7 +833,9 @@
       for (var i = 0; i < acts.length; i++) {
         var a = acts[i];
         var raw;
-        if (a.pinned) {
+        if (a.auto) {
+          raw = clamp01((performance.now() - a.auto) / clamp((a.span - 1) * 2000, 3000, 7000));
+        } else if (a.pinned) {
           var travel = Math.max(a.height - vh, 1);
           raw = clamp01((y - a.top) / travel);
         } else {
@@ -850,7 +857,7 @@
         // an act near the bottom must still reach its last frame while the page
         // can still scroll.
         a.vp = a.p;
-        if (a.pinned && !a.clipTravel) {
+        if (a.pinned && !a.clipTravel && !a.auto) {
           var startY = a.top - Math.min(vh, a.top);
           var endY = Math.min(a.top + a.height, maxY);
           var vraw = clamp01((y - startY) / Math.max(endY - startY, 1));
@@ -1202,6 +1209,11 @@
     }
 
     layout();
+    // the clock starts once the page has loaded, so a slow phone sees the story from its start
+    if (document.readyState !== 'complete') acts.forEach(function (a) { if (a.auto) { a.auto = Infinity; addEventListener('load', function () { a.auto = performance.now() + 400; }); } });
+    if (acts.some(function (a) { return a.auto; })) (function run() {
+      read(); if (acts.some(function (a) { return a.auto && a.raw < 1; })) requestAnimationFrame(run);
+    })();
     initPointer();
     requestAnimationFrame(tick);
     document.documentElement.classList.add('sc-ready');

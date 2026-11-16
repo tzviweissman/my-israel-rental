@@ -711,7 +711,7 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentEl
 
     // The phone bar: on from the first visit until the close, except while
     // the peak's own button is on screen.
-    var inPin = act.getBoundingClientRect().bottom > innerHeight + 2;
+    var inPin = act.getBoundingClientRect().bottom > (phone.matches ? innerHeight * 0.6 : innerHeight + 2);   // a phone's opening is one screen (3ac.1)
     var bookTop = document.getElementById('book').getBoundingClientRect().top;
     var barOn = phone.matches && p > 0.1 && !(inPin && r > 0.05) && bookTop > innerHeight * 0.75;
     if (barOn !== buybar.classList.contains('is-on')) {
