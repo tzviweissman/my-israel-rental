@@ -861,6 +861,42 @@
    "confirmed_by": "git log",
    "retried": false,
    "status": "planned"
+  },
+  {
+   "id": "A10.7",
+   "rule": "A moving ad's last frame is sketched and scored beside the library before it is built",
+   "how": ["ASK"],
+   "built_by": "scripts/ad-blueprint.mjs refuses an A10.7 answer without an existing sheet and a 'Score: 5' (or sent as it is); to build: a sketch step in new-moving-ad.mjs",
+   "confirmed_by": "ad-blueprint.mjs --done",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A10.8",
+   "rule": "A moving ad's movement is judged beside three 5/5 moving ads",
+   "how": ["ASK"],
+   "built_by": "scripts/moving-ad-vs-library.py makes the sheet; ad-blueprint.mjs refuses an answer without it and a score of 5",
+   "confirmed_by": "ad-blueprint.mjs --done",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A10.9",
+   "rule": "A hand-made moving ad starts from the kit",
+   "how": ["ASK"],
+   "built_by": "scripts/new-moving-ad.mjs writes docs/ads/gen/<name>/ from docs/ads/gen/_kit",
+   "confirmed_by": "new-moving-ad.mjs",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A10.10",
+   "rule": "Real things in a moving ad move as a generated clip of the business's own product",
+   "how": ["ASK"],
+   "built_by": "docs/ads/gen/_kit/clip.py (template, refuses without the one motion and --go) and new-moving-ad.mjs --clip; kit.js plays the frames",
+   "confirmed_by": "record-moving-ad.mjs",
+   "retried": false,
+   "status": "planned"
   }
  ]
 }

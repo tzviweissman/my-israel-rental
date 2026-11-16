@@ -5,7 +5,7 @@
 Why: check-ad-designs measures the ad maker's own videos, but a hand-made one (L.A. Cholent's, 16 Nov 2026) was
 timed by hand, and its first cut held still for 0.8 seconds against the 1.5 the rules ask. This reads every frame
 and fails a video that is not H.264 at 1080 wide, runs outside 5 to 10 seconds, opens on an empty ground, hardly
-moves, holds still under 1.5 seconds at the end, or whose QR code is not found, does not open a link, or is still
+moves, holds still under 1.5 or over 3.5 seconds at the end, or whose QR code is not found, does not open a link, or is still
 for 3 seconds or less."""
 import subprocess
 import sys
@@ -70,6 +70,9 @@ def check(path):
     hold = still_run(fs) / fps
     if hold < 1.5:
         bad.append(f"holds still {hold:.1f} seconds at the end, under 1.5 (A10.3)")
+    # a long still ending is a still ad that moved once: American Crust held 5 of its 8 seconds (Tzvi 16 Nov 2026)
+    if hold > 3.5:
+        bad.append(f"holds still {hold:.1f} seconds at the end, over 3.5: it should move for most of its length (A10.3)")
     link, pts, _ = cv2.QRCodeDetector().detectAndDecode(fs[-1])
     qr = "none"
     if pts is None or not link:

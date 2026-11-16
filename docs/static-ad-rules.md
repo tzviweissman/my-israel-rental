@@ -783,3 +783,20 @@ uncommitted until he asked. Every hand-made ad is now committed as soon as it is
 commit message carries the line `node scripts/ad-blueprint.mjs --note <name>` prints: the library score from A9.7,
 and, under 5, "sent as it is" with who said so, so a later look through the library can find the ads to redo. A
 score under 5 still fails the blueprint unless A9.7 says "Sent as it is: Tzvi, <date>". Step A10.6.
+
+## 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
+
+Four moving ads in one day showed where the time and the score went. American Crust scored 4 because its last frame
+was words over a photo, found only once the ad was built, and it held still for 5 of its 8 seconds. So:
+
+- The last frame comes first (A10.7): sketched and put beside the library before anything moves, and the idea is in
+  the picture, not only in the words.
+- The movement is judged too (A10.8): `scripts/moving-ad-vs-library.py` lays six frames of the ad above three 5/5
+  moving ads from the motion library. A 5 acts one idea out; words appearing over a still photo is a 3.
+- `check-moving-ad.py` now fails an ending still for over 3.5 seconds as well as under 1.5 (A10.3).
+- Every ad starts from the kit (A10.9): `node scripts/new-moving-ad.mjs <name> <slug>` writes the page with the
+  business's name, logo, link and QR from its listing, the timing helpers and `window.render(t)`
+  (`docs/ads/gen/_kit/`), so each ad is only its idea.
+- Real things move as real footage (A10.10): steam, a pour, bubbles or a bite is an image-to-video clip of their own
+  product (`docs/ads/gen/_kit/clip.py`, price read through the API first), played frame by frame under the words by
+  `new-moving-ad.mjs --clip`; code draws the words, the logo and the QR.
