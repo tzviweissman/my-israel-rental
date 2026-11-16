@@ -10,6 +10,12 @@
 2026-10-27 - commitment and consistency - Blazin' Boards order flow
 2026-11-03 - none proposed - none
 2026-11-11 - endowed progress (honest head start) - business sign-up readiness bar
+2026-11-12 - information scent - "Back to businesses" pill on business sites (mir-back.js)
+2026-11-13 - choice visibility (options with prices shown, not in a drop-down) - L.A. Cholent order form meat choice
+2026-11-14 - recognition over recall - The Brown Box order form, delivery date (open days as taps)
+2026-11-15 - Zeigarnik effect (unfinished task shown) - Sales summary, each item panel cost prompt
+2026-11-15 - Zeigarnik effect (unfinished costs count) - Sales summary, Each item panel
+2026-11-16 - fresh start effect - Clean Plus booking, first-day field
 
 ## Added by the 10 Nov 2026 audit merge
 
