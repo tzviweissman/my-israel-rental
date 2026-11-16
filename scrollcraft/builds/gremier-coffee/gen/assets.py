@@ -32,7 +32,9 @@ ITEMS = [
     ('cups', '25 XL cups, lids & straws', 24.9, None, 'Coffee bars', '25 cups', 'Twenty-five extra-large 500 ml cups with clear domed lids and sturdy straws, ready to serve your coffee.', 'cups-straws-lids-pack-v3'),
 ]
 CATS = ['Bottles', 'Mini packs', 'Wholesale', 'Syrups', 'Coffee bars']
-COLOUR = {'classic': '#F2C531', 'house': '#2FA8E0', 'colombia': '#2DBA7A', 'decaf': '#8A5A3C', 'sweetened': '#F2C531'}
+COLOUR = {'classic': '#F2C531', 'house': '#2FA8E0', 'colombia': '#2DBA7A', 'decaf': '#8A5A3C', 'sweetened': '#F2C531',
+          # the lattes' own pack labels, measured 16 Nov 2026 (Tzvi: the label stripe on the lattes too)
+          'original-latte': '#DB9A5E', 'vanilla-latte': '#E6D7C1', 'caramel-latte': '#D1893D', 'classic-mini': '#F2C531'}
 
 
 def save(src, dst, width, q=80):

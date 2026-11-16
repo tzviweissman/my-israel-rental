@@ -34,7 +34,10 @@
       s.insertBefore(v, s.firstChild);
       return { el: v, want: 0, shown: -1 };
     });
-    function size() { film.style.height = still ? '100svh' : ((units + 1) * 100) + 'svh'; }
+    // END: screens of scroll the closing words stay pinned and still before the film lets go (Tzvi 16 Nov 2026, Gremier:
+    // "Stock your fridge" came on only as the stage unpinned, so it was first seen sliding up under the menu bar)
+    var END = still ? 0 : 0.6;
+    function size() { film.style.height = still ? '100svh' : ((units + 1 + END) * 100) + 'svh'; }
     function ease(t) { return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
     // Phone: the opening plays by itself in one screen (rules 3ac.1, Tzvi 16 Nov 2026): the clips play one after another
     // (sped up, the chain is ~30 s), the track jumps to the next clip as each ends (they are chained, so the seam is the same
@@ -60,7 +63,7 @@
     var raf = 0;
     function frame() {
       raf = 0;
-      var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight;
+      var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight * (1 + END);
       var u = still ? units : Math.min(units, Math.max(0, -r.top / Math.max(1, span) * units)), pos = 0, active = 0;
       for (var i = 0; i < N; i++) {
         var start = starts[i];
