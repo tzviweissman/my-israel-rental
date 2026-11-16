@@ -231,3 +231,4 @@ Note, 7 Nov 2026: the order form follows each product's price type from the dash
 
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
 <!-- 14 Nov 2026: order.html got the shop layout by hand on the current page: phone basket bar only once something is in the basket ("N items, total, View basket"), an empty basket as one line with the steps hidden, a separate Continue button (#next1) on phone step 1, the Added toast heard by screen readers only, and a Most ordered row that shows only when #mir-popular names 3 or more gifts (data-mir-popular). -->
+<!-- Reviewed 2026-11-16: under 340px the business name in the header wraps onto two lines instead of running under the header button (rule 3s.31, check-text-fits); nothing else changed, every rule above still holds. -->

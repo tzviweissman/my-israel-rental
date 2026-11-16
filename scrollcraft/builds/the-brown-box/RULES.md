@@ -232,3 +232,4 @@ Note, 7 Nov 2026: the order form follows each product's price type from the dash
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
 
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+<!-- Reviewed 2026-11-16: under 340px the business name in the header wraps onto two lines instead of running under the header button (rule 3s.31, check-text-fits); nothing else changed, every rule above still holds. -->

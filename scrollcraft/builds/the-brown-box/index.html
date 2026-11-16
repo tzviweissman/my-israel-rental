@@ -471,6 +471,8 @@
   .foot .fbase .fnote { flex-basis: 100%; }
   .chap .btn-facts { margin-top: .9rem; color: #F4E8DA; text-shadow: 0 1px 10px rgb(18 10 5 / .6); }
   @media (max-width: 480px) and (max-height: 700px) { .chap .btn-facts { font-size: .8rem; gap: 3px 12px; margin-top: .6rem; text-shadow: none; } }
+  /* At 320 wide the name wraps onto two lines rather than running under the order button (rule 3s.31, 16 Nov 2026) */
+  @media (max-width: 340px) { .brand { min-width: 0; } .brand span { white-space: normal; line-height: 1.05; } }
 </style>
 </head>
 <body>

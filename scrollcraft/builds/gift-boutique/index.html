@@ -442,6 +442,8 @@
   .btn-facts li::before { content: ''; display: inline-block; vertical-align: middle; width: .4em; height: .4em; margin-inline-end: .45em; margin-bottom: .15em; border-radius: 50%; background: var(--gold); }
   .hero .btn-facts { justify-content: center; color: #fff; text-shadow: 0 1px 10px rgb(0 0 0 / .6); }
   .hero .btn-facts li::before { background: var(--gold-hi); }
+  /* At 320 wide the name wraps onto two lines rather than running under the button (rule 3s.31, 16 Nov 2026) */
+  @media (max-width: 340px) { .brand { min-width: 0; } body .brand span { white-space: normal; line-height: 1.1; } }
 </style>
 <script>document.documentElement.classList.add('js');</script>
 </head>
