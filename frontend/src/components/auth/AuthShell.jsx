@@ -4,7 +4,7 @@
  * business sites built on MyIsraelRental (Tzvi, 16 Nov 2026: "i like wix the
  * best", then chose the tilted wall of four Wix-like backgrounds). The wall
  * shows shops, never places, so it stays right when the site opens in
- * America; swap the pictures in /public/signup-wall/ for other businesses.
+ * America; change SITES below for other businesses.
  *
  * The wall fades out around the card so the middle stays calm, drifts very
  * slowly, and stands still for anyone who asked for reduced motion. It is
@@ -14,12 +14,57 @@
  * centred that way clips its top out of reach once it overflows, and step 2
  * of sign-up is a long form that simply scrolls the page.
  */
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './authWall.css';
 
-const WALL = Array.from({ length: 20 }, (_, i) => `/signup-wall/${(i % 12) + 1}.jpg`);
+// Each tile is that business's showcase picture, the same clip and still as its
+// card on /businesses (made by scripts/showcase-preview.mjs; its `still_at` picks
+// the best moment of the opening). `v` matches showcase.json so a remade clip
+// reaches the wall too. Tzvi, 16 Nov 2026: "show the best part of the wow moment
+// or have the business tiles move like our business page".
+const SITES = [
+  ['the-brown-box', 16], ['blazin-boards', 16], ['m-and-n-jewelry', 3], ['ls-fruit-platter', 17],
+  ['gremier-coffee', 4], ['the-gift-boutique', 17], ['american-crust', 12], ['michal-balloons', 12],
+  ['bake-away', 8], ['gifted-israel', 5], ['chicken-munch', 27], ['finest-cut', 4],
+];
+const WALL = Array.from({ length: 20 }, (_, i) => SITES[i % SITES.length]);
+// Six tiles in the outer columns, where the fade leaves them seen, six different
+// businesses. Only these ever play, and only on a laptop: about 1.5 MB in all.
+const MOVING = new Set([4, 7, 8, 11, 12, 15]);
+
+/** Plays the six clips after the page has loaded, one by one, so the sign-up
+ *  card always paints first. A phone, reduced motion or data saver: stills only,
+ *  no video element at all, so no clip is ever fetched. */
+function useWallMotion() {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const ok = window.matchMedia?.('(min-width: 1024px) and (prefers-reduced-motion: no-preference)').matches
+      && !navigator.connection?.saveData;
+    if (!ok) return undefined;
+    const go = () => setOn(true);
+    if (document.readyState === 'complete') { const t = setTimeout(go, 300); return () => clearTimeout(t); }
+    window.addEventListener('load', go, { once: true });
+    return () => window.removeEventListener('load', go);
+  }, []);
+  return on;
+}
+
+function WallClip({ slug, v, delay }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    const t = setTimeout(() => el?.play().catch(() => {}), delay);
+    return () => clearTimeout(t);
+  }, [delay]);
+  return (
+    <video ref={ref} src={`/showcase/${slug}.mp4?v=${v}`} poster={`/showcase/${slug}.webp?v=${v}`}
+      muted loop playsInline preload="none" aria-hidden="true" tabIndex={-1} />
+  );
+}
 
 export default function AuthShell({ children, testId }) {
+  const moving = useWallMotion();
+  let n = 0;
   return (
     <div
       className="auth-wall min-h-screen relative [overflow-x:clip] flex flex-col"
@@ -28,7 +73,9 @@ export default function AuthShell({ children, testId }) {
     >
       <div className="auth-wall-layer" aria-hidden="true">
         <div className="auth-wall-grid">
-          {WALL.map((src, i) => <img key={i} src={src} alt="" loading="lazy" decoding="async" />)}
+          {WALL.map(([slug, v], i) => (moving && MOVING.has(i)
+            ? <WallClip key={i} slug={slug} v={v} delay={(n++) * 400} />
+            : <img key={i} src={`/showcase/${slug}.webp?v=${v}`} alt="" decoding="async" />))}
         </div>
       </div>
       <div className="relative flex flex-1 px-4 pb-6" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 24px)' }}>

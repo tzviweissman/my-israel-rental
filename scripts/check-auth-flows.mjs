@@ -281,9 +281,9 @@ console.log('\n8. Google sign-in button present\n');
   await page.goto(`${APP}/signup`, { waitUntil: 'networkidle' });
   const wall = await page.evaluate(() => {
     const w = document.querySelector('.auth-wall-layer');
-    return w ? { hidden: w.getAttribute('aria-hidden'), stops: w.querySelectorAll('a[href], button, input, [tabindex]').length, pics: w.querySelectorAll('img').length } : null;
+    return w ? { hidden: w.getAttribute('aria-hidden'), stops: w.querySelectorAll('a[href], button, input, [tabindex]:not([tabindex="-1"])').length, pics: w.querySelectorAll('img').length } : null;
   });
-  ok('the wall is drawn behind the card', !!wall && wall.pics >= 12, JSON.stringify(wall));
+  ok('the wall is drawn behind the card', !!wall && wall.pics >= 14, JSON.stringify(wall));
   ok('and is hidden from screen readers with no tab stops', wall?.hidden === 'true' && wall?.stops === 0, JSON.stringify(wall));
   await ctx.close();
 }
