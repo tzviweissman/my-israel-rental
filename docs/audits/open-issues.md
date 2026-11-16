@@ -338,11 +338,19 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 ## Code review of 11 Nov 2026
 
 - [Medium] Leads board / business email: an email whose AI reading never runs (the server restarts or deploys between receiving it and reading it) stays "pending" for good and never appears on the leads board or in a nudge; nothing retries it (`email_inbox.py` `receive`, `email_cards`). First seen 11 Nov (2026-11-11-site-audit.md).
+- [Low] Backend tests: `mongomock_motor` and `pytest_asyncio` are not in requirements, so the new `test_email_inbox.py` (and the three older files) cannot collect on a fresh install. First seen 20 Oct; now 4 files (2026-11-11-site-audit.md).
+- [Fixed 11 Nov, 68ce50f5] Socials reader: the website lookup at sign-up blocked the whole server while DNS resolved (2.01 s stall with a slow domain). [14 Nov merge: dropped, superseded by 5388129b, in the 14 Nov audit PR]
+- [Fixed 11 Nov, d9e5be86] Socials reader: a website's whole page was read into memory before it was cut to 1.5 MB (60 MB held for a 60 MB page). [14 Nov merge: dropped, superseded by 5388129b, in the 14 Nov audit PR]
+- [Fixed 11 Nov, 087ca753] Order and booking emails ended their first line with the text's "Your tracking link:" / "Details:" pointing at nothing. [14 Nov merge: ee096693, in the 14 Nov audit PR]
+- Still open on main, fixed on audit branches: `ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits` (d5450913) and `dashboard.adPicsDone` (d10948a5) plural sets; test-i18n-parity still fails on main for these 4.
 - [Low] Backend tests: `mongomock_motor` and `pytest_asyncio` are not in requirements, so the new `test_email_inbox.py` (and the three older files) cannot collect on a fresh install. First seen 20 Oct; now 4 files (2026-11-11-site-audit.md). [Partly fixed 11 Nov, bbea0462: audit-setup.sh installs both; still not in requirements.txt]
+- [Fixed 11 Nov, 68ce50f5; on this branch fae1e96c] Socials reader: the website lookup at sign-up blocked the whole server while DNS resolved (2.01 s stall with a slow domain). [14 Nov merge: dropped, superseded by 5388129b, in the 14 Nov audit PR]
+- [Fixed 11 Nov, d9e5be86; on this branch 6fe9f6a8] Socials reader: a website's whole page was read into memory before it was cut to 1.5 MB (60 MB held for a 60 MB page). [14 Nov merge: dropped, superseded by 5388129b, in the 14 Nov audit PR]
+- [Fixed 11 Nov, 087ca753; on this branch d9211791] Order and booking emails ended their first line with the text's "Your tracking link:" / "Details:" pointing at nothing. [14 Nov merge: ee096693, in the 14 Nov audit PR]
+- Still open on main, fixed on audit branches: `ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits` (d5450913) and `dashboard.adPicsDone` (d10948a5) plural sets; test-i18n-parity still fails on main for these 4. [Fixed, merged to main with the 11 Nov follow-up, 162b4996]
 - [Fixed 11 Nov, 68ce50f5; on this branch fae1e96c] Socials reader: the website lookup at sign-up blocked the whole server while DNS resolved (2.01 s stall with a slow domain). [Superseded: 68ce50f5 dropped in the 13 Nov merge (the function it changed was split into `_fetch` on 12 Nov); fixed by 67b4f998, audit merge 13 Nov] [14 Nov merge: dropped, superseded by 5388129b, in the 14 Nov audit PR]
 - [Fixed 11 Nov, d9e5be86; on this branch 6fe9f6a8] Socials reader: a website's whole page was read into memory before it was cut to 1.5 MB (60 MB held for a 60 MB page). [Superseded: d9e5be86 dropped in the 13 Nov merge; fixed by 67b4f998, audit merge 13 Nov] [14 Nov merge: dropped, superseded by 5388129b, in the 14 Nov audit PR]
 - [Fixed 11 Nov, 087ca753; on this branch d9211791] Order and booking emails ended their first line with the text's "Your tracking link:" / "Details:" pointing at nothing. [Merged 13 Nov, bf88427e] [14 Nov merge: ee096693, in the 14 Nov audit PR]
-- Still open on main, fixed on audit branches: `ads.nudgeVisits`, `ads.weekVisits`, `advertising.visits` (d5450913) and `dashboard.adPicsDone` (d10948a5) plural sets; test-i18n-parity still fails on main for these 4. [Fixed, merged to main with the 11 Nov follow-up, 162b4996]
 
 (no section)
 
@@ -361,18 +369,23 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 ## Code review of 12 Nov 2026
 
 - [Low] Discount codes: the new practice order (`POST /order-form/{gig}/orders?dry_run=true`, no sign-in) checks a code and answers which ones are real at 400 tries per 10 minutes per address, against 30 on the code box; a business's own word codes ("SUMMER10") can be guessed that way. Fix: also apply the `discount_check` limit when `dry_run` carries a code (`orders.py:2515`). First seen 12 Nov 2026 (2026-11-12-site-audit.md). Report only (discounts).
+- [Medium] Sign-up website reader blocked the whole server on a slow domain and read whole pages into memory: last night's fixes (68ce50f5, d9e5be86) never reached main and 508a81d made it fetch up to six pages per site. First seen 11 Nov; came back 12 Nov (2026-11-12-site-audit.md). [Fixed 12 Nov, d69087db, on claude/exciting-bell-jpiuoz; the old fix on claude/audit-merge-4mafu8 will conflict with main and should be dropped in favour of this one] [14 Nov merge: dropped, superseded by 5388129b; 5388129b, in the 14 Nov audit PR]
+- [Medium] Designed-page menus (Finest Cuts, mir-catalog.js): products lost their description and products saved before ids existed lost their order id, so they dropped off the Finest Cuts menu; 5ebe10b8 undid that part of 5dee7ca8 unnoticed. First seen 12 Nov 2026 (2026-11-12-site-audit.md). [Fixed 12 Nov, 777b4185, on claude/exciting-bell-jpiuoz] [14 Nov merge: d2011237, in the 14 Nov audit PR]
+- Still open: unread business emails never reaching the leads board (11 Nov); `mongomock_motor` and `pytest_asyncio` not in requirements (20 Oct); audit sandbox has no MongoDB or Chromium download (15 Oct).
 - [Medium] Sign-up website reader blocked the whole server on a slow domain and read whole pages into memory: last night's fixes (68ce50f5, d9e5be86) never reached main and 508a81d made it fetch up to six pages per site. First seen 11 Nov; came back 12 Nov (2026-11-12-site-audit.md). [Fixed 12 Nov, d69087db, on claude/exciting-bell-jpiuoz; the old fix on claude/audit-merge-4mafu8 will conflict with main and should be dropped in favour of this one] [Merged 13 Nov, 67b4f998; the 11 Nov fixes were dropped] [14 Nov merge: dropped, superseded by 5388129b; 5388129b, in the 14 Nov audit PR]
 - [Medium] Designed-page menus (Finest Cuts, mir-catalog.js): products lost their description and products saved before ids existed lost their order id, so they dropped off the Finest Cuts menu; 5ebe10b8 undid that part of 5dee7ca8 unnoticed. First seen 12 Nov 2026 (2026-11-12-site-audit.md). [Fixed 12 Nov, 777b4185, on claude/exciting-bell-jpiuoz] [Merged 13 Nov, 7f6497af] [14 Nov merge: d2011237, in the 14 Nov audit PR]
-- Still open: unread business emails never reaching the leads board (11 Nov); `mongomock_motor` and `pytest_asyncio` not in requirements (20 Oct); audit sandbox has no MongoDB or Chromium download (15 Oct).
 
 ## UI audit of 13 Nov 2026
 
 - [Medium] L.A. Cholent order form: with WhatsApp off, a second tap on "Order now" after the thank-you message posts the same order again (button stays live, form kept); `la-cholent/order.html:288`. First seen 13 Nov 2026 (2026-11-13-ui-audit.md).
 - [Low] L.A. Cholent order form: "Without our meat" cut to "Without our mea" at 360 to 390 wide (`la-cholent/order.html:84`, needs ~175px, has 153 to 168). Wording is the business's; decision for Tzvi. First seen 13 Nov 2026 (2026-11-13-ui-audit.md).
+- [Low] Join page live line: Hebrew time showed "לפני שעתיים (2)". First seen 13 Nov 2026. [Fixed 13 Nov, d57be103] [14 Nov merge: 0891b48b, in the 14 Nov audit PR]
+- [Low] Join page live line: two middle dots a line. First seen 13 Nov 2026. [Fixed 13 Nov, ab80b9e7] [14 Nov merge: 5f2ce168, in the 14 Nov audit PR]
+- [Low] Leads board: new shared button style 36px (`LeadsBoard.jsx:27`). First seen 13 Nov 2026. [Fixed 13 Nov, cf317b24] [14 Nov merge: 65464807, in the 14 Nov audit PR]
+- [Low] My jobs tab: Hebrew relative time shows "(1)"/"(2)" after the word (`MyJobsTab.jsx:58`, same ICU quirk). First seen 13 Nov 2026 (2026-11-13-ui-audit.md).
 - [Low] Join page live line: Hebrew time showed "לפני שעתיים (2)". First seen 13 Nov 2026. [Fixed 13 Nov, d57be103; merged 13 Nov, 5731da71] [14 Nov merge: 0891b48b, in the 14 Nov audit PR]
 - [Low] Join page live line: two middle dots a line. First seen 13 Nov 2026. [Fixed 13 Nov, ab80b9e7; merged 13 Nov, aefbfc8f] [14 Nov merge: 5f2ce168, in the 14 Nov audit PR]
 - [Low] Leads board: new shared button style 36px (`LeadsBoard.jsx:27`). First seen 13 Nov 2026. [Fixed 13 Nov, cf317b24; merged 13 Nov, 28922c5a] [14 Nov merge: 65464807, in the 14 Nov audit PR]
-- [Low] My jobs tab: Hebrew relative time shows "(1)"/"(2)" after the word (`MyJobsTab.jsx:58`, same ICU quirk). First seen 13 Nov 2026 (2026-11-13-ui-audit.md).
 
 ## Code review of 13 Nov 2026
 
