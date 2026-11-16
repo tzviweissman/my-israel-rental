@@ -125,6 +125,21 @@ your reply, either "every check passes" or the problems it listed.
 14. **Publish.** `node scripts/publish-page.mjs <folder> <slug> --check` lists
     every problem; then publish (it re-records the preview clip). Afterwards
     `check-showcase-previews.mjs` and `check-business-pages` on live (§0b.12).
+    Run publish-page in the background (`run_in_background`), never in the
+    foreground: re-recording the preview passes 10 minutes on long sites and the
+    run gets cut off (The Gift Boutique, 16 Nov 2026). Pushing to main runs
+    `check-push-rules` (.githooks/pre-push): push a new rule together with the
+    sites whose RULES.md answer it.
+
+## Fixing a fault on a site already live
+
+After the edit and the publish, run the check that found the fault again on the
+published page (served from `frontend/public`, or live after the deploy) and
+look at it at that size. The edit alone proves nothing: an older, more specific
+rule in the same file can win (The Gift Boutique, 16 Nov 2026: `body .brand span`
+beat the new `.brand span` fix, and only `check-text-fits` caught it). Keep the
+fix to the sizes that were wrong, so every other size stays as approved, and add
+a dated line to that site's RULES.md saying what changed.
 
 ## When Tzvi gives a new rule
 

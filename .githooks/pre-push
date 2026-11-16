@@ -1,0 +1,10 @@
+#!/bin/sh
+# What goes to main must not have a site answering a rule its own rules list lacks (scripts/check-push-rules.mjs).
+while read local_ref local_sha remote_ref remote_sha; do
+  [ "$remote_ref" = "refs/heads/main" ] || continue
+  case "$local_sha" in 0000000000000000000000000000000000000000) continue ;; esac
+  case "$remote_sha" in 0000000000000000000000000000000000000000) base="" ;; *) base="$remote_sha" ;; esac
+  git cat-file -e "$base" 2>/dev/null || base=""
+  node scripts/check-push-rules.mjs "$local_sha" $base || exit 1
+done
+exit 0
