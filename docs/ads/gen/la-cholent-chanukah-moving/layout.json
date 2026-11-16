@@ -1,0 +1,9 @@
+{"shape": "portrait", "ground": "#24160d",
+ "boxes": [
+  {"what": "table", "x": 0.0, "y": 0.45, "w": 1.0, "h": 0.55, "colour": "#5a3a22"},
+  {"what": "challah", "x": 0.0, "y": 0.27, "w": 0.26, "h": 0.2, "colour": "#c08040"},
+  {"what": "menorah", "x": 0.72, "y": 0.21, "w": 0.27, "h": 0.2, "colour": "#c8c8d0"},
+  {"what": "slow cooker", "x": 0.21, "y": 0.11, "w": 0.56, "h": 0.31, "colour": "#9aa0a6"},
+  {"what": "board", "x": 0.8, "y": 0.38, "w": 0.2, "h": 0.12, "colour": "#7a4a2a"},
+  {"what": "tubs", "x": 0.0, "y": 0.44, "w": 1.0, "h": 0.42, "colour": "#b07850"}],
+ "keep_empty": [{"what": "headline", "x": 0.03, "y": 0.0, "w": 0.94, "h": 0.1}]}

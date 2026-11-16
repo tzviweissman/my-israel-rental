@@ -1,0 +1,111 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- LS Fruit Platter moving ad (docs/ads/blueprints/ls-fruit-platter-moving.md). One size a beat, each on its own
+     fruit colour with the size word huge behind their real platter (library motion 5s p009, p101), then all four.
+     Drawn by window.render(t); recorded by docs/ads/gen/la-cholent-moving/record.mjs-style record.mjs here. -->
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@500;700&family=Playfair+Display:ital,wght@1,600&display=block" rel="stylesheet">
+<style>
+html,body{margin:0}
+#ad{position:relative;width:1080px;height:1920px;overflow:hidden;background:#FBF4EC;font-family:Manrope,sans-serif}
+.abs{position:absolute}
+#flood{left:0;top:0;width:1080px;height:1920px}
+#words{left:0;right:0;top:470px;text-align:center;font:330px/300px Anton,sans-serif;white-space:nowrap}
+#words div{color:#FFF6EC}
+#words div:nth-child(odd){color:transparent;-webkit-text-stroke:4px rgba(255,255,255,.55)}
+#plate{left:0;top:0;transform-origin:center}
+#chip{left:0;right:0;top:1330px;text-align:center}
+#chip span{display:inline-block;background:#fff;color:#2a1a12;font:700 54px/1 Manrope;padding:22px 40px;border-radius:60px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+#end{left:0;top:0;width:1080px;height:1920px}
+#end .it{position:absolute;left:0;right:0;top:250px;text-align:center;font:italic 600 84px/100px 'Playfair Display',serif;color:#3A2418}
+#end .big{position:absolute;left:0;right:0;top:350px;text-align:center;font:330px/300px Anton,sans-serif;color:#C8323A}
+#end img.p{position:absolute;filter:drop-shadow(0 18px 24px rgba(60,30,10,.28))}
+#logo{left:48px;top:236px;height:100px;border-radius:10px}
+#foot{left:48px;top:1520px;color:#3A2418}
+#foot .n{font-weight:700;font-size:40px}
+#foot .s{font-weight:500;font-size:30px;margin-top:14px;color:#6b5446}
+#foot .u{font-weight:700;font-size:30px;margin-top:14px;color:#C8323A}
+#qr{left:868px;top:1508px;width:164px;height:164px;background:#fff;border-radius:14px;padding:8px;box-sizing:border-box;box-shadow:0 4px 16px rgba(0,0,0,.12)}
+#qr img{width:100%;height:100%}
+</style></head><body>
+<div id="ad">
+  <div id="flood" class="abs"></div>
+  <div id="words" class="abs"><div></div><div></div><div></div></div>
+  <img id="plate" class="abs">
+  <div id="chip" class="abs"><span></span></div>
+  <div id="end" class="abs">
+    <div class="it">Fruit platters,</div>
+    <div class="big">EVERY<br>SIZE.</div>
+    <img class="p" id="e0" src="small.webp">
+    <img class="p" id="e1" src="medium.webp">
+    <img class="p" id="e2" src="large.webp">
+    <img class="p" id="e3" src="xl.webp">
+  </div>
+  <img id="logo" class="abs" src="logo.jpg">
+  <div id="foot" class="abs"><div class="n">LS Fruit Platter</div>
+    <div class="s">For your home and events · Jerusalem</div>
+    <div class="s">Small to party size · From ₪300</div>
+    <div class="u">myisraelrental.com/p/ls-fruit-platter</div></div>
+  <div id="qr" class="abs"><img src="qr.png"></div>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const cl = (x) => Math.max(0, Math.min(1, x));
+const outBack = (x) => { const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const outCubic = (x) => 1 - Math.pow(1 - x, 3);
+// their four sizes and prices, as on their listing
+const SIZES = [
+  { word: 'SMALL', price: 'Small · ₪300', src: 'small.webp', bg: '#E5484D', w: 860 },
+  { word: 'MEDIUM', price: 'Medium · ₪400', src: 'medium.webp', bg: '#5E9E2F', w: 1000 },
+  { word: 'LARGE', price: 'Large · ₪500', src: 'large.webp', bg: '#E89A00', w: 1040 },
+  { word: 'PARTY', price: 'Extra large · ₪850', src: 'xl.webp', bg: '#6B2D7A', w: 900 },
+];
+const BEAT = 1.05, END = 4.2;
+// where each platter sits on the last frame: two rows under the headline
+const GRID = [{ x: 30, y: 820, w: 440 }, { x: 480, y: 900, w: 570 }, { x: 20, y: 1270, w: 620 }, { x: 610, y: 1110, w: 440 }];
+const nat = {};
+function size(img) { return nat[img.src] || (nat[img.src] = img.naturalHeight / img.naturalWidth); }
+window.render = (t) => {
+  const i = Math.min(3, Math.floor(t / BEAT)), s = SIZES[i], lt = t - i * BEAT;
+  const beats = t < END;
+  for (const id of ['flood', 'words', 'plate', 'chip']) $(id).style.display = beats ? '' : 'none';
+  $('end').style.display = beats ? 'none' : '';
+  $('logo').style.opacity = 1;
+  // the foot reads on cream: on the colour beats it turns white
+  $('foot').style.color = beats ? '#fff' : '#3A2418';
+  for (const el of document.querySelectorAll('#foot .s, #foot .u')) el.style.color = beats ? 'rgba(255,255,255,.9)' : '';
+  if (beats) {
+    $('flood').style.background = s.bg;
+    const ws = $('words').children;
+    for (const w of ws) w.textContent = s.word;
+    // the words slide in from the side as the colour cuts in
+    const k = outCubic(cl(lt / 0.3));
+    [...ws].forEach((w, j) => { w.style.transform = `translateX(${(j % 2 ? -1 : 1) * 300 * (1 - k)}px)`; });
+    const p = $('plate');
+    if (!p.src.endsWith(s.src)) p.src = s.src;
+    const h = s.w * size(p);
+    const drop = outBack(cl((lt - 0.08) / 0.4));
+    p.style.width = s.w + 'px';
+    p.style.left = (540 - s.w / 2) + 'px';
+    p.style.top = (900 - h / 2 - 900 * (1 - drop)) + 'px';
+    p.style.transform = `rotate(${-10 * (1 - drop)}deg)`;
+    p.style.filter = 'drop-shadow(0 30px 30px rgba(0,0,0,.3))';
+    const c = outBack(cl((lt - 0.38) / 0.25));
+    $('chip').firstChild.textContent = s.price;
+    $('chip').style.opacity = c > 0 ? 1 : 0;
+    $('chip').style.transform = `scale(${0.6 + 0.4 * c})`;
+    return;
+  }
+  // the end: the four platters land in their places, then the headline
+  const e = t - END;
+  GRID.forEach((g, j) => {
+    const img = $('e' + j), k = outBack(cl((e - j * 0.09) / 0.42));
+    img.style.width = g.w + 'px'; img.style.left = g.x + 'px';
+    img.style.top = (g.y + 700 * (1 - k)) + 'px';
+    img.style.opacity = cl((e - j * 0.09) / 0.1);
+  });
+  const hk = outBack(cl((e - 0.35) / 0.35));
+  document.querySelector('#end .big').style.transform = `scale(${0.5 + 0.5 * hk})`;
+  document.querySelector('#end .big').style.opacity = cl((e - 0.35) / 0.1);
+  document.querySelector('#end .it').style.opacity = cl((e - 0.2) / 0.25);
+};
+</script></body></html>
