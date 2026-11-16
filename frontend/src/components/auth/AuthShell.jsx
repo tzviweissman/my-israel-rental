@@ -62,7 +62,8 @@ function WallClip({ slug, v, delay }) {
   );
 }
 
-export default function AuthShell({ children, testId }) {
+// `below`: a second white card under the form, the same width (sign-up puts the work stream there; Tzvi, 16 Nov 2026).
+export default function AuthShell({ children, testId, below = null }) {
   const moving = useWallMotion();
   let n = 0;
   return (
@@ -79,12 +80,19 @@ export default function AuthShell({ children, testId }) {
         </div>
       </div>
       <div className="relative flex flex-1 px-4 pb-6" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 24px)' }}>
-        <div
-          className="w-full max-w-[26rem] m-auto bg-white rounded-md px-6 py-7 sm:px-8 sm:py-8"
-          style={{ boxShadow: '0 24px 60px rgba(0,0,0,.35)' }}
-          data-testid="auth-card"
-        >
-          {children}
+        <div className="w-full max-w-[26rem] m-auto">
+          <div
+            className="bg-white rounded-md px-6 py-7 sm:px-8 sm:py-8"
+            style={{ boxShadow: '0 24px 60px rgba(0,0,0,.35)' }}
+            data-testid="auth-card"
+          >
+            {children}
+          </div>
+          {below && (
+            <div className="mt-4 bg-white rounded-md p-4 sm:p-5" style={{ boxShadow: '0 24px 60px rgba(0,0,0,.35)' }}>
+              {below}
+            </div>
+          )}
         </div>
       </div>
     </div>

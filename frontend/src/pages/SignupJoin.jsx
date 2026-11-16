@@ -28,6 +28,7 @@ import { API, AuthContext } from '../App';
 import WelcomePopups from '../components/WelcomePopups';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import AuthShell from '../components/auth/AuthShell';
+import WorkForYou from '../components/auth/WorkForYou';
 import { countStep } from '../utils/tapKind';
 
 // Namespaced so it cannot collide with the listing wizard's draft.
@@ -242,7 +243,7 @@ const SignupJoin = () => {
 
   return (
     <>
-    <AuthShell testId="signup-join-page">
+    <AuthShell testId="signup-join-page" below={<WorkForYou />}>
         {/* STEP 1: the three choices and nothing else (Tzvi, 16 Nov 2026: the
             Wix look, "theirs look much cleaner"). Tapping a choice moves on,
             so there is no grey Continue waiting for one. Google is NOT here,

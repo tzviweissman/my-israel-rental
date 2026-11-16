@@ -1,13 +1,14 @@
 /**
- * What MyIsraelRental does for a business, on the join and sign-in pages (Tzvi, 12 Nov 2026, from polsia.com;
- * made the main thing on the panel 16 Nov 2026, replacing the photo sphere: "make that thing the main theme").
+ * What MyIsraelRental does for a business, in its own card under the sign-up card (Tzvi, 12 Nov 2026, from
+ * polsia.com; 16 Nov 2026: "put the stream under the sign-up card", AuthShell's `below`).
  *
- *  - a live stream of real work, typed out like a terminal, newest on top: the texts and emails the site sent, its
- *    instant replies and the replies it drafted (GET /api/site/work, routes/site_visits.py). Nothing names anyone:
- *    the kind of message, the business's area, how long ago. With too little to show the server sends nothing and
- *    the stream is left out: never invented, never repeated to look busier.
- *  - as each line lands, a small example of what that kind of message looks like (marked as an example: the real
- *    message is private), its city blinks on a faint map of Israel, and the matching job in the list below lights up.
+ *  - a stream of real work, typed out like a terminal, newest first: the texts and emails the site sent, its instant
+ *    replies, the replies it drafted, the ads businesses kept and the pages and websites built for them
+ *    (GET /api/site/work, routes/site_visits.py). Nothing names anyone: the kind of work and the business's area. With
+ *    too little to show the server sends nothing and the stream is left out: never invented, never repeated.
+ *  - as each line lands, a small example of what that kind of work looks like (marked as an example: the real
+ *    message is private), and the matching job in the list below lights up. No map: nothing tied to one country,
+ *    since the site will open in America (Tzvi, 16 Nov 2026).
  *  - the last row waits for the visitor: "Next: your business".
  *  - every job in one list, each one a feature the site has today.
  */
@@ -17,7 +18,6 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Check, Globe, Mail, Megaphone, MessageSquare, Star } from 'lucide-react';
 import { API } from '../../lib/apiBase';
 import { areaLabel } from '../../utils/areaNames';
-import { LOCATION_OPTIONS } from '../../constants/locations';
 
 const JOBS = [
   ['texts', 'Texts your customers.'],
@@ -64,37 +64,6 @@ const SAMPLE = {
   page_built: ['Your business, online', 'page'],
   site_built: ['Your business, online', 'page'],
 };
-
-// City -> [lng, lat]. An area matches by city name, or by a neighbourhood listed under that city.
-const CITY = {
-  Jerusalem: [35.21, 31.77], 'Tel Aviv': [34.78, 32.08], Haifa: [34.99, 32.79], Beersheba: [34.79, 31.25],
-  Netanya: [34.86, 32.32], Ashdod: [34.65, 31.8], Ashkelon: [34.57, 31.67], 'Petah Tikva': [34.89, 32.09],
-  'Rishon LeZion': [34.79, 31.96], 'Ramat Gan': [34.82, 32.07], Herzliya: [34.84, 32.16], Raanana: [34.87, 32.18],
-  'Kfar Saba': [34.91, 32.18], Modiin: [35.01, 31.9], 'Beit Shemesh': [34.99, 31.75], Eilat: [34.95, 29.56],
-  'Bnei Brak': [34.83, 32.08], Tiberias: [35.53, 32.79], Safed: [35.5, 32.96], Nahariya: [35.1, 33.01],
-  Hadera: [34.92, 32.43], Rehovot: [34.81, 31.89], Holon: [34.78, 32.01], 'Bat Yam': [34.75, 32.02],
-  'Maale Adumim': [35.3, 31.78], Acre: [35.08, 32.93], Caesarea: [34.9, 32.5], 'Zichron Yaakov': [34.95, 32.57],
-};
-function cityOf(area) {
-  const a = (area || '').toLowerCase().trim();
-  if (!a) return null;
-  const hit = Object.keys(CITY).find((c) => a.startsWith(c.toLowerCase()) || a.includes(` ${c.toLowerCase()}`));
-  if (hit) return hit;
-  for (const g of LOCATION_OPTIONS) {
-    if (CITY[g.city] && g.neighborhoods.some((n) => n.toLowerCase() === a)) return g.city;
-  }
-  return null;
-}
-// Plain projection onto a 100 x 230 box: Israel runs about 1.7 degrees wide and 3.9 tall.
-const px = ([lng, lat]) => [((lng - 34.2) / 1.7) * 100, ((33.35 - lat) / 3.9) * 230];
-const OUTLINE = [
-  [35.1, 33.09], [35.2, 33.08], [35.35, 33.06], [35.5, 33.12], [35.57, 33.28], [35.62, 33.24], [35.65, 33.05],
-  [35.63, 32.9], [35.65, 32.7], [35.57, 32.62], [35.55, 32.4], [35.52, 32.1], [35.55, 31.8], [35.47, 31.45],
-  [35.42, 31.1], [35.38, 30.9], [35.25, 30.6], [35.15, 30.2], [35.05, 29.9], [34.98, 29.55], [34.9, 29.49],
-  [34.85, 29.8], [34.7, 30.2], [34.55, 30.6], [34.4, 30.9], [34.25, 31.22], [34.35, 31.32], [34.48, 31.6],
-  [34.65, 31.82], [34.75, 32.05], [34.82, 32.3], [34.88, 32.55], [34.95, 32.75], [35.0, 32.82], [35.07, 32.88],
-  [35.08, 32.95],
-].map((p) => px(p).map((v) => v.toFixed(1)).join(',')).join(' ');
 
 const SHOW = 5;
 const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
@@ -185,30 +154,6 @@ function Sample({ e }) {
   );
 }
 
-function IsraelMap({ cities, ping }) {
-  return (
-    <svg viewBox="-4 -4 108 238" className="pointer-events-none absolute inset-y-4 end-4 h-[calc(100%-2rem)] w-auto opacity-90" aria-hidden="true">
-      <polygon points={OUTLINE} fill="rgba(36,175,235,0.06)" stroke="rgba(36,175,235,0.35)" strokeWidth="0.8" strokeLinejoin="round" />
-      {cities.map((c) => {
-        const [x, y] = px(CITY[c]);
-        return <circle key={c} cx={x} cy={y} r="1.6" fill="rgba(229,231,235,0.55)" />;
-      })}
-      {ping && CITY[ping.city] && (() => {
-        const [x, y] = px(CITY[ping.city]);
-        return (
-          <g key={ping.n}>
-            <circle cx={x} cy={y} r="2.6" fill="#34D399" />
-            <circle cx={x} cy={y} r="3" fill="none" stroke="#34D399" strokeWidth="1">
-              <animate attributeName="r" from="3" to="16" dur="1.6s" repeatCount="2" />
-              <animate attributeName="opacity" from="0.9" to="0" dur="1.6s" repeatCount="2" />
-            </circle>
-          </g>
-        );
-      })()}
-    </svg>
-  );
-}
-
 function useWork() {
   const [events, setEvents] = useState([]);
   useEffect(() => {
@@ -217,7 +162,7 @@ function useWork() {
   return events;
 }
 
-export default function WorkForYou({ className = '', fill = false }) {
+export default function WorkForYou({ className = '' }) {
   const { t } = useTranslation();
   const reduced = useReducedMotion();
   const events = useWork();
@@ -231,7 +176,6 @@ export default function WorkForYou({ className = '', fill = false }) {
     // 2026). The server only sends the last WORK_DAYS days, newest first.
     return [t(`workForYou.event.${e.kind}${key ? `_${key}` : ''}`, words[key]), e.area ? areaLabel(e.area, t) : ''].filter(Boolean).join(' · ');
   }), [play, t]);
-  const cities = useMemo(() => [...new Set(play.map((e) => cityOf(e.area)).filter(Boolean))], [play]);
 
   // k: the line being typed (lines 0..k-1 are done); shown: letters of line k so far. k === lines.length: all done.
   const [k, setK] = useState(0);
@@ -265,15 +209,14 @@ export default function WorkForYou({ className = '', fill = false }) {
   const visible = lines.slice(0, reduced ? lines.length : Math.min(k + 1, lines.length));
 
   return (
-    <div className={`${fill ? 'flex min-h-0 flex-1 flex-col' : ''} ${className}`} data-testid="work-for-you">
+    <div className={className} data-testid="work-for-you">
       {lines.length > 0 && (
         <div
-          className={`relative overflow-hidden rounded-2xl ${fill ? 'min-h-[300px] flex-1' : 'h-[380px]'}`}
+          className="relative h-[340px] overflow-hidden rounded-xl"
           dir="auto"
           style={{ background: 'var(--ink, #111827)', color: '#E5E7EB', fontFamily: MONO }}
           data-testid="work-live-line"
         >
-          <IsraelMap cities={cities} ping={current && typedDone ? null : current && { city: cityOf(current.area), n: `${round}-${k}` }} />
           <div className="relative flex h-full flex-col p-4 sm:p-5">
             <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em]" style={{ color: '#9CA3AF' }}>
               <span className="relative flex h-2 w-2" aria-hidden="true">
@@ -284,7 +227,7 @@ export default function WorkForYou({ className = '', fill = false }) {
             </div>
             <span className="sr-only">{t('workForYou.liveLabel', 'Just done for a business on MyIsraelRental:')} {lines.join('. ')}</span>
             {/* Newest on top, typed first; each older one is typed in below it, fading with age. */}
-            <ul className="mt-3 flex min-h-0 flex-1 flex-col gap-2 overflow-hidden text-[13px] leading-snug max-w-[78%] [mask-image:linear-gradient(to_bottom,#000_75%,transparent)]" aria-hidden="true">
+            <ul className="mt-3 flex min-h-0 flex-1 flex-col gap-2 overflow-hidden text-[13px] leading-snug [mask-image:linear-gradient(to_bottom,#000_75%,transparent)]" aria-hidden="true">
               {visible.map((line, idx) => idx).map((idx, pos) => (
                 <motion.li
                   key={`${round}-${idx}`}
