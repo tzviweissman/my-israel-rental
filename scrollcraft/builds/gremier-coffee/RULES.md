@@ -279,3 +279,9 @@ R3aa.29 pass: built by the starter: opening_slides(intro=2.6) in slides.js, the 
 R3aa.30 pass: check-iphone passes on index.html and shop.html (WebKit as an iPhone 13: no script error, nothing wider than the screen, the first clip at 2.6 s after 4 s), run again 15 Nov after the phone captions moved to the outer third and taps stopped zooming
 R3aa.31 pass: gen/coffee-journey-brief.md has the Enough line: one torrent as wide as the burrs, pouring the whole Grind clip, lands as a brown cloud reaching both sides (o2.png, o2t.png) before the sea turns brown; the prompts say the amount in those words
 R3aa.32 pass: clipchain.py story made gen/world/story.jpg; a Sonnet reviewer that did not write the prompts read it twice (the first reading failed the phone: grounds fell twice and the end was a striped photo, both fixed), then PASS: 1 fall, 1 whirlpool, 1 fill on each size; story_seen in chain.json matches the clips, and encode ran. Known and kept by Tzvi ("keep it for now"): the Serve glass dissolves into their plastic cup
+
+R3ac.1 pass: 16 Nov 2026 (Tzvi: "All sites, as a rule"): on a phone the opening is one screen and plays by itself from page load, then holds its end, one swipe from the next section; a laptop still follows the scroll; check-phone-opening passes
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->

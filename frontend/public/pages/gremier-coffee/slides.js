@@ -36,6 +36,27 @@
     });
     function size() { film.style.height = still ? '100svh' : ((units + 1) * 100) + 'svh'; }
     function ease(t) { return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+    // Phone: the opening plays by itself in one screen (rules 3ac.1, Tzvi 16 Nov 2026): the clips play one after another
+    // (sped up, the chain is ~30 s), the track jumps to the next clip as each ends (they are chained, so the seam is the same
+    // picture), the opening words leave after ~1.8 s, the last clip ends on the closing words and holds; one swipe goes on.
+    if (!still && matchMedia('(max-width: 860px)').matches) {
+      film.style.height = '100svh'; var RATE = 5, ci = 0, ended = false;
+      function cls(i) { for (var k = 0; k < N; k++) film.classList.toggle('c' + (k + 2), i >= k && (k > 0 || film.classList.contains('c2'))); }
+      function finish() {
+        if (ended) return; ended = true; cls(N - 1); film.classList.add('c2', 'c' + (N + 2), 'at-end', 'on-last');
+        if (bar) bar.classList.remove('in-film');
+      }
+      function go(i) {
+        if (i >= N) return finish();
+        ci = i; track.style.transform = 'translate3d(0,' + (-i * 100) + '%,0)'; cls(i); if (i) film.classList.add('c2');
+        var el = vids[i].el; el.playbackRate = i || film.classList.contains('c2') ? RATE : 1;   // the first clip at its own speed while the words are up el.onended = function () { go(i + 1); };
+        var pr = el.play(); if (pr && pr.catch) pr.catch(finish);   // play refused (Low Power Mode): show the ending at once
+      }
+      if (bar) bar.classList.add('in-film');
+      // the words stay up for 1.8 s of the first clip actually playing (the clock starts at its first picture, not at load)
+      vids[0].el.addEventListener('playing', function () { setTimeout(function () { if (!ended) { film.classList.add('c2'); cls(ci); vids[ci].el.playbackRate = RATE; } }, 1800); }, { once: true });
+      go(0); return;
+    }
     var raf = 0;
     function frame() {
       raf = 0;
