@@ -229,3 +229,9 @@ R3x.13 pass: built to the blueprint: every text size from the starter scale --t-
 R3r.3 pass: built to the blueprint: publish-page --check run after the last edit
 R3r.4 n/a: Tzvi has pointed out nothing on this site yet
 <!-- 15 Nov 2026: the shop page only: Add turns into - n + on the Ultimate Feast once it is in the basket (the choose-how-many picker before Add is gone), the phone bar shows only once something is in the basket as "2 items, $430, View basket", an empty basket is one line, the total is marked data-order-total, and the "Added" pop-up is heard but not shown. Skipped (one product): kinds row, search, sort, Most ordered. Prices, words and the other pages unchanged; check-order-data passes on the shop page. -->
+
+R3ac.1 pass: 16 Nov 2026 (Tzvi: "All sites, as a rule"): on a phone the opening is one screen and plays by itself from page load, then holds its end, one swipe from the next section; a laptop still follows the scroll; check-phone-opening passes
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->

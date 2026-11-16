@@ -25,6 +25,8 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { siteMade } from './rule-dates.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const INSPO = path.join(ROOT, 'docs', 'inspo');
@@ -50,7 +52,10 @@ export function checkReferences(dir) {
     return m ? m[1].trim() : null;
   };
   const problems = [];
-  for (const name of [...sources(), 'inspo', 'mobbin', '21st', 'fingerprints']) {
+  // a source saved after the site first went live never blocks it (new rules spare made sites, Tzvi 29 Oct 2026)
+  const made = siteMade(ROOT, dir);
+  const added = (name) => Number(spawnSync('git', ['log', '--diff-filter=A', '--format=%ct', '--', `docs/inspo/${name}*`], { cwd: ROOT, encoding: 'utf8' }).stdout.trim().split(/\s+/).pop() || 0) * 1000 || Date.now();
+  for (const name of [...sources().filter((n) => made == null || added(n) <= made), 'inspo', 'mobbin', '21st', 'fingerprints']) {
     const v = line(name);
     if (v === null) problems.push(`${name}: no line (every source is read before any idea, rule 3c.1)`);
     else if (v.length < 25) problems.push(`${name}: say what was taken from it or why nothing fits`);
