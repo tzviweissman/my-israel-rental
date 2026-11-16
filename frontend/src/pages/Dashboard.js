@@ -47,6 +47,7 @@ import OverviewTab from '../components/dashboard/OverviewTab';
 import useIsWide from '../hooks/useIsWide';
 import OnboardingProvider from '../components/onboarding/OnboardingProvider';
 import SetupChecklist from '../components/onboarding/SetupChecklist';
+import FillForMe from '../components/onboarding/FillForMe';
 import ShowMeAroundOffer from '../components/onboarding/ShowMeAroundOffer';
 import { useOnboarding } from '../components/onboarding/OnboardingProvider';
 import AttentionStrip from '../components/dashboard/AttentionStrip';
@@ -431,6 +432,8 @@ const Dashboard = () => {
           <OverviewTab
             setup={(
               <>
+                {/* Above the list: an empty page is filled in one go, not row by row (16 Nov 2026). */}
+                <FillForMe />
                 <SetupChecklist />
                 {setupAllDone && (
                   <div className="mb-6 text-sm">

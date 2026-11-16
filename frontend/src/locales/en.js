@@ -10,6 +10,40 @@
 // t('some.key', 'English fallback') and silently render the fallback forever
 // if the key goes missing.
 const en = {
+      // The "Fill it in for me" box on an empty business page (components/onboarding/FillForMe.jsx).
+      fillForMe: {
+        title: 'Let us fill in your page for you',
+        lead: 'Give us your website, Instagram or Facebook, or just your business name. We read what you already show customers, and you check it before anything is saved.',
+        placeholder: 'Website, @instagram or business name',
+        go: 'Fill it in for me',
+        reading: 'Reading, about a minute…',
+        flyer: 'Or add a photo of your flyer or menu',
+        notNow: 'Not now',
+        empty: 'Type your website, Instagram or business name first',
+        noMatch: 'Google does not know that name. Try your website or Instagram instead.',
+        whichOne: 'Which one is yours?',
+        nothing: 'We could not find much there. Try your website, or your business name as Google knows it.',
+        failed: 'Could not read that. Try another link, or fill it in yourself below.',
+        checkTitle: 'Here is what we found',
+        checkLead: 'Change anything that is wrong, then save. We only fill what is still empty.',
+        name: 'Business name',
+        about: 'About your business',
+        hours: 'Opening hours',
+        address: 'Address',
+        area: 'Town or city',
+        logo: 'Use as your logo',
+        cover: 'Use as your main picture',
+        items_one: '{{count}} thing you offer',
+        items_other: '{{count}} things you offer',
+        itemsNext: 'After saving you check these, with their prices and photos, and publish.',
+        save: 'Save to my business page',
+        back: 'Start again',
+        needName: 'Add your business name',
+        saved: 'Your business page is filled in.',
+        savedNext: 'Your business page is filled in. Now check what you offer and publish it.',
+        saveFailed: 'Could not save that. Try again.',
+        day: { sun: 'Sun', mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat' },
+      },
       // Screen-reader labels for the shared date picker
       // (components/ui/calendar.jsx). react-day-picker ships these in
       // English only and does not route them through its `locale`, so

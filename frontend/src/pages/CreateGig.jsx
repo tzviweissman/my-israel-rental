@@ -62,6 +62,7 @@ import { productPhotos } from '../utils/productPhotos';
 import SizeFields, { sizeValue } from '../components/marketplace/SizeFields';
 import PhoneInput from '../components/common/PhoneInput';
 import { apiErrorMessage } from '../utils/apiError';
+import { FILL_HANDOFF } from '../components/onboarding/FillForMe';
 import { useTranslation } from 'react-i18next';
 import { PriceKindPicker } from '../components/forms/PriceKind';
 import { countStep } from '../utils/tapKind';
@@ -682,6 +683,18 @@ const CreateGig = () => {
       toast.error(apiErrorMessage(err, t('wizard.socialsFailed', 'Could not read those. They are saved, so fill in the rest below.'), t), { duration: 8000 });
     } finally { setSocialsReading(false); }
   };
+
+  // From the dashboard's "Fill it in for me" box (?fill=1): what it read, already checked there, fills the form.
+  useEffect(() => {
+    if (searchParams.get('fill') !== '1') return;
+    let got = null;
+    try { got = JSON.parse(sessionStorage.getItem(FILL_HANDOFF) || 'null'); sessionStorage.removeItem(FILL_HANDOFF); } catch { /* private mode */ }
+    if (!got) return;
+    applyRead(got);
+    if (got.socials && Object.keys(got.socials).length) setForm((f) => ({ ...f, socials: { ...(f.socials || {}), ...got.socials } }));
+    // Runs once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [picturesSaving, setPicturesSaving] = useState(false);
   const togglePicked = (url) => set({ picked: (form.picked || []).includes(url) ? form.picked.filter((u) => u !== url) : [...(form.picked || []), url] });

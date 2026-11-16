@@ -66,6 +66,9 @@ export default function OnboardingProvider({ children }) {
   // Ids currently mounted and otherwise eligible to show.
   const [claims, setClaims] = useState(() => new Set());
 
+  // Bumped to load the state again after something on the dashboard finished a row (FillForMe).
+  const [loads, setLoads] = useState(0);
+  const refresh = useCallback(() => setLoads((n) => n + 1), []);
   useEffect(() => {
     if (!token) { setState(null); return undefined; }
     let cancelled = false;
@@ -83,7 +86,7 @@ export default function OnboardingProvider({ children }) {
       }
     })();
     return () => { cancelled = true; };
-  }, [token]);
+  }, [token, loads]);
 
   const dismiss = useCallback(async (id) => {
     // Locally first: the thing vanishes on click. A tip that lingers while
@@ -127,8 +130,8 @@ export default function OnboardingProvider({ children }) {
   );
 
   const value = useMemo(() => ({
-    state, dismissed, dismiss, claim, activeId, ready: state !== null,
-  }), [state, dismissed, dismiss, claim, activeId]);
+    state, dismissed, dismiss, claim, activeId, refresh, ready: state !== null,
+  }), [state, dismissed, dismiss, claim, activeId, refresh]);
 
   return (
     <OnboardingContext.Provider value={value}>

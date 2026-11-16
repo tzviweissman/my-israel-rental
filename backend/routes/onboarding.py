@@ -73,6 +73,8 @@ DISMISSIBLE_IDS: frozenset[str] = frozenset({
     "offer.complete",
     # T1 — the checklist itself, once complete and collapsed.
     "checklist.collapsed",
+    # The "Fill it in for me" box on an empty business page (FillForMe.jsx).
+    "box.fillForMe",
 })
 
 

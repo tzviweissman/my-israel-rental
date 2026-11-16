@@ -10,6 +10,40 @@
 // t('some.key', 'English fallback') and silently render the fallback forever
 // if the key goes missing.
 const he = {
+      // The "Fill it in for me" box on an empty business page (components/onboarding/FillForMe.jsx).
+      fillForMe: {
+        title: 'נמלא לכם את העמוד',
+        lead: 'תנו לנו את האתר, האינסטגרם או הפייסבוק שלכם, או רק את שם העסק. נקרא את מה שאתם כבר מראים ללקוחות, ותבדקו לפני שמשהו נשמר.',
+        placeholder: 'אתר, אינסטגרם או שם העסק',
+        go: 'מלאו בשבילי',
+        reading: 'קוראים, בערך דקה…',
+        flyer: 'או הוסיפו תמונה של הפלאייר או התפריט',
+        notNow: 'לא עכשיו',
+        empty: 'כתבו קודם את האתר, האינסטגרם או שם העסק',
+        noMatch: 'גוגל לא מכיר את השם הזה. נסו את האתר או האינסטגרם.',
+        whichOne: 'איזה מהם שלכם?',
+        nothing: 'לא מצאנו שם הרבה. נסו את האתר, או את שם העסק כפי שהוא מופיע בגוגל.',
+        failed: 'לא הצלחנו לקרוא את זה. נסו קישור אחר, או מלאו בעצמכם למטה.',
+        checkTitle: 'זה מה שמצאנו',
+        checkLead: 'תקנו כל מה שלא נכון, ואז שמרו. אנחנו ממלאים רק מה שעדיין ריק.',
+        name: 'שם העסק',
+        about: 'על העסק',
+        hours: 'שעות פתיחה',
+        address: 'כתובת',
+        area: 'עיר או יישוב',
+        logo: 'להשתמש כלוגו',
+        cover: 'להשתמש כתמונה הראשית',
+        items_one: 'דבר אחד שאתם מציעים',
+        items_other: '{{count}} דברים שאתם מציעים',
+        itemsNext: 'אחרי השמירה תבדקו אותם, עם המחירים והתמונות, ותפרסמו.',
+        save: 'שמירה בעמוד העסק',
+        back: 'להתחיל מחדש',
+        needName: 'הוסיפו את שם העסק',
+        saved: 'עמוד העסק מולא.',
+        savedNext: 'עמוד העסק מולא. עכשיו בדקו את מה שאתם מציעים ופרסמו.',
+        saveFailed: 'לא הצלחנו לשמור. נסו שוב.',
+        day: { sun: 'א׳', mon: 'ב׳', tue: 'ג׳', wed: 'ד׳', thu: 'ה׳', fri: 'ו׳', sat: 'ש׳' },
+      },
       // Screen-reader labels for the shared date picker
       // (components/ui/calendar.jsx). react-day-picker ships these in
       // English only and does not route them through its `locale`, so
