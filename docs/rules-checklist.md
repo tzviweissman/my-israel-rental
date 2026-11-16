@@ -11,9 +11,9 @@ Sections (line each starts on; read with that offset):
 - 277: 6. Order and booking flow
 - 303: 7. Motion
 - 332: 8. Phone
-- 347: 8b. From the seven videos, part two (29 Oct 2026)
-- 369: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 380: 9. Finish
+- 348: 8b. From the seven videos, part two (29 Oct 2026)
+- 370: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 381: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being

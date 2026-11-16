@@ -2,50 +2,51 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 109: 1. The job, in one line
-- 114: 2. What the AI gets, and the only facts it may use
-- 147: 3. Hard rules (checked: a page breaking one is thrown away and remade)
-- 184: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
-- 226: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
-- 294: 3b. The category checklist (from the Inspo study)
-- 333: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 466: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 561: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
-- 698: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 763: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 934: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
-- 1230: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 1268: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 1383: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 1462: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 1494: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 1521: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 1567: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 1604: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1676: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1701: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1738: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1855: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
-- 1876: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1947: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
-- 2032: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 2142: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 2234: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 2259: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 2299: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2476: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2503: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2568: 4. What is reported to the owner instead (content gaps)
-- 2577: 5. How to write
-- 2626: 5a. Lessons from the practice pages
-- 2655: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2704: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2721: 6. Playbooks for the most common businesses
-- 2841: 7. Choosing the three options (automatic page builder only)
-- 2865: 8. Photos, video and the tools
-- 3091: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3159: 9. The scroll sections: what the practice pages become
-- 3194: 10. Open decisions (need Tzvi)
+- 110: 1. The job, in one line
+- 115: 2. What the AI gets, and the only facts it may use
+- 148: 3. Hard rules (checked: a page breaking one is thrown away and remade)
+- 185: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
+- 227: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
+- 295: 3b. The category checklist (from the Inspo study)
+- 334: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 467: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 562: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
+- 699: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 764: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 935: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
+- 1231: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 1269: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 1384: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 1463: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 1495: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 1522: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 1568: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 1605: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1677: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1702: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1739: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1856: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
+- 1877: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1948: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+- 2033: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 2143: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 2235: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 2260: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 2300: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 2477: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2504: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2569: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2586: 4. What is reported to the owner instead (content gaps)
+- 2595: 5. How to write
+- 2644: 5a. Lessons from the practice pages
+- 2673: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2722: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2739: 6. Playbooks for the most common businesses
+- 2859: 7. Choosing the three options (automatic page builder only)
+- 2883: 8. Photos, video and the tools
+- 3109: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3177: 9. The scroll sections: what the practice pages become
+- 3212: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
