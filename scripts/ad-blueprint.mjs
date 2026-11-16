@@ -50,6 +50,8 @@ const STRANGER_RULES = new Set(['A2.10']);
 const HEADLINE_RULES = new Set(['A2.11']);
 const SCORE_RULES = new Set(['A9.7']);
 const LAYOUT_RULES = new Set(['A3.11']);
+const KEEP_RULES = new Set(['A9.8']);
+const SENT_ANYWAY = /sent as it is:\s*tzvi,\s*\d/i;
 const blank = (plan) => !plan || /^(\.\.\.|todo|tbd)$/i.test(plan);
 
 function problems(name, upTo, finished) {
@@ -75,7 +77,8 @@ function problems(name, upTo, finished) {
         const sc = /score:\s*(\d(?:\.\d)?)/i.exec(g.plan);
         if (!sheet) out.push(`stage ${s.n}, ${it.id}: name the sheet from scripts/ad-vs-library.py`);
         if (!sc) out.push(`stage ${s.n}, ${it.id}: write "Score: N" on the library's 1 to 5 scale`);
-        else if (Number(sc[1]) < 5) out.push(`stage ${s.n}, ${it.id}: scored ${sc[1]}; under 5 goes back to stage 1, not to anyone's phone`);
+        // Tzvi can send a lower score himself; the answer then says so, and --note puts it in the commit (16 Nov 2026).
+        else if (Number(sc[1]) < 5 && !SENT_ANYWAY.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: scored ${sc[1]}; under 5 goes back to stage 1, not to anyone's phone`);
       }
       if (HEADLINE_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
         const n = new Set([...g.plan.matchAll(/(?:^|\s)([1-9])\)/g)].map((x) => x[1])).size;
@@ -88,6 +91,11 @@ function problems(name, upTo, finished) {
         if (!pics.some((f) => fs.existsSync(path.resolve(ROOT, f)))) out.push(`stage ${s.n}, ${it.id}: draw the layout with scripts/ad-layout-sketch.py and name the picture (docs/ads/gen/${name}/layout.png)`);
         const gen = path.join(ROOT, 'docs', 'ads', 'gen', name, 'gen.py');
         if (finished && fs.existsSync(gen) && !/layout/.test(fs.readFileSync(gen, 'utf8'))) out.push(`stage ${s.n}, ${it.id}: docs/ads/gen/${name}/gen.py does not give the model the layout picture`);
+      }
+      // The page or script that draws a hand-made ad is kept beside it (A9.8, 16 Nov 2026).
+      if (KEEP_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
+        const kept = [...g.plan.matchAll(/(docs\/ads\/gen\/[\w./-]+\.(?:html|py|mjs|js))/gi)].map((x) => x[1]);
+        if (!kept.some((p) => fs.existsSync(path.resolve(ROOT, p)))) out.push(`stage ${s.n}, ${it.id}: name the page or script that draws it, kept in docs/ads/gen/${name}/`);
       }
       if (FIT_RULES.has(it.id) && !/^n\/a:/i.test(g.plan) && !/ad-fit-picture/.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: name scripts/ad-fit-picture.py, the way the picture was laid on the ad, or n/a`);
       // A design's blueprint says how the maker places every business's logo ("built by ..."), not one file.
@@ -173,9 +181,16 @@ if (args.includes('--designs')) {
   const p = problems(rest[0], done ? Infinity : Number(rest[1]), done);
   if (p.length) { console.error(`${rest[0]}: ${p.length} step(s) open:\n${p.join('\n')}`); process.exit(1); }
   console.log(`${rest[0]}: ${done ? 'every step done' : `stages 1 to ${rest[1]} answered`}`);
+} else if (args.includes('--note')) {
+  // The line that goes in the ad's commit message (A10.6): its library score, and who sent it under 5.
+  const g = fs.existsSync(path.join(DIR, `${rest[0]}.md`)) ? read(path.join(DIR, `${rest[0]}.md`)).get('A9.7') : null;
+  const sc = g && /score:\s*(\d(?:\.\d)?)/i.exec(g.plan);
+  if (!sc) { console.error(`${rest[0]}: no "Score: N" in A9.7`); process.exit(1); }
+  const sent = SENT_ANYWAY.exec(g.plan) && /sent as it is:\s*([^.;]*)/i.exec(g.plan)[1].trim();
+  console.log(`Library score ${sc[1]} (A9.7)${Number(sc[1]) < 5 ? `, sent as it is: ${sent || 'NOT approved'}` : ''}`);
 } else if (rest[0] && /^[a-z0-9-]+$/.test(rest[0])) {
   write(rest[0]);
 } else {
-  console.error('usage: node scripts/ad-blueprint.mjs <name> | --check <name> <stage> | --done <name> | --designs');
+  console.error('usage: node scripts/ad-blueprint.mjs <name> | --check <name> <stage> | --done <name> | --note <name> | --designs');
   process.exit(2);
 }

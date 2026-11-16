@@ -694,6 +694,17 @@
    "status": "planned"
   },
   {
+   "id": "A9.8",
+   "rule": "A hand-made ad's drawing page or script is kept in docs/ads/gen/<name>/",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "scripts/ad-blueprint.mjs refuses an A9.8 answer naming no file in docs/ads/gen/; to build: a starter page for hand-made moving ads that writes there itself",
+   "confirmed_by": "ad-blueprint.mjs --done",
+   "retried": false,
+   "status": "planned"
+  },
+  {
    "id": "A11.1",
    "rule": "One idea you get in a second",
    "how": [
@@ -828,6 +839,28 @@
    "confirmed_by": "check-ad-designs measure moving",
    "retried": false,
    "status": "built"
+  },
+  {
+   "id": "A10.5",
+   "rule": "A hand-made moving ad passes scripts/check-moving-ad.py",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "scripts/check-moving-ad.py measures the file; to build: record scripts run it themselves after writing the MP4",
+   "confirmed_by": "check-moving-ad.py",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A10.6",
+   "rule": "A hand-made ad is committed as soon as it is sent, with its library score in the commit message",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "scripts/ad-blueprint.mjs --note <name> prints the commit line; to build: a commit-ad script that stages the ad's files by name and commits with that line",
+   "confirmed_by": "git log",
+   "retried": false,
+   "status": "planned"
   }
  ]
 }

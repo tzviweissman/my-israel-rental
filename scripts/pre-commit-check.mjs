@@ -95,8 +95,11 @@ if (staged.includes('docs/rules-checklist.md') || staged.includes('scripts/bluep
 if (staged.some((f) => /^(frontend\/src\/components\/(dashboard\/AdMaker|admin\/AdStudio)\.jsx|docs\/ad-rules-checklist\.md|scripts\/ad-blueprint\.mjs)$/.test(f))) {
   const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'ad-blueprint.mjs'), '--designs'], { cwd: ROOT, encoding: 'utf8' });
   if (c.status !== 0) { console.error(`Commit refused: ${c.stderr || c.stdout}`); process.exit(1); }
-  // and the drawing that goes out is the drawing that was measured (Tzvi, 5 Nov 2026: "make sure we always use the blueprint")
-  if (!stagedIsMeasured(ROOT)) {
+  // and the drawing that goes out is the drawing that was measured (Tzvi, 5 Nov 2026: "make sure we always use the blueprint").
+  // Only when this commit changes the drawing: otherwise it ships what HEAD has, measured when that was committed, and
+  // another session's unsaved AdMaker edit no longer blocks a rules-only commit (16 Nov 2026, it did twice).
+  const drawing = staged.some((f) => /^frontend\/src\/(components\/(dashboard\/AdMaker|admin\/AdStudio)\.jsx|utils\/sharpCanvas\.js)$/.test(f));
+  if (drawing && !stagedIsMeasured(ROOT)) {
     console.error('Commit refused: the ad drawing changed since it was last measured. With the local servers up, run: node scripts/check-ad-designs.mjs (then stage the same files).');
     process.exit(1);
   }

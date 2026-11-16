@@ -654,6 +654,12 @@ pops, the link and QR slide in, and it holds on the finished ad. A short MP4 rat
 smaller, and what statuses and feeds expect. Every still rule still applies, because the last frame is the
 still. Steps A10.1 to A10.4 in `docs/ad-rules-checklist.md`.
 
+A hand-made moving ad is measured the same way (Tzvi, 16 Nov 2026): L.A. Cholent's first cut was timed by hand and
+held still for 0.8 seconds. `scripts/check-moving-ad.py <ad.mp4>` reads every frame, finds the QR code itself and
+fails a video that is the wrong size or length, opens on an empty ground, holds still under 1.5 seconds or keeps the
+QR still for 3 seconds or less. It compares the worst 30px square, not the whole frame, because a wisp of steam
+barely moves the mean. Step A10.5.
+
 ## 12. Never bland (Tzvi, 8 Nov 2026)
 
 "This seems a bit bland... make sure we dont make it bland in the future." Our first product-photo ad had six
@@ -762,3 +768,18 @@ the library's 5/5 ads put it (12 Nov 2026, 90 of them looked at: about 58% a top
 the product itself); a logo with see-through parts brings a white tile. When the design's words fill the top, the
 first free spot round the code. A design that fills its whole top (most status designs) should leave the logo a row. check-ad-designs draws every design with a wide test logo
 and fails one that is missing, under 54px high, outside a status's safe area, or over any word.
+
+## 21. The drawing is kept (Tzvi, 16 Nov 2026)
+
+The L.A. Cholent still (10 Nov) was drawn by a page nobody kept, so its moving version had to rebuild the layout by
+measuring the finished picture. Every hand-made ad now keeps the page or script that draws it, with the pictures it
+lays, in `docs/ads/gen/<name>/` beside the generation script. Step A9.8; ad-blueprint refuses an answer that names no
+file in that folder.
+
+## 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
+
+The American Crust moving ad scored 4, was held back, then sent as it was on Tzvi's word, and its files sat
+uncommitted until he asked. Every hand-made ad is now committed as soon as it is sent, its files staged by name. Its
+commit message carries the line `node scripts/ad-blueprint.mjs --note <name>` prints: the library score from A9.7,
+and, under 5, "sent as it is" with who said so, so a later look through the library can find the ads to redo. A
+score under 5 still fails the blueprint unless A9.7 says "Sent as it is: Tzvi, <date>". Step A10.6.
