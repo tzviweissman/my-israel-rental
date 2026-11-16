@@ -26,7 +26,8 @@ import { orderHref } from '../../utils/storeBasket';
 /** What the card's button does for this item. */
 export function actionKind(gig) {
   if ((gig.gig_type || 'deliverable') === 'store') {
-    return (gig.products || []).length === 1 ? 'product' : 'products';
+    const ps = gig.products || [];
+    return ps.length === 1 && !(ps[0].options || []).length ? 'product' : 'products';
   }
   const week = gig.weekly_availability || {};
   const hasSlots = Object.values(week).some((w) => (w || []).length);
@@ -52,6 +53,13 @@ export function QtyStepper({ value, onChange, t, testid, disabled = false }) {
    ids existed go by position, `idx:N` (orders.py _products_for_order). */
 const pid = (p, i) => p.id || `idx:${i}`;
 const withIds = (gig) => (gig.products || []).map((p, i) => ({ ...p, id: pid(p, i) }));
+/* What a customer picks from: a product with sizes is one row per size, keyed
+   "product::option" as the order page reads it (OrderPage.jsx), so a size and
+   its own price are always chosen and the bare product never goes in the basket. */
+const rowsOf = (gig) => withIds(gig).flatMap((p) => ((p.options || []).length
+  ? p.options.map((o) => ({ ...p, id: `${p.id}::${o.id}`, size: o.name,
+    price: o.price ?? p.price, price_kind: 'fixed', in_stock: p.in_stock !== false && o.in_stock !== false }))
+  : [p]));
 
 const priceText = (p, t) => (p.price === null || p.price === undefined || p.price === ''
   ? t('services.askForQuote', 'Ask for a quote') : kindPrice(t, p));
@@ -74,7 +82,7 @@ function Sheet({ title, onClose, children, testid }) {
 function ProductSheet({ gig, basket, title, onClose, t }) {
   const start = basket.items[gig.id] || {};
   const [qty, setQty] = useState(start);
-  const products = withIds(gig);
+  const products = rowsOf(gig);
   const save = () => {
     for (const p of products) basket.setQty(gig.id, p.id, qty[p.id] || 0);
     onClose();
@@ -91,7 +99,7 @@ function ProductSheet({ gig, basket, title, onClose, t }) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold truncate" dir="auto" style={{ color: 'var(--ink)' }}>{p.name}</p>
-                <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{out ? t('basket.outOfStock', 'Out of stock') : priceText(p, t)}</p>
+                <p className="text-xs" style={{ color: 'var(--brand-muted)' }} dir="auto">{p.size ? <span className="font-semibold" style={{ color: 'var(--ink)' }}>{p.size} · </span> : null}{out ?t('basket.outOfStock', 'Out of stock') : priceText(p, t)}</p>
               </div>
               {kindOf(p) === 'quote' ? (
                 <a href={`/services/gig/${gig.id}?ask=${encodeURIComponent(p.id)}`} className="shrink-0 px-3 min-h-[40px] inline-flex items-center rounded-full border text-xs font-semibold" style={{ borderColor: 'var(--ink)', color: 'var(--ink)' }} data-testid={`product-ask-${p.id}`}>{t('priceKind.ask', 'Ask for a price')}</a>
@@ -211,7 +219,7 @@ export function BasketBar({ business, basket, t, className = '', inline = false 
   const groups = Object.entries(basket.items).map(([gigId, group]) => {
     const gig = listings.find((g) => g.id === gigId);
     if (!gig) return null;
-    const products = withIds(gig);
+    const products = rowsOf(gig);
     const lines = Object.entries(group).map(([id, q]) => ({ p: products.find((x) => x.id === id), q })).filter((l) => l.p);
     if (!lines.length) return null;
     const priced = lines.every((l) => l.p.price !== null && l.p.price !== undefined && l.p.price !== '');
