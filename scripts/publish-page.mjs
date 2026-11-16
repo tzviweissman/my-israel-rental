@@ -127,7 +127,8 @@ const CHECK_ONLY = process.argv.includes('--check');
   const results = [];
   // A failure that is only a timing measure (SMOOTH frame rate, a FLASH on two quick taps) is run once more before it
   // counts: on a computer running several sessions' browsers these tripped on pages that pass alone (25 Oct 2026).
-  const onlyTiming = (out) => { const bad = out.split('\n').filter((l) => /^[A-Z]{4,}\s/.test(l)); return bad.length > 0 && bad.every((l) => /^(SMOOTH|FLASH|HEAVY|BUSY)\s/.test(l)); };
+  // So did a JUMP between two frames and a headline LATE at 2.5 s (Whipped Cup needed four runs, 16 Nov 2026): a real one fails twice.
+  const onlyTiming = (out) => { const bad = out.split('\n').filter((l) => /^[A-Z]{4,}\s/.test(l)); return bad.length > 0 && bad.every((l) => /^(SMOOTH|FLASH|HEAVY|BUSY|JUMP|LATE)\s/.test(l)); };
   // A check that belongs to a checklist rule added after this site was first published is not run (Tzvi, 29 Oct
   // 2026: "new rules shouldnt affect already made sites"; scripts/rule-dates.mjs). A new check gets its own script
   // and its rule id here, so it can be told apart from the rules the site was made under.

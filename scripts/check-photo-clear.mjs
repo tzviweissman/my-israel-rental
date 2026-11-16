@@ -10,7 +10,7 @@
  *
  *   node scripts/check-photo-clear.mjs <url> [more urls]
  *
- * At 390x844 and 360x640, the biggest photo, video or film canvas on the first
+ * At 390x844, 390x664 (an iPhone in Safari) and 360x640, the biggest photo, video or film canvas on the first
  * screen (if it fills at least a quarter of it) is screenshotted twice: as the
  * page shows it, and with everything except that picture hidden. Only the
  * picture's detail counts (its edges and textures: the product, the work), so
@@ -26,7 +26,8 @@
 import { createRequire } from 'node:module';
 const { chromium } = createRequire(process.cwd() + '/')('playwright');
 
-const PHONES = [[390, 844], [360, 640]];
+// 390x664 is an iPhone in Safari with its bars showing (16 Nov 2026): the screen most iPhones really give a page
+const PHONES = [[390, 844], [390, 664], [360, 640]];
 const MAX_COVERED = 0.40, MIN_DETAIL = 0.015;
 const urls = process.argv.slice(2);
 if (!urls.length) { console.error('usage: node scripts/check-photo-clear.mjs <url> [more urls]'); process.exit(2); }
@@ -53,10 +54,13 @@ const changed = (a, b) => cmp.evaluate(async ([a, b]) => {
 
 let bad = 0;
 for (const url of urls) {
-  for (const [w, h] of PHONES) {
+  for (const [w, h] of PHONES) for (const wait of [2500, 8500]) {
     const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
     await page.goto(url, { waitUntil: 'load' });
-    await page.waitForTimeout(2500);
+    // a phone opening plays by itself in 4 to 8 s and then holds (rules 3ac.1): its picture is seen if it is clear at
+    // 2.5 s or on the screen it settles on at 8.5 s (16 Nov 2026: Michal Simkin read 35% then 59% mid-play; RBS
+    // Cleaning's film plays clear, then settles on its words card)
+    await page.waitForTimeout(wait);
     const box = await page.evaluate(() => {
       const PIC = 'img, video, canvas';
       const seen = (el) => { const cs = getComputedStyle(el); return cs.visibility !== 'hidden' && +cs.opacity >= 0.6 && !/blur/.test(cs.filter); };
@@ -79,7 +83,7 @@ for (const url of urls) {
       document.querySelectorAll('video').forEach((v) => v.pause());
       return { clip: best.clip, src: best.el.currentSrc || best.el.getAttribute('src') || best.el.tagName.toLowerCase() };
     });
-    if (!box) { await page.close(); continue; }
+    if (!box) { await page.close(); if (wait === 2500) continue; break; }
     const shot = () => page.screenshot({ clip: box.clip, animations: 'disabled' });
     let res = null;
     // a picture that is still changing (a slideshow, a film) is shot again until two shots of the page agree
@@ -92,12 +96,15 @@ for (const url of urls) {
       if ((await changed(full, again))[0] < 0.02) res = await changed(full, alone);
       else await page.waitForTimeout(1200);
     }
+    const covered = !res || (res[2] >= MIN_DETAIL && res[1] > MAX_COVERED);
+    if (covered && wait === 2500) { await page.close(); continue; }
     const what = `the opening picture (${box.src.split('/').pop()})`;
     if (!res) { bad += 1; console.log(`COVERED ${w}x${h} ${url}: ${what} never held still for two shots, so how much is covered could not be measured`); }
     else if (res[2] < MIN_DETAIL) console.log(`ok ${w}x${h} ${url}: ${what} is a plain ground`);
     else if (res[1] > MAX_COVERED) { bad += 1; console.log(`COVERED ${w}x${h} ${url}: words, shades and tints cover ${Math.round(res[1] * 100)}% of ${what}; at most ${MAX_COVERED * 100}%`); }
-    else console.log(`ok ${w}x${h} ${url}: ${Math.round(res[1] * 100)}% of ${what} is covered`);
+    else console.log(`ok ${w}x${h} ${url}: ${Math.round(res[1] * 100)}% of ${what} is covered${wait > 2500 ? ' once it settles' : ''}`);
     await page.close();
+    break;
   }
 }
 await browser.close();
