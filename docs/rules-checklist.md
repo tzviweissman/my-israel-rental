@@ -332,6 +332,7 @@ R3x.12 | A progress line is used only on a page of six screens or more, 2 to 3 p
 ## 8. Phone
 
 R3b.6 | On a phone the action is pinned to the bottom with the price or proof beside it, from after the first screen until the order section; a bar that carries a counter or clock is there from the first screen and only its button waits | 3b.6, 3a payoff row | LOOK: 390x844 and 360x640 with touch emulation, whole scroll
+R3ac.1 | On a phone the opening is one screen that plays by itself from page load in about 4 to 8 s and holds its end, one swipe from the next section; a laptop may follow the scroll | 3ac.1 | script: `node scripts/check-phone-opening.mjs <urls>`; n/a with no scroll opening
 R3f.7 | The bottom bar fits at 360 px: its label shrinks or wraps, its button never | 3f.7 | LOOK: 360x640
 R3a.6 | A fixed bar never covers content (room is kept for it, including the last line and the end of the page) | 3a table | script: site PHONE
 R3s.22 | Everything to tap is at least 40 px on a phone and no two taps overlap | 3s TAP | script: site TAP

@@ -1211,6 +1211,13 @@ the product picture, a small join card in the corner, who models the size. From 
 not placed (a lid lifts, a grinder opens), its world around it, something alive (a pulsing jellyfish, an opening
 flower), each choice bringing its own colour and pieces, moving in to the detail the words name, ending on how it arrives.
 
+## 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026)
+
+Full text: reference/full-rules.md section 3ac. On a phone the opening is one screen (100svh) whose story runs on a clock
+from page load, 4 to 8 s, then holds; one swipe reaches the next section; a film plays as video; reduced motion shows the
+end. A laptop may still follow the scroll. scrollcraft.js (first pinned act) and starter/film.js do it; hand-written
+openings do it themselves. Every site, live ones included. Script: check-phone-opening.
+
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
 
 Full text: reference/full-rules.md section 3ab; notes in docs/inspo/videos-2026-11-12-landing-pages. Every h1 to h3

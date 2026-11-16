@@ -2565,6 +2565,23 @@ More from Pinterest across industries (Tzvi, 12 Nov 2026: "the waves across the 
 50. **Other versions as small thumbnails.** round thumbnails of the other colours or models beside the hero, which swap it (pinterest-touches-2026-11-12/axtra-chair-variant-thumbs.jpg)
 51. **One scene's floor is the next one's ceiling.** Scrolling down, the ground of the opening (a mountain, a table, the sand) rises and turns out to be the roof of the next scene (a cave with icicles, the inside of the cupboard), so the two sections join as one world (Wix Studio parallax, Tzvi 12 Nov 2026).
 
+## 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+
+After L.A. Cholent, Tzvi: "i thought we dont do scroll on mobile but theres a scroll". A laptop may keep an opening led
+by the scroll (3h); a phone may not, because a thumb has to push through screens of a pinned stage before it reaches
+anything to buy. Asked of every site, the ones already live included: on 16 Nov 2026 all thirteen live sites with a
+scroll opening were changed the same way.
+
+1. **One screen, played on arrival.** On a phone (860 px wide or less, or the site's own phone width) the opening
+   section is one screen tall (100svh), and its story (film, words, counters, chapters) runs on a clock that starts when
+   the page has loaded, in about 4 to 8 seconds, then holds its last state. One swipe reaches the next section. A film
+   plays as video (an iPhone loads no video data until a video is played, 3aa.30). Reduced motion shows the last state
+   at once. Whatever read the opening's scroll (the phone bar, chapter words) reads the clock instead, and the bar never
+   covers the opening's last words or button. The shared players already do it: `scrollcraft.js` (for the page's first
+   pinned act) and `scrollcraft/starter/film.js`; a hand-written opening does it itself, as L.A. Cholent's does. Checked
+   by `scripts/check-phone-opening.mjs` (WebKit as an iPhone, never scrolling: HELD when the opening is over 1.15
+   screens, STILL when nothing changed in 7 s).
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews

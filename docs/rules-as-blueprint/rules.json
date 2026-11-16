@@ -3197,6 +3197,17 @@
    "status": "planned"
   },
   {
+   "id": "R3ac.1",
+   "rule": "On a phone the opening is one screen that plays by itself from page load and holds its end",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "scrollcraft.js runs the first pinned act on a clock on phones; starter/film.js plays the film as video in one screen; a hand-written opening does the same",
+   "confirmed_by": "check-phone-opening -> confirm only",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
    "id": "R3ab.3",
    "rule": "Each review shows a first name and where it was left, with a link",
    "how": [
