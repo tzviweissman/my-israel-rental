@@ -36,9 +36,9 @@ html,body{margin:0}
     <div class="it">Fruit platters,</div>
     <div class="big">EVERY<br>SIZE.</div>
     <img class="p" id="e0" src="small.webp">
-    <img class="p" id="e1" src="medium.webp">
-    <img class="p" id="e2" src="large.webp">
-    <img class="p" id="e3" src="xl.webp">
+    <img class="p" id="e1" src="xl.webp">
+    <img class="p" id="e2" src="medium.webp">
+    <img class="p" id="e3" src="large.webp">
   </div>
   <img id="logo" class="abs" src="logo.jpg">
   <div id="foot" class="abs"><div class="n">LS Fruit Platter</div>
@@ -55,13 +55,14 @@ const outCubic = (x) => 1 - Math.pow(1 - x, 3);
 // their four sizes and prices, as on their listing
 const SIZES = [
   { word: 'SMALL', price: 'Small · ₪300', src: 'small.webp', bg: '#E5484D', w: 860 },
-  { word: 'MEDIUM', price: 'Medium · ₪400', src: 'medium.webp', bg: '#5E9E2F', w: 1000 },
-  { word: 'LARGE', price: 'Large · ₪500', src: 'large.webp', bg: '#E89A00', w: 1040 },
-  { word: 'PARTY', price: 'Extra large · ₪850', src: 'xl.webp', bg: '#6B2D7A', w: 900 },
+  { word: 'MEDIUM', price: 'Medium · ₪400', src: 'xl.webp', bg: '#5E9E2F', w: 900 },
+  { word: 'LARGE', price: 'Large · ₪500', src: 'medium.webp', bg: '#E89A00', w: 1000 },
+  { word: 'PARTY', price: 'Extra large · ₪850', src: 'large.webp', bg: '#6B2D7A', w: 1500, tilt: -22 },
 ];
 const BEAT = 1.05, END = 4.2;
 // where each platter sits on the last frame: two rows under the headline
-const GRID = [{ x: 30, y: 820, w: 440 }, { x: 480, y: 900, w: 570 }, { x: 20, y: 1270, w: 620 }, { x: 610, y: 1110, w: 440 }];
+// small, medium, large, then the XL biggest and on a slant across the bottom (Tzvi 16 Nov)
+const GRID = [{ x: 40, y: 820, w: 400 }, { x: 470, y: 860, w: 560 }, { x: 560, y: 1110, w: 480 }, { x: -80, y: 1150, w: 900, tilt: -14 }];
 const nat = {};
 function size(img) { return nat[img.src] || (nat[img.src] = img.naturalHeight / img.naturalWidth); }
 window.render = (t) => {
@@ -87,7 +88,7 @@ window.render = (t) => {
     p.style.width = s.w + 'px';
     p.style.left = (540 - s.w / 2) + 'px';
     p.style.top = (900 - h / 2 - 900 * (1 - drop)) + 'px';
-    p.style.transform = `rotate(${-10 * (1 - drop)}deg)`;
+    p.style.transform = `rotate(${(s.tilt || 0) - 10 * (1 - drop)}deg)`;
     p.style.filter = 'drop-shadow(0 30px 30px rgba(0,0,0,.3))';
     const c = outBack(cl((lt - 0.38) / 0.25));
     $('chip').firstChild.textContent = s.price;
@@ -102,6 +103,7 @@ window.render = (t) => {
     img.style.width = g.w + 'px'; img.style.left = g.x + 'px';
     img.style.top = (g.y + 700 * (1 - k)) + 'px';
     img.style.opacity = cl((e - j * 0.09) / 0.1);
+    img.style.transform = `rotate(${g.tilt || 0}deg)`;
   });
   const hk = outBack(cl((e - 0.35) / 0.35));
   document.querySelector('#end .big').style.transform = `scale(${0.5 + 0.5 * hk})`;
