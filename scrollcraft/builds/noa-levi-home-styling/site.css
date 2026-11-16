@@ -167,6 +167,7 @@ textarea.fld { min-height: 88px; resize: vertical; }
 .hs-chip span { grid-area: 1 / 1; transition: opacity 300ms; }
 .hs-chip .a { opacity: 0; } .scene.is-done .hs-chip .a { opacity: 1; } .scene.is-done .hs-chip .b { opacity: 0; }
 @media (max-width: 800px) {
+  .scene { height: 100svh !important; }  /* Phone: the opening plays by itself in one screen (rules 3ac.1, Tzvi 16 Nov 2026) */
   .pin { grid-template-columns: 1fr; align-content: center; padding-top: 14px; gap: 1rem; --S: min(100vw - 2 * var(--gutter), calc(100svh - 360px)); justify-items: start; }
   .hs-copy h1 { font-size: clamp(2.2rem, 10vw, 3rem); margin: .5rem 0 .8rem; }
   .hs-copy .sub { display: none; }
@@ -340,6 +341,7 @@ section.after { padding: calc(var(--top-h) + clamp(.8rem, 3svh, 2rem)) 0 3rem; }
 /* phone opening: the words fill the space above the photo, so no empty dark band is left under it as the opening scrolls away */
 @media (max-width: 800px) {
   .pin { align-content: end; padding-top: 0; padding-bottom: 14px; }
+  .pin { --S: min(100vw - 2 * var(--gutter), calc(100svh - 440px)); }  /* the whole opening fits one screen: headline never under the header */
   .hs-copy h1 { font-size: clamp(2.4rem, 11.5vw, 3.2rem); margin: .4rem 0 .7rem; }
   .hs-copy .sub { display: block; margin: 0 0 1rem; font-size: 1rem; max-width: none; color: rgba(247, 242, 236, .9); }
 }

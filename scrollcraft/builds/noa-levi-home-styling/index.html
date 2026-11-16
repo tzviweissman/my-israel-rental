@@ -170,11 +170,23 @@
     var top = scene.offsetTop, h = scene.offsetHeight - innerHeight;
     p = h > 0 ? Math.max(0, Math.min(1, (scrollY - top) / h)) : 1; draw();
   }
-  if (reduce) { p = 1; draw(); return; }
-  var raf = 0;
-  addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(function () { raf = 0; onScroll(); }); }, { passive: true });
-  addEventListener('resize', size);
-  size(); onScroll();
+  var raf = 0, phone = matchMedia('(max-width: 800px)').matches;
+  if (reduce) { p = 1; draw(); }
+  // Phone: the opening plays by itself in one screen (rules 3ac.1, Tzvi 16 Nov 2026): p runs 0 to 1 on a clock, eased, 7 s
+  else if (phone) {
+    var t0 = Infinity;   // the clock starts once the page has loaded, so a slow phone sees the story from its start
+    if (document.readyState === 'complete') t0 = performance.now() + 600; else addEventListener('load', function () { t0 = performance.now() + 600; });
+    (function tick(now) {
+      var u = Math.max(0, Math.min(1, (now - t0) / 7000)); p = u * u * (3 - 2 * u); draw();
+      if (u < 1) requestAnimationFrame(tick);
+    })(performance.now());
+    addEventListener('resize', size);
+    size();
+  } else {
+    addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(function () { raf = 0; onScroll(); }); }, { passive: true });
+    addEventListener('resize', size);
+    size(); onScroll();
+  }
 
   // before and after: choose a room, both photos change
   var cmp = document.getElementById('cmp'), z = 2, cur = cmp.querySelector('.lay.on'), done = 0;
