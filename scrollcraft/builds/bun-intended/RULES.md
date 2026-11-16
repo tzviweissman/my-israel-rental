@@ -231,3 +231,9 @@ Note, 6 Nov 2026 (later): the Order and Prices headlines are h1 and keep the edi
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
 
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+R3ac.1 pass: 16 Nov 2026 (Tzvi: "All sites, as a rule"): on a phone the opening is one screen and plays by itself from page load, then holds its end, one swipe from the next section; a laptop still follows the scroll; check-phone-opening passes
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->

@@ -332,7 +332,7 @@ if (go) location.replace(go);
       var live = p < T0 + 5 * STEP + DUR + .002;
       if (live) { cv.style.visibility = 'visible'; draw(p, rot * Math.PI / 180, m); } else if (cv.style.visibility !== 'hidden') { cv.style.visibility = 'hidden'; }
     }
-    function again() { geom(); measure(); cur = targetP(); update(cur); }
+    function again() { geom(); measure(); cur = (phoneMq && phoneMq.matches && !reduce) ? cur : targetP(); update(cur); }
     // the shown progress glides after the scroll (time-based easing), so a wheel notch never jumps
     var tgt = 0, run = false, lt = 0;
     function tick(now) {
@@ -342,8 +342,15 @@ if (go) location.replace(go);
       update(cur);
       if (cur !== tgt) requestAnimationFrame(tick); else run = false;
     }
-    addEventListener('scroll', function () { tgt = targetP(); if (reduce) { cur = tgt; update(cur); return; } if (!run) { run = true; lt = performance.now(); requestAnimationFrame(tick); } }, { passive: true });
+    addEventListener('scroll', function () { if (phoneMq.matches && !reduce) return; tgt = targetP(); if (reduce) { cur = tgt; update(cur); return; } if (!run) { run = true; lt = performance.now(); requestAnimationFrame(tick); } }, { passive: true });
     addEventListener('resize', function () { build(); again(); });
+    // Phone: the opening plays by itself in one screen (rules 3ac.1, Tzvi 16 Nov 2026): p runs on a 6 s clock, then holds
+    var phoneMq = matchMedia('(max-width: 860px)'), autoT0 = performance.now() + 400, autoDone = false;
+    function auto(now) {
+      var p = clamp((now - autoT0) / 6000); cur = tgt = p; update(p);
+      if (p < 1) requestAnimationFrame(auto); else autoDone = true;
+    }
+    if (phoneMq.matches && !reduce) requestAnimationFrame(auto);
     var go = function () { build(); again(); };
     if (document.fonts && document.fonts.load) document.fonts.load('700 40px "Cormorant Garamond"').then(go, go);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
