@@ -79,6 +79,17 @@ const partly = {
 ok('rows without a price are skipped', gigPriceParts(partly).text === '$120', gigPriceParts(partly).text);
 ok('priceRows returns only priced rows', priceRows(partly).length === 1);
 
+// ---- add-ons are not the "from" price (Burnt Meatboards, 16 Nov 2026: "from $5", a bottle of Coke) ----
+const boards = {
+  gig_type: 'store',
+  tiers: [],
+  products: [{ name: 'Coke', price: 5, currency: 'USD', group: 'Add-ons' }, { name: 'Taster board', price: 49, currency: 'USD' },
+    { name: 'Wine', price: 35, currency: 'USD', group: 'Drinks' }],
+};
+ok('a shop is "from" its cheapest main product', gigPriceParts(boards).text === '$49', gigPriceParts(boards).text);
+const onlyExtras = { gig_type: 'store', tiers: [], products: [{ name: 'Coke', price: 5, currency: 'USD', group: 'Extras' }] };
+ok('a shop of only add-ons still has a price', gigPriceParts(onlyExtras).text === '$5', gigPriceParts(onlyExtras).text);
+
 // ---- cheapest first, quotes last (site audit 24 Sep: untested) ----
 const offers = [{ n: 'quote', p: null }, { n: 'big', p: 300 }, { n: 'zero', p: 0 }, { n: 'small', p: 45 }, { n: 'mid', p: 120 }];
 const order = cheapestFirst(offers, (x) => x.p).map((x) => x.n).join(',');

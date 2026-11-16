@@ -603,9 +603,12 @@ async def create_business(payload: BusinessIn, user=Depends(verify_token)):
     if payload.logo_url:
         doc["logo_url"] = payload.logo_url
     # Read from their website at sign-up (12 Nov 2026); the owner checks them on the form first.
-    for key in ("hours", "address", "cover_url"):
+    for key in ("hours", "address", "cover_url", "delivery_note"):
         if (getattr(payload, key, None) or "").strip():
             doc[key] = getattr(payload, key).strip()
+    # The site's Kashrus page names who supervises it (16 Nov 2026).
+    if payload.kosher_certification:
+        doc["kosher_certification"] = payload.kosher_certification.model_dump()
     try:
         await db.businesses.insert_one(doc)
     except DuplicateKeyError:

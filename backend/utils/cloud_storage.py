@@ -9,6 +9,7 @@ preview envs), we fall back to the legacy local-disk path so dev still works.
 from __future__ import annotations
 
 import asyncio
+import logging
 import io
 import os
 import urllib.request
@@ -24,6 +25,7 @@ _API_KEY = os.environ.get("CLOUDINARY_API_KEY", "").strip()
 _API_SECRET = os.environ.get("CLOUDINARY_API_SECRET", "").strip()
 
 CLOUDINARY_ENABLED = bool(_CLOUD_NAME and _API_KEY and _API_SECRET)
+logger = logging.getLogger(__name__)
 
 if CLOUDINARY_ENABLED:
     cloudinary.config(
@@ -123,32 +125,93 @@ async def mirror_url_to_cloudinary(url: str, *, is_video: bool = False, folder: 
     """
     if not CLOUDINARY_ENABLED or not url:
         return None
+
+    def _send(src: str | bytes) -> dict[str, Any]:
+        res = cloudinary.uploader.upload(
+            src,
+            resource_type=_resource_type(is_video),
+            folder=folder,
+            public_id=uuid.uuid4().hex,
+            overwrite=False,
+            use_filename=False,
+            unique_filename=False,
+        )
+        secure_url = res.get("secure_url", "")
+        return {
+            "url": _with_auto_transforms(secure_url, is_video),
+            "public_id": res.get("public_id"),
+            "bytes": res.get("bytes", 0),
+            "etag": res.get("etag") or file_md5(secure_url),
+            "format": res.get("format"),
+            "resource_type": res.get("resource_type"),
+        }
+
     def _do_upload() -> dict[str, Any] | None:
+        # Errors are logged and None returned, so one broken image URL
+        # never kills a whole bulk import. They used to be swallowed
+        # silently, which hid every photo Cloudinary refused.
         try:
-            res = cloudinary.uploader.upload(
-                url,
-                resource_type=_resource_type(is_video),
-                folder=folder,
-                public_id=uuid.uuid4().hex,
-                overwrite=False,
-                use_filename=False,
-                unique_filename=False,
-            )
-            secure_url = res.get("secure_url", "")
-            return {
-                "url": _with_auto_transforms(secure_url, is_video),
-                "public_id": res.get("public_id"),
-                "bytes": res.get("bytes", 0),
-                "etag": res.get("etag") or file_md5(secure_url),
-                "format": res.get("format"),
-                "resource_type": res.get("resource_type"),
-            }
-        except Exception:  # noqa: BLE001
-            # Swallow Cloudinary errors and let the caller record the URL
-            # as failed — we don't want one broken image URL to kill the
-            # whole bulk import.
+            return _send(url)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("[mirror] %s refused: %s", url[:160], str(exc)[:200])
+        if is_video:
+            return None
+        # Usually too big for Cloudinary to take (a 17 MB 4974x3247 PNG,
+        # Burnt Meatboards, 16 Nov 2026): shrink it here and send the bytes.
+        try:
+            small = _shrunk_picture(url)
+            return _send(small) if small else None
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("[mirror] %s not copied after shrinking: %s", url[:160], str(exc)[:200])
             return None
     return await asyncio.to_thread(_do_upload)
+
+
+_PICTURE_BYTES = 60_000_000
+LONG_SIDE = 2500
+
+
+def _shrunk_picture(url: str) -> bytes | None:
+    """The picture at `url`, downloaded and saved as a JPEG whose long side
+    is at most LONG_SIDE pixels. Every hop is checked to be a public host:
+    the address can come from someone else's website. None when it cannot
+    be fetched."""
+    import httpx
+
+    from utils.helpers import _is_public_ical_url
+    with httpx.Client(timeout=30, follow_redirects=False) as http:
+        for _ in range(4):
+            if not _is_public_ical_url(url):
+                return None
+            with http.stream("GET", url) as r:
+                if r.is_redirect and r.headers.get("location"):
+                    url = str(r.url.join(r.headers["location"]))
+                    continue
+                if r.status_code != 200:
+                    return None
+                body = bytearray()
+                for chunk in r.iter_bytes():
+                    body += chunk
+                    if len(body) > _PICTURE_BYTES:
+                        return None
+                return shrink_picture(bytes(body))
+    return None
+
+
+def shrink_picture(content: bytes) -> bytes:
+    """Picture bytes as a JPEG no longer than LONG_SIDE on its long side,
+    transparency on white (a cut-out product would otherwise go black)."""
+    from PIL import Image
+    img = Image.open(io.BytesIO(content))
+    img.thumbnail((LONG_SIDE, LONG_SIDE))
+    if img.mode in ("RGBA", "LA", "P"):
+        img = img.convert("RGBA")
+        ground = Image.new("RGB", img.size, "white")
+        ground.paste(img, mask=img.getchannel("A"))
+        img = ground
+    out = io.BytesIO()
+    img.convert("RGB").save(out, "JPEG", quality=85)
+    return out.getvalue()
 
 
 def delete_from_cloudinary(public_id: str, *, is_video: bool = False) -> bool:

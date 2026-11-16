@@ -40,6 +40,7 @@ from typing import Any, List, Optional
 from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Request, UploadFile
 
 from routes.deps import ANTHROPIC_API_KEY, logger, verify_token
+from routes.marketplace.shared import ADD_ON_GROUP
 from utils.rate_limit import check_rate
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
@@ -229,7 +230,10 @@ does not say):
   subcategory    ONE kind listed under that category, or "" when none fits.
   description    2-4 sentences in the advert's language, using only what the
                  advert says. No marketing of your own.
-  area           the city it serves, in English (e.g. "Jerusalem").
+  area           the city in Israel it serves, in English (e.g. "Jerusalem").
+                 Never a place outside Israel, such as an owner's address
+                 abroad; when it only lists the cities it delivers to, the
+                 first of them.
   whatsapp       the phone or WhatsApp number exactly as written.
   contact_email  an email address if one is given.
   hours          the opening hours exactly as stated, as one short line in the
@@ -243,7 +247,19 @@ does not say):
                  unless the advert describes the item, "duration_minutes":
                  number or null (appointments only)}}. A price you cannot read
                  is null. Skip opening hours, addresses and delivery terms.
-  logo_box       only when there is a picture and the business's own logo
+  faqs           array, at most 20, of the questions and answers the advert
+                 itself gives (an FAQ page): {{"q": string, "a": string}},
+                 each exactly as written. [] when there are none.
+  delivery_note  <= 300 chars, what it says about delivery in its own words:
+                 which days, the order cut-off, where to and the fee for each
+                 place. "" when it does not say.
+  delivery_areas array of the places in Israel it delivers to, as listed:
+                 {{"city": the city in English, "fee": number or null}}.
+                 [] when not given.
+  kosher         who certifies or supervises its kashrut, as written ("Rabbi
+                 Dershowitz", "Badatz Eida Chareidis"); "" when no one is
+                 named. Never the word "kosher" alone.
+  logo_box      only when there is a picture and the business's own logo
                  (its mark or its name set as a logo) is on it: where, as
                  [left, top, right, bottom], each a fraction of the picture's
                  width or height from 0 to 1, drawn around the whole logo.
@@ -340,7 +356,10 @@ async def _read_ad(text: str, images: list, user: dict, photos: Optional[list[st
         _assign_photos(items, [src.get("photos") for src in srcs], photos)
     gig_type = s("gig_type", 20)
     # The name already has its own box; a title that repeats it says nothing more.
-    title, name = re.sub(r"\s*[–—]\s*", ", ", s("title", 70)), s("business_name", 80)
+    # Over 70 characters it ends at the last whole word ("delivered acros", 16 Nov 2026).
+    title = s("title", 71)
+    title = title.rsplit(" ", 1)[0].rstrip(" ,") if len(title) > 70 else title
+    title, name = re.sub(r"\s*[–—]\s*", ", ", title), s("business_name", 80)
     if name and title.lower().startswith(name.lower()) and len(title) > len(name) + 3:
         rest = title[len(name):].lstrip(" ,:-|")
         title = rest[:1].upper() + rest[1:]
@@ -358,6 +377,12 @@ async def _read_ad(text: str, images: list, user: dict, photos: Optional[list[st
         "hours": s("hours", 200),
         "address": s("address", 200),
         "items": items,
+        # From a website's own pages (16 Nov 2026, Burnt Meatboards): its FAQ, delivery terms and kashrut.
+        "faqs": _faqs(data.get("faqs")),
+        # No long dashes in our copy; between two times or prices one means "to" ("1:00 to 3:00 pm").
+        "delivery_note": re.sub(r"\s*[–—]\s*", ", ", re.sub(r"(\d)\s*[–—]\s*(\d)", r"\1 to \2", s("delivery_note", 300))),
+        "delivery_areas": _delivery_areas(data.get("delivery_areas")),
+        "kosher": s("kosher", 120) if s("kosher", 120).lower() not in ("kosher", "כשר") else "",
     }
     # Where the logo is on the flyer, so the page can cut it out for the logo spot (Tzvi, 7 Nov 2026).
     box = data.get("logo_box") if images else None
@@ -369,6 +394,32 @@ async def _read_ad(text: str, images: list, user: dict, photos: Optional[list[st
         box = None
     out["logo_box"] = box
     logger.info("[business-extract] user=%s items=%d image=%s logo=%s", user["user_id"], len(items), bool(images), bool(box))
+    return out
+
+
+def _faqs(raw: Any) -> list[dict[str, str]]:
+    """Question and answer pairs, both halves written, as the listing stores them ({q, a})."""
+    out = []
+    for f in (raw if isinstance(raw, list) else [])[:20]:
+        if isinstance(f, dict):
+            q, a = str(f.get("q") or "").strip()[:200], str(f.get("a") or "").strip()[:1000]
+            # The same question on two pages (the FAQ and the home page) is asked once.
+            if q and a and q.lower() not in {x["q"].lower() for x in out}:
+                out.append({"q": q, "a": a})
+    return out
+
+
+def _delivery_areas(raw: Any) -> list[dict[str, Any]]:
+    out = []
+    for d in (raw if isinstance(raw, list) else [])[:30]:
+        city = str((d or {}).get("city") or "").strip()[:60] if isinstance(d, dict) else ""
+        if not city:
+            continue
+        try:
+            fee = float(d.get("fee")) if d.get("fee") not in (None, "") else None
+        except (TypeError, ValueError):
+            fee = None
+        out.append({"city": city, "fee": fee if fee is not None and 0 <= fee <= 10_000 else None})
     return out
 
 
@@ -797,9 +848,16 @@ async def _fetch_json(url: str) -> Any:
         return None
 
 
-async def _shop_catalog(base: str) -> list[dict[str, Any]]:
-    """The whole product list a Shopify or WooCommerce shop publishes, with each product's own photos: exact,
-    so nothing has to be matched. [] for any other site."""
+# A shop's section for things bought beside the main product (drinks, a balloon) is kept as the product's group,
+# so the listing's "from" price is its cheapest main product (shared.ADD_ON_GROUP).
+SHOP_PAGES = 8
+PAGE_TEXT = 2500
+
+
+async def _shop_catalog(base: str) -> dict[str, Any]:
+    """What a Shopify or WooCommerce shop publishes about itself, exact, so nothing has to be matched:
+    {"products": the whole list, each with its own photos and its add-on group; "meta": the shop's name and
+    where it is registered (Shopify); "pages": its own pages as (title, words)}. Empty for any other site."""
     from urllib.parse import urlparse
     root = f"{urlparse(base).scheme}://{urlparse(base).netloc}"
     rows: list[dict[str, Any]] = []
@@ -808,13 +866,17 @@ async def _shop_catalog(base: str) -> list[dict[str, Any]]:
         # The shop's own currency (meta.json), not cart.js: that one follows the visitor's country, so the
         # same shop read as USD once and ILS the next time (Burnt Meatboards, 15 Nov 2026).
         meta = await _fetch_json(root + "/meta.json")
-        cur = str(meta.get("currency") or "ILS").upper() if isinstance(meta, dict) else "ILS"
+        meta = meta if isinstance(meta, dict) else {}
+        cur = str(meta.get("currency") or "ILS").upper()
+        extras = await _shopify_add_ons(root)
         for p in data["products"]:
             v = (p.get("variants") or [{}])[0]
+            kind = str(p.get("product_type") or "")
             rows.append({"name": p.get("title"), "price": v.get("price"), "currency": cur,
                          "description": p.get("body_html") or "",
+                         "group": kind if ADD_ON_GROUP.search(kind) else extras.get(p.get("id")),
                          "photos": [i.get("src") for i in p.get("images") or [] if i.get("src")]})
-        return _clean_catalog(rows, base)
+        return {"products": _clean_catalog(rows, base), "meta": meta, "pages": await _shopify_pages(root)}
     data = await _fetch_json(root + "/wp-json/wc/store/v1/products?per_page=100")
     if isinstance(data, list):
         for p in data:
@@ -823,10 +885,73 @@ async def _shop_catalog(base: str) -> list[dict[str, Any]]:
                 price = int(pr.get("price")) / (10 ** int(pr.get("currency_minor_unit") or 0))
             except (TypeError, ValueError):
                 price = None
+            cats = [str(c.get("name") or "") for c in p.get("categories") or [] if isinstance(c, dict)]
             rows.append({"name": p.get("name"), "price": price, "currency": pr.get("currency_code") or "ILS",
                          "description": p.get("short_description") or p.get("description") or "",
+                         "group": next((c for c in cats if ADD_ON_GROUP.search(c)), None),
                          "photos": [i.get("src") for i in p.get("images") or [] if i.get("src")]})
-    return _clean_catalog(rows, base)
+        pages = await _fetch_json(root + "/wp-json/wp/v2/pages?per_page=20")
+        return {"products": _clean_catalog(rows, base), "meta": {}, "pages": [
+            (_plain((p.get("title") or {}).get("rendered"), 80), _plain((p.get("content") or {}).get("rendered"), PAGE_TEXT))
+            for p in (pages if isinstance(pages, list) else [])[:SHOP_PAGES] if isinstance(p, dict)]}
+    return {"products": [], "meta": {}, "pages": []}
+
+
+def _plain(html: Any, limit: int) -> str:
+    """HTML as plain words."""
+    import html as html_mod
+    text = re.sub(r"(?is)<(script|style|noscript|svg)[^>]*>.*?</\1>", " ", str(html or ""))
+    return " ".join(html_mod.unescape(re.sub(r"(?s)<[^>]+>", " ", text)).split())[:limit]
+
+
+async def _shopify_add_ons(root: str) -> dict[Any, str]:
+    """Product id -> the shop's own add-ons section ("Add-ons", "Drinks") for every product in one. Shopify's
+    product_type is often blank (it was on all 38 of Burnt Meatboards'), but its sections are not."""
+    cols = await _fetch_json(root + "/collections.json?limit=250")
+    out: dict[Any, str] = {}
+    for c in [c for c in (cols if isinstance(cols, dict) else {}).get("collections") or [] if isinstance(c, dict)
+              and ADD_ON_GROUP.search(f"{c.get('title') or ''} {c.get('handle') or ''}")][:3]:
+        got = await _fetch_json(f"{root}/collections/{c.get('handle')}/products.json?limit=250")
+        for p in (got if isinstance(got, dict) else {}).get("products") or []:
+            out.setdefault(p.get("id"), str(c.get("title") or "Add-ons")[:60])
+    return out
+
+
+async def _shopify_pages(root: str) -> list[tuple[str, str]]:
+    """The shop's own pages (About, Shipping and Delivery, Kashrus, FAQ, Contact) as (title, words). A page built
+    from the theme's blocks (an FAQ accordion, a contact form) has an empty body in pages.json, so that one is read
+    from the page itself, its <main> only: the menu and footer are on every page and say nothing new."""
+    data = await _fetch_json(root + "/pages.json")
+    out: list[tuple[str, str]] = []
+    for p in ((data if isinstance(data, dict) else {}).get("pages") or [])[:SHOP_PAGES]:
+        if not isinstance(p, dict) or not re.fullmatch(r"[\w-]{1,120}", str(p.get("handle") or "")):
+            continue
+        words = _plain(p.get("body_html"), PAGE_TEXT)
+        if len(words) < 40:
+            try:
+                page, _ = await _fetch(f"{root}/pages/{p['handle']}")
+            except Exception:  # noqa: BLE001 - one slow page must not lose the rest of the site
+                continue
+            main = re.search(r"(?is)<main\b.*?</main>", page)
+            words = _plain(main.group(0) if main else "", PAGE_TEXT)
+        if len(words) >= 40:
+            out.append((_plain(p.get("title"), 80), words))
+    return out
+
+
+def _shop_facts(fields: dict, meta: dict) -> None:
+    """What the shop's own settings say, over the reader's guess. Its name, not the person's: a business signed up
+    from its site was named "Moshe Rube" after its owner (16 Nov 2026). And a shop registered abroad that ships to
+    Israel (Burnt Meatboards: Lakewood, New Jersey) serves the places on its delivery page, not its billing city."""
+    name = str(meta.get("name") or "").strip()[:80]
+    if name:
+        fields["business_name"] = name
+    country = str(meta.get("country") or "").upper()
+    if country and country != "IL":
+        abroad = {str(meta.get(k) or "").strip().lower() for k in ("city", "province")} - {""}
+        area = str(fields.get("area") or "").strip().lower()
+        if not area or area in abroad or any(a in area for a in abroad):
+            fields["area"] = next((d["city"] for d in fields.get("delivery_areas") or []), "")
 
 
 def _clean_catalog(rows: list[dict[str, Any]], base: str) -> list[dict[str, Any]]:
@@ -842,6 +967,7 @@ def _clean_catalog(rows: list[dict[str, Any]], base: str) -> list[dict[str, Any]
         # "WhatsApp_Image_...jpg" as a WhatsApp button and dropped five of Burnt Meatboards' photos.
         row["photos"] = [x for x in r["photos"] if isinstance(x, str) and x.startswith(("https://", "http://"))][:PHOTOS_PER_ITEM]
         row["duration_minutes"] = None
+        row["group"] = str(r.get("group") or "").strip()[:60] or None
     return out
 
 
@@ -885,6 +1011,7 @@ async def read_socials(request: Request, payload: dict = Body(...), user=Depends
     labelled: list[tuple[str, str]] = []  # every photo with what says whose it is, for matching to products
     declared: list[dict[str, Any]] = []  # products the pages declare, with their own photos
     catalog: list[dict[str, Any]] = []  # a shop's whole published product list
+    shop: dict[str, Any] = {}  # the shop's own settings (its name, where it is registered)
 
     def learn(page: str, base: str) -> None:
         take(_pictures(page, base))
@@ -907,9 +1034,17 @@ async def read_socials(request: Request, payload: dict = Body(...), user=Depends
         if len(words) > 40:
             texts.append(f"From their {label} ({end}):\n{words}")
         learn(page, end)
-        if not catalog:
-            catalog.extend(await _shop_catalog(end))
-        for sub in _same_site_links(page, end):
+        own_pages: list = []
+        if not catalog and not shop:
+            found = await _shop_catalog(end)
+            catalog.extend(found["products"])
+            shop.update(found["meta"])
+            own_pages = found["pages"]
+            # Ahead of the home page, inside the reader's budget: a shop's home page is mostly its menu and
+            # product cards, which the shop's own list already gives exactly.
+            texts[before:before] = [f"From their {label}, its page \"{t}\":\n{w}" for t, w in own_pages]
+        # A shop's own pages are the ones worth reading; the guessed ones would be its product sections.
+        for sub in ([] if own_pages else _same_site_links(page, end)):
             try:
                 sp, send = await _fetch(sub)
             except Exception:  # noqa: BLE001 - one page that fails must not stop the rest
@@ -971,6 +1106,9 @@ async def read_socials(request: Request, payload: dict = Body(...), user=Depends
         m = re.match(r"\s*([^\n(•|]{2,80}?)\s*(?:\(@|•|\||\n)", texts[0].split(":\n", 1)[-1])
         name = m.group(1).strip() if m else ""
         fields = {"business_name": name} if name and name.lower() not in ("instagram", "facebook", "tiktok") else None
+    if shop:
+        fields = fields or {}
+        _shop_facts(fields, shop)
     if fields is not None:
         await _product_photos(fields, catalog, declared)
     return {"links": links, "read": read, "fields": fields, "pictures": pictures}
@@ -984,7 +1122,10 @@ async def _product_photos(fields: dict, catalog: list[dict[str, Any]], declared:
 
     from utils.cloud_storage import mirror_url_to_cloudinary
     items = fields.get("items") or []
-    if catalog and fields.get("gig_type") == "store":
+    if catalog:
+        # A site that publishes a product list sells products, whatever else it does: Burnt Meatboards also
+        # caters, the reader called it catering, and its 38 products were replaced by 11 guessed rows (16 Nov 2026).
+        fields["gig_type"] = "store"
         items = fields["items"] = catalog[:SHOP_PRODUCTS]
     for row in items:
         exact = next((d for d in declared if d["photos"] and _same_name(d["name"], row["name"])), None)

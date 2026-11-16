@@ -53,3 +53,166 @@ def test_each_product_gets_only_its_own_photos():
     assert _ld_products(page, "https://s.com/p") == [{"name": "Family Board", "photos": ["https://s.com/img/f1.jpg", "https://cdn.x.com/f2.jpg"]}]
     lab = _labelled_photos('<img src="/i/c.jpg" alt="Classic"><h3>Classic Board</h3>180<img src="/logo.png" class="logo">', "https://s.com/")
     assert len(lab) == 1 and "Classic Board 180" in lab[0][1]
+
+
+# ---- A shop's own settings, pages and sections (Burnt Meatboards, set up by hand on 16 Nov 2026) ----
+
+SHOP = "https://shop.example.com"
+SHOP_JSON = {
+    f"{SHOP}/products.json?limit=250": {"products": [
+        {"id": 1, "title": "Taster Meat Board", "product_type": "", "body_html": "<p>Serves 2</p>",
+         "variants": [{"price": "75.00"}], "images": [{"src": "https://cdn.example.com/t1.jpg"}]},
+        {"id": 2, "title": "Glass bottle of coke", "product_type": "", "body_html": "",
+         "variants": [{"price": "5.00"}], "images": [{"src": "https://cdn.example.com/coke.jpg"}]},
+        {"id": 3, "title": "Wine", "product_type": "Drinks", "body_html": "", "variants": [{"price": "35"}], "images": []},
+    ]},
+    f"{SHOP}/meta.json": {"name": "Burnt Meatboards", "city": "Lakewood", "province": "New Jersey", "country": "US",
+                          "currency": "USD", "ships_to_countries": ["IL"]},
+    f"{SHOP}/collections.json?limit=250": {"collections": [
+        {"handle": "meatboards", "title": "Meatboards"}, {"handle": "alcohol", "title": "Add-ons"}]},
+    f"{SHOP}/collections/alcohol/products.json?limit=250": {"products": [{"id": 2}]},
+    f"{SHOP}/pages.json": {"pages": [
+        {"handle": "about-us", "title": "About Us", "body_html": "<p>" + "We craft high-quality meat boards. " * 3 + "</p>"},
+        {"handle": "faq", "title": "FAQ", "body_html": ""},
+        {"handle": "kashrus", "title": "Kashrus", "body_html": None},
+        {"handle": "../admin", "title": "Not a page", "body_html": None},
+    ]},
+}
+RENDERED = {
+    f"{SHOP}/pages/faq": "<nav>Shop Boards Kashrus About Us</nav><main><h1>FAQ</h1><details><summary>Do you offer free "
+                         "delivery?</summary>Yes, delivery is free within Jerusalem.</details></main><footer>2026</footer>",
+    f"{SHOP}/pages/kashrus": "<main><p>Our entire operation is under the strict supervision of Rabbi Dershowitz.</p></main>",
+}
+
+
+def _read_shop():
+    import asyncio
+    from unittest.mock import patch
+
+    import routes.marketplace.product_extract as pe
+
+    async def fake_json(url):
+        return SHOP_JSON.get(url)
+
+    async def fake_page(url):
+        return RENDERED.get(url, ""), url
+    with patch.object(pe, "_fetch_json", fake_json), patch.object(pe, "_fetch", fake_page):
+        return asyncio.run(pe._shop_catalog(SHOP + "/"))
+
+
+def test_shop_products_keep_their_add_on_section():
+    """Shopify's product_type was blank on all 38 products; the "Add-ons" section is where the Coke was."""
+    shop = _read_shop()
+    rows = {r["name"]: r for r in shop["products"]}
+    assert rows["Glass bottle of coke"]["group"] == "Add-ons"
+    assert rows["Wine"]["group"] == "Drinks"
+    assert rows["Taster Meat Board"]["group"] is None
+    assert rows["Taster Meat Board"]["price"] == 75 and rows["Taster Meat Board"]["currency"] == "USD"
+    assert rows["Taster Meat Board"]["photos"] == ["https://cdn.example.com/t1.jpg"]
+
+
+def test_shop_pages_fall_back_to_the_page_itself():
+    """FAQ accordions and the Kashrus page have no body in pages.json: read the page's <main>, not its menu."""
+    pages = dict(_read_shop()["pages"])
+    assert set(pages) == {"About Us", "FAQ", "Kashrus"}
+    assert "free within Jerusalem" in pages["FAQ"] and "Shop Boards" not in pages["FAQ"] and "2026" not in pages["FAQ"]
+    assert "Rabbi Dershowitz" in pages["Kashrus"]
+
+
+def test_shop_name_and_place_over_the_guess():
+    """Named after the shop, not its owner; a billing city abroad is not where it serves."""
+    from routes.marketplace.product_extract import _shop_facts
+    meta = _read_shop()["meta"]
+    fields = {"business_name": "Moshe Rube", "area": "Lakewood, NJ",
+              "delivery_areas": [{"city": "Jerusalem", "fee": 15.0}, {"city": "Modi'in", "fee": 30.0}]}
+    _shop_facts(fields, meta)
+    assert fields["business_name"] == "Burnt Meatboards" and fields["area"] == "Jerusalem"
+    kept = {"area": "Beit Shemesh", "delivery_areas": [{"city": "Jerusalem", "fee": None}]}
+    _shop_facts(kept, meta)
+    assert kept["area"] == "Beit Shemesh"
+    home = {"area": "Haifa"}
+    _shop_facts(home, {"name": "Noa", "country": "IL", "city": "Haifa"})
+    assert home == {"area": "Haifa", "business_name": "Noa"}
+
+
+def test_faqs_and_delivery_areas_are_checked():
+    from routes.marketplace.product_extract import _delivery_areas, _faqs
+    assert _faqs([{"q": "Returns?", "a": "No."}, {"q": "Half", "a": ""}, "junk", {"q": " ", "a": "x"}]) == [
+        {"q": "Returns?", "a": "No."}]
+    assert _faqs(None) == []
+    assert len(_faqs([{"q": "Weekly discount?", "a": "Yes."}, {"q": "weekly discount?", "a": "Absolutely!"}])) == 1
+    assert _delivery_areas([{"city": "Jerusalem", "fee": "15"}, {"city": "Tel Aviv", "fee": "ask"}, {"fee": 3},
+                            {"city": "Holon", "fee": -1}]) == [
+        {"city": "Jerusalem", "fee": 15.0}, {"city": "Tel Aviv", "fee": None}, {"city": "Holon", "fee": None}]
+
+
+def test_from_price_is_a_main_product():
+    """The card read "from $5", a bottle of Coke; it is "from" the cheapest board."""
+    from routes.marketplace.shared import _cheapest_tier_price
+    gig = {"gig_type": "store", "products": [
+        {"name": "Coke", "price": 5, "currency": "ILS", "group": "Add-ons"},
+        {"name": "Wine", "price": 35, "currency": "ILS", "group": "Drinks"},
+        {"name": "Board", "price": 75, "currency": "ILS", "group": "Meatboards"}]}
+    assert _cheapest_tier_price(gig) == 75
+    assert _cheapest_tier_price({"gig_type": "store", "products": gig["products"][:1]}) == 5
+
+
+def test_a_picture_too_big_for_cloudinary_is_shrunk_and_sent():
+    """A 17 MB 4974x3247 PNG was refused and the photo silently lost."""
+    import asyncio
+    import io
+    from unittest.mock import patch
+
+    from PIL import Image
+
+    import utils.cloud_storage as cs
+    png = io.BytesIO()
+    Image.new("RGBA", (4974, 3247), (200, 80, 20, 0)).save(png, "PNG")
+    small = cs.shrink_picture(png.getvalue())
+    img = Image.open(io.BytesIO(small))
+    assert img.format == "JPEG" and max(img.size) == 2500 and img.getpixel((5, 5)) == (255, 255, 255)
+
+    sent = []
+
+    def upload(src, **_):
+        sent.append(src)
+        if isinstance(src, str):
+            raise RuntimeError("File size too large. Got 17000000. Maximum is 10485760.")
+        return {"secure_url": "https://res.cloudinary.com/x/image/upload/v1/a.jpg", "public_id": "a", "etag": "e"}
+    with patch.object(cs, "CLOUDINARY_ENABLED", True), patch.object(cs.cloudinary.uploader, "upload", upload), \
+            patch.object(cs, "_shrunk_picture", lambda url: b"jpeg-bytes"):
+        res = asyncio.run(cs.mirror_url_to_cloudinary("https://cdn.example.com/huge.png"))
+    assert sent == ["https://cdn.example.com/huge.png", b"jpeg-bytes"]
+    assert res["url"].endswith("/a.jpg")
+
+
+def test_what_the_reader_returns_is_tidied():
+    """A shop that also caters is still a shop; a long title ends on a whole word; "1:00–3:00" is "1:00 to 3:00"."""
+    import asyncio
+    import json as _json
+    from unittest.mock import patch
+
+    import routes.marketplace.product_extract as pe
+    reply = _json.dumps({"gig_type": "deliverable", "business_name": "Moshe Rube",
+                         "title": "Kosher premium meat boards and charcuterie gift boards delivered across Israel",
+                         "delivery_note": "Fridays 1:00–3:00 pm — order by Wednesday", "items": []})
+
+    class Chat:
+        def __init__(self, **_):
+            pass
+
+        def with_model(self, *_):
+            return self
+
+        async def send_message(self, _):
+            return reply
+    with patch("utils.llm.LlmChat", Chat):
+        fields = asyncio.run(pe._read_ad("text", [], {"user_id": "t"}))
+    assert fields["title"] == "Kosher premium meat boards and charcuterie gift boards delivered"
+    assert fields["delivery_note"] == "Fridays 1:00 to 3:00 pm, order by Wednesday"
+
+    async def no_copy(url, **_):
+        return {"url": url}
+    with patch("utils.cloud_storage.mirror_url_to_cloudinary", no_copy):
+        asyncio.run(pe._product_photos(fields, [{"name": "Board", "price": 75, "photos": ["https://c.com/b.jpg"]}], []))
+    assert fields["gig_type"] == "store" and fields["items"][0]["images"] == ["https://c.com/b.jpg"]

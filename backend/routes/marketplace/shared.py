@@ -984,6 +984,18 @@ def _member_since_year(user: Optional[dict[str, Any]], prov: Optional[dict[str, 
 # card's "from" price and this sort key have to name the same option.
 USD_TO_ILS = 3.65
 
+# A store's section for things bought beside the main product: drinks, a balloon, a card. A listing whose cheapest
+# row was a $5 bottle of Coke read "from $5" on its card (Burnt Meatboards, 16 Nov 2026), so its "from" price is
+# its cheapest main product. The same words are in frontend/src/utils/gigPrice.js (ADD_ON_GROUP).
+ADD_ON_GROUP = re.compile(r"add.?ons?\b|extras?\b|drinks?|beverage|alcohol|wine|liquor|spirits|beer|soda|"
+                          r"תוספ|משקא|שתי|יינות|אלכוהול", re.I)
+
+
+def main_rows(rows: list[Any]) -> list[Any]:
+    """The rows that are not add-ons, or all of them when every one is."""
+    main = [r for r in rows if not (isinstance(r, dict) and ADD_ON_GROUP.search(str(r.get("group") or "")))]
+    return main or rows
+
 
 def _cheapest_tier_price(gig: dict[str, Any]) -> Optional[float]:
     """Lowest price on a gig IN SHEKELS, coerced to a float. Used by the
@@ -998,7 +1010,7 @@ def _cheapest_tier_price(gig: dict[str, Any]) -> Optional[float]:
     (2026-09-04 audit, finding 2.)"""
     rows: list[dict[str, Any]] = []
     if (gig.get("gig_type") or "deliverable") == "store":
-        rows = gig.get("products") or []
+        rows = main_rows(gig.get("products") or [])
     else:
         rows = gig.get("tiers") or []
     prices: list[float] = []

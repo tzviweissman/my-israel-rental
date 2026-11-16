@@ -62,8 +62,15 @@ export const priceRows = (gig) => {
  * cheaper option, and sorting on the bare figure would name the dollar
  * item and then print its price with a shekel sign.
  */
+// A shop's section for things bought beside the main product: drinks, a balloon, a card. A shop whose
+// cheapest row was a $5 bottle of Coke read "from $5" (Burnt Meatboards, 16 Nov 2026), so the "from" price is
+// the cheapest main product. Same words as ADD_ON_GROUP in backend/routes/marketplace/shared.py.
+export const ADD_ON_GROUP = /add.?ons?\b|extras?\b|drinks?|beverage|alcohol|wine|liquor|spirits|beer|soda|תוספ|משקא|שתי|יינות|אלכוהול/i;
+
 export const cheapestRow = (gig, rate = FX_USD_TO_ILS) => {
-  const rows = priceRows(gig);
+  const priced = priceRows(gig);
+  const main = priced.filter((r) => !ADD_ON_GROUP.test(String(r.group || '')));
+  const rows = main.length ? main : priced;
   if (!rows.length) return null;
   const inIls = (r) => (r.currency === 'USD' ? Number(r.price) * rate : Number(r.price));
   return rows.reduce((best, r) => (inIls(r) < inIls(best) ? r : best), rows[0]);

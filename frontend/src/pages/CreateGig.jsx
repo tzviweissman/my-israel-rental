@@ -626,12 +626,19 @@ const CreateGig = () => {
         // For the business, not the listing: shown on screen 1 to check, saved with the business.
         biz_hours: (f.biz_hours || '').trim() ? f.biz_hours : (data.hours || ''),
         biz_address: (f.biz_address || '').trim() ? f.biz_address : (data.address || ''),
+        // From the site's own pages (16 Nov 2026): its FAQ, delivery terms, kashrut and the cities it delivers to.
+        biz_delivery_note: (f.biz_delivery_note || '').trim() ? f.biz_delivery_note : (data.delivery_note || ''),
+        biz_kosher: (f.biz_kosher || '').trim() ? f.biz_kosher : (data.kosher || ''),
+        biz_areas: (data.delivery_areas || []).length ? data.delivery_areas.map((d) => d.city) : (f.biz_areas || []),
+        faqs: cleanFaqs(f.faqs).length ? f.faqs : (data.faqs || []).map((x, i) => ({ q: x.q, a: x.a, _k: `read-${i}` })),
       };
       if (type === 'store') {
         next.tiers = [];
         next.products = items.length
           // Each product's own photos, all of them, as the site reader matched them (Tzvi, 15 Nov 2026).
-          ? items.map((r) => ({ ...emptyProduct(r.currency), name: r.name, price: price(r), description: r.description || '', images: r.images || [] }))
+          ? items.map((r) => ({ ...emptyProduct(r.currency), name: r.name, price: price(r), description: r.description || '', images: r.images || [],
+            // The shop's own add-ons section ("Add-ons", "Drinks"), so the card's "from" price is a main product.
+            ...(r.group ? { group: r.group } : {}) }))
           : (f.products.length ? f.products : [emptyProduct()]);
       } else {
         next.products = [];
@@ -967,6 +974,7 @@ const CreateGig = () => {
           in_stock: !!p.in_stock,
           width_cm: sizeValue(p.width_cm),
           length_cm: sizeValue(p.length_cm),
+          group: (p.group || '').trim() || null,
         })) : [],
         weekly_availability: form.gig_type === 'appointment' ? form.weekly_availability : null,
         slot_duration_minutes: form.gig_type === 'appointment' ? form.slot_duration_minutes : null,
@@ -988,15 +996,23 @@ const CreateGig = () => {
           name, logo_url: bizLogo || null, socials: socialsOut,
           hours: (form.biz_hours || '').trim() || null, address: (form.biz_address || '').trim() || null,
           cover_url: form.biz_cover || null,
+          delivery_note: (form.biz_delivery_note || '').trim().slice(0, 300) || null,
+          kosher_certification: (form.biz_kosher || '').trim().length >= 2 ? { body: form.biz_kosher.trim().slice(0, 120) } : null,
+          // City names; the server keeps the ones it knows (normalize_service_areas).
+          areas: form.biz_areas || [],
         }, auth).catch(() => ({ data: null }));
         if (biz?.id) payload.business_id = biz.id;
       } else if (destination && ((bizLogo && !destination.logo_url) || Object.keys(socialsOut).length
-        || (form.biz_hours && !destination.hours) || (form.biz_address && !destination.address) || (form.biz_cover && !destination.cover_url))) {
+        || (form.biz_hours && !destination.hours) || (form.biz_address && !destination.address) || (form.biz_cover && !destination.cover_url)
+        || (form.biz_delivery_note && !destination.delivery_note) || (form.biz_kosher && !destination.kosher_certification))) {
         await axios.patch(`${API}/marketplace/businesses/${destination.id}`, {
           ...(bizLogo && !destination.logo_url ? { logo_url: bizLogo } : {}),
           ...((form.biz_hours || '').trim() && !destination.hours ? { hours: form.biz_hours.trim() } : {}),
           ...((form.biz_address || '').trim() && !destination.address ? { address: form.biz_address.trim() } : {}),
           ...(form.biz_cover && !destination.cover_url ? { cover_url: form.biz_cover } : {}),
+          ...((form.biz_delivery_note || '').trim() && !destination.delivery_note ? { delivery_note: form.biz_delivery_note.trim().slice(0, 300) } : {}),
+          ...((form.biz_kosher || '').trim().length >= 2 && !destination.kosher_certification
+            ? { kosher_certification: { body: form.biz_kosher.trim().slice(0, 120) } } : {}),
           ...(Object.keys(socialsOut).length ? { socials: { ...(destination.socials || {}), ...socialsOut } } : {}),
         }, auth).catch(() => {});
       }
@@ -1452,15 +1468,17 @@ const CreateGig = () => {
                 {socialsReading ? t('wizard.socialsReading', 'Reading your accounts…') : t('wizard.socialsRead', 'Fill in from these')}
               </button>
             </div>
-            {((form.biz_hours || form.biz_address) || (form.site_pictures && (form.site_pictures.logo || form.site_pictures.cover || (form.site_pictures.photos || []).length))) && (
+            {((form.biz_hours || form.biz_address || form.biz_delivery_note || form.biz_kosher) || (form.site_pictures && (form.site_pictures.logo || form.site_pictures.cover || (form.site_pictures.photos || []).length))) && (
               <div className="mt-4 pt-4 border-t border-[var(--brand-border)] space-y-3" data-testid="wizard-site-found">
                 <p className="text-sm font-semibold text-[var(--ink)]">{t('wizard.siteFound', 'Also found. Check it, change anything:')}</p>
                 {[['biz_hours', t('businessPage.hours', 'Hours'), 'Sun to Thu 9:00 to 18:00, Fri 9:00 to 13:00'],
-                  ['biz_address', t('wizard.address', 'Address'), t('wizard.addressHint', 'Street, number, city')]].map(([k, label, ph]) => (
+                  ['biz_address', t('wizard.address', 'Address'), t('wizard.addressHint', 'Street, number, city')],
+                  ['biz_delivery_note', t('wizard.deliveryNote', 'Delivery'), t('wizard.deliveryNoteHint', 'Which days, by when to order, where to and the fee'), 300],
+                  ['biz_kosher', t('wizard.kosher', 'Kashrut supervision'), t('wizard.kosherHint', 'Who certifies it, for example Badatz'), 120]].map(([k, label, ph, max = 200]) => (
                   (form[k] || '').length > 0 || form[k] === '' ? (
                     <label key={k} className="block text-xs font-semibold text-gray-700">
                       {label}
-                      <input value={form[k] || ''} onChange={(e) => set({ [k]: e.target.value })} placeholder={ph} dir="auto" maxLength={200}
+                      <input value={form[k] || ''} onChange={(e) => set({ [k]: e.target.value })} placeholder={ph} dir="auto" maxLength={max}
                         className="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm font-normal focus:outline-none focus:border-[var(--brand-primary)]"
                         data-testid={`wizard-${k}`} />
                     </label>
