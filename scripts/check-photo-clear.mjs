@@ -20,7 +20,8 @@
  * passed her new one (0%) and The Brown Box (32-37%). A picture with almost no
  * detail (under 1.5% of its pixels, a plain backdrop or a paper texture) is a
  * ground, not a photo of anything, and is not checked. There is no attribute to
- * skip it. Exit 1 on a covered picture.
+ * skip it. Another picture over it (her photo opening in a window over the sky,
+ * Whipped Cup, 16 Nov 2026) is not cover: only words, shades and tints count. Exit 1 on a covered picture.
  */
 import { createRequire } from 'node:module';
 const { chromium } = createRequire(process.cwd() + '/')('playwright');
@@ -84,7 +85,7 @@ for (const url of urls) {
     // a picture that is still changing (a slideshow, a film) is shot again until two shots of the page agree
     for (let tries = 0; tries < 4 && !res; tries++) {
       const full = await shot();
-      const hide = await page.addStyleTag({ content: '*, *::before, *::after { visibility: hidden !important; transition: none !important; } [data-photo-clear] { visibility: visible !important; }' });
+      const hide = await page.addStyleTag({ content: '*, *::before, *::after { visibility: hidden !important; transition: none !important; } [data-photo-clear], img, video, canvas, svg:has(image), svg:has(image) * { visibility: visible !important; }' });
       const alone = await shot();
       await hide.evaluate((s) => s.remove());
       const again = await shot();

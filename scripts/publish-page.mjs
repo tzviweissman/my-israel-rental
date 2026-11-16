@@ -78,10 +78,12 @@ const CHECK_ONLY = process.argv.includes('--check');
   const isNew = !live.includes(slug);
   const { spawnSync, spawn } = await import('node:child_process');
   const problems = [];
-  if (isNew) {
-    const { checkConcept } = await import('./check-concept.mjs');
+  // the commit check asks for the concept on every publish, so publishing does too: a batch once published five sites
+  // that the commit then refused (16 Nov 2026)
+  { const { checkConcept } = await import('./check-concept.mjs');
     const c = checkConcept(SRC);
-    if (c.length) problems.push(`concept not ready (new page):\n- ${c.join('\n- ')}`);
+    if (c.length) problems.push(`concept not ready${isNew ? ' (new page)' : ''}:\n- ${c.join('\n- ')}`); }
+  if (isNew) {
     const fp = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-fingerprints.mjs'), SRC], { encoding: 'utf8' });
     if (fp.status !== 0) problems.push(`too like a live page:\n${fp.stdout}${fp.stderr}`);
   }

@@ -172,7 +172,7 @@
     WIDE = W > H * 1.15; sec.classList.toggle('wide', WIDE);
     if (WIDE) { IH = Math.min(H * .9, 1213); IW = IH * 1170 / 1213; FX = W - IW - Math.max(24, W * .05); FY = (H - IH) / 2; }
     // a tall screen: her photo, whole, near the top, the words under it (the review: on a phone it filled the screen, zoomed in and cropped)
-    else { IW = Math.min(W * .9, 1170, H * .5 * 1170 / 1213); IH = IW * 1213 / 1170; FX = (W - IW) / 2; FY = Math.max(12, H * .04); }
+    else { IW = Math.min(W * .9, 1170, H * (H < 640 ? .38 : .5) * 1170 / 1213); IH = IW * 1213 / 1170; FX = (W - IW) / 2; FY = Math.max(12, H * .04); }
     img.setAttribute('width', IW); img.setAttribute('height', IH);
   }
   var clamp = function (x) { return Math.max(0, Math.min(1, x)); }, ease = function (t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
@@ -201,7 +201,12 @@
   size(); addEventListener('resize', function () { size(); frame(); });
   if (reduce) { draw(1); line.style.opacity = 1; line.style.transform = 'none'; return; }  // motion off: the question stays in the page for readers, out of sight (the end card is the whole page)
   var tick = 0;
-  function frame() { tick = 0; var r = sec.getBoundingClientRect(), span = sec.offsetHeight - innerHeight; draw(clamp(-r.top / Math.max(1, span))); }
+  // Phone: the opening plays by itself in one screen (rules 3ac.1, Tzvi 16 Nov 2026)
+  var phone = matchMedia('(max-width: 860px)').matches, autoFrom = performance.now() + 2500, AUTO = 5500;   // the question is read for 2.5 s first
+  function auto() { frame(); if (performance.now() < autoFrom + AUTO) requestAnimationFrame(auto); }
+  function frame() { tick = 0; if (phone) { draw(clamp((performance.now() - autoFrom) / AUTO)); return; } var r = sec.getBoundingClientRect(), span = sec.offsetHeight - innerHeight; draw(clamp(-r.top / Math.max(1, span))); }
+  // the clock starts once the page has loaded, so a slow phone sees the story from its start
+  if (phone) { autoFrom = Infinity; frame(); var go = function () { autoFrom = performance.now() + 2500; requestAnimationFrame(auto); }; if (document.readyState === 'complete') go(); else addEventListener('load', go); }
   // The sky film rests while the page is being scrolled and drifts again when it stops: a full-screen
   // film and the moving window together held the opening at 20-30 fps on a laptop (R3h.20, 25 Oct 2026).
   var rest = 0;
@@ -213,7 +218,7 @@
   // the puffs breathe only while the window is open on screen: the loop used to run every frame forever and kept a phone
   // busy 78% of the time while nobody scrolled (26 Oct 2026); it stops on its own and the next scroll starts it again
   var looping = false;
-  function breathing() { var r = sec.getBoundingClientRect(), q = clamp(-r.top / Math.max(1, sec.offsetHeight - innerHeight)); return r.bottom > 0 && q > .12 && q < .85; }
+  function breathing() { if (phone) return false; var r = sec.getBoundingClientRect(), q = clamp(-r.top / Math.max(1, sec.offsetHeight - innerHeight)); return r.bottom > 0 && q > .12 && q < .85; }
   function loop() { if (!breathing()) { looping = false; return; } frame(); requestAnimationFrame(loop); }
   function wake() { if (!looping && breathing()) { looping = true; requestAnimationFrame(loop); } }
   addEventListener('scroll', wake, { passive: true }); wake();

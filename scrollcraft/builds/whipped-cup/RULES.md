@@ -227,3 +227,15 @@ R3v.14 pass: From ₪40 a jar, Delivered to your door, Made in Ramat Eshkol, Jer
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
 
 <!-- 14 Nov 2026: rules looked at again after merging the shop layout onto the new order form (options from the listing); the phone bar keeps the cheapest jar price from the listing. -->
+
+R3ac.1 pass: 16 Nov 2026 (Tzvi: "All sites, as a rule"): on a phone the opening is one screen and plays by itself from page load, then holds its end, one swipe from the next section; a laptop still follows the scroll; check-phone-opening passes
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
