@@ -169,6 +169,10 @@ async def mirror_url_to_cloudinary(url: str, *, is_video: bool = False, folder: 
 
 _PICTURE_BYTES = 60_000_000
 LONG_SIDE = 2500
+# Decoding takes about 5 bytes a pixel whatever the file's size: a 0.45 MB
+# PNG of 12000x12000 held 772 MB while it shrank (audit, 16 Nov 2026), and a
+# website read copies many photos at once. Over this a picture is not copied.
+MAX_PIXELS = 40_000_000
 
 
 def _shrunk_picture(url: str) -> bytes | None:
@@ -203,6 +207,8 @@ def shrink_picture(content: bytes) -> bytes:
     transparency on white (a cut-out product would otherwise go black)."""
     from PIL import Image
     img = Image.open(io.BytesIO(content))
+    if img.width * img.height > MAX_PIXELS:
+        raise ValueError(f"picture too large to shrink: {img.width}x{img.height}")
     img.thumbnail((LONG_SIDE, LONG_SIDE))
     if img.mode in ("RGBA", "LA", "P"):
         img = img.convert("RGBA")
