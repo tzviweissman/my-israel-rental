@@ -1,0 +1,194 @@
+[
+ {
+  "kind": "site_built",
+  "business_id": "2804c4e6-7fed-49b0-8ecf-7cd3b1c7cc01",
+  "at": "2026-11-16T00:07:23+02:00",
+  "ref": "clean-plus"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "48abdcc9-5e80-4626-a9f3-dacb91123c58",
+  "at": "2026-11-15T23:09:05+02:00",
+  "ref": "gremier-coffee"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "7830e50f-f67a-41e6-8c61-8ba97ea41d9e",
+  "at": "2026-11-11T14:53:21+02:00",
+  "ref": "m-and-n-jewelry"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "83765927-ab97-4777-bc16-6f883a7e9422",
+  "at": "2026-11-11T14:29:56+02:00",
+  "ref": "daniel"
+ },
+ {
+  "kind": "ad_made",
+  "business_id": "7830e50f-f67a-41e6-8c61-8ba97ea41d9e",
+  "at": "2026-11-10T22:14:22+02:00",
+  "ref": "mn-jewelry-infinity"
+ },
+ {
+  "kind": "ad_made",
+  "business_id": "7830e50f-f67a-41e6-8c61-8ba97ea41d9e",
+  "at": "2026-11-10T21:37:34+02:00",
+  "ref": "mn-jewelry-bilingual"
+ },
+ {
+  "kind": "ad_made",
+  "business_id": "7830e50f-f67a-41e6-8c61-8ba97ea41d9e",
+  "at": "2026-11-10T21:21:56+02:00",
+  "ref": "mn-jewelry"
+ },
+ {
+  "kind": "ad_made",
+  "business_id": "fe453110-5383-4be0-9fac-afb105036047",
+  "at": "2026-11-10T19:31:16+02:00",
+  "ref": "la-cholent"
+ },
+ {
+  "kind": "ad_made",
+  "business_id": "a07a929a-90d8-46a0-9023-d93371c1e464",
+  "at": "2026-11-10T19:31:16+02:00",
+  "ref": "chicken-munch"
+ },
+ {
+  "kind": "ad_made",
+  "business_id": "092126bb-4550-49b8-bdb4-ee97a8c79add",
+  "at": "2026-11-10T19:31:16+02:00",
+  "ref": "blazin-boards"
+ },
+ {
+  "kind": "ad_made",
+  "business_id": "092126bb-4550-49b8-bdb4-ee97a8c79add",
+  "at": "2026-11-10T19:31:16+02:00",
+  "ref": "blazin-boards-chanukah"
+ },
+ {
+  "kind": "ad_made",
+  "business_id": "1d92c69d-89cb-42e7-b2bf-e1d076ed9e41",
+  "at": "2026-11-10T19:31:16+02:00",
+  "ref": "american-crust"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "201af5a4-0049-4866-9d02-ac65d4d613a1",
+  "at": "2026-11-10T10:14:50+02:00",
+  "ref": "gifted-israel"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "443e324e-9f91-4cf9-87bb-938a1709abdf",
+  "at": "2026-11-09T22:43:36+02:00",
+  "ref": "finest-cut"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "2d26930e-4ec3-41fb-be84-92d5a9eacd8a",
+  "at": "2026-11-08T14:28:47+02:00",
+  "ref": "hadassah-prys"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "8e5ad619-878c-4a79-b283-af1a187101be",
+  "at": "2026-10-28T20:53:20+02:00",
+  "ref": "bake-away"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "6981e93f-73ba-4f4c-b2d9-c5374994f9fe",
+  "at": "2026-10-25T21:42:01+02:00",
+  "ref": "noa-levi"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "946c8789-4777-4d41-b126-d6730a769fe5",
+  "at": "2026-10-25T21:42:01+02:00",
+  "ref": "michal-simkin"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "44766209-2fd3-4bde-a824-147e589e83ba",
+  "at": "2026-10-25T21:42:01+02:00",
+  "ref": "elisheva-brandeis"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "b6c83b18-f01f-41b7-af91-bf2a4c84febd",
+  "at": "2026-10-25T19:04:57+02:00",
+  "ref": "ls-fruit-platter"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "e81cb0a0-901b-4525-91e1-58f5121ea59e",
+  "at": "2026-10-24T22:56:25+03:00",
+  "ref": "rena-lipschitz"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "db9cba64-5a2f-4da3-a2f3-19fd0c88fc32",
+  "at": "2026-10-24T22:56:25+03:00",
+  "ref": "ravit-hen"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "1d92c69d-89cb-42e7-b2bf-e1d076ed9e41",
+  "at": "2026-10-24T20:48:27+03:00",
+  "ref": "american-crust"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "a07a929a-90d8-46a0-9023-d93371c1e464",
+  "at": "2026-10-18T18:11:55+03:00",
+  "ref": "chicken-munch"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "7d78976f-6dad-4656-8fd1-efb617463c6f",
+  "at": "2026-10-16T15:05:41+03:00",
+  "ref": "the-brown-box"
+ },
+ {
+  "kind": "site_built",
+  "business_id": null,
+  "at": "2026-10-15T13:50:20+03:00",
+  "ref": "business-d25d6d7c"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "d2ee2d02-500d-4617-bd12-766ce018ad9d",
+  "at": "2026-10-14T06:10:50+03:00",
+  "ref": "the-gift-boutique"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "fe453110-5383-4be0-9fac-afb105036047",
+  "at": "2026-10-09T13:08:27-04:00",
+  "ref": "l-a-cholent-by-rabbi-samuels"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "5acf58cd-f841-4189-b681-bd8eebd38d6f",
+  "at": "2026-10-09T13:08:27-04:00",
+  "ref": "kashermybnb-kashering-services"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "9cf8b8ae-c4e8-432c-a040-2486316827d0",
+  "at": "2026-10-08T22:35:28-04:00",
+  "ref": "aidy-yaniv"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "d1f59db3-d428-49d1-9332-32e6814359f0",
+  "at": "2026-10-08T22:14:58-04:00",
+  "ref": "michal-yodaiken"
+ },
+ {
+  "kind": "site_built",
+  "business_id": "092126bb-4550-49b8-bdb4-ee97a8c79add",
+  "at": "2026-10-07T23:22:33-04:00",
+  "ref": "blazin-boards"
+ }
+]

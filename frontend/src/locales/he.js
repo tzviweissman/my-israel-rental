@@ -4895,7 +4895,7 @@ const he = {
       },
       workForYou: {
         liveLabel: "עכשיו נעשה בשביל עסק ב-MyIsraelRental:",
-        streamTitle: "בשידור חי: מה נעשה בשביל עסקים באתר",
+        streamTitle: "לאחרונה, בשביל עסקים באתר",
         nextYou: "הבא בתור: העסק שלכם",
         sampleEmail: "מייל",
         sampleText: "הודעה",
@@ -4908,6 +4908,7 @@ const he = {
         sample: {
           ad_made: "טרי השבוע",
           page_built: "העסק שלכם, ברשת",
+          site_built: "העסק שלכם, ברשת",
           order_alert: "הזמנה חדשה הגיעה עכשיו.",
           received: "תודה! ההזמנה שלכם התקבלה ונמצאת בהכנה.",
           received_email: "הקבלה שלכם",
@@ -4941,6 +4942,7 @@ const he = {
           reply_drafted: "ניסחה תשובה ללקוח שחיכה",
           ad_made: "הכינה מודעה לעסק",
           page_built: "בנתה לעסק דף והעלתה אותו לאוויר",
+          site_built: "בנתה לעסק אתר משלו",
         },
       },
       demand: {

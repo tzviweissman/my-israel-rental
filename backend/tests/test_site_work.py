@@ -49,8 +49,13 @@ def test_ads_and_pages_in_the_stream(monkeypatch):
         def __getattr__(self, name): return Coll(name)
 
     monkeypatch.setattr(sv, "db", DB())
+    monkeypatch.setattr(sv, "_work_log", lambda: [
+        {"kind": "site_built", "business_id": "b3", "at": "2099-01-01T10:00:00+02:00"},
+        {"kind": "ad_made", "business_id": "b4", "at": "2000-01-01T10:00:00+02:00"},  # too old: left out
+    ])
     rows = asyncio.run(sv._work_rows())
-    assert sorted((r["kind"], r["business_id"]) for r in rows) == [("ad_made", "b1"), ("page_built", "b2")]
+    assert sorted((r["kind"], r["business_id"]) for r in rows) == [("ad_made", "b1"), ("page_built", "b2"), ("site_built", "b3")]
+    assert rows[0]["kind"] == "site_built" and rows[0]["at"].startswith("2099-01-01T08:00:00")  # newest first, in UTC
 
 
 def test_left_out():

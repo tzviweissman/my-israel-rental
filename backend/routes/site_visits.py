@@ -30,8 +30,10 @@ rows.
 """
 from __future__ import annotations
 
+import json
 import re
 import time
+from pathlib import Path
 from datetime import UTC, datetime, timedelta
 from typing import Literal
 
@@ -319,8 +321,31 @@ async def _work_rows() -> list[dict]:
                                                   {"_id": 0, "business_id": 1, "published_at": 1}
                                                   ).sort("published_at", -1).limit(100):
         rows.append({"kind": "page_built", "channel": "", "business_id": r.get("business_id"), "at": r.get("published_at")})
+    # The websites we built and the ads we made by hand, from git (scripts/build-work-log.mjs).
+    for r in _work_log():
+        at = _iso_utc(r.get("at"))
+        if at and at >= iso and r.get("kind") in ("site_built", "ad_made"):
+            rows.append({"kind": r["kind"], "channel": "", "business_id": r.get("business_id"), "at": at})
     rows.sort(key=lambda r: r["at"], reverse=True)
     return rows
+
+
+_WORK_LOG = Path(__file__).resolve().parents[1] / "data" / "work_log.json"
+
+
+def _work_log() -> list[dict]:
+    try:
+        return json.loads(_WORK_LOG.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+
+
+def _iso_utc(value) -> str:
+    """git writes +02:00 times; the database rows are UTC. Same form for both, so they sort together."""
+    try:
+        return datetime.fromisoformat(str(value)).astimezone(UTC).isoformat()
+    except ValueError:
+        return ""
 
 
 @router.get("/site/work")

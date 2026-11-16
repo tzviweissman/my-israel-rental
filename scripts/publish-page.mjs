@@ -333,6 +333,13 @@ fs.writeFileSync(listFile, `${JSON.stringify(list.sort(), null, 2)}\n`);
 const { recordPublished } = await import('./live-hash.mjs');
 recordPublished(ROOT, slug, folder, OUT);
 console.log(`published ${folder} as /business/${slug} (${files} files in frontend/public/pages/${slug}); pages: ${list.join(', ')}`);
+// The live work stream lists the websites we built (backend/data/work_log.json). A new site is dated by its first
+// commit, so it appears once committed and this has run again (16 Nov 2026).
+{
+  const { spawnSync } = await import('node:child_process');
+  const w = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'build-work-log.mjs')], { cwd: ROOT, encoding: 'utf8' });
+  process.stdout.write(w.stdout || '');
+}
 
 // Every script on every published page must still parse after the
 // rewriting above: one that does not stops the page and leaves a film-led

@@ -10,7 +10,7 @@
  * text (that is what it is for); text cut off on purpose by a box that hides its overflow is not counted.
  * Exit 1 when something is covered. Saves a picture of each screen it checks.
  *
- * `covered(root)` is exported for checks that need their own setup (scripts/check-signup-panel.mjs).
+ * `covered(root)` is exported for checks that need their own setup.
  */
 import { pathToFileURL } from 'node:url';
 

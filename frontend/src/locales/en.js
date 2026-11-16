@@ -5026,7 +5026,7 @@ const en = {
       },
       workForYou: {
         liveLabel: "Just done for a business on MyIsraelRental:",
-        streamTitle: "Live: done for businesses on the site",
+        streamTitle: "Lately, for businesses on the site",
         nextYou: "Next: your business",
         sampleEmail: "Email",
         sampleText: "Text message",
@@ -5039,6 +5039,7 @@ const en = {
         sample: {
           ad_made: "Fresh this week",
           page_built: "Your business, online",
+          site_built: "Your business, online",
           order_alert: "New order just came in.",
           received: "Thanks! Your order arrived and is being prepared.",
           received_email: "Your receipt",
@@ -5072,6 +5073,7 @@ const en = {
           reply_drafted: "Drafted a reply for a customer who was waiting",
           ad_made: "Made an ad for a business",
           page_built: "Built a business's page and put it live",
+          site_built: "Built a business its own website",
         },
       },
       demand: {

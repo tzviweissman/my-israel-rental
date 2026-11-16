@@ -37,12 +37,13 @@ const WORDS = {
   reply_drafted: { '': 'Drafted a reply for a customer who was waiting' },
   ad_made: { '': 'Made an ad for a business' },
   page_built: { '': "Built a business's page and put it live" },
+  site_built: { '': 'Built a business its own website' },
 };
 // Which job in the list an event proves.
 function jobOf(e) {
   if (e.kind === 'review_asked') return 'reviews';
   if (e.kind === 'ad_made') return 'ads';
-  if (e.kind === 'page_built') return 'page';
+  if (e.kind === 'page_built' || e.kind === 'site_built') return 'page';
   if (e.kind === 'auto_reply' || e.kind === 'reply_drafted') return 'replies';
   if (e.channel === 'email' && (e.kind === 'received' || e.kind === 'confirmed')) return 'receipts';
   if (e.channel === 'text' || e.kind === 'reminder_sent') return 'texts';
@@ -61,6 +62,7 @@ const SAMPLE = {
   reply_drafted: ['Hi! Yes, we have availability this week.', 'draft'],
   ad_made: ['Fresh this week', 'ad'],
   page_built: ['Your business, online', 'page'],
+  site_built: ['Your business, online', 'page'],
 };
 
 // City -> [lng, lat]. An area matches by city name, or by a neighbourhood listed under that city.
@@ -93,14 +95,6 @@ const OUTLINE = [
   [34.65, 31.82], [34.75, 32.05], [34.82, 32.3], [34.88, 32.55], [34.95, 32.75], [35.0, 32.82], [35.07, 32.88],
   [35.08, 32.95],
 ].map((p) => px(p).map((v) => v.toFixed(1)).join(',')).join(' ');
-
-function ago(at, lang) {
-  const s = Math.max(0, (Date.now() - new Date(at).getTime()) / 1000);
-  const rtf = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
-  if (s < 3600) return rtf.format(-Math.max(1, Math.round(s / 60)), 'minute');
-  if (s < 86400) return rtf.format(-Math.round(s / 3600), 'hour');
-  return rtf.format(-Math.round(s / 86400), 'day');
-}
 
 const SHOW = 5;
 const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
@@ -224,18 +218,19 @@ function useWork() {
 }
 
 export default function WorkForYou({ className = '', fill = false }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const reduced = useReducedMotion();
-  const lang = (i18n.language || 'en').startsWith('he') ? 'he' : 'en';
   const events = useWork();
-  // The newest few, played oldest first so each new line lands on top and the list ends newest-first.
-  const play = useMemo(() => events.slice(0, SHOW).reverse(), [events]);
+  // The newest few, newest typed first (Tzvi, 16 Nov 2026: "it should start with things that are the most recent").
+  const play = useMemo(() => events.slice(0, SHOW), [events]);
   const lines = useMemo(() => play.map((e) => {
     const words = WORDS[e.kind] || {};
     const key = e.channel in words ? e.channel : Object.keys(words)[0];
     if (key === undefined) return '';
-    return [t(`workForYou.event.${e.kind}${key ? `_${key}` : ''}`, words[key]), e.area ? areaLabel(e.area, t) : '', ago(e.at, lang)].filter(Boolean).join(' · ');
-  }), [play, t, lang]);
+    // No "how long ago": a line from 12 hours ago next to one from 2 days ago made the site look quiet (Tzvi, 16 Nov
+    // 2026). The server only sends the last WORK_DAYS days, newest first.
+    return [t(`workForYou.event.${e.kind}${key ? `_${key}` : ''}`, words[key]), e.area ? areaLabel(e.area, t) : ''].filter(Boolean).join(' · ');
+  }), [play, t]);
   const cities = useMemo(() => [...new Set(play.map((e) => cityOf(e.area)).filter(Boolean))], [play]);
 
   // k: the line being typed (lines 0..k-1 are done); shown: letters of line k so far. k === lines.length: all done.
@@ -285,12 +280,12 @@ export default function WorkForYou({ className = '', fill = false }) {
                 {!reduced && <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style={{ background: '#34D399' }} />}
                 <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: '#34D399' }} />
               </span>
-              {t('workForYou.streamTitle', 'Live: done for businesses on the site')}
+              {t('workForYou.streamTitle', 'Lately, for businesses on the site')}
             </div>
             <span className="sr-only">{t('workForYou.liveLabel', 'Just done for a business on MyIsraelRental:')} {lines.join('. ')}</span>
-            {/* Newest on top: the line being typed is first, the finished ones below it, fading with age. */}
+            {/* Newest on top, typed first; each older one is typed in below it, fading with age. */}
             <ul className="mt-3 flex min-h-0 flex-1 flex-col gap-2 overflow-hidden text-[13px] leading-snug max-w-[78%] [mask-image:linear-gradient(to_bottom,#000_75%,transparent)]" aria-hidden="true">
-              {visible.map((line, idx) => idx).reverse().map((idx, pos) => (
+              {visible.map((line, idx) => idx).map((idx, pos) => (
                 <motion.li
                   key={`${round}-${idx}`}
                   layout={!reduced}

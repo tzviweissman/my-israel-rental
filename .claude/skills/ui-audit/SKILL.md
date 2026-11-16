@@ -50,10 +50,9 @@ After `bash scripts/audit-setup.sh`, for every page touched by the diff:
   it scrolls the page on laptop and phone, English and Hebrew, and fails on
   any text with something on top of it (16 Nov 2026: the sign-up panel's
   live bar sat on its photo sphere for days and no check caught it). Each
-  line it prints is a finding; its pictures are in `screenshots/covered`. If
-  the sign-up or log-in page changed, also run
-  `node scripts/check-signup-panel.mjs --sample`, which watches the moving
-  stream at three moments.
+  line it prints is a finding; its pictures are in `screenshots/covered`. For a
+  page with something moving, run it again with `--wait 9000` to look at a
+  second moment.
 - Run the checks covering what changed: `node scripts/check-hebrew-pages.mjs`,
   `node scripts/check-tile-contrast.mjs`, `node scripts/test-i18n-parity.mjs`,
   `node scripts/test-theme-scope.mjs`, and any `scripts/check-*.mjs` named
