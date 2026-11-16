@@ -140,7 +140,7 @@ const Auth = () => {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle size={32} className="text-green-600" />
                 </div>
-                <h2 className="text-2xl font-bold mb-3" style={{ fontFamily: 'var(--font-head)' }}>{t('auth.checkYourEmail')}</h2>
+                <h2 className="text-2xl font-medium mb-3" style={{ fontFamily: 'var(--font-body)' }}>{t('auth.checkYourEmail')}</h2>
                 <p className="text-gray-600 text-sm mb-6" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('auth.resetLinkSent', { email: `<strong>${forgotEmail}</strong>` })) }} />
                 <button
                   onClick={() => navigate('/auth/login')}
@@ -162,7 +162,7 @@ const Auth = () => {
                   <div className="w-14 h-14 bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <KeyRound size={24} className="text-[var(--brand-primary)]" />
                   </div>
-                  <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>{t('auth.forgotPasswordTitle')}</h2>
+                  <h2 className="text-2xl font-medium" style={{ fontFamily: 'var(--font-body)' }}>{t('auth.forgotPasswordTitle')}</h2>
                   <p className="text-sm text-gray-500 mt-2">{t('auth.forgotPasswordHint')}</p>
                 </div>
                 <form onSubmit={handleForgotPassword} className="space-y-5" data-testid="forgot-password-form">
@@ -208,7 +208,7 @@ const Auth = () => {
               <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
                 <KeyRound size={24} className="text-red-500" />
               </div>
-              <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-head)' }}>
+              <h2 className="text-2xl font-medium mb-2" style={{ fontFamily: 'var(--font-body)' }}>
                 {t('auth.invalidResetLinkTitle', 'Invalid Reset Link')}
               </h2>
               <p className="text-sm text-gray-500 mb-6">
@@ -233,7 +233,7 @@ const Auth = () => {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle size={32} className="text-green-600" />
                 </div>
-                <h2 className="text-2xl font-bold mb-3" style={{ fontFamily: 'var(--font-head)' }}>{t('auth.passwordResetTitle')}</h2>
+                <h2 className="text-2xl font-medium mb-3" style={{ fontFamily: 'var(--font-body)' }}>{t('auth.passwordResetTitle')}</h2>
                 <p className="text-gray-600 text-sm mb-6">{t('auth.passwordResetSuccess')}</p>
                 <button
                   onClick={() => navigate('/auth/login')}
@@ -249,7 +249,7 @@ const Auth = () => {
                   <div className="w-14 h-14 bg-[rgb(var(--gold-rgb)/<alpha-value>)]/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <KeyRound size={24} className="text-[var(--gold)]" />
                   </div>
-                  <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>{t('auth.setNewPassword')}</h2>
+                  <h2 className="text-2xl font-medium" style={{ fontFamily: 'var(--font-body)' }}>{t('auth.setNewPassword')}</h2>
                   <p className="text-sm text-gray-500 mt-2">{t('auth.setNewPasswordHint')}</p>
                 </div>
                 <form onSubmit={handleResetPassword} className="space-y-5" data-testid="reset-password-form">
@@ -314,7 +314,7 @@ const Auth = () => {
     <>
       <AuthShell testId="auth-page">
         <div>
-          <h1 className="display-weight text-3xl sm:text-4xl font-semibold lg:font-normal tracking-tight mb-6" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+          <h1 className="text-[26px] leading-tight font-medium tracking-tight mb-6 text-center" style={{ fontFamily: 'var(--font-body)', color: 'var(--ink)' }}>
             {t('auth.loginTitle')}
           </h1>
 
