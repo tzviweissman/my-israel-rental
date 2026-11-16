@@ -38,6 +38,8 @@ for (const url of urls) {
       if (!v) return { why: [`VIDEO  no video element (does film.js handle data-video? file ${f.dataset.video})`] };
       for (let i = 0; i < 40 && v.readyState < 3 && !v.error; i++) await new Promise((r) => setTimeout(r, 250));
       if (v.error || v.readyState < 3) return { why: [`VIDEO  ${v.currentSrc || v.src} did not load (${v.error ? v.error.code : 'not ready'})`] };
+      // a phone's film plays by itself in one screen (rules 3ac.1, 16 Nov 2026): it follows no scroll, it only has to run
+      if (f.offsetHeight <= innerHeight * 1.15) return { why: v.currentTime > 0 || !v.paused ? [] : ['FREEZE the one-screen film did not play by itself (3ac.1)'] };
       // scrolled steadily through the film in 20 s (a slow, reading pace: the hard case): sampled every frame from 10% to 90%
       const span = f.offsetHeight - innerHeight, dur = v.duration, t0 = performance.now(), why = [];
       let last = -1, lastMove = 0, longest = 0, lag = 0, n = 0, same = 0;

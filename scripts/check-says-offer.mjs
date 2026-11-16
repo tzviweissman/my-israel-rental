@@ -7,7 +7,7 @@
  * 40 px or more (28 on a phone).
  *
  * The home page carries <meta name="offers" content="kumzits|guitar lesson">: each different kind of offer, in the words a
- * customer looks for. With two or more, each must be in the big words, unscrolled, 4 s after load, at 1366x800 and
+ * customer looks for. With two or more, each must be in the big words, unscrolled, 4 s after load (9 s on a phone, where the opening plays by itself first, 3ac.1), at 1366x800 and
  * 390x844; menu, footer and fixed bars do not count. With one kind the picture may show it, which a script cannot judge:
  * that stays a LOOK in the checklist line.
  *
@@ -24,8 +24,11 @@ let bad = 0;
 for (const [w, h, mobile] of [[1366, 800, false], [390, 844, true]]) {
   const c = await browser.newContext({ viewport: { width: w, height: h }, isMobile: mobile, hasTouch: mobile });
   const p = await c.newPage();
-  await p.goto(url, { waitUntil: 'load' }); await p.waitForTimeout(4000);
-  const r = await p.evaluate(() => {
+  await p.goto(url, { waitUntil: 'load' });
+  // read 4 s after load; on a phone, whose opening plays by itself (rules 3ac.1), also on arrival and once it has played:
+  // words seen at either moment count, as the visitor reads them without scrolling
+  const reads = [];
+  for (const t of mobile ? [1200, 9000] : [4000]) { await p.waitForTimeout(t - (reads.length ? 1200 : 0)); reads.push(await p.evaluate(() => {
     const seen = (el) => {
       const q = el.getBoundingClientRect();
       if (!q.width || !q.height || q.top >= innerHeight || q.bottom <= 0 || el.closest('header, nav, footer')) return false;
@@ -34,7 +37,8 @@ for (const [w, h, mobile] of [[1366, 800, false], [390, 844, true]]) {
     };
     const big = [...document.querySelectorAll('h1, h2, h3')].filter((e) => seen(e) && (e.tagName === 'H1' || parseFloat(getComputedStyle(e).fontSize) >= (innerWidth < 760 ? 28 : 40)));
     return { offers: document.querySelector('meta[name="offers"]')?.content || '', big: big.map((e) => e.innerText.replace(/\s+/g, ' ').trim()).join(' / ') };
-  });
+  })); }
+  const r = { offers: reads[0].offers, big: [...new Set(reads.map((x) => x.big).filter(Boolean))].join(' / ') };
   await c.close();
   const offers = r.offers.split('|').map((s) => s.trim()).filter(Boolean), why = [];
   if (!offers.length) why.push('no <meta name="offers" content="first offer|second offer"> on the home page');

@@ -21,6 +21,9 @@
 // m (phone, the frames' crop), H.264 with every frame a keyframe so any moment shows at once:
 //   ffmpeg -i opening.mp4 -vf scale=1920:-2 -c:v libx264 -g 1 -crf 24 -pix_fmt yuv420p -an -movflags +faststart opening-d.mp4
 // The frames stay: the picture until the video can play, the fallback without it, and reduced motion's last frame.
+// On a phone the film plays by itself in one screen (rules 3ac.1; Tzvi, 16 Nov 2026: "i thought we dont do scroll on
+// mobile", then "All sites, as a rule"): the section is 100svh, the video plays at its own speed (the frames by time
+// until it can), the chapters light as it goes and it holds its last frame. A laptop still follows the scroll.
 (function () {
   [].forEach.call(document.querySelectorAll('.film[data-frames]'), function (film) {
     var cv = film.querySelector('canvas'); if (!cv) return;
@@ -28,6 +31,10 @@
     var marks = (film.dataset.marks || '').split(',').filter(Boolean).map(Number);
     var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
     var kind = innerWidth <= 760 ? 'm' : 'd', blobs = new Array(N), p = 0, raf = 0;
+    var auto = !still && kind === 'm', t0 = performance.now(), T = Math.min(8000, Math.max(4000, N / 24 * 1000));   // 4 to 8 s (3ac.1)
+    if (auto) film.style.height = '100svh';
+    // the clock starts once the page has loaded, so a slow phone sees the story from its start
+    if (auto && document.readyState !== 'complete') { t0 = Infinity; addEventListener('load', function () { t0 = performance.now(); paint(); }); }
     function url(i) { return src + '/' + kind + '/' + String(i + 1).padStart(4, '0') + '.webp'; }
     cv.style.background = 'url(' + url(still ? N - 1 : 0) + ') center / cover no-repeat';
     var order = [], seen = {}, vid = false;
@@ -77,10 +84,12 @@
     function paint() {
       raf = 0;
       var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight;
-      p = still ? 1 : Math.min(1, Math.max(0, -r.top / Math.max(1, span)));
-      marks.forEach(function (m, i) { film.classList.toggle('c' + (i + 2), p >= m); });
+      p = still ? 1 : auto ? Math.min(1, (performance.now() - t0) / T) : Math.min(1, Math.max(0, -r.top / Math.max(1, span)));
+      chapters(p);
       draw();
+      if (auto && p < 1 && !vid && !raf) raf = requestAnimationFrame(paint);
     }
+    function chapters(q) { marks.forEach(function (m, i) { film.classList.toggle('c' + (i + 2), q >= m); }); }
     addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(paint); }, { passive: true });
 
     // Played as real video, tied exactly to the scroll (data-video; Tzvi, 3 Nov 2026: "it still doesnt look so smooth like
@@ -96,8 +105,21 @@
       v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0';
       cv.parentNode.appendChild(v);
       var ready = false, on = 0, rest = 0, shownT = -1;
+      if (auto) {
+        // a phone loads no video data until it is played, so it is played at once and shown when it runs; a long film is
+        // sped up to last T, so the story ends within 8 s (RBS Cleaning's is 15 s)
+        v.addEventListener('loadedmetadata', function () { if (v.duration) v.playbackRate = Math.max(1, v.duration / (T / 1000)); });
+        v.addEventListener('playing', function () {
+          if (ready) return; ready = true; vid = true;
+          if (p > 0 && v.duration) v.currentTime = p * v.duration;
+          v.style.opacity = 1; cv.style.visibility = 'hidden';
+          for (var k in bmp) if (bmp[k] && bmp[k].close) bmp[k].close(); bmp = {}; blobs = [];
+          (function lit() { chapters(v.ended ? 1 : v.currentTime / (v.duration || 1)); if (!v.ended) requestAnimationFrame(lit); })();
+        });
+        var go = v.play(); if (go && go.catch) go.catch(function () {});
+      }
       v.addEventListener('canplaythrough', function () {
-        if (ready) return; ready = true; v.pause(); v.style.opacity = 1; vid = true; cv.style.visibility = 'hidden';
+        if (ready || auto) return; ready = true; v.pause(); v.style.opacity = 1; vid = true; cv.style.visibility = 'hidden';
         for (var k in bmp) if (bmp[k] && bmp[k].close) bmp[k].close(); bmp = {}; blobs = [];   // the frames are not needed now
         addEventListener('scroll', wake, { passive: true }); wake();
       });

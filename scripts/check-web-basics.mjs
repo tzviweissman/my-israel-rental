@@ -121,7 +121,11 @@ for (const url of urls) {
   await p.close();
 }
 // GIFT: on one page of the site; it stays hidden until the owner switches gift cards on, so it is looked for in the HTML
-const htmls = await Promise.all(urls.map((u) => fetch(u).then((r) => r.text()).catch(() => '')));
+// (also on the pages the home page links to: publishing passes only the pages that changed, 15 Nov 2026)
+const get = (u) => fetch(u).then((r) => r.text()).catch(() => '');
+const htmls = await Promise.all(urls.map(get));
+const linked = [...new Set([...(htmls[urls.indexOf(home)] || htmls[0] || '').matchAll(/href="([\w-]+\.html)[?#"]/g)].map((m) => new URL(m[1], home).href))].filter((u) => !urls.includes(u));
+htmls.push(...await Promise.all(linked.map(get)));
 if (!htmls.some((h) => /data-mir-gift/.test(h))) { bad++; console.log(`BASICS  ${home}\n  GIFT   no page has the gift card section (SITE.gift_section(), gift.js, rules 3x.14)`); }
 await browser.close();
 process.exitCode = bad ? 1 : 0;   // not process.exit: on Windows it aborts while fetch's connections are still closing (libuv assertion, exit 127)

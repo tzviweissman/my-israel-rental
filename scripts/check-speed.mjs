@@ -29,7 +29,9 @@ for (const url of urls) {
   const cdp = await ctx.newCDPSession(p);
   try {
     await p.goto(url, { waitUntil: 'load', timeout: 90000 });
-    await p.waitForTimeout(3000);   // first pictures and fonts in; what loads later is the page's own business
+    // first pictures and fonts in, and a phone opening that plays by itself (4 to 8 s, rules 3ac.1) has finished:
+    // what loads or plays later is the page's own business
+    await p.waitForTimeout(9000);
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
     await cdp.send('Performance.enable');
     const m = async () => Object.fromEntries((await cdp.send('Performance.getMetrics')).metrics.map((x) => [x.name, x.value]));

@@ -157,6 +157,7 @@ const CHECK_ONLY = process.argv.includes('--check');
     ['check-same-button.mjs', 'has a button that breaks onto two lines', 'R3s.29'],
     // headings say the benefit, reviews stay open on a phone (Tzvi, 12 Nov 2026, rules 3ab)
     ['check-headings.mjs', 'has a heading that is only a section label', 'R3ab.1'], ['check-reviews-open.mjs', 'hides its reviews on a phone', 'R3ab.2'],
+    ['check-phone-opening.mjs', 'holds the scroll with its phone opening', 'R3ac.1'],
     // the page as an iPhone shows it: Safari's engine, where a film led only by seeking stands still (Tzvi, 14 Nov 2026, rules 3aa.30)
     ['check-iphone.mjs', 'breaks or stands still on an iPhone', 'R3aa.30'],
     // Correctness, so no rule date: they run on every site, however old (Tzvi, 12 Nov 2026: "these issues shouldnt

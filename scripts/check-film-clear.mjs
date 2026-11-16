@@ -43,11 +43,18 @@ for (const url of urls) {
     for (const at of AT) {
       const clip = await page.evaluate(async (at) => {
         const f = document.querySelector('.film');
+        // a phone film one screen tall plays by itself (rules 3ac.1): wait until its video has played that far, then hold it
+        const vis = () => [...f.querySelectorAll('video')].filter((e) => getComputedStyle(e).visibility !== 'hidden' && +getComputedStyle(e).opacity > 0.5).pop();
+        if (f.offsetHeight <= innerHeight * 1.15) {
+          for (let i = 0, v; i < 120; i++) { v = vis(); if (v && v.duration && v.currentTime / v.duration >= at) break; await new Promise((r) => setTimeout(r, 50)); }
+          f.querySelectorAll('video').forEach((e) => { e.dataset.filmClearPlay = e.paused ? '' : '1'; e.pause(); });
+        } else {
         scrollTo({ top: f.offsetTop + (f.offsetHeight - innerHeight) * at, behavior: 'instant' });
         await new Promise((r) => setTimeout(r, 900));
+        }
         // a video film eases to the new spot: wait until it has stopped (up to 5 s more), or a busy machine photographs
         // it still moving and the motion counts as cover (RBS Cleaning, 7 Nov 2026: 6% and 25% "covered", no card shown)
-        const v = f.querySelector('video');
+        const v = f.offsetHeight <= innerHeight * 1.15 ? null : f.querySelector('video');
         for (let i = 0, last = -1, still = 0; v && i < 50 && still < 3; i++) {
           await new Promise((r) => setTimeout(r, 100));
           still = !v.seeking && v.currentTime === last ? still + 1 : 0; last = v.currentTime;
@@ -63,6 +70,7 @@ for (const url of urls) {
       const hide = await page.addStyleTag({ content: '*, *::before, *::after { visibility: hidden !important; transition: none !important; } [data-film-clear], header.top, header.top * { visibility: visible !important; }' });
       const alone = await page.screenshot({ clip, animations: 'disabled' });
       await hide.evaluate((s) => s.remove());
+      await page.evaluate(() => document.querySelectorAll('video[data-film-clear-play="1"]').forEach((e) => e.play().catch(() => {})));
       const c = await covered(full, alone);
       if (c > MAX_COVERED) { bad++; console.log(`COVERED ${w}x${h} ${url} at ${at * 100}% of the film: words, cards and names cover ${Math.round(c * 100)}% of its picture; at most ${MAX_COVERED * 100}% while it plays`); }
     }
