@@ -186,6 +186,20 @@ def test_a_picture_too_big_for_cloudinary_is_shrunk_and_sent():
     assert res["url"].endswith("/a.jpg")
 
 
+def test_a_picture_with_too_many_pixels_is_not_decoded():
+    """A small file can hold a huge picture: 12000x12000 took 772 MB to shrink."""
+    import io
+
+    import pytest
+    from PIL import Image
+
+    import utils.cloud_storage as cs
+    png = io.BytesIO()
+    Image.new("1", (8000, 6000)).save(png, "PNG")
+    with pytest.raises(ValueError):
+        cs.shrink_picture(png.getvalue())
+
+
 def test_what_the_reader_returns_is_tidied():
     """A shop that also caters is still a shop; a long title ends on a whole word; "1:00–3:00" is "1:00 to 3:00"."""
     import asyncio
