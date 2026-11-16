@@ -133,6 +133,9 @@ const CreateGig = () => {
   // audit 23 Sep, finding 1). An older draft keeps its answers and restarts
   // at screen 1. Bump DRAFT_LAYOUT whenever the screens are renumbered.
   const [step, setStep] = useState(() => {
+    // Local testing only: ?step=3 opens that screen with whatever is filled in.
+    const jump = process.env.NODE_ENV === 'development' && parseInt(searchParams.get('step'), 10);
+    if (jump > 0) return jump;
     const d = readDraft('create-gig');
     return (d?.layout === DRAFT_LAYOUT && d?.step) || 1;
   });

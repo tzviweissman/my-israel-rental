@@ -205,6 +205,9 @@ if os.environ.get("DEV_AUTOLOGIN", "") == "1":
         r"|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}"
     )
     _origin_regex += rf"|http://(?:{_private_host}):(?:{'|'.join(str(p) for p in _DEV_PORTS)})"
+    # Any port on this machine, so several sessions can each run their own
+    # local frontend (3000, 3211, 3219...) against the one dev API.
+    _origin_regex += r"|http://localhost:\d{2,5}"
 
 app.add_middleware(
     CORSMiddleware,

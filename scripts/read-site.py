@@ -1,6 +1,6 @@
 """Try the sign-up's website reader (/socials/read) on a real business, before a reader change ships.
 
-    backend/.venv/Scripts/python scripts/read-site.py https://burntmeatboards.com [--instagram URL] [--copy-photos]
+    backend/.venv/Scripts/python scripts/read-site.py https://burntmeatboards.com [--instagram URL] [--copy-photos] [--save FILE]
 
 Prints what the sign-up form would be filled with: name, type, area, contacts, kashrut, delivery, FAQs, and every
 product with its price, section and photo count. Costs one paid reader call (a few cents). Saves nothing: photos
@@ -17,6 +17,7 @@ from pathlib import Path
 
 BACKEND = Path(__file__).resolve().parent.parent / "backend"
 sys.path.insert(0, str(BACKEND))
+START = Path.cwd()  # --save FILE is relative to where the script was run from
 os.chdir(BACKEND)
 from dotenv import load_dotenv  # noqa: E402
 
@@ -33,6 +34,7 @@ async def main() -> None:
     ap.add_argument("--instagram")
     ap.add_argument("--facebook")
     ap.add_argument("--copy-photos", action="store_true")
+    ap.add_argument("--save", metavar="FILE", help="also write what the form is filled with, for the local ?fill=1 test (CLAUDE.md, Local dev)")
     args = ap.parse_args()
 
     import routes.marketplace.product_extract as pe
@@ -46,6 +48,8 @@ async def main() -> None:
     links = {k: v for k, v in {"website": args.website, "instagram": args.instagram, "facebook": args.facebook}.items() if v}
     out = await pe.read_socials(None, {"links": links}, {"user_id": "read-site-script"})
     f = out.get("fields") or {}
+    if args.save:
+        (START / args.save).write_text(json.dumps({**f, "socials": links}, ensure_ascii=False), encoding="utf8")
     items = f.pop("items", None) or []
     faqs = f.pop("faqs", None) or []
     print("Read:", ", ".join(out["read"]) or "nothing")
