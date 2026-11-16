@@ -117,6 +117,12 @@ def test_who_counts(world, db, kind):
     assert _listing_views(db, eid, bot) == 0, "a bot is not a visitor to the listing"
     assert _site_pageviews(db, bot) == 0, "nor to the site"
 
+    # A request with no browser id is a script, not a person (16 Nov 2026: most business views were ours).
+    before = db.marketplace_view_events.count_documents({"entity_id": eid})
+    assert requests.get(url, headers={"User-Agent": BROWSER}, timeout=30).status_code == 200
+    time.sleep(0.6)
+    assert db.marketplace_view_events.count_documents({"entity_id": eid}) == before, "no browser id adds 0"
+
     for vid in (v, o, other, bot):
         db.site_visits.delete_many({"visitor": vid})
 

@@ -38,10 +38,14 @@ So the number is VISITORS, not page loads, and the dashboard says visitors.
 One person returning on three days still counts three times: that is a real
 signal (they came back) and the label is per-period, not "unique people".
 
-A client that sends no id — private mode, storage blocked, an old cached
-bundle — is recorded undeduped rather than dropped. A view we cannot
-attribute is still a view, and losing it would understate quiet listings
-worst of all.
+**A view with no browser id is not recorded** (16 Nov 2026). Every real
+browser sends one: the React pages and the designed sites both make an id
+even when storage is blocked. Until then a request with no id was recorded
+undeduped, and on the live data about 3,300 of 4,000 business views since
+18 Sep were exactly that - laptop, no language, no id, peaking on build
+days: our own build and check scripts loading business pages, counted as
+customers on the admin overview and on owners' numbers. Admins' own visits
+are left out too, as the site-wide counter already did.
 """
 from __future__ import annotations
 
@@ -149,8 +153,12 @@ async def record_view(
     visitor: Optional[str] = None,
     user_agent: Optional[str] = None,
     facts: Optional[dict[str, str]] = None,
+    viewer_role: Optional[str] = None,
 ) -> None:
     """Record one visit. Never raises — a lost metric beats a failed page.
+
+    Not recorded: a request with no browser id (a script, not a person) and
+    an admin's own visit (see the module docstring).
 
     `user_agent`: when given, a bot's visit is not recorded. Until 23 Sep
     2026 only the site-wide counter left crawlers out, so a link preview
@@ -159,8 +167,11 @@ async def record_view(
         return
     if user_agent is not None and is_bot(user_agent):
         return
-    # The owner looking at their own listing is not demand.
-    if viewer_id and owner_id and viewer_id == owner_id:
+    # The owner looking at their own listing is not demand; nor is an admin.
+    if (viewer_id and owner_id and viewer_id == owner_id) or viewer_role == "admin":
+        return
+    visitor = (visitor or "").strip()[:_MAX_VISITOR_LEN] or None
+    if not visitor:
         return
 
     now = datetime.now(UTC)
@@ -177,23 +188,18 @@ async def record_view(
         **(facts or {}),
     }
 
-    visitor = (visitor or "").strip()[:_MAX_VISITOR_LEN] or None
     try:
-        if visitor:
-            doc["returning"] = bool(await db[COLLECTION].find_one(
-                {"entity_id": entity_id, "visitor": visitor, "day": {"$ne": doc["day"]}}, {"_id": 1}))
-            # Upsert, not check-then-insert: two requests a millisecond
-            # apart would both read "absent" and both write. The unique
-            # index below is what actually makes this exclusive; the upsert
-            # is how we avoid turning that into an error on every refresh.
-            await db[COLLECTION].update_one(
-                {"entity_id": entity_id, "visitor": visitor, "day": doc["day"]},
-                {"$setOnInsert": {**doc, "visitor": visitor}},
-                upsert=True,
-            )
-        else:
-            # No id to dedupe on. Recorded anyway — see the module docstring.
-            await db[COLLECTION].insert_one({**doc, "visitor": None})
+        doc["returning"] = bool(await db[COLLECTION].find_one(
+            {"entity_id": entity_id, "visitor": visitor, "day": {"$ne": doc["day"]}}, {"_id": 1}))
+        # Upsert, not check-then-insert: two requests a millisecond
+        # apart would both read "absent" and both write. The unique
+        # index below is what actually makes this exclusive; the upsert
+        # is how we avoid turning that into an error on every refresh.
+        await db[COLLECTION].update_one(
+            {"entity_id": entity_id, "visitor": visitor, "day": doc["day"]},
+            {"$setOnInsert": {**doc, "visitor": visitor}},
+            upsert=True,
+        )
     except Exception:  # noqa: BLE001
         logger.exception("view event insert failed for %s %s", entity_type, entity_id)
 

@@ -142,8 +142,30 @@ def test_the_services_card_does_not_count_property_visitors(admin, db, owner):
     services and business pages. This owner adds 8 property visitors and 1
     gig visitor, so the card must move by exactly 1."""
     flow = requests.get(f"{BASE}/admin/metrics", params={"range": "all"}, headers=admin, timeout=30).json()["flow"]
-    expected = db.marketplace_view_events.count_documents({"entity_type": {"$in": ["gig", "business"]}})
+    expected = db.marketplace_view_events.count_documents(
+        {"entity_type": {"$in": ["gig", "business"]}, "visitor": {"$type": "string"}})
     assert flow["service_views"] == expected
+
+
+def test_the_overview_counts_people_not_scripts(admin, db, owner):
+    """A stored view with no browser id (our own scripts, before 16 Nov 2026) moves no card; a person who only
+    opened a business's own site is a site visitor; property views are people once a day, like services."""
+    now, stamp = datetime.now(UTC), owner["stamp"]
+    get = lambda: requests.get(f"{BASE}/admin/metrics", params={"range": "all"}, headers=admin, timeout=30).json()  # noqa: E731
+    before = get()
+    db.marketplace_view_events.insert_many([
+        {"entity_type": t, "entity_id": f"{stamp}-script-{t}", "owner_id": owner["uid"], "at": now,
+         "day": now.strftime("%Y-%m-%d"), "visitor": None} for t in ("business", "gig", "property")])
+    db.marketplace_view_events.insert_one({
+        "entity_type": "business", "entity_id": f"{stamp}-designed", "owner_id": owner["uid"], "at": now,
+        "day": now.strftime("%Y-%m-%d"), "visitor": f"{stamp}-designed-only"})
+    after = get()
+    assert after["flow"]["service_views"] == before["flow"]["service_views"] + 1
+    assert after["flow"]["views"] == before["flow"]["views"]
+    assert after["flow"]["site_visitors"] == before["flow"]["site_visitors"] + 1
+    assert after["flow"]["views"] == db.marketplace_view_events.count_documents(
+        {"entity_type": "property", "visitor": {"$type": "string"}})
+    assert "restaurant_visitors" in after["flow"] and "restaurant_taps" in after["flow"]
 
 
 def test_the_owner_sees_visitors_and_taps_on_each_listing(owner):

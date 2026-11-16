@@ -1154,6 +1154,7 @@ async def public_business(
             visitor=request.headers.get("X-Visitor-Id"),
             user_agent=request.headers.get("user-agent") or "",
             facts=view_tracking.visit_facts(request),
+            viewer_role=(viewer or {}).get("role"),
         ))
 
     ratings = await _batch_rating_aggregate([g["_id"] for g in raw])

@@ -1,7 +1,7 @@
 import VisitBreakdown from '../dashboard/VisitBreakdown';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Home, Eye, Users, Calendar, Briefcase, Store, Inbox, MessageCircle, QrCode, Globe, MousePointerClick } from 'lucide-react';
+import { Home, Eye, Users, Calendar, Briefcase, Store, Inbox, MessageCircle, QrCode, Globe, MousePointerClick, Utensils, Pointer } from 'lucide-react';
 import axios from 'axios';
 import { API } from '../../App';
 import AttentionQueue from './AttentionQueue';
@@ -81,6 +81,9 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
     { key: 'new-users', label: t('admin.kpiNewUsers', 'New users'), value: flow.new_users, icon: Users, go: 'users' },
     { key: 'bookings', label: t('admin.kpiBookings', 'Bookings'), value: flow.bookings, icon: Calendar, go: 'bookings' },
     { key: 'new-services', label: t('admin.kpiNewServices', 'New services'), value: flow.new_services, icon: Briefcase, go: 'services' },
+    // The restaurants section: people who opened it, and taps on Call, WhatsApp, Directions, Website or Order.
+    { key: 'restaurant-visitors', label: t('admin.kpiRestaurantVisitors', 'Restaurant visitors'), value: flow.restaurant_visitors, icon: Utensils, go: 'restaurants' },
+    { key: 'restaurant-taps', label: t('admin.kpiRestaurantTaps', 'Restaurant taps'), value: flow.restaurant_taps, icon: Pointer, go: 'restaurants' },
   ] : [];
 
   const stockCards = stock ? [
@@ -156,7 +159,8 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
         </p>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-3">
+      {/* 12 cards: three rows of four, no half-empty last row. */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-3">
         {flowCards.map(renderCard)}
       </div>
 
@@ -171,12 +175,18 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
         </p>
       )}
       {metrics?.views_since && (
-        <p className="text-xs mb-8" style={{ color: 'var(--brand-muted)' }} data-testid="admin-views-since">
+        <p className="text-xs mb-1" style={{ color: 'var(--brand-muted)' }} data-testid="admin-views-since">
           {t('admin.viewsSince', 'Views counted since {{date}}', {
-            date: new Date(metrics.views_since).toLocaleDateString(),
+            date: formatDate(metrics.views_since),
           })}
         </p>
       )}
+      {metrics?.restaurants_since && (
+        <p className="text-xs mb-1" style={{ color: 'var(--brand-muted)' }} data-testid="admin-restaurants-since">
+          {t('admin.restaurantsSince', 'Restaurant visitors and taps counted since {{date}}', { date: formatDate(metrics.restaurants_since) })}
+        </p>
+      )}
+      <div className="mb-8" />
 
       <GrowthCharts token={token} />
       <VisitBreakdown API={API} token={token} everyone className="mb-8" />

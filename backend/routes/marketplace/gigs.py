@@ -673,6 +673,7 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
         visitor=request.headers.get("X-Visitor-Id"),
         user_agent=request.headers.get("user-agent") or "",
         facts=view_tracking.visit_facts(request),
+        viewer_role=(viewer or {}).get("role"),
     ))
     prov = await db.marketplace_providers.find_one({"user_id": gig["provider_user_id"]})
     user = await db.users.find_one({"_id": gig["provider_user_id"]}) \

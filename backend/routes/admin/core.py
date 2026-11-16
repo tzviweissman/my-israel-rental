@@ -29,7 +29,7 @@ from routes.deps import db, logger, verify_token
 from utils import view_tracking
 from utils.auth import JWT_SECRET
 from utils.contract_files import forget_contract_file, resolve_private_contract_file
-from routes.site_visits import site_summary
+from routes.site_visits import RESTAURANT_TAPS, section_summary, site_summary
 from utils.events import publish
 
 router = APIRouter()
@@ -78,6 +78,12 @@ async def get_admin_dashboard(payload: dict = Depends(verify_token)) -> dict:
 # asking "today" means since this morning, and the business runs on Israel
 # time. Same timezone the QR scan buckets already use.
 METRIC_RANGES: dict[str, int | None] = {"today": 0, "7d": 7, "30d": 30, "all": None}
+
+
+# A view that came with a browser id: a person. Rows without one are our own scripts loading pages
+# (about 3,300 of 4,000 business views by 16 Nov 2026, see utils/view_tracking.py); they are no longer
+# recorded, and this keeps the ones already stored out of every admin number.
+REAL = {"visitor": {"$type": "string"}}
 
 
 def _range_cutoffs(rng: str) -> tuple[datetime | None, str | None]:
@@ -189,7 +195,11 @@ async def get_admin_metrics(
 
     # Datetime cutoff here — different collection, different stored type.
     view_q = {} if dt_cut is None else {"at": {"$gte": dt_cut}}
-    flow["views"] = await db.property_view_events.count_documents(view_q)
+    # People, once per property per day, never the owner, an admin or a crawler: the same stream as the
+    # services card. `property_view_events` counts every refresh, crawler and admin on purpose for Smart
+    # Pricing, and began three months before the page counter, so "All" read more property views than pages
+    # opened (Tzvi, 16 Nov 2026).
+    flow["views"] = await db.marketplace_view_events.count_documents({**view_q, **REAL, "entity_type": "property"})
 
     # The demand side, which this endpoint never reported (Tzvi, 18 Sep
     # 2026: "how many WhatsApp clicks, so I can track growth"). Every one of
@@ -207,7 +217,7 @@ async def get_admin_metrics(
     # properties under a "services" label - caught 18 Sep, the day after
     # this card shipped.
     flow["service_views"] = await db.marketplace_view_events.count_documents(
-        {**view_q, "entity_type": {"$in": ["gig", "business"]}}
+        {**view_q, **REAL, "entity_type": {"$in": ["gig", "business"]}}
     )
     flow["whatsapp_clicks"] = await db.lead_events.count_documents(
         {"type": "whatsapp_click", **since}
@@ -222,7 +232,12 @@ async def get_admin_metrics(
     if range != "all":
         _, site_days = view_tracking.il_day_window(max(METRIC_RANGES.get(range) or 1, 1))
     site = await site_summary(site_days)
-    flow["site_visitors"] = site["visitors"]
+    # Plus the people who only opened a business's own designed site, which the site counter never sees
+    # (123 of them by 16 Nov 2026): anyone with a recorded view, counted once.
+    day_q = {} if site_days is None else {"day": {"$in": site_days}}
+    on_site = {v for v in await db.site_visits.distinct("visitor", day_q) if v}
+    viewers = {v for v in await db.marketplace_view_events.distinct("visitor", {**day_q, **REAL})}
+    flow["site_visitors"] = site["visitors"] + len(viewers - on_site)
     # Designed business sites are plain HTML outside the React app, so the
     # site counter never sees them; their pages are counted in
     # page_view_counts instead. Without this a busy business site showed as
@@ -233,23 +248,18 @@ async def get_admin_metrics(
     ]).to_list(1)
     flow["site_pageviews"] = site["pageviews"] + (designed[0]["n"] if designed else 0)
 
+    # The restaurants section (Tzvi, 16 Nov 2026: "where are restaurant views and clicks?"):
+    # people who opened it and taps on a restaurant's buttons, counted since 12 Nov 2026.
+    rest = next((s for s in await section_summary(site_days) if s["section"] == "restaurants"), {})
+    flow["restaurant_visitors"] = rest.get("visitors", 0)
+    flow["restaurant_taps"] = await db[RESTAURANT_TAPS].count_documents(day_q)
+    first_rest = await db.section_visits.find_one({"section": "restaurants"}, {"day": 1}, sort=[("day", 1)])
+
     # When view logging actually began, so "all time" can say what it means
     # instead of implying it covers the whole life of the site.
-    # Some old rows hold `at` as an ISO string, and Mongo sorts every string
-    # before every date, so the earliest of each type is read and compared.
-    # Assuming a datetime put a 500 on the admin overview (22 Sep 2026).
-    starts = []
-    for kind in ("date", "string"):
-        row = await db.property_view_events.find_one({"at": {"$type": kind}}, {"at": 1}, sort=[("at", 1)])
-        at = (row or {}).get("at")
-        if isinstance(at, str):
-            try:
-                at = datetime.fromisoformat(at)
-            except ValueError:
-                at = None
-        if isinstance(at, datetime):
-            starts.append(at if at.tzinfo else at.replace(tzinfo=UTC))
-    views_since = min(starts).isoformat() if starts else None
+    first = await db.marketplace_view_events.find_one(REAL, {"at": 1}, sort=[("at", 1)])
+    at = (first or {}).get("at")
+    views_since = (at if at.tzinfo else at.replace(tzinfo=UTC)).isoformat() if isinstance(at, datetime) else None
 
     return {
         "range": range,
@@ -260,6 +270,7 @@ async def get_admin_metrics(
         # First day the site-wide counter ran. Lifetime means "since then":
         # nothing before it was recorded, and saying so is the honest label.
         "site_since": site["since"],
+        "restaurants_since": (first_rest or {}).get("day"),
     }
 
 
@@ -272,7 +283,6 @@ async def get_admin_metrics_daily(payload: dict = Depends(verify_token), days: i
         raise HTTPException(status_code=403, detail="Admin access required")
     days = max(7, min(days, 365))
     cut, keys = view_tracking.il_day_window(days)
-    tz = "Asia/Jerusalem"
     series = {k: dict.fromkeys(keys, 0) for k in (
         "site_visitors", "site_pageviews", "views", "service_views", "whatsapp_clicks", "qr_scans", "new_users")}
 
@@ -290,16 +300,20 @@ async def get_admin_metrics_daily(payload: dict = Depends(verify_token), days: i
         {"$match": {"day": {"$in": keys}}}, {"$group": {"_id": "$day", "n": {"$sum": "$n"}}},
     ]):
         add("site_pageviews", r["_id"], r["n"])
-    async for r in db.property_view_events.aggregate([
-        {"$match": {"at": {"$type": "date", "$gte": cut}}},
-        {"$group": {"_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$at", "timezone": tz}}, "n": {"$sum": 1}}},
-    ]):
-        add("views", r["_id"], r["n"])
+    # People only, the same rows the cards count (REAL, above).
     async for r in db.marketplace_view_events.aggregate([
-        {"$match": {"day": {"$in": keys}, "entity_type": {"$in": ["gig", "business"]}}},
-        {"$group": {"_id": "$day", "n": {"$sum": 1}}},
+        {"$match": {"day": {"$in": keys}, **REAL}},
+        {"$group": {"_id": {"day": "$day", "prop": {"$eq": ["$entity_type", "property"]}}, "n": {"$sum": 1}}},
     ]):
-        add("service_views", r["_id"], r["n"])
+        add("views" if r["_id"]["prop"] else "service_views", r["_id"]["day"], r["n"])
+    # And each day's people who only opened a designed business site, as the visitors card counts them.
+    on_site: dict = {}
+    async for r in db.site_visits.find({"day": {"$in": keys}, "visitor": {"$type": "string"}}, {"day": 1, "visitor": 1}):
+        on_site.setdefault(r["day"], set()).add(r["visitor"])
+    async for r in db.marketplace_view_events.aggregate([
+        {"$match": {"day": {"$in": keys}, **REAL}}, {"$group": {"_id": "$day", "v": {"$addToSet": "$visitor"}}},
+    ]):
+        add("site_visitors", r["_id"], len(set(r["v"]) - on_site.get(r["_id"], set())))
     # lead_events keeps an ISO string; its first ten characters are the UTC
     # day, at most a few hours off the Israel day - fine for a trend line.
     iso_cut = cut.replace(tzinfo=None).isoformat()
@@ -367,7 +381,7 @@ async def get_admin_metrics_by_user(
 
     visitors: dict = {}
     async for row in db.marketplace_view_events.aggregate([
-        {"$match": view_q},
+        {"$match": {**view_q, **REAL}},
         {"$group": {"_id": "$owner_id", "n": {"$sum": 1}}},
     ]):
         visitors[row["_id"]] = row["n"]
