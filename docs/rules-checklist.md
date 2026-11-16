@@ -4,16 +4,16 @@
 Sections (line each starts on; read with that offset):
 - 25: How to use it
 - 70: 1. Facts and words
-- 100: 2. Opening
-- 167: 3. Sections and worlds
-- 222: 4. Photos and media
-- 252: 5. Prices and savings
-- 274: 6. Order and booking flow
-- 300: 7. Motion
-- 328: 8. Phone
-- 343: 8b. From the seven videos, part two (29 Oct 2026)
-- 365: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 376: 9. Finish
+- 101: 2. Opening
+- 170: 3. Sections and worlds
+- 225: 4. Photos and media
+- 255: 5. Prices and savings
+- 277: 6. Order and booking flow
+- 303: 7. Motion
+- 332: 8. Phone
+- 347: 8b. From the seven videos, part two (29 Oct 2026)
+- 369: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 380: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -70,6 +70,7 @@ thing a script can prove is a `when:`. Scripts, all run from the repo root again
 ## 1. Facts and words
 
 R0b.1 | Published under the business's real slug from the live record, not a made-up one | 0b.1 | LOOK: compare the page address with the live business record's slug
+R0b.14 | The order form sends exactly the fields its listing needs (record_facts BOOKING), and every ASK FIRST line and flyer mismatch opens OWNER-QUESTIONS.md | 0b.1b | LOOK: the BOOKING line against the form's POST body; the ASK FIRST lines against the top of OWNER-QUESTIONS.md
 R0b.3 | Prices and currency on the page match the owner's own menu or flyer; the real menu is loaded in their shop with fixed product ids | 0b.3 | LOOK: list every price on the page against the menu/flyer and the shop listing
 R2.1 | Only facts the owner or record gave: no invented number, "since", "fresh daily", "trusted by", guest counts | 2, 3 numbers, 5a.4 | LOOK: read every sentence of every page and trace each fact to the record, listings, flyer or an owner answer
 R2.2 | The owner is asked only about their own business, never how we build (no tools, credits, vendors), and never what the record already answers | 2 | LOOK: read `message-to-owner.md`
@@ -321,6 +322,7 @@ R3s.10 | The picture appears the moment a thing is named | 3s.10 | LOOK
 R3s.27 | Same thing, same place: a repeated kind of thing (each size, step, card, slide, scroll state) is written in the same place and style every time, and a growing block hangs from a fixed top so its heading never moves | 3s.27 | LOOK: step through every state on a phone and a laptop; the label's top must not change; n/a if nothing repeats
 R3s.29 | Same button, same shape: no button's words break onto a second line at any size, and a repeated button (each card's) is the same height every time; the text beside it gives way, never the button | 3s.29 | script: check-same-button
 R3s.30 | Cards of one kind side by side on different grounds have words and buttons all one colour or in a mirrored pattern (white, black, white), never two of one and one of the other; order the grounds to get it, never force a colour that fails contrast | 3s.30 | LOOK: each row of three or more cards, laptop and phone
+R3s.31 | Words fit inside their button: at 320 and 360 wide no button, link, label, pill or chip has words running past its edge | 3s.31 | script: check-text-fits
 R3s.28 | No blank screen anywhere in the scroll: at every stop something is there to look at (words, a picture, the film), never a screen of plain ground | 3s | script: check-blank
 R3i.3 | A live readout tied to the scroll shows only a true fact of their process, small mono at a corner, never a made-up number | 3i.3 | LOOK; n/a if none
 R3s.21 | No script errors, console errors, 404s or dead links between the site's pages | 3s BROKEN | script: site BROKEN

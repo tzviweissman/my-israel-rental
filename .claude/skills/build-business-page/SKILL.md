@@ -62,9 +62,11 @@ your reply, either "every check passes" or the problems it listed.
 
 ## The steps
 
-1. **Fetch the record.** `scrollcraft/starter/fetch_business.py`, real slug from
-   the live record, every photo on one numbered sheet. Read everything they
-   already told us; never re-ask it (§1, §0b.1).
+1. **Fresh copy, then fetch the record.** Work in a new worktree of origin/main
+   (§0b.1a). `scrollcraft/starter/fetch_business.py`, real slug from the live
+   record, every photo on one numbered sheet. Read everything they already told
+   us; never re-ask it (§1, §0b.1). Its last lines (`record_facts.py`) say what
+   the order form must send and what to ask first (§0b.1b).
 2. **Look at every photo.** Duplicates, screenshots, small sizes, kinds (§3o.6,
    §3o.7). A big photo of the wrong shape is extended with
    `scrollcraft/starter/extend_photo.py`, never zoomed or cropped (§0b.2b, rules 3c.12).
@@ -100,7 +102,8 @@ your reply, either "every check passes" or the problems it listed.
    follow: facts and claims (§1), copy (§2), the first screen (§3g.13), the
    category checklist (§3, §3b), design and persuasion (§3c, §3e, §3g, §3i,
    §3s), honest deals (§3j), similar products (§3l), owner-filled places (§3m),
-   design and story (§4), build rules (§5).
+   design and story (§4), build rules (§5). The day the form first sends,
+   `node scripts/check-order-data.mjs <form page>` (§0b.8a).
 9. **Whole page right with a still, then the film.** Build and check with a
    still where the film goes, then put it in and check again; new motion tried
    on `scrollcraft/starter/kit/test.html` first (§0b.6a).
@@ -109,7 +112,7 @@ your reply, either "every check passes" or the problems it listed.
     `readable.mjs`, `clipped.mjs`, `cutoff.mjs`, `scroll-finish.mjs` for each
     scroll-tied effect, `overlay-truth.mjs` for anything placed on a picture,
     `cutout.py --check` for cut-outs (§6.3), and `check-fits`, `check-site`,
-    `check-motion` (§3r, §3s). Fix and run again until a full pass is clean.
+    `check-motion`, `check-text-fits` (§3r, §3s). Fix and run again until a full pass is clean.
 11. **Someone else reviews it.** A Sonnet subagent that did not build it, against
     `docs/page-review-checklist.md`; fix every FAIL, it looks again (§3r.2). Score
     the wow gate (§3n).

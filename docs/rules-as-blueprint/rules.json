@@ -2248,6 +2248,18 @@
    "status": "planned"
   },
   {
+   "id": "R0b.14",
+   "rule": "Form sends the listing's BOOKING fields; ASK FIRST lines open the owner questions",
+   "how": [
+    "GEN",
+    "OWNER"
+   ],
+   "built_by": "scrollcraft/starter/record_facts.py (printed by fetch_business.py): BOOKING, MATCH, ASK FIRST",
+   "confirmed_by": "check-order-data (practice order, rules 0b.8a) plus LOOK at OWNER-QUESTIONS.md",
+   "gremier_retry": false,
+   "status": "built"
+  },
+  {
    "id": "R3l.1",
    "rule": "Owner asked what a customer can choose and how many per item family",
    "how": [
@@ -2613,6 +2625,17 @@
    ],
    "built_by": "site.css .btn white-space: nowrap plus min-height; text beside gives way via flex-shrink",
    "confirmed_by": "check-same-button -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3s.31",
+   "rule": "Words fit inside their button at 320 and 360 wide",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "short label below 400px (.lg/.sm spans, as Clean Plus), less padding or a wrapping row",
+   "confirmed_by": "check-text-fits -> confirm only",
    "gremier_retry": false,
    "status": "planned"
   },

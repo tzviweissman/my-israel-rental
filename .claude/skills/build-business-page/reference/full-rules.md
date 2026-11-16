@@ -11,41 +11,41 @@ Sections (line each starts on; read with that offset):
 - 333: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
 - 466: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
 - 561: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
-- 677: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 742: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 913: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
-- 1209: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 1247: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 1362: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 1441: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 1473: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 1500: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 1546: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 1583: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1655: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1680: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1717: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1826: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
-- 1847: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1918: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
-- 2003: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 2113: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 2205: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 2230: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 2270: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2430: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2457: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2522: 4. What is reported to the owner instead (content gaps)
-- 2531: 5. How to write
-- 2580: 5a. Lessons from the practice pages
-- 2609: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2658: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2675: 6. Playbooks for the most common businesses
-- 2795: 7. Choosing the three options (automatic page builder only)
-- 2819: 8. Photos, video and the tools
-- 3045: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3113: 9. The scroll sections: what the practice pages become
-- 3148: 10. Open decisions (need Tzvi)
+- 697: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 762: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 933: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
+- 1229: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 1267: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 1382: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 1461: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 1493: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 1520: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 1566: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 1603: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1675: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1700: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1737: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1854: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
+- 1875: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1946: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+- 2031: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 2141: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 2233: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 2258: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 2298: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 2475: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2502: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2567: 4. What is reported to the owner instead (content gaps)
+- 2576: 5. How to write
+- 2625: 5a. Lessons from the practice pages
+- 2654: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2703: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2720: 6. Playbooks for the most common businesses
+- 2840: 7. Choosing the three options (automatic page builder only)
+- 2864: 8. Photos, video and the tools
+- 3090: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3158: 9. The scroll sections: what the practice pages become
+- 3193: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -583,6 +583,22 @@ a round with Tzvi. Done in this order, none of them happens.
 1. **Read the record, then the real address.** Use the business's actual
    slug from the live record when publishing (Michal Balloons was first
    published under a made-up slug the site would never serve).
+1a. **Start in a fresh copy of the latest main** (Tzvi, 16 Nov 2026, from Clean Plus: the local main was 86
+   commits behind and held other sessions' unfinished work, so publishing needed a clean copy made halfway
+   through). Before fetching the record: `git fetch origin` and `git worktree add ../mir-<slug> -b site-<slug>
+   origin/main`, junction both `node_modules` into it (memory: worktree needs node_modules), and build and
+   publish only there. Other sessions' changes in the main checkout are never committed with a site, and the
+   checks run against the rules as they are on main that day.
+1b. **The record says what the form must send and what to ask first** (Tzvi, 16 Nov 2026, from Clean Plus: the
+   booking form was refused until publish because the listing takes appointments and needs a start time, and
+   the flyer's phone number and the listing's "4 hours" visit of 60 minutes were found one at a time).
+   `fetch_business.py` now ends with `scrollcraft/starter/record_facts.py` (run it alone on a build already
+   fetched): `BOOKING` per listing names the fields the server's `/book` needs (an appointment listing: an exact
+   tier name, a date and a start time inside its hours and long enough for the visit, taken times greyed from
+   `/gigs/<id>/taken-slots`); the form is built to send exactly those from its first draft. `MATCH` lists every
+   phone and price in the record: read every flyer, menu and screenshot on the photo sheet against them. `ASK
+   FIRST` lists contradictions the script finds (a tier named "4 hours" that books 60 minutes, two numbers); each
+   one, and every flyer mismatch, opens OWNER-QUESTIONS.md, before any other question.
 2. **Look at every photo first.** Flag duplicates, screenshots, small sizes
    and overlays at once, and ask the owner for more in the same message
    (Michal's only photo was uploaded twice and was a phone screenshot; the
@@ -664,6 +680,10 @@ a round with Tzvi. Done in this order, none of them happens.
    the check failed three times.
 8. **The header and every main button go to the quickest way to order from
    the first draft** (section 8, The quickest way to order; wording: 5b.2), not after Tzvi asks.
+8a. **Send a practice order the day the form first sends** (Tzvi, 16 Nov 2026, from Clean Plus): `node
+   scripts/check-order-data.mjs <order or booking page url>` (served locally is fine; it sends to the live
+   server with `?dry_run=true`, nothing is saved) as soon as the form sends anything, not first at publish.
+   A refusal found then is one fix; found at publish it held the whole site back.
 9. **One idea per page, used once** (5a.6, 5a.7): the Gift Boutique had three
    ribbons.
 10. **Run all three checks before any link, screenshot or video reaches
@@ -1758,6 +1778,14 @@ cards, panels or tiles of one kind sit side by side on different grounds, their 
 colour or in a mirrored pattern (white, black, white; black, white, black), never two of one and one of the other.
 Fix it by ordering the grounds (dark, light, dark), never by forcing a colour that fails contrast. Applies to any row
 of three or more, and to every screen size the row shows at.
+
+**Words fit inside their button on small phones (3s.31)** (Tzvi, 16 Nov 2026, from the Clean Plus build: the review
+found "Every two weeks" running 9px out of its pill into "Just once" at 360 wide, and it took two rounds to fix). A
+label kept on one line (3s.29) must also fit: at 320 and 360 wide no button, link, label, tab, pill or chip has words
+reaching past its own edge. Make room the way Clean Plus did: a shorter label below 400px ("Every 2 weeks", the long
+one kept for wider screens), smaller padding, or the row wraps; never a smaller font than the body. Labels that end
+in "..." on purpose and chip rows that scroll sideways are not counted. Checked by `node scripts/check-text-fits.mjs
+<urls>` (publish-page runs it).
 
 **Same button, same shape (3s.29)** (Tzvi, 10 Nov 2026, on L.A. Cholent's three size cards: "things need to be
 consistent and here the middle one, the message to order, is two lines and the others are in 1 line"). A

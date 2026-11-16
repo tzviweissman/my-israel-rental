@@ -4,40 +4,40 @@
 Sections (line each starts on; read with that offset):
 - 55: 0. Use the same tools (this is what gives the full capability)
 - 147: 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
-- 214: 1. Facts: only theirs
-- 284: 2. How to write
-- 327: 3. The category checklist (what the best real sites share)
-- 353: 3b. The sections every page has (Tzvi, 6 Oct 2026)
-- 376: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 420: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 455: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 485: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 545: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
-- 615: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 637: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 732: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 795: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 827: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 854: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 894: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 927: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 985: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1009: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1037: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1113: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
-- 1117: 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
-- 1129: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1139: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 1154: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 1165: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 1172: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 1183: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 1194: 3bb. Small touches (Tzvi, 12 Nov 2026)
-- 1206: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1214: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1248: 4. Design and story
-- 1278: 5. Build rules (each one shipped as a defect once)
-- 1301: 6. Look through it, fix it, then show it
+- 219: 1. Facts: only theirs
+- 289: 2. How to write
+- 332: 3. The category checklist (what the best real sites share)
+- 358: 3b. The sections every page has (Tzvi, 6 Oct 2026)
+- 381: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 425: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 460: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 490: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 550: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
+- 620: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 642: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 737: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 800: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 832: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 859: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 899: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 932: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 990: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1014: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1042: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1121: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
+- 1125: 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
+- 1137: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1147: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 1162: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 1173: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 1180: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 1191: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 1202: 3bb. Small touches (Tzvi, 12 Nov 2026)
+- 1214: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1222: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1256: 4. Design and story
+- 1286: 5. Build rules (each one shipped as a defect once)
+- 1309: 6. Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section numbers are unchanged, so "3g.13", "3h.11" and the like still point to the same text. The full rulebook is `full-rules.md`.
@@ -155,6 +155,10 @@ tick lines as built; RULES.md is written from it at check-build and publish. Ful
    Start with `scrollcraft/starter/fetch_business.py` and the starter
    skeleton (rules 3p); choose the look and pass `check-fingerprints.mjs`
    before building sections.
+1a. Start in a fresh worktree of origin/main (`git worktree add ../mir-<slug> -b site-<slug> origin/main`,
+   node_modules junctioned); build and publish only there (Clean Plus, 16 Nov 2026).
+1b. Read `record_facts.py`'s lines (fetch_business prints them): build the form to send the BOOKING fields
+   from draft one; check flyers and menus against MATCH; every ASK FIRST and mismatch opens OWNER-QUESTIONS.md.
 2. Look at every photo; flag duplicates, screenshots, small sizes; ask the
    owner for more in the first message.
 2a. Start building the moment the questions go out (Tzvi, 17 Oct 2026), so
@@ -194,6 +198,7 @@ tick lines as built; RULES.md is written from it at check-build and publish. Ful
 7. Text over imagery gets its edge shade (or small solid card) from the start
    (section 4, 5b.3).
 8. Header and main buttons go to the quickest order path from draft one.
+8a. `node scripts/check-order-data.mjs <form page>` the day the form first sends, not first at publish.
 9. One idea per page, used once (section 4).
 10. Wow test, clipped.mjs, readable.mjs BEFORE any link or video is sent.
 10a. **The report ends with "Not done yet" and "For your call"** (3u.13, `gen/report.md`), after a
@@ -1104,6 +1109,9 @@ empty form that sends or says nothing, a filled one that sends no message or not
 `node scripts/check-motion.mjs <pages>` fails a choice that jumps, flashes a blank or old frame
 (also on two quick taps), or does not take its colour. Both run with the other checks (3r) before
 anything is shown, and publish-page refuses a new page that fails them.
+
+**Words fit their button (3s.31):** at 320 and 360 wide no button, pill or chip has words past its edge;
+give a short label below 400px, less padding or a wrapping row. `check-text-fits.mjs` (publish runs it).
 
 **Studying a video** (Tzvi: "how can you go through videos better to catch everything"): see
 docs/ui-videos/HOW-TO-WATCH.md. Every change a video shows becomes a line in a before-and-after

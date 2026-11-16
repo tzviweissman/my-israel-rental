@@ -155,6 +155,8 @@ const CHECK_ONLY = process.argv.includes('--check');
     ['check-button-colour.mjs', 'has a main button not in the colour of its product', 'R3g.19'],
     // a button's words stay on one line and repeats match (Tzvi, 10 Nov 2026, rules 3s.29)
     ['check-same-button.mjs', 'has a button that breaks onto two lines', 'R3s.29'],
+    // and its words fit inside it on small phones (Tzvi, 16 Nov 2026, from Clean Plus, rules 3s.31)
+    ['check-text-fits.mjs', 'has words wider than their button on a small phone', 'R3s.31'],
     // headings say the benefit, reviews stay open on a phone (Tzvi, 12 Nov 2026, rules 3ab)
     ['check-headings.mjs', 'has a heading that is only a section label', 'R3ab.1'], ['check-reviews-open.mjs', 'hides its reviews on a phone', 'R3ab.2'],
     ['check-phone-opening.mjs', 'holds the scroll with its phone opening', 'R3ac.1'],

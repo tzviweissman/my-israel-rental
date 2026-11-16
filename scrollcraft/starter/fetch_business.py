@@ -11,7 +11,7 @@ Set PYTHONIOENCODING=utf-8 first on Windows, or Hebrew text crashes the print.
 
 Writes scrollcraft/builds/<folder>/src/record.json, src/owner/pNN.jpg (every
 photo, numbered in the order: cover, gallery, then each listing's items) and
-sheet.jpg. Look at the sheet before anything else (page rules 3o.6): skip
+sheet.jpg, then the BOOKING / MATCH / ASK FIRST lines of record_facts.py. Look at the sheet before anything else (page rules 3o.6): skip
 duplicates, note screenshots, and ask the owner about any photo whose kind is
 not clear.
 """
@@ -25,6 +25,8 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, '.')
 from routes.deps import db  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from record_facts import facts  # noqa: E402
 
 slug, folder = sys.argv[1], sys.argv[2]
 OUT = os.path.join('..', 'scrollcraft', 'builds', folder)
@@ -94,5 +96,7 @@ async def main():
         for q in g.get("faqs") or []:
             print(f"  FAQ {q}")
     print(f"{len(files)} photos in {SRC}, sheet at {os.path.join(OUT, 'sheet.jpg')}")
+    # what the order form must send, and what to check against their flyers (record_facts.py)
+    print('\n'.join(facts(json.loads(json.dumps(record, default=str)))[0]))
 
 asyncio.run(main())
