@@ -41,9 +41,14 @@ const ID = /^(R[0-9][0-9a-z]*\.[0-9]+)\s*\|\s*(.*)$/;
 const args = process.argv.slice(2);
 const template = args.includes('--template');
 const force = args.includes('--force');
+// --touch="what you looked at": after re-checking the rules against a changed site, adds that note with today's date
+// to RULES.md and so re-saves it (16 Nov 2026: a stale RULES.md blocked Gremier's publish twice). A note is required:
+// the date says the rules were looked at again, the note says what was looked at.
+const touch = (args.find((a) => a.startsWith('--touch=')) || '').slice(8).trim();
+if (args.some((a) => a === '--touch' || a === '--touch=') || (args.some((a) => a.startsWith('--touch=')) && !touch)) { console.error('--touch needs a note: --touch="re-checked every rule after the latte stripes"'); process.exit(2); }
 const target = args.find((a) => !a.startsWith('--'));
 if (!target) {
-  console.error('usage: node scripts/check-rules.mjs [--template [--force]] <build-folder-or-slug>');
+  console.error('usage: node scripts/check-rules.mjs [--template [--force]] [--touch="note"] <build-folder-or-slug>');
   process.exit(2);
 }
 const dir = fs.existsSync(target) && fs.statSync(target).isDirectory() ? path.resolve(target) : path.join(ROOT, 'scrollcraft', 'builds', target);
@@ -141,6 +146,9 @@ let newest = { t: 0, f: '' };
     if (t > newest.t) newest = { t, f };
   }
 })(dir);
+if (touch) fs.appendFileSync(rulesFile, `
+Re-checked ${new Date().toISOString().slice(0, 10)}: ${touch}
+`);
 const rulesTime = dated(rulesFile);
 // a merge or a fresh checkout writes RULES.md and the pages in the same instant, a few ms apart in no set order
 // (1 Nov 2026, merging every branch onto main): within 2 s is the same moment, not an edit after the rules
