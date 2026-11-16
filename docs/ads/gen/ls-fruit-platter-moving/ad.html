@@ -35,7 +35,7 @@ html,body{margin:0}
   <div id="end" class="abs">
     <div class="it">Fruit platters,</div>
     <div class="big">EVERY<br>SIZE.</div>
-    <img class="p" id="e0" src="small.webp">
+    <img class="p" id="e0" src="small-real.webp">
     <img class="p" id="e1" src="xl.webp">
     <img class="p" id="e2" src="medium.webp">
     <img class="p" id="e3" src="large.webp">
@@ -54,7 +54,7 @@ const outBack = (x) => { const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) 
 const outCubic = (x) => 1 - Math.pow(1 - x, 3);
 // their four sizes and prices, as on their listing
 const SIZES = [
-  { word: 'SMALL', price: 'Small · ₪300', src: 'small.webp', bg: '#E5484D', w: 860 },
+  { word: 'SMALL', price: 'Small · ₪300', src: 'small-real.webp', bg: '#E5484D', w: 860 },
   { word: 'MEDIUM', price: 'Medium · ₪400', src: 'xl.webp', bg: '#5E9E2F', w: 900 },
   { word: 'LARGE', price: 'Large · ₪500', src: 'medium.webp', bg: '#E89A00', w: 1000 },
   { word: 'PARTY', price: 'Extra large · ₪850', src: 'large.webp', bg: '#6B2D7A', w: 1500, tilt: -22 },
@@ -62,7 +62,7 @@ const SIZES = [
 const BEAT = 1.05, END = 4.2;
 // where each platter sits on the last frame: two rows under the headline
 // small, medium, large, then the XL biggest and on a slant across the bottom (Tzvi 16 Nov)
-const GRID = [{ x: 40, y: 820, w: 400 }, { x: 470, y: 860, w: 560 }, { x: 560, y: 1110, w: 480 }, { x: -80, y: 1150, w: 900, tilt: -14 }];
+const GRID = [{ x: 30, y: 830, w: 420 }, { x: 480, y: 800, w: 570 }, { x: 560, y: 1060, w: 500 }, { x: -60, y: 1210, w: 880, tilt: -12 }];
 const nat = {};
 function size(img) { return nat[img.src] || (nat[img.src] = img.naturalHeight / img.naturalWidth); }
 window.render = (t) => {
