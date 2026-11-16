@@ -642,7 +642,9 @@ const CreateGig = () => {
           // Each product's own photos, all of them, as the site reader matched them (Tzvi, 15 Nov 2026).
           ? items.map((r) => ({ ...emptyProduct(r.currency), name: r.name, price: price(r), description: r.description || '', images: r.images || [],
             // The shop's own add-ons section ("Add-ons", "Drinks"), so the card's "from" price is a main product.
-            ...(r.group ? { group: r.group } : {}) }))
+            ...(r.group ? { group: r.group } : {}),
+            // Every size the shop sells, each with its own price and stock (16 Nov 2026).
+            ...((r.options || []).length ? { options: r.options } : {}), in_stock: r.in_stock !== false }))
           : (f.products.length ? f.products : [emptyProduct()]);
       } else {
         next.products = [];

@@ -852,6 +852,54 @@ async def _fetch_json(url: str) -> Any:
 # so the listing's "from" price is its cheapest main product (shared.ADD_ON_GROUP).
 SHOP_PAGES = 8
 PAGE_TEXT = 2500
+# Every size a shop sells, as the product's options (Tzvi, 16 Nov 2026: "you only chose the cheapest price when
+# there are several options"). ProductItem keeps at most 20; past that the sold-out sizes go first.
+MAX_OPTIONS = 20
+WOO_VARIATIONS = 150  # variation reads per WooCommerce shop: its store API gives a variation's price one at a time
+DESCRIPTION = 2000
+
+
+def _sizes(variants: list[dict[str, Any]]) -> dict[str, Any]:
+    """A product's sizes as {price, in_stock, options, notes}: variants are {title, price, available}. The price is
+    the cheapest size on sale (Burnt Meatboards' roast beef read as $19.99, a sold-out raw size). "Eat (cooked to
+    perfection) / 0.5 lb" is the option "Eat, 0.5 lb", and "Eat: cooked to perfection." goes in the notes. Split
+    on the last " / ": "Smoked/cooked" is one word. A lone "Default Title" variant is no choice at all."""
+    vs = [v for v in variants if isinstance(v, dict)]
+    prices = []
+    for v in vs:
+        try:
+            prices.append(float(v.get("price")))
+        except (TypeError, ValueError):
+            prices.append(None)
+    on_sale = [x for v, x in zip(vs, prices) if x is not None and v.get("available", True)]
+    priced = [x for x in prices if x is not None]
+    out: dict[str, Any] = {"price": min(on_sale or priced) if priced else None,
+                           "in_stock": any(v.get("available", True) for v in vs) if vs else True,
+                           "options": [], "notes": {}}
+    if len(vs) < 2:
+        return out
+    for v, x in zip(vs, prices):
+        title = " ".join(str(v.get("title") or "").split())
+        kind, _, size = title.rpartition(" / ") if " / " in title else (title, "", "")
+        m = re.fullmatch(r"(.*?)\s*\((.*)\)", kind)
+        if m and size:
+            kind = m.group(1)
+            out["notes"].setdefault(kind, m.group(2))
+        name = f"{kind}, {size}" if size else kind
+        if name:
+            out["options"].append({"name": name[:40], "price": x, "in_stock": bool(v.get("available", True))})
+    if len(out["options"]) > MAX_OPTIONS:
+        out["options"] = [o for o in out["options"] if o["in_stock"]]
+    out["options"] = out["options"][:MAX_OPTIONS]
+    return out
+
+
+def _lines(html: Any) -> str:
+    """A shop's product text as plain lines, whole: its paragraphs and list items each on their own line."""
+    import html as html_mod
+    text = re.sub(r"(?i)<br\s*/?>|</p>|</li>|</h\d>|</div>", "\n", str(html or ""))
+    text = html_mod.unescape(re.sub(r"(?s)<[^>]+>", " ", text))
+    return "\n".join(" ".join(ln.split()) for ln in text.splitlines() if ln.strip())[:DESCRIPTION]
 
 
 async def _shop_catalog(base: str) -> dict[str, Any]:
@@ -870,23 +918,41 @@ async def _shop_catalog(base: str) -> dict[str, Any]:
         cur = str(meta.get("currency") or "ILS").upper()
         extras = await _shopify_add_ons(root)
         for p in data["products"]:
-            v = (p.get("variants") or [{}])[0]
             kind = str(p.get("product_type") or "")
-            rows.append({"name": p.get("title"), "price": v.get("price"), "currency": cur,
+            rows.append({"name": p.get("title"), **_sizes(p.get("variants") or []), "currency": cur,
                          "description": p.get("body_html") or "",
                          "group": kind if ADD_ON_GROUP.search(kind) else extras.get(p.get("id")),
                          "photos": [i.get("src") for i in p.get("images") or [] if i.get("src")]})
         return {"products": _clean_catalog(rows, base), "meta": meta, "pages": await _shopify_pages(root)}
     data = await _fetch_json(root + "/wp-json/wc/store/v1/products?per_page=100")
     if isinstance(data, list):
+        import asyncio
+        data = [p for p in data if isinstance(p, dict)]
+        # A variable product lists its variations by id only; each one's price and stock is its own read.
+        wanted = [v["id"] for p in data for v in (p.get("variations") or [])[:MAX_OPTIONS * 2]
+                  if isinstance(v, dict) and isinstance(v.get("id"), int)][:WOO_VARIATIONS]
+        got = await asyncio.gather(*[_fetch_json(f"{root}/wp-json/wc/store/v1/products/{i}") for i in wanted])
+        by_id = {i: g for i, g in zip(wanted, got) if isinstance(g, dict)}
+
+        def woo_price(x: dict) -> Optional[float]:
+            pr = x.get("prices") or {}
+            try:
+                return int(pr.get("price")) / (10 ** int(pr.get("currency_minor_unit") or 0))
+            except (TypeError, ValueError):
+                return None
+
         for p in data:
             pr = p.get("prices") or {}
-            try:
-                price = int(pr.get("price")) / (10 ** int(pr.get("currency_minor_unit") or 0))
-            except (TypeError, ValueError):
-                price = None
+            variants = []
+            for v in p.get("variations") or []:
+                full = by_id.get(v.get("id")) if isinstance(v, dict) else None
+                if full:
+                    title = ", ".join(str(a.get("value") or "") for a in v.get("attributes") or [] if isinstance(a, dict))
+                    variants.append({"title": title, "price": woo_price(full), "available": bool(full.get("is_in_stock", True))})
+            sizes = _sizes(variants) if variants else {"price": woo_price(p), "in_stock": bool(p.get("is_in_stock", True)),
+                                                       "options": [], "notes": {}}
             cats = [str(c.get("name") or "") for c in p.get("categories") or [] if isinstance(c, dict)]
-            rows.append({"name": p.get("name"), "price": price, "currency": pr.get("currency_code") or "ILS",
+            rows.append({"name": p.get("name"), **sizes, "currency": pr.get("currency_code") or "ILS",
                          "description": p.get("short_description") or p.get("description") or "",
                          "group": next((c for c in cats if ADD_ON_GROUP.search(c)), None),
                          "photos": [i.get("src") for i in p.get("images") or [] if i.get("src")]})
@@ -959,8 +1025,7 @@ def _clean_catalog(rows: list[dict[str, Any]], base: str) -> list[dict[str, Any]
     import html as html_mod
     rows = [r for r in rows if isinstance(r.get("name"), str) and r["name"].strip()]
     out = _rows(json.dumps({"products": [{
-        **r, "name": html_mod.unescape(r["name"]),
-        "description": " ".join(html_mod.unescape(re.sub(r"(?s)<[^>]+>", " ", str(r.get("description") or ""))).split()),
+        **r, "name": html_mod.unescape(r["name"]), "description": "",  # the whole text is set below
     } for r in rows]}), limit=SHOP_PRODUCTS)
     for row, r in zip(out, rows):
         # The shop set these as this product's photos, so the site-furniture filter is not applied: it read
@@ -968,6 +1033,11 @@ def _clean_catalog(rows: list[dict[str, Any]], base: str) -> list[dict[str, Any]
         row["photos"] = [x for x in r["photos"] if isinstance(x, str) and x.startswith(("https://", "http://"))][:PHOTOS_PER_ITEM]
         row["duration_minutes"] = None
         row["group"] = str(r.get("group") or "").strip()[:60] or None
+        # The shop's whole text, its lines kept, and what each choice means ("Eat: cooked to perfection.").
+        notes = "".join(f"\n{k}: {v.rstrip('.')}." for k, v in (r.get("notes") or {}).items())
+        row["description"] = (_lines(r.get("description")) + notes).strip()[:DESCRIPTION]
+        row["options"] = list(r.get("options") or [])
+        row["in_stock"] = bool(r.get("in_stock", True))
     return out
 
 

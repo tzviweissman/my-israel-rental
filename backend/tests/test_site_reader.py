@@ -225,3 +225,64 @@ def test_delivery_fees_are_filed_by_city_slug():
     areas = normalize_service_areas(["Jerusalem", "Tel Aviv"])
     got = fees_by_area({"Jerusalem": 15, "Tel Aviv": 50, "Haifa": 40, "Nowhere": 5, "jerusalem": -1}, areas)
     assert got == {areas[0]: 15.0, areas[1]: 50.0}  # a city not served, unknown, or a bad fee is dropped
+
+
+def _real_shop(json_by_path):
+    import asyncio
+    from unittest.mock import patch
+
+    import routes.marketplace.product_extract as pe
+
+    async def fake_json(url):
+        return json_by_path(url.split("://", 1)[1].split("/", 1)[1])
+
+    async def fake_page(url):
+        return "", url
+    with patch.object(pe, "_fetch_json", fake_json), patch.object(pe, "_fetch", fake_page):
+        return asyncio.run(pe._shop_catalog("https://burntmeatboards.com/"))["products"]
+
+
+def test_every_size_of_a_real_shop_product():
+    """Burnt Meatboards' own products.json (16 Nov 2026): every size kept, not only the first one at its price."""
+    import json
+    from pathlib import Path
+
+    from routes.marketplace.shared import ProductItem
+    data = json.loads((Path(__file__).parent / "fixtures" / "burnt-meatboards-products.json").read_text(encoding="utf-8"))
+    rows = {r["name"]: r for r in _real_shop(lambda p: data if p.startswith("products.json") else None)}
+    assert len(rows) == 38
+    oyster = rows["Oyster steak"]
+    assert len(oyster["options"]) == 8 and oyster["options"][0] == {"name": "Eat, 0.5 lb", "price": 40.0, "in_stock": True}
+    assert next(o for o in oyster["options"] if o["name"] == "Eat, 2 lb")["in_stock"] is False
+    assert "Eat: cooked to perfection." in oyster["description"]
+    assert len(rows["Smoked Rib Roast"]["options"]) == 16  # 24 sizes: the sold-out ones go first
+    assert all(o["in_stock"] for o in rows["Smoked Rib Roast"]["options"])
+    beef = rows["Roast beef"]
+    assert beef["price"] == min(o["price"] for o in beef["options"] if o["in_stock"]) != 19.99  # not a sold-out raw size
+    taster = rows["Taster Meat Board"]
+    assert taster["in_stock"] is False and taster["price"] == 75  # every size sold out
+    assert len(rows["Grilled Chicken board"]["options"]) == 6
+    assert rows["Oyster steak"]["description"].count("\n") >= 1  # the text keeps its lines
+    one = next(r for r in rows.values() if r["name"] == "Glass bottle of coke")
+    assert one["options"] == []  # one "Default Title" variant is no choice
+    for r in rows.values():
+        # What the form saves: a product with no price ("Coming soon!") goes in at 0 as before.
+        ProductItem(**{**{k: v for k, v in r.items() if k not in ("photos", "duration_minutes", "photo_box", "page")},
+                       "price": r["price"] or 0})
+
+
+def test_woocommerce_variations_are_sizes():
+    shop = {
+        "wp-json/wc/store/v1/products?per_page=100": [
+            {"name": "Cake", "prices": {"price": "5000", "currency_minor_unit": 2, "currency_code": "ILS"},
+             "variations": [{"id": 11, "attributes": [{"name": "Size", "value": "Small"}]},
+                            {"id": 12, "attributes": [{"name": "Size", "value": "Large"}]}]},
+            {"name": "Card", "prices": {"price": "1000", "currency_minor_unit": 2, "currency_code": "ILS"}, "variations": []}],
+        "wp-json/wc/store/v1/products/11": {"prices": {"price": "5000", "currency_minor_unit": 2}, "is_in_stock": False},
+        "wp-json/wc/store/v1/products/12": {"prices": {"price": "9000", "currency_minor_unit": 2}, "is_in_stock": True},
+    }
+    rows = {r["name"]: r for r in _real_shop(shop.get)}
+    assert rows["Cake"]["options"] == [{"name": "Small", "price": 50.0, "in_stock": False},
+                                       {"name": "Large", "price": 90.0, "in_stock": True}]
+    assert rows["Cake"]["price"] == 90 and rows["Cake"]["in_stock"] is True
+    assert rows["Card"]["options"] == [] and rows["Card"]["price"] == 10
