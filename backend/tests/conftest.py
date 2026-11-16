@@ -224,6 +224,17 @@ def _leave_a_usable_event_loop_for_the_next_test():
         )
 
 
+def pytest_sessionfinish(session, exitstatus):  # noqa: ARG001
+    """A run where every test skipped tested nothing, so it does not pass (16 Nov 2026: a run started before
+    its server was up read "12 skipped", exit 0, and looked like a green check)."""
+    tr = session.config.pluginmanager.get_plugin("terminalreporter")
+    stats = getattr(tr, "stats", {}) if tr else {}
+    ran = sum(len(stats.get(k, [])) for k in ("passed", "failed", "error", "xfailed", "xpassed"))
+    if stats.get("skipped") and not ran:
+        tr.write_line(f"Every test skipped, so nothing was tested. Is the backend at {TEST_API_BASE} running?", red=True)
+        session.exitstatus = 1
+
+
 def pytest_collection_modifyitems(config, items):  # noqa: ARG001
     if _api_is_reachable():
         return

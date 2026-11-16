@@ -123,6 +123,12 @@ def test_who_counts(world, db, kind):
     time.sleep(0.6)
     assert db.marketplace_view_events.count_documents({"entity_id": eid}) == before, "no browser id adds 0"
 
+    # A program, even one sending a browser id, is not a person: our scripts (node, Python) and our checks (mir-check).
+    for ua in ("node", "python-requests/2.32", f"{BROWSER} mir-check"):
+        s = f"test-script-{uuid.uuid4().hex[:10]}"
+        _visit(url, visitor=s, ua=ua)
+        assert _listing_views(db, eid, s) == 0 and _site_pageviews(db, s) == 0, ua
+
     for vid in (v, o, other, bot):
         db.site_visits.delete_many({"visitor": vid})
 

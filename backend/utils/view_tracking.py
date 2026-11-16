@@ -97,6 +97,11 @@ def spawn(coro: Coroutine[Any, Any, Any]) -> None:
 BOT_MARKERS = (
     "bot", "crawler", "spider", "slurp", "preview", "facebookexternalhit",
     "whatsapp", "headless", "lighthouse", "pingdom", "uptimerobot", "monitor",
+    # Programs, not people: our own scripts calling the API (node fetch, Python) were most of the business
+    # views until 16 Nov 2026. "mir-check" is the mark our browser checks add to their user agent when they
+    # run as a phone (check-iphone, check-phone-opening), which would otherwise look like a real iPhone.
+    "mir-check", "node", "undici", "python", "httpx", "aiohttp", "curl/", "wget", "axios", "go-http",
+    "okhttp", "java/", "postman", "insomnia",
 )
 
 

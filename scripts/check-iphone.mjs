@@ -21,7 +21,8 @@ if (!urls.length) { console.error('usage: node scripts/check-iphone.mjs <url> [m
 const browser = await webkit.launch();
 const problems = [];
 for (const url of urls) {
-  const ctx = await browser.newContext(devices['iPhone 13']);
+  // "mir-check" in the user agent: the live site does not count this run as a visitor (utils/view_tracking.py).
+  const ctx = await browser.newContext({ ...devices['iPhone 13'], userAgent: `${devices['iPhone 13'].userAgent} mir-check` });
   const page = await ctx.newPage();
   const errs = [];
   // WebKit reports a blocked network call as a page error even when the page catches it (the gift-card call to a local
