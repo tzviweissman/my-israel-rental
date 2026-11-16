@@ -103,7 +103,7 @@
           <h3>Your order</h3>
           <ul id="sum-mini"><li><span>Nothing yet</span></li></ul>
           <p class="sum-where" id="sum-where" hidden></p>
-          <div class="total"><span>Total</span><span id="total">$0</span></div>
+          <div class="total"><span>Total</span><span id="total" data-order-total>$0</span></div>
           <button class="btn" id="send" type="submit"><span>Continue to your appointment</span></button>
           <button class="back" id="back" type="button" hidden>Back</button>
           <p class="note" id="send-note">Next: the day you would like to see it.</p>
@@ -295,7 +295,7 @@
   function save(notes) {
     var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: ITEMS[k.split('|')[0]].id, qty: q[k] });
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: ls, fulfilment: 'pickup', date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes, discount_code: MirCode.code() }) })
+      body: JSON.stringify({ lines: ls, fulfilment: 'pickup', date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes.length > 1000 ? notes.slice(0, 999) + '…' : notes, discount_code: MirCode.code() }) })
       .then(function (r) { return r.json().then(function (j) { return r.ok ? j : null; }, function () { return null; }); }).catch(function () { return null; });
     return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
   }
