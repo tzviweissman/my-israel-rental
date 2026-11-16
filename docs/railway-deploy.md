@@ -130,6 +130,13 @@ curl -I https://<backend>/api/uploads/signed_<any>.pdf   # expect 404 — contra
 Then in the browser: sign in with Google, open a booking with a signed contract,
 confirm it downloads.
 
+**Waiting for a push to go live: run the wait in the background from the start.**
+A frontend build takes about 10 minutes, as long as a foreground command may run,
+so a foreground loop that polls the live site times out right at the end (16 Nov
+2026). Start it with `run_in_background` and wait for the notice. Search every
+live chunk, not only `main.*.js`: a component loaded on demand (the dashboard's
+dialogs) lives in a numbered chunk listed in `/asset-manifest.json`.
+
 Finally, run `normalize_contract_urls.py --apply` (optional, cosmetic — the
 backend resolves both URL formats).
 
