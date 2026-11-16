@@ -38,6 +38,13 @@ import WebsiteButton from './WebsiteButton';
 // operators drive people and their things too, so the questions are not
 // scoped to taxis alone.
 const DRIVING_CATEGORIES = new Set(['transportation', 'travel-tourism', 'moving-relocation']);
+// The four kinds backend/utils/social_links.py accepts, with the wizard's placeholders.
+const SOCIAL_KINDS = [
+  ['website', 'Website', 'yourbusiness.co.il'],
+  ['instagram', 'Instagram', '@yourbusiness'],
+  ['facebook', 'Facebook', 'facebook.com/yourbusiness'],
+  ['tiktok', 'TikTok', '@yourbusiness'],
+];
 
 export default function BusinessDetailsForm({ business, API, token, onClose, onSaved }) {
   const { t } = useTranslation();
@@ -81,6 +88,9 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
     // rather than a fresh empty picker.
     areas: b.areas || [],
     serves_nationwide: !!b.serves_nationwide,
+    // Asked for at sign-up and filled by "Fill it in for me", but until
+    // now there was no place to change them afterwards.
+    socials: { ...(b.socials || {}) },
   });
 
   // The curated city list, fetched once. Failing quietly is right: the
@@ -182,6 +192,9 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
         // "leave alone" and strand it.
         areas: form.areas,
         serves_nationwide: form.serves_nationwide,
+        // Sent whole: the API replaces the set, so an emptied box removes
+        // that link. It also drops anything it cannot read as a link.
+        socials: form.socials,
         // Cleared to null when the field is emptied, so a business that
         // removes its licence number is not left showing a stale one.
         license_number: showLicence ? orNull(form.license_number) : undefined,
@@ -194,9 +207,17 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
           : null,
       };
 
-      await axios.patch(`${API}/marketplace/businesses/${b.id}`, payload, {
+      const { data: savedBiz } = await axios.patch(`${API}/marketplace/businesses/${b.id}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      // A link the API could not read is dropped without an error; say so,
+      // or the owner believes "facebook" saved when nothing did.
+      const dropped = SOCIAL_KINDS.map(([k, label]) => (String(form.socials[k] || '').trim() && !savedBiz?.socials?.[k] ? label : null)).filter(Boolean);
+      if (dropped.length) {
+        toast.error(t('businesses.linksDropped', { kinds: dropped.join(', '), defaultValue: 'This link could not be used: {{kinds}}. Check it and save again.' }), { duration: 8000 });
+        onSaved && onSaved();
+        return;
+      }
       toast.success(t('businesses.detailsSaved', 'Saved'));
       onSaved && onSaved();
       onClose && onClose();
@@ -224,7 +245,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
           value={form[key]}
           onChange={(e) => set({ [key]: e.target.value })}
           placeholder={placeholder}
-          className="mt-1 w-full px-3 py-2 rounded-lg border text-sm"
+          className="mt-1 w-full px-3 py-2 rounded-lg border text-base sm:text-sm"
           style={{ borderColor: 'var(--brand-border)' }}
           dir={opts.dir}
           data-testid={`biz-details-${key}`}
@@ -235,7 +256,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
           onChange={(e) => set({ [key]: e.target.value })}
           placeholder={placeholder}
           inputMode={opts.numeric ? 'numeric' : undefined}
-          className="mt-1 w-full px-3 py-2 rounded-lg border text-sm"
+          className="mt-1 w-full px-3 py-2 rounded-lg border text-base sm:text-sm"
           style={{ borderColor: 'var(--brand-border)' }}
           // Every input here can hold either language, and an owner
           // working in Hebrew types plenty of English into them. Without
@@ -363,6 +384,34 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
             </p>
           </div>
 
+          <div data-testid="biz-details-links">
+            <span className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }}>
+              {t('businesses.linksTitle', 'Website and social links')}
+            </span>
+            <div className="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {SOCIAL_KINDS.map(([k, label, ph]) => (
+                <label key={k} className="block text-[11px] font-semibold" style={{ color: 'var(--ink)' }}>
+                  {k === 'website' ? t('wizard.socialsWebsite', 'Website') : label}
+                  <input
+                    value={form.socials[k] || ''}
+                    onChange={(e) => set({ socials: { ...form.socials, [k]: e.target.value } })}
+                    placeholder={ph}
+                    dir="ltr"
+                    inputMode="url"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    className="mt-1 w-full px-3 py-2 rounded-lg border text-base sm:text-sm font-normal"
+                    style={{ borderColor: 'var(--brand-border)' }}
+                    data-testid={`biz-details-social-${k}`}
+                  />
+                </label>
+              ))}
+            </div>
+            <p className="mt-1 text-[11px]" style={{ color: 'var(--brand-muted)' }}>
+              {t('businesses.linksHint', 'Add or change them any time. We use them to fill in your page and keep them for your site.')}
+            </p>
+          </div>
+
           {field('description', t('businesses.about', 'About your business'),
             t('businesses.aboutPh', 'What you do, and what makes you worth choosing.'), { textarea: true })}
           {field('description_he', t('businesses.aboutHe', 'About your business, in Hebrew (optional)'),
@@ -412,7 +461,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
                 <select
                   value={form.shabbat}
                   onChange={(e) => set({ shabbat: e.target.value })}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border text-sm"
+                  className="mt-1 w-full px-3 py-2 rounded-lg border text-base sm:text-sm"
                   style={{ borderColor: 'var(--brand-border)' }}
                   data-testid="biz-details-shabbat"
                 >
