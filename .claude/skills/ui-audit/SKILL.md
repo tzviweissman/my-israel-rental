@@ -45,6 +45,15 @@ After `bash scripts/audit-setup.sh`, for every page touched by the diff:
   empty, or plainly broken is a finding even if no rule below names it.
 - Add a short laptop (1536x753) for anything with a pinned or full-screen
   section: the default heights hide the worst bugs.
+- For every page touched by the diff, run
+  `node scripts/check-covered.mjs "http://localhost:3210/<path>?as=owner"`:
+  it scrolls the page on laptop and phone, English and Hebrew, and fails on
+  any text with something on top of it (16 Nov 2026: the sign-up panel's
+  live bar sat on its photo sphere for days and no check caught it). Each
+  line it prints is a finding; its pictures are in `screenshots/covered`. If
+  the sign-up or log-in page changed, also run
+  `node scripts/check-signup-panel.mjs --sample`, which watches the moving
+  stream at three moments.
 - Run the checks covering what changed: `node scripts/check-hebrew-pages.mjs`,
   `node scripts/check-tile-contrast.mjs`, `node scripts/test-i18n-parity.mjs`,
   `node scripts/test-theme-scope.mjs`, and any `scripts/check-*.mjs` named

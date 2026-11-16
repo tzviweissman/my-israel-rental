@@ -242,7 +242,16 @@ export const areaLabel = (stored, t) => {
     return typeof t === 'function' ? t('areas.other', UNGROUPED_AREA) : raw;
   }
   const canonical = canonicalArea(raw);
-  if (!canonical) return raw;
+  if (!canonical) {
+    // "<City> - <Neighbourhood>" with a neighbourhood not in the table (16 Nov 2026: "Tel Aviv - Florentin" stayed
+    // English on Hebrew pages). The city is known, so it is shown in the page's language; the neighbourhood keeps
+    // its stored spelling unless that is Latin on a Hebrew page, where it is dropped rather than mixing scripts.
+    const { city, bare } = splitCity(raw.trim());
+    if (!city || typeof t !== 'function') return raw;
+    const cityName = t(`areas.${i18nKeyFor(city)}`, city);
+    if (cityName === city) return raw;
+    return /[A-Za-z]/.test(bare) ? cityName : `${cityName} - ${bare}`;
+  }
   if (typeof t !== 'function') return canonical;
   return t(`areas.${i18nKeyFor(canonical)}`, canonical);
 };

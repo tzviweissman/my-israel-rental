@@ -310,6 +310,15 @@ async def _work_rows() -> list[dict]:
             at = at.isoformat() if isinstance(at, datetime) else str(at or "")
             if at >= iso:
                 rows.append({"kind": k, "channel": "", "business_id": r.get("business_id"), "at": at})
+    # Ads the site made for a business that the business kept, and pages it built that went live (16 Nov 2026:
+    # "Makes your ads" and "Builds your page" had nothing to prove them in the stream).
+    async for r in db.saved_ads.find({"target_type": "business", "created_at": {"$gte": iso}},
+                                     {"_id": 0, "target_id": 1, "created_at": 1}).sort("created_at", -1).limit(100):
+        rows.append({"kind": "ad_made", "channel": "", "business_id": r.get("target_id"), "at": r.get("created_at")})
+    async for r in db.business_page_versions.find({"published_at": {"$gte": iso}},
+                                                  {"_id": 0, "business_id": 1, "published_at": 1}
+                                                  ).sort("published_at", -1).limit(100):
+        rows.append({"kind": "page_built", "channel": "", "business_id": r.get("business_id"), "at": r.get("published_at")})
     rows.sort(key=lambda r: r["at"], reverse=True)
     return rows
 

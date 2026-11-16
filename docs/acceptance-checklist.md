@@ -51,5 +51,6 @@
 - [ ] Screenshot matches the mockup (spacing, colors, radii, type scale).
 - [ ] **Verified on the rendered page, not in the stylesheet.** Four separate rules in this project have looked correct in CSS and done nothing — beaten on specificity or source order by `App.css`, by `.finale p`, or by a Tailwind utility. Check the computed value in the browser.
 - [ ] Font weights: confirm the face is actually loaded (`document.fonts.check`), not just requested. A browser never synthesises a *lighter* weight — it silently substitutes the nearest one while `getComputedStyle` keeps reporting what you asked for.
+- [ ] **Nothing covers any text,** on laptop (1440×900 and 1280×720) and phone (390), English and Hebrew, at more than one moment if anything moves. On 16 Nov 2026 the sign-up panel's live work bar sat on top of the photo sphere and no check noticed. Any page: `node scripts/check-covered.mjs <url>` (scrolls it a screen at a time, fails on covered text, saves the pictures). The sign-up / log-in panel, whose stream moves: `node scripts/check-signup-panel.mjs --sample`.
 - [ ] No console errors; Lighthouse a11y ≥ 90; keyboard focus states visible.
 - [ ] Diff shown to the user; no unrelated files touched; CLAUDE.md guardrails respected (no secrets printed, no prod writes/deploys without approval).

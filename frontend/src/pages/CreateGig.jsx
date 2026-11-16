@@ -1120,7 +1120,12 @@ const CreateGig = () => {
   const priced = form.gig_type === 'store'
     ? (form.products || []).some((x) => x.price_kind === 'quote' || parseFloat(x.price) > 0)
     : (form.tiers || []).some((x) => parseFloat(x.price) > 0);
+  // The first two are done on arrival (endowed progress: a bar that starts
+  // above 0% gets finished more often; Tzvi, 16 Nov 2026). Both are true: the
+  // page is started and a listing type is picked by default.
   const readiness = [
+    { k: 'started', ok: true, step: 1, label: t('wizard.todoStarted', 'Start your page') },
+    { k: 'type', ok: !!form.gig_type, step: 1, label: t('wizard.todoType', 'Choose your listing type') },
     { k: 'name', ok: !!form.title.trim(), step: 1, label: t('wizard.todoName', 'Name what you offer') },
     { k: 'category', ok: !!form.category, step: 1, label: t('wizard.todoCategory', 'Pick a category') },
     { k: 'description', ok: (form.description || '').trim().length >= 20, step: 2, label: t('wizard.todoDescription', 'Describe what you offer') },
