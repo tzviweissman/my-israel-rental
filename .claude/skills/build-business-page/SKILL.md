@@ -63,7 +63,8 @@ your reply, either "every check passes" or the problems it listed.
 ## The steps
 
 1. **Fresh copy, then fetch the record.** Work in a new worktree of origin/main
-   (§0b.1a). `scrollcraft/starter/fetch_business.py`, real slug from the live
+   (§0b.1a) and turn its checks on: `git -C ../mir-<slug> config core.hooksPath
+   .githooks`. `scrollcraft/starter/fetch_business.py`, real slug from the live
    record, every photo on one numbered sheet. Read everything they already told
    us; never re-ask it (§1, §0b.1). Its last lines (`record_facts.py`) say what
    the order form must send and what to ask first (§0b.1b).

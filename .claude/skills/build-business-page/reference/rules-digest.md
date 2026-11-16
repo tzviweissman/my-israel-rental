@@ -156,7 +156,7 @@ tick lines as built; RULES.md is written from it at check-build and publish. Ful
    skeleton (rules 3p); choose the look and pass `check-fingerprints.mjs`
    before building sections.
 1a. Start in a fresh worktree of origin/main (`git worktree add ../mir-<slug> -b site-<slug> origin/main`,
-   node_modules junctioned); build and publish only there (Clean Plus, 16 Nov 2026).
+   node_modules junctioned, checks on: `git -C ../mir-<slug> config core.hooksPath .githooks`); build and publish only there (Clean Plus, 16 Nov 2026).
 1b. Read `record_facts.py`'s lines (fetch_business prints them): build the form to send the BOOKING fields
    from draft one; check flyers and menus against MATCH; every ASK FIRST and mismatch opens OWNER-QUESTIONS.md.
 2. Look at every photo; flag duplicates, screenshots, small sizes; ask the
