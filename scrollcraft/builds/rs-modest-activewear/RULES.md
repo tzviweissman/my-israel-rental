@@ -223,3 +223,9 @@ R3v.14 pass: three facts under "Shop the skirt, ₪320" on the first screen (bui
 
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
 <!-- 14 Nov 2026: the "Added" pop-up is heard by screen readers but not shown: on a phone it covered the page heading; the - n + on the product and the basket bar show the add. Nothing else changed. -->
+
+R3ac.1 pass: 16 Nov 2026 (Tzvi: "All sites, as a rule"): on a phone the opening is one screen and plays by itself from page load, then holds its end, one swipe from the next section; a laptop still follows the scroll; check-phone-opening passes
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
+
+<!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->

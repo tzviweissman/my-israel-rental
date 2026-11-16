@@ -569,3 +569,6 @@ body:not(.no-js) #order.is-empty .o-empty { display: block; margin: 0; font-size
 body:not(.no-js) #order.is-empty .osteps, body:not(.no-js) #order.is-empty .form { display: none; }
 
 .toast, .toast.show { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; padding: 0 !important; border: 0 !important; transform: none !important; }   /* heard, not shown: it covered the page heading on a phone; the − n + on the product and the basket bar show the add */
+
+/* Phone: the opening plays by itself in one screen (rules 3ac.1, Tzvi 16 Nov 2026) */
+@media (max-width: 860px) { .open { height: 100svh !important; } }

@@ -145,12 +145,16 @@
 <script>
 (function () {
   var open = document.getElementById('open'), stage = document.getElementById('stage'), w2 = document.getElementById('w2');
-  var still = matchMedia('(prefers-reduced-motion: reduce)').matches, tick = 0;
+  var still = matchMedia('(prefers-reduced-motion: reduce)').matches, tick = 0, phone = matchMedia('(max-width: 860px)'), autoFrom = Infinity;   // the phone clock starts once the page has loaded (3ac.1)
+  if (document.readyState === 'complete') autoFrom = performance.now() + 700; else addEventListener('load', function () { autoFrom = performance.now() + 700; });
   function ease(x) { return x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x); }
   function frame() {
     tick = 0; if (still) return;
-    var r = open.getBoundingClientRect(), span = open.offsetHeight - stage.offsetHeight;
-    var p = Math.min(1, Math.max(0, -r.top / (span * .85)));   // done at 85% of the pin, then a short hold
+    var p;
+    // Phone: the opening plays by itself in one screen (rules 3ac.1, Tzvi 16 Nov 2026)
+    if (phone.matches) { p = Math.min(1, Math.max(0, (performance.now() - autoFrom) / 6000)); if (p < 1) tick = requestAnimationFrame(frame); }
+    else { var r = open.getBoundingClientRect(), span = open.offsetHeight - stage.offsetHeight;
+    p = Math.min(1, Math.max(0, -r.top / (span * .85))); }   // done at 85% of the pin, then a short hold
     var d = ease((p - .1) / .62), t = ease((p - .52) / .3);
     stage.style.setProperty('--d', d.toFixed(4)); stage.style.setProperty('--t', t.toFixed(4));
     var on = t > .6; w2.setAttribute('aria-hidden', on ? 'false' : 'true');
