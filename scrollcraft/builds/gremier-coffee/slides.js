@@ -52,7 +52,8 @@
       function go(i) {
         if (i >= N) return finish();
         ci = i; track.style.transform = 'translate3d(0,' + (-i * 100) + '%,0)'; cls(i); if (i) film.classList.add('c2');
-        var el = vids[i].el; el.playbackRate = i || film.classList.contains('c2') ? RATE : 1;   // the first clip at its own speed while the words are up el.onended = function () { go(i + 1); };
+        var el = vids[i].el; el.playbackRate = i || film.classList.contains('c2') ? RATE : 1;   // the first clip at its own speed while the words are up
+        el.onended = function () { go(i + 1); };
         var pr = el.play(); if (pr && pr.catch) pr.catch(finish);   // play refused (Low Power Mode): show the ending at once
       }
       if (bar) bar.classList.add('in-film');
