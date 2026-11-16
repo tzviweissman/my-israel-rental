@@ -57,7 +57,7 @@ const withIds = (gig) => (gig.products || []).map((p, i) => ({ ...p, id: pid(p, 
    "product::option" as the order page reads it (OrderPage.jsx), so a size and
    its own price are always chosen and the bare product never goes in the basket. */
 const rowsOf = (gig) => withIds(gig).flatMap((p) => ((p.options || []).length
-  ? p.options.map((o) => ({ ...p, id: `${p.id}::${o.id}`, size: o.name,
+  ? p.options.map((o) => ({ ...p, options: [], id: `${p.id}::${o.id}`, size: o.name,
     price: o.price ?? p.price, price_kind: 'fixed', in_stock: p.in_stock !== false && o.in_stock !== false }))
   : [p]));
 

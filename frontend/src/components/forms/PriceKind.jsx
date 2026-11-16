@@ -17,6 +17,13 @@ export function priceText(t, p, currency) {
   const cur = currency || p?.currency || 'ILS';
   const kind = kindOf(p);
   if (kind === 'quote') return t('priceKind.onRequest', 'Price on request');
+  // Sizes at different prices: the price shown is where it starts, never a
+  // bare figure that reads as the price of every size (Burnt's Oyster steak
+  // showed "$40", its 0.5 lb price, 16 Nov 2026).
+  const sized = (p?.options || []).filter((o) => o.in_stock !== false && o.price != null).map((o) => Number(o.price));
+  if (sized.length && new Set(sized).size > 1) {
+    return t('priceKind.fromPrice', 'from {{price}}', { price: money(Math.min(...sized), cur) });
+  }
   const low = money(Number(p.price) || 0, cur);
   if (p.price_to && Number(p.price_to) > Number(p.price)) return t('priceKind.range', '{{low}} to {{high}}', { low, high: money(Number(p.price_to), cur) });
   return kind === 'from' ? t('priceKind.fromPrice', 'from {{price}}', { price: low }) : low;
