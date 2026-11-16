@@ -36,6 +36,14 @@ if (merging && git('rev-parse', '-q', '--verify', `${merging}^{commit}`).status 
   staged = staged.filter((f) => differs.has(f));
 }
 
+// The checks below read files from disk, but a commit saves the staged copy. A file in the commit that has more
+// changes on disk than were staged would be checked as one thing and saved as another (16 Nov 2026: rule 3ac's
+// contents list passed on disk and went in stale), so the two must agree: stage the rest, or set it aside.
+{
+  const onTop = new Set(lines(git('diff', '--name-only')));
+  const split = staged.filter((f) => onTop.has(f));
+  if (split.length) { console.error(`Commit refused: ${split.join(', ')} changed again on disk after it was staged, so the checks would read something other than what is saved. git add it again (or git stash the rest), then commit.`); process.exit(1); }
+}
 // a staged script never leans on a file that was never added (15 Nov 2026: check-rules.mjs went in importing
 // site-has.mjs, which sat untracked for days, and every other copy of the repo broke): its local imports are tracked or staged
 {
