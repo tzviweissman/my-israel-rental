@@ -1,0 +1,85 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- American Crust moving ad (docs/ads/blueprints/american-crust-moving.md). Their own flyer line, Boil. Bake. Brag.,
+     one word at a time over their real bagel photo, and the photo goes through each step: bubbles, oven glow, a
+     camera flash (library motion 5 d76). Drawn by window.render(t); node scripts/record-moving-ad.mjs records it. -->
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@500;700&display=block" rel="stylesheet">
+<style>
+html,body{margin:0;background:#111}
+#ad{position:relative;width:1080px;height:1920px;overflow:hidden;background:#111;font-family:Manrope,sans-serif}
+.l{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#photo{transform-origin:540px 1100px}
+#cool{background:rgba(40,110,190,.42);mix-blend-mode:multiply}
+#heat{background:radial-gradient(ellipse 900px 700px at 540px 1900px,rgba(255,120,20,.75),rgba(255,120,20,0) 70%);mix-blend-mode:screen}
+#flash{background:#fff}
+#scrim{background:linear-gradient(#000c 0,#0009 520px,#0000 900px,#0000 1350px,#000d 1620px,#000e 1920px)}
+.w{position:absolute;left:60px;font:190px/1 Anton,sans-serif;color:#F6B21B;text-shadow:0 6px 30px rgba(0,0,0,.45);transform-origin:left center}
+#sub{position:absolute;left:64px;top:912px;font:700 54px/1.2 Manrope;color:#fff;text-shadow:0 3px 16px rgba(0,0,0,.6)}
+#logo{position:absolute;left:900px;top:236px;width:130px;height:130px}
+#foot{position:absolute;left:48px;top:1520px;color:#fff}
+#foot .n{font-weight:700;font-size:40px}
+#foot .s{font-weight:500;font-size:30px;margin-top:14px;color:#eee}
+#foot .u{font-weight:700;font-size:30px;margin-top:14px;color:#F6B21B}
+#qr{position:absolute;left:868px;top:1508px;width:164px;height:164px;background:#fff;border-radius:14px;padding:8px;box-sizing:border-box}
+#qr img{width:100%;height:100%}
+</style></head><body>
+<div id="ad">
+  <img id="photo" class="l" src="bagels.webp">
+  <div id="cool" class="l"></div>
+  <canvas id="bub" class="l" width="1080" height="1920"></canvas>
+  <div id="heat" class="l"></div>
+  <div id="scrim" class="l"></div>
+  <div class="w" id="w0">Boil.</div><div class="w" id="w1">Bake.</div><div class="w" id="w2">Brag.</div>
+  <div id="sub">6 ready-to-bake bagels, ₪30</div>
+  <div id="flash" class="l"></div>
+  <img id="logo" src="logo.png">
+  <div id="foot"><div class="n">American Crust</div>
+    <div class="s">American-style bagel dough · Jerusalem</div>
+    <div class="s">Kosher, Rabbi Akiva Dershowitz</div>
+    <div class="u">myisraelrental.com/p/american-crust</div></div>
+  <div id="qr"><img src="qr.png"></div>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const cl = (x) => Math.max(0, Math.min(1, x));
+const outBack = (x) => { const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const outCubic = (x) => 1 - Math.pow(1 - x, 3);
+const AT = [0, 0.95, 1.9];              // Boil., Bake., Brag.
+const SLOT = [300, 490, 680];           // each word's line, stacked like their flyer
+let s = 11; const rnd = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
+const bubbles = [...Array(70)].map(() => ({ x: rnd() * 1080, y0: 1200 + rnd() * 800, r: 6 + rnd() * 22, v: 500 + rnd() * 700, t0: rnd() * 0.5 }));
+window.render = (t) => {
+  // Boil.: cold water and bubbles over a soft photo
+  const boil = 1 - cl((t - 0.95) / 0.3);
+  $('cool').style.opacity = boil;
+  const c = $('bub').getContext('2d'); c.clearRect(0, 0, 1080, 1920);
+  for (const b of bubbles) {
+    const a = t - b.t0; if (a < 0 || boil <= 0) continue;
+    const y = b.y0 - a * b.v; if (y < 300) continue;
+    c.strokeStyle = `rgba(255,255,255,${0.55 * boil})`; c.lineWidth = 3;
+    c.beginPath(); c.arc(b.x + Math.sin(a * 6 + b.r) * 8, y, b.r, 0, 7); c.stroke();
+  }
+  // Bake.: oven glow rises and the photo comes into focus
+  $('heat').style.opacity = cl((t - 0.95) / 0.25) * (1 - cl((t - 1.9) / 0.4));
+  const blur = 7 * (1 - cl((t - 0.95) / 0.7));
+  // Brag.: a camera flash, then the bagels sharp and full colour, settling from a small push-in
+  const fl = t >= 1.9 && t < 2.3 ? 1 - (t - 1.9) / 0.4 : 0;
+  $('flash').style.opacity = fl * 0.85;
+  const push = 1 + 0.06 * (1 - outCubic(cl((t - 1.9) / 0.9)));
+  $('photo').style.filter = `blur(${blur}px) saturate(${t < 1.9 ? 0.8 : 1})`;
+  $('photo').style.transform = `scale(${t < 1.9 ? 1.06 : push})`;
+  AT.forEach((a, i) => {
+    const el = $('w' + i);
+    if (t < a) { el.style.opacity = 0; return; }
+    el.style.opacity = 1;
+    const pop = outBack(cl((t - a) / 0.22));
+    const k = outCubic(cl((t - a - 0.38) / 0.4));
+    const big = 1.7 * (0.7 + 0.3 * pop), sc = big + (1 - big) * k;
+    el.style.top = (SLOT[i] + (760 - SLOT[i]) * (1 - k)) + 'px';
+    el.style.left = (60 + 220 * (1 - k)) + 'px';
+    el.style.transform = `scale(${sc})`;
+  });
+  const sk = outCubic(cl((t - 2.75) / 0.35));
+  $('sub').style.opacity = sk; $('sub').style.transform = `translateY(${30 * (1 - sk)}px)`;
+};
+</script></body></html>
