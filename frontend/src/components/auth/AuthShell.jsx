@@ -81,7 +81,7 @@ export default function AuthShell({ children, testId }) {
       <div className="relative flex flex-1 px-4 pb-6" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 24px)' }}>
         <div
           className="w-full max-w-[26rem] m-auto bg-white rounded-md px-6 py-7 sm:px-8 sm:py-8"
-          style={{ boxShadow: '0 2px 24px rgba(17,24,39,.14)' }}
+          style={{ boxShadow: '0 24px 60px rgba(0,0,0,.35)' }}
           data-testid="auth-card"
         >
           {children}

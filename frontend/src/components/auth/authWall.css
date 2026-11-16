@@ -1,13 +1,13 @@
 /* The tilted wall of business sites behind the sign-in card (AuthShell.jsx).
-   The mask fades the wall out around the middle so the card sits on calm grey. */
+   No fade around the card: the faded middle read as a "weird glow" (Tzvi,
+   16 Nov 2026). The tiles stay at full strength, as on Wix, and the card's own
+   shadow separates it from them. */
 .auth-wall-layer {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
   perspective: 1600px;
-  -webkit-mask: radial-gradient(ellipse 42% 50% at center, rgba(0, 0, 0, .06) 32%, #000 100%);
-  mask: radial-gradient(ellipse 42% 50% at center, rgba(0, 0, 0, .06) 32%, #000 100%);
 }
 .auth-wall-grid {
   position: absolute;
@@ -33,11 +33,7 @@
 @keyframes auth-wall-drift { to { transform: translate(-50%, -58%) rotateX(28deg) rotateZ(-14deg); } }
 @keyframes auth-wall-drift-rtl { to { transform: translate(-50%, -58%) rotateX(28deg) rotateZ(14deg); } }
 @media (prefers-reduced-motion: reduce) { .auth-wall-grid { animation: none; } }
-/* A phone: a smaller wall, faded harder so the card stays easy to read. */
+/* A phone: a smaller wall. */
 @media (max-width: 639px) {
   .auth-wall-grid { width: 900px; gap: 12px; }
-  .auth-wall-layer {
-    -webkit-mask: radial-gradient(ellipse 60% 46% at center, rgba(0, 0, 0, .04) 40%, #000 100%);
-    mask: radial-gradient(ellipse 60% 46% at center, rgba(0, 0, 0, .04) 40%, #000 100%);
-  }
 }
