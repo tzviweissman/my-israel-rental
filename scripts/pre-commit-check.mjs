@@ -18,7 +18,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { liveHash, readPublished } from './live-hash.mjs';
 import { stagedIsMeasured } from './ad-measured.mjs';
-import { FILES as CONTENTS_FILES } from './contents.mjs';
+import { FILES as CONTENTS_FILES, withContents } from './contents.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const git = (...a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 });
@@ -64,10 +64,10 @@ if (staged.some((f) => /^(\.claude\/skills\/build-business-page|scripts\/hooks)\
   if (c.status !== 0) { console.error(`Commit refused: ${c.stdout}`); process.exit(1); }
 }
 // each long rule file opens with a contents list that matches its sections (15 Nov 2026)
-if (staged.some((f) => CONTENTS_FILES.includes(f))) {
-  const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'contents.mjs'), '--check'], { cwd: ROOT, encoding: 'utf8' });
-  if (c.status !== 0) { console.error(`Commit refused: ${c.stdout}`); process.exit(1); }
-}
+// The STAGED copy is what is saved, so that is what is read: the copy on disk passed while a stale list was committed
+// (16 Nov 2026, rule 3ac: the files were staged, then check-rule-copies --sync rebuilt the lists on disk only)
+const staleContents = staged.filter((f) => CONTENTS_FILES.includes(f)).filter((f) => { const s = git('show', `:${f}`).stdout; return s && withContents(s) !== s; });
+if (staleContents.length) { console.error(`Commit refused: the contents list is out of date in the staged ${staleContents.join(', ')}. Run: node scripts/contents.mjs, then git add them again`); process.exit(1); }
 // a rule copied by hand falls behind: the full rulebook is copied into the skill, and both copies must match (10 Nov 2026)
 if (staged.includes('docs/page-generation-rules.md')) {
   const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-rule-copies.mjs')], { cwd: ROOT, encoding: 'utf8' });
