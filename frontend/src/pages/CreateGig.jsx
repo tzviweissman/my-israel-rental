@@ -631,6 +631,8 @@ const CreateGig = () => {
         biz_delivery_note: (f.biz_delivery_note || '').trim() ? f.biz_delivery_note : (data.delivery_note || ''),
         biz_kosher: (f.biz_kosher || '').trim() ? f.biz_kosher : (data.kosher || ''),
         biz_areas: (data.delivery_areas || []).length ? data.delivery_areas.map((d) => d.city) : (f.biz_areas || []),
+        // Each city's fee, filed with the business's order settings, where checkout reads it.
+        biz_area_fees: Object.fromEntries((data.delivery_areas || []).filter((d) => d.fee != null).map((d) => [d.city, d.fee])),
         faqs: cleanFaqs(f.faqs).length ? f.faqs : (data.faqs || []).map((x, i) => ({ q: x.q, a: x.a, _k: `read-${i}` })),
       };
       if (type === 'store') {
@@ -1013,6 +1015,7 @@ const CreateGig = () => {
           kosher_certification: (form.biz_kosher || '').trim().length >= 2 ? { body: form.biz_kosher.trim().slice(0, 120) } : null,
           // City names; the server keeps the ones it knows (normalize_service_areas).
           areas: form.biz_areas || [],
+          area_fees: form.biz_area_fees || {},
         }, auth).catch(() => ({ data: null }));
         if (biz?.id) payload.business_id = biz.id;
       } else if (destination && ((bizLogo && !destination.logo_url) || Object.keys(socialsOut).length

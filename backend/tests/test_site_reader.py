@@ -216,3 +216,12 @@ def test_what_the_reader_returns_is_tidied():
     with patch("utils.cloud_storage.mirror_url_to_cloudinary", no_copy):
         asyncio.run(pe._product_photos(fields, [{"name": "Board", "price": 75, "photos": ["https://c.com/b.jpg"]}], []))
     assert fields["gig_type"] == "store" and fields["items"][0]["images"] == ["https://c.com/b.jpg"]
+
+
+def test_delivery_fees_are_filed_by_city_slug():
+    """The fees a shop's delivery page lists become its order settings, keyed as checkout reads them."""
+    from routes.marketplace.businesses import fees_by_area
+    from routes.marketplace.shared import normalize_service_areas
+    areas = normalize_service_areas(["Jerusalem", "Tel Aviv"])
+    got = fees_by_area({"Jerusalem": 15, "Tel Aviv": 50, "Haifa": 40, "Nowhere": 5, "jerusalem": -1}, areas)
+    assert got == {areas[0]: 15.0, areas[1]: 50.0}  # a city not served, unknown, or a bad fee is dropped

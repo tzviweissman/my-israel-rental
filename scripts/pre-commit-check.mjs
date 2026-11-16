@@ -21,7 +21,20 @@ import { stagedIsMeasured } from './ad-measured.mjs';
 import { FILES as CONTENTS_FILES } from './contents.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
-const staged = spawnSync('git', ['diff', '--cached', '--name-only', '--diff-filter=ACMR'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+const git = (...a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 });
+const lines = (r) => r.stdout.split('\n').filter(Boolean);
+let staged = lines(git('diff', '--cached', '--name-only', '--diff-filter=ACMR'));
+// A merge commit is checked only on what the merge itself changed (16 Nov 2026: merging main into a branch was
+// refused over rule and ad files exactly as main has them, which passed this check when they went in there).
+// A file staged exactly as the branch being merged has it is that branch's work; a resolved conflict is checked.
+// The branch merged in: MERGE_HEAD once a conflict stopped the merge (pre-commit); during a clean merge
+// (pre-merge-commit) git has not written it yet, but names it in GIT_REFLOG_ACTION ("merge origin/main").
+const merging = git('rev-parse', '-q', '--verify', 'MERGE_HEAD').status === 0 ? 'MERGE_HEAD'
+  : (/^merge (\S+)$/.exec(process.env.GIT_REFLOG_ACTION || '') || [])[1];
+if (merging && git('rev-parse', '-q', '--verify', `${merging}^{commit}`).status === 0) {
+  const differs = new Set(lines(git('diff', '--cached', '--name-only', merging)));
+  staged = staged.filter((f) => differs.has(f));
+}
 
 // a staged script never leans on a file that was never added (15 Nov 2026: check-rules.mjs went in importing
 // site-has.mjs, which sat untracked for days, and every other copy of the repo broke): its local imports are tracked or staged

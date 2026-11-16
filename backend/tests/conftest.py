@@ -11,6 +11,15 @@ _ENV_PATH = Path(__file__).parent / ".env.test"
 if _ENV_PATH.exists():
     load_dotenv(_ENV_PATH)
 
+# A worktree (.claude/worktrees/<name>/) has no gitignored .env files of its own, so the suite failed to import
+# there until a wrapper loaded the main checkout's (16 Nov 2026). Fall back to the main checkout's copies.
+_BACKEND = Path(__file__).resolve().parent.parent
+if not (_BACKEND / ".env").exists() and _BACKEND.parent.parent.name == "worktrees":
+    _MAIN = _BACKEND.parents[3] / "backend"
+    for _env in (_MAIN / "tests" / ".env.test", _MAIN / ".env"):
+        if _env.exists():
+            load_dotenv(_env)
+
 TEST_ADMIN_EMAIL = os.environ.get("TEST_ADMIN_EMAIL", "")
 TEST_ADMIN_PASSWORD = os.environ.get("TEST_ADMIN_PASSWORD", "")
 TEST_OWNER_EMAIL = os.environ.get("TEST_OWNER_EMAIL", "")

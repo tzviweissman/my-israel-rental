@@ -147,6 +147,12 @@ def public_testimonials(items: Any) -> list[dict[str, str]]:
     return out[:12]
 
 
+def fees_by_area(fees: dict[str, float], areas: list[str]) -> dict[str, float]:
+    """City (name or slug) -> fee, as order_settings.area_fees keeps it: slugs of the cities served, 0 to 10,000."""
+    return {s[0]: float(v) for k, v in fees.items()
+            if 0 <= float(v) <= 10_000 and (s := normalize_service_areas([k])) and s[0] in areas}
+
+
 class BusinessIn(BaseModel):
     name: str = Field(..., min_length=2, max_length=80)
     description: str = Field("", max_length=2000)
@@ -189,6 +195,9 @@ class BusinessIn(BaseModel):
     vehicle: Optional[Vehicle] = None
     founded_year: Optional[int] = Field(None, ge=1800, le=2100)
     delivery_note: Optional[str] = Field(None, max_length=300)
+    # Each city's delivery fee, read from their website at sign-up (16 Nov 2026): city (name or slug) -> fee.
+    # Filed as order_settings.area_fees for the cities in `areas`, where checkout reads it.
+    area_fees: dict[str, float] = Field(default_factory=dict, max_length=100)
     lead_time: Optional[str] = Field(None, max_length=120)
     payment_note: Optional[str] = Field(None, max_length=200)
     kosher_certification: Optional[KosherCert] = None
@@ -609,6 +618,9 @@ async def create_business(payload: BusinessIn, user=Depends(verify_token)):
     # The site's Kashrus page names who supervises it (16 Nov 2026).
     if payload.kosher_certification:
         doc["kosher_certification"] = payload.kosher_certification.model_dump()
+    fees = fees_by_area(payload.area_fees, doc["areas"])
+    if fees:
+        doc["order_settings"] = {"area_fees": fees}
     try:
         await db.businesses.insert_one(doc)
     except DuplicateKeyError:
