@@ -1,44 +1,43 @@
 /**
- * The frame every sign-in page shares: one white card, one screen tall from
- * lg up, the form centred on the left and the sphere panel inset on the
- * right (Tzvi, 7 Oct 2026: "cleaner", one card, fits on one screen; "the log
- * in page should look the same").
+ * The frame every sign-in page shares (sign up and log in): one plain white
+ * card in the middle of a light grey page, over a tilted wall of real
+ * business sites built on MyIsraelRental (Tzvi, 16 Nov 2026: "i like wix the
+ * best", then chose the tilted wall of four Wix-like backgrounds). The wall
+ * shows shops, never places, so it stays right when the site opens in
+ * America; swap the pictures in /public/signup-wall/ for other businesses.
  *
- * The form column centres with auto margins, not justify-center: a flex
- * column centred that way clips its top out of reach of the scrollbar once
- * it overflows. Below lg the sphere is not mounted at all (a phone would
- * fetch a sphere it never draws); the card still fills the screen, with a
- * short form centred in it, and a long one simply scrolls the page.
+ * The wall fades out around the card so the middle stays calm, drifts very
+ * slowly, and stands still for anyone who asked for reduced motion. It is
+ * decoration only: aria-hidden, no pointer events, lazy pictures.
+ *
+ * The card centres with auto margins, not justify-center: a flex column
+ * centred that way clips its top out of reach once it overflows, and step 2
+ * of sign-up is a long form that simply scrolls the page.
  */
 import React from 'react';
-import SignupSphere from './SignupSphere';
-import useIsWide from '../../hooks/useIsWide';
+import './authWall.css';
+
+const WALL = Array.from({ length: 20 }, (_, i) => `/signup-wall/${(i % 12) + 1}.jpg`);
 
 export default function AuthShell({ children, testId }) {
-  const isWide = useIsWide(1024);
   return (
     <div
-      className="min-h-screen relative [overflow-x:clip]"
-      // The flow theme's one alternate surface, so the white card reads as the page.
-      style={{ background: 'var(--surface-muted, #F9FAFB)' }}
+      className="auth-wall min-h-screen relative [overflow-x:clip] flex flex-col"
+      style={{ background: '#F3F4F6' }}
       data-testid={testId}
     >
-      <div className="mx-auto max-w-[1320px] px-3 sm:px-4 pb-4 lg:pb-2" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 10px)' }}>
+      <div className="auth-wall-layer" aria-hidden="true">
+        <div className="auth-wall-grid">
+          {WALL.map((src, i) => <img key={i} src={src} alt="" loading="lazy" decoding="async" />)}
+        </div>
+      </div>
+      <div className="relative flex flex-1 px-4 pb-6" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 24px)' }}>
         <div
-          className="flex flex-col min-h-[calc(100svh-var(--nav-h,68px)-1.5rem)] rounded-3xl bg-white shadow-[0_1px_2px_rgba(17,24,39,0.04),0_12px_32px_-12px_rgba(17,24,39,0.12)] lg:grid lg:grid-cols-[1.4fr_1fr] xl:grid-cols-2 lg:h-[calc(100svh-var(--nav-h,68px)-1.25rem)] lg:min-h-[500px] lg:p-3"
+          className="w-full max-w-[26rem] m-auto bg-white rounded-md px-6 py-7 sm:px-8 sm:py-8"
+          style={{ boxShadow: '0 2px 24px rgba(17,24,39,.14)' }}
           data-testid="auth-card"
         >
-          <div
-            className="flex flex-1 flex-col px-4 py-5 sm:px-10 sm:py-10 lg:py-5 lg:overflow-y-auto"
-            data-testid="signup-form-panel"
-          >
-            <div className="w-full max-w-[30rem] m-auto">{children}</div>
-          </div>
-          {isWide && (
-            <div className="hidden lg:block lg:min-h-0" data-testid="signup-right-panel">
-              <SignupSphere />
-            </div>
-          )}
+          {children}
         </div>
       </div>
     </div>

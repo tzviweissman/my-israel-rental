@@ -21,16 +21,14 @@ import { phoneError, phonePreview } from '../utils/phoneValidation';
 import { apiErrorMessage } from '../utils/apiError';
 import PhoneInput from '../components/common/PhoneInput';
 import {
-  ArrowLeft, ArrowRight, Check, Eye, EyeOff,
+  ArrowLeft, Eye, EyeOff,
   Plane, Home, Sparkles,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import WelcomePopups from '../components/WelcomePopups';
-import DemandLines from '../components/common/DemandLines';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import AuthShell from '../components/auth/AuthShell';
 import { countStep } from '../utils/tapKind';
-import WorkForYou from '../components/auth/WorkForYou';
 
 // Namespaced so it cannot collide with the listing wizard's draft.
 const SIGNUP_DRAFT = 'signup-join';
@@ -245,199 +243,53 @@ const SignupJoin = () => {
   return (
     <>
     <AuthShell testId="signup-join-page">
-        {/* Step indicator */}
-        <div className="flex items-center gap-3 max-sm:hidden [@media(max-height:760px)]:hidden text-xs font-semibold tracking-wide text-gray-500">
-          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 1 ? 'bg-[var(--action)] text-[var(--action-ink)]' : 'bg-gray-200 text-gray-700'}`}>1</span>
-          <span className={step === 1 ? 'text-[var(--brand-primary)]' : ''}>{t('signupJoin.stepRole', 'YOUR ROLE')}</span>
-          <div className="h-px w-8 bg-gray-300" />
-          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 2 ? 'bg-[var(--action)] text-[var(--action-ink)]' : 'bg-gray-200 text-gray-700'}`}>2</span>
-          <span className={step === 2 ? 'text-[var(--brand-primary)]' : ''}>{t('signupJoin.stepDetails', 'YOUR DETAILS')}</span>
-        </div>
-
-        {/* STEP 1 — role picker */}
+        {/* STEP 1: the three choices and nothing else (Tzvi, 16 Nov 2026: the
+            Wix look, "theirs look much cleaner"). Tapping a choice moves on,
+            so there is no grey Continue waiting for one. Google is NOT here,
+            deliberately: pressed with no role chosen it once made every new
+            account a traveller in silence. It lives on step 2, where a role
+            has necessarily been chosen. */}
         {step === 1 && (
-          <section className="mt-6 max-sm:mt-0 [@media(max-height:760px)]:mt-0" data-testid="signup-step-role">
+          <section className="text-center" data-testid="signup-step-role">
             <h1
-              className="display-weight text-3xl sm:text-4xl font-semibold lg:font-normal tracking-tight"
-              // Playfair (Frank Ruhl Libre in Hebrew) via the token, and
-              // --ink instead of the leftover #0F3A3A dark teal.
-              // font-black is dropped: Playfair ships 600–800 here, so a
-              // 900 weight silently fell back to a synthesised bold.
-              // A1: extrabold below lg, regular at lg+ where this hits
-              // 60px. `lg:font-normal` is needed as well as
-              // `.display-weight` because a bare Tailwind utility would
-              // otherwise beat the token rule on source order; the class
-              // is what carries the RTL 500 override.
-              style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}
+              className="text-[26px] leading-tight font-medium tracking-tight"
+              style={{ fontFamily: 'var(--font-body)', color: 'var(--ink)' }}
               data-testid="signup-headline"
             >
               {t('signupJoin.headline', 'Join My Israel Rental')}
             </h1>
-            <p className="mt-2 text-base text-gray-600 max-sm:hidden [@media(max-height:760px)]:hidden">
-              {t('signupJoin.sub', 'Book a stay, list a property, or offer your services - all in one place.')}
+            <p className="mt-2 text-sm" style={{ color: 'var(--brand-muted)' }}>
+              {t('signupJoin.haveAccount', 'Already have an account?')}{' '}
+              <Link to={loginHref} className="font-semibold text-[var(--brand-primary)] hover:underline" data-testid="signup-login-link">
+                {t('signupJoin.logIn', 'Log in')}
+              </Link>
             </p>
-
-            <p className="mt-6 text-xs font-semibold tracking-wide uppercase text-gray-500 max-sm:hidden [@media(max-height:680px)]:hidden">
-              {t('signupJoin.question', 'What best describes you?')}
-            </p>
-
-            {/* The three roles as one list of rows (redesign, 7 Oct 2026):
-                icon, who it is for, what it costs, and a round mark that
-                fills when chosen. The tall cards with their own "Continue
-                as" line and arrow made three choices take two screens; a
-                choice is a tile you tap, and the one button below is the
-                only action (page rules 3c: choices are tiles, one quiet
-                system, no arrows that do nothing). The "Most popular"
-                badge is gone: nothing measured it. */}
-            <div className="mt-3 max-sm:mt-4 [@media(max-height:680px)]:mt-4 space-y-2 sm:space-y-2.5" role="radiogroup" aria-label={t('signupJoin.question', 'What best describes you?')} data-testid="signup-role-cards">
-              {ROLE_CARDS.map(({
-                key, Icon, tKey, defaultLabel, tDescKey, defaultDesc,
-                tValueKey, defaultValue, learnMoreHref, tLearnMoreKey, defaultLearnMore,
-              }) => {
-                const active = selectedRole === key;
-                return (
-                  /* The learn-more link is a SIBLING of the choice button
-                     (a link inside a button is invalid, and clicking it
-                     would also choose the row); the frame holds both. */
-                  <div
-                    key={key}
-                    className="rounded-2xl border bg-white transition-colors"
-                    style={{
-                      borderColor: active ? 'var(--brand-primary)' : 'var(--brand-border)',
-                      background: active ? 'rgb(var(--brand-primary-rgb) / 0.04)' : 'var(--surface, #fff)',
-                      boxShadow: active ? '0 0 0 1px var(--brand-primary)' : 'none',
-                    }}
-                  >
-                    <button
-                      type="button"
-                      role="radio"
-                      aria-checked={active}
-                      onClick={() => setSelectedRole(key)}
-                      onDoubleClick={() => { setSelectedRole(key); handleContinue(key); }}
-                      className="w-full flex items-start gap-3 sm:gap-3.5 p-3 sm:p-3.5 text-start rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 active:scale-[0.995] transition-transform"
-                      data-testid={`signup-role-${key}`}
-                    >
-                      <span
-                        className={`shrink-0 h-9 w-9 sm:h-10 sm:w-10 rounded-xl flex items-center justify-center transition-colors ${active ? 'text-white' : 'text-[var(--brand-primary)]'}`}
-                        style={{ background: active ? 'var(--brand-primary)' : 'rgb(var(--brand-primary-rgb) / 0.08)' }}
-                      >
-                        <Icon size={20} aria-hidden="true" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-base font-semibold leading-tight" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-                          {t(tKey, defaultLabel)}
-                        </span>
-                        <span className="mt-0.5 block text-sm leading-snug" style={{ color: 'var(--brand-muted)' }}>
-                          {t(tDescKey, defaultDesc)}
-                        </span>
-                        {tValueKey && (
-                          /* Each part with its own tick, not dots between them: a
-                             dot left at a line end on a phone reads as a stray
-                             mark, and bare spacing ran the parts together. */
-                          <span className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] font-semibold" style={{ color: 'var(--gold-text-on-light)' }} data-testid={`signup-role-value-${key}`}>
-                            {t(tValueKey, defaultValue).split(/\s*·\s*/).map((part) => (
-                              <span key={part} className="inline-flex items-center gap-1 first-letter:uppercase">
-                                <Check size={13} strokeWidth={3} aria-hidden="true" className="shrink-0" />
-                                <span className="inline-block first-letter:uppercase">{part}</span>
-                              </span>
-                            ))}
-                          </span>
-                        )}
-                      </span>
-                      <span
-                        className="shrink-0 mt-1 h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors"
-                        style={{
-                          borderColor: active ? 'var(--brand-primary)' : 'var(--brand-border)',
-                          background: active ? 'var(--brand-primary)' : 'transparent',
-                        }}
-                        aria-hidden="true"
-                      >
-                        {active && <Check size={14} strokeWidth={3} className="text-white" />}
-                      </span>
-                    </button>
-                    {learnMoreHref && (
-                      <Link
-                        to={learnMoreHref}
-                        className="block px-3 sm:px-3.5 pb-2.5 -mt-2 ps-[4.5rem] sm:ps-[4.75rem] text-sm sm:text-xs font-semibold hover:underline"
-                        style={{ color: 'var(--brand-primary)' }}
-                        data-testid={`signup-role-learnmore-${key}`}
-                      >
-                        {t(tLearnMoreKey, defaultLearnMore)}
-                      </Link>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-4 sm:mt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <p className="max-sm:hidden text-xs text-gray-600 max-w-md">
-                {t('signupJoin.roleHint', 'You can always add another role later from your account settings.')}
-              </p>
-              <button
-                type="button"
-                onClick={() => handleContinue()}
-                disabled={!selectedRole}
-                className="w-full sm:w-auto justify-center inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-bold shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
-                // The theme's black action with a white label. This read `--gold` on
-                  // the primary blue; since the flow theme put the accent blue into
-                  // every gold name, the label was blue on blue and the button blank.
-                  style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }}
-                data-testid="signup-continue-btn"
-              >
-                {t('signupJoin.continue', 'Continue')}
-                <ArrowRight size={16} className="[[dir=rtl]_&]:rotate-180" aria-hidden="true" />
-              </button>
-            </div>
-
-            {/* NO Google button on this step, deliberately.
-
-                It used to sit here, below the cards, and it could be
-                pressed with no card selected — in which case no role was
-                remembered and the new account was created as a traveller
-                in silence. A cleaner or a plumber taking the fastest-
-                looking route landed on a traveller's dashboard with
-                nothing to say why.
-
-                It lives on step 2 instead, above the form, where a role
-                has necessarily been chosen to get there. That also puts
-                it in front of someone BEFORE they type out name, phone
-                and password — offering the one-tap route after the form
-                is filled in is offering it too late to be worth
-                anything. */}
-
-            <DemandLines compact className="mt-4 flex justify-center [@media(max-height:760px)]:hidden" />
-
-            {/* F4 — the feature library, linked from /join. Someone still
-                deciding which card to press is exactly who benefits from
-                reading what the site actually does. Below the cards, so it
-                never competes with the choice itself. */}
-            <div className="mt-4 sm:mt-5 flex flex-wrap justify-center gap-x-5 gap-y-1 text-sm" style={{ color: 'var(--brand-muted)' }}>
-              <span>
-                {t('signupJoin.haveAccount', 'Already have an account?')}{' '}
-                <Link to={loginHref} className="font-semibold text-[var(--brand-primary)] hover:underline" data-testid="signup-login-link">
-                  {t('signupJoin.logIn', 'Log in')}
-                </Link>
-              </span>
-              <span>
-                {t('signupJoin.notSure', 'Not sure yet?')}{' '}
-                <Link
-                  to="/what-you-can-do"
-                  className="font-semibold text-[var(--brand-primary)] hover:underline"
-                  data-testid="signup-what-you-can-do"
+            <div className="mt-6 space-y-3 text-start" role="group" aria-label={t('signupJoin.question', 'What best describes you?')} data-testid="signup-role-cards">
+              {ROLE_CARDS.map(({ key, tKey, defaultLabel, tDescKey, defaultDesc }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => { setSelectedRole(key); handleContinue(key); }}
+                  className="w-full rounded border border-gray-300 bg-white px-4 py-3 text-start transition-colors hover:border-gray-900 focus:outline-none focus-visible:border-gray-900 focus-visible:ring-1 focus-visible:ring-gray-900"
+                  data-testid={`signup-role-${key}`}
                 >
-                  {t('features.title', 'What you can do here')}
-                </Link>
-              </span>
+                  <span className="block text-[15px] font-medium" style={{ color: 'var(--ink)' }}>{t(tKey, defaultLabel)}</span>
+                  <span className="mt-0.5 block text-[13px] leading-snug" style={{ color: 'var(--brand-muted)' }}>{t(tDescKey, defaultDesc)}</span>
+                </button>
+              ))}
             </div>
-            {/* On a laptop this sits in the right panel (SignupSphere); a phone has no panel, so it follows here. */}
-            <WorkForYou className="mt-6 lg:hidden" />
+            <p className="mt-5 text-xs" style={{ color: 'var(--brand-muted)' }}>
+              {t('signupJoin.notSure', 'Not sure yet?')}{' '}
+              <Link to="/what-you-can-do" className="font-semibold text-[var(--brand-primary)] hover:underline" data-testid="signup-what-you-can-do">
+                {t('features.title', 'What you can do here')}
+              </Link>
+            </p>
           </section>
         )}
 
         {/* STEP 2 — details form */}
         {step === 2 && activeCard && (
-          <section className="mt-5 max-sm:mt-0 [@media(max-height:760px)]:mt-0" data-testid="signup-step-details">
+          <section data-testid="signup-step-details">
             <div className="flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
@@ -456,8 +308,8 @@ const SignupJoin = () => {
 
             <div className="mt-3">
               <h1
-                className="text-2xl sm:text-3xl font-extrabold tracking-tight"
-                style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}
+                className="text-2xl font-medium tracking-tight"
+                style={{ fontFamily: 'var(--font-body)', color: 'var(--ink)' }}
               >
                 {t('signupJoin.detailsHeadline', 'Create your account')}
               </h1>
