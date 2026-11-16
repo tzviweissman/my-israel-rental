@@ -6,12 +6,15 @@
   if (!st) return;
   var rooms = [].slice.call(st.querySelectorAll('.r-room')), dots = [].slice.call(st.querySelectorAll('.r-dots a')), n = rooms.length;
   st.classList.add('live');
-  var still = matchMedia('(prefers-reduced-motion: reduce)').matches, want = null, raf = 0, last = -1;
+  var phone = matchMedia('(max-width: 860px)'), autoFrom = performance.now() + 1500, still = matchMedia('(prefers-reduced-motion: reduce)').matches, want = null, raf = 0, last = -1;
   function frame() {
     raf = 0;
     var r = st.getBoundingClientRect(), run = st.offsetHeight - innerHeight;
     // each room has one screen of scroll: the first two thirds hold it still, the last third wipes the next one in
-    var p = Math.min(Math.max(-r.top / Math.max(run, 1), 0), 1) * (n - 1), at = Math.floor(p), f = p - at;
+    // Phone: the opening plays by itself in one screen (rules 3ac.1, Tzvi 16 Nov 2026): one room a second, then it holds the last
+    var auto = phone.matches, k = auto ? (still ? 1 : Math.min(Math.max((performance.now() - autoFrom) / 6000, 0), 1)) : Math.min(Math.max(-r.top / Math.max(run, 1), 0), 1);
+    if (auto && k < 1) ask();
+    var p = k * (n - 1), at = Math.floor(p), f = p - at;
     var t = still ? (f > .5 ? 1 : 0) : Math.min(Math.max((f - .45) / .55, 0), 1);
     t = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
     var base = t >= 1 ? at + 1 : at;   // the room fully in view

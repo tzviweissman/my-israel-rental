@@ -414,6 +414,7 @@ label.chip { display: inline-flex; align-items: center; position: relative; }
 @media (prefers-reduced-motion: reduce) { .rooms.go .r-room:first-child .r-front, .rooms.go .r-room:first-child .r-word { animation: none; } }
 .r-dots { display: none; }
 .rooms.live { height: calc(var(--n) * 100svh); }
+@media (max-width: 860px) { .rooms.live { height: 100svh; } }  /* Phone: the opening plays by itself in one screen (rules 3ac.1, Tzvi 16 Nov 2026) */
 .rooms.live .r-stage { position: sticky; top: 0; height: 100svh; min-height: 560px; overflow: hidden; }
 .rooms.live .r-room { position: absolute; inset: 0; clip-path: inset(0 0 0 calc((1 - var(--t, 1)) * 100%)); }
 .rooms.live .r-room:not(:first-child) { --t: 0; }
