@@ -11,6 +11,8 @@
  *   WIDE    the page is wider than the screen (it scrolls sideways)
  *   INTRO   a slides opening with no data-intro (sitekit.opening_slides(intro=...), rules 3aa.29)
  *   FROZEN  the opening says its first clip plays on arrival (data-intro over 0) and it has not moved after 4 s
+ *   STUCK   an opening that plays by itself on a phone (one screen tall, rules 3ac.1) has not reached its closing words
+ *           (.at-end) within 40 s (Gremier, 16 Nov 2026: the next-clip line sat inside a comment and phones stopped on clip one)
  */
 import { webkit, devices } from 'playwright';
 
@@ -34,6 +36,11 @@ for (const url of urls) {
       slides: !!film, intro: film ? film.getAttribute('data-intro') : null, t: v ? v.currentTime : null,
     };
   });
+  if (r.slides && await page.evaluate(() => { const f = document.querySelector('.film.slides'); return f.style.height === '100svh' && f.querySelectorAll('.slide').length > 1; })) {
+    let end = false;
+    for (let i = 0; i < 36 && !end; i++) { await page.waitForTimeout(1000); end = await page.evaluate(() => document.querySelector('.film.slides').classList.contains('at-end')); }
+    if (!end) problems.push(`STUCK   ${url}: the opening plays by itself on a phone and had not reached its closing words after 40 s (${await page.evaluate(() => document.querySelector('.film.slides .track').style.transform)})`);
+  }
   for (const e of errs) problems.push(`ERROR   ${url}: ${e.slice(0, 160)}`);
   if (r.wide > 1) problems.push(`WIDE    ${url}: ${r.wide}px wider than an iPhone screen`);
   if (r.slides && r.intro === null) problems.push(`INTRO   ${url}: the opening has no data-intro: say how many seconds of the first clip play on arrival, or 0 (3aa.29)`);

@@ -105,6 +105,18 @@ if (builds.size) {
   }
   if (behind.size) problems.push(`this checkout is behind main's rules (${[...behind].slice(0, 8).join(', ')}${behind.size > 8 ? ` and ${behind.size - 8} more` : ''}): merge main first (git merge main), then answer the new rules in RULES.md`);
 }
+// A RULES.md answers only rules the commit itself carries (16 Nov 2026: Gremier's RULES.md went to main answering R3ac.1
+// while that rule sat only in the committing checkout's unstaged rules-checklist.md; check-rules read the working copy and
+// passed, and every other checkout was refused). The checklist is read as it will be committed (the index), not from disk.
+{
+  const idx = spawnSync('git', ['show', ':docs/rules-checklist.md'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 });
+  const known = new Set([...(idx.stdout || '').matchAll(/^(R[0-9][0-9a-z]*\.[0-9]+)\s*\|/gm)].map((m) => m[1]));
+  for (const f of staged.filter((x) => /^scrollcraft\/builds\/[^/]+\/RULES\.md$/.test(x))) {
+    const r = spawnSync('git', ['show', `:${f}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 });
+    const unknown = [...new Set([...(r.stdout || '').matchAll(/^(R[0-9][0-9a-z]*\.[0-9]+)\s+(?:pass|n\/a|fix|todo)\b/gm)].map((m) => m[1]))].filter((id) => !known.has(id));
+    if (known.size && unknown.length) problems.push(`${f} answers ${unknown.join(', ')}, not in docs/rules-checklist.md as committed: stage the rule's checklist line (and its rule homes) in this commit, or wait until it is on main`);
+  }
+}
 for (const folder of builds) {
   const dir = path.join('scrollcraft', 'builds', folder);
   if (!fs.existsSync(path.join(ROOT, dir, 'index.html'))) continue;  // not a site (or deleted)
