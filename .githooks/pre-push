@@ -6,5 +6,17 @@ while read local_ref local_sha remote_ref remote_sha; do
   case "$remote_sha" in 0000000000000000000000000000000000000000) base="" ;; *) base="$remote_sha" ;; esac
   git cat-file -e "$base" 2>/dev/null || base=""
   node scripts/check-push-rules.mjs "$local_sha" $base || exit 1
+  # Railway's watch paths look only at the LAST commit's own files (CLAUDE.md, Railway deploy):
+  # backend work under a last commit that does not touch backend/ ships nothing, with no error.
+  if [ -n "$base" ] && git cat-file -e "$local_sha^" 2>/dev/null; then
+    for side in backend frontend; do
+      if [ -n "$(git diff --name-only "$base" "$local_sha" -- "$side/")" ] && [ -z "$(git diff --name-only "$local_sha^" "$local_sha" -- "$side/")" ]; then
+        echo "" >&2
+        echo "WARNING: this push changes $side/, but its last commit does not, so Railway will SKIP the $side deploy." >&2
+        echo "  Fix: make the last commit one that touches $side/ (rebase it to the top), or after pushing" >&2
+        echo "  check scripts/wait-deploy.mjs shows the $side built, not SKIPPED." >&2
+      fi
+    done
+  fi
 done
 exit 0

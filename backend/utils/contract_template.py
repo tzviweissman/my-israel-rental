@@ -527,13 +527,17 @@ def ensure_templates(uploads_root: Path) -> dict[str, Path]:
     reached nobody. A contract change that silently does not ship is the
     worst kind, because the deploy is green and the document is stale.
 
-    The stamp is a hash of this module written beside the PDFs. No PDF
+    The stamp is a hash of this module written beside the PDFs. After editing this
+    file, start the server once and commit the two PDFs AND .generator-stamp. No PDF
     parser, no new dependency, and it costs one small read per boot.
     """
     out_dir = uploads_root / "templates"
     out_dir.mkdir(parents=True, exist_ok=True)
     stamp_file = out_dir / ".generator-stamp"
-    stamp = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()[:16]
+    # The stamp is committed with the PDFs (git add -f, uploads/ is ignored), so a fresh checkout or
+    # worktree does not rewrite them on its first boot and leave two changed files behind (16 Nov 2026).
+    # Line endings are evened out first: a Windows checkout has CRLF and Railway LF.
+    stamp = hashlib.sha256(Path(__file__).read_bytes().replace(b"\r\n", b"\n")).hexdigest()[:16]
     try:
         current = stamp_file.read_text(encoding="utf-8").strip()
     except OSError:
