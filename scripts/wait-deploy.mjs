@@ -11,7 +11,8 @@ import path from 'node:path';
 
 const SERVICES = { backend: 'my-israel-rental Backend', frontend: 'My Israel Rental Frontend' };
 const DONE = ['SUCCESS', 'SKIPPED', 'FAILED', 'CRASHED', 'REMOVED'];
-const run = (cmd, args, cwd) => spawnSync(cmd, args, { cwd, encoding: 'utf8', shell: process.platform === 'win32', maxBuffer: 1 << 26 });
+// The shell is needed for the npm `railway` shim on Windows; git never needs it.
+const run = (cmd, args, cwd) => spawnSync(cmd, args, { cwd, encoding: 'utf8', shell: cmd === 'railway' && process.platform === 'win32', maxBuffer: 1 << 26 });
 
 const sha = run('git', ['rev-parse', process.argv[2] || 'HEAD']).stdout.trim();
 if (!sha) { console.error('Unknown commit'); process.exit(2); }
@@ -40,11 +41,15 @@ for (;;) {
   await new Promise((r) => setTimeout(r, 20_000));
 }
 // REMOVED: a later push's deploy replaced this one, which carries this commit's code too.
-const ok = Object.values(seen).every((s) => s === 'SUCCESS' || s === 'REMOVED');
+// SKIPPED is right for a side this commit does not change (a backend-only commit skips the frontend).
+const touches = (side) => !!run('git', ['diff', '--name-only', `${sha}^`, sha, '--', `${side}/`]).stdout.trim();
+const fine = (side, s) => s === 'SUCCESS' || s === 'REMOVED' || (s === 'SKIPPED' && !touches(side));
+const ok = Object.entries(seen).every(([side, s]) => fine(side, s));
 for (const [side, s] of Object.entries(seen)) {
-  if (s === 'SKIPPED') console.log(`${side} was SKIPPED: the commit's own files do not touch ${side}/, so nothing of it shipped.`);
+  if (s === 'SKIPPED' && !touches(side)) console.log(`${side}: skipped, as it should be (this commit does not change ${side}/).`);
+  else if (s === 'SKIPPED') console.log(`${side} was SKIPPED: the commit's own files do not touch ${side}/, so nothing of it shipped.`);
   else if (s === 'REMOVED') console.log(`${side}: replaced by a newer deploy, which includes this commit; check that one if in doubt.`);
   else if (s !== 'SUCCESS') console.log(`${side} ended ${s} after ${since()}: look at its build log.`);
 }
-console.log(ok ? `Both live after ${since()}.` : 'Not both built.');
+console.log(ok ? `Deployed as expected after ${since()}.` : 'Not deployed as expected.');
 process.exit(ok ? 0 : 1);
