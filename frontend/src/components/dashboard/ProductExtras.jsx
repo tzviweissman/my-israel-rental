@@ -45,7 +45,7 @@ export default function ProductExtras({ option: o, onChange, i, others = [] }) {
           <div className="flex flex-wrap items-center gap-2">
             <label className="inline-flex items-center gap-2">
               {t('editListing.stock', 'How many you have')}
-              <input type="number" min="0" inputMode="numeric" value={o.stock ?? ''} className={`${box} w-24`} style={boxStyle}
+              <input type="number" min="0" inputMode="numeric" value={o.stock ?? ''} className={`${box} w-32`} style={boxStyle}
                      onChange={(e) => onChange({ stock: e.target.value, ...(Number(e.target.value) > 0 ? { in_stock: true } : {}) })}
                      placeholder={t('editListing.stockPh', 'Not counted')} data-testid={`product-stock-${i}`} />
             </label>

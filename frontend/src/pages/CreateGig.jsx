@@ -60,6 +60,7 @@ import { useFormDraft, readDraft, clearDraft } from '../hooks/useFormDraft';
 import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink';
 import { productPhotos } from '../utils/productPhotos';
 import SizeFields, { sizeValue } from '../components/marketplace/SizeFields';
+import ProductExtras, { cleanExtras } from '../components/dashboard/ProductExtras';
 import PhoneInput from '../components/common/PhoneInput';
 import { apiErrorMessage } from '../utils/apiError';
 import { FILL_HANDOFF } from '../components/onboarding/FillForMe';
@@ -990,6 +991,7 @@ const CreateGig = () => {
           width_cm: sizeValue(p.width_cm),
           length_cm: sizeValue(p.length_cm),
           group: (p.group || '').trim() || null,
+          ...cleanExtras(p),
         })) : [],
         weekly_availability: form.gig_type === 'appointment' ? form.weekly_availability : null,
         slot_duration_minutes: form.gig_type === 'appointment' ? form.slot_duration_minutes : null,
@@ -2061,6 +2063,8 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, onDuplicate, o
           placeholder={t('wizard.productDescPh', 'Short description (optional): size, materials, colours…')}
           className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" />
         <SizeFields option={p} onChange={(patch) => onUpdate(i, patch)} testid={`wizard-product-size-${i}`} />
+        {/* The sizes read from their shop, to check before saving (16 Nov 2026); the dashboard's same editor. */}
+        <ProductExtras option={p} i={i} onChange={(patch) => onUpdate(i, patch)} />
       </div>
     ))}
     <button type="button" onClick={onAdd} className="text-sm font-semibold text-[var(--brand-primary)] flex items-center gap-1" data-testid="wizard-product-add">
