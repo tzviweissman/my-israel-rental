@@ -149,3 +149,10 @@ regardless, per the brief.
 should read and extend this file rather than re-reading every report.
 treat it as used and do not repeat it.
 which is a different report type). Flagged as documentation drift, same as the
+2026-11-12 - information scent - "Back to businesses" pill on business sites (mir-back.js)
+2026-11-13 - choice visibility (options with prices shown, not in a drop-down) - L.A. Cholent order form meat choice
+2026-11-14 - recognition over recall - The Brown Box order form, delivery date (open days as taps)
+2026-11-15 - Zeigarnik effect (unfinished task shown) - Sales summary, each item panel cost prompt
+2026-11-15 - Zeigarnik effect (unfinished costs count) - Sales summary, Each item panel
+2026-11-16 - fresh start effect - Clean Plus booking, first-day field
+2026-11-17 - self-reference effect - sign-up card headline
