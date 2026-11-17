@@ -814,3 +814,13 @@ name for the offer (flavours tap or swap, sizes grow or stack, a dish builds or 
 mid-action; everything moves for a reason; the product fills half the width or more; a change every beat and no
 stall; words wait for the end; one colour world per beat across the whole screen; it ends whole on a clean hero
 frame and loops. `check-moving-ad.py` measures the opening and the stalls (M2, M5).
+
+## 25. Every listing photo in an ad is clean (Tzvi, 17 Nov 2026)
+
+The MyIsraelRental orbit ad used twelve of the home page's public business tiles, and half of them could not go in as
+they were: two flyers with a person's name and phone numbers, one with a logo and a kashrut certificate, a phone
+screenshot with its chat icon and black bars, and a peeling wall that was a "before" photo on its own. They were caught
+by eye. So before a layout, every listing photo an ad uses is looked at and cut to its subject: no phone number, email
+or person's name, no screenshot edges or app icons, no other logo or certificate, and never a "before" photo without its
+"after". A photo that cannot be cut clean is left out and the ad says which.
+

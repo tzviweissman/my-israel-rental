@@ -949,6 +949,17 @@
    "confirmed_by": "moving-ad-vs-library.py and check-moving-ad.py",
    "retried": false,
    "status": "planned"
+  },
+  {
+   "id": "A5.7",
+   "rule": "Every listing photo in an ad is clean, cut to its subject before the layout",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "docs/static-ad-rules.md section 25",
+   "confirmed_by": "the blueprint answer, looked at by eye",
+   "retried": false,
+   "status": "planned"
   }
  ]
 }

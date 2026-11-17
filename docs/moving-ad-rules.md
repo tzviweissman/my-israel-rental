@@ -55,6 +55,10 @@ A thing falls because it was dropped, splits because it was cut, flips because i
 poured. Nothing floats about for no reason; nothing slides in from the side just to arrive. The cause can be seen:
 a finger, a knife, gravity, a pour (n03: the bar rides a chocolate ribbon).
 
+Before anything is built, write one sentence saying what moves in depth or what causes each beat. The MyIsraelRental
+ad's first cut had tiles sliding into slots "just to arrive" and scored 4; its second, where each colour pulse from the
+stay swings a ring of real businesses round it in depth, scored 5 (17 Nov 2026).
+
 ## M4. The product is big through the action
 
 During the action the product fills at least half the screen's width, centred, sharp. Small products in a busy

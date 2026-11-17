@@ -14,6 +14,16 @@ const q = process.argv[4] || '';
 const only = process.argv[5];
 const name = process.argv[3];
 const FPS = 30, LEN = 8;
+// Plan first, then build (Tzvi 17 Nov 2026): the MyIsraelRental ad's first cut was drawn before its blueprint's
+// stages 1 to 4 were answered and did not match the plan. A folder named _something is a kit test, not an ad.
+const AD = path.basename(HERE);
+if (!AD.startsWith('_')) {
+  const bp = path.join(ROOT, 'docs', 'ads', 'blueprints', `${AD}.md`);
+  if (!fs.existsSync(bp)) { console.error(`no blueprint: node scripts/ad-blueprint.mjs ${AD}, answered through stage 4, before anything is recorded`); process.exit(1); }
+  try { execFileSync('node', [path.join(ROOT, 'scripts', 'ad-blueprint.mjs'), '--check', AD, '4'], { stdio: 'pipe' }); }
+  catch (e) { console.error(`${AD}: answer the blueprint through stage 4 before recording, even test frames:
+${String(e.stderr || e.stdout).trim()}`); process.exit(1); }
+}
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'lacrec-'));
 const b = await chromium.launch();
 const p = await (await b.newContext({ viewport: { width: 1080, height: 1920 } })).newPage();
