@@ -1,7 +1,7 @@
 import VisitBreakdown from '../dashboard/VisitBreakdown';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Home, Eye, Users, Calendar, Briefcase, Store, Inbox, MessageCircle, QrCode, Globe, MousePointerClick, Utensils, Pointer } from 'lucide-react';
+import { Home, Eye, Users, Calendar, Briefcase, Store, Inbox, MessageCircle, QrCode, Globe, MousePointerClick, Utensils, Pointer, ShoppingBag } from 'lucide-react';
 import axios from 'axios';
 import { API } from '../../App';
 import AttentionQueue from './AttentionQueue';
@@ -187,6 +187,33 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
         </p>
       )}
       <div className="mb-8" />
+
+      {/* Orders customers placed on the site, in the chosen range, and which businesses got them. */}
+      {flow && (
+        <div className="bg-white p-4 sm:p-5 rounded-xl border border-[var(--brand-border)] mb-8" data-testid="admin-website-orders">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg shrink-0" style={{ background: 'rgb(var(--brand-primary-rgb) / 0.10)' }}>
+              <ShoppingBag size={18} color="var(--brand-primary)" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{(flow.website_orders || 0).toLocaleString()}</p>
+              <p className="text-xs text-gray-500">{t('admin.kpiWebsiteOrders', 'Orders through the website')}</p>
+            </div>
+          </div>
+          {metrics.website_orders?.length > 0 && (
+            <ul className="mt-4 divide-y divide-[var(--brand-border)] text-sm">
+              {metrics.website_orders.slice(0, 10).map((r) => (
+                <li key={r.id} className="flex items-center justify-between gap-3 py-2">
+                  <span className="font-medium truncate" dir="auto">{r.business}</span>
+                  <span className="shrink-0 text-gray-500">
+                    {t('admin.ordersCount', '{{count}} orders', { count: r.orders })} · {t('admin.lastOrder', 'last {{date}}', { date: formatDate(r.last) })}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <GrowthCharts token={token} />
       <VisitBreakdown API={API} token={token} everyone className="mb-8" />

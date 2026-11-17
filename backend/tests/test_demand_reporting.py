@@ -168,6 +168,25 @@ def test_the_overview_counts_people_not_scripts(admin, db, owner):
     assert "restaurant_visitors" in after["flow"] and "restaurant_taps" in after["flow"]
 
 
+def test_the_overview_counts_website_orders_per_business(admin, db, owner):
+    """Orders customers placed on the site count; ones a business typed in itself do not."""
+    stamp, biz = owner["stamp"], f"{owner['stamp']}-orders-biz"
+    get = lambda: requests.get(f"{BASE}/admin/metrics", params={"range": "today"}, headers=admin, timeout=30).json()  # noqa: E731
+    before = get()["flow"]["website_orders"]
+    db.businesses.insert_one({"_id": biz, "name": f"TEST orders {stamp}", "slug": biz})
+    now = datetime.now(UTC).isoformat()
+    db.store_orders.insert_many([{"_id": f"{biz}-{i}", "business_id": biz, "source": s, "created_at": now}
+                                 for i, s in enumerate(("website", "website", "manual"))])
+    try:
+        m = get()
+        assert m["flow"]["website_orders"] == before + 2
+        row = next(r for r in m["website_orders"] if r["business"] == f"TEST orders {stamp}")
+        assert row["orders"] == 2
+    finally:
+        db.store_orders.delete_many({"business_id": biz})
+        db.businesses.delete_one({"_id": biz})
+
+
 def test_the_owner_sees_visitors_and_taps_on_each_listing(owner):
     r = requests.get(f"{BASE}/properties/performance/summary",
                      headers={"Authorization": f"Bearer {owner['token']}"}, timeout=30)

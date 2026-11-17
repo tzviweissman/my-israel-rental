@@ -96,12 +96,20 @@ def _api_is_reachable() -> bool:
     parsed = _urlparse(TEST_API_BASE)
     host = parsed.hostname or "localhost"
     port = parsed.port or (443 if parsed.scheme == "https" else 80)
-    try:
-        with _socket.create_connection((host, port), timeout=2):
-            _live_api_up = True
-    except OSError:
-        _live_api_up = False
-    return _live_api_up
+    # TEST_API_WAIT=<seconds>: keep trying that long, for a server just started (16 Nov 2026: a worktree API took
+    # ~5 minutes to come up and the run had already skipped everything). Uvicorn opens its port only once startup
+    # has finished, so a connection means it is ready.
+    import time as _time
+    deadline = _time.monotonic() + float(os.environ.get("TEST_API_WAIT") or 0)
+    while True:
+        try:
+            with _socket.create_connection((host, port), timeout=2):
+                _live_api_up = True
+        except OSError:
+            _live_api_up = False
+        if _live_api_up or _time.monotonic() >= deadline:
+            return _live_api_up
+        _time.sleep(3)
 
 
 # ---------------------------------------------------------------------------

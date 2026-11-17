@@ -255,6 +255,19 @@ async def get_admin_metrics(
     flow["restaurant_taps"] = await db[RESTAURANT_TAPS].count_documents(day_q)
     first_rest = await db.section_visits.find_one({"section": "restaurants"}, {"day": 1}, sort=[("day", 1)])
 
+    # Orders customers placed on the site (Tzvi, 17 Nov 2026: "how many orders were made through the website"),
+    # not the ones a business typed in itself. Per business too, so the number says who is selling.
+    web = {"source": "website", **since}
+    flow["website_orders"] = await db.store_orders.count_documents(web)
+    by_biz = await db.store_orders.aggregate([
+        {"$match": web},
+        {"$group": {"_id": "$business_id", "orders": {"$sum": 1}, "last": {"$max": "$created_at"}}},
+        {"$sort": {"orders": -1, "last": -1}},
+    ]).to_list(50)
+    names = {b["_id"]: b.get("name") for b in await db.businesses.find(
+        {"_id": {"$in": [r["_id"] for r in by_biz]}}, {"name": 1}).to_list(50)}
+    website_orders = [{"id": r["_id"], "business": names.get(r["_id"]) or "?", "orders": r["orders"], "last": r["last"]} for r in by_biz]
+
     # When view logging actually began, so "all time" can say what it means
     # instead of implying it covers the whole life of the site.
     first = await db.marketplace_view_events.find_one(REAL, {"at": 1}, sort=[("at", 1)])
@@ -271,6 +284,7 @@ async def get_admin_metrics(
         # nothing before it was recorded, and saying so is the honest label.
         "site_since": site["since"],
         "restaurants_since": (first_rest or {}).get("day"),
+        "website_orders": website_orders,
     }
 
 

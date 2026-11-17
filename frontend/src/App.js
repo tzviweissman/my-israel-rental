@@ -302,9 +302,11 @@ function App() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(response.data);
-      // Apply the user's saved UI language preference (cross-device).
+      // Apply the user's saved UI language preference (cross-device), unless the address asks for one
+      // (?lng=he): that is a deliberate choice for this page, and it lost to the account's setting (17 Nov 2026).
       const pref = response.data?.preferred_language;
-      if (pref && (pref === 'en' || pref === 'he') && !i18n.language.startsWith(pref)) {
+      const asked = new URLSearchParams(window.location.search).has('lng');
+      if (!asked && pref && (pref === 'en' || pref === 'he') && !i18n.language.startsWith(pref)) {
         i18n.changeLanguage(pref);
       }
     } catch (error) {
