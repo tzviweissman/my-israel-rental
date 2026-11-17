@@ -1,0 +1,122 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- MyIsraelRental moving ad, "the orbit" (docs/ads/blueprints/myisraelrental-moving.md; idea and plan by Fable 5.2).
+     The stay is the sun: one real stay card never moves, and a ring of twelve real business photos (the home page's own
+     public tiles, cut to their subjects in tiles/) orbits it in depth, behind the big word and in front of the room. Each
+     pulse of colour the stay sends out swings the next four to the front. All code, no generation.
+     Record: node scripts/record-moving-ad.mjs docs/ads/gen/myisraelrental-moving myisraelrental-moving
+     Check:  backend/.venv/Scripts/python scripts/check-moving-ad.py docs/ads/myisraelrental-moving.mp4 -->
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Playfair+Display:ital,wght@1,600&family=Manrope:wght@500;700;800&display=block" rel="stylesheet">
+<style>
+html,body{margin:0;background:#111}
+#ad{position:relative;width:1080px;height:1920px;overflow:hidden;background:#167AB8;font-family:Manrope,sans-serif;color:#fff}
+.l{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#far,#near{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#far{z-index:1}#word{z-index:2}#stay{z-index:3}#near{z-index:4}#h1,#h2{z-index:2}
+#word{position:absolute;left:0;right:0;top:470px;text-align:center;font:300px/1 Anton,sans-serif;white-space:nowrap;transform-origin:50% 70%}
+#h1{position:absolute;left:0;right:0;top:236px;text-align:center;font:italic 600 78px/1 'Playfair Display',serif;opacity:0}
+#h2{position:absolute;left:0;right:0;top:330px;text-align:center;font:120px/1 Anton,sans-serif;letter-spacing:6px;opacity:0}
+#stay{position:absolute;left:220px;top:832px;width:640px;height:416px;border-radius:28px;overflow:hidden;
+  box-shadow:0 40px 80px #0006,0 0 0 8px #fff;}
+#stay img{width:100%;height:100%;object-fit:cover}
+#glint{position:absolute;inset:0;background:linear-gradient(105deg,#fff0 40%,#ffffff70 50%,#fff0 60%);background-size:300% 100%}
+.t{position:absolute;border-radius:20px;overflow:hidden;box-shadow:0 18px 40px #0005,0 0 0 5px #fff}
+.t img{width:100%;height:100%;object-fit:cover;display:block}
+#logo{position:absolute;left:910px;top:236px;width:120px;height:120px;border-radius:26px;background:#0F2A4A;object-fit:contain;padding:16px;box-sizing:border-box}
+#foot{position:absolute;left:48px;top:1520px;width:780px;color:#fff}
+#foot .n{font-weight:800;font-size:42px}
+#foot .s{font-weight:500;font-size:30px;margin-top:14px;opacity:.9}
+#foot .u{font-weight:700;font-size:32px;margin-top:14px}
+#qr{position:absolute;left:868px;top:1508px;width:164px;height:164px;background:#fff;border-radius:14px;padding:8px;box-sizing:border-box}
+#qr img{width:100%;height:100%}
+</style></head><body>
+<div id="ad">
+  <div id="bgA" class="l"></div><div id="bgB" class="l"></div>
+  <div id="far"></div>
+  <div id="h1">Find a stay.</div>
+  <div id="h2">FIND THE</div>
+  <div id="word">A STAY.</div>
+  <div id="stay"><img src="tiles/s07.jpg" alt=""><div id="glint"></div></div>
+  <div id="near"></div>
+</div>
+<script src="../_kit/kit.js"></script>
+<script>
+window.AD = {"name":"MyIsraelRental","lines":["Stays, local businesses and restaurants"],"link":"myisraelrental.com","logo":"logo-mark.png"};
+K.foot();
+const $ = (id) => document.getElementById(id);
+const BLUE = '#167AB8';
+// the ring, in order; each wave's four sit together on it, and the word is true of the four lit at the front
+const RING = ['b10', 'b06', 'b00', 'b02', 'b03', 'b04', 'b01', 'b08', 'b09', 'b05', 'b07a', 'b07b'];
+const WAVES = [
+  { at: 0.0, word: 'DINNER.', bg: '#C9781E', ink: '#fff' },
+  { at: 1.6, word: 'A PARTY.', bg: '#2B8A8E', ink: '#fff' },
+  { at: 3.2, word: 'A FRESH LOOK.', bg: '#E7A9A2', ink: '#111827' },
+];
+const WHIP = 4.8, LAND = 5.6;                            // still from about 5.95 s to 8 (A10.3)
+const CX = 540, CY = 1030, RX = 440, RY = 330;          // the orbit, round the stay card's centre
+// ring angle that puts wave w's four at the front (front = bottom of the ellipse, nearest the viewer)
+const PHI = (w) => -(120 * w + 45);
+const PHI_END = -105 - 720;                              // b00, b02, b03, b04 nearest on the still: one and a half turns on
+const tiles = RING.map((id, i) => {
+  const el = document.createElement('div'); el.className = 't'; el.innerHTML = `<img src="tiles/${id}.jpg" alt="">`;
+  $('far').appendChild(el); return { el, i, wave: Math.floor(i / 4) };
+});
+// the word is fitted to the width, whatever its length
+const fit = (txt) => { const w = $('word'); w.style.fontSize = '300px'; w.textContent = txt;
+  const s = Math.min(1, 1000 / w.scrollWidth); w.style.fontSize = Math.floor(300 * s) + 'px'; };
+let shown = null;
+const word = (txt, ink, scale, op) => {
+  if (txt !== shown) { fit(txt); shown = txt; }
+  Object.assign($('word').style, { color: ink, opacity: op, transform: `scale(${scale})` });
+};
+window.render = async (t) => {
+  let wi = 0; while (wi + 1 < WAVES.length && t >= WAVES[wi + 1].at) wi++;
+  const k = t - WAVES[wi].at;
+  // the ring's angle: each pulse swings it to its wave with a magnet-like overshoot; frame one is 20 degrees in (M2)
+  let phi;
+  if (t < WHIP) {
+    const from = wi === 0 ? PHI(0) + 20 : PHI(wi - 1), to = PHI(wi);
+    const sw = wi === 0 ? K.outBack(K.cl(0.35 + k / 0.45)) : K.outBack(K.cl(k / 0.45));
+    phi = from + (to - from) * sw + Math.sin(t * 2.4) * 3;       // and it never stops drifting (M5)
+  } else {
+    phi = PHI(2) + (PHI_END - PHI(2)) * K.outBack(K.at(t, WHIP, LAND - WHIP));
+  }
+  const widen = 1 + 0.15 * Math.sin(Math.PI * K.at(t, WHIP, LAND - WHIP));
+  const endK = K.at(t, WHIP, 0.6);
+  // the ground: each pulse floods the wave's colour out from the stay; blue comes back for the end
+  const cur = t < WHIP ? WAVES[wi].bg : BLUE, prev = t < WHIP ? (wi === 0 ? BLUE : WAVES[wi - 1].bg) : WAVES[2].bg;
+  const fl = t < WHIP ? K.outCubic(K.cl((wi === 0 ? 0.12 : 0) + k / 0.5)) : K.outCubic(K.at(t, WHIP, 0.5));
+  $('bgA').style.background = prev; $('bgB').style.background = cur;
+  $('bgB').style.clipPath = `circle(${fl * 2300}px at ${CX}px ${CY}px)`;
+  // the tiles: size and order from their depth; the wave in front lit, the rest hazed; the far half behind the word
+  tiles.forEach((tl) => {
+    const th = (tl.i * 30 + phi) * Math.PI / 180;
+    const z = Math.cos(th);
+    const x = CX + RX * widen * Math.sin(th), y = CY + RY * widen * z;
+    const bob = t < WHIP && tl.wave === wi ? Math.sin(t * 5 + tl.i) * 8 : 0;
+    const s = 160 + 72 * z;
+    const lit = t >= WHIP ? endK : (tl.wave === wi ? 1 : 0);
+    Object.assign(tl.el.style, { left: `${x - s / 2}px`, top: `${y - s / 2 + bob}px`, width: `${s}px`, height: `${s}px`,
+      zIndex: Math.round(500 + z * 100), filter: `brightness(${0.55 + 0.45 * lit}) saturate(${0.5 + 0.5 * lit})`,
+      transform: `rotate(${Math.sin(th) * -8}deg)` });
+    const want = z > 0.05 ? 'near' : 'far';
+    if (tl.el.parentNode.id !== want) $(want).appendChild(tl.el);
+  });
+  // the stay: sways with each swing, pushes in 4% at most (the room stays the real photo), a glint on each pulse
+  const swing = t < WHIP ? Math.sin(Math.PI * K.cl(k / 0.6)) : Math.sin(Math.PI * K.at(t, WHIP, 0.8));
+  $('stay').style.transform = `rotate(${swing * 2.5}deg)`;
+  $('stay').querySelector('img').style.transform = `scale(${1 + 0.04 * Math.sin(Math.PI * Math.min(1, t / 5.9))})`;
+  $('glint').style.backgroundPosition = `${100 - (t < WHIP ? K.cl(k / 0.9) : K.at(t, LAND, 0.3)) * 100}% 0`;
+  // the words: A STAY. on frame one; each wave's word slams 0.5 s into its pulse (the last one fades as it goes);
+  // REST. lands at 5.6 s under "Find a stay. / FIND THE"
+  if (t >= LAND) word('REST.', '#fff', 1.25 - 0.25 * K.outBack(K.at(t, LAND, 0.25)), 1);
+  else if (t >= WHIP) word(WAVES[2].word, WAVES[2].ink, 1, 1 - K.at(t, WHIP, 0.3));
+  else if (k < 0.5) {
+    const before = wi === 0 ? { word: 'A STAY.', ink: '#fff' } : WAVES[wi - 1];
+    word(before.word, before.ink, 1, wi === 0 ? 1 : 1 - K.cl(k / 0.25));
+  } else word(WAVES[wi].word, WAVES[wi].ink, 1.25 - 0.25 * K.outBack(K.cl((k - 0.5) / 0.22)), 1);
+  const h = K.at(t, LAND, 0.3);
+  $('h1').style.opacity = h; $('h2').style.opacity = h;
+  $('h2').style.transform = `translateY(${(1 - K.outCubic(h)) * -30}px)`;
+};
+</script></body></html>
