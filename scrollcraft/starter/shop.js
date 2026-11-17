@@ -198,7 +198,9 @@
   var HE = (document.documentElement.lang || '').indexOf('he') === 0, T = function (en, he) { return HE ? he : en; };
   var ORD = document.getElementById('order').dataset, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var STEP = 24, limit = STEP, query = '', hideOut = false;
-  var $$ = function (sel, root) { return [].slice.call((root || cat).querySelectorAll(sel)); };
+  // this block has its own scope: byName lives in the order block above, so it is defined here too (17 Nov 2026)
+  function byName(n) { return CAT.items.filter(function (it) { return it.name.toLowerCase() === n; })[0]; }
+  var $$= function (sel, root) { return [].slice.call((root || cat).querySelectorAll(sel)); };
   var groups = function () { return $$('.grp:not(.grp-pop)'); };
   var gName = function (g) { return g.dataset.c || ((g.querySelector('h2') || {}).textContent || '').trim(); };
   function itemOf(pc) {
