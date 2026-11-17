@@ -35,6 +35,12 @@ still running (`RemoteTrigger` list_runs) and say so.
   screenshots and the fixes you kept) and, with Tzvi's go-ahead to push,
   into `main`. Two runs may both have edited `open-issues.md`: keep every
   line from both.
+- **One audit PR open at a time.** After opening your pull request, close
+  every older open audit PR (`Audit fixes <date>`) whose fixes are all
+  carried in yours or already on `main`, with a one-line comment naming
+  your PR. A PR with a fix you didn't carry stays open, and your PR body
+  says which and why. (Tzvi, 17 Nov 2026: each day's PR replaced the last
+  without closing it, and #4 to #24 piled up unmerged.)
 
 ## 2. Verify before you fix. This is the point of the exercise.
 
