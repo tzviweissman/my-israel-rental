@@ -52,14 +52,14 @@ function jobOf(e) {
 // What that kind of message looks like. Wording only, no names or amounts: an example, labelled as one.
 const SAMPLE = {
   order_alert: ['New order just came in.', 'Confirm'],
-  received: ['Thanks! Your order arrived and is being prepared.', ''],
+  received: ['Thanks. Your order arrived and is being prepared.', ''],
   received_email: ['Your receipt', ''],
-  confirmed: ['Your order is confirmed. See you soon!', ''],
+  confirmed: ['Your order is confirmed. See you soon.', ''],
   confirmed_email: ['Your order is confirmed', ''],
   review_asked: ['How did we do? Leave us a review.', 'stars'],
   reminder_sent: ['Reminder: your booking is tomorrow.', ''],
-  auto_reply: ['Thanks for your message! We will get back to you shortly.', ''],
-  reply_drafted: ['Hi! Yes, we have availability this week.', 'draft'],
+  auto_reply: ['Thanks for your message. We will get back to you shortly.', ''],
+  reply_drafted: ['Hi, yes, we have availability this week.', 'draft'],
   ad_made: ['Fresh this week', 'ad'],
   page_built: ['Your business, online', 'page'],
   site_built: ['Your business, online', 'page'],
