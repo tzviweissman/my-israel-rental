@@ -1,0 +1,76 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- Chicken Munch moving ad, the glaze pour (docs/ads/blueprints/chicken-munch-moving.md; idea and plan by Fable 5.2).
+     The clip (clip.py, his own poppers with his glaze pouring) plays under the words; the glaze runs down HOT., then
+     DRIPPING and "Kosher chicken," arrive. Code draws the words, the drips, the logo and the QR.
+     Record: node scripts/record-moving-ad.mjs docs/ads/gen/chicken-munch-moving chicken-munch-moving
+     Check:  backend/.venv/Scripts/python scripts/check-moving-ad.py docs/ads/chicken-munch-moving.mp4 -->
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Fraunces:ital,wght@1,600&family=Manrope:wght@500;700&display=block" rel="stylesheet">
+<style>
+html,body{margin:0;background:#111}
+#ad{position:relative;width:1080px;height:1920px;overflow:hidden;background:#0d1b33;font-family:Manrope,sans-serif;color:#F6EBD9}
+.l{position:absolute;left:0;top:0;width:1080px;height:1920px;object-fit:cover}
+#scrim{background:linear-gradient(#0000 0,#0000 1380px,#0d1b33d0 1540px,#0d1b33f2 1920px)}
+#front{position:absolute;left:0;top:0;width:1080px;height:960px}
+.w{position:absolute;left:0;right:0;text-align:center}
+#kc{top:232px;font:italic 600 76px/1 Fraunces,serif;color:#F6EBD9}
+#dr{top:318px;font:150px/1 Anton,sans-serif;letter-spacing:4px;color:#E8742A}
+#hot{top:452px;font:340px/1 Anton,sans-serif;letter-spacing:6px;
+  background:linear-gradient(#E8742A 0,#E8742A var(--fill),#F6EBD9 var(--fill));-webkit-background-clip:text;background-clip:text;color:transparent}
+.drip{position:absolute;width:30px;background:#E8742A;border-radius:0 0 15px 15px}
+#logo{position:absolute;left:830px;top:104px;width:210px;height:auto}
+#foot{position:absolute;left:48px;top:1520px;width:780px}
+#foot .n{font-weight:700;font-size:40px}
+#foot .s{font-weight:500;font-size:30px;margin-top:14px;opacity:.85}
+#foot .u{font-weight:700;font-size:30px;margin-top:14px}
+#qr{position:absolute;left:868px;top:1508px;width:164px;height:164px;background:#fff;border-radius:14px;padding:8px;box-sizing:border-box}
+#qr img{width:100%;height:100%}
+</style></head><body>
+<div id="ad">
+  <img id="clip" class="l" src="ground.jpg" alt="">
+  <div id="scrim" class="l"></div>
+  <div id="kc" class="w">Kosher chicken,</div>
+  <div id="dr" class="w">DRIPPING</div>
+  <div id="hot" class="w">HOT.</div>
+  <div class="drip" id="d0"></div><div class="drip" id="d1"></div><div class="drip" id="d2"></div>
+  <img id="front" alt="">
+</div>
+<script src="../_kit/kit.js"></script>
+<script>
+window.AD = {"name":"Chicken Munch","lines":["Original Hot Poppers, Jerusalem","Hechsher of Rav Akiva Dershowitz"],"link":"myisraelrental.com/p/chicken-munch","logo":"logo-mark.png"};
+K.foot();
+const $ = (id) => document.getElementById(id);
+const CLIP_FRAMES = 198;
+const CLIP_FPS = CLIP_FRAMES / 6.0;  // the clip's 6.6 s played in 6.0, so the end holds 2 s (A10.3)
+const hech = document.querySelectorAll('#foot .s')[1];
+// the drips hang under H, O and T (x of each letter's foot, measured once the font is in)
+// the glaze drips off DRIPPING itself once it lands, so the last frame shows the joke too (A9.7)
+const DRIPS = [{ x: 0.285, len: 55, at: 4.65 }, { x: 0.47, len: 90, at: 4.8 }, { x: 0.705, len: 42, at: 4.95 }];
+let hotBox = null;
+// the glaze and the top pieces sit in front of HOT.: front/NNNN.png is each clip frame's top half with only its
+// orange pixels kept (keyfront.py; a canvas cannot read file:// pixels in the recorder)
+async function front(t) {
+  const n = CLIP_FRAMES ? Math.max(1, Math.min(CLIP_FRAMES, Math.floor(t * CLIP_FPS) + 1)) : 0;
+  const src = `front/${String(n).padStart(4, '0')}.png`;
+  const f = $('front');
+  if (!f.src.endsWith(src)) { f.src = src; await f.decode().catch(() => {}); }
+}
+window.render = async (t) => {
+  if (CLIP_FRAMES) await K.clip($('clip'), t, { frames: CLIP_FRAMES, fps: CLIP_FPS });
+  await front(t);
+  if (!hotBox) hotBox = $('hot').getBoundingClientRect();
+  // HOT. settles on frame one, then the glaze colour runs down it from the top (0.5 to 2.3 s)
+  $('hot').style.transform = `scale(${1.08 - 0.08 * K.outCubic(K.at(t, 0, 0.5))})`;
+  $('hot').style.setProperty('--fill', `${Math.round(K.inOut(K.at(t, 0.5, 1.8)) * 100)}%`);
+  DRIPS.forEach((d, i) => {
+    const g = K.outCubic(K.at(t, d.at, 0.9)) * d.len;
+    Object.assign($('d' + i).style, { left: `${d.x * 1080 - 11}px`, top: '452px', width: '22px', height: `${g}px`, opacity: g > 1 ? 1 : 0 });
+  });
+  // DRIPPING slams in at 4.4 s; "Kosher chicken," wipes in at 5.0; the hechsher line fades in
+  const s = K.at(t, 4.4, 0.25);
+  $('dr').style.opacity = s > 0 ? 1 : 0;
+  $('dr').style.transform = `scale(${1.5 - 0.5 * K.outBack(s)})`;
+  $('kc').style.clipPath = `inset(0 ${100 - K.outCubic(K.at(t, 5.0, 0.45)) * 100}% 0 0)`;
+  hech.style.opacity = 0.85 * K.at(t, 5.0, 0.5);
+};
+</script></body></html>

@@ -1,0 +1,5 @@
+{"shape": "story", "ground": "#0d1b33",
+ "boxes": [{"what": "glaze ribbon", "x": 0.477, "y": 0.0, "w": 0.046, "h": 0.46, "colour": "#d9661c"},
+           {"what": "bowl of glazed chicken", "x": 0.167, "y": 0.448, "w": 0.666, "h": 0.307, "colour": "#b0703a"}],
+ "keep_empty": [{"what": "headline", "x": 0.05, "y": 0.118, "w": 0.9, "h": 0.33, "over": ["glaze ribbon"]},
+                {"what": "foot", "x": 0.04, "y": 0.781, "w": 0.92, "h": 0.099}]}
