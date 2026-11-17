@@ -3230,6 +3230,53 @@
    "confirmed_by": "LOOK",
    "gremier_retry": false,
    "status": "planned"
+  },
+  {
+   "id": "R3ad.4",
+   "rule": "Home sections named for the business's own things, from its category in the anatomy study; no slot names",
+   "how": [
+    "ASK",
+    "EYE"
+   ],
+   "built_by": "Blueprint stage 3 plan: the - sections: line in CONCEPT.md ## Body, written before any layout from docs/inspo/awwwards-anatomy-2026-10-22",
+   "confirmed_by": "LOOK",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ad.1",
+   "rule": "At least two sections after the opening take a form only this business could have, from its own data or main task",
+   "how": [
+    "ASK",
+    "EYE"
+   ],
+   "built_by": "Blueprint stage 3 plan names them; CONCEPT.md ## Body - signature: lines (id, what, from)",
+   "confirmed_by": "check-signature-body -> confirm only, plus LOOK",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ad.2",
+   "rule": "Menu bar, steps and closing band written for this site, not the starter markup in new colours",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "Written per site from its category and references; the starter keeps only behaviour (phone menu, basket count, footer facts)",
+   "confirmed_by": "check-body-alike -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ad.3",
+   "rule": "Home page rhythm after the opening: 2+ ground changes, one 1.6x headline, one edge-to-edge picture or a collage",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Section plan assigns a ground, a type size and one full-bleed or collage section before build (with R3v.6 heights)",
+   "confirmed_by": "check-rhythm -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
   }
  ]
 }

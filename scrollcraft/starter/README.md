@@ -6,6 +6,18 @@ works**, never **how it looks**: every business still gets its own brand,
 opening and signature moment, and `scripts/check-fingerprints.mjs` fails a
 build that comes out too close to another.
 
+**Its look is a placeholder, not a design** (rules 3ad, 17 Nov 2026). The menu
+bar (`header.top`, `a.mark`, `nav.nav`, `div.top-r`), the `.sec` heading and
+card grid, the numbered steps and the dark `.close` band shipped on 15 live
+sites almost unchanged, so every site matched after its opening
+(`docs/inspo/sameness-2026-11-17/`). Keep what they DO (phone menu, basket
+count, footer facts); rewrite their markup and look for each site, from its
+category and its references. `scripts/check-body-alike.mjs` refuses a new site
+whose menu bar, steps or closing band shares 60% of its classed elements with a
+live one; `check-signature-body.mjs` wants two sections only this business
+could have; `check-rhythm.mjs` wants grounds that change, one headline jump and
+one edge-to-edge section.
+
 ## Steps
 
 1. **Fetch the business** (one command, writes nothing live). From `backend/`:

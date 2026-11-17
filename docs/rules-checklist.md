@@ -6,14 +6,14 @@ Sections (line each starts on; read with that offset):
 - 70: 1. Facts and words
 - 101: 2. Opening
 - 170: 3. Sections and worlds
-- 225: 4. Photos and media
-- 255: 5. Prices and savings
-- 277: 6. Order and booking flow
-- 303: 7. Motion
-- 332: 8. Phone
-- 348: 8b. From the seven videos, part two (29 Oct 2026)
-- 370: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 381: 9. Finish
+- 229: 4. Photos and media
+- 259: 5. Prices and savings
+- 281: 6. Order and booking flow
+- 307: 7. Motion
+- 336: 8. Phone
+- 352: 8b. From the seven videos, part two (29 Oct 2026)
+- 374: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 385: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -221,6 +221,10 @@ R3z.5 | A site on a dark ground has one light section (questions, prices or how 
 R3ab.1 | Every h1 to h3 says what the visitor gets on its own, never only a section label ("How it works", "Our services", "Why choose us" and their Hebrew); "Questions" and contact headings allowed | 3ab.1 | script: `node scripts/check-headings.mjs <urls>`
 R3ab.2 | Real reviews are stacked and fully shown on a phone, never in a swiping row, moving ribbon or fold-out | 3ab.2 | script: `node scripts/check-reviews-open.mjs <urls>`; n/a with no reviews
 R3ab.3 | Each review shows the first name the owner may show and where it was left (with a link when the source has one), a photo only with permission; a press mention is the outlet's own sentence, never a bare logo | 3ab.3 | LOOK: read every review; n/a with no reviews
+R3ad.4 | Planned before any layout: each home section named for the business's own things, from its category in docs/inspo/awwwards-anatomy-2026-10-22 with the real site it follows, on a "- sections:" line in CONCEPT.md "## Body"; no slot names ("How it works", "Gallery", "About") | 3ad.4, 3t | LOOK: CONCEPT.md ## Body against the home page
+R3ad.1 | At least two sections after the opening take a form only this business could have, shaped by its own data or main task (not a card grid in new colours), each on a "- signature:" line (its #id, what the visitor does or sees, and from: what data or task) in CONCEPT.md "## Body" | 3ad.1 | script: `node scripts/check-signature-body.mjs <build>` plus LOOK that each is this business's own
+R3ad.2 | The menu bar, steps and closing band are written for this site, not the starter's markup in new colours (60% or more of a part's classed elements shared with a live page fails) | 3ad.2, 3p.1 | script: `node scripts/check-body-alike.mjs <build>`
+R3ad.3 | The home page has a rhythm after the opening: two or more changes of ground, one headline at least 1.6x the others, one edge-to-edge picture or film or a collage of different sizes | 3ad.3, 3v.6 | script: `node scripts/check-rhythm.mjs <urls>`
 
 ## 4. Photos and media
 

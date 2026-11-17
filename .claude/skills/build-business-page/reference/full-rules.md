@@ -2,51 +2,52 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 110: 1. The job, in one line
-- 115: 2. What the AI gets, and the only facts it may use
-- 148: 3. Hard rules (checked: a page breaking one is thrown away and remade)
-- 185: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
-- 227: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
-- 295: 3b. The category checklist (from the Inspo study)
-- 334: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 467: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 562: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
-- 699: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 764: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 935: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
-- 1231: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 1269: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 1384: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 1463: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 1495: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 1522: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 1568: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 1605: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1677: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1702: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1739: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1856: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
-- 1877: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1948: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
-- 2033: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 2143: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 2235: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 2260: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 2300: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2477: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2504: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2569: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2586: 4. What is reported to the owner instead (content gaps)
-- 2595: 5. How to write
-- 2644: 5a. Lessons from the practice pages
-- 2673: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2722: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2739: 6. Playbooks for the most common businesses
-- 2859: 7. Choosing the three options (automatic page builder only)
-- 2883: 8. Photos, video and the tools
-- 3109: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3177: 9. The scroll sections: what the practice pages become
-- 3212: 10. Open decisions (need Tzvi)
+- 111: 1. The job, in one line
+- 116: 2. What the AI gets, and the only facts it may use
+- 149: 3. Hard rules (checked: a page breaking one is thrown away and remade)
+- 186: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
+- 228: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
+- 296: 3b. The category checklist (from the Inspo study)
+- 335: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 468: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 563: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
+- 700: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 765: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 936: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
+- 1232: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 1270: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 1385: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 1464: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 1496: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 1523: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 1569: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 1606: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1680: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1705: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1742: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1859: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
+- 1880: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1951: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+- 2036: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 2146: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 2238: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 2263: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 2303: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 2480: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2507: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2572: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2589: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2635: 4. What is reported to the owner instead (content gaps)
+- 2644: 5. How to write
+- 2693: 5a. Lessons from the practice pages
+- 2722: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2771: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2788: 6. Playbooks for the most common businesses
+- 2908: 7. Choosing the three options (automatic page builder only)
+- 2932: 8. Photos, video and the tools
+- 3158: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3226: 9. The scroll sections: what the practice pages become
+- 3261: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -1612,7 +1613,9 @@ script, Jost), and Chicken Munch shares Anton with Michal Yodaiken.
    pulls the record and every photo onto one numbered sheet in one command;
    `sitekit.py`, `site.css` and `site.js` give the menu bar, phone menu,
    footer, phone bar, contacts labelled by what they do, owner-filled gallery
-   and questions. The starter is how the site works, never how it looks.
+   and questions. The starter is how the site works, never how it looks: its
+   menu bar, steps and closing band markup are a working default to rewrite
+   for each site, never shipped as they are (3ad.2).
 2. **The look is chosen fresh for each business** from its own logo, photos
    and menu, and written into `scrollcraft/fingerprints.json` (hero,
    signature, nav, close, layout, ground, own_colours) before any section is
@@ -2582,6 +2585,52 @@ scroll opening were changed the same way.
    pinned act) and `scrollcraft/starter/film.js`; a hand-written opening does it itself, as L.A. Cholent's does. Checked
    by `scripts/check-phone-opening.mjs` (WebKit as an iPhone, never scrolling: HELD when the opening is over 1.15
    screens, STILL when nothing changed in 7 s).
+
+## 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+
+Tzvi: "look through our custom sites and see how they all look very similar and they dont have any uniqueness to them
+other than the hero". Eight live sites side by side, screen by screen (`docs/inspo/sameness-2026-11-17/`), had the same
+menu bar (logo, pill tabs, pill button), the same `.sec` (a heading, a short line, a grid of equal cards in a 74rem
+column), the same three numbered steps and the same dark closing band, all from the starter. Only the fonts, the colours
+and the opening differed. The rules asked for a special opening and nothing after it, and check-fingerprints compared
+only what each site's fingerprint said about its nav and close. Real sites (the anatomy study,
+`docs/inspo/awwwards-anatomy-2026-10-22/`) change ground from section to section, give the product a form only it could
+have (Agrumea's floating jars, Delta's coffee quiz, Aventura's panel per service, floor plans for houses), jump the type
+size, and mix collages with edge-to-edge pictures. In the 17 Nov videos the winning car-parts redesign was built round the
+business's own job (a car whose parts open and label, a working part finder), and Kyle Skelly's expedition site got its
+signature section from the expeditions' own heights. Not asked of a site published before 17 Nov 2026 (rule-dates.mjs);
+when the scripts first ran, 15 live sites shared the starter's menu bar (and Michal Balloons and The Gift Boutique each
+other's), 14 a closing band, and 21 of 24 home pages had no rhythm. They are left as they are unless Tzvi asks.
+
+1. **A signature body.** At least two sections after the opening take a form only this business could have, shaped by
+   its own data or its main task: tap the rooms of a home to build a cleaning plan, a wall of before and after sliders of
+   her real cupboards, build the office coffee bar from the real jugs and bottles, fill the box with the real flavours.
+   Not a grid of cards with a new colour. CONCEPT.md has a `## Body` part with one line per signature section:
+   `- signature: #<id> | what the visitor does or sees | from: <the data or task it is shaped by>`, the id a section of
+   the home page after the opening. Checked by `scripts/check-signature-body.mjs` (MISSING, SHAPE, NOID) at a new
+   site's publish; that it really is this business's own is a LOOK.
+2. **The parts after the opening are written for this site.** The menu bar, the steps and the closing band are not the
+   starter's markup with new colours: each is written for this site, from its category (3t) and its own references
+   (3c.1). The starter keeps how they work (the phone menu, the basket count, the footer's facts). Checked by
+   `scripts/check-body-alike.mjs`: each part's classed elements (tag.class) against every live page, SAME when 60% or
+   more are shared (an exact match missed the starter's bar, which differed only in the logo inside it). The footer is
+   left out, because 3v.1 asks every site for the same five parts.
+3. **A rhythm on the home page.** After the opening, at least two changes of ground between neighbouring sections (a
+   colour of its own, or a picture ground); one section whose headline is at least 1.6 times the middle size of the
+   others' headlines; and one section with a picture or film edge to edge (95% of the width, half a screen tall) or a
+   collage of three or more pictures of clearly different sizes. Heights stay check-heights' (3v.6). Checked by
+   `scripts/check-rhythm.mjs` (GROUND, SCALE, BLEED) at 1366x800. 1.6, not 2: Graza (120 px against 72 px) plainly
+   has the jump; our starter's `.big` at 1.46 does not. Tried on six real shops on 17 Nov: five passed (Graza, Olipop,
+   Omsom, Diaspora, Blue Bottle); Flamingo Estate's headings are plain divs, so SCALE is not judged when nothing over
+   24 px is found.
+4. **Sections named from the business.** Before any layout, the blueprint asks "what sections does this business
+   need?" and answers from its category in the anatomy study (`docs/inspo/awwwards-anatomy-2026-10-22/`): each home
+   section is named for the business's own things (rooms, jars, boxes, the bar, the studio, past events), with the real
+   site it follows, in CONCEPT.md's `## Body` on a `- sections:` line. "How it works", "Gallery", "About" and "FAQ" are
+   slot names, not section names: a FAQ may stay, under the visitor's own question (3ab.1). LOOK.
+
+Every new build also gets `screens.jpg` in its folder at each publish check (`scripts/screen-strip.mjs`: the home page
+screen by screen at 1280x800), which is the picture a review of 3ad starts from.
 
 ## 4. What is reported to the owner instead (content gaps)
 

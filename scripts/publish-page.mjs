@@ -86,6 +86,11 @@ const CHECK_ONLY = process.argv.includes('--check');
   if (isNew) {
     const fp = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-fingerprints.mjs'), SRC], { encoding: 'utf8' });
     if (fp.status !== 0) problems.push(`too like a live page:\n${fp.stdout}${fp.stderr}`);
+    // the parts after the opening are its own (Tzvi, 17 Nov 2026: "no uniqueness other than the hero"; rules 3ad.1, 3ad.2)
+    const sig = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-signature-body.mjs'), SRC], { encoding: 'utf8' });
+    if (sig.status !== 0) problems.push(`no signature body (3ad.1):\n${sig.stdout}${sig.stderr}`);
+    const alike = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-body-alike.mjs'), SRC], { encoding: 'utf8' });
+    if (alike.status !== 0) problems.push(`menu bar, steps or closing band copied from another site (3ad.2):\n${alike.stdout.split('\n').filter((l) => /^SAME/.test(l)).join('\n')}${alike.stderr}`);
   }
   // every line of the rules checklist answered in RULES.md, and answered after the last change. A site built from a
   // blueprint (scripts/blueprint.mjs, Tzvi 1 Nov 2026) has RULES.md written from it here, so it is never stale
@@ -163,6 +168,8 @@ const CHECK_ONLY = process.argv.includes('--check');
     // headings say the benefit, reviews stay open on a phone (Tzvi, 12 Nov 2026, rules 3ab)
     ['check-headings.mjs', 'has a heading that is only a section label', 'R3ab.1'], ['check-reviews-open.mjs', 'hides its reviews on a phone', 'R3ab.2'],
     ['check-phone-opening.mjs', 'holds the scroll with its phone opening', 'R3ac.1'],
+    // the home page has a rhythm: grounds change, one headline jumps in size, one section opens edge to edge (Tzvi, 17 Nov 2026, rules 3ad.3)
+    ['check-rhythm.mjs', 'has a home page with no rhythm (one ground, one heading size, no edge-to-edge section)', 'R3ad.3'],
     // the page as an iPhone shows it: Safari's engine, where a film led only by seeking stands still (Tzvi, 14 Nov 2026, rules 3aa.30)
     ['check-iphone.mjs', 'breaks or stands still on an iPhone', 'R3aa.30'],
     // Correctness, so no rule date: they run on every site, however old (Tzvi, 12 Nov 2026: "these issues shouldnt
@@ -176,6 +183,11 @@ const CHECK_ONLY = process.argv.includes('--check');
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }
     results.push({ why, ...r });
   }
+  // the home page screen by screen, for whoever reviews it next (17 Nov 2026); never blocks a publish.
+  // Spawned, not spawnSync: a blocked event loop would stop this process's own server answering it.
+  const strip = await new Promise((r) => { let err = ''; const c = spawn(process.execPath, [path.join(ROOT, 'scripts', 'screen-strip.mjs'), base + 'index.html', path.join(SRC, 'screens.jpg')], { cwd: ROOT });
+    c.stderr.on('data', (d) => { err += d; }); c.on('exit', (code) => r({ code, err })); });
+  console.log(strip.code === 0 ? `screens: ${path.join(SRC, 'screens.jpg')}` : `screens: not made (${strip.err.split('\n')[0]})`);
   server.close();
   for (const r of results) if (r.code !== 0) problems.push(`${r.why}:\n${r.out.split('\n').filter((l) => l.trim() && !/: checked$|^\S+: \d+ choices tapped/.test(l)).join('\n')}`);
   if (problems.length) {

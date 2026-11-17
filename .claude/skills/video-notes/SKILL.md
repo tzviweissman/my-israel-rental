@@ -32,6 +32,24 @@ being diagnosed. Check this first, always.
 
 ## Getting the transcript
 
+### 0. Which browser: the user's Chrome first for more than one video
+
+Verified 17 Nov 2026, four videos in a row: `yt-dlp --write-auto-subs` got
+**HTTP 429** on every subtitle; the in-app Browser pane read two transcripts,
+then YouTube throttled it (the page below the player stayed a grey skeleton,
+no "Show transcript" button, playback buffering at 2s per 5s). The user's
+Chrome (claude-in-chrome) read the other two at once. So:
+
+- **One video:** the in-app pane is fine.
+- **Two or more, or the first try shows a skeleton page:** go straight to
+  claude-in-chrome. One tab, one video at a time.
+- In Chrome, never `await` long inside `javascript_tool` (it froze at 45s):
+  start the clicks with `setTimeout` and return, `computer wait` 10s, then
+  `get_page_text`. The transcript text is in the page text once the panel
+  has opened, even when the segment count reads 0.
+- Do not retry yt-dlp after a 429, and do not reach for browser cookies to
+  get past it (refused as unauthorized access).
+
 ### 1. Find the video
 
 If the user says it is open, check rather than asking:
