@@ -1,0 +1,26 @@
+diff --git a/scrollcraft/builds/chicken-munch/order.html b/scrollcraft/builds/chicken-munch/order.html
+index c1eda3b5..6ae4c5cb 100644
+--- a/scrollcraft/builds/chicken-munch/order.html
++++ b/scrollcraft/builds/chicken-munch/order.html
+@@ -195,7 +195,7 @@
+     if (html && both()) html += '<li><span>Two currencies, so two orders</span><span>sent together</span></li>';
+     document.getElementById('sum-list').innerHTML = html || '<li><span>Nothing yet</span></li>';
+     var tc = curs(), tt = totals(), tb = document.getElementById('total');
+-    tb.innerHTML = tc.length ? tc.map(function (c) { var n = tc.length === 1 && MirCode.code() ? MirCode.after(tt[c]) : tt[c]; return (both() ? '<span class="ordn">Order ' + (c === 'USD' ? 1 : 2) + ': </span>' : '') + '<span data-order-total data-currency="' + c + '">' + money(n, c) + '</span>'; }).join('') + (deliveryOn ? '<span class="dnote"> + delivery</span>' : '') : '0';
++    tb.innerHTML = tc.length ? tc.map(function (c) { var n = tc.length === 1 && MirCode.code() ? MirCode.after(tt[c]) : tt[c]; return (both() ? '<span class="ordn">Order ' + (c === 'USD' ? 1 : 2) + ': </span>' : '') + '<span data-order-total data-currency="' + c + '">' + money(n, c) + '</span>'; }).join(', ') + (deliveryOn ? '<span class="dnote"> + delivery</span>' : '') : '0';
+     send.firstElementChild.textContent = step < 3 ? NEXT[step] : totalText() !== '0' ? 'Send my order on WhatsApp, ' + totalText() : 'Send my order on WhatsApp';
+     var b = {}; for (var k2 in q) if (q[k2]) b[k2] = q[k2]; window.cmBasket.set(b);
+     // one real add-on, only with a pan, and only until it is added or turned down
+diff --git a/scrollcraft/builds/whipped-cup/shop.html b/scrollcraft/builds/whipped-cup/shop.html
+index 032b3409..d4d3c00e 100644
+--- a/scrollcraft/builds/whipped-cup/shop.html
++++ b/scrollcraft/builds/whipped-cup/shop.html
+@@ -18,7 +18,7 @@
+   /* form fields at 16px so iPhones do not zoom in; grid cells may shrink */
+   .fld, input[type=tel].fld, input[type=date].fld { font-size: 16px; min-width: 0; }
+   .form > *, .card, .sum { min-width: 0; }
+-  .sent.bad { color: #B3261E; }
++  .sent.bad { color: #8a1c14; background: #fdecea; }
+ </style>
+ </head>
+ <body class="no-js" data-page="shop">
