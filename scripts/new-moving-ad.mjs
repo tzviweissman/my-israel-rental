@@ -43,7 +43,14 @@ const [name, slug] = args;
 const TEST = args.includes('--test');
 if (!/^[a-z0-9-]+$/.test(name || '') || !/^[a-z0-9-]+$/.test(slug || '')) die('usage: node scripts/new-moving-ad.mjs <ad name> <business slug>');
 const TESTS = path.join(os.tmpdir(), 'mir-ad-tests');
-if (TEST) fs.cpSync(path.join(GEN, '_kit'), path.join(TESTS, '_kit'), { recursive: true });
+if (TEST) {
+  // try-outs older than a week are cleared each time, so the temp folder does not fill up
+  for (const d of fs.existsSync(TESTS) ? fs.readdirSync(TESTS) : []) {
+    const p = path.join(TESTS, d);
+    if (d !== '_kit' && Date.now() - fs.statSync(p).mtimeMs > 7 * 864e5) fs.rmSync(p, { recursive: true, force: true });
+  }
+  fs.cpSync(path.join(GEN, '_kit'), path.join(TESTS, '_kit'), { recursive: true });
+}
 const dir = path.join(TEST ? TESTS : GEN, name);
 if (fs.existsSync(dir)) die(`${dir} already exists`);
 
