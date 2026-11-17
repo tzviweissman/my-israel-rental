@@ -86,6 +86,13 @@ if (staged.some((f) => /^(docs\/(page-generation-rules|rules-checklist|static-ad
   const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-rule-homes.mjs')], { cwd: ROOT, encoding: 'utf8' });
   if (c.status !== 0) { console.error(`Commit refused: ${c.stdout}`); process.exit(1); }
 }
+// a change to the moving-ad check (or its self-test) must still pass a good ad and refuse the broken ones (17 Nov 2026);
+// it records four short ads, so it runs only then, never on other commits
+if (staged.some((f) => /^scripts\/(check-moving-ad\.py|test-moving-ad-checks\.mjs)$/.test(f))) {
+  console.log('check-moving-ad changed: running scripts/test-moving-ad-checks.mjs (four recordings, a few minutes)');
+  const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'test-moving-ad-checks.mjs')], { cwd: ROOT, encoding: 'utf8' });
+  if (c.status !== 0) { console.error(`Commit refused: the moving-ad check no longer tells good from broken:\n${c.stdout}${c.stderr}`); process.exit(1); }
+}
 // every checklist rule is a step of the build blueprint: a new section must have a stage (4 Nov 2026, "8d")
 if (staged.includes('docs/rules-checklist.md') || staged.includes('scripts/blueprint.mjs')) {
   const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'blueprint.mjs'), '--order'], { cwd: ROOT, encoding: 'utf8' });
