@@ -18,6 +18,10 @@
  * confirm the combined value is right. A test that types first would
  * pass against the bug.
  *
+ * Since 17 Nov 2026 sign-up asks no phone ("ours is very busy"), so the
+ * check drives the same PhoneInput in Settings (WhatsApp number), signed in
+ * as the local test owner (?as=owner, needs DEV_AUTOLOGIN on the API).
+ *
  * Usage:
  *   node scripts/shot-phone-country.mjs
  */
@@ -33,12 +37,11 @@ await mkdir(OUT, { recursive: true });
 const browser = await chromium.launch();
 const failures = [];
 
-/** Signup step 2, where the phone field lives. */
+/** Settings, where the phone field with the country picker lives now. */
 async function openDetails(page) {
-  await page.goto(`${APP}/signup`, { waitUntil: 'domcontentloaded', timeout: 60000 });
-  await page.locator('[data-testid="signup-role-provider"]').click({ timeout: 30000 });
-  await page.locator('[data-testid="signup-continue-btn"]').click({ timeout: 15000 });
-  await page.locator('[data-testid="signup-step-details"]').waitFor({ timeout: 20000 });
+  await page.goto(`${APP}/dashboard?tab=settings&as=owner`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.locator('[data-testid="settings-whatsapp-country"]').waitFor({ timeout: 30000 });
+  await page.locator('[data-testid="settings-whatsapp-input"]').fill('');
   await page.waitForTimeout(600);
 }
 
@@ -48,9 +51,6 @@ try {
       const ctx = await browser.newContext({
         viewport: { width, height: 900 },
         deviceScaleFactor: 2,
-      });
-      await ctx.addInitScript(() => {
-        try { localStorage.removeItem('draft:signup-join'); } catch { /* private mode */ }
       });
       if (rtl) {
         await ctx.addInitScript(() => {
@@ -64,9 +64,16 @@ try {
 
       const label = `${rtl ? 'rtl' : 'ltr'}-${width}`;
       await openDetails(page);
+      // The test owner's saved language wins over localStorage once signed in,
+      // so the Hebrew pass switches with the toggle when it opened in English.
+      if (rtl && await page.evaluate(() => document.documentElement.dir !== 'rtl')) {
+        await page.locator('[data-testid="language-toggle"]').first().click();
+        await page.waitForFunction(() => document.documentElement.dir === 'rtl', null, { timeout: 10000 });
+        await page.locator('[data-testid="settings-whatsapp-country"]').waitFor({ timeout: 15000 });
+      }
 
-      const country = page.locator('[data-testid="signup-phone-country"]');
-      const number = page.locator('[data-testid="signup-phone-input"]');
+      const country = page.locator('[data-testid="settings-whatsapp-country"]');
+      const number = page.locator('[data-testid="settings-whatsapp-input"]');
 
       // Every country in the list must be selectable, not just present.
       // Three spread across the list, including one whose dial code is a
