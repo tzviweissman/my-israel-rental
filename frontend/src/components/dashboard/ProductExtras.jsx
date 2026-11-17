@@ -24,12 +24,14 @@ export function cleanExtras(o) {
   const goesWith = (o.goes_with || []).filter(Boolean).slice(0, 4);
   const date = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : null);
   return { stock, low_stock_at: stock === null ? null : low, options, goes_with: goesWith,
-    available_from: date(o.available_from), available_until: date(o.available_until) };
+    available_from: date(o.available_from), available_until: date(o.available_until),
+    // only sent once set, so an untouched product still compares equal to its original
+    pickup_only: o.pickup_only ? true : ('pickup_only' in o ? false : null) };
 }
 
 export default function ProductExtras({ option: o, onChange, i, others = [] }) {
   const { t } = useTranslation();
-  const has = (o.stock !== null && o.stock !== undefined && o.stock !== '') || (o.options || []).length > 0 || (o.goes_with || []).length > 0 || !!o.available_from || !!o.available_until;
+  const has = (o.stock !== null && o.stock !== undefined && o.stock !== '') || (o.options || []).length > 0 || (o.goes_with || []).length > 0 || !!o.available_from || !!o.available_until || !!o.pickup_only;
   const [open, setOpen] = useState(has);
   const opts = o.options || [];
   const setOpt = (k, patch) => onChange({ options: opts.map((x, j) => (j === k ? { ...x, ...patch } : x)) });
@@ -38,7 +40,7 @@ export default function ProductExtras({ option: o, onChange, i, others = [] }) {
     <div className="text-sm" data-testid={`product-extras-${i}`}>
       <button type="button" onClick={() => setOpen(!open)} aria-expanded={open}
               className="inline-flex items-center gap-1 min-h-[44px] font-semibold text-gray-700" data-testid={`product-extras-toggle-${i}`}>
-        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />} {t('editListing.extrasPairs', 'Stock count, sizes, and what goes with it')}
+        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />} {t('editListing.extrasPairs2', 'Stock count, sizes, pickup only, and what goes with it')}
       </button>
       {open && (
         <div className="space-y-3 rounded-lg p-3" style={{ background: '#F9FAFB' }}>
@@ -58,6 +60,12 @@ export default function ProductExtras({ option: o, onChange, i, others = [] }) {
             )}
           </div>
           <p className="text-xs text-gray-600">{t('editListing.stockHelp', 'Orders on your page take from the count. At 0 it shows as sold out. Leave empty if you do not count.')}</p>
+
+          {/* Pickup only (backend orders.py refuses a delivery with it), e.g. a pickup bundle. */}
+          <label className="inline-flex items-center gap-2 min-h-[44px]">
+            <input type="checkbox" checked={!!o.pickup_only} onChange={(e) => onChange({ pickup_only: e.target.checked })} data-testid={`product-pickup-only-${i}`} />
+            {t('editListing.pickupOnly', 'Pickup only (cannot be delivered)')}
+          </label>
 
           {/* A holiday or seasonal item (backend seasonal.py). */}
           <div data-testid={`product-season-${i}`}>

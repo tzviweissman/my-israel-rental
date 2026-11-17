@@ -1,0 +1,10 @@
+{
+  "_note": "American Crust's pickup bundle (owner's request, 16 Nov 2026): 2 pizza + 2 bagel doughs for 105, 9 less than the four bought one by one (2 x 27 + 2 x 30 = 114). Pickup only: the site switches the order to pickup while it is in the basket. Run: add_site_products.py --plan scripts/site_products_plan_american_crust.json",
+  "listings": [
+    {"label": "American Crust (american-crust)", "gig_id": "4ed30fc8-206a-42bd-85d9-36067c442350", "business_id": "1d92c69d-89cb-42e7-b2bf-e1d076ed9e41",
+     "products": [
+      {"name": "Pickup bundle: 2 pizza doughs and 2 bagel doughs", "price": 105, "currency": "ILS",
+       "description": "Two classic American pizza doughs and two American style bagel doughs (12 bagels), for pickup in Sanhedria. ₪9 less than buying them one by one."}
+     ]}
+  ]
+}

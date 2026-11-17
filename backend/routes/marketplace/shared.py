@@ -634,6 +634,9 @@ class ProductItem(BaseModel):
     # a holiday item. `available_until` is the last day to order it.
     available_from: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     available_until: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    # Sold for pickup only (a pickup bundle; Tzvi, 17 Nov 2026): an order
+    # with it cannot be a delivery (orders.py). None and False are the same.
+    pickup_only: Optional[bool] = None
 
     @model_validator(mode="after")
     def _counted_stock(self):

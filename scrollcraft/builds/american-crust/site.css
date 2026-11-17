@@ -374,3 +374,40 @@ body:not(.no-js) section.sec#order.is-empty { padding-block: 1.4rem; }
 .st-l .pks { max-width: 480px; }
 
 .toast, .toast.show { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; padding: 0 !important; border: 0 !important; transform: none !important; }   /* heard, not shown: it covered the page heading on a phone; the − n + on the product and the basket bar show the add */
+
+/* the owner's pickup bundle (16 Nov 2026): a card across both columns, its price beside what the four doughs cost one by one */
+.pk-deal { grid-column: 1 / -1; } .pk[hidden] { display: none; }
+.pk-sel s, .st-was { font: 600 1rem/1.2 var(--font-body); opacity: .75; }
+.pk-sel s { margin-inline-start: .35rem; }
+.st-was { display: block; margin-top: .3rem; text-decoration: none; }
+.ful .opt.off { opacity: .45; cursor: not-allowed; }
+
+/* gift cards on the page (gift.js, rules 3x.14), in the brand: cream ground, mustard line, black chosen state */
+.gift { background: var(--surface); }
+.gift-form { display: grid; gap: 1.6rem; max-width: 36rem; margin-top: 1.6rem; }
+.gift-form fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: .8rem; }
+.gift-form legend { padding: 0; margin-bottom: .8rem; font-weight: 700; }
+.gift-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr)); gap: .6rem; }
+.gift-tile { min-height: 64px; border: 2px solid var(--ink); border-radius: var(--r); background: var(--ground); color: var(--ink); font: 400 var(--d3)/1.1 var(--font-head); cursor: pointer; touch-action: manipulation; }
+.gift-tile[aria-pressed="true"] { background: var(--ink); color: var(--mustard); }
+.gift-switch { display: inline-flex; justify-self: start; padding: .3rem; border: 2px solid var(--ink); border-radius: 999px; }
+.gift-switch button { min-height: 44px; padding: 0 1.1rem; border: 0; border-radius: 999px; background: transparent; color: var(--ink); font: 700 1rem/1 var(--font-body); cursor: pointer; }
+.gift-switch button[aria-pressed="true"] { background: var(--ink); color: var(--ground); }
+.gift-to { display: grid; gap: .8rem; }
+.gift-to[hidden], .gift-field[hidden] { display: none; }
+.gift-field { display: grid; gap: .3rem; }
+.gift-field label { font-weight: 700; }
+.gift-field input, .gift-field textarea { width: 100%; min-height: 48px; padding: .8rem; border: 2px solid var(--line); border-radius: 12px; background: var(--ground); color: var(--ink); font: 400 1rem/1.4 var(--font-body); }
+.gift-note, .gift-msg { margin: 0; color: var(--soft); font-size: .95rem; }
+.gift-msg:empty { display: none; }
+.gift-msg { color: var(--ink); font-weight: 700; }
+.gift-done { display: grid; gap: .8rem; justify-items: start; max-width: 36rem; margin-top: 1.6rem; }
+.gift-done h3, .gift-done p { margin: 0; }
+.gift-see { font-weight: 700; color: var(--ink); }
+.gift-tile, .gift-switch button { transition: background 150ms var(--out), color 150ms var(--out), transform 120ms var(--out); }
+.gift-tile:hover { background: var(--mustard-lt); } .gift-switch button:hover { background: var(--mustard-lt); }
+.gift-tile[aria-pressed="true"]:hover, .gift-switch button[aria-pressed="true"]:hover { background: var(--ink);  box-shadow: 0 0 0 3px var(--mustard-lt); }
+.gift-tile:active, .gift-switch button:active { transform: scale(.96); }
+
+/* three cards on a short laptop screen (1280x650): the picker keeps inside the screen */
+@media (min-width: 861px) and (max-height: 720px) { .pk { padding: .3rem .45rem; } .pk-sel { min-height: 44px; } }

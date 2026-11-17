@@ -25,7 +25,9 @@ sys.path.insert(0, '.')
 from routes.deps import db  # noqa: E402
 
 HERE = Path(__file__).parent
-PLAN = HERE / "site_products_plan.json"
+# --plan <file> reads another plan, so one business's products can be added without re-running every other site's
+# (16 Nov 2026, American Crust's pickup bundle)
+PLAN = Path(sys.argv[sys.argv.index("--plan") + 1]) if "--plan" in sys.argv else HERE / "site_products_plan.json"
 LOG = HERE / "site_products_log.jsonl"
 
 

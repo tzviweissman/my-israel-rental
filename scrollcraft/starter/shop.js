@@ -7,7 +7,8 @@
   var ORD = document.getElementById('order').dataset, WA = ORD.wa, GIG = ORD.gig, NAME = ORD.name, ADDON = ORD.addon || '';
   var FIRST_DAYS = +(ORD.leadDays || 1);
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
-  var byName = {}; CAT.items.forEach(function (it) { byName[it.name.toLowerCase()] = it; });
+  // by name, looked up each time: catalog.js adds products the owner added in the dashboard after load
+  function byName(n) { return CAT.items.filter(function (it) { return it.name.toLowerCase() === n; })[0]; }
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ── category chips: go to that group, nothing below moves ──
@@ -21,7 +22,7 @@
   var sheet = document.getElementById('sheet'), cur = null, n = 1;
   function open(it) {
     cur = it; n = 1;
-    var img = document.getElementById('sh-img'); img.src = 'assets/p/' + it.id + '.webp'; img.alt = it.name; img.width = it.w; img.height = it.h;
+    var img = document.getElementById('sh-img'); img.src = it.img || 'assets/p/' + it.id + '.webp'; img.alt = it.name; img.width = it.w; img.height = it.h;
     document.getElementById('sh-name').textContent = it.name;
     document.getElementById('sh-pr').innerHTML = (it.size === 'from' ? 'from ' : '') + money(it.price) + (it.was ? ' <s>' + money(it.was) + '</s>' : '');
     document.getElementById('sh-size').textContent = it.size === 'from' ? 'Built for your guest count' : it.size;
@@ -49,7 +50,7 @@
   document.getElementById('cat').addEventListener('click', function (e) {
     if (e.target.closest('[data-add]')) return;
     var a = e.target.closest('.pc-a'); if (!a) return;
-    var it = by[a.dataset.id] || byName[((a.querySelector('[data-f="name"]') || {}).textContent || '').trim().toLowerCase()];
+    var it = by[a.dataset.id] || byName(((a.querySelector('[data-f="name"]') || {}).textContent || '').trim().toLowerCase());
     if (!it) return; e.preventDefault(); open(it);
   });
 
@@ -65,7 +66,17 @@
   var q = fromBasket(), step = 1, send = document.getElementById('send');
   function pickup() { return document.querySelector('input[name=ful]:checked').value === 'pickup'; }
   function total() { var t = 0; for (var k in q) t += q[k] * CAT.unit(k); return t; }
+  // a product sold for pickup only (dashboard: "Pickup only", e.g. a pickup bundle) makes the order a pickup; the server
+  // refuses a delivery with it (orders.py)
+  function pickupOnly() {
+    var lock = false; for (var k in q) if (q[k] && by[k] && by[k].pickup_only) lock = true;
+    var d = document.querySelector('input[name=ful][value=delivery]'), p = document.querySelector('input[name=ful][value=pickup]');
+    if (!d || !p) return;
+    if (lock && d.checked) { p.checked = true; p.dispatchEvent(new Event('change', { bubbles: true })); }
+    d.disabled = lock; d.parentNode.classList.toggle('is-off', lock); d.parentNode.title = lock ? 'Something in your basket is for pickup only' : '';
+  }
   function update() {
+    pickupOnly();
     var html = '', mini = '';
     for (var k in q) if (q[k]) {
       var nm = CAT.label(k);
@@ -172,7 +183,7 @@
   if (qs.get('c')) addEventListener('load', function () { jump(qs.get('c'), false); });
   update();
   var m0 = /#order-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
-  var pick = by[qs.get('p')] || byName[(qs.get('add') || '').toLowerCase()];
+  var pick = by[qs.get('p')] || byName((qs.get('add') || '').toLowerCase());
   if (pick) open(pick);
 })();
 
@@ -187,14 +198,13 @@
   var HE = (document.documentElement.lang || '').indexOf('he') === 0, T = function (en, he) { return HE ? he : en; };
   var ORD = document.getElementById('order').dataset, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var STEP = 24, limit = STEP, query = '', hideOut = false;
-  var byName = {}; CAT.items.forEach(function (it) { byName[it.name.toLowerCase()] = it; });
   var $$ = function (sel, root) { return [].slice.call((root || cat).querySelectorAll(sel)); };
   var groups = function () { return $$('.grp:not(.grp-pop)'); };
   var gName = function (g) { return g.dataset.c || ((g.querySelector('h2') || {}).textContent || '').trim(); };
   function itemOf(pc) {
     var a = pc.querySelector('[data-id]'), b = pc.querySelector('[data-add]');
     var id = (a && a.dataset.id) || (b && b.dataset.add);
-    return (id && CAT.by[id]) || byName[((pc.querySelector('[data-f="name"]') || {}).textContent || '').trim().toLowerCase()];
+    return (id && CAT.by[id]) || byName(((pc.querySelector('[data-f="name"]') || {}).textContent || '').trim().toLowerCase());
   }
   function isOut(pc) { var it = itemOf(pc); return pc.classList.contains('is-out') || !!(it && it.out); }
 
@@ -368,7 +378,7 @@
     var list; try { list = JSON.parse((document.getElementById('mir-popular') || {}).textContent || '[]'); } catch (e) { list = []; }
     var seen = {}, picks = [];
     (Array.isArray(list) ? list : []).forEach(function (k) {
-      var it = CAT.by[k] || byName[String(k).toLowerCase()]; if (!it || seen[it.id]) return;
+      var it = CAT.by[k] || byName(String(k).toLowerCase()); if (!it || seen[it.id]) return;
       var pc = $$('.grp:not(.grp-pop) .pc').filter(function (c) { var x = itemOf(c); return x && x.id === it.id && !isOut(c); })[0];
       if (pc) { seen[it.id] = 1; picks.push(pc); }
     });

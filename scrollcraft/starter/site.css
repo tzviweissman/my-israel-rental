@@ -408,3 +408,6 @@ p a:not([class]), li a:not([class]) { color: inherit; text-decoration: underline
 .o-empty { display: none; }
 body:not(.no-js) #order.is-empty .o-empty { display: block; font-size: var(--t1); color: var(--soft); }
 body:not(.no-js) #order.is-empty .osteps, body:not(.no-js) #order.is-empty .form { display: none; }
+
+/* a product in the basket is for pickup only (shop.js pickupOnly) */
+.ful .chip.is-off { opacity: .45; cursor: not-allowed; }

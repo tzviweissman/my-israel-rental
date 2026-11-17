@@ -353,6 +353,7 @@ async def get_page_edits(slug_or_id: str):
                     "image": (p.get("images") or [None])[0] or p.get("image"),
                     "group": (p.get("group") or "").strip() or None,
                     "in_stock": bool(p.get("in_stock", True)),
+                    "pickup_only": bool(p.get("pickup_only")),
                 })
         for row in (g.get("products") or []) + (g.get("tiers") or []):
             if row.get("price_kind") == "quote":

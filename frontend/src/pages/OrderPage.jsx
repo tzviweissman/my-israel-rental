@@ -208,6 +208,9 @@ export default function OrderPage() {
     }))
     : [{ key: p.id, product: p, option: null, name: p.name, price: p.price }]);
   const lines = products.flatMap(rowsOf).filter((r) => (qty[r.key] || 0) > 0).map((r) => ({ ...r, qty: qty[r.key] }));
+  // A product the business sells for pickup only (a pickup bundle) makes the order a pickup; the server refuses a delivery.
+  const pickupOnlyBasket = lines.some((l) => l.product.pickup_only);
+  if (pickupOnlyBasket && fulfilment !== 'pickup') setFulfilment('pickup');
   const fromLines = lines.filter((l) => kindOf(l.product) === 'from');
   const subtotal = lines.reduce((s, l) => s + Number(l.price || 0) * l.qty, 0);
   // A counted product (backend stock.py) caps the quantity across its options.
@@ -229,7 +232,7 @@ export default function OrderPage() {
   const belowMin = fulfilment === 'delivery' && minOrder > 0 && subtotal < minOrder;
   // Delivery only when the store has said it delivers (its own switch in
   // Orders settings) and there is somewhere to deliver to.
-  const deliveryPossible = !!data.settings.delivery_on && (data.business.serves_nationwide || data.business.areas.length > 0);
+  const deliveryPossible = !pickupOnlyBasket && !!data.settings.delivery_on && (data.business.serves_nationwide || data.business.areas.length > 0);
   const phoneErr = phoneError(phone, t);
   // Days and times already at the store's order limits (orders._full).
   const full = data.full || { days: [], windows: [] };

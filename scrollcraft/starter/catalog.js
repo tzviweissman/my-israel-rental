@@ -17,7 +17,14 @@
   function liveStock() {
     try {
       JSON.parse((document.getElementById('mir-live-products') || {}).textContent || '[]').forEach(function (p) {
-        var it = by[p.id]; if (it) { if (Number(p.price) > 0) it.price = Number(p.price); it.out = p.in_stock === false; }
+        var it = by[p.id];
+        // a product the owner added in the dashboard (a bundle, a new item) is sold here too, with the listing's photo
+        // (Tzvi, 17 Nov 2026: owners add deals without us); mir-catalog.js draws its card
+        if (!it && p.id && p.name && Number(p.price) > 0 && p.price_kind !== 'quote') {
+          it = by[p.id] = { id: p.id, name: p.name, price: Number(p.price), desc: p.description || '', size: '', img: p.image || '', w: 800, h: 800, live: true };
+          CAT.items.push(it);
+        }
+        if (it) { if (Number(p.price) > 0) it.price = Number(p.price); it.out = p.in_stock === false; it.pickup_only = !!p.pickup_only; }
       });
     } catch (e) { /* the typed-in catalogue stays */ }
   }

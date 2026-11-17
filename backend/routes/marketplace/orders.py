@@ -2396,6 +2396,7 @@ def _products_for_order(gig: dict[str, Any]) -> list[dict[str, Any]]:
             # Products the business says go with this one (pairings.py).
             "goes_with": [x for x in (p.get("goes_with") or []) if isinstance(x, str)][:4],
             "available_until": p.get("available_until"),
+            "pickup_only": bool(p.get("pickup_only")),
             "options": [{"id": o.get("id"), "name": o.get("name"), "price": o.get("price"), "in_stock": o.get("in_stock", True)}
                         for o in p.get("options") or []],
         })
@@ -2589,6 +2590,9 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         if prod.get("price_kind") == "quote":
             he = (payload.lang or "").startswith("he")
             raise HTTPException(status_code=400, detail=f"ל{prod['name']} צריך לבקש הצעת מחיר" if he else f"Ask for a price for {prod['name']}")
+        if prod.get("pickup_only") and payload.fulfilment == "delivery" and payload.table is None:
+            he = (payload.lang or "").startswith("he")
+            raise HTTPException(status_code=400, detail=f"{prod['name']} - באיסוף עצמי בלבד" if he else f"{prod['name']} is for pickup only")
         if prod.get("price_kind") == "from":
             to_confirm = True
         price, name, opt = float(prod.get("price") or 0), prod["name"], None

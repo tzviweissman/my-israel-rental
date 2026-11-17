@@ -592,6 +592,8 @@ const en = {
         inStock: 'In stock',
         extras: "Stock count, sizes and options",
         extrasPairs: "Stock count, sizes, and what goes with it",
+        extrasPairs2: "Stock count, sizes, pickup only, and what goes with it",
+        pickupOnly: "Pickup only (cannot be delivered)",
         season: "Only on sale between",
         seasonFrom: "From",
         seasonUntil: "Last day to order",
