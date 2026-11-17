@@ -35,6 +35,7 @@ from the library's ideas, and say why it fits this offer:
 | A dish or product made of parts | **build**: the layers drop in one by one; **morph**: the ingredients fly together and become it | n07 (burger), n10 (juice), t01, n01 |
 | Flavours or varieties | **tap / swap**: one tap or wipe changes the product and the whole ground's colour | t02, n12, n29 |
 | Sizes | **grow / stack**: one item grows step by step, or they stack up, each with its size and price; never the tap | (Tzvi 16 Nov: "the lays style is better for different flavors not as much for different sizes") |
+| A sauce, glaze, syrup or drink | **pour, acting on something**: the pour falls through the headline or onto the product and changes it (the word drips, the product gets coated); a pour alone is a 4: every pour-only ad in the library scored 4 (n14, n18, n45, n46, n60) | n03 (a bar rides a chocolate ribbon), Chicken Munch's DRIPPING HOT. (17 Nov 2026) |
 | One hero product | **split and re-form**: it breaks apart and comes back whole; **drop**: it lands for a reason | n06 (chocolate), p034 |
 | Food that is cooked or served | **chain**: pack to pan to plate, one continuous event | n04 |
 | A range or a menu | **swap surroundings**: the product stays put while everything around it changes | n11 |
@@ -82,6 +83,12 @@ frame.
 
 The film ends on the product whole and big, on a plain ground, with the headline, name, link, QR and logo, still
 for 1.5 to 3.5 seconds (A10.1, A10.3). If the idea broke it apart, it ends re-formed.
+
+## M8b. Score the end before the full recording
+
+Draw a few test frames with `record-moving-ad.mjs <folder> <name> '' <t,t,t,7.9>` and score the last one beside the
+library (A10.7) before recording all 240 frames. Chicken Munch's first cut scored 4 only because its drips sat behind
+the chicken; that was found after a full recording.
 
 ## M9. It loops
 

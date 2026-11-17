@@ -31,11 +31,13 @@ html,body{margin:0;background:#111}
 window.AD = {{CONFIG}};
 K.foot();
 const $ = (id) => document.getElementById(id);
-// A generated clip (A10.10): node scripts/new-moving-ad.mjs --clip {{AD}} <clip.mp4> sets CLIP_FRAMES.
+// A generated clip (A10.10): node scripts/new-moving-ad.mjs --clip {{AD}} <clip.mp4> sets CLIP_FRAMES and CLIP_FPS,
+// so whatever its length the clip plays in 6.0 s and the 8 s ad holds still for 2 (A10.3).
 const CLIP_FRAMES = 0;
+const CLIP_FPS = 30;
 if (CLIP_FRAMES) $('ad').classList.add('clip');  // the clip shows, and a shade keeps the foot readable
 window.render = async (t) => {
-  if (CLIP_FRAMES) await K.clip($('clip'), t, { frames: CLIP_FRAMES });
+  if (CLIP_FRAMES) await K.clip($('clip'), t, { frames: CLIP_FRAMES, fps: CLIP_FPS });
   const k = K.outBack(K.at(t, 0.1, 0.5));
   $('word').style.transform = `scale(${0.6 + 0.4 * k})`;
 };

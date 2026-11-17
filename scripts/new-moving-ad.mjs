@@ -26,8 +26,12 @@ if (args[0] === '--clip') {
   const f = path.join(dir, 'ad.html');
   const html = fs.readFileSync(f, 'utf8');
   if (!/const CLIP_FRAMES = \d+;/.test(html)) die(`${f} has no "const CLIP_FRAMES = N;" line to set`);
-  fs.writeFileSync(f, html.replace(/const CLIP_FRAMES = \d+;/, `const CLIP_FRAMES = ${n};`));
-  console.log(`${n} clip frames in docs/ads/gen/${name}/clip/ (${(n / 30).toFixed(1)} s); the ad holds the last one after that`);
+  // played in 6.0 s whatever the clip's length, so the 8 s ad holds still for 2 (Chicken Munch's 6.6 s clip left 1.4, 17 Nov 2026)
+  let out = html.replace(/const CLIP_FRAMES = \d+;/, `const CLIP_FRAMES = ${n};`);
+  if (/const CLIP_FPS = [^;]+;/.test(out)) out = out.replace(/const CLIP_FPS = [^;]+;/, `const CLIP_FPS = ${(n / 6).toFixed(3)};`);
+  else console.warn('no "const CLIP_FPS = N;" line: the clip plays at 30 a second; pass fps: CLIP_FPS to K.clip so it ends at 6.0 s');
+  fs.writeFileSync(f, out);
+  console.log(`${n} clip frames in docs/ads/gen/${name}/clip/ (${(n / 30).toFixed(1)} s), played in 6.0 s; the ad holds the last one for 2 s`);
   process.exit(0);
 }
 
@@ -47,6 +51,9 @@ let logo = null;
 if (b.logo_url) {
   const l = await fetch(b.logo_url.replace('/f_auto,q_auto/', '/f_png/'));
   if (l.ok) { fs.writeFileSync(path.join(dir, 'logo.png'), Buffer.from(await l.arrayBuffer())); logo = 'logo.png'; }
+  // a whole flyer as the listing's logo reads as nothing at 130px (Chicken Munch, 17 Nov 2026): cut the mark out first
+  const [w, h] = execFileSync(PY, ['-c', 'import sys;from PIL import Image;print(*Image.open(sys.argv[1]).size)', path.join(dir, 'logo.png')]).toString().trim().split(' ').map(Number);
+  if (logo && (w > 800 || h > 800)) console.warn(`WARNING logo.png is ${w}x${h}: probably a flyer or a photo, not a mark. Look at it; cut their wordmark or mark out as logo-mark.png and set window.AD.logo (A4.6).`);
 }
 const cap = (s) => String(s).replace(/(^|[-_ ])(\w)/g, (_, a, c) => (a ? ' ' : '') + c.toUpperCase());
 const where = [b.categories?.[0] && cap(b.categories[0]), b.areas?.[0] && cap(b.areas[0])].filter(Boolean).join(' · ');
