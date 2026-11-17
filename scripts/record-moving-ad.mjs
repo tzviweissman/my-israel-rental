@@ -17,7 +17,8 @@ const FPS = 30, LEN = 8;
 // Plan first, then build (Tzvi 17 Nov 2026): the MyIsraelRental ad's first cut was drawn before its blueprint's
 // stages 1 to 4 were answered and did not match the plan. A folder named _something is a kit test, not an ad.
 const AD = path.basename(HERE);
-if (!AD.startsWith('_')) {
+const INREPO = HERE.toLowerCase().startsWith(path.join(ROOT, 'docs', 'ads', 'gen').toLowerCase());
+if (INREPO && !AD.startsWith('_')) {
   const bp = path.join(ROOT, 'docs', 'ads', 'blueprints', `${AD}.md`);
   if (!fs.existsSync(bp)) { console.error(`no blueprint: node scripts/ad-blueprint.mjs ${AD}, answered through stage 4, before anything is recorded`); process.exit(1); }
   try { execFileSync('node', [path.join(ROOT, 'scripts', 'ad-blueprint.mjs'), '--check', AD, '4'], { stdio: 'pipe' }); }
@@ -40,7 +41,7 @@ for (const [i, t] of times.entries()) {
 await b.close();
 if (errs.length) { console.error(errs); process.exit(1); }
 if (only) { console.log(`frames in ${tmp}`); process.exit(0); }
-const out = path.join(ROOT, 'docs', 'ads', name);
+const out = INREPO ? path.join(ROOT, 'docs', 'ads', name) : path.join(HERE, name);  // a --test try-out keeps its video beside it
 const src = ['-y', '-v', 'error', '-framerate', String(FPS), '-i', path.join(tmp, '%04d.png')];
 execFileSync('ffmpeg', [...src, '-c:v', 'libx264', '-crf', '18', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', `${out}.mp4`]);
 execFileSync('ffmpeg', [...src, '-vf', 'fps=15,scale=540:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=192[p];[b][p]paletteuse=dither=sierra2_4a', '-loop', '0', `${out}.gif`]);

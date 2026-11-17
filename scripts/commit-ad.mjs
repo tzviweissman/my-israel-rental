@@ -1,6 +1,8 @@
 // Commit one hand-made ad as soon as it is sent (A10.6, Tzvi 16 Nov 2026): its files by name, nothing else, with
 // the library score line from ad-blueprint.mjs --note in the message.
 //   node scripts/commit-ad.mjs <name> "<title>" ["<more paragraphs>"...]
+//   node scripts/commit-ad.mjs --finish <name> "<title>" [...]   first runs check-moving-ad on docs/ads/<name>.mp4 (when
+//     there is one) and puts its line in the message: the finish of a moving ad in one step (17 Nov 2026)
 // Takes docs/ads/<name>.* and <name>-*, docs/ads/gen/<name>/ and docs/ads/blueprints/<name>.md. Refuses while the
 // blueprint is not done. Other changes in the tree, staged or not, stay out of the commit.
 import { spawnSync } from 'node:child_process';
@@ -8,7 +10,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
-const [name, title, ...more] = process.argv.slice(2);
+const argv = process.argv.slice(2);
+const FINISH = argv[0] === '--finish';
+const [name, title, ...more] = FINISH ? argv.slice(1) : argv;
 if (!name || !/^[a-z0-9-]+$/.test(name) || !title) {
   console.error('usage: node scripts/commit-ad.mjs <name> "<title>" ["<more paragraphs>"...]');
   process.exit(2);
@@ -20,6 +24,13 @@ const done = bp('--done');
 if (done.status !== 0) { console.error(done.stderr || done.stdout); process.exit(1); }
 const note = bp('--note');
 if (note.status !== 0) { console.error(note.stderr); process.exit(1); }
+let checked = '';
+if (FINISH && fs.existsSync(path.join(ROOT, 'docs', 'ads', `${name}.mp4`))) {
+  const py = path.join(ROOT, 'backend', '.venv', 'Scripts', 'python');
+  const c = run(py, [path.join(ROOT, 'scripts', 'check-moving-ad.py'), `docs/ads/${name}.mp4`]);
+  if (c.status !== 0) { console.error(c.stdout + c.stderr); process.exit(1); }
+  checked = `check-moving-ad: ${c.stdout.trim().split(': ').slice(1).join(': ')}`;
+}
 
 const ads = path.join(ROOT, 'docs', 'ads');
 const paths = fs.readdirSync(ads)
@@ -39,7 +50,7 @@ if (big.length) { console.error(`over 40 MB, left for you to decide: ${big.join(
 
 const add = run('git', ['add', '-A', '--', ...files]);
 if (add.status !== 0) { console.error(add.stderr); process.exit(1); }
-const msg = [title, note.stdout.trim(), ...more].join('\n\n');
+const msg = [title, [note.stdout.trim(), checked].filter(Boolean).join('\n'), ...more].join('\n\n');
 const c = spawnSync('git', ['commit', '-q', '-m', msg, '--', ...files], { cwd: ROOT, encoding: 'utf8', stdio: 'inherit' });
 if (c.status !== 0) process.exit(c.status);
 console.log(`${name}: committed ${files.length} file(s)\n${run('git', ['log', '-1', '--oneline']).stdout.trim()}`);
