@@ -4,7 +4,7 @@
  * Two-step wizard:
  *   1. Role selection — three big cards (Traveler / Host / Service Provider)
  *      mapped to the existing backend roles (renter / owner / provider).
- *   2. Account details — name, email, phone, password + terms.
+ *   2. Account details — name, email, password + terms (the phone is asked later, 17 Nov 2026).
  *
  * Intentionally kept as a separate page from /auth/login so the funnel
  * feels welcoming rather than "yet another form". Redirects, welcome
@@ -17,11 +17,9 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { phoneError, phonePreview } from '../utils/phoneValidation';
 import { apiErrorMessage } from '../utils/apiError';
-import PhoneInput from '../components/common/PhoneInput';
 import {
-  ArrowLeft, Eye, EyeOff,
+  Eye, EyeOff,
   Plane, Home, Sparkles,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
@@ -182,19 +180,9 @@ const SignupJoin = () => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [step]);
 
-  // Recomputed each render so the message tracks the input without extra
-  // state. Empty phone is always fine — the field is optional.
-  const phoneErr = phoneError(form.phone, t);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!activeCard) return;
-    if (phoneErr) {
-      // Blocked rather than saved: an ambiguous number gets no WhatsApp
-      // button later and nothing explains why.
-      toast.error(phoneErr);
-      return;
-    }
     if (form.password.length < 6) {
       toast.error(t('auth.passwordTooShort', 'Password must be at least 6 characters.'));
       return;
@@ -291,21 +279,17 @@ const SignupJoin = () => {
         {/* STEP 2 — details form */}
         {step === 2 && activeCard && (
           <section data-testid="signup-step-details">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-[var(--brand-primary)] transition-colors"
-              data-testid="signup-back-btn"
-            >
-              <ArrowLeft size={16} className="[[dir=rtl]_&]:rotate-180" aria-hidden="true" />
-              {t('signupJoin.back', 'Back to role')}
-            </button>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 text-[var(--brand-primary)] text-xs font-semibold">
-                <activeCard.Icon size={14} />
-                {t('signupJoin.signingUpAs', 'Signing up as')} · {t(activeCard.tKey, activeCard.defaultLabel)}
-              </div>
-            </div>
+            {/* One quiet line instead of a back button and a pill (Tzvi, 17 Nov
+                2026: "ours is very busy"). */}
+            <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>
+              {t('signupJoin.signingUpAs', 'Signing up as')}{' '}
+              <span className="font-semibold" style={{ color: 'var(--ink)' }}>{t(activeCard.tKey, activeCard.defaultLabel)}</span>
+              {' · '}
+              <button type="button" onClick={() => setStep(1)}
+                className="font-semibold text-[var(--brand-primary)] hover:underline" data-testid="signup-back-btn">
+                {t('signupJoin.change', 'Change')}
+              </button>
+            </p>
 
             <div className="mt-3">
               <h1
@@ -314,9 +298,6 @@ const SignupJoin = () => {
               >
                 {t('signupJoin.detailsHeadline', 'Create your account')}
               </h1>
-              <p className="mt-1.5 text-sm text-gray-600 max-sm:hidden [@media(max-height:760px)]:hidden">
-                {t(activeCard.tDetailsSubKey, activeCard.defaultDetailsSub)}
-              </p>
 
               {/* Google Sign-In — the one-tap alternative to the form
                   below, and deliberately ABOVE it: someone who would
@@ -372,35 +353,6 @@ const SignupJoin = () => {
                   />
                 </Field>
                 </div>
-                <Field
-                  label={t('signupJoin.phone', 'Phone')}
-                  optional
-                  testId="signup-phone"
-                >
-                  <PhoneInput
-                    value={form.phone}
-                    onChange={(v) => setForm({ ...form, phone: v })}
-                    error={phoneErr}
-                    hint={phonePreview(form.phone)
-                      // Who calls this number depends on who is signing up:
-                      // renters call a host, customers call a provider, and
-                      // owners/pros call a traveler back. The old hint said
-                      // "Renters" to all three — nonsense to a plumber.
-                      ? t(
-                          activeCard?.backendRole === 'provider'
-                            ? 'phone.willDialCustomers'
-                            : activeCard?.backendRole === 'renter'
-                              ? 'phone.willDialOwners'
-                              : 'phone.willDial',
-                          {
-                            number: phonePreview(form.phone),
-                            defaultValue: `You can be reached at ${phonePreview(form.phone)}`,
-                          },
-                        )
-                      : ''}
-                    testid="signup-phone"
-                  />
-                </Field>
                 {/* Password, then the same again. The repeat box was taken
                     out on 23 Sep 2026 as one field too many, and put back
                     on 7 Oct 2026 (Tzvi: "it doesn't ask to confirm the
@@ -483,12 +435,6 @@ const SignupJoin = () => {
                     : t('signupJoin.createAccount', 'Create account')}
                 </button>
 
-                <p className="text-center text-sm text-gray-600 [@media(max-height:680px)]:hidden">
-                  {t('signupJoin.haveAccount', 'Already have an account?')}{' '}
-                  <Link to={loginHref} className="font-semibold text-[var(--brand-primary)]" data-testid="signup-login-link-form">
-                    {t('signupJoin.logIn', 'Log in')}
-                  </Link>
-                </p>
               </form>
             </div>
           </section>

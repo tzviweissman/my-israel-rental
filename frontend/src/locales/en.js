@@ -3694,6 +3694,7 @@ const en = {
         logIn: 'Log in',
         back: 'Back to role',
         signingUpAs: 'Signing up as',
+        change: 'Change',
         detailsHeadline: 'Create your account',
         fullName: 'Full name',
         fullNamePh: 'Jane Doe',

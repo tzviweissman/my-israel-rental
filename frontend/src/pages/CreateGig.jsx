@@ -239,9 +239,8 @@ const CreateGig = () => {
   };
 
   // Post-signup onboarding hook — when a provider lands here fresh from
-  // the Google sign-in flow (?welcome=1), surface a one-shot friendly
-  // banner + strip the flag from the URL so refreshes stay clean.
-  const [showWelcome, setShowWelcome] = useState(searchParams.get('welcome') === '1');
+  // the Google sign-in flow (?welcome=1), strip the flag from the URL so
+  // refreshes stay clean. (The welcome banner it showed went 17 Nov 2026.)
   useEffect(() => {
     if (searchParams.get('welcome') === '1') {
       const url = new URL(window.location.href);
@@ -1248,33 +1247,8 @@ const CreateGig = () => {
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="create-gig-page">
       <PageMeta title={t('wizard.metaTitle', 'Add your business | MyIsraelRental')} description={t('wizard.metaDescription', 'List your business on MyIsraelRental, free.')} path="/services/create" />
       <div className="max-w-2xl mx-auto px-4 py-8">
-        {showWelcome && (
-          <div
-            className="mb-6 relative rounded-2xl bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary-dark)] text-white p-5 shadow-lg"
-            data-testid="create-gig-welcome-banner"
-          >
-            <button
-              type="button"
-              onClick={() => setShowWelcome(false)}
-              className="absolute top-3 end-3 text-white/70 hover:text-white transition-colors"
-              aria-label={t('wizard.dismiss', 'Dismiss')}
-              data-testid="create-gig-welcome-dismiss"
-            >
-              <X size={16} />
-            </button>
-            <div className="pe-6">
-              <div className="text-xs font-semibold uppercase tracking-wider text-white/80 mb-1">
-                {t('wizard.welcomeEyebrow', 'Welcome aboard')}
-              </div>
-              <div className="text-lg font-semibold mb-1" style={{ fontFamily: 'var(--font-head)' }}>
-                {t('wizard.welcomeTitle', 'Let us create your first listing')}
-              </div>
-              <p className="text-sm text-white/85 leading-snug">
-                {t('wizard.welcomeBody', 'Tell us what you offer. Customers see your listing as soon as you publish it.')}
-              </p>
-            </div>
-          </div>
-        )}
+        {/* No welcome banner, no to-do chips and no goals any more (Tzvi, 17 Nov
+            2026: "i like how clean wix looks, ours is very busy"): one thin bar. */}
         <div className="mb-6" data-testid="wizard-progress">
           <div className="flex items-baseline justify-between gap-3 mb-2 text-sm">
             <span id="wizard-progress-label" className="font-semibold" data-testid="wizard-progress-pct">
@@ -1308,26 +1282,6 @@ const CreateGig = () => {
             <div className="h-full rounded-full bg-[var(--brand-primary)] transition-[width] duration-300"
                  style={{ width: `${missing.length ? readyPct : 100}%` }} />
           </div>
-          {missing.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-3">
-              {readiness.map((x) => (x.ok ? (
-                <span key={x.k} className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-full text-xs bg-gray-100 text-gray-500 line-through">
-                  <Check size={12} aria-hidden="true" /> {x.label}
-                </span>
-              ) : (
-                <button
-                  key={x.k}
-                  type="button"
-                  disabled={x.step > step}
-                  onClick={() => setStep(x.step)}
-                  className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-full text-xs font-semibold border border-[var(--brand-border)] bg-white enabled:hover:border-[var(--gold)] disabled:cursor-default"
-                  data-testid={`wizard-todo-${x.k}`}
-                >
-                  + {x.label}
-                </button>
-              )))}
-            </div>
-          )}
         </div>
         <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-head)' }}>
           {stepLabels[step]}
@@ -1340,36 +1294,6 @@ const CreateGig = () => {
               ? t('wizard.reassureLast', 'Last screen. Then your page goes live.')
               : t('wizard.reassureMid', 'Nice, you are halfway there. Photos and prices are what customers look at first.')}
         </p>
-
-        {step === 1 && (
-          <div className="mb-5" data-testid="wizard-goals">
-            <div className="text-base font-semibold mb-2">{t('wizard.goalsTitle', 'What do you want most? Pick any.')}</div>
-            <div className="flex flex-wrap gap-2">
-              {[
-                ['customers', t('wizard.goalCustomers', 'More customers')],
-                ['orders', t('wizard.goalOrders', 'Orders on WhatsApp')],
-                ['bookings', t('wizard.goalBookings', 'Bookings')],
-                ['page', t('wizard.goalPage', 'A nicer page')],
-              ].map(([id, label]) => {
-                const on = (form.goals || []).includes(id);
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => set({ goals: on ? (form.goals || []).filter((g) => g !== id) : [...(form.goals || []), id] })}
-                    className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border-2 transition-colors ${
-                      on ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white' : 'border-gray-200 bg-white hover:border-[var(--gold)]'
-                    }`}
-                    data-testid={`wizard-goal-${id}`}
-                  >
-                    {on && <Check size={14} aria-hidden="true" />}{label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Their listing as customers will see it, filling in as they type
             (Tzvi, 10 Nov 2026: show the result straight away, not only at the end). */}
@@ -1930,12 +1854,12 @@ const CreateGig = () => {
           <div className="flex flex-col items-end gap-1">
             {step < totalSteps ? (
               <button type="button" disabled={!canNext()} onClick={() => setStep((s) => s + 1)}
-                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] disabled:opacity-40 flex items-center gap-1" data-testid="wizard-next">
+                className="px-6 py-2.5 rounded-full text-sm font-semibold disabled:opacity-40 flex items-center gap-1" style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }} data-testid="wizard-next">
                 {t('wizard.next', 'Next')} <ArrowRight size={14} className="rtl:rotate-180" />
               </button>
             ) : (
               <button type="button" disabled={!canNext() || saving} onClick={submit}
-                className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] disabled:opacity-40 flex items-center gap-1" data-testid="wizard-publish">
+                className="px-6 py-2.5 rounded-full text-sm font-semibold disabled:opacity-40 flex items-center gap-1" style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }} data-testid="wizard-publish">
                 {saving ? (
                   <>
                     <Loader2 className="animate-spin" size={14} />
@@ -1947,7 +1871,7 @@ const CreateGig = () => {
               </button>
             )}
             {!canNext() && nextBlockReason() && (
-              <p className="text-[11px] text-red-600 font-medium max-w-xs text-end" data-testid="wizard-next-blocked-reason">
+              <p className="text-xs text-gray-500 max-w-xs text-end" data-testid="wizard-next-blocked-reason">
                 {nextBlockReason()}
               </p>
             )}

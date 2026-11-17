@@ -3613,6 +3613,7 @@ const he = {
         logIn: 'התחברות',
         back: 'חזרה לבחירת תפקיד',
         signingUpAs: 'נרשם/ת בתור',
+        change: 'שינוי',
         detailsHeadline: 'צרו את החשבון שלכם',
         fullName: 'שם מלא',
         fullNamePh: 'ישראל ישראלי',

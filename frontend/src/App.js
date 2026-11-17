@@ -20,7 +20,7 @@ import '@/styles/page-theme.css';
 // declined the same evening. It is kept, not deleted, so the next "let me
 // see it" is one import line here rather than a rebuild from a description.
 
-import Navigation from './components/Navigation';
+import Navigation, { isSignupPath } from './components/Navigation';
 import ImpersonationBanner from './components/ImpersonationBanner';
 import WhatsAppButton from './components/WhatsAppButton';
 import SiteVisitTracker from './components/SiteVisitTracker';
@@ -62,7 +62,7 @@ startVersionWatcher();
  */
 function FloatingContact() {
   const { pathname } = useLocation();
-  if (pathname === '/') return null;
+  if (pathname === '/' || isSignupPath(pathname)) return null;
   return <WhatsAppButton />;
 }
 

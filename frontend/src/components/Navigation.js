@@ -343,7 +343,9 @@ const Navigation = () => {
 
   // The sign-up has no site menu (Tzvi, 10 Nov 2026, from the HelpScout
   // funnel video): a menu is a way out halfway. Logo and language only.
-  if (location.pathname === '/businesses/add' || location.pathname === '/services/create-gig') {
+  // Since 17 Nov 2026 the same for joining and logging in ("i like how clean
+  // wix looks, ours is very busy").
+  if (isSignupPath(location.pathname)) {
     return (
       <nav ref={navRef} data-testid="global-nav" data-bare="true" className="fixed top-0 left-0 right-0 z-50 bg-white border-b" style={{ borderColor: '#E3E3E3' }}>
         <div className="max-w-7xl mx-auto flex items-center justify-between" style={{ padding: '10px clamp(16px,3vw,36px)' }}>
@@ -925,5 +927,9 @@ const Navigation = () => {
     </nav>
   );
 };
+
+/** Pages that show only the logo and language, and no floating chat bubble. */
+export const isSignupPath = (p) => ['/businesses/add', '/services/create-gig', '/join', '/signup'].includes(p)
+  || (p.startsWith('/auth/') && p !== '/auth/deeplink');
 
 export default Navigation;
