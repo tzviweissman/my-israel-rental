@@ -23,6 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, '.')
 from routes.deps import db  # noqa: E402
+from routes.marketplace.shared import ProductItem  # noqa: E402
 
 HERE = Path(__file__).parent
 # --plan <file> reads another plan, so one business's products can be added without re-running every other site's
@@ -41,14 +42,19 @@ def tier_images(gig: dict, tier_name: str) -> list[str]:
 
 
 def new_product(gig: dict, p: dict) -> dict:
+    """Every product setting the plan names is carried (pickup_only, serves, group, images...), and the result is
+    checked against ProductItem, so a setting is never dropped on the way (17 Nov 2026: pickup_only was)."""
     imgs = tier_images(gig, p["images_from_tier"]) if p.get("images_from_tier") else []
-    return {
-        # stable id from the listing and the name, so a re-run makes the same one
-        "id": uuid.uuid5(uuid.NAMESPACE_URL, f"site-products/{gig['_id']}/{key(p['name'])}").hex[:12],
+    prod = {
         "name": p["name"], "price": float(p["price"]), "price_to": None, "currency": p.get("currency") or "ILS",
         "description": p.get("description") or "", "image": None, "images": imgs, "in_stock": True,
-        "group": p.get("group"), "serves": None, "width_cm": None, "length_cm": None,
+        "group": None, "serves": None, "width_cm": None, "length_cm": None,
     }
+    prod.update({k: v for k, v in p.items() if k in ProductItem.model_fields and k not in ("id", "name", "price")})
+    # stable id from the listing and the name, so a re-run makes the same one
+    prod["id"] = uuid.uuid5(uuid.NAMESPACE_URL, f"site-products/{gig['_id']}/{key(p['name'])}").hex[:12]
+    ProductItem(**prod)   # refuses a misspelt value before anything is written
+    return prod
 
 
 def new_tier(t: dict) -> dict:
@@ -107,4 +113,5 @@ async def main(apply: bool, convert: bool) -> None:
         print("\ndry run: nothing written (add --apply)")
 
 
-asyncio.run(main("--apply" in sys.argv, "--convert-to-store" in sys.argv))
+if __name__ == "__main__":
+    asyncio.run(main("--apply" in sys.argv, "--convert-to-store" in sys.argv))

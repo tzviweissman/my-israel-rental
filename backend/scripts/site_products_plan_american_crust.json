@@ -3,7 +3,7 @@
   "listings": [
     {"label": "American Crust (american-crust)", "gig_id": "4ed30fc8-206a-42bd-85d9-36067c442350", "business_id": "1d92c69d-89cb-42e7-b2bf-e1d076ed9e41",
      "products": [
-      {"name": "Pickup bundle: 2 pizza doughs and 2 bagel doughs", "price": 105, "currency": "ILS",
+      {"name": "Pickup bundle: 2 pizza doughs and 2 bagel doughs", "price": 105, "currency": "ILS", "pickup_only": true, "images": ["https://myisraelrental.com/pages/american-crust/assets/bundle.webp"],
        "description": "Two classic American pizza doughs and two American style bagel doughs (12 bagels), for pickup in Sanhedria. ₪9 less than buying them one by one."}
      ]}
   ]
