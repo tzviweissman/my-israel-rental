@@ -1,0 +1,107 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- {{NAME}} moving ad, tap to switch (docs/ads/blueprints/{{AD}}.md). Kit template 2 (A10.9), from Lay's (motion t02).
+     FOR FLAVOURS OR VARIETIES, NOT SIZES (Tzvi 16 Nov 2026): each tap flips the product to the next one and the whole
+     ground turns that one's colour, about a beat a second; then all of them line up and the foot comes in.
+     Fill ITEMS with their own cutouts (2 to 5, same angle and size, rule 3s.27), one colour each, then record:
+       node scripts/record-moving-ad.mjs docs/ads/gen/{{AD}} {{AD}}
+     A hand.png (a generated hand, fingertip at its top centre) is shown under the product if the file exists. -->
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@500;700&display=block" rel="stylesheet">
+<style>
+html,body{margin:0;background:#111}
+#ad{position:relative;width:1080px;height:1920px;overflow:hidden;background:#F4EFE6;font-family:Manrope,sans-serif;color:#1d1a17}
+.l{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#name{position:absolute;left:40px;right:40px;top:200px;text-align:center;font:150px/1 Anton,sans-serif;color:#fff;text-transform:uppercase}
+#price{position:absolute;left:40px;right:40px;top:370px;text-align:center;font:700 54px Manrope,sans-serif;color:#fff}
+#hero{position:absolute;left:140px;top:520px;width:800px;height:800px;object-fit:contain;filter:drop-shadow(0 40px 50px #0006)}
+#hand{position:absolute;left:390px;top:1290px;width:300px;display:none}
+#ring{position:absolute;width:80px;height:80px;margin:-40px 0 0 -40px;border:8px solid #fff;border-radius:50%;opacity:0}
+.row{position:absolute;object-fit:contain;filter:drop-shadow(0 24px 30px #0005);opacity:0}
+.rn{position:absolute;text-align:center;font:44px/1.05 Anton,sans-serif;text-transform:uppercase;opacity:0}
+#logo{position:absolute;left:900px;top:236px;width:130px;height:130px;object-fit:contain}
+#foot{position:absolute;left:48px;top:1520px;width:780px}
+#foot .n{font-weight:700;font-size:40px}
+#foot .s{font-weight:500;font-size:30px;margin-top:14px;opacity:.85}
+#foot .u{font-weight:700;font-size:30px;margin-top:14px}
+#qr{position:absolute;left:868px;top:1508px;width:164px;height:164px;background:#fff;border-radius:14px;padding:8px;box-sizing:border-box}
+#qr img{width:100%;height:100%}
+</style></head><body>
+<div id="ad">
+  <div id="bgA" class="l"></div><div id="bgB" class="l"></div>
+  <div id="name"></div><div id="price"></div>
+  <img id="hero" alt=""><img id="hand" src="hand.png" alt="" onload="this.style.display='block'" onerror="this.remove()">
+  <div id="ring"></div>
+</div>
+<script src="../_kit/kit.js"></script>
+<script>
+window.AD = {{CONFIG}};
+// Their own items: cutout (png/webp with a clear ground), name, price as they write it, ground colour, text colour.
+const ITEMS = [
+  { src: 'item1.png', name: 'First', price: '', bg: '#1E9E57', ink: '#fff' },
+  { src: 'item2.png', name: 'Second', price: '', bg: '#E8A317', ink: '#fff' },
+  { src: 'item3.png', name: 'Third', price: '', bg: '#E2541B', ink: '#fff' },
+];
+const END_BG = '#F4EFE6';        // the line-up ground, calm so the foot reads
+K.foot();
+const $ = (id) => document.getElementById(id);
+const ad = $('ad'), n = ITEMS.length;
+const END_TITLE = AD.name;       // the line-up's headline: their name, or a short line of theirs
+const LINE = 4.2, HOLD = 4.85;     // line-up starts, then still from HOLD to 8 s (3.15 s: QR over 3, A10.3; hold under 3.5, A10.5)
+ad.insertAdjacentHTML('beforeend', `<div id="endt" style="position:absolute;left:40px;right:40px;top:330px;text-align:center;font:120px/1 Anton,sans-serif;text-transform:uppercase;opacity:0"></div>`);
+$('endt').textContent = END_TITLE;
+const BEAT = (LINE - 0.3) / n;     // one tap per item before the line-up
+const TAP = (i) => 0.3 + i * BEAT; // item i arrives at this tap; item 0 is there from the start
+const FX = 540, FY = 1300;         // the fingertip: under the product, where the tap ripples from
+['foot', 'qr', 'logo'].forEach((id) => $(id) && ($(id).style.opacity = 0));
+// the line-up: every item small, side by side, its name under it
+const W = Math.min(340, 1040 / n), gap = (1080 - W * n) / (n + 1);
+const rows = ITEMS.map((it, i) => {
+  const x = gap + i * (W + gap), y = 640;
+  ad.insertAdjacentHTML('beforeend', `<img class="row" src="${it.src}" style="left:${x}px;top:${y}px;width:${W}px;height:${W * 1.2}px">` +
+    `<div class="rn" style="left:${x - 20}px;top:${y + W * 1.2 + 20}px;width:${W + 40}px;color:${it.bg}"></div>`);
+  const els = ad.querySelectorAll('.row'), names = ad.querySelectorAll('.rn');
+  names[i].textContent = it.name + (it.price ? ` ${it.price}` : '');
+  return { img: els[i], name: names[i], x, y };
+});
+const show = (it) => {
+  if (!$('hero').src.endsWith(it.src)) $('hero').src = it.src;
+  $('name').textContent = it.name; $('name').style.color = it.ink;
+  $('price').textContent = it.price; $('price').style.color = it.ink;
+};
+window.render = async (t) => {
+  // which tap we are in; k is how far into it
+  let i = 0; while (i + 1 < n && t >= TAP(i + 1)) i++;
+  const k = i === 0 ? 1 : K.cl((t - TAP(i)) / 0.45);
+  // it opens mid-action (M2): the first one drops onto the fingertip, its name slams in
+  const drop = K.outBack(K.at(t, 0, 0.45));
+  $('name').style.transform = `scale(${1.6 - 0.6 * K.outCubic(K.at(t, 0, 0.3))})`;
+  // and it never stalls (M5): the product balances on the fingertip, swaying, until the line-up
+  const sway = Math.sin(t * 4.2) * 4, bob = Math.sin(t * 5.3) * 10 + (1 - drop) * -700;
+  const prev = ITEMS[Math.max(0, i - 1)], cur = ITEMS[i];
+  // the ground: the new colour grows as a circle from the fingertip over the old one
+  $('bgA').style.background = prev.bg; $('bgB').style.background = cur.bg;
+  $('bgB').style.clipPath = `circle(${K.outCubic(k) * 2300}px at ${FX}px ${FY}px)`;
+  // the product flips: squeezes to an edge, swaps at the middle, opens as the next one
+  const f = i === 0 ? 1 : Math.abs(Math.cos(Math.PI * K.inOut(K.cl(k * 1.4))));
+  show(k * 1.4 < 0.5 && i > 0 ? prev : cur);
+  const hop = i === 0 ? 0 : Math.sin(Math.PI * K.cl(k * 1.4)) * 60;
+  // the tap: the finger dips, a ring spreads
+  const dip = i === 0 ? 0 : Math.sin(Math.PI * K.cl((t - TAP(i) + 0.12) / 0.24)) * 26;
+  if ($('hand')) $('hand').style.transform = `translateY(${dip}px)`;
+  const r = K.cl((t - (i === 0 ? 0.35 : TAP(i))) / 0.4);  // the first ring when the first one lands
+  Object.assign($('ring').style, { left: FX + 'px', top: FY + 'px', opacity: r > 0 ? 1 - r : 0, transform: `scale(${0.4 + 2.2 * r})` });
+  // the line-up: the hero and its words go, the ground calms, every item drops into its place, then the foot
+  const L = K.at(t, LINE, HOLD - LINE - 0.1);
+  const out = 1 - K.cl(L * 3);
+  ['hero', 'name', 'price', 'hand', 'ring'].forEach((id) => { if ($(id)) $(id).style.opacity = Math.min(out, id === 'ring' ? 1 - r : 1); });
+  $('hero').style.transform = `translateY(${bob - hop}px) rotate(${sway}deg) scaleX(${Math.max(0.02, f)}) scale(${1 - 0.3 * L})`;
+  ad.style.background = END_BG;
+  ['bgA', 'bgB'].forEach((id) => { $(id).style.opacity = 1 - K.cl(L * 2); });
+  rows.forEach((row, j) => {
+    const d = K.outBack(K.at(t, LINE + 0.1 + j * 0.06, 0.4));
+    row.img.style.opacity = K.cl(d * 3); row.img.style.transform = `translateY(${(1 - d) * -260}px)`;
+    row.name.style.opacity = K.at(t, LINE + 0.4, 0.3);
+  });
+  ['foot', 'qr', 'logo', 'endt'].forEach((id) => $(id) && ($(id).style.opacity = K.at(t, LINE + 0.25, 0.35)));
+};
+</script></body></html>

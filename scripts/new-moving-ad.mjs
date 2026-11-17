@@ -1,5 +1,6 @@
 // Starts a hand-made moving ad from the kit (A10.9, Tzvi 16 Nov 2026), so an ad is only its idea:
 //   node scripts/new-moving-ad.mjs <ad name> <business slug>     docs/ads/gen/<name>/ with ad.html, logo, QR, name and link
+//   node scripts/new-moving-ad.mjs <ad name> <business slug> --tap   tap to switch: flavours or varieties (kit tap.html)
 //   node scripts/new-moving-ad.mjs --clip <ad name> <clip.mp4>    a generated clip as frames under the words (A10.10)
 // Reads the business from the public API (no sign-in, nothing written there). Free: no generation.
 import { execFileSync } from 'node:child_process';
@@ -53,7 +54,9 @@ const where = [b.categories?.[0] && cap(b.categories[0]), b.areas?.[0] && cap(b.
 const s1 = (b.description || '').split(/(?<=[.!?])\s/)[0].replace(/[.]$/, '').trim();
 const first = s1.length <= 44 ? s1 : '';
 const config = { name: b.name, lines: [where, first].filter(Boolean), link, logo };
-const html = fs.readFileSync(path.join(GEN, '_kit', 'ad.html'), 'utf8')
+// --tap: the tap-to-switch template (Lay's, motion t02), for flavours or varieties, never sizes
+const tap = args.includes('--tap');
+const html = fs.readFileSync(path.join(GEN, '_kit', tap ? 'tap.html' : 'ad.html'), 'utf8')
   .replaceAll('{{AD}}', name).replaceAll('{{NAME}}', b.name.replace(/[<>&]/g, ''))
   .replace('{{CONFIG}}', JSON.stringify(config));
 fs.writeFileSync(path.join(dir, 'ad.html'), html);

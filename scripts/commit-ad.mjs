@@ -29,7 +29,10 @@ for (const p of [`docs/ads/gen/${name}`, `docs/ads/blueprints/${name}.md`]) if (
 
 // only what changed or is new under those paths, each file by name (never a whole folder: stage-files-not-folders)
 const st = run('git', ['status', '--porcelain', '-uall', '--', ...paths]).stdout;
-const files = st.split('\n').filter(Boolean).map((l) => l.slice(3).replace(/^"|"$/g, ''));
+// clip/ and front/ are frames rebuilt from out/clip.mp4 (new-moving-ad.mjs --clip, a page's keyfront.py): 195 MB for
+// Chicken Munch's moving ad (17 Nov 2026), so they are never committed
+const files = st.split('\n').filter(Boolean).map((l) => l.slice(3).replace(/^"|"$/g, ''))
+  .filter((f) => !/^docs\/ads\/gen\/[^/]+\/(clip|front)\//.test(f));
 if (!files.length) { console.log(`${name}: nothing new to commit`); process.exit(0); }
 const big = files.filter((f) => fs.existsSync(path.join(ROOT, f)) && fs.statSync(path.join(ROOT, f)).size > 40e6);
 if (big.length) { console.error(`over 40 MB, left for you to decide: ${big.join(', ')}`); process.exit(1); }

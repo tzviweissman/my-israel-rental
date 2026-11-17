@@ -2,35 +2,39 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 62: 0. The one idea
-- 80: 1. Anatomy: three layers, in this order
-- 102: 2. The headline carries the ad
-- 125: 3. The picture
-- 152: 4. The body: points, price, proof
-- 181: 5. Honesty: what an ad may never do
-- 207: 6. Words are kept apart from the picture
-- 222: 7. Variations: test different ideas, not different commas
-- 235: 8. Making it work on a phone
-- 263: 9. What this means for the ad maker
-- 297: 9b. Standing out (12 more videos, 1 Nov 2026)
-- 367: 9c. How ads are worded (12 more videos, 1 Nov 2026)
-- 396: 9d. Ideas, not layouts (1,194 Pinterest ads, 2 Nov 2026)
-- 420: 9e. What the best ads share (second look, 2 Nov 2026)
-- 483: 9f. Three more videos (4 Nov 2026)
-- 544: 9h. What makes it look designed (Tzvi, 6 Nov 2026: "can we make the ads better")
-- 550: 9g. Three more videos: why an ad catches the eye (4 Nov 2026)
-- 595: 10. What to discount from the videos
-- 614: Sources
-- 649: 11. Moving ads (Tzvi, 6 Nov 2026)
-- 657: 12. Never bland (Tzvi, 8 Nov 2026)
-- 665: 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
-- 673: 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
-- 689: 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
-- 701: 16. The headline says the offer (Tzvi, 10 Nov 2026)
-- 711: 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
-- 727: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
-- 739: 19. A 5 every time (Tzvi, 10 Nov 2026)
-- 750: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
+- 66: 0. The one idea
+- 84: 1. Anatomy: three layers, in this order
+- 106: 2. The headline carries the ad
+- 129: 3. The picture
+- 156: 4. The body: points, price, proof
+- 185: 5. Honesty: what an ad may never do
+- 211: 6. Words are kept apart from the picture
+- 226: 7. Variations: test different ideas, not different commas
+- 239: 8. Making it work on a phone
+- 267: 9. What this means for the ad maker
+- 301: 9b. Standing out (12 more videos, 1 Nov 2026)
+- 371: 9c. How ads are worded (12 more videos, 1 Nov 2026)
+- 400: 9d. Ideas, not layouts (1,194 Pinterest ads, 2 Nov 2026)
+- 424: 9e. What the best ads share (second look, 2 Nov 2026)
+- 487: 9f. Three more videos (4 Nov 2026)
+- 548: 9h. What makes it look designed (Tzvi, 6 Nov 2026: "can we make the ads better")
+- 554: 9g. Three more videos: why an ad catches the eye (4 Nov 2026)
+- 599: 10. What to discount from the videos
+- 618: Sources
+- 653: 11. Moving ads (Tzvi, 6 Nov 2026)
+- 667: 12. Never bland (Tzvi, 8 Nov 2026)
+- 675: 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
+- 683: 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
+- 699: 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
+- 711: 16. The headline says the offer (Tzvi, 10 Nov 2026)
+- 721: 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
+- 737: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
+- 749: 19. A 5 every time (Tzvi, 10 Nov 2026)
+- 760: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
+- 776: 21. The drawing is kept (Tzvi, 16 Nov 2026)
+- 783: 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
+- 791: 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
+- 808: 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
 <!-- /contents -->
 
 The rules for every still advert MyIsraelRental makes: the ad maker on the
@@ -800,3 +804,13 @@ was words over a photo, found only once the ad was built, and it held still for 
 - Real things move as real footage (A10.10): steam, a pour, bubbles or a bite is an image-to-video clip of their own
   product (`docs/ads/gen/_kit/clip.py`, price read through the API first), played frame by frame under the words by
   `new-moving-ad.mjs --clip`; code draws the words, the logo and the QR.
+
+## 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
+
+Tzvi: "we should have our own set of rules for moving ads. we should take whats applicable from regular ads but im
+sure theres a lot more to moving ads that we can learn." The full rules are in `docs/moving-ad-rules.md`, written
+from 130 kept moving and video ads (29 scored 5) in the motion library. In short: one idea acted out and chosen by
+name for the offer (flavours tap or swap, sizes grow or stack, a dish builds or its ingredients become it); it opens
+mid-action; everything moves for a reason; the product fills half the width or more; a change every beat and no
+stall; words wait for the end; one colour world per beat across the whole screen; it ends whole on a clean hero
+frame and loops. `check-moving-ad.py` measures the opening and the stalls (M2, M5).

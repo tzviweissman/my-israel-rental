@@ -865,7 +865,9 @@
   {
    "id": "A10.7",
    "rule": "A moving ad's last frame is sketched and scored beside the library before it is built",
-   "how": ["ASK"],
+   "how": [
+    "ASK"
+   ],
    "built_by": "scripts/ad-blueprint.mjs refuses an A10.7 answer without an existing sheet and a 'Score: 5' (or sent as it is); to build: a sketch step in new-moving-ad.mjs",
    "confirmed_by": "ad-blueprint.mjs --done",
    "retried": false,
@@ -874,7 +876,9 @@
   {
    "id": "A10.8",
    "rule": "A moving ad's movement is judged beside three 5/5 moving ads",
-   "how": ["ASK"],
+   "how": [
+    "ASK"
+   ],
    "built_by": "scripts/moving-ad-vs-library.py makes the sheet; ad-blueprint.mjs refuses an answer without it and a score of 5",
    "confirmed_by": "ad-blueprint.mjs --done",
    "retried": false,
@@ -883,7 +887,9 @@
   {
    "id": "A10.9",
    "rule": "A hand-made moving ad starts from the kit",
-   "how": ["ASK"],
+   "how": [
+    "ASK"
+   ],
    "built_by": "scripts/new-moving-ad.mjs writes docs/ads/gen/<name>/ from docs/ads/gen/_kit",
    "confirmed_by": "new-moving-ad.mjs",
    "retried": false,
@@ -892,9 +898,55 @@
   {
    "id": "A10.10",
    "rule": "Real things in a moving ad move as a generated clip of the business's own product",
-   "how": ["ASK"],
+   "how": [
+    "ASK"
+   ],
    "built_by": "docs/ads/gen/_kit/clip.py (template, refuses without the one motion and --go) and new-moving-ad.mjs --clip; kit.js plays the frames",
    "confirmed_by": "record-moving-ad.mjs",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A10.11",
+   "rule": "A moving ad acts out one idea named from the moving-ad rulebook, fitting the offer",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "docs/moving-ad-rules.md; kit templates docs/ads/gen/_kit (ad.html, tap.html)",
+   "confirmed_by": "moving-ad-vs-library.py and check-moving-ad.py",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A10.12",
+   "rule": "Everything in a moving ad moves for a visible reason, the product half the width or more",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "docs/moving-ad-rules.md; kit templates docs/ads/gen/_kit (ad.html, tap.html)",
+   "confirmed_by": "moving-ad-vs-library.py and check-moving-ad.py",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A10.13",
+   "rule": "Words wait for the last frame; one colour world per beat",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "docs/moving-ad-rules.md; kit templates docs/ads/gen/_kit (ad.html, tap.html)",
+   "confirmed_by": "moving-ad-vs-library.py and check-moving-ad.py",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A10.14",
+   "rule": "A moving ad loops back into its first frame",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "docs/moving-ad-rules.md; kit templates docs/ads/gen/_kit (ad.html, tap.html)",
+   "confirmed_by": "moving-ad-vs-library.py and check-moving-ad.py",
    "retried": false,
    "status": "planned"
   }

@@ -67,6 +67,18 @@ def check(path):
     moved = np.abs(fs[len(fs) // 3].astype(np.int16) - fs[-1].astype(np.int16)).mean()
     if moved < 0.4:
         bad.append(f"it hardly moves ({moved:.2f})")
+    # Moving-ad rulebook M2 and M5 (docs/moving-ad-rules.md): something is already happening in the first second, and
+    # nothing stalls before the end, because every 5 in the motion library opens mid-action and changes once a beat.
+    opening = max(worst_square(fs[0], fs[i]) for i in range(1, min(len(fs), int(fps) + 1)))
+    if opening < 8:
+        bad.append(f"nothing happens in the first second (biggest change {opening:.1f}): open mid-action (M2)")
+    end = len(fs) - still_run(fs)
+    run = longest = 0
+    for i in range(1, end):
+        run = run + 1 if worst_square(fs[i - 1], fs[i]) < 1.5 else 0
+        longest = max(longest, run)
+    if longest / fps > 1.0:
+        bad.append(f"stalls for {longest / fps:.1f} seconds before the end: a change every beat, about a second (M5)")
     hold = still_run(fs) / fps
     if hold < 1.5:
         bad.append(f"holds still {hold:.1f} seconds at the end, under 1.5 (A10.3)")
