@@ -12,7 +12,7 @@ P = kit.price
 PRICE = 325                      # the listing's one price: Weekly cleaning 4 hours, ILS
 TIER = 'Weekly cleaning 4 hours'
 GIG = '8d8bb8e8-1571-45ce-a6e9-5b177b83561e'
-WA = '+972 50-423-2291'          # the listing's WhatsApp (flyer's 058 number asked, question 1)
+WA = '+972 58-713-0664'          # the listing's WhatsApp (flyer's 058 number asked, question 1)
 ARW = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg>'
 HOUSE = '<svg class="house" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>'
 def icon(paths):

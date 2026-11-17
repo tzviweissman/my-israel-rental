@@ -2,7 +2,7 @@
   // Build your plan (rules 3x.9): tiles, and one plain plan that writes itself beside the form. That plan is what is
   // saved on MyIsraelRental and sent on WhatsApp. Only the weekly 4-hour visit has a price (the listing's, read live);
   // everything else is priced by the owner on WhatsApp.
-  var WA = '972504232291', GIG = '__GIG__', TIER = '__TIER__';
+  var WA = '972587130664', GIG = '__GIG__', TIER = '__TIER__';
   var PRICE = Number((window.MIR_PRICES || {})[TIER]) || __PRICE__;
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
   var NAMES = { sun: 'Sunday', mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };

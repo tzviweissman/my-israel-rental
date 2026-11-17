@@ -279,3 +279,4 @@ R3x.8 pass: built to the blueprint: sitekit writes the skip link, footer h2s and
 R3x.13 pass: built to the blueprint: every text size a step of --t-1..--t5 and every gap of --s1..--s10, written into BRAND.md; check-web-basics passes
 R3r.3 pass: built to the blueprint: check-rules passes after the last edit
 R3r.4 n/a: nothing pointed out twice on this site yet
+<!-- Reviewed 2026-11-17: the owner gave the right phone number, 058-713-0664, now on every page and in the WhatsApp links; nothing else changed, every rule above still holds. -->
