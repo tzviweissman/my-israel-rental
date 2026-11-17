@@ -152,7 +152,7 @@ Re-checked ${new Date().toISOString().slice(0, 10)}: ${touch}
 const rulesTime = dated(rulesFile);
 // a merge or a fresh checkout writes RULES.md and the pages in the same instant, a few ms apart in no set order
 // (1 Nov 2026, merging every branch onto main): within 2 s is the same moment, not an edit after the rules
-if (newest.t > rulesTime + 2000) problems.push(`RULES.md is older than ${path.relative(dir, newest.f)} (changed ${new Date(newest.t).toISOString().replace('T', ' ').slice(0, 19)}, RULES.md ${new Date(rulesTime).toISOString().replace('T', ' ').slice(0, 19)}): look at every rule again against the current site, then save RULES.md`);
+if (newest.t > rulesTime + 2000) problems.push(`RULES.md is older than ${path.relative(dir, newest.f)} (changed ${new Date(newest.t).toISOString().replace('T', ' ').slice(0, 19)}, RULES.md ${new Date(rulesTime).toISOString().replace('T', ' ').slice(0, 19)}): look at every rule again against the current site, then save RULES.md (or, once re-checked: node scripts/check-rules.mjs --touch="what you re-checked" ${target})`);
 
 // a rule left out as "not on this site (film: no)" while the files show one was skipped, not n/a (10 Nov 2026)
 for (const w of contradicted(dir, fs.readFileSync(rulesFile, 'utf8'))) problems.unshift(w);   // first, so it is never cut off the list
