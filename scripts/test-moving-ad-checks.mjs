@@ -39,7 +39,8 @@ for (const [name, c] of Object.entries(CASES)) {
   $('word').style.transform = \`translateX(\${(m - 0.5) * 600}px)\`;
 };`);
   fs.writeFileSync(path.join(dir, 'ad.html'), html);
-  execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'record-moving-ad.mjs'), dir, name], { stdio: 'pipe' });
+  execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'record-moving-ad.mjs'), dir, name],
+    { stdio: 'pipe', env: { ...process.env, RECORD_FPS: '15' } });   // test ads at 15 a second: half the time
   const r = spawnSync(path.join(ROOT, 'backend', '.venv', 'Scripts', 'python'),
     [path.join(ROOT, 'scripts', 'check-moving-ad.py'), path.join(dir, `${name}.mp4`)], { encoding: 'utf8' });
   const out = r.stdout + r.stderr;

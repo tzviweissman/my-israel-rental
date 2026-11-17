@@ -13,7 +13,8 @@ const { chromium } = createRequire(path.join(ROOT, 'scripts', 'x.js'))('playwrig
 const q = process.argv[4] || '';
 const only = process.argv[5];
 const name = process.argv[3];
-const FPS = 30, LEN = 8;
+// RECORD_FPS=15 halves a recording for test-only ads (test-moving-ad-checks.mjs); ads that go out are always 30
+const FPS = Number(process.env.RECORD_FPS) || 30, LEN = 8;
 // Plan first, then build (Tzvi 17 Nov 2026): the MyIsraelRental ad's first cut was drawn before its blueprint's
 // stages 1 to 4 were answered and did not match the plan. A folder named _something is a kit test, not an ad.
 const AD = path.basename(HERE);
