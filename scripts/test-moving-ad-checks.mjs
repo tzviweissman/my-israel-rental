@@ -1,9 +1,9 @@
 // Proves check-moving-ad.py (and so commit-ad.mjs --finish, which runs it) refuses broken moving ads (17 Nov 2026).
 //   node scripts/test-moving-ad-checks.mjs
-// Draws four try-outs from the kit in <temp>/mir-ad-tests/ (outside the repo), each over a real ad's last frame
+// Draws five try-outs from the kit in <temp>/mir-ad-tests/ (outside the repo), each over a real ad's last frame
 // (Chicken Munch's, so the first-frame check sees a real ad, not an empty test page): a good one, one that does nothing in its
 // first second, one that stalls in the middle, and one that never holds still at the end. The good one must pass and
-// each broken one must fail with its own reason. Free, no generation; takes a few minutes (four recordings).
+// each broken one must fail with its own reason. Free, no generation; takes a few minutes (five recordings). The fifth shows its QR from the start and must fail (M6).
 import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -23,6 +23,7 @@ const CASES = {
   'late-start': { motion: 'K.at(t, 1.5, 4.5)', want: 'nothing happens in the first second' },
   'stalls': { motion: 't < 2 ? t / 6 : t < 4 ? 2 / 6 : K.cl(t / 6)', want: 'stalls for' },
   'no-hold': { motion: 't / 8', want: 'holds still' },
+  'qr-early': { motion: 'K.cl(t / 6)', want: 'the QR code is on screen at', footAlways: true },
 };
 let bad = 0;
 for (const [name, c] of Object.entries(CASES)) {
@@ -35,8 +36,10 @@ for (const [name, c] of Object.entries(CASES)) {
     .replace(/window\.render = async \(t\) => \{[\s\S]*?\n\};/, `window.render = async (t) => {
   const m = ${c.motion};
   // a real ad's last frame under it, so frame one is already an ad (A10.2); only the word's motion differs between cases
-  $('ad').style.background = 'url(real.png) 0 0 / 1080px 1920px';
+  // its own QR (881,1521 to 1018,1658) covered, so only the kit's QR is read (the qr-early case, M6)
+  $('ad').style.background = 'linear-gradient(#111,#111) 860px 1500px / 180px 180px no-repeat, url(real.png) 0 0 / 1080px 1920px';
   $('word').style.transform = \`translateX(\${(m - 0.5) * 600}px)\`;
+  ${c.footAlways ? '' : 'K.footIn(t);'}
 };`);
   fs.writeFileSync(path.join(dir, 'ad.html'), html);
   execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'record-moving-ad.mjs'), dir, name],

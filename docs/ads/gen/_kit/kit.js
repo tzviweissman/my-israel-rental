@@ -27,5 +27,15 @@
     document.querySelectorAll('#foot .s').forEach((el, i) => { el.textContent = a.lines[i]; });
     document.querySelector('#foot .u').textContent = a.link;
   };
+  // Words wait (M6, A10.13): the name, link and QR rise in at `start` and are whole 0.4 s later. 4.2 keeps the QR still
+  // for over 3 s in an 8 s ad (A10.3); the logo stays. check-moving-ad.py fails a QR readable in the first two seconds.
+  K.footIn = (t, start = 4.2) => {
+    const k = K.outCubic(K.at(t, start, 0.4));
+    for (const id of ['foot', 'qr']) {
+      const el = document.getElementById(id);
+      el.style.opacity = k;
+      el.style.transform = `translateY(${(1 - k) * 40}px)`;
+    }
+  };
   window.K = K;
 })();

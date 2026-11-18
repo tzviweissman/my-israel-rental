@@ -40,5 +40,6 @@ window.render = async (t) => {
   if (CLIP_FRAMES) await K.clip($('clip'), t, { frames: CLIP_FRAMES, fps: CLIP_FPS });
   const k = K.outBack(K.at(t, 0.1, 0.5));
   $('word').style.transform = `scale(${0.6 + 0.4 * k})`;
+  K.footIn(t);  // name, link and QR wait for the last beat (M6)
 };
 </script></body></html>

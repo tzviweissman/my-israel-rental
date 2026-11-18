@@ -98,6 +98,13 @@ def check(path):
             bad.append(f"the QR code reads {link!r}, not a link")
         if qhold <= 3:
             bad.append(f"the QR code is still for {qhold:.1f} seconds, not over 3 (A10.3)")
+    # Words wait (M6, A10.13, 18 Nov 2026): the name, link and QR arrive on the last beat, so a QR that reads in the
+    # first two seconds makes the ad a poster with an effect (L.A. Cholent, American Crust). Ads finished before then
+    # are not checked again, so this does not hold them back (new-rules-spare-made-sites).
+    early = next((i / fps for i in range(0, min(len(fs), int(2 * fps) + 1), max(1, int(fps) // 4))
+                  if cv2.QRCodeDetector().detectAndDecode(fs[i])[0]), None)
+    if early is not None:
+        bad.append(f"the QR code is on screen at {early:.2f}s: name, link and QR wait for the last beat (K.footIn, M6)")
     print(f"{path}: {w}x{h} {codec}, {dur:.1f}s, holds {hold:.1f}s, QR {qr}")
     for b in bad:
         print(f"  FAIL {b}")

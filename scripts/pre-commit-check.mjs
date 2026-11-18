@@ -87,7 +87,7 @@ if (staged.some((f) => /^(docs\/(page-generation-rules|rules-checklist|static-ad
   if (c.status !== 0) { console.error(`Commit refused: ${c.stdout}`); process.exit(1); }
 }
 // a change to the moving-ad check (or its self-test) must still pass a good ad and refuse the broken ones (17 Nov 2026);
-// it records four short ads, so it runs only then, never on other commits
+// it records five short ads, so it runs only then, never on other commits
 const selfTest = staged.filter((f) => /^scripts\/(check-moving-ad\.py|test-moving-ad-checks\.mjs)$/.test(f));
 if (selfTest.length) {
   // the exact staged versions that already passed (in any worktree: the stamp is in the shared .git) are not tested
@@ -98,7 +98,7 @@ if (selfTest.length) {
   if (fs.existsSync(stamp) && fs.readFileSync(stamp, 'utf8').trim() === key) {
     console.log(`${selfTest.join(' and ')} changed: these exact versions already passed scripts/test-moving-ad-checks.mjs, not run again`);
   } else {
-    console.log(`${selfTest.join(' and ')} changed: running scripts/test-moving-ad-checks.mjs (four recordings, several minutes)`);
+    console.log(`${selfTest.join(' and ')} changed: running scripts/test-moving-ad-checks.mjs (five recordings, about 20 minutes)`);
     const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'test-moving-ad-checks.mjs')], { cwd: ROOT, encoding: 'utf8' });
     if (c.status !== 0) { console.error(`Commit refused: the moving-ad check no longer tells good from broken:\n${c.stdout}${c.stderr}`); process.exit(1); }
     fs.writeFileSync(stamp, key);
