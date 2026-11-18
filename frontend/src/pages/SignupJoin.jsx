@@ -286,7 +286,7 @@ const SignupJoin = () => {
               <span className="font-semibold" style={{ color: 'var(--ink)' }}>{t(activeCard.tKey, activeCard.defaultLabel)}</span>
               {' · '}
               <button type="button" onClick={() => setStep(1)}
-                className="font-semibold text-[var(--brand-primary)] hover:underline" data-testid="signup-back-btn">
+                className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-3 px-1 font-semibold text-[var(--brand-primary)] hover:underline" data-testid="signup-back-btn">
                 {t('signupJoin.change', 'Change')}
               </button>
             </p>
