@@ -1848,18 +1848,18 @@ const CreateGig = () => {
 
         <div className="flex flex-col items-end mt-8 gap-2 sm:flex-row sm:items-center sm:justify-between">
           <button type="button" disabled={step === 1} onClick={() => setStep((s) => s - 1)}
-            className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 disabled:opacity-30 flex items-center gap-1 self-start sm:self-auto" data-testid="wizard-back">
+            className="px-4 py-2 min-h-[44px] rounded-lg text-sm font-semibold text-gray-600 disabled:opacity-30 flex items-center gap-1 self-start sm:self-auto" data-testid="wizard-back">
             <ArrowLeft size={14} className="rtl:rotate-180" /> {t('wizard.back', 'Back')}
           </button>
           <div className="flex flex-col items-end gap-1">
             {step < totalSteps ? (
               <button type="button" disabled={!canNext()} onClick={() => setStep((s) => s + 1)}
-                className="px-6 py-2.5 rounded-full text-sm font-semibold disabled:opacity-40 flex items-center gap-1" style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }} data-testid="wizard-next">
+                className="px-6 py-2.5 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-40 flex items-center gap-1" style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }} data-testid="wizard-next">
                 {t('wizard.next', 'Next')} <ArrowRight size={14} className="rtl:rotate-180" />
               </button>
             ) : (
               <button type="button" disabled={!canNext() || saving} onClick={submit}
-                className="px-6 py-2.5 rounded-full text-sm font-semibold disabled:opacity-40 flex items-center gap-1" style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }} data-testid="wizard-publish">
+                className="px-6 py-2.5 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-40 flex items-center gap-1" style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }} data-testid="wizard-publish">
                 {saving ? (
                   <>
                     <Loader2 className="animate-spin" size={14} />
