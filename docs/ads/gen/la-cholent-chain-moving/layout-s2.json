@@ -1,0 +1,7 @@
+{"shape": "story", "ground": "#1a1a1a",
+ "boxes": [{"what": "jug of water", "x": 0.0, "y": 0.36, "w": 0.12, "h": 0.16, "colour": "#9fb4c0"},
+           {"what": "slow cooker with black lid on, fogged, from above", "x": 0.15, "y": 0.30, "w": 0.70, "h": 0.394, "colour": "#2c2c2c"},
+           {"what": "lid knob", "x": 0.45, "y": 0.47, "w": 0.10, "h": 0.056, "colour": "#111111"},
+           {"what": "hand reaching for the knob", "x": 0.55, "y": 0.42, "w": 0.40, "h": 0.12, "colour": "#c8906a"}],
+ "keep_empty": [{"what": "headline", "x": 0.05, "y": 0.11, "w": 0.9, "h": 0.12},
+                {"what": "foot", "x": 0.04, "y": 0.78, "w": 0.92, "h": 0.11}]}

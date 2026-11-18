@@ -1,0 +1,6 @@
+{"shape": "story", "ground": "#1a1a1a",
+ "boxes": [{"what": "jug of water", "x": 0.0, "y": 0.36, "w": 0.12, "h": 0.16, "colour": "#9fb4c0"},
+           {"what": "steel slow cooker from above, open", "form": "ring", "band": 0.1, "x": 0.15, "y": 0.30, "w": 0.70, "h": 0.394, "colour": "#9a9a9a"},
+           {"what": "hand tipping open tub of red-brown kit", "x": 0.50, "y": 0.24, "w": 0.46, "h": 0.17, "colour": "#a0522d", "angle": -25}],
+ "keep_empty": [{"what": "headline", "x": 0.05, "y": 0.11, "w": 0.9, "h": 0.12},
+                {"what": "foot", "x": 0.04, "y": 0.78, "w": 0.92, "h": 0.11}]}

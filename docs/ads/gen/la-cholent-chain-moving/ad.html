@@ -1,0 +1,81 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- L.A. Cholent by Rabbi Samuels, the chain (docs/ads/blueprints/la-cholent-chain-moving.md), from the kit (A10.9).
+     Three shots (M14): c1/ the hand tips their tub into the pot, c2/ the lid lifts in steam (real footage, clip.py),
+     then out/s3.jpg, the bowl where the pot was, with their real label laid on the sealed tub (label.png, A3.7).
+     Words wait (M6): one line per beat, the headline in three hits and the foot from 4.2 s.
+     Record: node scripts/record-moving-ad.mjs docs/ads/gen/la-cholent-chain-moving la-cholent-chain-moving
+     Check:  backend/.venv/Scripts/python scripts/check-moving-ad.py docs/ads/la-cholent-chain-moving.mp4 -->
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@500;700&display=block" rel="stylesheet">
+<style>
+html,body{margin:0;background:#111}
+#ad{position:relative;width:1080px;height:1920px;overflow:hidden;background:#141210;font-family:Manrope,sans-serif;color:#fff}
+.l{position:absolute;left:0;top:0;width:1080px;height:1920px;object-fit:cover}
+#s3w{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:516px 950px}
+/* their real label (label.png from medium.jpg) on the sealed tub's blank lid; its own black runs on into the lid's */
+#label{position:absolute;left:706px;top:330px;width:255px;height:112px;filter:brightness(.85)}
+#scrim{background:linear-gradient(#0009 0,#0000 640px,#0000 1300px,#000b 1560px,#000e 1920px)}
+.w{position:absolute;left:60px;width:820px;font:118px/1 Anton,sans-serif;color:#F4EAD5;text-transform:uppercase;text-shadow:0 4px 24px #0008}
+#beat{top:150px}
+#h1{top:200px}#h2{top:322px}#h3{top:452px;font-size:156px;color:#E9A15B}
+/* the bowl again, in front of CHOLENT., so the word sinks behind its rim (type and photo interlock, A11.2) */
+#s3t{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:516px 950px;clip-path:circle(404px at 517px 960px)}
+#logo{position:absolute;left:930px;top:110px;width:120px;height:120px;object-fit:contain;border-radius:50%}
+#foot{position:absolute;left:48px;top:1520px;width:780px}
+#foot .n{font-weight:700;font-size:40px}
+#foot .s{font-weight:500;font-size:30px;margin-top:14px;opacity:.9}
+#foot .u{font-weight:700;font-size:30px;margin-top:14px}
+#qr{position:absolute;left:868px;top:1508px;width:164px;height:164px;background:#fff;border-radius:14px;padding:8px;box-sizing:border-box}
+#qr img{width:100%;height:100%}
+</style></head><body>
+<div id="ad">
+  <img id="c1" class="l" alt="">
+  <img id="c2" class="l" alt="">
+  <div id="s3w"><img id="s3" class="l" src="out/s3.jpg" alt=""><img id="label" src="label.png" alt=""></div>
+  <div id="scrim" class="l"></div>
+  <div id="beat" class="w"></div>
+  <div id="h1" class="w">Tip it in.</div><div id="h2" class="w">Add water.</div><div id="h3" class="w">Cholent.</div>
+  <div id="s3t"><img class="l" src="out/s3.jpg" alt=""></div>
+</div>
+<script src="../_kit/kit.js"></script>
+<script>
+window.AD = {"name":"L.A. Cholent by Rabbi Samuels","lines":["Raw cholent kits from ₪100 · Kosher, Rabbi Weiner"],"link":"myisraelrental.com/p/l-a-cholent-by-rabbi-samuels","logo":"logo.png"};
+K.foot();
+const $ = (id) => document.getElementById(id);
+// a clip's frames (c1/0001.jpg...), played from clip second `from` at `speed` times real time
+async function frame(img, dir, t, from, speed, frames) {
+  const n = Math.max(1, Math.min(frames, Math.floor((from + t * speed) * 30) + 1));
+  const src = `${dir}/${String(n).padStart(4, '0')}.jpg`;
+  if (!img.src.endsWith(src)) { img.src = src; await img.decode().catch(() => {}); }
+}
+const CUT2 = 2.5, CUT3 = 4.0;
+const slam = (el, t, at) => {           // a word slams in on its beat
+  const k = K.at(t, at, 0.22);
+  el.style.opacity = k > 0 ? 1 : 0;
+  el.style.transform = `scale(${1.5 - 0.5 * K.outCubic(k)})`;
+  el.style.transformOrigin = 'left center';
+};
+window.render = async (t) => {
+  // shot 1: the hand tips the tub in (clip seconds 0 to 5 at 2x); shot 2: the lid lifts in steam (0.8 to 3.8 at 2x)
+  await frame($('c1'), 'c1', Math.min(t, CUT2), 0, 2, 198);
+  await frame($('c2'), 'c2', K.cl((t - CUT2) / 1.5) * 1.5, 0.8, 2, 198);
+  $('c1').style.opacity = t < CUT2 ? 1 : 0;
+  $('c2').style.opacity = t >= CUT2 && t < CUT3 + 0.3 ? 1 : 0;
+  // shot 3: out of the steam, the bowl sits where the pot was and settles back to its own place (one circle, M14)
+  const d = K.at(t, CUT3, 0.3), s = K.outCubic(K.at(t, CUT3, 0.6));
+  for (const id of ['s3w', 's3t']) {
+    $(id).style.opacity = d;
+    $(id).style.transform = `translate(${(1 - s) * 24}px, ${(1 - s) * 95}px) scale(${1.2 - 0.2 * s})`;
+  }
+  // words wait: one line per beat during the action
+  const beat = $('beat');
+  if (t < CUT2) { beat.textContent = 'Tip it in.'; slam(beat, t, 0.15); }
+  else if (t < CUT3) {
+    const h = Math.round(1 + 19 * K.inOut(K.at(t, CUT2 + 0.2, 1.1)));
+    beat.textContent = h < 20 ? `${h} h on low` : '20 hours on low.';
+    slam(beat, t, CUT2 + 0.05);
+  } else beat.style.opacity = 0;
+  slam($('h1'), t, 4.2); slam($('h2'), t, 4.6); slam($('h3'), t, 5.0);
+  K.footIn(t, 4.2);
+};
+</script></body></html>

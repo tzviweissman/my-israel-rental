@@ -1,0 +1,7 @@
+{"shape": "story", "ground": "#1a1a1a",
+ "boxes": [{"what": "cream bowl of cooked cholent from above, where the pot was", "form": "ring", "band": 0.05, "x": 0.12, "y": 0.335, "w": 0.76, "h": 0.43, "colour": "#e8dcc4"},
+           {"what": "cooked cholent", "x": 0.19, "y": 0.375, "w": 0.62, "h": 0.35, "colour": "#7a3e1d"},
+           {"what": "sealed tub", "x": 0.63, "y": 0.2, "w": 0.33, "h": 0.12, "colour": "#a0522d"},
+           {"what": "spoon", "x": 0.9, "y": 0.45, "w": 0.08, "h": 0.22, "colour": "#9a9a9a"}],
+ "keep_empty": [{"what": "headline", "x": 0.04, "y": 0.06, "w": 0.56, "h": 0.25},
+                {"what": "foot", "x": 0.04, "y": 0.79, "w": 0.92, "h": 0.1}]}
