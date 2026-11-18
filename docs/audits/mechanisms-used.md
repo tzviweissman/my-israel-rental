@@ -156,3 +156,4 @@ which is a different report type). Flagged as documentation drift, same as the
 2026-11-15 - Zeigarnik effect (unfinished costs count) - Sales summary, Each item panel
 2026-11-16 - fresh start effect - Clean Plus booking, first-day field
 2026-11-17 - self-reference effect - sign-up card headline
+2026-11-18 - concreteness effect - American Crust pickup bundle card (shop.html)
