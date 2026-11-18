@@ -6,6 +6,9 @@
 // Prints each status change with the time since the start, and exits 0 only when both built (SUCCESS).
 // SKIPPED means Railway's watch paths did not see that side in the commit's own files (CLAUDE.md, Railway deploy).
 // Why it exists: 16 Nov 2026 a normal build was taken for one stuck half an hour after four minutes.
+// It waits up to 40 minutes itself: run it in the background, never inside `timeout` or a foreground
+// call (two-minute limit). On 18 Nov a `timeout 590` cut it off at DEPLOYING after a 9m42s build.
+// Then: node scripts/check-live.mjs <paths> to see the change on the real site.
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 

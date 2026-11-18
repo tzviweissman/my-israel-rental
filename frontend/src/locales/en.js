@@ -1420,7 +1420,7 @@ const en = {
         metaDescription: 'List your business on MyIsraelRental, free.',
         productsIntro: 'Add each product you sell as its own row, with photos, a price and a short description. Customers browse them and message you to buy.',
         removePhoto: 'Remove photo',
-        productNamePh: 'Product name (e.g. Oak dining table)',
+        productNamePh: 'Name, e.g. Oak table',
         productDescPh: 'Short description (optional): size, materials, colours…',
         addProduct: 'Add another product',
         tiersIntroAppt: 'List each service people can book. A barber might add Haircut (30 min · ₪60), Beard trim (15 min · ₪30) and Full grooming (45 min · ₪90). The length is what builds your booking times.',

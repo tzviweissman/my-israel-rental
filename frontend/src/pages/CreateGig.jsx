@@ -1950,7 +1950,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, onDuplicate, o
           </div>
           <div className="flex-1 min-w-0 space-y-2">
             <input value={p.name} onChange={(e) => onUpdate(i, { name: e.target.value })}
-              placeholder={t('wizard.productNamePh', 'Product name (e.g. Oak dining table)')}
+              placeholder={t('wizard.productNamePh', 'Name, e.g. Oak table')}
               className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 text-sm font-semibold focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 placeholder:text-gray-400 placeholder:font-normal"
               data-testid={`wizard-product-name-${i}`} />
             <PriceKindPicker value={p.price_kind} onChange={(k) => onUpdate(i, { price_kind: k })} testid={`wizard-product-kind-${i}`} />
