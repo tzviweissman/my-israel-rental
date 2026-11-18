@@ -18,7 +18,8 @@
 // seconds: the scroll itself (default 40); 2.5 s of the opening and 2.5 s
 // at the end are added. fps defaults to 30. It also writes <out>-sheet.jpg,
 // a contact sheet: look at it before sending the video.
-// Needs ffmpeg on PATH (a phone plays the mp4; WhatsApp takes ~10 MB).
+// Needs ffmpeg on PATH. A phone-size run also writes <out>-whatsapp.mp4, small enough to send.
+// For the owner, add --speed 1: the 1.5x default is for Tzvi's own videos.
 //
 // Re-record only what changed (Tzvi, 18 Oct 2026: "instead of rerecording
 // everything if you could only rerecord the part we changed"): every run
@@ -32,7 +33,7 @@
 //   ... record.mjs http://localhost:4523/ 390 844 out.mp4 50 --stop ".picker|2" --redo "#open"
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 const { chromium } = createRequire(process.cwd() + '/')('playwright');
 const argv = process.argv.slice(2), STOPS = [];
@@ -181,5 +182,12 @@ execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-framerate', String(fps), '
 const every = Math.max(1, Math.floor(n / 12));
 execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', out, '-vf', `select=not(mod(n\\,${every})),scale=-2:540,tile=6x2`,
   '-frames:v', '1', out.replace(/\.mp4$/i, '') + '-sheet.jpg']);
+// A copy small enough to send on WhatsApp (Cakes by Tova, 18 Nov 2026: crf 18 gave 19 MB for 57 s; crf 27 gave
+// 3.6 MB with no visible loss). Only for phone-size videos: wide ones stay as they are.
+const wa = out.replace(/\.mp4$/i, '') + '-whatsapp.mp4';
+if (phone) execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', out, '-c:v', 'libx264', '-crf', '27', '-preset', 'slow',
+  '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', wa]);
 // The frames stay in <out>.frames/ for the next --redo.
-console.log(`wrote ${out} (${n} frames at ${fps} fps, ${partial ? redrawn + ' drawn again, ' + (n - redrawn) + ' reused' : 'all drawn'}) and its contact sheet`);
+const mb = f => (statSync(f).size / 1048576).toFixed(1) + ' MB';
+console.log(`wrote ${out} (${mb(out)}, ${n} frames at ${fps} fps, ${partial ? redrawn + ' drawn again, ' + (n - redrawn) + ' reused' : 'all drawn'}) and its contact sheet` +
+  (phone ? `; ${wa} (${mb(wa)}) is the one to send on WhatsApp` : ''));

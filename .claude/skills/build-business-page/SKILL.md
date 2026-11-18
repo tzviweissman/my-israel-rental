@@ -126,7 +126,8 @@ your reply, either "every check passes" or the problems it listed.
 13. **Report.** Ends with "Not done yet" and "For your call", after a
     shorter-version pass on every long line (§0b.10a). Videos for Tzvi at 1.5x
     with an HTML link, recorded with `scripts/record.mjs` from the live page,
-    contact sheet looked at first (§3c.11).
+    contact sheet looked at first (§3c.11). A video for the owner plays at
+    normal speed (`--speed 1`); send its `-whatsapp.mp4` copy.
 14. **Publish.** `node scripts/publish-page.mjs <folder> <slug> --check` lists
     every problem; then publish (it re-records the preview clip). Afterwards
     `check-showcase-previews.mjs` and `check-business-pages` on live (§0b.12).
