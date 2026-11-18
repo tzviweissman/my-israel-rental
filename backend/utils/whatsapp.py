@@ -170,8 +170,28 @@ async def send_order_delivered_to_customer(
     WHATSAPP_TEMPLATE_ORDER_DELIVERED names an approved template with an IMAGE
     header (docs/whatsapp-order-delivered-template.md); the email with the
     photo goes out either way. Never raises."""
+    return await _send_photo_to_customer("WHATSAPP_TEMPLATE_ORDER_DELIVERED", recipient_phone,
+                                         business_name, track_url, photo_url, language)
+
+
+async def send_order_making_to_customer(
+    *, recipient_phone: str, business_name: str, track_url: str, photo_url: Optional[str],
+    language: str = "he",
+) -> bool:
+    """The business's photo of the order while it is being made (18 Nov
+    2026, after the behind-the-scenes order shots on Gremier's site). Off
+    until WHATSAPP_TEMPLATE_ORDER_MAKING names an approved template with an
+    IMAGE header (docs/whatsapp-order-photos.md). Never raises."""
+    return await _send_photo_to_customer("WHATSAPP_TEMPLATE_ORDER_MAKING", recipient_phone,
+                                         business_name, track_url, photo_url, language)
+
+
+async def _send_photo_to_customer(env_key: str, recipient_phone: str, business_name: str,
+                                  track_url: str, photo_url: Optional[str], language: str) -> bool:
+    """A customer template with an image header and two body values
+    (business name, order link). Meta fetches the picture, so https only."""
     meta = _meta_config()
-    tpl = os.environ.get("WHATSAPP_TEMPLATE_ORDER_DELIVERED")
+    tpl = os.environ.get(env_key)
     if not (meta and tpl and (photo_url or "").startswith("https://")):
         return False
     return await _send_meta_template(

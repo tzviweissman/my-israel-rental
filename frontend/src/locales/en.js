@@ -288,6 +288,9 @@ const en = {
         weeklyTitle: 'Repeats every week',
         // Phase 4 (spec O7): the customer's status link.
         sendTrack: 'Send status link',
+        makingPhoto: 'Send the customer a photo',
+        makingPhotoAgain: 'Send another photo',
+        makingPhotoSent: "Photo added to the customer's order page",
         trackShareText: 'Hi {{name}}, you can follow your order here: {{url}}',
         track: {
           howToPay: 'How to pay',
@@ -314,6 +317,8 @@ const en = {
           footer: 'Questions about the order? Contact the store directly.',
           badLinkTitle: 'This link no longer works',
           photoTitle: 'Delivered {{time}}',
+          makingTitle: 'Your order, being made',
+          makingAlt: 'Photo of your order being made',
           reviewAsk: 'How was your order?',
           reviewButton: 'Write a review',
           reviewStars: 'Tap a star to rate',
@@ -5009,6 +5014,9 @@ const en = {
         googleReview: 'Google review',
         language: 'Language of the ad',
         words: 'The words (change anything)',
+        extraLine: 'Add a line of your own (optional)',
+        shotThis: '{{item}} has no product photo yet, so a plain photo shows.',
+        shotThisMake: 'Photograph this one',
         rewrite: 'Write again',
         headline: 'Headline',
         point: 'Selling point',

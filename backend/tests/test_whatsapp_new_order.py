@@ -170,3 +170,23 @@ def test_no_delivery_message_without_template_or_https_photo(monkeypatch):
     assert _delivered(monkeypatch, None, PHOTO) == (False, None)
     assert _delivered(monkeypatch, "order_delivered", None) == (False, None)
     assert _delivered(monkeypatch, "order_delivered", "/uploads/x.jpg") == (False, None)
+
+
+def test_making_photo_uses_its_own_template(monkeypatch):
+    monkeypatch.setenv("WHATSAPP_TEMPLATE_ORDER_MAKING", "order_making")
+    posted = {}
+
+    async def fake_post(cfg, payload):
+        posted.update(payload)
+        return True
+
+    with patch.object(wa, "_meta_config", return_value=dict(META)), patch.object(wa, "_post_meta", fake_post):
+        assert asyncio.run(wa.send_order_making_to_customer(
+            recipient_phone="0501234567", business_name="Blazin Boards",
+            track_url="https://myisraelrental.com/orders/track/t1", photo_url=PHOTO, language="en"))
+    assert posted["template"]["name"] == "order_making"
+    assert posted["template"]["components"][0]["parameters"][0]["image"]["link"] == PHOTO
+    monkeypatch.delenv("WHATSAPP_TEMPLATE_ORDER_MAKING")
+    with patch.object(wa, "_meta_config", return_value=dict(META)):
+        assert asyncio.run(wa.send_order_making_to_customer(
+            recipient_phone="0501234567", business_name="x", track_url="y", photo_url=PHOTO)) is False

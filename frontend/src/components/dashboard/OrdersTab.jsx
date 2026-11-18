@@ -38,6 +38,7 @@ import { money } from '../../utils/currency';
 import { pastCutoff } from '../../utils/orderCutoffs';
 import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle, notesWithoutCode } from './OrderCard';
 import SendToSupplierDialog from './SendToSupplierDialog';
+import { uploadOneFile } from '../../utils/fastUpload';
 import MoreMenu from './MoreMenu';
 import CustomFieldsEditor from './CustomFieldsEditor';
 // Walk-in sales (backend counter_sales.py).
@@ -317,6 +318,21 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
       setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
     } catch (err) {
       toast.error(apiErrorMessage(err, t('orders.saveFailed', 'Could not save'), t));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  // A photo of the order being made, to the customer (orders.py send_making_photo).
+  const sendMakingPhoto = async (order, file) => {
+    setBusyId(order.id);
+    try {
+      const url = await uploadOneFile(file, API, token);
+      const { data } = await axios.post(`${API}/marketplace/orders/${order.id}/making-photo`, { photo_url: url }, auth);
+      setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
+      toast.success(t('orders.makingPhotoSent', 'Photo added to the customer\'s order page'));
+    } catch (err) {
+      toast.error(apiErrorMessage(err, t('orders.courier.photoFailed', 'Could not upload the photo'), t));
     } finally {
       setBusyId(null);
     }
@@ -669,6 +685,7 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
                     onRepeat={repeatWeekly}
                     onSendToSupplier={setSupplyOrder}
                     onCancelSale={cancelSale}
+                    onMakingPhoto={sendMakingPhoto}
                     couriers={couriers}
                     t={t}
                   />

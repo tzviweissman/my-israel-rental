@@ -27,6 +27,23 @@ Any new version of a template copies these words, so the English and Hebrew stay
 
 To read them again: Graph API Explorer, `GET 1727212035044702/message_templates?fields=name,language,status,components`.
 
+## Submitting a template in one call (no form)
+
+The WhatsApp Manager form is slow, and a closed tab loses it, which happened on 18 Nov 2026. A template with **no image** goes in with one call in Graph API Explorer: `POST 1727212035044702/message_templates`, using the JSON tab:
+
+```json
+{"name": "example_name", "language": "en", "category": "UTILITY",
+ "components": [
+   {"type": "BODY", "text": "Hello, your order from {{1}} is ready. Details: {{2}} Thank you.",
+    "example": {"body_text": [["Blazin Boards", "https://myisraelrental.com/orders/track/abc123"]]}},
+   {"type": "BUTTONS", "buttons": [{"type": "QUICK_REPLY", "text": "Confirm"}, {"type": "QUICK_REPLY", "text": "Decline"}]}
+ ]}
+```
+
+Send it again with `"language": "he"` and the Hebrew text. The answer is `{"id": ..., "status": "PENDING"}`.
+
+A template with an **image header** needs the sample picture uploaded first, through Meta's upload API, which the Explorer cannot send a file to. Use the form for those: it took about five minutes each. In the form, set the body and the sample boxes by pasting, because typing `{{` adds a second `}}`. A body may not start or end with a `{{n}}`.
+
 ## 1. Submit two message templates
 
 Meta must approve every message we start. Do each one twice, once in English and once in Hebrew, under the same name.

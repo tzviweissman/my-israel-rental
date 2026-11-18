@@ -189,6 +189,13 @@ export default function OrderTrackPage() {
             })}
           />
         )}
+        {/* The business's photo of the order being made, until the delivery photo replaces it. */}
+        {data.making_photo_url && !data.delivered_photo_url && (
+          <section className="rounded-2xl border bg-white p-4 mt-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="track-making-photo">
+            <p className="text-xs font-semibold mb-2" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.makingTitle', 'Your order, being made')}</p>
+            <a href={data.making_photo_url} target="_blank" rel="noopener noreferrer"><img src={data.making_photo_url} alt={t('orders.track.makingAlt', 'Photo of your order being made')} className="w-full rounded-xl object-cover aspect-[4/3] max-h-72" /></a>
+          </section>
+        )}
         {data.delivered_photo_url && (
           <section className="rounded-2xl border bg-white p-4 mt-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="track-photo">
             <p className="text-xs font-semibold mb-2" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.photoTitle', 'Delivered {{time}}', { time: String(data.delivered_at || '').slice(11, 16) })}</p>

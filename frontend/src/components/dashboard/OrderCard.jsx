@@ -52,7 +52,8 @@ export function pillStyle(status, on) {
  * owner's tab passes no `onReveal` because its orders already carry the
  * contact details; nothing about that view changes.
  */
-export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, onPayment, onRepeat, onReveal, onSendToSupplier, onCancelSale, couriers, t }) {
+export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, onPayment, onRepeat, onReveal, onSendToSupplier, onCancelSale, onMakingPhoto, couriers, t }) {
+  const photoRef = React.useRef(null);
   const counter = o.source === 'counter';
   const [more, setMore] = useState(false);
   const time = (o.needed_by || '').includes('T') ? o.needed_by.slice(11, 16) : '';
@@ -296,6 +297,15 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
             <button type="button" disabled={busy} onClick={() => onSendToSupplier(o)} className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-send-to-supplier">
               <Truck size={12} /> {t('orders.sendToSupplier', 'Send to a supplier')}
             </button>
+          )}
+          {/* A photo of it being made, for the customer's tracking page and WhatsApp (orders.py send_making_photo). */}
+          {onMakingPhoto && o.track_token && (
+            <>
+              <input ref={photoRef} type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onMakingPhoto(o, f); }} data-testid="order-making-photo-input" />
+              <button type="button" disabled={busy} onClick={() => photoRef.current?.click()} className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-making-photo">
+                <Camera size={12} /> {o.making_photo ? t('orders.makingPhotoAgain', 'Send another photo') : t('orders.makingPhoto', 'Send the customer a photo')}
+              </button>
+            </>
           )}
           {o.track_token && o.customer_phone_e164 && (() => {
             const url = `${window.location.origin}/orders/track/${o.track_token}`;
