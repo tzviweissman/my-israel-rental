@@ -33,23 +33,23 @@ Sections (line each starts on; read with that offset):
 - 2245: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
 - 2270: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
 - 2310: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2487: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2514: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2579: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2596: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2642: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2662: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2692: 4. What is reported to the owner instead (content gaps)
-- 2701: 5. How to write
-- 2750: 5a. Lessons from the practice pages
-- 2779: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2828: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2845: 6. Playbooks for the most common businesses
-- 2965: 7. Choosing the three options (automatic page builder only)
-- 2989: 8. Photos, video and the tools
-- 3215: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3283: 9. The scroll sections: what the practice pages become
-- 3318: 10. Open decisions (need Tzvi)
+- 2505: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2532: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2597: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2614: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2660: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2680: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2710: 4. What is reported to the owner instead (content gaps)
+- 2719: 5. How to write
+- 2768: 5a. Lessons from the practice pages
+- 2797: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2846: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2863: 6. Playbooks for the most common businesses
+- 2983: 7. Choosing the three options (automatic page builder only)
+- 3007: 8. Photos, video and the tools
+- 3233: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3301: 9. The scroll sections: what the practice pages become
+- 3336: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2354,6 +2354,13 @@ approved were shown full size, never as a phone sees them.
    letter or part of the object in front so they interlock (POUR / PLAY's grinder standing in "Your"); drawn into the
    step's still before the clip, from the layout sketch, never a small label in a box over the film. If the clip
    bends the letters, the word goes in code in front of the film instead.
+   **The words are set in code, never painted by the image model** (Tzvi, 18 Nov 2026, Burnt: the model's "We Bring
+   the Fire" came out with pale patches in the e's and the F, and a credit went on removing them). Every still is
+   made with plain ground where the word goes; the word is then set into the still in code in the site's own face,
+   behind the object: what stands in front of it (the board's far edge, food in the air) is found against the same
+   scene without it and laid back over the letters. The letters are then exact, the same in every still, and can
+   change between steps in code. Worked example: `scrollcraft/builds/burnt-meatboards/gen/fire_words.py` (with
+   `fire_wordpng.mjs` for the word pictures).
 10. **Show how it works.** Where the product has parts or a process (a grinder, a machine, layers, a filling), one step
     shows it taken apart or opened in the air, so the visitor sees how it is made.
 11. **The product leads into the next section and the film ends where they buy.** The last step turns into the next
@@ -2366,6 +2373,12 @@ approved were shown full size, never as a phone sees them.
     a phone frame, never only full size.
 14. **A phone never gets a cut-down film.** A phone sees the film's whole width on the page's ground with the words
     above it, or a tall clip made for it; `clipchain.py` never crops a wide clip to a phone's middle third.
+    **A tall still is laid out for the tall frame** (Tzvi, 18 Nov 2026, Burnt: the wide board shrunk to the phone's
+    width filled 15 percent of its height, with walnut all round). Rule 8 holds on a phone too: the object whole at
+    about half the phone frame's height, from its own tall layout sketch (the object turned upright, nearer, or made
+    tall), the words tight above it, as Bramble's phone screens hold the product large with its chapter word
+    (docs/inspo/videos-2026-11-08). Never the wide still shrunk to the width with plain ground round it. Each step's
+    `frame` line in `gen/chain.json` says what the phone sees as well.
 
 **An option, not a rule: the product's own journey** (Tzvi, 12 Nov 2026: "not every build needs to be exactly like this but this should be a good option. personification of the item having people feel the journey"). The visitor rides with the product as if they were it, one camera all the way: for Gremier, the grounds fall from the grinder into waves of cold water and turn them brown, the waves become a whirlpool, run out of the tap into a glass, and the camera pulls back to their coffee bar. Offer it among the opening ideas (IDEAS.md) where the product has a journey of its own (coffee, juice, bread, a parcel, a cleaned room), never as the only kind.
 
@@ -2397,6 +2410,11 @@ part where one exists, so it is there without being remembered.
 17. **A join that is the same picture is no join.** Two clips that meet on the same frame carry on in place; pushing
     the second up as a new slide shows that picture twice and reads as a restart. A slide push is only for a change of
     scene.
+    **An edited still keeps only what it was asked to change** (Tzvi, 18 Nov 2026, Burnt: an edit adding the iron
+    also redrew the walnut and the board a little everywhere, about 6 levels in 255, which a clip shows as the whole
+    scene shimmering). After every image edit, `scrollcraft/starter/keep_change.py` lays the edit over the untouched
+    still only where the change was asked (a box, or the area that really changed), so the stills of one scene share
+    every other pixel and a clip between them cannot drift.
 18. **Feedback where the eye already is.** An Add says "Added" in the basket button and, on a phone, in the bottom bar,
     which then becomes the basket (count, total, Basket); never a message floating over the products.
 19. **Every number from its source.** A saving is worked out from the live prices of the same thing bought in the
