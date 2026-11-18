@@ -74,6 +74,17 @@ def test_photo_shows_on_the_tracking_page(owner, business):
     assert _track(owner, business, o["id"])["making_photo_url"] == PHOTO
 
 
+def test_the_owners_line_shows_with_it(owner, business):
+    o = _order(owner, business)
+    r = requests.post(f"{BASE}/marketplace/orders/{o['id']}/making-photo",
+                      json={"photo_url": PHOTO, "note": "  Fresh out of the oven  "}, headers=_auth(owner), timeout=30)
+    assert r.status_code == 200, r.text
+    assert _track(owner, business, o["id"])["making_photo_note"] == "Fresh out of the oven"
+    too_long = requests.post(f"{BASE}/marketplace/orders/{o['id']}/making-photo",
+                             json={"photo_url": PHOTO, "note": "x" * 121}, headers=_auth(owner), timeout=30)
+    assert too_long.status_code == 422
+
+
 def test_only_a_photo_we_host(owner, business):
     o = _order(owner, business)
     for bad in ("https://evil.example.com/a.jpg", "javascript:alert(1)", ""):

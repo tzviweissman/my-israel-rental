@@ -289,6 +289,7 @@ const en = {
         // Phase 4 (spec O7): the customer's status link.
         sendTrack: 'Send status link',
         makingPhoto: 'Send the customer a photo',
+        makingNote: 'A line under the photo (optional)',
         makingPhotoAgain: 'Send another photo',
         makingPhotoSent: "Photo added to the customer's order page",
         trackShareText: 'Hi {{name}}, you can follow your order here: {{url}}',

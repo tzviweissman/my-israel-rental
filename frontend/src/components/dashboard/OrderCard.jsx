@@ -54,6 +54,7 @@ export function pillStyle(status, on) {
  */
 export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, onPayment, onRepeat, onReveal, onSendToSupplier, onCancelSale, onMakingPhoto, couriers, t }) {
   const photoRef = React.useRef(null);
+  const [photoNote, setPhotoNote] = React.useState('');
   const counter = o.source === 'counter';
   const [more, setMore] = useState(false);
   const time = (o.needed_by || '').includes('T') ? o.needed_by.slice(11, 16) : '';
@@ -301,7 +302,9 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
           {/* A photo of it being made, for the customer's tracking page and WhatsApp (orders.py send_making_photo). */}
           {onMakingPhoto && o.track_token && (
             <>
-              <input ref={photoRef} type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onMakingPhoto(o, f); }} data-testid="order-making-photo-input" />
+              <input ref={photoRef} type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onMakingPhoto(o, f, photoNote.trim()); }} data-testid="order-making-photo-input" />
+              {/* text-base: 16px, so iPhones do not zoom in on focus. */}
+              <input type="text" value={photoNote} onChange={(e) => setPhotoNote(e.target.value)} maxLength={120} placeholder={t('orders.makingNote', 'A line under the photo (optional)')} className="px-3 min-h-[44px] rounded-full text-base border min-w-0 flex-1 basis-48" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-making-note" />
               <button type="button" disabled={busy} onClick={() => photoRef.current?.click()} className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-making-photo">
                 <Camera size={12} /> {o.making_photo ? t('orders.makingPhotoAgain', 'Send another photo') : t('orders.makingPhoto', 'Send the customer a photo')}
               </button>

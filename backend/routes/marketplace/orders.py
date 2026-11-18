@@ -1365,6 +1365,8 @@ async def assign_order(order_id: str, payload: AssignIn, user=Depends(verify_tok
 
 class MakingPhotoIn(BaseModel):
     photo_url: str = Field(..., max_length=MAX_MEDIA_URL_LEN)
+    # The business's own line under the photo ("Fresh out of the oven").
+    note: str = Field("", max_length=120)
 
     @field_validator("photo_url")
     @classmethod
@@ -1386,7 +1388,7 @@ async def send_making_photo(order_id: str, payload: MakingPhotoIn, user=Depends(
     if order.get("status") not in OPEN_STATUSES:
         raise HTTPException(status_code=400, detail="This order is already closed")
     await db.store_orders.update_one({"_id": order_id}, {"$set": {
-        "making_photo": {"url": payload.photo_url, "at": _now_iso(), "by": user["user_id"]}, "updated_at": _now_iso()}})
+        "making_photo": {"url": payload.photo_url, "note": payload.note.strip(), "at": _now_iso(), "by": user["user_id"]}, "updated_at": _now_iso()}})
     fresh = await db.store_orders.find_one({"_id": order_id})
     phone = fresh.get("customer_phone_e164") or fresh.get("customer_phone")
     if phone and fresh.get("track_token"):
@@ -1736,6 +1738,7 @@ async def track_order(token: str, request: Request):
         "delivered_photo_url": (o.get("delivery") or {}).get("photo_url") if o.get("status") == "done" else None,
         # The business's photo of it being made (send_making_photo).
         "making_photo_url": (o.get("making_photo") or {}).get("url") if o.get("status") != "cancelled" else None,
+        "making_photo_note": (o.get("making_photo") or {}).get("note") if o.get("status") != "cancelled" else None,
         "window": o.get("window"),
         "lines": o.get("lines"),
         # The same order again, once this one is done (reorder_path).

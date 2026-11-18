@@ -275,6 +275,7 @@ const he = {
         weeklyTitle: 'חוזר כל שבוע',
         sendTrack: 'שליחת קישור מעקב',
         makingPhoto: 'שליחת תמונה ללקוח',
+        makingNote: 'שורה מתחת לתמונה (לא חובה)',
         makingPhotoAgain: 'שליחת תמונה נוספת',
         makingPhotoSent: 'התמונה נוספה לדף ההזמנה של הלקוח',
         trackShareText: 'היי {{name}}, אפשר לעקוב אחרי ההזמנה כאן: {{url}}',

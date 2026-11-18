@@ -324,11 +324,11 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
   };
 
   // A photo of the order being made, to the customer (orders.py send_making_photo).
-  const sendMakingPhoto = async (order, file) => {
+  const sendMakingPhoto = async (order, file, note = '') => {
     setBusyId(order.id);
     try {
       const url = await uploadOneFile(file, API, token);
-      const { data } = await axios.post(`${API}/marketplace/orders/${order.id}/making-photo`, { photo_url: url }, auth);
+      const { data } = await axios.post(`${API}/marketplace/orders/${order.id}/making-photo`, { photo_url: url, note }, auth);
       setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
       toast.success(t('orders.makingPhotoSent', 'Photo added to the customer\'s order page'));
     } catch (err) {
