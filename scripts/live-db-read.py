@@ -32,6 +32,8 @@ def _clean(x):
 
 
 def main() -> None:
+    # Hebrew in a row crashed the print on Windows and the run showed nothing at all (18 Nov 2026).
+    sys.stdout.reconfigure(encoding="utf-8")
     url, name = _railway_var("MONGO_URL"), _railway_var("DB_NAME")
     if not url or not name:
         sys.exit("Could not get the live database address from Railway (railway login?).")
@@ -41,7 +43,8 @@ def main() -> None:
         return
     coll, flt = sys.argv[1], json.loads(sys.argv[2] if len(sys.argv) > 2 else "{}")
     limit = int(sys.argv[3]) if len(sys.argv) > 3 else 10
-    cur = db[coll].find(flt, {"_id": 0}).limit(limit)
+    # _id kept: other collections point at it (marketplace_gigs.business_id is a business's _id).
+    cur = db[coll].find(flt).limit(limit)
     if len(sys.argv) > 4:
         cur = cur.sort(sys.argv[4].lstrip("-"), -1 if sys.argv[4].startswith("-") else 1)
     for row in cur:

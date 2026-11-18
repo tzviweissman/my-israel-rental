@@ -1442,8 +1442,8 @@ function pieceMove(name, { t, layout, rtl }, w, h, H) {
     const p = progress(t, 0, 0.5);
     return { alpha: 0.3 + 0.7 * p, s: 1 + (1 - easeOut(p)) * 0.35 };
   }
-  if (name === 'qr' || name === 'logo' || name === 'link' || name === 'name' || name === 'labels' || name === 'review' || name === 'deal') {
-    const p = progress(t, { qr: 1.55, logo: 1.45, link: 1.7, name: 1.1, labels: 0.9, review: 1.9, deal: 1.4 }[name], 0.4);
+  if (name === 'qr' || name === 'logo' || name === 'link' || name === 'name' || name === 'labels' || name === 'review' || name === 'deal' || name === 'extra') {
+    const p = progress(t, { qr: 1.55, logo: 1.45, link: 1.7, name: 1.1, labels: 0.9, review: 1.9, deal: 1.4, extra: 1.3 }[name], 0.4);
     return { alpha: p, y: (1 - easeOut(p)) * 60 };
   }
   return null;
@@ -1524,7 +1524,7 @@ function part(ctx, name, [x, y, w, h], draw, { later = false, minScale = 0.3 } =
 
 // The round price sticker: the price of the item in the picture, "from"
 // only when that item is the cheapest one the business sells (9e.8).
-const nameAndPrice = (item) => [item.name, item.priceText].filter(Boolean).join(', ');
+const nameAndPrice = (item) => [item.name, item.size, item.priceText].filter(Boolean).join(', ');
 function sticker(ctx, given) {
   if (!given.item?.priceText) return; // the site itself has no price
   // Big enough that "from" stays 30px, the smallest text an ad may have (rules 8).
@@ -1574,6 +1574,20 @@ function drawSticker(ctx, { x, y, r, item, fromWord, body }) {
   }
   ctx.font = `800 ${Math.round(r * (item.priceText.length > 5 ? 0.42 : 0.55))}px ${body}`;
   ctx.fillText(item.priceText, x, y + (item.cheapest ? r * 0.38 : r * 0.2));
+  // How big it is, on a tag under the sticker ("Feeds 8 to 10"), so a price never stands without its size.
+  if (item.size) {
+    ctx.font = `700 30px ${body}`;
+    ctx.direction = dirOf(item.size, false);
+    const tw = ctx.measureText(item.size).width + 36;
+    const ty = y + r + 10;
+    ctx.fillStyle = INK;
+    ctx.beginPath();
+    ctx.roundRect(x - tw / 2, ty, tw, 46, 23);
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(item.size, x, ty + 33);
+    ctx.direction = 'ltr';
+  }
 }
 
 function shadowed(ctx, img, x0, y0, w, h, blur = 40, dy = 24, { name = 'product', tilt = PARTS && PARTS.tilt } = {}) {
@@ -2622,7 +2636,7 @@ function drawShoot(canvas, a) {
   ctx.fillStyle = base;
   ctx.fillRect(0, footTop - px(150), W, H - footTop + px(150));
   // The price first and whole; the item's name after it, shortened only when it runs out of room.
-  const name = a.item?.name || '';
+  const name = [a.item?.name, a.item?.size].filter(Boolean).join(" · ");
   const price = a.item?.priceText || '';
   if (name || price) {
     part(ctx, 'price', [PAD, footTop - px(70), W - PAD * 2, px(60)], () => {
@@ -3026,6 +3040,32 @@ function extras(canvas, a) {
       lines.forEach((l, i) => ctx.fillText(l, tx, y + 92 + i * 42));
     });
   }
+  // The owner's own line, on any design (Tzvi, 18 Nov 2026: "doesnt allow businesses to write their own words or
+  // add another line"). A white label above the foot (and above a review), movable like every other piece.
+  const extra = (a.words?.extra || '').trim();
+  if (extra) {
+    ctx.font = `700 34px ${body}`;
+    ctx.direction = dirOf(extra, a.rtl);
+    const lines = wrap(ctx, extra, W * 0.74, 2);
+    const w = Math.max(...lines.map((l) => ctx.measureText(l).width)) + 56;
+    const h = 30 + lines.length * 44;
+    const x = (W - w) / 2;
+    const rvBox = PARTS && PARTS.boxes.review;
+    const y = (rvBox ? rvBox[1] - 16 : footTopOf(a.format, H) - 24) - h;
+    part(ctx, 'extra', [x, y, w, h], () => {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.shadowColor = 'rgba(0,0,0,.22)';
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, 22);
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'center';
+      ctx.font = `700 34px ${body}`;
+      lines.forEach((l, i) => ctx.fillText(l, x + w / 2, y + 50 + i * 44));
+    });
+  }
   // Last, so it keeps clear of everything above, the deal and the review included.
   const q = PARTS && PARTS.boxes.qr;
   const lk = PARTS && PARTS.boxes.link;
@@ -3282,6 +3322,8 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const [moves, setMoves] = useState({});
   const [boxes, setBoxes] = useState({});
   const [sel, setSel] = useState('');
+  // Typing on a phone: the pinned preview shrinks to a thumbnail, so the keyboard leaves room to see what you type.
+  const [typing, setTyping] = useState(false);
   const [guides, setGuides] = useState({});
   // "Make your own": its background, and the photo search.
   const [bg, setBg] = useState({ id: 'sand' });
@@ -3371,6 +3413,8 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   // being written must not let the older reply land on top.
   const langNow = useRef(lang);
   langNow.current = lang;
+  const wordsNow = useRef(null);
+  wordsNow.current = words;
   const write = async (row = null, who = forWhom) => {
     setBusy(true);
     setFailed(false);
@@ -3392,7 +3436,9 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
           big_word: data.big_word || '', caller: data.caller || '', decline: data.decline || '',
           search: data.search || '', switches: data.switches || '', checklist: data.checklist || '',
           ...Object.fromEntries(NEW_FIELDS.map((k) => [k, data[k] || ''])),
-          chat: (data.faqs || []).slice(0, 2).flatMap((f) => [f.q, f.a]).join('\n') }));
+          chat: (data.faqs || []).slice(0, 2).flatMap((f) => [f.q, f.a]).join('\n'),
+          // The owner's own line is theirs: writing again never takes it away.
+          extra: wordsNow.current?.extra || '' }));
       }
       const [loaded, its] = await Promise.all([
         Promise.all((data.photos || []).slice(0, 4).map(loadImage)),
@@ -3527,7 +3573,11 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const sameShot = (x, it, shape) => x.item === it.name && x.shape === shape && x.occasion === shotOccasion && (x.idea || '') === shotIdea;
   const shotOf = (it, shape = format) => {
     if (!it || targetType !== 'business') return null;
-    const s = shots.find((x) => x.status === 'ready' && shotImgs[x.id] && sameShot(x, it, shape));
+    // A product sold with the same photo as one already photographed (Chicken Munch's three boxes) shares that shot:
+    // picking the Grand box kept dropping the Product photo design for a plain one (Tzvi, 18 Nov 2026).
+    const twin = (x) => it.photo && pool.some((p) => p.name === x.item && p.photo === it.photo) && sameShot({ ...x, item: it.name }, it, shape);
+    const ready = (x) => x.status === 'ready' && shotImgs[x.id];
+    const s = shots.find((x) => ready(x) && sameShot(x, it, shape)) || shots.find((x) => ready(x) && twin(x));
     return s ? { ...shotImgs[s.id], word: s.word, dark: !!s.dark } : null;
   };
   const askedShot = useRef('');
@@ -4263,7 +4313,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {/* Stays in view while the options beside or under it scroll (Tzvi, 5 Nov 2026). */}
           <div className={`min-w-0 space-y-2 sticky z-10 bg-white self-start ${inline ? 'top-24 sm:top-20' : 'top-0'}`} data-testid="ad-preview-column">
-            <div className="bg-[#F9FAFB] rounded-xl flex items-center justify-center p-2 sm:p-3 min-h-[180px] sm:min-h-[280px]" onPointerDown={() => setSel('')}>
+            <div className={`bg-[#F9FAFB] rounded-xl flex items-center justify-center p-2 sm:p-3 ${typing ? "min-h-0" : "min-h-[180px]"} sm:min-h-[280px]`} onPointerDown={() => setSel('')}>
               {failed && (
                 <div className="text-center text-sm space-y-2" role="alert" data-testid="ad-failed">
                   <p style={{ color: 'var(--ink)' }}>{t('ads.failed', 'Could not write the ad. Try again.')}</p>
@@ -4277,7 +4327,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
               <div className={`relative ${!preview || busy ? 'hidden' : 'inline-block'}`} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
                 {guides.x != null && <div aria-hidden="true" data-testid="ad-guide-x" className="absolute top-0 bottom-0 z-10 pointer-events-none" style={{ left: `${(guides.x / W0) * 100}%`, width: 1, background: '#167AB8', boxShadow: '0 0 0 1px rgba(255,255,255,.7)' }} />}
                 {guides.y != null && <div aria-hidden="true" data-testid="ad-guide-y" className="absolute left-0 right-0 z-10 pointer-events-none" style={{ top: `${(guides.y / H0) * 100}%`, height: 1, background: '#167AB8', boxShadow: '0 0 0 1px rgba(255,255,255,.7)' }} />}
-                <canvas ref={canvasRef} className="block max-h-[36vh] sm:max-h-[66vh] max-w-full w-auto h-auto rounded-lg shadow" role="img"
+                <canvas ref={canvasRef} className={`block ${typing ? 'max-h-[14vh]' : 'max-h-[36vh]'} sm:max-h-[66vh] transition-[max-height] duration-200 max-w-full w-auto h-auto rounded-lg shadow`} role="img"
                   aria-label={t('ads.previewAlt', 'Your ad')} data-testid="ad-preview" />
                 {video && (
                   <div className="absolute inset-0 z-20" onPointerDown={(e) => e.stopPropagation()}>
@@ -4308,7 +4358,11 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
               </div>
             )}
           </div>
-          <div className="space-y-4">
+          {/* On a phone the preview above stays pinned over ~40% of the screen, so a
+              field tapped or focused would scroll in under it and the tap hit the ad
+              (18 Nov 2026). The margin keeps scrolled-to controls below the preview. */}
+          <div className={`space-y-4 ${typing ? 'max-sm:[&_:is(input,textarea,select,button)]:scroll-mt-[220px]' : 'max-sm:[&_:is(input,textarea,select,button)]:scroll-mt-[440px]'}`}
+            onFocus={(e) => setTyping(e.target.matches('input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=date]), textarea'))} onBlur={() => setTyping(false)}>
             {((themed && layout !== 'custom' && layout !== 'fullphoto' && layout !== 'shoot') || COLOUR_FIXED.includes(layout)) && (
               <div className="space-y-1.5">
                 <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.colourTitle', 'Background colour')}</p>
@@ -4485,6 +4539,16 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                         </button>
                       ))}
                     </div>
+                    {/* Picking a product with no photo of its own on the Product photo design shows a plain photo
+                        instead: say so where it was picked, with the button to photograph it (18 Nov 2026). */}
+                    {layout === 'shoot' && targetType === 'business' && featured && !shotOf(featured)
+                      && !shots.some((x) => x.status === 'making' && sameShot(x, featured, format)) && (
+                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs" style={{ background: '#F9FAFB', color: 'var(--ink)' }} data-testid="ad-shot-this">
+                        <span dir="auto">{t('ads.shotThis', '{{item}} has no product photo yet, so a plain photo shows.', { item: featured.name })}</span>
+                        <button type="button" onClick={makeShot} disabled={shotsLeft === 0} className="px-3 py-1.5 rounded-lg font-semibold text-white disabled:opacity-50"
+                          style={{ background: '#000' }} data-testid="ad-shot-this-make">{t('ads.shotThisMake', 'Photograph this one')}</button>
+                      </div>
+                    )}
                   </div>
                 )}
                 {(words.ideas || []).length > 0 && (
@@ -4500,7 +4564,9 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                     </div>
                   </div>
                 )}
-                <input className={field} value={wordsFor(layout).headline} maxLength={60} onChange={(e) => setWords({ ...wordsFor(layout), headline: e.target.value, picked: true })} aria-label={t('ads.headline', 'Headline')} />
+                <input className={field} value={wordsFor(layout).headline} maxLength={60} onChange={(e) => setWords({ ...wordsFor(layout), headline: e.target.value, picked: true })} aria-label={t('ads.headline', 'Headline')} data-testid="ad-headline" />
+                <input className={field} value={words.extra || ''} maxLength={70} onChange={(e) => setWords({ ...words, extra: e.target.value })}
+                  aria-label={t('ads.extraLine', 'Add a line of your own (optional)')} placeholder={t('ads.extraLine', 'Add a line of your own (optional)')} data-testid="ad-extra" />
                 {headlineWords > 9 && (
                   <p className="text-xs font-semibold rounded-lg px-2.5 py-2" style={{ background: '#FFF4E5', color: '#7A4100' }} data-testid="ad-one-message">
                     {t('ads.oneMessage', 'One idea per ad works best: try 9 words or fewer in the headline.')}

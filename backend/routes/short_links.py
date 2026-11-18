@@ -663,6 +663,8 @@ How good ads are written (docs/static-ad-rules.md 9c):
   listing says it suits them.
 - Short everyday words, one idea per sentence, words a ten-year-old follows.
 - Numbers only when the listing gives them.
+- item_sizes, when given, says how many each product feeds or how big it is. A size is
+  a strong concrete fact: "Feeds 10. One box." beats a vague line.
 
 Return ONE JSON object:
   headline  <= 38 characters and at most 5 words, as above; 2 to 4 words is best
@@ -774,6 +776,21 @@ Reply with the JSON object and nothing else."""
 _PHOTO_EXT = (".mp4", ".mov", ".webm", ".m4v")
 
 
+# How big an item is, for its ad (Tzvi, 18 Nov 2026: the Grand and Supreme boxes "dont say what size it is like
+# the mini does"): the owner's own "serves", else the sentence of the description that says it ("Feeds 8 to 10.").
+_SIZE_RE = re.compile(r"[^.!\n]*\b(?:feeds|serves|for \d+ (?:people|guests))\b[^.!\n]*|[^.!\n]*(?:מספיק ל|ל-?\s?\d+\s*(?:סועדים|אנשים|איש)|מנות)[^.!\n]*", re.I)
+
+
+def _item_size(row: dict) -> str:
+    serves = row.get("serves")
+    if isinstance(serves, (int, float)) and serves > 0:
+        return f"Feeds {int(serves)}"
+    if isinstance(serves, str) and serves.strip():
+        return serves.strip()[:30]
+    m = _SIZE_RE.search(str(row.get("description") or ""))
+    return " ".join(m.group(0).split())[:30] if m else ""
+
+
 def _ad_photos(urls: list[Any], limit: int = 8) -> list[str]:
     out: list[str] = []
     for u in urls:
@@ -851,7 +868,7 @@ async def _ad_facts(target_type: str, target_id: str, lang: str = "en") -> tuple
             # still a product: its ad simply shows none.
             if row_photos and row.get("name") and all(i["name"] != str(row["name"])[:40] for i in items):
                 items.append({"name": str(row["name"])[:40], "price": float(row["price"]) if priced else 0,
-                              "currency": row.get("currency") or "ILS", "photo": row_photos[0]})
+                              "currency": row.get("currency") or "ILS", "photo": row_photos[0], "size": _item_size(row)})
         for f in g.get("faqs") or []:
             q, a = " ".join(str(f.get("q") or "").split()), " ".join(str(f.get("a") or "").split())
             if q and a and len(q) <= 90 and len(a) <= 220 and len(faqs) < 5:
@@ -1204,6 +1221,10 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
 
     if not ANTHROPIC_API_KEY:
         raise HTTPException(status_code=503, detail="The ad maker is not switched on here.")
+    # How big each product is (Tzvi, 18 Nov 2026): a size makes a concrete headline.
+    sizes = {i["name"]: i["size"] for i in extra.get("items") or [] if i.get("size")}
+    if sizes:
+        facts["item_sizes"] = sizes
     # The customers' own words, so situations and the mirror come from real
     # moments (9f.1), and the reader the owner picked, if any (9f.7).
     if reviews:
