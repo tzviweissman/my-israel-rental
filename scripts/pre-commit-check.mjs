@@ -90,9 +90,19 @@ if (staged.some((f) => /^(docs\/(page-generation-rules|rules-checklist|static-ad
 // it records four short ads, so it runs only then, never on other commits
 const selfTest = staged.filter((f) => /^scripts\/(check-moving-ad\.py|test-moving-ad-checks\.mjs)$/.test(f));
 if (selfTest.length) {
-  console.log(`${selfTest.join(' and ')} changed: running scripts/test-moving-ad-checks.mjs (four recordings, several minutes)`);
-  const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'test-moving-ad-checks.mjs')], { cwd: ROOT, encoding: 'utf8' });
-  if (c.status !== 0) { console.error(`Commit refused: the moving-ad check no longer tells good from broken:\n${c.stdout}${c.stderr}`); process.exit(1); }
+  // the exact staged versions that already passed (in any worktree: the stamp is in the shared .git) are not tested
+  // again, so replaying a passed commit onto main in a push copy does not cost another quarter hour (18 Nov 2026)
+  const git = (...a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' }).stdout.trim();
+  const key = ['scripts/check-moving-ad.py', 'scripts/test-moving-ad-checks.mjs'].map((f) => git('rev-parse', `:${f}`)).join(' ');
+  const stamp = path.resolve(ROOT, git('rev-parse', '--git-common-dir'), 'moving-ad-selftest-passed');
+  if (fs.existsSync(stamp) && fs.readFileSync(stamp, 'utf8').trim() === key) {
+    console.log(`${selfTest.join(' and ')} changed: these exact versions already passed scripts/test-moving-ad-checks.mjs, not run again`);
+  } else {
+    console.log(`${selfTest.join(' and ')} changed: running scripts/test-moving-ad-checks.mjs (four recordings, several minutes)`);
+    const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'test-moving-ad-checks.mjs')], { cwd: ROOT, encoding: 'utf8' });
+    if (c.status !== 0) { console.error(`Commit refused: the moving-ad check no longer tells good from broken:\n${c.stdout}${c.stderr}`); process.exit(1); }
+    fs.writeFileSync(stamp, key);
+  }
 }
 // every checklist rule is a step of the build blueprint: a new section must have a stage (4 Nov 2026, "8d")
 if (staged.includes('docs/rules-checklist.md') || staged.includes('scripts/blueprint.mjs')) {
