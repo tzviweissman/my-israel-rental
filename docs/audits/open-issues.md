@@ -494,3 +494,21 @@ Main moved on after PR #24 was opened (the sign-up work stream was rewritten), s
 - [Fixed, this PR 741eeb5f] Sign-up work stream: no exclamation marks in the example messages (78e1be94, 17 Nov).
 - Dropped as superseded by main: d57be103 (no "(2)" after the Hebrew time) and ab80b9e7 (one middle dot) on the join page live line. Main's 151f422f removed the "how long ago" time from that line, so there is no time to tidy and only one dot left.
 - [Low, new, not fixed] Sign-up website reader: `_product_photos` still runs the blocking DNS check `_is_public_ical_url` on the event loop for every photo (`product_extract.py:1243`), the same fault fixed in `_fetch` and `_fetch_json`. Seen by this follow-up, 17 Nov 2026.
+
+## Audit merge of 18 Nov 2026 (every new line from claude/exciting-bell-i41zid and claude/sweet-knuth-pjkk1b, kept as written; PR #25, the 17 Nov merge, is carried in this branch)
+
+## Code review of 17 Nov 2026
+- [Medium] Starter shop: `shop.js`'s catalogue block called `byName`, which 51ac35b moved into the order block's scope, so finding a card by name or a "Most ordered" list keyed by name threw a ReferenceError and stopped search, the out-of-stock filter and Most ordered on any new shop built from the starter. First seen 17 Nov 2026 (2026-11-17-site-audit.md). [Fixed 17 Nov, 26f8fe71, on claude/exciting-bell-i41zid; carried as 8ccb8230 on claude/audit-merge-4ooqvv]
+- [Medium] Starter shop: a product the owner adds in the dashboard (`catalog.js:23`, new 51ac35b) is sold with no sizes or choices, but the server refuses any order line for a product with options and no choice ("Pick a choice for X", `orders.py:2601`), and `page_edits.py` does not send options; a "from" price shows as a plain price. So a dashboard-added product with sizes can be put in the basket but never ordered. Only starter shops built from now on (Gremier Coffee keeps its own copy). First seen 17 Nov 2026 (2026-11-17-site-audit.md).
+- Still open, re-checked 17 Nov: starter shop delivery orders still sent without the delivery area (`scrollcraft/starter/shop.js:128`, first seen 13 Nov).
+
+## UI audit of 18 Nov 2026
+- [Medium] Header unreadable on /signup and /auth/login (17 Nov). [Fixed 17 Nov by 8c58044: joining and logging in now show the bare white header, logo and language only; re-checked 18 Nov at 375 and 1280, English and Hebrew]
+- [Low] Sign-up form (business): Next and Publish 40px, Back 36px tall on phones. First seen 18 Nov 2026. [Fixed 18 Nov, 5a961efb, on claude/sweet-knuth-pjkk1b; carried as 8eae2021 on claude/audit-merge-4ooqvv]
+- [Low] Join form: "Change" beside "Signing up as" 20px tall (24px wide in Hebrew). First seen 18 Nov 2026. [Fixed 18 Nov, 682dd155, on claude/sweet-knuth-pjkk1b; carried as 74ff0819 on claude/audit-merge-4ooqvv]
+- [Low] Order page: a pickup-only product in the basket hides the Pickup/Delivery switch and switches a chosen delivery to pickup with no reason shown; the typed address is dropped silently (`OrderPage.jsx:212-213,235,484-487`). American Crust's own shop explains it. First seen 18 Nov 2026 (2026-11-18-ui-audit.md).
+- [Low] American Crust: footer "Gift cards" link on all three pages points at a section that only appears when gift cards are switched on and the shop answers; otherwise it lands on the top of the shop (`scrollcraft/builds/american-crust/*.html` footer, `gift.js`). First seen 18 Nov 2026 (2026-11-18-ui-audit.md).
+- [Low] Sign-up form (business): the 16 category buttons are 34px tall and "Fill in from these" 36px on phones (`CreateGig.jsx`, `wizard-cat-*`, `wizard-socials-read`). First seen 18 Nov 2026 (2026-11-18-ui-audit.md).
+- [Low] Join form: password placeholder "6+ characters" cut to "6+ charact" at 375 wide (English). First seen 18 Nov 2026 (2026-11-18-ui-audit.md).
+- [Tooling] check-covered.mjs reports Clean Plus booking choices as "under <input>": the radio and tick boxes sit over their own label boxes on purpose; a false alarm, not a page fault. 18 Nov 2026.
+- Still open, re-checked 18 Nov: sign-up headline "Join My Israel Rental" (17 Nov).
