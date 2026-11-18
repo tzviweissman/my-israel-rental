@@ -72,7 +72,21 @@ def check(path):
     opening = max(worst_square(fs[0], fs[i]) for i in range(1, min(len(fs), int(fps) + 1)))
     if opening < 8:
         bad.append(f"nothing happens in the first second (biggest change {opening:.1f}): open mid-action (M2)")
-    end = len(fs) - still_run(fs)
+    # A living ending (M8, 18 Nov 2026): the product may go on moving in the page's window.LIVING box (steam, a spoon)
+    # while the words and QR hold still; record-moving-ad.mjs writes that box into the MP4's comment. The end hold is
+    # then measured outside the box, and the stall check stops where the words stop.
+    tag = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format_tags=comment", "-of", "default=nw=1:nk=1", path],
+                         capture_output=True, text=True).stdout.strip()
+    living, words_still = None, still_run(fs)
+    if tag.startswith("living:"):
+        x0, y0, x1, y1 = (int(v) for v in tag[7:].split(","))
+        living = (x0, y0, x1, y1)
+        masked = [f.copy() for f in fs]
+        for f in masked:
+            f[max(0, y0):y1, max(0, x0):x1] = 0
+        words_still = still_run(masked)
+    words_hold = words_still / fps
+    end = len(fs) - words_still
     run = longest = 0
     for i in range(1, end):
         run = run + 1 if worst_square(fs[i - 1], fs[i]) < 1.5 else 0
@@ -80,8 +94,8 @@ def check(path):
     if longest / fps > 1.0:
         bad.append(f"stalls for {longest / fps:.1f} seconds before the end: a change every beat, about a second (M5)")
     hold = still_run(fs) / fps
-    if hold < 1.5:
-        bad.append(f"holds still {hold:.1f} seconds at the end, under 1.5 (A10.3)")
+    if words_hold < 1.5:
+        bad.append(f"{'the words and QR hold' if living else 'holds'} still {words_hold:.1f} seconds at the end, under 1.5 (A10.3)")
     # a long still ending is a still ad that moved once: American Crust held 5 of its 8 seconds (Tzvi 16 Nov 2026)
     if hold > 3.5:
         bad.append(f"holds still {hold:.1f} seconds at the end, over 3.5: it should move for most of its length (A10.3)")
@@ -105,7 +119,8 @@ def check(path):
                   if cv2.QRCodeDetector().detectAndDecode(fs[i])[0]), None)
     if early is not None:
         bad.append(f"the QR code is on screen at {early:.2f}s: name, link and QR wait for the last beat (K.footIn, M6)")
-    print(f"{path}: {w}x{h} {codec}, {dur:.1f}s, holds {hold:.1f}s, QR {qr}")
+    held = f"holds {hold:.1f}s" + (f", words {words_hold:.1f}s outside living {living}" if living else "")
+    print(f"{path}: {w}x{h} {codec}, {dur:.1f}s, {held}, QR {qr}")
     for b in bad:
         print(f"  FAIL {b}")
     return not bad

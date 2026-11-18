@@ -1,9 +1,10 @@
 // Proves check-moving-ad.py (and so commit-ad.mjs --finish, which runs it) refuses broken moving ads (17 Nov 2026).
 //   node scripts/test-moving-ad-checks.mjs
-// Draws five try-outs from the kit in <temp>/mir-ad-tests/ (outside the repo), each over a real ad's last frame
+// Draws six try-outs from the kit in <temp>/mir-ad-tests/ (outside the repo), each over a real ad's last frame
 // (Chicken Munch's, so the first-frame check sees a real ad, not an empty test page): a good one, one that does nothing in its
 // first second, one that stalls in the middle, and one that never holds still at the end. The good one must pass and
-// each broken one must fail with its own reason. Free, no generation; takes a few minutes (five recordings). The fifth shows its QR from the start and must fail (M6).
+// each broken one must fail with its own reason. Free, no generation; takes a few minutes (six recordings). The fifth shows its QR from the start and must fail (M6); the sixth keeps a box moving in its
+// window.LIVING area after the words stop and must pass (M8).
 import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -24,6 +25,8 @@ const CASES = {
   'stalls': { motion: 't < 2 ? t / 6 : t < 4 ? 2 / 6 : K.cl(t / 6)', want: 'stalls for' },
   'no-hold': { motion: 't / 8', want: 'holds still' },
   'qr-early': { motion: 'K.cl(t / 6)', want: 'the QR code is on screen at', footAlways: true },
+  // a living ending (M8): the words stop at 6 s but a box in window.LIVING moves to the very end; it must pass
+  'living-end': { motion: 'K.cl(t / 6)', want: null, living: true },
 };
 let bad = 0;
 for (const [name, c] of Object.entries(CASES)) {
@@ -40,7 +43,11 @@ for (const [name, c] of Object.entries(CASES)) {
   $('ad').style.background = 'linear-gradient(#111,#111) 860px 1500px / 180px 180px no-repeat, url(real.png) 0 0 / 1080px 1920px';
   $('word').style.transform = \`translateX(\${(m - 0.5) * 600}px)\`;
   ${c.footAlways ? '' : 'K.footIn(t);'}
-};`);
+  ${c.living ? `window.LIVING = [200, 700, 880, 1100];
+  if (!$('liv')) $('ad').insertAdjacentHTML('beforeend', '<div id="liv" style="position:absolute;left:440px;top:800px;width:200px;height:200px;background:#c33"></div>');
+  $('liv').style.transform = \`translateX(\${Math.sin(t * 3) * 180}px)\`;` : ''}
+};
+${c.living ? 'window.LIVING = [200, 700, 880, 1100];' : ''}`);
   fs.writeFileSync(path.join(dir, 'ad.html'), html);
   execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'record-moving-ad.mjs'), dir, name],
     { stdio: 'pipe', env: { ...process.env, RECORD_FPS: '15' } });   // test ads at 15 a second: half the time

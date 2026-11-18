@@ -90,6 +90,13 @@ frame.
 The film ends on the product whole and big, on a plain ground, with the headline, name, link, QR and logo, still
 for 1.5 to 3.5 seconds (A10.1, A10.3). If the idea broke it apart, it ends re-formed.
 
+The product may keep living while the words hold (18 Nov 2026): the best food ads keep building to their last frame
+(d01), and the L.A. Cholent remake lost its 5 by sitting still on a dark ground for 2.8 seconds. Steam drifting off
+the bowl, a spoon lifting a bite, a drip still running: one small real motion inside a box the page names as
+`window.LIVING = [x0, y0, x1, y1]`, with the headline, foot and QR outside it. `record-moving-ad.mjs` writes the box
+into the MP4, and `check-moving-ad.py` then measures the end hold outside it (the words and QR still for 1.5 seconds
+or more, the QR over 3).
+
 ## M8b. Score the end before the full recording
 
 Draw a few test frames with `record-moving-ad.mjs <folder> <name> '' <t,t,t,7.9>` and score the last one beside the
@@ -132,3 +139,8 @@ that is made, cooked or used in steps is shown in two to four shots, each its ow
 melting, the burger landing (d01); pack to pan to plate (n04). For L.A. Cholent: the tub tipped into the pot, steam
 under the lid, a full bowl served. Each shot is the same product (one-look-per-product), cut on a beat. One locked
 picture is allowed only when the idea is one continuous action in it (a pour, a build, a morph) (A10.16).
+
+When a cut joins two round things (pot to bowl, cup to cup), measure before building, not by eye:
+`backend/.venv/Scripts/python scripts/match-shots.py <shot A> <shot B> <sheet.jpg>` finds the rim in each and prints
+the transform that puts B's circle on A's at the cut, then B eases to its own place. The sheet shows one circle when
+the cut will land. Within 40px and 10% B is used as it is; the cholent's first bowl was 241px off and was remade by eye.
