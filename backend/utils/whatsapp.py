@@ -160,6 +160,27 @@ async def send_order_confirmed_to_customer(
     )
 
 
+async def send_order_delivered_to_customer(
+    *, recipient_phone: str, business_name: str, track_url: str, photo_url: Optional[str],
+    language: str = "he",
+) -> bool:
+    """The courier's delivery photo, on the customer's WhatsApp, the way a
+    parcel company shows the parcel at the door (18 Nov 2026, after Bramble's
+    order status, which leads with the item). Off until
+    WHATSAPP_TEMPLATE_ORDER_DELIVERED names an approved template with an IMAGE
+    header (docs/whatsapp-order-delivered-template.md); the email with the
+    photo goes out either way. Never raises."""
+    meta = _meta_config()
+    tpl = os.environ.get("WHATSAPP_TEMPLATE_ORDER_DELIVERED")
+    if not (meta and tpl and (photo_url or "").startswith("https://")):
+        return False
+    return await _send_meta_template(
+        meta, recipient_phone, "he" if language == "he" else "en", [business_name, track_url],
+        template=tpl,
+        header={"type": "header", "parameters": [{"type": "image", "image": {"link": photo_url}}]},
+    )
+
+
 async def send_whatsapp_text(*, recipient_phone: str, body: str) -> bool:
     """Free-form text. Only delivered inside Meta's 24-hour window, e.g.
     right after the owner tapped a button. Never raises."""

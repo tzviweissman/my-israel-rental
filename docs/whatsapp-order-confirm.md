@@ -4,6 +4,29 @@ How it works: a customer orders on a business's page. The business gets a WhatsA
 
 Claude sets all the Railway variables. You only do the Meta clicks below.
 
+## Order of steps (where it stands, 18 Nov 2026)
+
+Switch the alerts on before adding features on top of them: a feature built on alerts that are off can't be tried with a real message.
+
+1. Done: number +1 711-008-3174 registered (status Connected, 250 customers a day).
+2. Done: templates `new_order_confirm` and `order_confirmed` approved, English and Hebrew (wording below).
+3. To do: a permanent access token (Business Settings > System users). Tzvi puts it in `backend/.env` as `WHATSAPP_ACCESS_TOKEN`, and Claude copies it to Railway without showing it.
+4. To do: the webhook and the App Secret (section 2 below).
+5. To do: Claude sets `WHATSAPP_TEMPLATE_NEW_ORDER_CONFIRM=new_order_confirm` and `WHATSAPP_TEMPLATE_ORDER_CONFIRMED=order_confirmed` (restarts the backend for about a minute), then sends one test order.
+6. Only then: the add-ons, such as the product photo (`docs/whatsapp-new-order-photo-template.md`) and the delivery photo for the customer.
+7. Not blocking: Meta's business verification. Until it passes, the number stays at the 250 limit.
+
+## Approved wording (read from Meta, 18 Nov 2026)
+
+Any new version of a template copies these words, so the English and Hebrew stay the same. `\n` marks a line break.
+
+- `new_order_confirm` en: `You received a new {{1}} from {{2}}.\nItems: {{3}}\nOrder details: {{4}}\nPlease confirm or decline this order with the buttons below.` Buttons: Confirm, Decline.
+- `new_order_confirm` he: `שלום, קיבלת {{1}} חדשה מהלקוח {{2}} דרך דף העסק שלך.\nהפריטים בהזמנה: {{3}}\nלכל פרטי ההזמנה: {{4}}\nנא לאשר את ההזמנה או לדחות אותה בעזרת הכפתורים שלמטה. ללא מענה, ההזמנה תישאר ממתינה.` Buttons: אישור, דחייה.
+- `order_confirmed` en: `Hello, your order from {{1}} has been confirmed.\nYou can see your order details and the payment options here: {{2}}\nIf you have any question about this order, reply to the business directly.`
+- `order_confirmed` he: `שלום, ההזמנה שלך מ{{1}} אושרה.\nפרטי ההזמנה ואפשרויות התשלום נמצאים כאן: {{2}}\nלשאלות לגבי ההזמנה, אפשר לפנות ישירות לעסק.`
+
+To read them again: Graph API Explorer, `GET 1727212035044702/message_templates?fields=name,language,status,components`.
+
 ## 1. Submit two message templates
 
 Meta must approve every message we start. Do each one twice, once in English and once in Hebrew, under the same name.

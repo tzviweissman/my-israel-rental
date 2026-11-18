@@ -1619,6 +1619,14 @@ async def courier_set_status(order_id: str, payload: CourierStatusIn, user=Depen
             + (f"<p><a href=\"{_esc(_frontend_url() + reorder_path(order))}\">Order the same again</a></p>" if reorder_path(order) else ""),
             tag="order-delivered", button=("See your order", track),
         )
+        # And the photo on the customer's WhatsApp (needs its template).
+        phone = order.get("customer_phone_e164") or order.get("customer_phone")
+        if phone:
+            from utils.bg_tasks import spawn
+            from utils.whatsapp import send_order_delivered_to_customer
+            spawn(send_order_delivered_to_customer(
+                recipient_phone=phone, business_name=biz.get("name") or "", track_url=track,
+                photo_url=payload.photo_url, language="he" if order.get("lang") == "he" else "en"))
         if order.get("customer_user_id"):
             await _notify(order["customer_user_id"], type_="order_delivered", message=f"Your order from {biz.get('name')} was delivered", action_url="/dashboard?tab=my-orders", order_id=order_id)
     else:

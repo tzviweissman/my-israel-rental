@@ -136,3 +136,37 @@ def test_no_photo_or_not_https_keeps_the_plain_button_alert(monkeypatch):
         t = _meta(monkeypatch, photo_tpl="new_order_photo", photo_url=url)
         assert t["name"] == "new_order_confirm", url
         assert t["components"][0]["type"] == "body"
+
+
+# --- The delivery photo to the customer (18 Nov 2026) ----------------------
+
+def _delivered(monkeypatch, tpl, photo):
+    if tpl:
+        monkeypatch.setenv("WHATSAPP_TEMPLATE_ORDER_DELIVERED", tpl)
+    else:
+        monkeypatch.delenv("WHATSAPP_TEMPLATE_ORDER_DELIVERED", raising=False)
+    posted = {}
+
+    async def fake_post(cfg, payload):
+        posted.update(payload)
+        return True
+
+    with patch.object(wa, "_meta_config", return_value=dict(META)), patch.object(wa, "_post_meta", fake_post):
+        ok = asyncio.run(wa.send_order_delivered_to_customer(
+            recipient_phone="0501234567", business_name="Blazin Boards",
+            track_url="https://myisraelrental.com/orders/track/t1", photo_url=photo, language="he"))
+    return ok, posted.get("template")
+
+
+def test_delivery_photo_goes_in_the_header(monkeypatch):
+    ok, t = _delivered(monkeypatch, "order_delivered", PHOTO)
+    assert ok and t["name"] == "order_delivered" and t["language"]["code"] == "he"
+    assert t["components"][0]["parameters"][0]["image"]["link"] == PHOTO
+    assert [p["text"] for p in t["components"][1]["parameters"]] == [
+        "Blazin Boards", "https://myisraelrental.com/orders/track/t1"]
+
+
+def test_no_delivery_message_without_template_or_https_photo(monkeypatch):
+    assert _delivered(monkeypatch, None, PHOTO) == (False, None)
+    assert _delivered(monkeypatch, "order_delivered", None) == (False, None)
+    assert _delivered(monkeypatch, "order_delivered", "/uploads/x.jpg") == (False, None)

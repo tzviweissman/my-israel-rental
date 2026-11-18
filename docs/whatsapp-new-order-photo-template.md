@@ -4,19 +4,20 @@ What it does: a business's WhatsApp alert for a new order opens with a picture o
 
 Until this template is approved and its name is set on the server, nothing changes: the alert goes out exactly as before.
 
-## Submit it (not submitted yet, waiting for Tzvi's OK)
+## Submit it (submitted 18 Nov 2026, English and Hebrew, in review)
 
 Where: Meta Business Suite > WhatsApp Manager > Message templates > Create template.
 
 1. Category: **Utility**. Name: `new_order_photo`. Language: English.
 2. Header: **Image**. Meta asks for a sample picture: upload any product photo, for example a board from the shop.
-3. Body, exactly (the same as the approved `new_order_confirm`):
-   `You received a new {{1}} from {{2}}. Items: {{3}} Order details: {{4}} Please confirm or decline this order with the buttons below.`
+3. Body, exactly the approved `new_order_confirm` English words (four lines, see `docs/whatsapp-order-confirm.md`):
+   `You received a new {{1}} from {{2}}.` / `Items: {{3}}` / `Order details: {{4}}` / `Please confirm or decline this order with the buttons below.`
 4. Buttons > Add a button > **Custom**. Add two, in this order: `Confirm`, then `Decline`.
 5. Examples for the {{ }}: 1 = order, 2 = Dani, 3 = 2 x Family board, 4 = https://myisraelrental.com/dashboard
 6. Submit. Then create it again under the same name, language **Hebrew**:
    - Header: Image (same sample).
-   - Body: `קיבלת {{1}} חדשה מ{{2}}. פריטים: {{3}} פרטי ההזמנה: {{4}} נא לאשר או לדחות את ההזמנה בכפתורים למטה.`
+   - Body, the approved `new_order_confirm` Hebrew words (four lines):
+     `שלום, קיבלת {{1}} חדשה מהלקוח {{2}} דרך דף העסק שלך.` / `הפריטים בהזמנה: {{3}}` / `לכל פרטי ההזמנה: {{4}}` / `נא לאשר את ההזמנה או לדחות אותה בעזרת הכפתורים שלמטה. ללא מענה, ההזמנה תישאר ממתינה.`
    - Buttons, in this order: `אישור`, then `דחייה`.
    - Examples: 1 = הזמנה, 2 = דני, 3 = 2 x מגש משפחתי, 4 = https://myisraelrental.com/dashboard
 
