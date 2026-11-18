@@ -1,6 +1,9 @@
 // The shop, from the starter (12 Nov 2026; tested on Gifted Israel and Gremier Coffee): category chips, the product sheet,
 // one optional add-on, and the order in three steps, saved to MyIsraelRental before WhatsApp opens (rules 3k). Write it
 // with sitekit.shop_page(); the WhatsApp number, the listing and the business's name come from #order's data.
+// Sizes (from Burnt Meatboards, 17 Nov 2026): a product with it.sizes picks one in the sheet (#sh-sizes), sold-out sizes
+// disabled, and the basket line is the size; a 'quote' product says "Ask for the price" and its button opens WhatsApp;
+// a product with no photo (it.w 0) gets a one-column sheet.
 (function () {
   var CAT = window.CAT, by = CAT.by, money = CAT.money;
   var BIN = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -19,30 +22,47 @@
   document.getElementById('filters').addEventListener('click', function (e) { var b = e.target.closest('.chip'); if (b) jump(b.dataset.c, true); });
 
   // ── the product sheet ──
-  var sheet = document.getElementById('sheet'), cur = null, n = 1;
+  var sheet = document.getElementById('sheet'), cur = null, n = 1, size = null, sizesEl = document.getElementById('sh-sizes');
   function open(it) {
     cur = it; n = 1;
-    var img = document.getElementById('sh-img'); img.src = it.img || 'assets/p/' + it.id + '.webp'; img.alt = it.name; img.width = it.w; img.height = it.h;
+    var img = document.getElementById('sh-img'), fig = img.parentNode;
+    fig.hidden = !it.w; sheet.classList.toggle('nophoto', !it.w);
+    if (it.w) { img.src = it.img || 'assets/p/' + it.id + '.webp'; img.alt = it.name; img.width = it.w; img.height = it.h; }
     document.getElementById('sh-name').textContent = it.name;
-    document.getElementById('sh-pr').innerHTML = (it.size === 'from' ? 'from ' : '') + money(it.price) + (it.was ? ' <s>' + money(it.was) + '</s>' : '');
-    document.getElementById('sh-size').textContent = it.size === 'from' ? 'Built for your guest count' : it.size;
     document.getElementById('sh-desc').textContent = it.desc;
+    var zs = it.sizes || []; size = zs.filter(function (z) { return !z.out; })[0] || null;
+    if (sizesEl) {
+      sizesEl.hidden = !zs.length;
+      sizesEl.innerHTML = zs.length ? '<legend>Choose a size</legend>' + zs.map(function (z) {
+        return '<label class="sz' + (z.out ? ' out' : '') + '"><input type="radio" name="sz" value="' + z.id + '"' + (z === size ? ' checked' : '') + (z.out ? ' disabled' : '') + '><span>' + z.name + '</span><b>' + (z.out ? 'Sold out' : money(z.price)) + '</b></label>';
+      }).join('') : '';
+    }
     label();
     sheet.showModal(); document.body.style.overflow = 'hidden';
     history.replaceState(null, '', '?p=' + it.id + location.hash);
   }
+  if (sizesEl) sizesEl.addEventListener('change', function (e) { if (e.target.name === 'sz') { size = by[e.target.value]; label(); } });
+  function unit() { return size || cur; }
   function label() {
+    var u = unit(), out = cur.out || (cur.sizes && !size), quote = cur.price_kind === 'quote';
+    document.getElementById('sh-pr').innerHTML = quote ? 'Ask for the price' : size ? money(size.price)
+      : (cur.size === 'from' ? 'from ' : '') + money(cur.price) + (cur.was ? ' <s>' + money(cur.was) + '</s>' : '');
+    document.getElementById('sh-size').textContent = size ? size.name : cur.size === 'from' ? 'Built for your guest count' : cur.size;
     document.getElementById('sh-n').textContent = n;
     var b = document.getElementById('sh-add');
-    b.lastElementChild.textContent = cur.out ? 'Out of stock' : 'Add' + (n > 1 ? ' ' + n : '') + ', ' + money(n * cur.price);
-    b.disabled = !!cur.out;
+    b.lastElementChild.textContent = out ? 'Out of stock' : quote ? 'Ask us on WhatsApp' : 'Add' + (n > 1 ? ' ' + n : '') + ', ' + money(n * u.price);
+    b.disabled = !!out;
   }
+  CAT.open = open;
   function close() { if (sheet.open) sheet.close(); }
   sheet.addEventListener('close', function () { document.body.style.overflow = ''; history.replaceState(null, '', location.pathname + location.hash); });
   document.getElementById('sh-x').addEventListener('click', close);
   sheet.addEventListener('click', function (e) { if (e.target === sheet) close(); });
   sheet.querySelector('.step').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; n = Math.max(1, Math.min(20, n + (+b.dataset.d))); label(); });
-  document.getElementById('sh-add').addEventListener('click', function () { CAT.add(cur.id, n); q[cur.id] = window.siteBasket.get()[cur.id]; update(); close(); });
+  document.getElementById('sh-add').addEventListener('click', function () {
+    if (cur.price_kind === 'quote') { window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent('Hi ' + NAME + ', what is the price of ' + cur.name + '?'), '_blank'); return; }
+    var id = unit().id; CAT.add(id, n); q[id] = window.siteBasket.get()[id]; update(); close();
+  });
   // a phone bottom sheet closes by swiping it down, as well as by its Close button (rules 3e.17)
   var y0 = null;
   sheet.addEventListener('touchstart', function (e) { y0 = sheet.scrollTop <= 0 ? e.touches[0].clientY : null; }, { passive: true });
@@ -69,7 +89,7 @@
   // a product sold for pickup only (dashboard: "Pickup only", e.g. a pickup bundle) makes the order a pickup; the server
   // refuses a delivery with it (orders.py)
   function pickupOnly() {
-    var lock = false; for (var k in q) if (q[k] && by[k] && by[k].pickup_only) lock = true;
+    var lock = false; for (var k in q) if (q[k] && by[k] && (by[k].pickup_only || (by[by[k].pid] || {}).pickup_only)) lock = true;   // a size takes its product's
     var d = document.querySelector('input[name=ful][value=delivery]'), p = document.querySelector('input[name=ful][value=pickup]');
     if (!d || !p) return;
     if (lock && d.checked) { p.checked = true; p.dispatchEvent(new Event('change', { bubbles: true })); }
@@ -123,7 +143,8 @@
   [].forEach.call(document.querySelectorAll('input[name=ful]'), function (i) { i.addEventListener('change', function () { update(); }); });
   function itemised() { var out = []; for (var k in q) if (q[k]) out.push('• ' + q[k] + ' × ' + CAT.label(k) + ' (' + money(q[k] * CAT.unit(k)) + ')'); return out; }
   function save(notes) {
-    var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: k, qty: q[k] });
+    // a size's basket key is "<product id>::<option id>", as the order API takes it
+    var ls = []; for (var k in q) if (q[k]) { var pz = k.split('::'); ls.push(pz[1] ? { product_id: pz[0], option_id: pz[1], qty: q[k] } : { product_id: k, qty: q[k] }); }
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ lines: ls, fulfilment: pickup() ? 'pickup' : 'delivery', address: pickup() ? undefined : v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
       .then(function (r) { return r.json().then(function (j) { return r.ok ? j : null; }, function () { return null; }); }).catch(function () { return null; });

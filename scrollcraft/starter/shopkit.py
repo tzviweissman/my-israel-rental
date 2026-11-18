@@ -14,31 +14,66 @@ import json
 from html import escape
 
 
-def money_html(n: float) -> str:
+SYMS = {'ILS': '₪', 'USD': '$', 'EUR': '€', 'GBP': '£'}
+CUR = 'ILS'   # the business's one currency, set by catalog_js from its items (prices only in the currency it chose)
+
+
+def money_html(n: float, currency: str | None = None) -> str:
     from sitekit import price
-    return price(n)
+    return price(n, currency or CUR)
+
+
+def low(it: dict) -> float:
+    """The price a card shows: the cheapest size in stock (any size if all are out), else the product's own."""
+    zs = it.get('sizes') or []
+    p = [z['price'] for z in zs if not z.get('out')] or [z['price'] for z in zs]
+    return min(p) if p else it['price']
+
+
+def is_from(it: dict) -> bool:
+    return len({z['price'] for z in it.get('sizes') or []}) > 1
 
 
 def catalog_js(items: list[dict], cats: list[str], source: str) -> str:
     """assets/catalog.js: window.CAT = {items, cats}. items: id, name, price, was (or None), cat, size ('1 litre', or
-    'from' for a from-price), desc, w, h (the card photo's size, assets/p/<id>.webp), colour (optional stripe)."""
+    'from' for a from-price), desc, w, h (the card photo's size, assets/p/<id>.webp, 0 when there is no photo), colour
+    (optional stripe), currency (optional, 'ILS' when absent; one currency per business), price_kind ('quote': "Ask for
+    the price" on WhatsApp), sizes (optional: [{id: '<product id>::<option id>', name, price, out}], the listing's
+    options, each its own basket line and order option_id)."""
+    global CUR
     need = {'id', 'name', 'price', 'cat', 'size', 'desc', 'w', 'h'}
     for it in items:
         miss = need - set(it)
         if miss:
             from sitekit import BuildError
             raise BuildError(f'catalog item {it.get("id")}: missing {sorted(miss)}')
+        for z in it.get('sizes') or []:
+            if not {'id', 'name', 'price'} <= set(z) or not str(z['id']).startswith(f'{it["id"]}::'):
+                from sitekit import BuildError
+                raise BuildError(f'catalog item {it["id"]}: each size needs id "{it["id"]}::<option id>", name and price ({z})')
+    curs = {it.get('currency') or 'ILS' for it in items}
+    if len(curs) > 1:
+        from sitekit import BuildError
+        raise BuildError(f'catalog: one currency per business, these items mix {sorted(curs)}')
+    CUR = curs.pop() if curs else 'ILS'
+    if CUR not in SYMS:
+        from sitekit import BuildError
+        raise BuildError(f'catalog: no sign for currency {CUR}')
     by = {i['id']: i for i in items}
     for it in items:   # a saving against other items is worked out from their prices, never typed (3j.13, 3j.14)
         if it.get('was_of'):
             n, of = it['was_of']
             it['was'] = n * by[of]['price']
-    return f'// {source}\nwindow.CAT = ' + json.dumps({'items': items, 'cats': cats}, ensure_ascii=False) + ';\n'
+    cat = {'items': items, 'cats': cats}
+    if CUR != 'ILS':
+        cat['sym'] = SYMS[CUR]   # catalog.js reads it; ₪ when absent, so shekel shops are written as before
+    return f'// {source}\nwindow.CAT = ' + json.dumps(cat, ensure_ascii=False) + ';\n'
 
 
-def prices_json(items: list[dict], sym: str = '₪') -> str:
+def prices_json(items: list[dict], sym: str | None = None) -> str:
     """prices.json: every price the site shows, by its product name in the listing, so frontend/server.js puts the
     dashboard's price on the page and in window.MIR_PRICES, which catalog.js reads (3j.14). Names must match the listing."""
+    sym = sym or SYMS[CUR]
     return json.dumps({i['name']: {'was': i['price'], 'sym': sym} for i in items}, ensure_ascii=False, indent=1) + '\n'
 
 
@@ -49,7 +84,12 @@ def price_row(it: dict) -> str:
         pct = round((1 - it['price'] / it['was']) * 100)
         was = f' <s aria-label="was {it["was"]:g}">{money_html(it["was"])}</s>'
         off = f'<span class="off">{pct}% off</span>' if pct >= 1 else ''
-    size = '' if it['size'] == 'from' else f'<span class="unit">{escape(it["size"])}</span>'
+    size = '' if it['size'] == 'from' or not it['size'] else f'<span class="unit">{escape(it["size"])}</span>'
+    if it.get('sizes'):   # "from" the cheapest size in stock when the sizes differ; catalog.js keeps it live
+        fr = '' if is_from(it) else ' hidden'
+        return f'<p class="pr-row"><span class="fr unit"{fr}>from </span><span class="pr">{money_html(low(it))}</span>{size}</p>'
+    if it.get('price_kind') == 'quote':
+        return '<p class="pr-row"><span class="pr">Ask for the price</span></p>'
     pre = '<span class="unit">from</span> ' if it['size'] == 'from' else ''
     return f'<p class="pr-row">{pre}<span class="pr">{money_html(it["price"])}</span>{was}{off}{size}</p>'
 
@@ -60,7 +100,7 @@ def card(it: dict, lazy: bool = True) -> str:
     return (f'<li class="pc"{stripe}><a class="pc-a" data-f="link" data-id="{it["id"]}" href="shop.html?p={it["id"]}">'
             f'<span class="pc-ph"><img data-f="img" src="assets/p/{it["id"]}.webp" alt="{escape(it["name"], True)}" width="{it["w"]}" height="{it["h"]}"{load}></span>'
             f'<span class="pc-t"><b data-f="name">{escape(it["name"])}</b>{price_row(it)}</span></a>'
-            f'<button class="btn btn-sm" type="button" data-add="{it["id"]}" aria-label="Add {escape(it["name"], True)}, {it["price"]:g}">Add</button></li>')
+            f'<button class="btn btn-sm" type="button" data-add="{it["id"]}" aria-label="{'Choose a size of ' if it.get('sizes') else 'Add '}{escape(it["name"], True)}, {low(it):g}">{'Choose size' if it.get('sizes') else 'Add'}</button></li>')
 
 
 def shop_page(site, items: list[dict], cats: list[str], *, popular: str, wa: str, gig: str, lede: str, title_html: str,
@@ -107,6 +147,7 @@ def shop_page(site, items: list[dict], cats: list[str], *, popular: str, wa: str
       <div>
         <h2 id="sh-name"></h2>
         <p class="pr-row"><span class="pr" id="sh-pr"></span><span class="unit" id="sh-size"></span></p>
+        <fieldset class="sizes-pick" id="sh-sizes" hidden></fieldset>
         <p class="desc" id="sh-desc"></p>
         <div class="buy">
           <span class="step"><button type="button" data-d="-1" aria-label="One fewer">−</button><output id="sh-n">1</output><button type="button" data-d="1" aria-label="One more">+</button></span>

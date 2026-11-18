@@ -78,10 +78,15 @@ function prefill() {
   const b = rec.business || {}, listings = rec.listings || [];
   const prices = [];
   for (const l of listings) for (const x of [...(l.tiers || []), ...(l.products || [])]) { const p = Number(x.price ?? x.price_ils ?? x.amount); if (p > 0) prices.push(p); }
-  const cur = (listings[0] && (listings[0].currency || listings[0].tiers?.[0]?.currency)) === 'USD' ? '$' : '₪';
+  // the currency is the listing's, else its products' or tiers' (Burnt Meatboards, 18 Nov 2026: USD on each product only,
+  // and the blueprint wrote a ₪ price for a dollar shop)
+  const curOf = listings.flatMap((l) => [l.currency, ...[...(l.products || []), ...(l.tiers || [])].map((x) => x.currency)]).find(Boolean) || b.currency;
+  const cur = { USD: '$', EUR: '€', GBP: '£' }[curOf] || '₪';
   const from = prices.length ? `From ${cur}${Math.min(...prices)}` : '';
   const areas = (b.areas || []).map((a) => a.replace(/(^|[-\s])\w/g, (c) => c.toUpperCase()).replace(/-/g, ' '));
-  const kosher = b.kosher_certification && (b.kosher_certification.body || '').trim();
+  // kashrus is a certificate object ({body}) or the owner's own words as text (Burnt Meatboards: "Meat from shechita under
+  // Rabbi Rubin; ..."); text means kosher, said in those words, never "no certificate"
+  const kc = b.kosher_certification, kosher = typeof kc === 'string' ? kc.trim() : kc && String(kc.body || '').trim();
   const facts = [from, b.delivery_note && `Delivery: ${b.delivery_note}`, b.lead_time && `Order ${b.lead_time} ahead`, b.payment_note, kosher && `Kosher, ${kosher}`, areas.length && !b.delivery_note && `Serving ${areas.join(', ')}`].filter(Boolean);
   const say = (re, plan) => { for (const it of items) if (re.test(it.rule) && !out.has(it.id)) out.set(it.id, plan); };
   out.set('R3v.14', facts.length >= 3 ? `choose three, in the owner's words: ${facts.join(' · ')}` : `from the record: ${facts.join(' · ') || 'nothing yet'}; ask the owner for the rest (message-to-owner.md)`);
@@ -231,6 +236,18 @@ if (mode === 'has') {
   if (open.length && ['check', 'done', 'rules'].includes(mode)) { console.log(`answer "This site has" first: node scripts/blueprint.mjs --has ${open.map((k) => `${k}=yes|no`).join(' ')} ${path.basename(dir)}`); process.exit(1); }
   const wrong = contradicted(dir, fs.readFileSync(file, 'utf8'));
   if (wrong.length && ['done', 'rules'].includes(mode)) { for (const w of wrong) console.log(w); process.exit(1); }
+}
+// --check <build> film: every film rule (the Opening stage's lines and any line tagged when:film) has a plan, before the
+// sketch sheet goes to Tzvi and before any paid clip (~/.claude/hooks/film-gate.mjs runs it). Burnt Meatboards, 18 Nov
+// 2026: 3aa.8, 3aa.9 and 3aa.11 were first read after the film was made, and the approved storyboard broke all three.
+if (mode === 'check' && rest[1] === 'film') {
+  const film = stages.flatMap((s) => s.items.filter((i) => i.sec === '2' || i.when === 'film').map((i) => [s, i]));
+  const open = film.filter(([, i]) => !planned(plans.get(i.id))).map(([s, i]) => `stage ${s.n} ${i.id}: ${i.rule.slice(0, 90)}`);
+  if (open.length) {
+    console.log(`${open.length} film rule(s) have no plan yet. Plan them before the sketch sheet, and draw the sketches to them; a row that breaks one names the rule for Tzvi:`);
+    for (const o of open) console.log('  ' + o); process.exit(1);
+  }
+  console.log(`all ${film.length} film rules are planned`); process.exit(0);
 }
 if (mode === 'check') {
   const upto = Number(rest[1] || stages.length);

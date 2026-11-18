@@ -1,17 +1,29 @@
 // The catalogue helpers every page of a shop site shares, from the starter (12 Nov 2026; tested on Gremier Coffee).
 // A basket line's key is the product id; window.CAT comes from assets/catalog.js, written by sitekit.catalog_js().
+// Sizes (from Burnt Meatboards, 17 Nov 2026): a product whose listing has options (his Oyster steak: Eat or Serve, 0.5 to
+// 2 lb) has it.sizes, each with its own price and stock, and the basket line is the size, keyed "<product id>::<size id>"
+// as the order API reads it; a card shows "from" the cheapest size in stock. CAT.sym is the business's one currency
+// sign (shopkit.catalog_js writes it from the items' currency; ₪ when none).
 (function () {
   var CAT = window.CAT, by = {};
-  CAT.items.forEach(function (it) { by[it.id] = it; });
+  CAT.items.forEach(function (it) {
+    by[it.id] = it;
+    (it.sizes || []).forEach(function (z) { z.pid = it.id; z.label = it.name + ' (' + z.name + ')'; by[z.id] = z; });
+  });
+  CAT.low = function (it) {   // the price a card shows: the cheapest size in stock, else the product's own
+    var p = (it.sizes || []).filter(function (z) { return !z.out; }).map(function (z) { return z.price; });
+    return p.length ? Math.min.apply(null, p) : it.price;
+  };
+  CAT.from = function (it) { var p = (it.sizes || []).map(function (z) { return z.price; }); return p.length > 1 && Math.min.apply(null, p) !== Math.max.apply(null, p); };
   // Every price comes from the listing (rules 3j.14). frontend/server.js puts the listing's prices, by product name, in
   // window.MIR_PRICES in <head>, so they are here before this runs; its #mir-live-products (stock) comes at the end of
   // <body>, after this script, so it is read once the page has loaded. A "was" of form "6 x classic" is worked out from
   // the live price of that item, never typed (sitekit.catalog_js writes it from the build's was_of).
-  CAT.money = function (n) { return '₪' + (Math.round(n * 100) / 100); };
+  CAT.money = function (n) { var r = Math.round(n * 100) / 100; return (CAT.sym || '₪') + (r % 1 ? r.toFixed(2) : r); };
   function livePrices() {
     var P = window.MIR_PRICES || {};
     try { JSON.parse((document.getElementById('mir-live-prices') || {}).textContent || '{}', function (k, v) { if (k && typeof v === 'number' && !(k in P)) P[k] = v; return v; }); } catch (e) { /* none */ }
-    CAT.items.forEach(function (it) { var p = Number(P[it.name]); if (p > 0) it.price = p; });
+    CAT.items.forEach(function (it) { var p = Number(P[it.name]); if (p > 0 && !it.sizes) it.price = p; });
     CAT.items.forEach(function (it) { if (it.was_of && by[it.was_of[1]]) it.was = it.was_of[0] * by[it.was_of[1]].price; });
   }
   function liveStock() {
@@ -24,7 +36,9 @@
           it = by[p.id] = { id: p.id, name: p.name, price: Number(p.price), desc: p.description || '', size: '', img: p.image || '', w: 800, h: 800, live: true };
           CAT.items.push(it);
         }
-        if (it) { if (Number(p.price) > 0) it.price = Number(p.price); it.out = p.in_stock === false; it.pickup_only = !!p.pickup_only; }
+        if (!it) return;
+        if (Number(p.price) > 0) it.price = Number(p.price); it.out = p.in_stock === false; it.pickup_only = !!p.pickup_only;
+        (p.options || []).forEach(function (o) { var z = by[it.id + '::' + o.id]; if (z) { if (Number(o.price) > 0) z.price = Number(o.price); z.out = o.in_stock === false || it.out; } });
       });
     } catch (e) { /* the typed-in catalogue stays */ }
   }
@@ -33,7 +47,8 @@
     [].forEach.call(document.querySelectorAll('[data-id]'), function (a) {
       var it = by[a.dataset.id], row = a.querySelector('.pr-row'); if (!it || !row) return;
       var pr = row.querySelector('.pr'), s = row.querySelector('s'), off = row.querySelector('.off');
-      if (pr) pr.textContent = CAT.money(it.price);
+      if (pr) pr.textContent = CAT.money(CAT.low(it));
+      var fr = row.querySelector('.fr'); if (fr) fr.hidden = !CAT.from(it);
       var pct = it.was ? Math.round((1 - it.price / it.was) * 100) : 0;
       if (s) { s.hidden = pct < 1; s.textContent = CAT.money(it.was || 0); s.setAttribute('aria-label', 'was ' + (it.was || 0)); }
       if (off) { off.hidden = pct < 1; off.textContent = pct + '% off'; }
@@ -47,7 +62,7 @@
   CAT.paint = paint;
   if (window.MIR_PRICES) paint();
   addEventListener('DOMContentLoaded', function () { if (document.getElementById('mir-live-products')) { liveStock(); livePrices(); paint(); } });
-  CAT.label = function (id) { var it = by[id]; return it ? it.name : ''; };
+  CAT.label = function (id) { var it = by[id]; return it ? it.label || it.name : ''; };
   CAT.unit = function (id) { var it = by[id]; return it ? it.price : 0; };
   CAT.add = function (id, n) {
     var b = window.siteBasket.get(); b[id] = Math.min(20, (+b[id] || 0) + (n || 1)); window.siteBasket.set(b);
@@ -56,7 +71,9 @@
   // every Add button on any page: <button data-add="classic">
   document.addEventListener('click', function (e) {
     var b = e.target.closest('[data-add]'); if (!b || !by[b.dataset.add]) return;
-    e.preventDefault(); CAT.add(b.dataset.add, 1);
+    e.preventDefault();
+    if (by[b.dataset.add].sizes) { if (CAT.open) CAT.open(by[b.dataset.add]); else location.href = 'shop.html?p=' + b.dataset.add; return; }
+    CAT.add(b.dataset.add, 1);
     b.classList.remove('added'); void b.offsetWidth; b.classList.add('added');
   });
   // A card's Add becomes − 1 + once that item is in the basket, so nobody adds it twice by mistake (Baymard; shop

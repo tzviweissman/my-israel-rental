@@ -18,11 +18,14 @@
 //   7. "Phones asked:" with Tzvi's own answer in quotes (rule 3aa.26; Tzvi, 13 Nov 2026, after Gremier's phones got the
 //      wide film on cream "for now" without asking, then needed five more clips: "make a rule so phones are always asked
 //      before generating"): tall 9:16 clips for phones, at what cost, or the whole width on the ground.
+//   8. The build's BLUEPRINT.md has a plan for every film rule (`node scripts/blueprint.mjs --check <build> film`), so the
+//      film is made to rules 3aa (Burnt Meatboards, 18 Nov 2026: 3aa.8, 3aa.9 and 3aa.11 were first read after the film).
 // Watches: Higgsfield generate_video / generate_video_batch (a price check with get_cost passes),
 // and Bash commands that run a gen/*.py script calling a video model (Higgsfield API, kie.ai).
 // Prints the refusal reason for the model; never blocks anything else.
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const WEEK = 7 * 24 * 3600 * 1000;
 let input = '';
@@ -75,7 +78,9 @@ process.stdin.on('end', () => {
       // the cause is big enough for its effect (rules 3aa.31, Gremier 15 Nov: a thin trickle of grounds browned a whole sea)
       const hasEnough = /^\s*-?\s*Enough:\s*\S.{20,}/im.test(t);
       seen.push(`${path.basename(b)}/gen/${f}: object list ${hasList ? 'yes' : 'MISSING'}, how it really happens (with its source) ${hasReal ? 'yes' : 'MISSING'}, key moment ${hasKey ? 'yes' : 'MISSING'}, looks real (with the real photograph) ${hasLooks ? 'yes' : 'MISSING'}, clip plan ${plan || 'yes'}, phones asked (his words in quotes) ${hasPhone ? 'yes' : 'MISSING'}, enough line ${hasEnough ? 'yes' : 'MISSING'}, approval ${hasYes ? 'yes' : 'MISSING'}`);
-      if (hasList && hasReal && hasKey && hasLooks && !plan && hasPhone && hasEnough && hasYes) ok.push(p);
+      const rules = filmRules(b);
+      seen[seen.length - 1] += `, film rules planned ${rules || 'yes'}`;
+      if (hasList && hasReal && hasKey && hasLooks && !plan && hasPhone && hasEnough && hasYes && !rules) ok.push(p);
     }
   }
   if (ok.length) process.exit(0);
@@ -89,6 +94,7 @@ process.stdin.on('end', () => {
     + 'and what gets trimmed or dissolved if a clip is nearly right; '
     + 'a line "Phones asked: <date>, Tzvi: \"<his answer>\"" (rule 3aa.26: ask him before any clip whether phones get tall 9:16 clips, with their get_cost credits, or the whole width on the ground), '
     + 'a line "Enough: <each cause, its amount, and why that much does what the step shows>" (rule 3aa.31: a thin trickle cannot brown a sea), '
+    + 'plan every film rule in BLUEPRINT.md (node scripts/blueprint.mjs --check <site> film) before the sketch sheet, '
     + 'show Tzvi the steps and the object list, and only after his yes add the line "Approved by Tzvi: <date and his words>". '
     + (seen.length ? `Briefs found this week: ${seen.join('; ')}.` : 'No brief changed in the last 7 days was found.');
   process.stdout.write(JSON.stringify({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: reason } }));
@@ -111,6 +117,16 @@ function clipPlan(t, build, gen) {
     [/trim|dissolve/i.test(sec), 'what is trimmed if nearly right'],
   ].filter(([ok]) => !ok).map(([, what]) => what);
   return need.length ? `MISSING (${need.join(', ')})` : '';
+}
+
+// '' when every film rule in the build's BLUEPRINT.md has a plan, or the build has none, else what is missing
+function filmRules(build) {
+  const bp = path.join(build, 'BLUEPRINT.md');
+  // a blueprint written before rules 3aa existed belongs to a site already made: new rules spare it (Tzvi, 29 Oct 2026)
+  if (!fs.existsSync(bp) || !/\bR3aa\.8\b/.test(fs.readFileSync(bp, 'utf8'))) return '';
+  const repo = path.resolve(build, '..', '..', '..');
+  const r = spawnSync(process.execPath, [path.join(repo, 'scripts', 'blueprint.mjs'), '--check', build, 'film'], { encoding: 'utf8' });
+  return r.status === 0 ? '' : `MISSING (${(r.stdout.match(/^\d+/) || ['some'])[0]} unplanned: node scripts/blueprint.mjs --check ${path.basename(build)} film)`;
 }
 
 function safeJson(s) { try { return JSON.parse(s); } catch { return {}; } }

@@ -118,6 +118,16 @@ SITE.write('contact', 'Contact · ...', '...', 'og.webp', SITE.page_head('Say he
 (call only, no WhatsApp), `text`, `email`. Ask the owner which number takes
 what (rules 3o.4). `kit.price(90)` sets the ₪ in the body face (3o.5).
 
+**Shops with sizes, or in dollars** (from Burnt Meatboards, 18 Nov 2026). Give
+each catalogue item `currency: 'USD'` (one currency per business; ILS when
+absent) and `kit.catalog_js()` writes the sign for `catalog.js` and every
+price `shopkit` writes. A product whose listing has options gets
+`sizes: [{id: '<product id>::<option id>', name, price, out}]`: its card says
+"from" the cheapest size in stock and "Choose size", the sheet picks the size
+(sold-out sizes off), the basket line is the size, and the order is saved with
+its `option_id`. `price_kind: 'quote'` shows "Ask for the price" and opens
+WhatsApp; `w: 0` (no photo) gives a one-column sheet.
+
 ## Ready parts and the one check (24 Oct 2026)
 
 - **The builder brief**: every build or rework starts from `docs/build-brief-template.md`, filled in, nothing deleted. Each line is a mistake that already reached Tzvi.

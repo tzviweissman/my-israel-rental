@@ -97,6 +97,10 @@ your reply, either "every check passes" or the problems it listed.
    confirm the motion as numbered steps; plan the phone frame; three concept
    stills; `brightness.py` on every still and clip; check-clip on every clip
    (§3h, §3o.1, §1). Generate in the background while writing the page.
+   Before the sketch sheet, plan every film rule in BLUEPRINT.md
+   (`node scripts/blueprint.mjs --check <build> film`: rules 3aa and every film
+   line) and draw the sketches to them; a row that breaks one names the rule for
+   Tzvi. The film gate refuses paid clips until it passes.
 8. **Build from the starter** (`scrollcraft/starter`, §3p.1) as a website,
    not a page: pages by kind, one menu bar, full footer, Shop with steps, basket
    between pages, orders saved before WhatsApp (§3k, §3v). While building,
