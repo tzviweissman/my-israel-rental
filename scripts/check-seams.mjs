@@ -11,6 +11,10 @@
  *           seen: one object that goes down the page with you (3ae.2)
  * A page of fewer than three such sections is not judged.
  *
+ * Passes on: none found yet (18 Nov 2026: Graza, Omsom, Blue Bottle, Diaspora, Flamingo Estate, Brightland,
+ * Boomball and Monarque fail CROSS; Era Residence passed but its picture showed only a loading screen). Look at
+ * the first site built to 3ae.
+ *
  *   node scripts/check-seams.mjs <url> [more urls]      exit 1 on a home page that fails
  *   node scripts/check-seams.mjs --self-test           proves it passes a page that has both and fails one that has neither
  */
