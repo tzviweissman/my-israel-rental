@@ -279,6 +279,8 @@ async def ensure_order_indexes() -> None:
     booking index: the queries still work, just slower."""
     try:
         await db.store_orders.create_index([("business_id", 1), ("needed_by", 1)], background=True)
+        # WhatsApp alerts awaiting Meta's delivery report; a failure comes within minutes.
+        await db.whatsapp_sent.create_index("at", expireAfterSeconds=2 * 86400, background=True)
         await db.store_orders.create_index([("business_id", 1), ("status", 1)], background=True)
         await db.businesses.create_index("orders_staff_token", sparse=True, background=True)
         await db.businesses.create_index("couriers.token", sparse=True, background=True)
@@ -2812,7 +2814,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     # The alert opens with the first ordered product that has a picture,
     # else the listing's own (utils/whatsapp.py, needs a photo template).
     photo = next((products[ln["product_id"]].get("image") for ln in lines
-                  if products.get(ln["product_id"], {}).get("image")), None) or (gig.get("images") or [None])[0]
+                  if products.get(ln["product_id"], {}).get("image")), None) or (gig.get("images") or [None])[0]         or biz.get("logo_url")  # no photo at all: the business's own logo
     spawn(alert_business_on_whatsapp(gig, biz.get("owner_user_id"), payload.customer_name,
                                      items_text, "/dashboard?tab=orders", "order", order_id=doc["_id"],
                                      photo_url=photo))
@@ -2874,6 +2876,13 @@ async def alert_business_on_whatsapp(gig: dict[str, Any], owner_user_id: Optiona
                 path=path, kind=kind, language=owner.get("preferred_language") or "en",
                 order_id=order_id, photo_url=photo_url,
             )
+        if isinstance(sent, str):
+            # Meta "accepts" then may fail delivery later (131031, account
+            # locked, 18 Nov 2026); the webhook texts the owner then.
+            await db.whatsapp_sent.insert_one({
+                "_id": sent, "kind": kind, "order_id": order_id, "booking_token": booking_token,
+                "gig_id": gig.get("_id"), "customer_name": customer_name, "summary": summary,
+                "owner_user_id": owner_user_id, "at": datetime.now(timezone.utc)})
         # No WhatsApp (Meta still checking the business, Nov 2026, or the
         # send failed): a text with the one-tap confirm link instead, to the
         # business's texting number.

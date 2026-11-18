@@ -96,8 +96,10 @@ def _meta_config() -> Optional[dict]:
     }
 
 
-async def _post_meta(cfg: dict, payload: dict) -> bool:
-    """POST one message to the Graph API. Never raises."""
+async def _post_meta(cfg: dict, payload: dict):
+    """POST one message to the Graph API. Never raises. Returns Meta's
+    message id (truthy) or False, so a caller can match the later
+    delivery report (routes/whatsapp_webhook.py) to what it sent."""
     import httpx
     try:
         async with httpx.AsyncClient(timeout=10) as client:
@@ -111,7 +113,10 @@ async def _post_meta(cfg: dict, payload: dict) -> bool:
             log.warning("Meta WhatsApp send failed: %s %s", r.status_code, r.text[:300])
             return False
         log.info("WhatsApp sent via Meta to=%s***", payload["to"][:6])
-        return True
+        try:
+            return str(r.json()["messages"][0]["id"]) or True
+        except Exception:  # noqa: BLE001
+            return True
     except Exception as exc:  # noqa: BLE001
         log.warning("Meta WhatsApp send failed: %s", type(exc).__name__)
         return False

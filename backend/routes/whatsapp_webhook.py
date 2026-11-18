@@ -72,6 +72,10 @@ async def receive_webhook(request: Request):
                         err = (st.get("errors") or [{}])[0]
                         logger.warning("WhatsApp delivery failed: %s %s %s", err.get("code"), err.get("title"),
                                        (err.get("error_data") or {}).get("details", ""))
+                        try:
+                            await _text_instead(str(st.get("id") or ""))
+                        except Exception as exc:  # noqa: BLE001
+                            logger.warning("WhatsApp fallback text failed: %s", type(exc).__name__)
                 for msg in value.get("messages") or []:
                     try:
                         await _handle_message(msg)
@@ -80,6 +84,21 @@ async def receive_webhook(request: Request):
     except Exception as exc:  # noqa: BLE001
         logger.warning("WhatsApp webhook body unreadable: %s", type(exc).__name__)
     return {"ok": True}
+
+
+async def _text_instead(msg_id: str) -> None:
+    """A new-order or booking alert Meta failed to deliver: the business
+    gets the one-tap text instead, once (the record is taken as it is read)."""
+    rec = await db.whatsapp_sent.find_one_and_delete({"_id": msg_id}) if msg_id else None
+    if not rec:
+        return
+    from routes.marketplace import order_texts
+    if rec.get("kind") == "order" and rec.get("order_id"):
+        await order_texts.text_owner_new_order(rec["order_id"])
+    elif rec.get("kind") == "booking" and rec.get("booking_token"):
+        gig = await db.marketplace_gigs.find_one({"_id": rec.get("gig_id")}) or {}
+        await order_texts.text_owner_new_booking(gig, rec.get("customer_name"), rec.get("summary"),
+                                                 rec["booking_token"], rec.get("owner_user_id"))
 
 
 def _payload_of(msg: dict[str, Any]) -> str:

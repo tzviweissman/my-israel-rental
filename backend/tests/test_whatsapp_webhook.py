@@ -39,6 +39,12 @@ class Coll:
             raise DuplicateKeyError("dup")
         self.docs.append(d)
 
+    async def find_one_and_delete(self, q):
+        d = await self.find_one(q)
+        if d:
+            self.docs.remove(d)
+        return d
+
     async def delete_one(self, q):
         self.docs = [d for d in self.docs if not all(d.get(k) == v for k, v in q.items())]
 
@@ -81,6 +87,7 @@ def world(monkeypatch):
     db.users = Coll([{"id": "u1", "preferred_language": "en"}])
     db.marketplace_gigs = Coll([{"_id": "g1", "provider_user_id": "u1"}])
     db.whatsapp_webhook_events = Coll()
+    db.whatsapp_sent = Coll()
     customer, text = AsyncMock(return_value=True), AsyncMock(return_value=True)
     with patch.object(wh, "db", db), patch.object(orders, "db", db), \
             patch("routes.marketplace.gigs.gig_whatsapp_number", AsyncMock(return_value="050-123-4567")), \
@@ -114,6 +121,17 @@ def test_failed_delivery_is_logged_without_the_phone(world):
     assert log.warning.call_count == 1
     line = log.warning.call_args.args[0] % log.warning.call_args.args[1:]
     assert "131049" in line and "ecosystem" in line and "15550001111" not in line
+
+
+def test_failed_alert_texts_the_owner_once(world):
+    wh.db.whatsapp_sent = Coll([{"_id": "wamid.7", "kind": "order", "order_id": "o1"}])
+    st = {"id": "wamid.7", "status": "failed", "errors": [{"code": 131031, "title": "Business Account locked"}]}
+    raw = json.dumps({"entry": [{"changes": [{"value": {"statuses": [st]}}]}]}).encode()
+    texted = AsyncMock()
+    with patch("routes.marketplace.order_texts.text_owner_new_order", texted):
+        _post(raw)
+        _post(raw)  # Meta re-delivers the report: still one text
+    texted.assert_awaited_once_with("o1")
 
 
 def test_bad_signature_is_refused(world):
