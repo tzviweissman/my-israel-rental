@@ -2759,8 +2759,13 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     # both unopened. In the background: a slow Twilio call must never
     # hold up the customer's confirmation.
     from utils.bg_tasks import spawn
+    # The alert opens with the first ordered product that has a picture,
+    # else the listing's own (utils/whatsapp.py, needs a photo template).
+    photo = next((products[ln["product_id"]].get("image") for ln in lines
+                  if products.get(ln["product_id"], {}).get("image")), None) or (gig.get("images") or [None])[0]
     spawn(alert_business_on_whatsapp(gig, biz.get("owner_user_id"), payload.customer_name,
-                                     items_text, "/dashboard?tab=orders", "order", order_id=doc["_id"]))
+                                     items_text, "/dashboard?tab=orders", "order", order_id=doc["_id"],
+                                     photo_url=photo))
     from .order_texts import _texts_after, text_customer_received
     # The customer's receipt below already says "confirmed" when it was accepted automatically: no second email.
     spawn(_texts_after(doc, biz, True, tell_business=False, email=False) if auto else text_customer_received(doc, biz))
@@ -2803,7 +2808,7 @@ async def my_orders(user=Depends(verify_token)):
 
 async def alert_business_on_whatsapp(gig: dict[str, Any], owner_user_id: Optional[str], customer_name: str,
                                      summary: str, path: str, kind: str, order_id: Optional[str] = None,
-                                     booking_token: Optional[str] = None) -> None:
+                                     booking_token: Optional[str] = None, photo_url: Optional[str] = None) -> None:
     """A new order or booking, to the business's own WhatsApp (the number
     on the listing). Never raises: the order is already saved, and the
     email and the bell have already gone out."""
@@ -2817,7 +2822,7 @@ async def alert_business_on_whatsapp(gig: dict[str, Any], owner_user_id: Optiona
             sent = await send_new_order_notification(
                 recipient_phone=number, customer_name=customer_name or "", summary=summary or "",
                 path=path, kind=kind, language=owner.get("preferred_language") or "en",
-                order_id=order_id,
+                order_id=order_id, photo_url=photo_url,
             )
         # No WhatsApp (Meta still checking the business, Nov 2026, or the
         # send failed): a text with the one-tap confirm link instead, to the

@@ -86,3 +86,53 @@ def test_does_nothing_without_twilio():
     with patch.object(wa, "_config", return_value=None):
         assert asyncio.run(wa.send_new_order_notification(
             recipient_phone="0501234567", customer_name="x", summary="y", path="/p")) is False
+
+
+# --- Meta: the photo header (18 Nov 2026) ---------------------------------
+# The alert may open with the first ordered product's picture, but only once
+# an approved photo template is named; otherwise the payload must be exactly
+# the button alert it was before.
+
+META = {"token": "t", "phone_id": "1", "public_url": "https://myisraelrental.com", "template": "new_order"}
+PHOTO = "https://res.cloudinary.com/x/image/upload/board.jpg"
+
+
+def _meta(monkeypatch, photo_tpl=None, **kw):
+    monkeypatch.setenv("WHATSAPP_TEMPLATE_NEW_ORDER_CONFIRM", "new_order_confirm")
+    if photo_tpl:
+        monkeypatch.setenv("WHATSAPP_TEMPLATE_NEW_ORDER_PHOTO", photo_tpl)
+    else:
+        monkeypatch.delenv("WHATSAPP_TEMPLATE_NEW_ORDER_PHOTO", raising=False)
+    posted = {}
+
+    async def fake_post(cfg, payload):
+        posted.update(payload)
+        return True
+
+    with patch.object(wa, "_meta_config", return_value=dict(META)), patch.object(wa, "_post_meta", fake_post):
+        asyncio.run(wa.send_new_order_notification(
+            recipient_phone="0501234567", customer_name="Dani", summary="2 × Family board",
+            path="/dashboard?tab=orders", kind="order", language="en", order_id="o1", **kw))
+    return posted["template"]
+
+
+def test_photo_template_opens_with_the_product_picture(monkeypatch):
+    t = _meta(monkeypatch, photo_tpl="new_order_photo", photo_url=PHOTO)
+    assert t["name"] == "new_order_photo"
+    kinds = [c["type"] for c in t["components"]]
+    assert kinds == ["header", "body", "button", "button"]
+    assert t["components"][0]["parameters"][0]["image"]["link"] == PHOTO
+    assert [c["parameters"][0]["payload"] for c in t["components"][2:]] == ["order_confirm:o1", "order_decline:o1"]
+
+
+def test_without_the_photo_template_the_alert_is_unchanged(monkeypatch):
+    t = _meta(monkeypatch, photo_url=PHOTO)
+    assert t["name"] == "new_order_confirm"
+    assert [c["type"] for c in t["components"]] == ["body", "button", "button"]
+
+
+def test_no_photo_or_not_https_keeps_the_plain_button_alert(monkeypatch):
+    for url in (None, "", "http://example.com/a.jpg", "/uploads/a.jpg"):
+        t = _meta(monkeypatch, photo_tpl="new_order_photo", photo_url=url)
+        assert t["name"] == "new_order_confirm", url
+        assert t["components"][0]["type"] == "body"

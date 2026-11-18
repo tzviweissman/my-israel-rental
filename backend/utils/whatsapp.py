@@ -120,13 +120,16 @@ async def _post_meta(cfg: dict, payload: dict) -> bool:
 async def _send_meta_template(
     cfg: dict, raw_phone: str, lang: str, params: list,
     template: Optional[str] = None, buttons: Optional[list] = None,
+    header: Optional[dict] = None,
 ) -> bool:
     """Send one template message. `buttons` are extra components, e.g. the
-    quick-reply buttons of the order-confirm template. Never raises."""
+    quick-reply buttons of the order-confirm template; `header` an image
+    header component. Never raises."""
     digits = normalize_whatsapp_number(raw_phone)
     if not digits:
         return False
-    components = [{"type": "body", "parameters": [
+    components = [header] if header else []
+    components += [{"type": "body", "parameters": [
         # Meta refuses an empty parameter, so a blank becomes "-".
         {"type": "text", "text": str(p) or "-"} for p in params]}]
     components += buttons or []
@@ -320,10 +323,16 @@ async def send_contract_signed_notification(
 async def send_new_order_notification(
     *, recipient_phone: str, customer_name: str, summary: str,
     path: str, kind: str = "order", language: str = "he",
-    order_id: Optional[str] = None,
+    order_id: Optional[str] = None, photo_url: Optional[str] = None,
 ) -> bool:
     """Tell a business on WhatsApp that an order or booking came in on the
     site (Tzvi, 22 Oct 2026).
+
+    `photo_url`: the first ordered product's picture. With Meta, an order_id
+    and WHATSAPP_TEMPLATE_NEW_ORDER_PHOTO (an approved template with an IMAGE
+    header, docs/whatsapp-new-order-photo-template.md) set, the alert opens
+    with it (18 Nov 2026), as the order screens in our inspo do; otherwise
+    the message is exactly as before.
 
     Why: production had two real orders sitting at "new" for three days.
     The owner was told by email and by the bell on the site, and opened
@@ -356,11 +365,19 @@ async def send_new_order_notification(
     if meta:
         params = [word, who, what, link]
         confirm_tpl = os.environ.get("WHATSAPP_TEMPLATE_NEW_ORDER_CONFIRM")
+        photo_tpl = os.environ.get("WHATSAPP_TEMPLATE_NEW_ORDER_PHOTO")
+        buttons = [_quick_reply(0, f"order_confirm:{order_id}"),
+                   _quick_reply(1, f"order_decline:{order_id}")]
+        # Meta fetches the header itself, so only a public https picture.
+        if order_id and photo_tpl and (photo_url or "").startswith("https://"):
+            header = {"type": "header", "parameters": [{"type": "image", "image": {"link": photo_url}}]}
+            return await _send_meta_template(
+                meta, recipient_phone, "he" if he else "en", params, template=photo_tpl,
+                buttons=buttons, header=header)
         if order_id and confirm_tpl:
             return await _send_meta_template(
                 meta, recipient_phone, "he" if he else "en", params, template=confirm_tpl,
-                buttons=[_quick_reply(0, f"order_confirm:{order_id}"),
-                         _quick_reply(1, f"order_decline:{order_id}")])
+                buttons=buttons)
         return await _send_meta_template(meta, recipient_phone, "he" if he else "en", params)
     key = "tpl_new_order_he" if he and cfg.get("tpl_new_order_he") else "tpl_new_order"
     return await _send(
