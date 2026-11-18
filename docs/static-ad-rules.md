@@ -31,12 +31,12 @@ Sections (line each starts on; read with that offset):
 - 739: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
 - 751: 19. A 5 every time (Tzvi, 10 Nov 2026)
 - 762: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
-- 778: 21. The drawing is kept (Tzvi, 16 Nov 2026)
-- 785: 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
-- 793: 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
-- 810: 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
-- 820: 25. Every listing photo in an ad is clean (Tzvi, 17 Nov 2026)
-- 829: 26. Memorable, not one template (Tzvi, 18 Nov 2026: "All ten")
+- 786: 21. The drawing is kept (Tzvi, 16 Nov 2026)
+- 793: 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
+- 801: 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
+- 818: 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
+- 828: 25. Every listing photo in an ad is clean (Tzvi, 17 Nov 2026)
+- 837: 26. Memorable, not one template (Tzvi, 18 Nov 2026: "All ten")
 <!-- /contents -->
 
 The rules for every still advert MyIsraelRental makes: the ad maker on the
@@ -774,6 +774,14 @@ the library's 5/5 ads put it (12 Nov 2026, 90 of them looked at: about 58% a top
 the product itself); a logo with see-through parts brings a white tile. When the design's words fill the top, the
 first free spot round the code. A design that fills its whole top (most status designs) should leave the logo a row. check-ad-designs draws every design with a wide test logo
 and fails one that is missing, under 54px high, outside a status's safe area, or over any word.
+
+Its letters must read, not only its box (Tzvi, 18 Nov 2026: "make sure the logo never comes out unclear again"). L.A.
+Cholent's logo is a round badge: thin gold letters round a faded slow cooker, which carries another brand's name. In the
+corner of its moving ad at 120px its letters were 11px tall at 1080 wide, mush on a phone. So a logo's lettering is at
+least 30px tall at 1080, like any other text (A8.2), measured by `scripts/logo_check.py` (check-moving-ad.py runs it on
+every moving ad's last frame). A badge, seal or flyer is not shrunk into a corner: their wordmark is lifted out clean,
+with what is behind it made see-through (L.A. Cholent's `logo-mark.png`, its gold letters and bars only), and shown
+large enough to pass.
 
 ## 21. The drawing is kept (Tzvi, 16 Nov 2026)
 

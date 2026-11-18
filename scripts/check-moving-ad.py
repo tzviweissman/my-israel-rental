@@ -13,6 +13,8 @@ import sys
 import cv2
 import numpy as np
 
+from logo_check import logo_letters, verdict  # scripts/logo_check.py, the logo reads at phone size (A4.6)
+
 
 def probe(path):
     out = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=codec_name,width,height",
@@ -77,9 +79,10 @@ def check(path):
     # then measured outside the box, and the stall check stops where the words stop.
     tag = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format_tags=comment", "-of", "default=nw=1:nk=1", path],
                          capture_output=True, text=True).stdout.strip()
+    parts = dict(p.split(":", 1) for p in tag.split(";") if ":" in p)
     living, words_still = None, still_run(fs)
-    if tag.startswith("living:"):
-        x0, y0, x1, y1 = (int(v) for v in tag[7:].split(","))
+    if "living" in parts:
+        x0, y0, x1, y1 = (int(v) for v in parts["living"].split(","))
         living = (x0, y0, x1, y1)
         masked = [f.copy() for f in fs]
         for f in masked:
@@ -119,8 +122,22 @@ def check(path):
                   if cv2.QRCodeDetector().detectAndDecode(fs[i])[0]), None)
     if early is not None:
         bad.append(f"the QR code is on screen at {early:.2f}s: name, link and QR wait for the last beat (K.footIn, M6)")
+    # The logo reads at phone size (A4.6, 18 Nov 2026): L.A. Cholent's round badge, thin gold letters round a faded pot,
+    # came out as mush at 120px. Its lettering must be as tall as any other text on the ad (30px at 1080, A8.2).
+    logo_note = "no logo box (recorded before 18 Nov 2026 or no #logo)"
+    if "logo" in parts:
+        box, _, kind = parts["logo"].partition(":")
+        if kind == "mark":
+            logo_note = "logo is a mark, no lettering"
+        else:
+            b = tuple(int(v) for v in box.split(","))
+            n, tall = logo_letters(fs[-1], b)
+            logo_note = f"logo lettering {tall:.0f}px ({n} letters)"
+            why = verdict(fs[-1], b)
+            if why:
+                bad.append(why + " (window.AD.logoText = false for a pure mark)")
     held = f"holds {hold:.1f}s" + (f", words {words_hold:.1f}s outside living {living}" if living else "")
-    print(f"{path}: {w}x{h} {codec}, {dur:.1f}s, {held}, QR {qr}")
+    print(f"{path}: {w}x{h} {codec}, {dur:.1f}s, {held}, QR {qr}, {logo_note}")
     for b in bad:
         print(f"  FAIL {b}")
     return not bad

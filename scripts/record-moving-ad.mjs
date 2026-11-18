@@ -38,18 +38,27 @@ await p.waitForTimeout(500);
 // goes on moving (steam, a spoon) after the words and QR stop. It rides in the MP4's comment, so check-moving-ad.py
 // measures the end hold outside that box. The words, foot and QR must sit outside it.
 const living = await p.evaluate(() => (Array.isArray(window.LIVING) && window.LIVING.length === 4 ? window.LIVING.map(Math.round) : null));
+// Where the logo sits, so check-moving-ad.py can read its lettering on the last frame (A4.6, 18 Nov 2026: L.A.
+// Cholent's round badge came out as mush). window.AD.logoText = false marks a logo with no letters (a pure mark).
 const times = only ? only.split(',').map(Number) : [...Array(LEN * FPS).keys()].map((i) => i / FPS);
 for (const [i, t] of times.entries()) {
   await p.evaluate((x) => window.render(x), t);
   await p.locator('#ad').screenshot({ path: path.join(tmp, `${String(i).padStart(4, '0')}.png`) });
 }
+const logo = await p.evaluate(() => {
+  const el = document.getElementById('logo'), ad = document.getElementById('ad');
+  if (!el) return null;
+  const r = el.getBoundingClientRect(), a = ad.getBoundingClientRect();
+  return `${[r.left - a.left, r.top - a.top, r.width, r.height].map(Math.round).join(',')}${window.AD && window.AD.logoText === false ? ':mark' : ''}`;
+});
 await b.close();
+const comment = [living && `living:${living.join(',')}`, logo && `logo:${logo}`].filter(Boolean).join(';');
 if (errs.length) { console.error(errs); process.exit(1); }
 if (only) { console.log(`frames in ${tmp}`); process.exit(0); }
 const out = INREPO ? path.join(ROOT, 'docs', 'ads', name) : path.join(HERE, name);  // a --test try-out keeps its video beside it
 const src = ['-y', '-v', 'error', '-framerate', String(FPS), '-i', path.join(tmp, '%04d.png')];
 execFileSync('ffmpeg', [...src, '-c:v', 'libx264', '-crf', '18', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
-  ...(living ? ['-metadata', `comment=living:${living.join(',')}`] : []), `${out}.mp4`]);
+  ...(comment ? ['-metadata', `comment=${comment}`] : []), `${out}.mp4`]);
 execFileSync('ffmpeg', [...src, '-vf', 'fps=15,scale=540:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=192[p];[b][p]paletteuse=dither=sierra2_4a', '-loop', '0', `${out}.gif`]);
 fs.copyFileSync(path.join(tmp, `${String(times.length - 1).padStart(4, '0')}.png`), `${out}-last.png`);
 fs.rmSync(tmp, { recursive: true, force: true });

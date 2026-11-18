@@ -88,6 +88,11 @@ if (staged.some((f) => /^(docs\/(page-generation-rules|rules-checklist|static-ad
 }
 // a change to the moving-ad check (or its self-test) must still pass a good ad and refuse the broken ones (17 Nov 2026);
 // it records five short ads, so it runs only then, never on other commits
+// the logo measure (A4.6) must still fail L.A. Cholent's badge and read the wordmarks: seconds, no recording (18 Nov 2026)
+if (staged.some((f) => /^scripts\/(logo_check\.py|check-moving-ad\.py)$/.test(f))) {
+  const c = spawnSync(path.join(ROOT, 'backend', '.venv', 'Scripts', 'python'), [path.join(ROOT, 'scripts', 'logo_check.py'), '--selftest'], { cwd: ROOT, encoding: 'utf8' });
+  if (c.status !== 0) { console.error(`Commit refused: the logo check no longer tells a mushy logo from a clear one:\n${c.stdout}${c.stderr}`); process.exit(1); }
+}
 const selfTest = staged.filter((f) => /^scripts\/(check-moving-ad\.py|test-moving-ad-checks\.mjs)$/.test(f));
 if (selfTest.length) {
   // the exact staged versions that already passed (in any worktree: the stamp is in the shared .git) are not tested
