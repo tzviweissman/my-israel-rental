@@ -2,52 +2,53 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 111: 1. The job, in one line
-- 116: 2. What the AI gets, and the only facts it may use
-- 149: 3. Hard rules (checked: a page breaking one is thrown away and remade)
-- 186: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
-- 228: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
-- 296: 3b. The category checklist (from the Inspo study)
-- 335: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 468: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 563: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
-- 700: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 765: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 936: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
-- 1232: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 1270: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 1385: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 1464: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 1496: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 1523: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 1569: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 1606: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1680: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1705: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1742: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1859: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
-- 1880: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1951: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
-- 2036: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 2146: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 2238: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 2263: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 2303: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2480: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2507: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2572: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2589: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2635: 4. What is reported to the owner instead (content gaps)
-- 2644: 5. How to write
-- 2693: 5a. Lessons from the practice pages
-- 2722: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2771: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2788: 6. Playbooks for the most common businesses
-- 2908: 7. Choosing the three options (automatic page builder only)
-- 2932: 8. Photos, video and the tools
-- 3158: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3226: 9. The scroll sections: what the practice pages become
-- 3261: 10. Open decisions (need Tzvi)
+- 112: 1. The job, in one line
+- 117: 2. What the AI gets, and the only facts it may use
+- 150: 3. Hard rules (checked: a page breaking one is thrown away and remade)
+- 187: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
+- 229: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
+- 297: 3b. The category checklist (from the Inspo study)
+- 336: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 469: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 564: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
+- 701: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 766: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 937: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
+- 1233: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 1271: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 1386: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 1465: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 1497: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 1524: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 1570: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 1607: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1681: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1706: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1743: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1860: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
+- 1881: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1952: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+- 2037: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 2147: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 2239: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 2264: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 2304: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 2481: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2508: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2573: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2590: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2636: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2656: 4. What is reported to the owner instead (content gaps)
+- 2665: 5. How to write
+- 2714: 5a. Lessons from the practice pages
+- 2743: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2792: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2809: 6. Playbooks for the most common businesses
+- 2929: 7. Choosing the three options (automatic page builder only)
+- 2953: 8. Photos, video and the tools
+- 3179: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3247: 9. The scroll sections: what the practice pages become
+- 3282: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2631,6 +2632,26 @@ other's), 14 a closing band, and 21 of 24 home pages had no rhythm. They are lef
 
 Every new build also gets `screens.jpg` in its folder at each publish check (`scripts/screen-strip.mjs`: the home page
 screen by screen at 1280x800), which is the picture a review of 3ad starts from.
+
+## 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+
+Tzvi, from the 17 Nov videos: "make things go from one page into the next". Our sections all stop at a straight edge,
+so even with 3ad's rhythm the page reads as a stack of boxes. Real sites tie neighbouring parts together. Of the ways
+offered, Tzvi chose two. Not asked of a site published before 18 Nov 2026 (rule-dates.mjs); when the check first ran,
+only Aidy Yaniv and Clean Plus had anything across a line, and no site had an object that travels.
+
+1. **Something crosses the line.** At least one picture, film or object sits across the line between two neighbouring
+   sections, at least 48 px into each: a jar standing half on a dark band and half on the light one under it, a photo
+   card hanging below its section into the next, a cut-out product overlapping the seam. It is the business's own
+   thing (a real product, a real photo), not a decoration. On a phone it may come back inside its section if crossing
+   would cover words (3s.27). Mark a non-picture object `data-cross` to have it counted. Checked by
+   `scripts/check-seams.mjs` (CROSS) at 1366x800.
+2. **One object travels with you.** One element, the business's own (the product from the opening, a balloon, the
+   coffee cup, a cleaning spray), goes down the page with the visitor: it stays in view for at least a screen and a
+   half of scroll and reaches another section, moving, turning or changing size as it goes (it may land in a place of
+   its own there, such as the order box). It is marked `data-travel`. It never covers words or buttons (3h.25) and
+   holds still under reduced motion. Planned in CONCEPT.md's `## Body` on a `- travels:` line (what, from which
+   section, to which). Checked by `scripts/check-seams.mjs` (TRAVEL); that it moves well is a LOOK.
 
 ## 4. What is reported to the owner instead (content gaps)
 

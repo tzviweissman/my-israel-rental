@@ -6,14 +6,14 @@ Sections (line each starts on; read with that offset):
 - 70: 1. Facts and words
 - 101: 2. Opening
 - 170: 3. Sections and worlds
-- 229: 4. Photos and media
-- 259: 5. Prices and savings
-- 281: 6. Order and booking flow
-- 307: 7. Motion
-- 336: 8. Phone
-- 352: 8b. From the seven videos, part two (29 Oct 2026)
-- 374: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 385: 9. Finish
+- 231: 4. Photos and media
+- 261: 5. Prices and savings
+- 283: 6. Order and booking flow
+- 309: 7. Motion
+- 338: 8. Phone
+- 354: 8b. From the seven videos, part two (29 Oct 2026)
+- 376: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 387: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -225,6 +225,8 @@ R3ad.4 | Planned before any layout: each home section named for the business's o
 R3ad.1 | At least two sections after the opening take a form only this business could have, shaped by its own data or main task (not a card grid in new colours), each on a "- signature:" line (its #id, what the visitor does or sees, and from: what data or task) in CONCEPT.md "## Body" | 3ad.1 | script: `node scripts/check-signature-body.mjs <build>` plus LOOK that each is this business's own
 R3ad.2 | The menu bar, steps and closing band are written for this site, not the starter's markup in new colours (60% or more of a part's classed elements shared with a live page fails) | 3ad.2, 3p.1 | script: `node scripts/check-body-alike.mjs <build>`
 R3ad.3 | The home page has a rhythm after the opening: two or more changes of ground, one headline at least 1.6x the others, one edge-to-edge picture or film or a collage of different sizes | 3ad.3, 3v.6 | script: `node scripts/check-rhythm.mjs <urls>`
+R3ae.1 | At least one of the business's own pictures, films or objects sits across the line between two neighbouring home sections, 48 px or more into each | 3ae.1 | script: `node scripts/check-seams.mjs <urls>` (CROSS)
+R3ae.2 | One object of the business's own, marked data-travel and planned on a "- travels:" line in CONCEPT.md "## Body", stays in view for a screen and a half of scroll and reaches another section, never covering words | 3ae.2, 3h.25 | script: `node scripts/check-seams.mjs <urls>` (TRAVEL) plus LOOK that it moves well
 
 ## 4. Photos and media
 

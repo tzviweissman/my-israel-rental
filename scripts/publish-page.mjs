@@ -170,6 +170,8 @@ const CHECK_ONLY = process.argv.includes('--check');
     ['check-phone-opening.mjs', 'holds the scroll with its phone opening', 'R3ac.1'],
     // the home page has a rhythm: grounds change, one headline jumps in size, one section opens edge to edge (Tzvi, 17 Nov 2026, rules 3ad.3)
     ['check-rhythm.mjs', 'has a home page with no rhythm (one ground, one heading size, no edge-to-edge section)', 'R3ad.3'],
+    // one part leads into the next: something crosses a section line, one object travels down with you (Tzvi, 18 Nov 2026, rules 3ae)
+    ['check-seams.mjs', 'has a home page where nothing crosses a section line or travels with the visitor', 'R3ae.1'],
     // the page as an iPhone shows it: Safari's engine, where a film led only by seeking stands still (Tzvi, 14 Nov 2026, rules 3aa.30)
     ['check-iphone.mjs', 'breaks or stands still on an iPhone', 'R3aa.30'],
     // Correctness, so no rule date: they run on every site, however old (Tzvi, 12 Nov 2026: "these issues shouldnt

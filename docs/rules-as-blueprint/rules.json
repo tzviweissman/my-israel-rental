@@ -3277,6 +3277,28 @@
    "confirmed_by": "check-rhythm -> confirm only",
    "gremier_retry": false,
    "status": "planned"
+  },
+  {
+   "id": "R3ae.1",
+   "rule": "One of the business's own pictures or objects crosses the line between two home sections, 48 px into each",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Section plan names the object and the seam it crosses before build",
+   "confirmed_by": "check-seams CROSS -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ae.2",
+   "rule": "One object of the business's own (data-travel, '- travels:' in CONCEPT.md) goes down the page with the visitor for 1.5 screens into another section",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "CONCEPT.md ## Body '- travels:' line planned before build",
+   "confirmed_by": "check-seams TRAVEL -> confirm only, LOOK for the motion",
+   "gremier_retry": false,
+   "status": "planned"
   }
  ]
 }
