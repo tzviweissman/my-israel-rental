@@ -75,7 +75,9 @@ Between changes the product still lives (sways, bobs, turns a little), so the fi
 
 During the action, at most one big word or one short line per beat, slammed or wiped in on the beat (the flavour's
 name, BEAT THE HEAT). The headline, the offer and the foot arrive on the last frame. Everything reads with the sound
-off; there is no voice and no paragraph.
+off; there is no voice and no paragraph. The name, link and QR are not on screen during the action (a small logo may
+stay): with them there from the first frame, L.A. Cholent and American Crust read as posters with an effect (18 Nov
+2026). Until the last beat the screen is the product and the action (p107, n06 in the motion library).
 
 ## M7. One colour world per beat, the whole screen
 
@@ -97,7 +99,8 @@ the chicken; that was found after a full recording.
 ## M9. It loops
 
 A GIF and a story loop. The last frame leads back into the first: the same ground colour, or the product in the
-same place, so the restart reads as one more beat and not as a jump cut.
+same place, so the restart reads as one more beat and not as a jump cut. Best of all, the loop is itself the action:
+the cake slice is eaten bite by bite and is whole again (p107), the cup empties popper by popper and refills.
 
 ## M10. Real things move as real footage
 
@@ -114,3 +117,18 @@ MP4 where a video is taken and keep the GIF (540 wide) for chats.
 
 `node scripts/new-moving-ad.mjs <name> <slug>` for a free idea, `--tap` for flavours or varieties
 (`docs/ads/gen/_kit/tap.html`), `--clip` to lay a generated clip under the words. Sizes are not a tap (M1).
+
+## M13. Someone does something to the product (Tzvi, 18 Nov 2026)
+
+In Chicken Munch and American Crust nobody acts: sauce falls, or words appear. The ones people remember have an actor:
+a drawn stick man climbs into a real rice bowl and dances (d09), a finger taps the bag to change the flavour (t02). A
+hand, a person or a small drawn character living on the real photo does the thing: a doodle sneaks poppers out of the
+cup one at a time. Never a generated customer (A5.4). The blueprint names the actor and what it does (A10.15).
+
+## M14. Several shots, not one locked picture (Tzvi, 18 Nov 2026)
+
+L.A. Cholent's eight frames (`docs/ads/la-cholent-moving-frames.jpg`) are one table; only the words change. A product
+that is made, cooked or used in steps is shown in two to four shots, each its own picture: the grill, the cheese
+melting, the burger landing (d01); pack to pan to plate (n04). For L.A. Cholent: the tub tipped into the pot, steam
+under the lid, a full bowl served. Each shot is the same product (one-look-per-product), cut on a beat. One locked
+picture is allowed only when the idea is one continuous action in it (a pour, a build, a morph) (A10.16).

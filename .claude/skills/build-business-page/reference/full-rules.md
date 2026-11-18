@@ -2,53 +2,54 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 117: 1. The job, in one line
-- 122: 2. What the AI gets, and the only facts it may use
-- 155: 3. Hard rules (checked: a page breaking one is thrown away and remade)
-- 192: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
-- 234: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
-- 302: 3b. The category checklist (from the Inspo study)
-- 341: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 474: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 569: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
-- 706: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 771: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 942: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
-- 1238: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 1276: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 1391: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 1470: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 1502: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 1529: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 1575: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 1612: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1686: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1711: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1748: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1865: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
-- 1886: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1957: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
-- 2042: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 2152: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 2244: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 2269: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 2309: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2486: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2513: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2578: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2595: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2641: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2661: 4. What is reported to the owner instead (content gaps)
-- 2670: 5. How to write
-- 2719: 5a. Lessons from the practice pages
-- 2748: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2797: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2814: 6. Playbooks for the most common businesses
-- 2934: 7. Choosing the three options (automatic page builder only)
-- 2958: 8. Photos, video and the tools
-- 3184: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3252: 9. The scroll sections: what the practice pages become
-- 3287: 10. Open decisions (need Tzvi)
+- 118: 1. The job, in one line
+- 123: 2. What the AI gets, and the only facts it may use
+- 156: 3. Hard rules (checked: a page breaking one is thrown away and remade)
+- 193: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
+- 235: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
+- 303: 3b. The category checklist (from the Inspo study)
+- 342: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 475: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 570: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
+- 707: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 772: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 943: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
+- 1239: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 1277: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 1392: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 1471: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 1503: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 1530: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 1576: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 1613: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1687: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1712: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1749: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1866: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
+- 1887: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1958: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+- 2043: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 2153: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 2245: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 2270: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 2310: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 2487: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2514: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2579: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2596: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2642: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2662: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2692: 4. What is reported to the owner instead (content gaps)
+- 2701: 5. How to write
+- 2750: 5a. Lessons from the practice pages
+- 2779: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2828: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2845: 6. Playbooks for the most common businesses
+- 2965: 7. Choosing the three options (automatic page builder only)
+- 2989: 8. Photos, video and the tools
+- 3215: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3283: 9. The scroll sections: what the practice pages become
+- 3318: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2657,6 +2658,36 @@ only Aidy Yaniv and Clean Plus had anything across a line, and no site had an ob
    its own there, such as the order box). It is marked `data-travel`. It never covers words or buttons (3h.25) and
    holds still under reduced motion. Planned in CONCEPT.md's `## Body` on a `- travels:` line (what, from which
    section, to which). Checked by `scripts/check-seams.mjs` (TRAVEL); that it moves well is a LOOK.
+
+## 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+
+Tzvi asked for sites "more unique and memorable and to look more like a real website like the best of our inspo".
+Beside the best food sites in `docs/inspo/awwwards-food-2026-10-18`, Clean Plus could be any cleaner or a software
+company (blue icon cards, "Your plan in three steps"), Elisheva never shows her or speaks in her voice, her work is a
+tidy grid, and Chicken Munch's seven styles are a grey word list. Four things the best do. Not asked of a site published
+before 18 Nov 2026 (rule-dates.mjs). Each is planned in CONCEPT.md's `## Body` before layout and judged by LOOK.
+
+1. **One mark of their own runs through the site.** One drawn detail taken from the business's own logo or product (Clean
+   Plus's sparkle, a bun's sesame seed, a balloon's knot), or a small mascot drawn from them, appears in at least three
+   parts of the site doing a job: the bullets, the pointer or chosen state, the dividers, the empty state, the order
+   confirmation. Burrito Madre's two characters own every page (`burrito-madre-3-mascot-loyalty.webp`); Buck's Sauce
+   puts antlers on everything (`bucks-sauce-3-choose-weapon-outline.webp`). Planned on a `- mark:` line (what, from
+   which part of the logo, the places it appears). Never a stock icon set in the brand colour.
+2. **The owner speaks, signed, with real faces.** A short note in the owner's own words (three sentences or so, asked of
+   them, never written for them, 1.1), signed with their name, beside their real photo and photos of the place or the
+   customers, set like a letter: Pizza Amici's "Ciao!" letter with stamp-edged photos (`pizza-amici-1-letter-and-stamps.webp`).
+   When the owner has not given the words or a photo, it is a content gap (section 4), asked for, never filled with
+   invented words. Planned on a `- owner:` line (the words' source and the photos).
+3. **Their photos you can play with.** When the site has four or more photos of the business's own work, at least one
+   set is laid loose instead of a tidy grid: tilted, overlapping prints or polaroids with a handwritten label (the shade,
+   the dish), that can be dragged or tapped to flip and show what it is and its price (Sunbeam Bagels,
+   `sunbeam-bagels-3-polaroid-collage.webp`). On a phone a tap flips, nothing needs a drag, and nothing covers words
+   (3s.27); under reduced motion it holds still. Planned on a `- loose:` line.
+4. **Each product has its own card and personality.** When the business sells three or more kinds, styles or flavours,
+   each gets its own card in its own colour (taken from that product, 3g.19), its own cut-out picture and one line of
+   character, under a heading in the business's voice ("Choose your weapon", Buck's Sauce). Never a grey list of names
+   with one photo that swaps. Planned on a `- cards:` line (each product, its colour, its line), or "- cards: n/a" for a
+   business with fewer than three.
 
 ## 4. What is reported to the owner instead (content gaps)
 

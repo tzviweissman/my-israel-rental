@@ -2,39 +2,41 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 66: 0. The one idea
-- 84: 1. Anatomy: three layers, in this order
-- 106: 2. The headline carries the ad
-- 129: 3. The picture
-- 156: 4. The body: points, price, proof
-- 185: 5. Honesty: what an ad may never do
-- 211: 6. Words are kept apart from the picture
-- 226: 7. Variations: test different ideas, not different commas
-- 239: 8. Making it work on a phone
-- 267: 9. What this means for the ad maker
-- 301: 9b. Standing out (12 more videos, 1 Nov 2026)
-- 371: 9c. How ads are worded (12 more videos, 1 Nov 2026)
-- 400: 9d. Ideas, not layouts (1,194 Pinterest ads, 2 Nov 2026)
-- 424: 9e. What the best ads share (second look, 2 Nov 2026)
-- 487: 9f. Three more videos (4 Nov 2026)
-- 548: 9h. What makes it look designed (Tzvi, 6 Nov 2026: "can we make the ads better")
-- 554: 9g. Three more videos: why an ad catches the eye (4 Nov 2026)
-- 599: 10. What to discount from the videos
-- 618: Sources
-- 653: 11. Moving ads (Tzvi, 6 Nov 2026)
-- 667: 12. Never bland (Tzvi, 8 Nov 2026)
-- 675: 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
-- 683: 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
-- 699: 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
-- 711: 16. The headline says the offer (Tzvi, 10 Nov 2026)
-- 721: 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
-- 737: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
-- 749: 19. A 5 every time (Tzvi, 10 Nov 2026)
-- 760: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
-- 776: 21. The drawing is kept (Tzvi, 16 Nov 2026)
-- 783: 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
-- 791: 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
-- 808: 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
+- 68: 0. The one idea
+- 86: 1. Anatomy: three layers, in this order
+- 108: 2. The headline carries the ad
+- 131: 3. The picture
+- 158: 4. The body: points, price, proof
+- 187: 5. Honesty: what an ad may never do
+- 213: 6. Words are kept apart from the picture
+- 228: 7. Variations: test different ideas, not different commas
+- 241: 8. Making it work on a phone
+- 269: 9. What this means for the ad maker
+- 303: 9b. Standing out (12 more videos, 1 Nov 2026)
+- 373: 9c. How ads are worded (12 more videos, 1 Nov 2026)
+- 402: 9d. Ideas, not layouts (1,194 Pinterest ads, 2 Nov 2026)
+- 426: 9e. What the best ads share (second look, 2 Nov 2026)
+- 489: 9f. Three more videos (4 Nov 2026)
+- 550: 9h. What makes it look designed (Tzvi, 6 Nov 2026: "can we make the ads better")
+- 556: 9g. Three more videos: why an ad catches the eye (4 Nov 2026)
+- 601: 10. What to discount from the videos
+- 620: Sources
+- 655: 11. Moving ads (Tzvi, 6 Nov 2026)
+- 669: 12. Never bland (Tzvi, 8 Nov 2026)
+- 677: 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
+- 685: 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
+- 701: 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
+- 713: 16. The headline says the offer (Tzvi, 10 Nov 2026)
+- 723: 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
+- 739: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
+- 751: 19. A 5 every time (Tzvi, 10 Nov 2026)
+- 762: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
+- 778: 21. The drawing is kept (Tzvi, 16 Nov 2026)
+- 785: 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
+- 793: 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
+- 810: 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
+- 820: 25. Every listing photo in an ad is clean (Tzvi, 17 Nov 2026)
+- 829: 26. Memorable, not one template (Tzvi, 18 Nov 2026: "All ten")
 <!-- /contents -->
 
 The rules for every still advert MyIsraelRental makes: the ad maker on the
@@ -823,4 +825,25 @@ screenshot with its chat icon and black bars, and a peeling wall that was a "bef
 by eye. So before a layout, every listing photo an ad uses is looked at and cut to its subject: no phone number, email
 or person's name, no screenshot edges or app icons, no other logo or certificate, and never a "before" photo without its
 "after". A photo that cannot be cut clean is left out and the ad says which.
+
+## 26. Memorable, not one template (Tzvi, 18 Nov 2026: "All ten")
+
+Tzvi: improvements should make the ads themselves "more unique and memorable". Side by side
+(`docs/ads/*-vs-pros.jpg`), Chicken Munch, M and N Jewelry and L.A. Cholent were one template: a small italic line,
+giant capitals, the product in the middle, a dark ground, a block of small text and the QR at the foot. The 24 best ads
+in `docs/inspo/pinterest-ads-2026-11-02/best-of.jpg` have 24 layouts. Three things they do that ours did not:
+
+1. **Each business gets its own look** (A11.9). The ad starts from the business's own colour (its logo, product or
+   storefront) and a layout none of its earlier ads and none of our last five ads used; the blueprint lists those ads
+   and says how this one differs. The foot shrinks to the logo, one line, and the link with its QR (still 150px, A8.6),
+   never a block of four small lines.
+2. **The product takes another thing's place** (A11.10). The product sits where a familiar object belongs, so the
+   picture is a small puzzle: a plate of food in a ring box ("Will you.... get biriyani with me", best-of.jpg), cholent
+   tubs wrapped as a Shabbos gift. Not a ring in a ring box, which has nothing to work out. A paid ad without one says
+   why in the blueprint.
+3. **A hand or a person acts** (A11.11). Something human does the thing: a hand lifts one popper out of the cup, offers
+   the box, a painted figure leans out of its frame to spray (best-of.jpg, Cleaning). Generated people are never shown as
+   customers (A5.4); a hand, a figure in a drawing, or the owner's own photo is fine.
+
+Moving ads take the same three, plus their own in `docs/moving-ad-rules.md` M6, M9, M13 and M14.
 

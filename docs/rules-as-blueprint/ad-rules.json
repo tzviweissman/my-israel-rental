@@ -960,6 +960,51 @@
    "confirmed_by": "the blueprint answer, looked at by eye",
    "retried": false,
    "status": "planned"
+  },
+  {
+   "id": "A11.9",
+   "rule": "Each business's ad has its own colour and a layout none of its earlier ads or our last five used; a small foot",
+   "how": ["ASK"],
+   "built_by": "docs/static-ad-rules.md section 26",
+   "confirmed_by": "the blueprint answer, ad-vs-pros sheet looked at by eye",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A11.10",
+   "rule": "The product takes a familiar object's place, so the picture is a small puzzle",
+   "how": ["ASK"],
+   "built_by": "docs/static-ad-rules.md section 26",
+   "confirmed_by": "the blueprint answer, looked at by eye",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A11.11",
+   "rule": "A hand or a person acts on the product, never a generated customer",
+   "how": ["ASK"],
+   "built_by": "docs/static-ad-rules.md section 26",
+   "confirmed_by": "the blueprint answer, looked at by eye",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A10.15",
+   "rule": "In a moving ad someone (a hand, a person, a drawn character) does something to the product",
+   "how": ["ASK"],
+   "built_by": "docs/moving-ad-rules.md M13",
+   "confirmed_by": "moving-ad-vs-library.py sheet looked at by eye",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A10.16",
+   "rule": "A moving ad for a product made in steps shows two to four shots, not one locked picture",
+   "how": ["ASK"],
+   "built_by": "docs/moving-ad-rules.md M14",
+   "confirmed_by": "moving-ad-vs-library.py sheet looked at by eye",
+   "retried": false,
+   "status": "planned"
   }
  ]
 }

@@ -3299,6 +3299,42 @@
    "confirmed_by": "check-seams TRAVEL -> confirm only, LOOK for the motion",
    "gremier_retry": false,
    "status": "planned"
+  },
+  {
+   "id": "R3af.1",
+   "rule": "One drawn mark from the business's own logo or product does a job in three or more parts of the site",
+   "how": ["GEN"],
+   "built_by": "CONCEPT.md ## Body '- mark:' line planned before build",
+   "confirmed_by": "LOOK",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3af.2",
+   "rule": "The owner speaks in a short signed note beside their real photos; missing words are a content gap",
+   "how": ["ASK"],
+   "built_by": "CONCEPT.md ## Body '- owner:' line; the owner asked for the words and a photo",
+   "confirmed_by": "LOOK",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3af.3",
+   "rule": "With four or more work photos, one set is laid loose and flips or drags to show what it is",
+   "how": ["GEN"],
+   "built_by": "CONCEPT.md ## Body '- loose:' line planned before build",
+   "confirmed_by": "LOOK at laptop and phone, reduced motion on",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3af.4",
+   "rule": "Three or more kinds each get their own colour card, cut-out picture and one line of character",
+   "how": ["GEN"],
+   "built_by": "CONCEPT.md ## Body '- cards:' line planned before build",
+   "confirmed_by": "LOOK",
+   "gremier_retry": false,
+   "status": "planned"
   }
  ]
 }

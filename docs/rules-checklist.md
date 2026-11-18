@@ -6,14 +6,14 @@ Sections (line each starts on; read with that offset):
 - 70: 1. Facts and words
 - 101: 2. Opening
 - 170: 3. Sections and worlds
-- 231: 4. Photos and media
-- 261: 5. Prices and savings
-- 283: 6. Order and booking flow
-- 309: 7. Motion
-- 338: 8. Phone
-- 354: 8b. From the seven videos, part two (29 Oct 2026)
-- 376: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 387: 9. Finish
+- 235: 4. Photos and media
+- 265: 5. Prices and savings
+- 287: 6. Order and booking flow
+- 313: 7. Motion
+- 342: 8. Phone
+- 358: 8b. From the seven videos, part two (29 Oct 2026)
+- 380: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 391: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -227,6 +227,10 @@ R3ad.2 | The menu bar, steps and closing band are written for this site, not the
 R3ad.3 | The home page has a rhythm after the opening: two or more changes of ground, one headline at least 1.6x the others, one edge-to-edge picture or film or a collage of different sizes | 3ad.3, 3v.6 | script: `node scripts/check-rhythm.mjs <urls>`
 R3ae.1 | At least one of the business's own pictures, films or objects sits across the line between two neighbouring home sections, 48 px or more into each | 3ae.1 | script: `node scripts/check-seams.mjs <urls>` (CROSS)
 R3ae.2 | One object of the business's own, marked data-travel and planned on a "- travels:" line in CONCEPT.md "## Body", stays in view for a screen and a half of scroll and reaches another section, never covering words | 3ae.2, 3h.25 | script: `node scripts/check-seams.mjs <urls>` (TRAVEL) plus LOOK that it moves well
+R3af.1 | One drawn mark taken from the business's own logo or product (or a mascot drawn from them) appears in three or more parts of the site doing a job (bullets, pointer, chosen state, dividers, confirmation), planned on a "- mark:" line in CONCEPT.md "## Body"; never a stock icon set | 3af.1 | LOOK: the mark in each place listed on the "- mark:" line, laptop and phone
+R3af.2 | The owner speaks: a short note in their own words, signed with their name, beside their real photo and photos of the place or customers, planned on a "- owner:" line; missing words or photo are a content gap, never invented | 3af.2, 1.1 | LOOK: the note's words against what the owner gave
+R3af.3 | With four or more photos of their own work, one set is laid loose (tilted, overlapping, labelled by hand) and can be dragged or tapped to flip to what it is and its price; a tap is enough on a phone, still under reduced motion, planned on a "- loose:" line | 3af.3, 3s.27 | LOOK: tap and drag at laptop and phone, reduced motion on
+R3af.4 | Three or more kinds, styles or flavours: each on its own card in its own colour from that product, with its own cut-out picture and one line of character, planned on a "- cards:" line; never a grey list of names | 3af.4, 3g.19 | LOOK: the cards against the "- cards:" line
 
 ## 4. Photos and media
 
