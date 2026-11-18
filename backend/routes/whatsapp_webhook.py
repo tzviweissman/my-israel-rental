@@ -63,7 +63,16 @@ async def receive_webhook(request: Request):
         body = await request.json()
         for entry in body.get("entry") or []:
             for change in entry.get("changes") or []:
-                for msg in (change.get("value") or {}).get("messages") or []:
+                value = change.get("value") or {}
+                # Meta "accepts" every send, then reports a failed delivery
+                # only here (18 Nov 2026: a test alert never arrived and the
+                # reason was thrown away). Code and title only, no phone.
+                for st in value.get("statuses") or []:
+                    if st.get("status") == "failed":
+                        err = (st.get("errors") or [{}])[0]
+                        logger.warning("WhatsApp delivery failed: %s %s %s", err.get("code"), err.get("title"),
+                                       (err.get("error_data") or {}).get("details", ""))
+                for msg in value.get("messages") or []:
                     try:
                         await _handle_message(msg)
                     except Exception as exc:  # noqa: BLE001

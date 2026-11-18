@@ -105,6 +105,17 @@ def test_handshake():
             assert e.value.status_code == 403
 
 
+def test_failed_delivery_is_logged_without_the_phone(world):
+    st = {"id": "wamid.9", "status": "failed", "recipient_id": "15550001111",
+          "errors": [{"code": 131049, "title": "Not delivered", "error_data": {"details": "ecosystem"}}]}
+    raw = json.dumps({"entry": [{"changes": [{"value": {"statuses": [st, {"status": "delivered"}]}}]}]}).encode()
+    with patch.object(wh, "logger") as log:
+        assert _post(raw) == {"ok": True}
+    assert log.warning.call_count == 1
+    line = log.warning.call_args.args[0] % log.warning.call_args.args[1:]
+    assert "131049" in line and "ecosystem" in line and "15550001111" not in line
+
+
 def test_bad_signature_is_refused(world):
     with pytest.raises(HTTPException) as e:
         _post(_body("order_confirm:o1"), sig="sha256=bad")
