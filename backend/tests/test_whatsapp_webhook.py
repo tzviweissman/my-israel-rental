@@ -134,6 +134,13 @@ def test_failed_alert_texts_the_owner_once(world):
     texted.assert_awaited_once_with("o1")
 
 
+def test_confirm_reply_links_the_order_page(world):
+    order, customer, text = world
+    order["owner_token"] = "own123"
+    _post(_body("order_confirm:o1"))
+    assert "/orders/owner/own123" in text.await_args.kwargs["body"]
+
+
 def test_bad_signature_is_refused(world):
     with pytest.raises(HTTPException) as e:
         _post(_body("order_confirm:o1"), sig="sha256=bad")

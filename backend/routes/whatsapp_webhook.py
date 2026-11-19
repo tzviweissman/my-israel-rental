@@ -181,13 +181,20 @@ async def _handle_message(msg: dict[str, Any]) -> None:
         await tell_owner("Declined.", "ההזמנה נדחתה.")
         return
 
+    # The order's own page, so the owner marks it ready from WhatsApp (Tzvi, 19 Nov 2026).
+    page = ""
+    if order.get("owner_token"):
+        from routes.marketplace.order_texts import owner_link
+        page = owner_link(order)
+    en_more = f"\nMark it ready here: {page}" if page else ""
+    he_more = f"\nלסימון שהיא מוכנה: {page}" if page else ""
     phone = order.get("customer_phone_e164") or normalize_whatsapp_number(order.get("customer_phone"))
     if phone:
         await send_order_confirmed_to_customer(
             recipient_phone=phone, business_name=biz.get("name") or "",
             track_url=f"{_frontend_url()}/orders/track/{order.get('track_token')}", language="he",
         )
-        await tell_owner(f"Confirmed. {who} was sent their order link.", f"ההזמנה אושרה. {who} קיבל/ה את קישור ההזמנה.")
+        await tell_owner(f"Confirmed. {who} was sent their order link.{en_more}", f"ההזמנה אושרה. {who} קיבל/ה את קישור ההזמנה.{he_more}")
     else:
-        await tell_owner(f"Confirmed. {who} has no phone number, they have the link by email.",
-                         f"ההזמנה אושרה. ל{who} אין מספר טלפון, הקישור נשלח במייל.")
+        await tell_owner(f"Confirmed. {who} has no phone number, they have the link by email.{en_more}",
+                         f"ההזמנה אושרה. ל{who} אין מספר טלפון, הקישור נשלח במייל.{he_more}")
