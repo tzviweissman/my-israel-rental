@@ -13,9 +13,11 @@ while read local_ref local_sha remote_ref remote_sha; do
   case "$remote_sha" in 0000000000000000000000000000000000000000) base="" ;; *) base="$remote_sha" ;; esac
   git cat-file -e "$base" 2>/dev/null || base=""
   node scripts/check-push-rules.mjs "$local_sha" $base || exit 1
-  # Railway's watch paths look only at the LAST commit's own files (CLAUDE.md, Railway deploy):
-  # backend work under a last commit that does not touch backend/ ships nothing, with no error.
-  if [ -n "$base" ] && git cat-file -e "$local_sha^" 2>/dev/null; then
+  # A push whose last commit is a MERGE can skip a side (CLAUDE.md, Railway deploy, 28 Oct 2026):
+  # the merge's own files decide. A plain run of commits is judged as a whole: on 19 Nov 2026
+  # 532858bd (frontend change, then a backend-only last commit) built both, so warn only on a merge.
+  # ponytail: one observed linear push; if a linear push is ever SKIPPED, drop the merge test.
+  if [ -n "$base" ] && git cat-file -e "$local_sha^2" 2>/dev/null; then
     for side in backend frontend; do
       if [ -n "$(git diff --name-only "$base" "$local_sha" -- "$side/")" ] && [ -z "$(git diff --name-only "$local_sha^" "$local_sha" -- "$side/")" ]; then
         echo "" >&2
