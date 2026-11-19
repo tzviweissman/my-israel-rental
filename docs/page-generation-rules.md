@@ -33,24 +33,24 @@ Sections (line each starts on; read with that offset):
 - 2246: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
 - 2271: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
 - 2311: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2547: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2574: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2639: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2656: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2702: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2722: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2752: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2789: 4. What is reported to the owner instead (content gaps)
-- 2798: 5. How to write
-- 2847: 5a. Lessons from the practice pages
-- 2876: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2925: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2942: 6. Playbooks for the most common businesses
-- 3062: 7. Choosing the three options (automatic page builder only)
-- 3086: 8. Photos, video and the tools
-- 3312: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3380: 9. The scroll sections: what the practice pages become
-- 3415: 10. Open decisions (need Tzvi)
+- 2550: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2577: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2642: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2659: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2705: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2725: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2755: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2792: 4. What is reported to the owner instead (content gaps)
+- 2801: 5. How to write
+- 2850: 5a. Lessons from the practice pages
+- 2879: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2928: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2945: 6. Playbooks for the most common businesses
+- 3065: 7. Choosing the three options (automatic page builder only)
+- 3089: 8. Photos, video and the tools
+- 3315: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3383: 9. The scroll sections: what the practice pages become
+- 3418: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2536,8 +2536,11 @@ part where one exists, so it is there without being remembered.
     any still is shown, `python scripts/inspo-beside.py <inspo picture> <still>` puts it beside that picture at the same
     height, and a `shot_seen` line in the brief says what was compared on the five points. `python
     scripts/check-light-pool.py <stills> [--soft]` fails a picture whose edges are not darker than its middle (5); it
-    cannot see 1 to 4, which the side-by-side sheet is for. The film's brightness check (3h) still applies: lift the lit
-    product, never the dark around it (Burnt's low-hero-1-lit.png).
+    cannot see 1 to 4, which the side-by-side sheet is for. For stills it is also the brightness check: the product
+    itself must read 33 of 100 or more, while a dark ground on purpose passes (19 Nov 2026: brightness.py, made for
+    films, failed Burnt's dark-walnut stills, and lifting the walnut to pass it made this check call them flat). A dark
+    product is fixed by lighting the product, never the ground round it (Burnt's iron: its steel lifted from 23 to 36,
+    the walnut left matched to the board scenes). brightness.py stays the check for clips.
     **The approved framing is locked** (19 Nov 2026: room for the words was made by shrinking the approved close-up
     into a wider frame, which put the whole board back in view, the catalogue look 1 bans, and Tzvi: "its not the
     better angle that we discussed"). Once a still's framing is approved, every still of that scene keeps it: room for
