@@ -1984,8 +1984,10 @@ async def _owner_settings_out(biz: dict[str, Any]) -> dict[str, Any]:
     # service listings that also sell products.
     selling = await db.marketplace_gigs.find_one(
         {"business_id": biz["_id"], "status": "published", "$or": [{"gig_type": "store"}, {"products.0": {"$exists": True}}]},
-        {"whatsapp": 1, "provider_user_id": 1},
+        {"whatsapp": 1, "provider_user_id": 1, "products": 1, "images": 1},
     )
+    # One real product for the message preview on the texts page: the photo the WhatsApp alert would carry.
+    sample = next((p for p in _products_for_order(selling) if p.get("image")), None) if selling else None
     from .order_texts import texts_on
     from .order_emails import emails_on
     return {**_settings_out(biz, await _store_of(biz["_id"])), "pause": pause_of(biz), "text_on": texts_on(biz),
@@ -1994,6 +1996,8 @@ async def _owner_settings_out(biz: dict[str, Any]) -> dict[str, Any]:
             "text_templates": (biz.get("order_settings") or {}).get("text_templates") or {},
             "auto_confirm": bool((biz.get("order_settings") or {}).get("auto_confirm")),
             "business_name": biz.get("name") or "", "business_name_he": biz.get("name_he") or "",
+            "logo_url": biz.get("logo_url") or "",
+            "sample_product": {k: sample.get(k) for k in ("name", "image", "price", "currency")} if sample else None,
             "text_defaults": TEXT_DEFAULTS,
             # Emails (order_emails.py): on unless switched off; the account's address unless another is chosen.
             "email_on": emails_on(biz), "email_to": (biz.get("order_settings") or {}).get("email_to") or "",

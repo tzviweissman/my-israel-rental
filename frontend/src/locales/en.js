@@ -8129,6 +8129,7 @@ const en = {
         done: "All done. Enjoy, and thank you for ordering.",
       },
       orderTexts: {
+        pv: { title: "See what gets sent", hint: "A sample order, with your words and your own line. It changes as you type.", who: "Who gets it", how: "How it arrives", customer: "Your customer", you: "You", text: "Text", email: "Email", confirm: "Confirm", decline: "Decline", track: "Track your order", decide: "Confirm or decline", yourBusiness: "Your business", item: "Family box" },
         title: "Texts and emails",
         pickBusiness: "Which business?",
         saved: "Saved",

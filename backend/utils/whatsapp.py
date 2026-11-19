@@ -425,9 +425,12 @@ async def send_new_order_notification(
         # Meta fetches the header itself, so only a public https picture.
         if order_id and photo_tpl and (photo_url or "").startswith("https://"):
             header = {"type": "header", "parameters": [{"type": "image", "image": {"link": photo_url}}]}
-            return await _send_meta_template(
+            sent = await _send_meta_template(
                 meta, recipient_phone, "he" if he else "en", params, template=photo_tpl,
                 buttons=buttons, header=header)
+            # Refused (19 Nov 2026: 131037 on the photo one while the plain one went): the plain alert, not a text.
+            if sent or not confirm_tpl:
+                return sent
         if order_id and confirm_tpl:
             return await _send_meta_template(
                 meta, recipient_phone, "he" if he else "en", params, template=confirm_tpl,

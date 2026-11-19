@@ -15,6 +15,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Check, Loader2, X } from 'lucide-react';
 import TextTemplatesEditor from './TextTemplatesEditor';
+import MessagePreview from './MessagePreview';
 
 export default function TextNotificationsPanel({ API, token, businessId, onClose }) {
   const { t } = useTranslation();
@@ -199,12 +200,7 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
                  className="px-2 min-h-[40px] rounded-lg border text-sm bg-white w-full" style={fieldStyle} dir="auto"
                  placeholder={t('orderTexts.notePlaceholder', 'For example: Pickup at Farn 5, ring the bell')} data-testid="settings-text-note-input" />
           <p className="text-[11px] mt-1 text-end" style={{ color: 'var(--brand-muted)' }}>{note.length}/80</p>
-          {note.trim() && (
-            <div className="mt-1 rounded-xl px-3 py-2 text-[13px] whitespace-pre-line" style={{ background: 'var(--surface-alt, #F9FAFB)', color: 'var(--ink)' }} dir="auto" data-testid="settings-text-preview">
-              <span className="block text-[11px] font-semibold mb-0.5" style={{ color: 'var(--brand-muted)' }}>{t('orderTexts.preview', 'What your customer gets')}</span>
-              {t('orderTexts.previewText', 'Your order #1042 is confirmed. Your tracking link: myisraelrental.com/…')}{'\n'}{note.trim()}
-            </div>
-          )}
+          <MessagePreview loaded={loaded} templates={templates} note={note} />
           <TextTemplatesEditor defaults={loaded.text_defaults} templates={templates} setTemplates={setTemplates}
                                businessName={loaded.business_name} businessNameHe={loaded.business_name_he} />
         </div>
