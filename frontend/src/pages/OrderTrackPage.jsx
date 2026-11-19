@@ -195,6 +195,14 @@ export default function OrderTrackPage() {
             <p className="text-xs font-semibold mb-2" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.makingTitle', 'Your order, being made')}</p>
             <a href={data.making_photo_url} target="_blank" rel="noopener noreferrer"><img src={data.making_photo_url} alt={t('orders.track.makingAlt', 'Photo of your order being made')} className="w-full rounded-xl object-cover aspect-[4/3] max-h-72" /></a>
             {data.making_photo_note && <p className="text-sm mt-2" style={{ color: 'var(--ink)' }} dir="auto" data-testid="track-making-note">{data.making_photo_note}</p>}
+            {/* One tap back to the business (orders.py like_making_photo); no sign-in. */}
+            <button type="button" disabled={data.making_photo_liked}
+              onClick={() => { setData((d) => ({ ...d, making_photo_liked: true })); axios.post(`${API}/marketplace/orders/track/${encodeURIComponent(token)}/making-photo/like`).catch(() => setData((d) => ({ ...d, making_photo_liked: false }))); }}
+              className="mt-3 inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold border disabled:opacity-100"
+              style={data.making_photo_liked ? { borderColor: 'transparent', background: '#E6F4EA', color: '#2E7D4F' } : { borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
+              data-testid="track-making-like">
+              {data.making_photo_liked ? t('orders.track.likedPhoto', 'Thanks, the business will see it') : t('orders.track.likePhoto', 'Looks great 👍')}
+            </button>
           </section>
         )}
         {data.delivered_photo_url && (

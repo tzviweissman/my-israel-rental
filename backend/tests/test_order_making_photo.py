@@ -102,3 +102,20 @@ def test_not_on_a_closed_order(owner, business):
                        headers=_auth(owner), timeout=30)
     assert r.status_code == 200, r.text
     assert _send(owner, o["id"], PHOTO).status_code == 400
+
+
+def test_the_customer_can_like_the_photo(owner, business):
+    o = _order(owner, business)
+    full = requests.get(f"{BASE}/marketplace/businesses/{business}/orders",
+                        params={"from": "2031-06-06", "to": "2031-06-06"}, headers=_auth(owner), timeout=30).json()
+    tok = next(x for x in full["orders"] if x["id"] == o["id"])["track_token"]
+    like = f"{BASE}/marketplace/orders/track/{tok}/making-photo/like"
+    assert requests.post(like, timeout=30).status_code == 404  # no photo yet
+    assert _send(owner, o["id"], PHOTO).status_code == 200
+    assert requests.post(like, timeout=30).status_code == 200
+    assert requests.post(like, timeout=30).status_code == 200  # twice is fine
+    assert _track(owner, business, o["id"])["making_photo_liked"] is True
+    assert requests.post(f"{BASE}/marketplace/orders/track/not-a-real-token-123/making-photo/like", timeout=30).status_code == 404
+    # A new photo starts fresh.
+    assert _send(owner, o["id"], PHOTO).status_code == 200
+    assert _track(owner, business, o["id"])["making_photo_liked"] is False

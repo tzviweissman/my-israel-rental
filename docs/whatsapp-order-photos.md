@@ -13,6 +13,8 @@ It is a button the business chooses to press, so nothing changes for a business 
 
 The business can add one line under the photo ("Fresh out of the oven", up to 120 letters). It shows under the photo on the tracking page. The WhatsApp template has no slot for it.
 
+Under the photo the customer has one button, **Looks great 👍**, with no sign-in (19 Nov 2026). It shows "The customer liked your photo 👍" on the business's order card. A new photo starts fresh. Route: `POST /marketplace/orders/track/{token}/making-photo/like`.
+
 Submit it with the form, as described in `docs/whatsapp-order-confirm.md`, because it has an image header. After approval, set `WHATSAPP_TEMPLATE_ORDER_MAKING=order_making` on the backend.
 
 The code: `send_making_photo` in `backend/routes/marketplace/orders.py` (`POST /marketplace/orders/{id}/making-photo`, for the owner or staff with orders access, open orders only, and only photos uploaded through the app). Also `send_order_making_to_customer` in `backend/utils/whatsapp.py`, the button in `frontend/src/components/dashboard/OrderCard.jsx`, and the photo in `frontend/src/pages/OrderTrackPage.jsx`.

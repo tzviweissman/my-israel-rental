@@ -1699,6 +1699,23 @@ async def _assign_unassigned(business_id: str) -> int:
 # — the step it is at — and, for a delivery, the line the spec requires:
 # the delivery person will see your number to reach you.
 
+@router.post("/orders/track/{token}/making-photo/like")
+async def like_making_photo(token: str, request: Request):
+    """The customer's one-tap "Looks great" on the business's photo of their
+    order (19 Nov 2026). No sign-in: the tracking link is the key. Shown on
+    the business's order card. Tapping again changes nothing."""
+    check_rate(request, bucket="orders_track", limit=300, window_seconds=600)
+    if not token or len(token) < 16:
+        raise HTTPException(status_code=404, detail="This link is not valid")
+    res = await db.store_orders.update_one(
+        {"track_token": token, "making_photo.url": {"$exists": True}, "making_photo.liked_at": {"$exists": False}},
+        {"$set": {"making_photo.liked_at": _now_iso()}})
+    if not res.modified_count and not await db.store_orders.find_one(
+            {"track_token": token, "making_photo.url": {"$exists": True}}, {"_id": 1}):
+        raise HTTPException(status_code=404, detail="This link is not valid")
+    return {"liked": True}
+
+
 @router.get("/orders/track/{token}")
 async def track_order(token: str, request: Request):
     check_rate(request, bucket="orders_track", limit=300, window_seconds=600)
@@ -1741,6 +1758,7 @@ async def track_order(token: str, request: Request):
         # The business's photo of it being made (send_making_photo).
         "making_photo_url": (o.get("making_photo") or {}).get("url") if o.get("status") != "cancelled" else None,
         "making_photo_note": (o.get("making_photo") or {}).get("note") if o.get("status") != "cancelled" else None,
+        "making_photo_liked": bool((o.get("making_photo") or {}).get("liked_at")),
         "window": o.get("window"),
         "lines": o.get("lines"),
         # The same order again, once this one is done (reorder_path).

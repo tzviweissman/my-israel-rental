@@ -1,5 +1,12 @@
 #!/bin/sh
 # What goes to main must not have a site answering a rule its own rules list lacks (scripts/check-push-rules.mjs).
+# Low disk (18 Nov 2026: 0 bytes free stopped commits, a push copy and the local database).
+free_gb=$(df -Pk . 2>/dev/null | awk 'NR==2 {print int($4/1048576)}')
+if [ -n "$free_gb" ] && [ "$free_gb" -lt 5 ]; then
+  echo "" >&2
+  echo "WARNING: only ${free_gb} GB free on this disk. A push copy needs a few GB, and at 0 commits and the local database stop." >&2
+  echo "  See what takes space: git worktree list (old copies), then ask Tzvi which to remove (node scripts/remove-worktree.mjs <path>)." >&2
+fi
 while read local_ref local_sha remote_ref remote_sha; do
   [ "$remote_ref" = "refs/heads/main" ] || continue
   case "$local_sha" in 0000000000000000000000000000000000000000) continue ;; esac

@@ -308,6 +308,7 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
               <button type="button" disabled={busy} onClick={() => photoRef.current?.click()} className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-making-photo">
                 <Camera size={12} /> {o.making_photo ? t('orders.makingPhotoAgain', 'Send another photo') : t('orders.makingPhoto', 'Send the customer a photo')}
               </button>
+              {o.making_photo?.liked_at && <span className="inline-flex items-center px-3 min-h-[44px] text-xs font-semibold" style={{ color: '#2E7D4F' }} data-testid="order-making-liked">{t('orders.makingLiked', 'The customer liked your photo 👍')}</span>}
             </>
           )}
           {o.track_token && o.customer_phone_e164 && (() => {
