@@ -235,7 +235,7 @@ R3af.4 | Three or more kinds, styles or flavours: each on its own card in its ow
 R3ag.1 | Product photos look shot for a shop: one plain ground, one soft light, no foil, counter, hand or flash; owner phone photos re-lit with relight_photo.py, each checked beside the original with product-match-sheet.py, all to the same ground | 3ag.1, 3c.12 | LOOK: the photo sheet beside the originals
 R3ag.2 | Every product sold with its price is a card led by its photo, 200 px or wider at a laptop, never a small thumbnail beside a list | 3ag.2 | script: `node scripts/check-look.mjs <home url>` (SMALL)
 R3ag.3 | The home page's sections use two grounds taking turns, three at most | 3ag.3, 3ad.3 | script: `node scripts/check-look.mjs <home url>` (GROUNDS)
-R3ag.4 | The opening's words sit beside or under the product photo on their own ground, never on a panel over it; the photo whole | 3ag.4, 3g.13 | LOOK: 1366x800 and 390x844
+R3ag.4 | The opening photo fills the screen (3h.1) with the product whole, extended on its plain side, and the words stand on that plain ground, never on a panel over the product | 3ag.4, 3h.1, 3c.12 | LOOK: 1366x800 and 390x844
 R3ag.5 | Every section headline is one size with a small label above it; the only other size is 3ad.3's one jump | 3ag.5 | script: `node scripts/check-look.mjs <home url>` (HEADINGS)
 R3ag.6 | Before review, compare.jpg puts screens.jpg beside two top sites of the same category, and REFERENCES.md has a ## Compared part naming each difference and what changed | 3ag.6 | script: `node scripts/check-compared.mjs <build>`
 

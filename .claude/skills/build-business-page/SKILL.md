@@ -73,6 +73,11 @@ your reply, either "every check passes" or the problems it listed.
 2. **Look at every photo.** Duplicates, screenshots, small sizes, kinds (§3o.6,
    §3o.7). A big photo of the wrong shape is extended with
    `scrollcraft/starter/extend_photo.py`, never zoomed or cropped (§0b.2b, rules 3c.12).
+   Mark each photo shop-ready or not (§3ag.1): the rest are re-lit first
+   (`relight_photo.py`), then extended. The first screen must be at least 70%
+   picture (3h.1, `check-site` OPENING), so plan now which opening photos get
+   a plain side for the words (§3ag.4); a box beside the words fails (Cakes by
+   Tova, 17 and 19 Nov 2026: the opening was built twice, then a third time).
 3. **Ask the owner, once, then build while waiting.** Only about their
    business: missing facts, more photos, guarantee (§3j.1), FAQ with 5 to 8
    example questions (§3b.4), per-item choices for similar products (§3l.1),

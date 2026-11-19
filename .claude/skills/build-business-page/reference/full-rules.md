@@ -40,17 +40,17 @@ Sections (line each starts on; read with that offset):
 - 2690: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
 - 2710: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
 - 2740: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2775: 4. What is reported to the owner instead (content gaps)
-- 2784: 5. How to write
-- 2833: 5a. Lessons from the practice pages
-- 2862: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2911: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2928: 6. Playbooks for the most common businesses
-- 3048: 7. Choosing the three options (automatic page builder only)
-- 3072: 8. Photos, video and the tools
-- 3298: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3366: 9. The scroll sections: what the practice pages become
-- 3401: 10. Open decisions (need Tzvi)
+- 2777: 4. What is reported to the owner instead (content gaps)
+- 2786: 5. How to write
+- 2835: 5a. Lessons from the practice pages
+- 2864: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2913: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2930: 6. Playbooks for the most common businesses
+- 3050: 7. Choosing the three options (automatic page builder only)
+- 3074: 8. Photos, video and the tools
+- 3300: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3368: 9. The scroll sections: what the practice pages become
+- 3403: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2759,10 +2759,12 @@ them. The fixes, made on her site the same day, are the rule. Not asked of a sit
    as one), and they alternate, light and dark: Tova's cream and her card's charcoal. Her page had six (cream, white
    cards, ice blue, blush, charcoal, blush) and every section looked like a different site. Accent colours stay on
    buttons and small marks. 3ad.3's two changes of ground still hold. Checked by `scripts/check-look.mjs` (GROUNDS).
-4. **The opening shows the product whole, with nothing laid over it.** The headline sits on its own ground beside or
-   under the product photo, never in a panel over it: on a laptop words at one side, the photo whole at the other; on a
-   phone the photo first, then the words. 3g.13 (first screen) and the 40% phone rule still hold. LOOK, at 1366x800
-   and 390x844.
+4. **The opening shows the product whole, with nothing laid over it.** The photo still fills the screen (3h.1, at
+   least 70% picture), and the headline stands on the photo's own plain ground, never in a panel over the product:
+   extend the photo on its plain side (`extend_photo.py`, 3c.12) so a laptop has the product whole at one side and
+   plain cloth, table or wall at the other for the words, and a phone has the product on top and the plain ground
+   under it. A box beside the words fails 3h.1 (Cakes by Tova, 19 Nov 2026, tried it first: check-site OPENING, 32%
+   picture). 3g.13 and the 40% phone rule still hold. LOOK, at 1366x800 and 390x844.
 5. **One headline size.** Every section's headline is one size, with a small label above it (Tova's ribbon:
    "Chanukah", "From abroad"), and 3ad.3's one jump is the only other size. Hers were 36, 36, 76 and 52 px, and it read
    as untidy. Checked by `scripts/check-look.mjs` (HEADINGS: at most 2 sizes within 3 px).

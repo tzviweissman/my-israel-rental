@@ -1261,8 +1261,8 @@ Full text: reference/full-rules.md section 3ag; the picture in docs/inspo/compar
 check and still looked worse than real bakery sites. (1) Product photos look shot for a shop: plain ground, soft
 light, no foil, counter or flash; re-light the owner's photos with relight_photo.py, check each with
 product-match-sheet.py. (2) Every priced product is a big photo card, 200 px+ at a laptop (check-look SMALL).
-(3) Two grounds taking turns, three at most (check-look GROUNDS). (4) The opening's words beside or under the product
-photo, never on a panel over it. (5) One headline size with a small label above, plus 3ad.3's one jump (check-look
+(3) Two grounds taking turns, three at most (check-look GROUNDS). (4) The opening photo still fills the screen (3h.1),
+extended on its plain side, and the words stand on that plain ground, never on a panel over the product. (5) One headline size with a small label above, plus 3ad.3's one jump (check-look
 HEADINGS). (6) Before review: compare.jpg (compare-sheet.mjs) and a `## Compared` part in REFERENCES.md
 (check-compared). New sites only.
 
