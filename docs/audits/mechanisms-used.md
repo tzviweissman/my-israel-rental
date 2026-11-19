@@ -157,3 +157,4 @@ which is a different report type). Flagged as documentation drift, same as the
 2026-11-16 - fresh start effect - Clean Plus booking, first-day field
 2026-11-17 - self-reference effect - sign-up card headline
 2026-11-18 - concreteness effect - American Crust pickup bundle card (shop.html)
+2026-11-19 - operational transparency (labour illusion) - order card, photo button while preparing (OrderCard.jsx)
