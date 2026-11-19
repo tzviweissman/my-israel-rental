@@ -53,6 +53,24 @@ async def designed_site_tap(slug_or_id: str, body: TapIn, request: Request):
     return Response(status_code=204)
 
 
+# Taps that are someone getting in touch, counted the same on the owner's dashboard and on the admin People tab
+# (Tzvi, 19 Nov 2026: admin said 44, the owner's page said 4). A standard listing page's WhatsApp button is a
+# lead_events whatsapp_click; a designed site's buttons are site_taps.
+CONTACT_KINDS = ["whatsapp", "phone", "email"]
+
+
+async def contact_taps(owner_id: str | None, since: datetime | None) -> int:
+    who = {} if owner_id is None else {"$or": [{"owner_id": owner_id}, {"provider_id": owner_id}, {"poster_id": owner_id}]}
+    lead_q: dict[str, Any] = {"type": "whatsapp_click", **who}
+    site_q: dict[str, Any] = {"kind": {"$in": CONTACT_KINDS}}
+    if owner_id is not None:
+        site_q["owner_id"] = owner_id
+    if since is not None:
+        lead_q["created_at"] = {"$gte": since.replace(tzinfo=None).isoformat()}
+        site_q["at"] = {"$gte": since}
+    return await db.lead_events.count_documents(lead_q) + await db.site_taps.count_documents(site_q)
+
+
 def _rows(counts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [{"key": r["_id"], "n": r["n"]} for r in sorted(counts, key=lambda r: -r["n"]) if r["_id"] not in (None, "")]
 
@@ -101,6 +119,8 @@ async def visits_breakdown(days: int = Query(30, ge=1, le=365), everyone: bool =
         {"$match": match}, {"$group": {"_id": "$page", "n": {"$sum": "$n"}}}, {"$sort": {"n": -1}}, {"$limit": 10},
     ]).to_list(10)
     back = {r["_id"]: r["n"] for r in f.get("returning") or []}
+    owner = None if (everyone and user.get("role") == "admin") else user["user_id"]
+    since = datetime.now(UTC) - timedelta(days=days)
     return {
         "days": days,
         "visits": (f.get("total") or [{"n": 0}])[0]["n"],
@@ -113,5 +133,7 @@ async def visits_breakdown(days: int = Query(30, ge=1, le=365), everyone: bool =
         "taps": _rows(taps),
         "buttons": _rows(buttons),
         "pages": _rows(pages),
+        "contact_taps": await contact_taps(owner, since),
+        "contact_taps_all": await contact_taps(owner, None),
         "listings": await _names(f.get("listings") or []),
     }

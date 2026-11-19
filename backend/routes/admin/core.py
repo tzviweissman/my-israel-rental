@@ -404,13 +404,16 @@ async def get_admin_metrics_by_user(
     # site_taps rather than lead_events. Leaving them out made the table
     # look like it only covered rentals (Tzvi, 12 Nov 2026).
     other_taps: dict = {}
+    contact_more: dict = {}  # calls and emails; with WhatsApp, the owner's "contact taps" (visit_data.contact_taps)
     async for row in db.site_taps.aggregate([
         {"$match": view_q},
-        {"$group": {"_id": {"o": "$owner_id", "wa": {"$eq": ["$kind", "whatsapp"]}}, "n": {"$sum": 1}}},
+        {"$group": {"_id": {"o": "$owner_id", "k": "$kind"}, "n": {"$sum": 1}}},
     ]):
-        uid = row["_id"]["o"]
-        bucket = taps if row["_id"]["wa"] else other_taps
+        uid, kind = row["_id"].get("o"), row["_id"].get("k")
+        bucket = taps if kind == "whatsapp" else other_taps
         bucket[uid] = bucket.get(uid, 0) + row["n"]
+        if kind in ("phone", "email"):
+            contact_more[uid] = contact_more.get(uid, 0) + row["n"]
 
     scans = await _qr_scans_by_owner(range)
 
@@ -439,6 +442,7 @@ async def get_admin_metrics_by_user(
             "businesses": biz_names.get(uid, []),
             "whatsapp_clicks": taps.get(uid, 0),
             "other_taps": other_taps.get(uid, 0),
+            "contact_taps": taps.get(uid, 0) + contact_more.get(uid, 0),
             "visitors": visitors.get(uid, 0),
             "qr_scans": scans.get(uid, 0),
         })

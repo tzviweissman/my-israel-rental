@@ -190,8 +190,8 @@ const AccountPanel = ({ u, h, stats, onClose, actions, busyItem, resendingId, t 
           <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2">
             <Stat label={t('admin.statListings', 'Listings')} value={h.listings.length} sub={t('admin.nLive', '{{n}} live', { n: liveListings })} />
             <Stat label={t('admin.statServices', 'Services')} value={h.services.length} sub={t('admin.nLive', '{{n}} live', { n: liveServices })} />
-            <Stat label={t('admin.statTaps', 'WhatsApp taps')} value={(stats?.whatsapp_clicks || 0) + (stats?.other_taps || 0)} />
-            <Stat label={t('admin.byPersonColVisitors', 'Visitors')} value={stats?.visitors || 0} />
+            <Stat label={t('admin.statContactTaps', 'Taps to WhatsApp, call or email, last 30 days')} value={stats?.contact_taps || 0} />
+            <Stat label={t('admin.statVisitors30', 'Visitors, last 30 days')} value={stats?.visitors || 0} />
           </div>
 
           {h.businesses.length > 0 && (
@@ -268,7 +268,7 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
   // Each person's businesses, listings and services.
   const { data: holdings, refresh: fetchHoldings } = useApiSWR(`${API}/admin/users/holdings`, token, { initial: {} });
   // All-time taps and visitors per person, the same numbers as Demand by person.
-  const { data: demand } = useApiSWR(`${API}/admin/metrics/by-user?range=all&limit=5000`, token, { initial: { rows: [] } });
+  const { data: demand } = useApiSWR(`${API}/admin/metrics/by-user?range=30d&limit=5000`, token, { initial: { rows: [] } });
   const statsBy = useMemo(() => Object.fromEntries((demand?.rows || []).map((r) => [r.user_id, r])), [demand]);
   const [busyItem, setBusyItem] = useState('');
   const [restoringId, setRestoringId] = useState('');
@@ -463,7 +463,7 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
             <tr>
               <th className="px-4 py-3 text-start text-xs font-semibold text-gray-600 uppercase">{t('admin.colPerson', 'Person')}</th>
               <th className="hidden sm:table-cell px-4 py-3 text-start text-xs font-semibold text-gray-600 uppercase">{t('admin.colOwns', 'Owns')}</th>
-              <th className="hidden sm:table-cell px-4 py-3 text-start text-xs font-semibold text-gray-600 uppercase">{t('admin.colDemand', 'Demand')}</th>
+              <th className="hidden sm:table-cell px-4 py-3 text-start text-xs font-semibold text-gray-600 uppercase">{t('admin.colDemand30', 'Demand, 30 days')}</th>
               <th className="hidden sm:table-cell px-4 py-3 text-start text-xs font-semibold text-gray-600 uppercase">{t('admin.colJoined')}</th>
               <th className="px-4 py-3" aria-hidden="true" />
             </tr>
@@ -509,8 +509,8 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
                   </td>
                   <td className="hidden sm:table-cell px-4 py-3 align-top">
                     <div className="flex items-center gap-3">
-                      <Count Icon={MessageCircle} n={(s?.whatsapp_clicks || 0) + (s?.other_taps || 0)} label={t('admin.statTaps', 'WhatsApp taps')} />
-                      <Count Icon={Users} n={s?.visitors || 0} label={t('admin.byPersonColVisitors', 'Visitors')} />
+                      <Count Icon={MessageCircle} n={s?.contact_taps || 0} label={t('admin.statContactTaps', 'Taps to WhatsApp, call or email, last 30 days')} />
+                      <Count Icon={Users} n={s?.visitors || 0} label={t('admin.statVisitors30', 'Visitors, last 30 days')} />
                     </div>
                   </td>
                   <td className="hidden sm:table-cell px-4 py-3 text-sm text-gray-500 align-top">{fmtDate(u.created_at)}</td>

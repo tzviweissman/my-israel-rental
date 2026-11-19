@@ -55,6 +55,11 @@ export default function VisitBreakdown({ API, token, everyone = false, className
         {t('visits.total', '{{n}} visits', { n: d.visits })}
         {d.since ? ` · ${t('visits.since', 'details counted from {{date}}', { date: new Date(`${d.since}T12:00:00`).toLocaleDateString(i18n.language?.startsWith('he') ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'long' }) })}` : ''}
       </p>
+      {d.contact_taps_all > 0 && (
+        <p className="mb-4 rounded-lg px-3 py-2 text-sm" style={{ background: 'var(--surface-muted)', color: 'var(--ink)' }} data-testid="visits-contact-taps">
+          {t('visits.contactTaps', 'People tapped to WhatsApp, call or email you {{n}} times in the last {{days}} days, and {{all}} times in all.', { n: d.contact_taps, days: d.days, all: d.contact_taps_all })}
+        </p>
+      )}
       {!everyone && fromOrders > 0 && (
         <p className="mb-4 rounded-lg px-3 py-2 text-sm" style={{ background: 'var(--accent-soft)', color: 'var(--ink)' }} data-testid="visits-from-orders">
           {t('visits.fromOrders', { count: fromOrders, defaultValue: "{{count}} visits came from other businesses' order pages on MyIsraelRental." })}
