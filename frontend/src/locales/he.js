@@ -308,6 +308,7 @@ const he = {
           makingTitle: 'ההזמנה שלך בהכנה',
           likePhoto: 'נראה מעולה 👍',
           likedPhoto: 'תודה, העסק יראה את זה',
+          makingTitleDone: 'ההזמנה שלך בזמן ההכנה',
           makingAlt: 'תמונה של ההזמנה שלך בהכנה',
           reviewAsk: 'איך הייתה ההזמנה?',
           reviewButton: 'כתיבת ביקורת',

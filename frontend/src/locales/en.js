@@ -322,6 +322,7 @@ const en = {
           makingTitle: 'Your order, being made',
           likePhoto: 'Looks great 👍',
           likedPhoto: 'Thanks, the business will see it',
+          makingTitleDone: 'Your order, as it was made',
           makingAlt: 'Photo of your order being made',
           reviewAsk: 'How was your order?',
           reviewButton: 'Write a review',
