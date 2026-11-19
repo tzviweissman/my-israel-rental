@@ -61,6 +61,9 @@ let webpackConfig = {
 };
 
 webpackConfig.devServer = (devServerConfig) => {
+  // NO_RELOAD=1: a page open for a long check is never reloaded by another session's edits
+  // (scripts/check-ad-designs.mjs starts its own server this way; 19 Nov 2026).
+  if (process.env.NO_RELOAD === '1') { devServerConfig.hot = false; devServerConfig.liveReload = false; }
   // Add health check endpoints if enabled
   if (config.enableHealthCheck && setupHealthEndpoints && healthPluginInstance) {
     const originalSetupMiddlewares = devServerConfig.setupMiddlewares;

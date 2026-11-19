@@ -1,4 +1,9 @@
 #!/bin/sh
 # Every business site a commit touches must pass its rule checks (scripts/pre-commit-check.mjs).
 # Turned on per clone with: git config core.hooksPath .githooks
+# Low disk warns before it stops anything (18 Nov 2026: 0 bytes free stopped a push mid-copy; pre-push warns at 5).
+free_gb=$(df -Pk . 2>/dev/null | awk 'NR==2 {print int($4/1048576)}')
+if [ -n "$free_gb" ] && [ "$free_gb" -lt 10 ]; then
+  echo "WARNING: only ${free_gb} GB free on this disk. Old copies whose work is on main: node scripts/remove-worktree.mjs --stale (lists, deletes nothing); show Tzvi the list before --stale --yes." >&2
+fi
 exec node scripts/pre-commit-check.mjs

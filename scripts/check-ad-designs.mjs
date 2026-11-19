@@ -4,7 +4,8 @@
  * (docs/ad-rules-checklist.md): text size, nothing cut off, story safe areas, the QR, one price, copy rules.
  * Every word drawn on the picture is recorded as it is drawn, so a rule cannot pass by being read from the code.
  *
- * Needs the local servers: frontend on :3210 and the API on :8001 (DEV_AUTOLOGIN=1). The words come from
+ * Needs the local API on :8001 (DEV_AUTOLOGIN=1). Starts its own frontend on a free port that never reloads,
+ * so other sessions' edits cannot break the run; --port 3210 uses a server already running. The words come from
  * scripts/fixtures, so this spends no API credit. Local dev business: any the owner has.
  *
  *   node scripts/check-ad-designs.mjs [--only behind,chat] [--pictures <folder>] [--port 3210]
@@ -19,7 +20,25 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace
 const arg = (n) => { const i = process.argv.indexOf(n); return i > 0 ? process.argv[i + 1] : null; };
 const only = arg('--only') ? new Set(arg('--only').split(',')) : null;
 const pictures = arg('--pictures');
-const SITE = `http://localhost:${arg('--port') || 3210}`;
+const SITE = `http://localhost:${arg('--port') || await ownServer()}`;
+// A private dev server (19 Nov 2026: edits by other sessions reloaded the shared :3210 mid-run and failed it twice).
+async function ownServer() {
+  const net = await import('node:net');
+  const { spawn, execSync } = await import('node:child_process');
+  const port = await new Promise((ok) => { const s = net.createServer().listen(0, () => { const q = s.address().port; s.close(() => ok(q)); }); });
+  const child = spawn('npm --prefix frontend start', { cwd: ROOT, shell: true, stdio: 'ignore',
+    env: { ...process.env, PORT: String(port), BROWSER: 'none', NO_RELOAD: '1' } });
+  child.unref();
+  process.on('exit', () => { try { execSync(process.platform === 'win32' ? `taskkill /pid ${child.pid} /T /F` : `kill -- -${child.pid}`, { stdio: 'ignore' }); } catch {} });
+  for (const s of ['SIGINT', 'SIGTERM']) process.on(s, () => process.exit(1));
+  console.log(`Starting a private frontend on :${port} ...`);
+  for (let i = 0; i < 100; i++) {
+    await new Promise((r) => setTimeout(r, 3000));
+    if (child.exitCode !== null) { console.error('The private frontend stopped while starting.'); process.exit(1); }
+    try { if ((await fetch(`http://localhost:${port}/`)).ok) return port; } catch {}
+  }
+  console.error('The private frontend did not start in 5 minutes.'); process.exit(1);
+}
 if (pictures) fs.mkdirSync(pictures, { recursive: true });
 const fixture = (l) => JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts', 'fixtures', `ad-maker-${l}.json`), 'utf8'));
 const MIN_TEXT = 30;

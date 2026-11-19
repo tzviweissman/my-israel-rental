@@ -385,6 +385,8 @@ const lightColour = (c) => {
 };
 function keyLine(ctx, line, x, y, key, accent, keyFont) {
   if (PARTS && PARTS.stats) PARTS.stats.strips = true;
+  // The headline's own face and colours, so the owner's extra line is set in the design's style (extras()).
+  if (PARTS && !PARTS.headStyle) PARTS.headStyle = { font: ctx.font, ink: String(ctx.fillStyle), accent: accent || null };
   if (PARTS && PARTS.strips) { stripLine(ctx, line, x, y, key, accent || ctx.fillStyle, keyFont); return; }
   const at = key && accent ? line.indexOf(key) : -1;
   if (at < 0) { ctx.fillText(line, x, y); return; }
@@ -1798,6 +1800,7 @@ function drawCalling(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, i
     ctx.beginPath();
     ctx.arc(bx, btnY, btnR, 0, Math.PI * 2);
     ctx.fill();
+    if (PARTS) PARTS.texts.push([bx - btnR, btnY - btnR, btnR * 2, btnR * 2]); // kept clear like words (extras())
     ctx.strokeStyle = '#FFFFFF';
     ctx.lineWidth = Math.round(btnR * 0.17);
     ctx.lineCap = 'round';
@@ -3041,28 +3044,47 @@ function extras(canvas, a) {
     });
   }
   // The owner's own line, on any design (Tzvi, 18 Nov 2026: "doesnt allow businesses to write their own words or
-  // add another line"). A white label above the foot (and above a review), movable like every other piece.
+  // add another line"). Above the foot (and above a review), movable like every other piece. Set in the headline's
+  // face on a label of the headline's accent colour (19 Nov: a plain white label looked pasted on), white when the
+  // design gives no headline style.
   const extra = (a.words?.extra || '').trim();
   if (extra) {
-    ctx.font = `700 34px ${body}`;
+    const hs = PARTS && PARTS.headStyle;
+    const face = (hs && /\d+(?:\.\d+)?px\s*(.+)$/.exec(hs.font)?.[1]) || (PARTS && PARTS.font) || headFont(a.rtl);
+    const ground = (hs && /^#[0-9a-f]{6}$/i.test(hs.accent || '') && hs.accent) || (hs && /^#[0-9a-f]{6}$/i.test(hs.ink) && hs.ink) || '#FFFFFF';
+    const lum = (c) => { const n = parseInt(c.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
+    const word = lum(ground) > 0.6 ? INK : '#FFFFFF';
+    const eFont = `800 34px ${face}`;
+    ctx.font = eFont;
     ctx.direction = dirOf(extra, a.rtl);
     const lines = wrap(ctx, extra, W * 0.74, 2);
     const w = Math.max(...lines.map((l) => ctx.measureText(l).width)) + 56;
     const h = 30 + lines.length * 44;
     const x = (W - w) / 2;
     const rvBox = PARTS && PARTS.boxes.review;
-    const y = (rvBox ? rvBox[1] - 16 : footTopOf(a.format, H) - 24) - h;
+    // Where it covers the least of every word and piece already drawn (a design's own buttons too), nearest to
+    // just above the foot: any word it would cover counts most, then the area of pieces (the product a third, a background photo a tenth).
+    const ov = (b, by) => Math.max(0, Math.min(x + w, b[0] + b[2]) - Math.max(x, b[0]) + 8) * Math.max(0, Math.min(by + h, b[1] + b[3]) - Math.max(by, b[1]) + 8);
+    const boxes = Object.entries((PARTS && PARTS.boxes) || {}).filter(([nm]) => nm !== 'extra' && nm !== 'logo');
+    const cost = (by) => ((PARTS && PARTS.texts) || []).reduce((t, b) => t + (ov(b, by) > 0 ? 1e7 : 0), 0)
+      + boxes.reduce((t, [nm, b]) => t + ov(b, by) * (nm.startsWith('product') ? 0.3 : nm === 'photo' ? 0.1 : 1), 0);
+    const y0 = (rvBox ? rvBox[1] - 16 : footTopOf(a.format, H) - 24) - h;
+    let y = y0;
+    for (let by = y0, best = cost(y0); by > (story ? 236 : H * 0.15) && best > 0; by -= 12) {
+      const c = cost(by);
+      if (c < best) { best = c; y = by; }
+    }
     part(ctx, 'extra', [x, y, w, h], () => {
-      ctx.fillStyle = '#FFFFFF';
+      ctx.fillStyle = ground;
       ctx.shadowColor = 'rgba(0,0,0,.22)';
       ctx.shadowBlur = 18;
       ctx.beginPath();
       ctx.roundRect(x, y, w, h, 22);
       ctx.fill();
       ctx.shadowColor = 'transparent';
-      ctx.fillStyle = INK;
+      ctx.fillStyle = word;
       ctx.textAlign = 'center';
-      ctx.font = `700 34px ${body}`;
+      ctx.font = eFont;
       lines.forEach((l, i) => ctx.fillText(l, x + w / 2, y + 50 + i * 44));
     });
   }

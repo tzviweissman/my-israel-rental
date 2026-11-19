@@ -123,7 +123,7 @@ if (staged.some((f) => /^(frontend\/src\/components\/(dashboard\/AdMaker|admin\/
   // another session's unsaved AdMaker edit no longer blocks a rules-only commit (16 Nov 2026, it did twice).
   const drawing = staged.some((f) => /^frontend\/src\/(components\/(dashboard\/AdMaker|admin\/AdStudio)\.jsx|utils\/sharpCanvas\.js)$/.test(f));
   if (drawing && !stagedIsMeasured(ROOT)) {
-    console.error('Commit refused: the ad drawing changed since it was last measured. With the local servers up, run: node scripts/check-ad-designs.mjs (then stage the same files).');
+    console.error('Commit refused: the ad drawing changed since it was last measured. With the local API up, run: node scripts/check-ad-designs.mjs (it starts its own frontend) (then stage the same files).');
     process.exit(1);
   }
 }
