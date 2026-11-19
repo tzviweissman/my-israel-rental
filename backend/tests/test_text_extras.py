@@ -163,6 +163,26 @@ def test_review_text_once_and_only_with_switch_on(world):
     assert world.sent.await_count == 1
 
 
+def test_review_opens_warmer_after_the_customer_liked_the_photo(world):
+    world.db.store_orders.docs[0]["making_photo"] = {"url": "https://res.cloudinary.com/x.jpg", "liked_at": "2026-11-19T10:00:00"}
+    run(ot.text_review_order(world.db.store_orders.docs[0]))
+    body = world.sent.await_args.kwargs["body"]
+    assert body.startswith("You loved the photo, how was the order from Blazin Boards?") and "/orders/track/" in body
+
+
+def test_photo_not_liked_keeps_the_normal_review_text(world):
+    world.db.store_orders.docs[0]["making_photo"] = {"url": "https://res.cloudinary.com/x.jpg"}
+    run(ot.text_review_order(world.db.store_orders.docs[0]))
+    assert world.sent.await_args.kwargs["body"].startswith("Thanks for choosing Blazin Boards!")
+
+
+def test_business_own_review_wording_wins_over_the_warmer_one(world):
+    world.biz["order_settings"]["text_templates"] = {"review": {"en": "Rate us please:"}}
+    world.db.store_orders.docs[0]["making_photo"] = {"url": "https://res.cloudinary.com/x.jpg", "liked_at": "2026-11-19T10:00:00"}
+    run(ot.text_review_order(world.db.store_orders.docs[0]))
+    assert world.sent.await_args.kwargs["body"].startswith("Rate us please:")
+
+
 def test_booking_review_goes_to_its_status_page(world):
     run(ot.text_review_booking(world.booking))
     assert "/bookings/track/" + "k" * 22 in world.sent.await_args.kwargs["body"]

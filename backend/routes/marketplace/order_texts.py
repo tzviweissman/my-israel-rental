@@ -182,6 +182,10 @@ TEMPLATES: dict[str, dict[str, str]] = {
     # Off until the business writes one: the answer to a customer's reply (needs the reply number).
     "auto_reply": {"en": "", "he": ""},
 }
+# The review request when the customer liked the photo of their order being
+# made (orders.py like_making_photo). Not in TEMPLATES: not one the business edits.
+REVIEW_AFTER_LIKE = {"en": "You loved the photo, how was the order from {business}? Leave a quick review here:",
+                     "he": "אהבת את התמונה, איך הייתה ההזמנה מ{business}? אפשר להשאיר ביקורת קצרה כאן:"}
 PLACEHOLDERS = ("customer", "business", "order", "service", "when", "time")
 
 
@@ -537,6 +541,11 @@ async def _review_text(coll: str, doc: dict[str, Any], biz: dict[str, Any], phon
     vals = {"business": _biz_name(biz, lang), "customer": doc.get("customer_name") or doc.get("guest_name") or "",
             "order": order_no(doc) if coll == "store_orders" else ""}
     body = compose(biz, "review", lang, vals, link)
+    own = (((biz.get("order_settings") or {}).get("text_templates") or {}).get("review") or {}).get(lang)
+    if (doc.get("making_photo") or {}).get("liked_at") and not own:
+        # They tapped "Looks great" on the photo of their order being made
+        # (Tzvi, 19 Nov 2026). The business's own wording, if any, still wins.
+        body = f"{REVIEW_AFTER_LIKE[lang].replace('{business}', vals['business'])} {link}"
     await _text(phone, body, biz_id=biz.get("_id"), who="customer", kind=kind, ref_id=doc["_id"],
                 label=order_no(doc) if coll == "store_orders" else "")
 
