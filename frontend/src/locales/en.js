@@ -319,6 +319,7 @@ const en = {
           badLinkTitle: 'This link no longer works',
           photoTitle: 'Delivered {{time}}',
           makingTitle: 'Your order, being made',
+          makingTitleDone: 'Your order, as it was made',
           makingAlt: 'Photo of your order being made',
           reviewAsk: 'How was your order?',
           reviewButton: 'Write a review',
