@@ -33,24 +33,24 @@ Sections (line each starts on; read with that offset):
 - 2246: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
 - 2271: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
 - 2311: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2535: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2562: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2627: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2644: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2690: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2710: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2740: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2777: 4. What is reported to the owner instead (content gaps)
-- 2786: 5. How to write
-- 2835: 5a. Lessons from the practice pages
-- 2864: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2913: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2930: 6. Playbooks for the most common businesses
-- 3050: 7. Choosing the three options (automatic page builder only)
-- 3074: 8. Photos, video and the tools
-- 3300: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3368: 9. The scroll sections: what the practice pages become
-- 3403: 10. Open decisions (need Tzvi)
+- 2547: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2574: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2639: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2656: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2702: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2722: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2752: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2789: 4. What is reported to the owner instead (content gaps)
+- 2798: 5. How to write
+- 2847: 5a. Lessons from the practice pages
+- 2876: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2925: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2942: 6. Playbooks for the most common businesses
+- 3062: 7. Choosing the three options (automatic page builder only)
+- 3086: 8. Photos, video and the tools
+- 3312: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3380: 9. The scroll sections: what the practice pages become
+- 3415: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2416,6 +2416,13 @@ part where one exists, so it is there without being remembered.
     scene shimmering). After every image edit, `scrollcraft/starter/keep_change.py` lays the edit over the untouched
     still only where the change was asked (a box, or the area that really changed), so the stills of one scene share
     every other pixel and a clip between them cannot drift.
+    **One base picture per scene** (Tzvi, 19 Nov 2026, Burnt: "the boards in the pictures dont seem to match", then
+    "the wood doesnt match"). The bare board, the full board and the walnut-only still were three edits of one
+    picture, and each came back with its own grain, colour and edge, so the board changed between steps. A scene's
+    stills come from one base: the emptiest still (the bare board) is the base, the full one is the base with the
+    approved still's food cut out and laid on it, and a still with less in it (the walnut alone) keeps the base's own
+    pixels everywhere but where the object was, the edit's fill there matched in colour to the base round it
+    (Burnt's gen/fire_hero.py). The base is graded once to the approved still's colour, on wood both show bare.
 18. **Feedback where the eye already is.** An Add says "Added" in the basket button and, on a phone, in the bottom bar,
     which then becomes the basket (count, total, Basket); never a message floating over the products.
 19. **Every number from its source.** A saving is worked out from the live prices of the same thing bought in the
@@ -2531,6 +2538,11 @@ part where one exists, so it is there without being remembered.
     scripts/check-light-pool.py <stills> [--soft]` fails a picture whose edges are not darker than its middle (5); it
     cannot see 1 to 4, which the side-by-side sheet is for. The film's brightness check (3h) still applies: lift the lit
     product, never the dark around it (Burnt's low-hero-1-lit.png).
+    **The approved framing is locked** (19 Nov 2026: room for the words was made by shrinking the approved close-up
+    into a wider frame, which put the whole board back in view, the catalogue look 1 bans, and Tzvi: "its not the
+    better angle that we discussed"). Once a still's framing is approved, every still of that scene keeps it: room for
+    the words is made in the words (their size, their place, the dark the shot already has), never by reframing,
+    shrinking or extending the picture. A framing change is a new approval, asked for before any credit.
 
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
 

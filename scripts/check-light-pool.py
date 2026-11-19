@@ -10,7 +10,8 @@ bottom eighths, the left and right tenths). Passes when the ring is at most 0.75
 64 of 255). --soft (a bright brand: a bakery in white, a cleaning service, a kids' shop) asks only for the ring at
 most 0.9 of the middle: a step darker at the edges, never black. Exit 1 on a flat picture.
 Measured on Burnt, 19 Nov 2026: the flat top-down master, middle 99 and ring 103 (FLAT); the low angled one, middle 87
-and ring 47 (pool). The angle itself (low, three-quarter, the product diagonal) is a LOOK line in the checklist."""
+and ring 47 (pool). A tall (phone) frame is skipped: it is its wide still cropped close, the board running
+off both sides, so its edges are board, not ground; the wide still is judged. The angle itself (low, three-quarter, the product diagonal) is a LOOK line in the checklist."""
 import sys
 from pathlib import Path
 
@@ -26,7 +27,10 @@ for a in args:
     files += sorted(f for f in p.iterdir() if f.suffix.lower() in ('.png', '.jpg', '.jpeg', '.webp')) if p.is_dir() else [p]
 bad = 0
 for f in files:
-    im = Image.open(f).convert('L').resize((480, 270) if Image.open(f).width >= Image.open(f).height else (270, 480))
+    im = Image.open(f).convert('L')
+    if im.height > im.width:                # a phone frame is its wide still cropped close: the pool is judged there
+        print(f'phone {f.name}: judged on its wide still'); continue
+    im = im.resize((480, 270))
     W, H = im.size
     mid = ImageStat.Stat(im.crop((W // 4, H // 4, 3 * W // 4, 3 * H // 4))).mean[0]
     parts = [im.crop((0, 0, W, H // 8)), im.crop((0, H - H // 8, W, H)), im.crop((0, 0, W // 10, H)), im.crop((W - W // 10, 0, W, H))]

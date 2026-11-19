@@ -808,6 +808,26 @@
    "status": "built"
   },
   {
+   "id": "R3aa.34",
+   "rule": "The approved framing kept in every still of its scene; room for words made in the words, never by reframing",
+   "how": [
+    "EYE"
+   ],
+   "built_by": "the film brief's Shot line (3aa.33)",
+   "confirmed_by": "LOOK: each still beside the approved one",
+   "status": "built"
+  },
+  {
+   "id": "R3aa.35",
+   "rule": "Every still of one scene from one base picture, the board pixel for pixel the same",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "scrollcraft/builds/burnt-meatboards/gen/fire_hero.py (the worked example)",
+   "confirmed_by": "LOOK: the scene's stills blended in pairs",
+   "status": "built"
+  },
+  {
    "id": "R3bb.1",
    "rule": "Pick at least three small touches from 3bb, named in CONCEPT.md",
    "how": [

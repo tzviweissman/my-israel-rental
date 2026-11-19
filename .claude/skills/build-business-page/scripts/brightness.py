@@ -12,6 +12,12 @@ film averaged 19 and failed; the graded one averages 35. A product that is dark 
 nature (acai, chocolate, coffee) sits near 33 in the middle at best: push it
 further and it turns milky; lighten the ground instead.) Grade up (ffmpeg eq=gamma=...) or
 regenerate with brighter light before building the page.
+
+A tall (phone) frame is measured where its picture is, not on the empty dark kept above it for the words (Tzvi, 19
+Nov 2026, Burnt: the phone stills put the board at the foot of the frame with "We Bring the Fire" on the dark above
+it, as rule 3aa.14 and 3aa.33 ask, and the old middle third, all dark ground, failed every one of them): on a frame
+taller than it is wide, "whole" is its lower 60% and "middle" the middle third across of the rows 45% to 95% down.
+--rows a b (shares of the height) measures any other band, for a layout that puts the product elsewhere.
 """
 import subprocess
 import sys
@@ -36,12 +42,18 @@ def luma(im):
     return ImageStat.Stat(im.convert('L')).mean[0] / 2.55
 
 
+rows = tuple(float(v) for v in sys.argv[sys.argv.index('--rows') + 1:sys.argv.index('--rows') + 3]) if '--rows' in sys.argv else None
 bad, total = [], []
 for f in frames:
     im = Image.open(f)
     w, h = im.size
-    whole = luma(im)
-    mid = luma(im.crop((w // 3, h // 3, 2 * w // 3, 2 * h // 3)))
+    if rows or h > w:                       # a phone frame: where its picture is (see above)
+        r0, r1 = rows or (0.45, 0.95)
+        whole = luma(im.crop((0, int(h * (rows[0] if rows else 0.4)), w, int(h * (rows[1] if rows else 1.0)))))
+        mid = luma(im.crop((w // 3, int(h * r0), 2 * w // 3, int(h * r1))))
+    else:
+        whole = luma(im)
+        mid = luma(im.crop((w // 3, h // 3, 2 * w // 3, 2 * h // 3)))
     total.append(whole)
     if mid < 33 or whole < 22:
         bad.append(f'{f.name}: whole {whole:.0f}, middle {mid:.0f}')
