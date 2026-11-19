@@ -214,3 +214,11 @@ def test_decline_cancels(world):
     assert order["status"] == "cancelled"
     customer.assert_not_awaited()
     assert text.await_args.kwargs["body"] == "Declined."
+
+
+def test_owner_with_a_foreign_number_can_confirm(world):
+    """Meta sends 15166809190 for a US phone: it must match the listing's +1 number."""
+    order, customer, text = world
+    with patch("routes.marketplace.gigs.gig_whatsapp_number", AsyncMock(return_value="+1 516-680-9190")):
+        _post(_body("order_confirm:o1", sender="15166809190"))
+    assert order["status"] == "preparing"

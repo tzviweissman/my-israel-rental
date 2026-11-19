@@ -146,7 +146,9 @@ async def _handle_message(msg: dict[str, Any]) -> None:
         return
     if not await _first_time(msg["id"]):
         return
-    sender = normalize_whatsapp_number(msg.get("from"))
+    # Meta sends full international digits without the "+"; bare digits alone read as Israeli only, which
+    # silently ignored a US owner's Confirm tap (19 Nov 2026).
+    sender = normalize_whatsapp_number("+" + str(msg["from"])) if msg.get("from") else None
     order = await db.store_orders.find_one({"_id": order_id})
     if not sender or not order:
         return
