@@ -512,3 +512,15 @@ Main moved on after PR #24 was opened (the sign-up work stream was rewritten), s
 - [Low] Join form: password placeholder "6+ characters" cut to "6+ charact" at 375 wide (English). First seen 18 Nov 2026 (2026-11-18-ui-audit.md).
 - [Tooling] check-covered.mjs reports Clean Plus booking choices as "under <input>": the radio and tick boxes sit over their own label boxes on purpose; a false alarm, not a page fault. 18 Nov 2026.
 - Still open, re-checked 18 Nov: sign-up headline "Join My Israel Rental" (17 Nov).
+
+## Code review of 18 Nov 2026
+- [Low] Orders: "Send the customer a photo" has no limit, and each tap is one more WhatsApp template message to the customer once WHATSAPP_TEMPLATE_ORDER_MAKING is set (`orders.py` send_making_photo, ~line 1383). Off until the template is approved. First seen 18 Nov 2026 (2026-11-18-site-audit.md).
+- [Low] Tooling: `scripts/live-db-read.py` runs `railway` with a list and `shell=True`, which works on Windows but drops every argument on Mac and Linux, so it always says "Could not get the live database address". First seen 18 Nov 2026 (2026-11-18-site-audit.md).
+- [Decision] Privacy: `scripts/live-db-read.py` hides passwords, tokens and secrets but prints customers' phones, emails and addresses in full into the session. First seen 18 Nov 2026 (2026-11-18-site-audit.md).
+- Still open, 18 Nov: audit sandbox could not start MongoDB or Playwright (since 15 Oct), so the endpoint tests skipped again.
+## UI audit of 19 Nov 2026
+- [Low] Order card: the photo's note box squeezed to about 200px between unrelated buttons on a laptop, hint cut, no label. First seen 19 Nov 2026. [Fixed 19 Nov, 5a0ea33e; carried as 88b18c69 on claude/audit-merge-dj5yt4]
+- [Low] Order tracking: a finished pickup order's photo still titled "Your order, being made". First seen 19 Nov 2026. [Fixed 19 Nov, b3e611b2; carried as 3c6a118a on claude/audit-merge-dj5yt4]
+- [Low] Order card: the line typed under one photo is not cleared and goes out with the next photo (`OrderCard.jsx:57`). First seen 19 Nov 2026 (2026-11-19-ui-audit.md).
+- [Low] Language files: `extraLine`, `shotThis`, `shotThisMake` (ad maker block) added in eec9b041 with nothing using them; Hebrew `shotThis` glues ל onto the product name. First seen 19 Nov 2026 (2026-11-19-ui-audit.md).
+- Still open, re-checked 19 Nov: order page pickup-only switch with no reason (18 Nov); American Crust gift cards footer link (18 Nov); sign-up category buttons and password hint on phones (18 Nov); sign-up headline (17 Nov).
