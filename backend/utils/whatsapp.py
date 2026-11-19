@@ -206,13 +206,21 @@ async def _send_photo_to_customer(env_key: str, recipient_phone: str, business_n
     )
 
 
-async def send_whatsapp_text(*, recipient_phone: str, body: str) -> bool:
+async def send_whatsapp_text(*, recipient_phone: str, body: str,
+                             buttons: Optional[list[tuple[str, str]]] = None) -> bool:
     """Free-form text. Only delivered inside Meta's 24-hour window, e.g.
-    right after the owner tapped a button. Never raises."""
+    right after the owner tapped a button. `buttons` are (payload, title)
+    reply buttons, up to 3, title up to 20 characters. Never raises."""
     meta = _meta_config()
     digits = normalize_whatsapp_number(recipient_phone) if meta else None
     if not digits:
         return False
+    if buttons:
+        return await _post_meta(meta, {
+            "messaging_product": "whatsapp", "to": digits, "type": "interactive",
+            "interactive": {"type": "button", "body": {"text": body}, "action": {"buttons": [
+                {"type": "reply", "reply": {"id": pid, "title": title[:20]}} for pid, title in buttons[:3]]}},
+        })
     return await _post_meta(meta, {
         "messaging_product": "whatsapp", "to": digits,
         "type": "text", "text": {"body": body},

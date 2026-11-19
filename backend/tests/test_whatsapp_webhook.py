@@ -134,6 +134,19 @@ def test_failed_alert_texts_the_owner_once(world):
     texted.assert_awaited_once_with("o1")
 
 
+def test_owner_runs_the_order_from_whatsapp(world):
+    order, customer, text = world
+    _post(_body("order_confirm:o1", msg_id="wamid.a"))
+    assert text.await_args.kwargs["buttons"] == [("order_ready:o1", "Ready")]
+    _post(_body("order_ready:o1", msg_id="wamid.b"))
+    assert order["status"] == "ready"
+    assert text.await_args.kwargs["buttons"] == [("order_done:o1", "Picked up")]
+    _post(_body("order_done:o1", msg_id="wamid.c"))
+    assert order["status"] == "done"
+    _post(_body("order_ready:o1", msg_id="wamid.d"))  # a late tap changes nothing
+    assert order["status"] == "done" and "already done" in text.await_args.kwargs["body"]
+
+
 def test_confirm_reply_links_the_order_page(world):
     order, customer, text = world
     order["owner_token"] = "own123"

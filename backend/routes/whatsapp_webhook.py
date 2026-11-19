@@ -13,7 +13,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import os
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import PlainTextResponse
@@ -27,6 +27,11 @@ router = APIRouter()
 # "Confirm" means accepted and being made; the board's own word for that.
 CONFIRMED_STATUS = "preparing"
 DECLINED_STATUS = "cancelled"
+# Which status each button needs, and where it moves the order.
+_MOVES = {
+    "order_confirm": ("new", CONFIRMED_STATUS), "order_decline": ("new", DECLINED_STATUS),
+    "order_ready": ("preparing", "ready"), "order_done": ("ready", "done"),
+}
 # How the owner's "already ..." answer names each status.
 _STATUS_WORDS = {
     "preparing": ("confirmed", "אושרה"), "ready": ("ready", "מוכנה"), "done": ("done", "הושלמה"),
@@ -137,7 +142,7 @@ async def _owner_numbers(order: dict[str, Any]) -> set[str]:
 
 async def _handle_message(msg: dict[str, Any]) -> None:
     action, _, order_id = _payload_of(msg).partition(":")
-    if action not in ("order_confirm", "order_decline") or not order_id or not msg.get("id"):
+    if action not in _MOVES or not order_id or not msg.get("id"):
         return
     if not await _first_time(msg["id"]):
         return
@@ -157,17 +162,19 @@ async def _handle_message(msg: dict[str, Any]) -> None:
     he = owner.get("preferred_language") == "he"
     who = order.get("customer_name") or ""
 
-    async def tell_owner(en: str, hebrew: str) -> None:
-        await send_whatsapp_text(recipient_phone=sender, body=hebrew if he else en)
+    async def tell_owner(en: str, hebrew: str, button: Optional[tuple[str, str, str]] = None) -> None:
+        """`button` is (payload, English title, Hebrew title): the next step."""
+        buttons = [(button[0], button[2] if he else button[1])] if button else None
+        await send_whatsapp_text(recipient_phone=sender, body=hebrew if he else en, buttons=buttons)
 
-    if order.get("status") != "new":
+    need, new_status = _MOVES[action]
+    if order.get("status") != need:
         en, hebrew = _STATUS_WORDS.get(order.get("status"), (order.get("status"), order.get("status")))
         await tell_owner(f"This order is already {en}.", f"ההזמנה כבר {hebrew}.")
         return
 
-    confirm = action == "order_confirm"
     try:
-        await _transition(order, StatusIn(status=CONFIRMED_STATUS if confirm else DECLINED_STATUS), by="whatsapp")
+        await _transition(order, StatusIn(status=new_status), by="whatsapp")
     except Exception as exc:  # noqa: BLE001
         # The tap must not vanish (code audit 30 Oct 2026): forget the message
         # id so a second tap is handled, and tell the owner to try again.
@@ -176,25 +183,37 @@ async def _handle_message(msg: dict[str, Any]) -> None:
         await tell_owner("That did not go through. Please tap the button again, or open the order on the site.",
                          "הפעולה לא הצליחה. אפשר ללחוץ שוב על הכפתור, או לפתוח את ההזמנה באתר.")
         return
-    if not confirm:
+    delivery = order.get("fulfilment") == "delivery"
+    if action == "order_decline":
         # _transition emails nobody on a cancel, so say only what happened.
         await tell_owner("Declined.", "ההזמנה נדחתה.")
         return
+    if action == "order_ready":
+        # _transition tells the customer; the owner gets the last step.
+        await tell_owner(f"Marked ready. {who} was told.", f"סומנה כמוכנה. {who} קיבל/ה הודעה.",
+                         (f"order_done:{order_id}", "Delivered" if delivery else "Picked up",
+                          "נמסרה" if delivery else "נאספה"))
+        return
+    if action == "order_done":
+        await tell_owner("Done. The order is closed.", "בוצע. ההזמנה נסגרה.")
+        return
 
-    # The order's own page, so the owner marks it ready from WhatsApp (Tzvi, 19 Nov 2026).
+    # The order's own page, and a Ready button, so the owner runs the order
+    # from WhatsApp (Tzvi, 19 Nov 2026).
     page = ""
     if order.get("owner_token"):
         from routes.marketplace.order_texts import owner_link
         page = owner_link(order)
-    en_more = f"\nMark it ready here: {page}" if page else ""
-    he_more = f"\nלסימון שהיא מוכנה: {page}" if page else ""
+    en_more = f"\nTap Ready when it is, or open the order: {page}" if page else "\nTap Ready when it is."
+    he_more = f"\nלחצו מוכנה כשהיא מוכנה, או פתחו את ההזמנה: {page}" if page else "\nלחצו מוכנה כשהיא מוכנה."
+    ready = (f"order_ready:{order_id}", "Ready", "מוכנה")
     phone = order.get("customer_phone_e164") or normalize_whatsapp_number(order.get("customer_phone"))
     if phone:
         await send_order_confirmed_to_customer(
             recipient_phone=phone, business_name=biz.get("name") or "",
             track_url=f"{_frontend_url()}/orders/track/{order.get('track_token')}", language="he",
         )
-        await tell_owner(f"Confirmed. {who} was sent their order link.{en_more}", f"ההזמנה אושרה. {who} קיבל/ה את קישור ההזמנה.{he_more}")
+        await tell_owner(f"Confirmed. {who} was sent their order link.{en_more}", f"ההזמנה אושרה. {who} קיבל/ה את קישור ההזמנה.{he_more}", ready)
     else:
         await tell_owner(f"Confirmed. {who} has no phone number, they have the link by email.{en_more}",
-                         f"ההזמנה אושרה. ל{who} אין מספר טלפון, הקישור נשלח במייל.{he_more}")
+                         f"ההזמנה אושרה. ל{who} אין מספר טלפון, הקישור נשלח במייל.{he_more}", ready)
