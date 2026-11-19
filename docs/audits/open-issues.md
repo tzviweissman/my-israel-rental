@@ -516,7 +516,9 @@ Main moved on after PR #24 was opened (the sign-up work stream was rewritten), s
 ## Code review of 18 Nov 2026
 - [Low] Orders: "Send the customer a photo" has no limit, and each tap is one more WhatsApp template message to the customer once WHATSAPP_TEMPLATE_ORDER_MAKING is set (`orders.py` send_making_photo, ~line 1383). Off until the template is approved. First seen 18 Nov 2026 (2026-11-18-site-audit.md).
 - [Low] Tooling: `scripts/live-db-read.py` runs `railway` with a list and `shell=True`, which works on Windows but drops every argument on Mac and Linux, so it always says "Could not get the live database address". First seen 18 Nov 2026 (2026-11-18-site-audit.md).
-- [Decision] Privacy: `scripts/live-db-read.py` hides passwords, tokens and secrets but prints customers' phones, emails and addresses in full into the session. First seen 18 Nov 2026 (2026-11-18-site-audit.md).
+- [Decision] Privacy: `scripts/live-db-read.py` hides passwords, tokens and secrets but prints customers' phones, emails and addresses in full into the session. First seen 18 Nov 2026 (2026-11-18-site-audit.md). Still open 19 Nov.
+- [Low] Ads: the product size printed under an ad's price is guessed from the description; in Hebrew any sentence with מנות counts ("כל המנות מוכנות טריות" becomes the size) and "4.50 serves 2" gives "50 serves 2" (`short_links.py` `_SIZE_RE`). First seen 19 Nov 2026 (2026-11-19-site-audit.md).
+- [Medium] WhatsApp: the Ready reply told the owner the customer was told, when nothing messages the customer on ready. First seen 19 Nov 2026 (2026-11-19-site-audit.md). Fixed 828ab071 on claude/exciting-bell-dnlebi; carried as dd23ac1e on claude/audit-merge-p2luwg.
 - Still open, 18 Nov: audit sandbox could not start MongoDB or Playwright (since 15 Oct), so the endpoint tests skipped again.
 ## UI audit of 19 Nov 2026
 - [Low] Order card: the photo's note box squeezed to about 200px between unrelated buttons on a laptop, hint cut, no label. First seen 19 Nov 2026. [Fixed 19 Nov, 5a0ea33e; carried as 88b18c69 on claude/audit-merge-dj5yt4]
