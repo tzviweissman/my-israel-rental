@@ -42,7 +42,12 @@ export default function PageEditor() {
   const [pages, setPages] = useState([]);
   const [pageName, setPageName] = useState('index');
   const [box, setBox] = useState({ w: 1200, h: 800 });
+  // On a phone the page is edited at the phone's own width, filling the screen (Tzvi, 19 Nov 2026).
+  const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 760px)').matches);
+  const [top, setTop] = useState(0);
+  const [previewReady, setPreviewReady] = useState(false);
   const frame = useRef(null);
+  const preview = useRef(null);
   const stage = useRef(null);
   const fileInput = useRef(null);
   const [photosOpen, setPhotosOpen] = useState(false);
@@ -78,8 +83,27 @@ export default function PageEditor() {
     return () => ro.disconnect();
   }, [biz]);
 
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 760px)');
+    const on = () => setNarrow(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  useEffect(() => { if (narrow && device !== 'm') { setDevice('m'); setReady(false); setFrameKey((k) => k + 1); } }, [narrow, device]);
+  // The impersonation banner is fixed over the top of the screen; the editor starts below it.
+  useEffect(() => {
+    const b = document.querySelector('[data-impersonation-banner]');
+    if (!b) return undefined;
+    const ro = new ResizeObserver(() => setTop(b.offsetHeight));
+    ro.observe(b);
+    return () => ro.disconnect();
+  }, []);
+
   const send = useCallback((msg) => {
     frame.current?.contentWindow?.postMessage({ source: 'mir-dashboard', ...msg }, window.location.origin);
+  }, []);
+  const sendPreview = useCallback((msg) => {
+    preview.current?.contentWindow?.postMessage({ source: 'mir-dashboard', ...msg }, window.location.origin);
   }, []);
 
   const loadLive = useCallback(() => {
@@ -94,6 +118,8 @@ export default function PageEditor() {
   }, [biz]);
   useEffect(loadLive, [loadLive]);
   useEffect(() => { if (ready && live) send({ type: 'mir:live', ...live }); }, [ready, live, send]);
+  // The phone view beside the laptop one shows every change as it is made.
+  useEffect(() => { if (previewReady && live) sendPreview({ type: 'mir:live', ...live }); }, [previewReady, live, sendPreview]);
 
   const push = useCallback((edits) => {
     setHist((h) => (same(h.now, edits) ? h : { past: [...h.past, h.now].slice(-100), now: edits, future: [] }));
@@ -119,6 +145,10 @@ export default function PageEditor() {
     const onMsg = (e) => {
       if (e.origin !== window.location.origin || !e.data || e.data.source !== 'mir-editor') return;
       const d = e.data;
+      if (preview.current && e.source === preview.current.contentWindow) {
+        if (d.type === 'mir:ready') { setPreviewReady(true); sendPreview({ type: 'mir:peek' }); }
+        return;
+      }
       if (d.type === 'mir:ready') {
         setReady(true);
         // First load: what is saved. After a device switch the frame
@@ -146,7 +176,7 @@ export default function PageEditor() {
     };
     window.addEventListener('message', onMsg);
     return () => window.removeEventListener('message', onMsg);
-  }, [push, undo, redo, send, businessId, token, t]);
+  }, [push, undo, redo, send, sendPreview, businessId, token, t]);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -157,6 +187,9 @@ export default function PageEditor() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [undo, redo]);
+
+  useEffect(() => { setPreviewReady(false); }, [frameKey, device]);
+  useEffect(() => { if (previewReady && ready) sendPreview({ type: 'mir:load', edits: hist.now }); }, [previewReady, ready, hist.now, sendPreview]);
 
   useEffect(() => {
     if (!dirty) return undefined;
@@ -233,16 +266,51 @@ export default function PageEditor() {
     return <div className="pe-loading"><Loader2 className="animate-spin" size={22} /></div>;
   }
   const slug = biz.slug;
-  const W = device === 'd' ? 1280 : 390;
-  const H = device === 'd' ? Math.max(720, Math.round(box.h / Math.min(1, (box.w - 32) / 1280))) : 844;
-  const scale = device === 'd' ? Math.min(1, (box.w - 32) / 1280) : Math.min(1, (box.h - 24) / 844);
+  const path = `/business/${slug}${pageName === 'index' ? '' : `/${pageName}`}`;
+  // The laptop view fits the screen whole, and beside it the same page on a phone, live, when there is room
+  // (Tzvi, 19 Nov 2026: "they dont see it all on one screen ... should also see how everything looks on mobile").
+  const side = !narrow && device === 'd' && box.w >= 1100;
+  const pScale = Math.min(1, (box.h - 44) / 844);
+  const sideW = side ? Math.round(390 * pScale) + 24 : 0;
+  let W = 390; let H = 844; let scale = Math.min(1, box.h / 844);
+  if (narrow) { W = box.w; H = box.h; scale = 1; } else if (device === 'd') {
+    scale = Math.min(1, (box.w - sideW) / 1280);
+    W = 1280;
+    H = Math.round(box.h / scale);
+  }
+  const toggle = (n) => {
+    setAskOpen((o) => n === 'ask' && !o);
+    setPhotosOpen((o) => n === 'photos' && !o);
+    setHoursOpen((o) => n === 'hours' && !o);
+    setLinkFor(null);
+  };
+  const tool = (key, on, Icon, label, short, onClick) => (
+    <button type="button" key={key} className={`pe-btn pe-ghost pe-tool${on ? ' on' : ''}`} onClick={onClick} aria-expanded={on === null ? undefined : on} title={label} aria-label={label}>
+      <Icon size={16} /> <span className="pe-lbl">{narrow ? short : label}</span>
+    </button>
+  );
+  const tools = [
+    tool('ask', askOpen, Wand2, t('pageEditor.ask', 'Ask for a change'), t('pageEditor.askShort', 'Ask'), () => toggle('ask')),
+    tool('photos', photosOpen, Images, t('pageEditor.photos', 'Photos'), t('pageEditor.photos', 'Photos'), () => toggle('photos')),
+    tool('hours', hoursOpen, Clock, t('pageEditor.hoursNotice', 'Hours and notice'), t('pageEditor.hoursShort', 'Hours'), () => toggle('hours')),
+    tool('reset', null, RotateCcw, t('pageEditor.reset', 'Original design'), t('pageEditor.resetShort', 'Original'), resetAll),
+    <a key="live" className="pe-btn pe-ghost pe-tool" href={`${path}?fresh=1`} target="_blank" rel="noreferrer" title={t('pageEditor.viewLive', 'View live')} aria-label={t('pageEditor.viewLive', 'View live')}>
+      <ExternalLink size={16} /> <span className="pe-lbl">{narrow ? t('pageEditor.liveShort', 'Live') : t('pageEditor.viewLive', 'View live')}</span>
+    </a>,
+  ];
+  const undoRedo = (
+    <div className="pe-group">
+      <button type="button" className="pe-icon" onClick={undo} disabled={!hist.past.length} aria-label={t('pageEditor.undo', 'Undo')} title={t('pageEditor.undo', 'Undo')}><Undo2 size={17} className="pe-flip" /></button>
+      <button type="button" className="pe-icon" onClick={redo} disabled={!hist.future.length} aria-label={t('pageEditor.redo', 'Redo')} title={t('pageEditor.redo', 'Redo')}><Redo2 size={17} className="pe-flip" /></button>
+    </div>
+  );
 
   return (
-    <div className="pe">
+    <div className={`pe${narrow ? ' pe-narrow' : ''}`} style={{ top }}>
       <style>{CSS}</style>
       <header className="pe-bar">
-        <button type="button" className="pe-btn pe-ghost" onClick={() => (!dirty || window.confirm(t('pageEditor.leave', 'Leave without saving your changes?'))) && navigate('/dashboard?tab=my-businesses')}>
-          <ArrowLeft size={16} className="pe-flip" /> <span>{t('pageEditor.back', 'Back')}</span>
+        <button type="button" className="pe-btn pe-ghost pe-back" onClick={() => (!dirty || window.confirm(t('pageEditor.leave', 'Leave without saving your changes?'))) && navigate('/dashboard?tab=my-businesses')} aria-label={t('pageEditor.back', 'Back')}>
+          <ArrowLeft size={16} className="pe-flip" /> <span className="pe-lbl">{t('pageEditor.back', 'Back')}</span>
         </button>
         <div className="pe-title">
           <strong>{t('pageEditor.title', 'Edit your page')}</strong>
@@ -250,60 +318,56 @@ export default function PageEditor() {
         </div>
         {pages.length > 1 && (
           <label className="pe-page">
-            <span className="pe-hide-sm">{t('pageEditor.page', 'Page')}</span>
-            <select value={pageName} onChange={(e) => switchPage(e.target.value)}>
+            <span className="pe-lbl">{t('pageEditor.page', 'Page')}</span>
+            <select value={pageName} onChange={(e) => switchPage(e.target.value)} aria-label={t('pageEditor.page', 'Page')}>
               {pages.map((p) => <option key={p.page} value={p.page}>{p.title}</option>)}
             </select>
           </label>
         )}
-        <div className="pe-group" role="group" aria-label={t('pageEditor.device', 'Screen')}>
-          <button type="button" className={`pe-seg${device === 'd' ? ' on' : ''}`} aria-pressed={device === 'd'} onClick={() => switchDevice('d')}>
-            <Laptop size={16} /> <span>{t('pageEditor.laptop', 'Laptop')}</span>
-          </button>
-          <button type="button" className={`pe-seg${device === 'm' ? ' on' : ''}`} aria-pressed={device === 'm'} onClick={() => switchDevice('m')}>
-            <Smartphone size={16} /> <span>{t('pageEditor.phone', 'Phone')}</span>
-          </button>
-        </div>
-        <div className="pe-group">
-          <button type="button" className="pe-icon" onClick={undo} disabled={!hist.past.length} aria-label={t('pageEditor.undo', 'Undo')} title={t('pageEditor.undo', 'Undo')}><Undo2 size={17} className="pe-flip" /></button>
-          <button type="button" className="pe-icon" onClick={redo} disabled={!hist.future.length} aria-label={t('pageEditor.redo', 'Redo')} title={t('pageEditor.redo', 'Redo')}><Redo2 size={17} className="pe-flip" /></button>
-        </div>
-        <div className="pe-end">
-          <button type="button" className={`pe-btn pe-ghost${askOpen ? ' on' : ''}`} onClick={() => { setAskOpen((o) => !o); setPhotosOpen(false); setHoursOpen(false); setLinkFor(null); }} aria-expanded={askOpen}>
-            <Wand2 size={15} /> <span className="pe-hide-sm">{t('pageEditor.ask', 'Ask for a change')}</span>
-          </button>
-          <button type="button" className={`pe-btn pe-ghost${photosOpen ? ' on' : ''}`} onClick={() => { setPhotosOpen((o) => !o); setAskOpen(false); setHoursOpen(false); setLinkFor(null); }} aria-expanded={photosOpen}>
-            <Images size={15} /> <span className="pe-hide-sm">{t('pageEditor.photos', 'Photos')}</span>
-          </button>
-          <button type="button" className={`pe-btn pe-ghost${hoursOpen ? ' on' : ''}`} onClick={() => { setHoursOpen((o) => !o); setAskOpen(false); setPhotosOpen(false); setLinkFor(null); }} aria-expanded={hoursOpen}>
-            <Clock size={15} /> <span className="pe-hide-sm">{t('pageEditor.hoursNotice', 'Hours and notice')}</span>
-          </button>
-          <button type="button" className="pe-btn pe-ghost" onClick={resetAll} title={t('pageEditor.reset', 'Original design')}>
-            <RotateCcw size={15} /> <span className="pe-hide-sm">{t('pageEditor.reset', 'Original design')}</span>
-          </button>
-          <a className="pe-btn pe-ghost" href={`/business/${slug}${pageName === 'index' ? '' : `/${pageName}`}?fresh=1`} target="_blank" rel="noreferrer">
-            <ExternalLink size={15} /> <span className="pe-hide-sm">{t('pageEditor.viewLive', 'View live')}</span>
-          </a>
-          <button type="button" className="pe-btn pe-save" onClick={save} disabled={!dirty || saving}>
-            {saving ? <Loader2 size={16} className="animate-spin" /> : null}
-            {dirty ? t('pageEditor.save', 'Save') : t('pageEditor.savedShort', 'Saved')}
-          </button>
-        </div>
+        {!narrow && (
+          <div className="pe-group" role="group" aria-label={t('pageEditor.device', 'Screen')}>
+            <button type="button" className={`pe-seg${device === 'd' ? ' on' : ''}`} aria-pressed={device === 'd'} onClick={() => switchDevice('d')}>
+              <Laptop size={16} /> <span>{t('pageEditor.laptop', 'Laptop')}</span>
+            </button>
+            <button type="button" className={`pe-seg${device === 'm' ? ' on' : ''}`} aria-pressed={device === 'm'} onClick={() => switchDevice('m')}>
+              <Smartphone size={16} /> <span>{t('pageEditor.phone', 'Phone')}</span>
+            </button>
+          </div>
+        )}
+        {!narrow && undoRedo}
+        {!narrow && <div className="pe-end">{tools}</div>}
+        <button type="button" className="pe-btn pe-save" onClick={save} disabled={!dirty || saving}>
+          {saving ? <Loader2 size={16} className="animate-spin" /> : null}
+          {dirty ? t('pageEditor.save', 'Save') : t('pageEditor.savedShort', 'Saved')}
+        </button>
       </header>
-      <p className="pe-help">{t('pageEditor.help', 'Click text to select it, click again to type. Drag anything to move it: it lines up with what is around it. Click a line or a card to add another just like it, or drag it to a new place in its row. Moves on laptop and on phone are kept separately.')}</p>
       <div className="pe-stage" ref={stage}>
         <div className="pe-frame-wrap" style={{ width: W * scale, height: H * scale }}>
           <iframe
             key={frameKey}
             ref={frame}
             title={t('pageEditor.title', 'Edit your page')}
-            src={`/business/${slug}${pageName === 'index' ? '' : `/${pageName}`}?mir-edit=1`}
-            className={`pe-frame${device === 'm' ? ' phone' : ''}`}
+            src={`${path}?mir-edit=1`}
+            className={`pe-frame${device === 'm' && !narrow ? ' phone' : ''}`}
             style={{ width: W, height: H, transform: `scale(${scale})` }}
           />
           {!ready && <div className="pe-cover"><Loader2 className="animate-spin" size={22} /></div>}
         </div>
+        {side && (
+          <div className="pe-side" style={{ width: Math.round(390 * pScale) }}>
+            <button type="button" className="pe-side-head" onClick={() => switchDevice('m')}>
+              <Smartphone size={15} /> <span>{t('pageEditor.onPhone', 'On a phone')}</span>
+              <b>{t('pageEditor.editPhone', 'Edit the phone view')}</b>
+            </button>
+            <div className="pe-frame-wrap" style={{ width: 390 * pScale, height: 844 * pScale }}>
+              <iframe key={`p${frameKey}`} ref={preview} tabIndex={-1} aria-hidden="true" title={t('pageEditor.onPhone', 'On a phone')}
+                src={`${path}?mir-edit=1`} className="pe-frame phone pe-peek" style={{ width: 390, height: 844, transform: `scale(${pScale})` }} />
+              {!previewReady && <div className="pe-cover"><Loader2 className="animate-spin" size={20} /></div>}
+            </div>
+          </div>
+        )}
       </div>
+      {narrow && <nav className="pe-dock" aria-label={t('pageEditor.tools', 'Editing tools')}>{undoRedo}{tools}</nav>}
       <input ref={fileInput} type="file" accept="image/*" hidden onChange={onFile} />
       {askOpen && (
         <RequestPanel businessId={businessId} token={token} auth={auth} t={t} dirty={dirty}
@@ -689,7 +753,7 @@ function RequestPanel({ businessId, token, auth, t, dirty, onClose, onApplied })
 const CSS = `
 .pe { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; background: var(--surface-muted); }
 .pe-loading { min-height: 100vh; display: grid; place-items: center; color: var(--brand-muted); }
-.pe-bar { user-select: none; display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--brand-border); flex-wrap: wrap; }
+.pe-bar { user-select: none; display: flex; align-items: center; gap: 10px; padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--brand-border); }
 .pe-title { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; margin-inline-end: auto; }
 .pe-title strong { font-size: 1rem; color: var(--ink); }
 .pe-title span { font-size: .85rem; color: var(--brand-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -710,8 +774,26 @@ const CSS = `
 .pe-save:disabled { background: var(--surface-muted); color: var(--brand-muted); box-shadow: inset 0 0 0 1px var(--brand-border); }
 .pe-save:active:not(:disabled) { transform: translateY(1px); }
 .pe-btn:focus-visible, .pe-seg:focus-visible, .pe-icon:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
-.pe-help { user-select: none; margin: 0; padding: 8px 16px; font-size: .88rem; color: var(--brand-muted); background: var(--surface); border-bottom: 1px solid var(--brand-border); }
-.pe-stage { flex: 1; min-height: 0; overflow: auto; display: flex; justify-content: center; align-items: flex-start; padding: 16px; }
+.pe-stage { flex: 1; min-height: 0; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; gap: 24px; padding: 16px; }
+.pe-side { flex: none; display: flex; flex-direction: column; gap: 8px; }
+.pe-side-head { display: flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 4px; font-size: .85rem; font-weight: 600; color: var(--brand-muted); background: none; border-radius: 8px; }
+.pe-side-head b { margin-inline-start: auto; color: var(--gold); font-weight: 600; }
+.pe-side-head:hover b { text-decoration: underline; }
+.pe-side-head:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.pe-peek { pointer-events: none; }
+.pe-end .pe-tool { padding: 0 12px; }
+@media (max-width: 1500px) { .pe:not(.pe-narrow) .pe-end .pe-lbl { display: none; } .pe-end .pe-tool { min-width: 44px; justify-content: center; padding: 0; } }
+.pe-narrow .pe-bar { padding: 6px 8px; gap: 6px; }
+.pe-narrow .pe-back { padding: 0; min-width: 44px; justify-content: center; }
+.pe-narrow .pe-back .pe-lbl, .pe-narrow .pe-page .pe-lbl { display: none; }
+.pe-narrow .pe-page select { max-width: 120px; padding: 0 8px; }
+.pe-narrow .pe-save { padding: 0 16px; }
+.pe-narrow .pe-stage { padding: 0; }
+.pe-narrow .pe-frame { box-shadow: none; }
+.pe-dock { user-select: none; display: flex; align-items: stretch; gap: 2px; padding: 4px 4px calc(4px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--brand-border); overflow-x: auto; }
+.pe-dock .pe-group { background: none; box-shadow: none; padding: 0; gap: 0; }
+.pe-dock .pe-tool { flex: 1 0 auto; flex-direction: column; gap: 2px; min-height: 52px; min-width: 52px; padding: 4px 6px; justify-content: center; border: 0; border-radius: 10px; font-size: .72rem; }
+.pe-dock .pe-icon { min-height: 52px; }
 .pe-frame-wrap { position: relative; flex: none; }
 .pe-frame { border: 0; background: var(--surface); transform-origin: 0 0; display: block; box-shadow: 0 1px 2px rgb(17 24 39 / .06), 0 18px 40px -20px rgb(17 24 39 / .3); }
 .pe-frame.phone { border-radius: 28px; }
@@ -750,5 +832,6 @@ const CSS = `
 .pe-links button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 .pe-links span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .pe-links small { color: var(--brand-muted); font-size: .82rem; }
-@media (max-width: 760px) { .pe-hide-sm { display: none; } .pe-title { width: 100%; order: -1; } }
+.pe-narrow .pe-title { flex: 1; }
+.pe-narrow .pe-title strong { font-size: .9rem; }
 `;

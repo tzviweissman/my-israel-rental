@@ -50,7 +50,8 @@
     'Put it back on the page': 'החזרה לדף', 'Add another just like this, in line with the others': 'הוספת עוד אחד בדיוק כזה, בשורה עם האחרים',
     'Show your opening hours or a price from your dashboard here, so it changes when you change it there': 'הצגת שעות הפתיחה או מחיר מלוח הבקרה, כך שישתנה כשתשנו אותו שם',
     'The same words in Hebrew': 'אותן מילים בעברית', 'The same words in English': 'אותן מילים באנגלית',
-    'Click text or a photo to change it. Drag it to move it. Click a line or a card to add another just like it.': 'לחצו על טקסט או תמונה כדי לשנות. גררו כדי להזיז. לחצו על שורה או כרטיס כדי להוסיף עוד אחד בדיוק כמוהו.'
+    'Click text or a photo to change it. Drag it to move it. Click a line or a card to add another just like it.': 'לחצו על טקסט או תמונה כדי לשנות. גררו כדי להזיז. לחצו על שורה או כרטיס כדי להוסיף עוד אחד בדיוק כמוהו.',
+    'Tap text or a photo to select it, tap again to type. Once it is selected, drag it to move it.': 'הקישו על טקסט או תמונה כדי לבחור, והקישו שוב כדי להקליד. אחרי שנבחר, גררו כדי להזיז.'
   };
   var T = function (s) { return heUI && HE[s] ? HE[s] : s; };
   var post = function (msg) { window.parent.postMessage(Object.assign({ source: 'mir-editor' }, msg), location.origin); };
@@ -194,6 +195,9 @@
   ui.textContent = [
     'html.mir-on img{-webkit-user-drag:none;user-select:none}',
     'html.mir-on [data-mir-key],html.mir-on [data-mir-field]{cursor:pointer;touch-action:none;outline:1px dashed transparent;outline-offset:3px;transition:outline-color .15s}',
+    // A finger scrolls the page unless what it lands on is already selected; then it drags (19 Nov 2026).
+    'html.mir-peek [data-mir-key],html.mir-peek [data-mir-field]{outline:0 !important}',
+    '@media (pointer:coarse){html.mir-on [data-mir-key],html.mir-on [data-mir-field]{touch-action:manipulation}html.mir-on .mir-sel{touch-action:none}}',
     'html.mir-on [data-mir-key]:hover,html.mir-on [data-mir-field]:hover{outline-color:rgba(22,122,184,.7)}',
     'html.mir-on .mir-sel{outline:2px solid #167AB8 !important;outline-offset:3px}',
     'html.mir-on .mir-typing{outline:2px solid #111827 !important;cursor:text;background:rgba(255,255,255,.08)}',
@@ -280,7 +284,9 @@
   var sel = null, bar = null;
   var tip = document.createElement('div');
   tip.id = 'mir-tip';
-  tip.textContent = T('Click text or a photo to change it. Drag it to move it. Click a line or a card to add another just like it.');
+  tip.textContent = window.matchMedia('(pointer:coarse)').matches
+    ? T('Tap text or a photo to select it, tap again to type. Once it is selected, drag it to move it.')
+    : T('Click text or a photo to change it. Drag it to move it. Click a line or a card to add another just like it.');
   if (heUI) tip.dir = 'rtl';
   document.body.appendChild(tip);
   setTimeout(function () { tip.style.transition = 'opacity .4s'; tip.style.opacity = '0'; }, 7000);
@@ -560,6 +566,8 @@
     var el = e.target.closest && e.target.closest('[data-mir-key], [data-mir-field]');
     if (typing && el === typing) return;
     if (!el) { select(null); return; }
+    // Touch: the first tap only selects, so a finger on text can still scroll the page.
+    if (e.pointerType === 'touch' && sel !== el) { drag = { el: el, tap: true, x0: e.clientX, y0: e.clientY }; return; }
     e.preventDefault();
     var i = info(el);
     // In a row of cards or lines, dragging gives it another place in the row, so the row stays even.
@@ -575,6 +583,7 @@
   document.addEventListener('pointermove', function (e) {
     if (!drag) return;
     var dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+    if (drag.tap) { if (Math.abs(dx) + Math.abs(dy) > 10) drag = null; return; }
     if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
     if (drag.order) { orderMove(e); return; }
     if (!drag.moved) {
@@ -602,6 +611,7 @@
   document.addEventListener('pointerup', function () {
     if (!drag) return;
     var d = drag; drag = null;
+    if (d.tap) { select(d.el); return; }
     clearGuides();
     d.el.classList.remove('mir-drag');
     slice(document.querySelectorAll('.mir-lift')).forEach(function (n) { n.classList.remove('mir-lift'); });
@@ -609,6 +619,15 @@
     if (d.free) tidy(keyOf(d.el));
     if (d.moved) { changed(); return; }
     if (d.wasSel && !isImg(d.el)) startTyping(d.el, d.cx, d.cy); else select(d.el);
+  }, true);
+  // The browser took the finger to scroll.
+  document.addEventListener('pointercancel', function () {
+    if (!drag) return;
+    var d = drag; drag = null;
+    clearGuides();
+    if (d.el) d.el.classList.remove('mir-drag');
+    slice(document.querySelectorAll('.mir-lift')).forEach(function (n) { n.classList.remove('mir-lift'); });
+    if (d.moved) changed();
   }, true);
   document.addEventListener('dblclick', function (e) {
     var el = e.target.closest && e.target.closest('[data-mir-key], [data-mir-field]');
@@ -656,6 +675,10 @@
       if (!d.texts || !d.texts[0]) return;
       slot.set(d.texts[0]);
       paint(); changed();
+    } else if (d.type === 'mir:peek') {
+      // The small phone view beside the laptop one only shows the page: no tip, no outlines.
+      document.documentElement.classList.add('mir-peek');
+      tip.remove();
     } else if (d.type === 'mir:deselect') {
       select(null);
     }

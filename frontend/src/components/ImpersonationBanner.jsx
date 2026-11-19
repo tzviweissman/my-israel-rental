@@ -18,7 +18,7 @@ const ImpersonationBanner = () => {
 
   return (
     <div
-      className="fixed top-0 inset-x-0 z-[100] bg-red-600 text-white shadow-lg"
+      data-impersonation-banner="" className="fixed top-0 inset-x-0 z-[100] bg-red-600 text-white shadow-lg"
       style={{ paddingTop: 'env(safe-area-inset-top, 0)' }}
       data-testid="impersonation-banner"
     >
