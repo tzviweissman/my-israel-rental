@@ -305,6 +305,7 @@ const he = {
           badLinkTitle: 'הקישור הזה כבר לא עובד',
           photoTitle: 'נמסר {{time}}',
           makingTitle: 'ההזמנה שלך בהכנה',
+          makingTitleDone: 'ההזמנה שלך בזמן ההכנה',
           makingAlt: 'תמונה של ההזמנה שלך בהכנה',
           reviewAsk: 'איך הייתה ההזמנה?',
           reviewButton: 'כתיבת ביקורת',
