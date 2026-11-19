@@ -33,23 +33,23 @@ Sections (line each starts on; read with that offset):
 - 2245: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
 - 2270: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
 - 2310: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2505: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2532: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2597: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2614: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2660: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2680: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2710: 4. What is reported to the owner instead (content gaps)
-- 2719: 5. How to write
-- 2768: 5a. Lessons from the practice pages
-- 2797: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2846: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2863: 6. Playbooks for the most common businesses
-- 2983: 7. Choosing the three options (automatic page builder only)
-- 3007: 8. Photos, video and the tools
-- 3233: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3301: 9. The scroll sections: what the practice pages become
-- 3336: 10. Open decisions (need Tzvi)
+- 2534: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2561: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2626: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2643: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2689: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2709: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2739: 4. What is reported to the owner instead (content gaps)
+- 2748: 5. How to write
+- 2797: 5a. Lessons from the practice pages
+- 2826: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2875: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2892: 6. Playbooks for the most common businesses
+- 3012: 7. Choosing the three options (automatic page builder only)
+- 3036: 8. Photos, video and the tools
+- 3262: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3330: 9. The scroll sections: what the practice pages become
+- 3365: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2501,6 +2501,35 @@ part where one exists, so it is there without being remembered.
     times. Every step's event happens once, nothing falls or starts again over a join, and each cause is enough for its
     effect (31). The answer goes in chain.json as `story_seen` with the clips' fingerprint, so a remade clip needs a new
     reading; `clipchain.py encode` refuses until it matches.
+33. **The product is shot like a premium product photograph** (Tzvi, 18 and 19 Nov 2026, Burnt: "i like how in the
+    inspo its dark around the wood so it makes it dramatic", "the angle of the wood made it look dramatic and premium
+    ... not just a sky view of the board which is very plain", then of the first remake beside its inspo: "compare to
+    the inspo it still looks better"). Every other check passed a flat, evenly lit board seen from straight above. The
+    first remake, with a pool of light and a 35 degree angle, passed a light check that the inspo passed too (middle 87
+    and edges 47, against 92 and 49) and still looked weaker: what the inspo had was how it was shot. Any business
+    whose opening shows a thing (food, a board, a ring, a chair, a bottle; for a service, its result: the clean room,
+    the fixed tap) gets all five, unless the best sites of its own category in our inspo do otherwise and the brief
+    names them:
+    1. **Close, running off the frame.** The camera is near; the product fills most of the width and at least one
+       corner or edge runs out of the frame. Never the whole thing floating small in an empty ground, which reads as a
+       catalogue.
+    2. **A hero angle.** Low, about 20 to 40 degrees above the surface, the product turned diagonally. Straight from
+       above only where the category's best sites use it, and then still lit as in 3.
+    3. **One hard light from one side.** Low across the product, so each surface catches light on one side and throws
+       a short shadow: the crust, the grain, the facet shows. Never soft even light from above.
+    4. **Its thickness and one hero.** The product's side is seen (a board's thick edge, a ring's band, a cake's
+       layers), so it looks heavy and real. One part (one cut, one stone, one pastry) is the sharpest and brightest
+       thing in the picture; the focus is shallow and the far side soft.
+    5. **The ground falls off.** Beyond the product the ground goes quickly to near black, the clear space for the
+       words (3aa.5) in that dark. A bright brand (a white bakery, a cleaning service, a kids' shop) falls off only a
+       step, never to black.
+    The brief has a `Shot:` line copied from the chosen inspo picture, naming its distance, angle, light direction,
+    focus and hero, and the still prompt says the same in those words (Burnt: `low-hero` in gen/fire_stills.py). Before
+    any still is shown, `python scripts/inspo-beside.py <inspo picture> <still>` puts it beside that picture at the same
+    height, and a `shot_seen` line in the brief says what was compared on the five points. `python
+    scripts/check-light-pool.py <stills> [--soft]` fails a picture whose edges are not darker than its middle (5); it
+    cannot see 1 to 4, which the side-by-side sheet is for. The film's brightness check (3h) still applies: lift the lit
+    product, never the dark around it (Burnt's low-hero-1-lit.png).
 
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
 

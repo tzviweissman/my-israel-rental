@@ -5,15 +5,15 @@ Sections (line each starts on; read with that offset):
 - 25: How to use it
 - 70: 1. Facts and words
 - 101: 2. Opening
-- 170: 3. Sections and worlds
-- 235: 4. Photos and media
-- 265: 5. Prices and savings
-- 287: 6. Order and booking flow
-- 313: 7. Motion
-- 342: 8. Phone
-- 358: 8b. From the seven videos, part two (29 Oct 2026)
-- 380: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 391: 9. Finish
+- 171: 3. Sections and worlds
+- 236: 4. Photos and media
+- 266: 5. Prices and savings
+- 288: 6. Order and booking flow
+- 314: 7. Motion
+- 343: 8. Phone
+- 359: 8b. From the seven videos, part two (29 Oct 2026)
+- 381: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 392: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -143,6 +143,7 @@ R3aa.29 | The opening's first event plays on arrival (opening_slides intro, or 0
 R3aa.30 | Every page passes check-iphone: no script error, nothing wider than the screen, the film moves | 3aa.30 | RUN: check-iphone
 R3aa.31 | The brief has an Enough line: each cause's amount and why it is enough for its effect | 3aa.31 | LOOK: the brief's Enough line; n/a with no film when:film
 R3aa.32 | The whole film read in order by someone who did not write the prompts; story_seen matches the clips | 3aa.32 | RUN: clipchain.py encode (refuses without it); n/a with no film when:film
+R3aa.33 | The product shot like a premium product photo: close, low hero angle, one hard side light, its thickness and one hero part, the ground falling off; a Shot line from the inspo, each still beside it | 3aa.33 | RUN: check-light-pool on the opening stills; LOOK: the brief's Shot and shot_seen lines, the inspo-beside sheet; n/a with no product picture in the opening
 R3bb.1 | A new site picks at least three small touches from 3bb that fit its category and story, named on a "- touches:" line in CONCEPT.md, not the same three as the site built before; each shows only true facts | 3bb | LOOK: CONCEPT.md touches line and each touch on the site
 R3h.1 | The home page opens on a full-screen picture or film (at least 70% picture) and it is an event from their own thing (a film, or an event built in code), proposed with the first build, never after | 3h.1, 3n | script: site OPENING (home page) plus LOOK to confirm it is an event, not a drift
 R3n.1 | The owner's strongest real photo fills at least half the first screen on a laptop and on a phone, not a small card or cut-out shape | 3n.1 | LOOK: first screen at 1440x900 and 390x844

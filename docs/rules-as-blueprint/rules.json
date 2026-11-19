@@ -797,6 +797,17 @@
    "status": "built"
   },
   {
+   "id": "R3aa.33",
+   "rule": "The product shot like a premium product photo: close, hero angle, one side light, thickness and one hero, the ground falling off",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "scripts/check-light-pool.py and scripts/inspo-beside.py",
+   "confirmed_by": "RUN: check-light-pool; LOOK: the brief's Shot and shot_seen lines",
+   "status": "built"
+  },
+  {
    "id": "R3bb.1",
    "rule": "Pick at least three small touches from 3bb, named in CONCEPT.md",
    "how": [
