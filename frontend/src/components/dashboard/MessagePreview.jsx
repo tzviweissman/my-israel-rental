@@ -8,6 +8,9 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const WA_GREEN = '#075E54';
+// Off until Meta verifies the business and approves our display name: until then Meta refuses every WhatsApp we
+// send, and texts and emails carry the alerts (Tzvi, 19 Nov 2026: "remove whatsapp from business dashboards").
+const WHATSAPP_LIVE = false;
 
 export default function MessagePreview({ loaded, templates, note }) {
   const { t, i18n } = useTranslation();
@@ -95,7 +98,7 @@ export default function MessagePreview({ loaded, templates, note }) {
         </div>
         <div className="inline-flex rounded-full border p-0.5" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('orderTexts.pv.how', 'How it arrives')}>
           <Tab value="text" current={how} set={setHow} id="pv-how-text">{t('orderTexts.pv.text', 'Text')}</Tab>
-          <Tab value="whatsapp" current={how} set={setHow} id="pv-how-whatsapp">WhatsApp</Tab>
+          {WHATSAPP_LIVE && <Tab value="whatsapp" current={how} set={setHow} id="pv-how-whatsapp">WhatsApp</Tab>}
           <Tab value="email" current={how} set={setHow} id="pv-how-email">{t('orderTexts.pv.email', 'Email')}</Tab>
         </div>
       </div>
