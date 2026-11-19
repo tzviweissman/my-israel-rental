@@ -39,7 +39,9 @@ always with `?as=owner`, never a sign-in.
 - **Ideas on Fable.** Steps 5 to 7's ideas (opening ideas, the "Own:" idea,
   film stories, headlines) are written by one subagent with `model: "fable"`,
   given the record, the photo sheet, `REFERENCES.md` and the digest's §3g, §3h,
-  §3n and §3t. It writes them; you check them with the step's scripts as usual.
+  §3n, §3t and §3ag, plus the section rules a plan most often breaks (3b.3 one
+  solid button a screen, 3z.1 a card over an edge, 3u.3 the price a piece,
+  check-fits' one screen a section). It writes them; you check them with the step's scripts as usual.
   This is the one exception to "subagents run on Sonnet".
 - **Building on this session's model** (Opus, medium effort). Searches and the
   step 11 review stay on Sonnet.
@@ -118,7 +120,13 @@ your reply, either "every check passes" or the problems it listed.
     scroll-tied effect, `overlay-truth.mjs` for anything placed on a picture,
     `cutout.py --check` for cut-outs (§6.3), and `check-fits`, `check-site`,
     `check-motion`, `check-text-fits` (§3r, §3s). Fix and run again until a full pass is clean.
-11. **Someone else reviews it.** A Sonnet subagent that did not build it, against
+11. **Beside the best of its kind, then someone else reviews it.** First put the home
+    page's screens.jpg beside two of the best sites of its category (Pinterest,
+    Awwwards or Inspo): `node scripts/compare-sheet.mjs <build> <pic 1> <pic 2>`,
+    then REFERENCES.md `## Compared` with each difference and what you changed
+    (`check-compared`; §3ag). Photos shot for a shop (`relight_photo.py`), big
+    product cards, two grounds, one headline size are §3ag's, and planned from
+    step 6, not found here. Then a Sonnet subagent that did not build it, against
     `docs/page-review-checklist.md`; fix every FAIL, it looks again (§3r.2). Score
     the wow gate (§3n).
 12. **RULES.md.** Answer every line of `docs/rules-checklist.md` and pass

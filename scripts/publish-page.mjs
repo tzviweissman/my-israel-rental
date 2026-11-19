@@ -91,6 +91,10 @@ const CHECK_ONLY = process.argv.includes('--check');
     if (sig.status !== 0) problems.push(`no signature body (3ad.1):\n${sig.stdout}${sig.stderr}`);
     const alike = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-body-alike.mjs'), SRC], { encoding: 'utf8' });
     if (alike.status !== 0) problems.push(`menu bar, steps or closing band copied from another site (3ad.2):\n${alike.stdout.split('\n').filter((l) => /^SAME/.test(l)).join('\n')}${alike.stderr}`);
+    // put beside two of the best of its kind before review (Tzvi, 19 Nov 2026: "see why ours doesnt look as good"; rules 3ag.6)
+    const cmp = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-compared.mjs'), SRC], { encoding: 'utf8' });
+    if (cmp.status !== 0) problems.push(`not compared with the best of its kind (3ag.6):
+${cmp.stdout}${cmp.stderr}`);
   }
   // every line of the rules checklist answered in RULES.md, and answered after the last change. A site built from a
   // blueprint (scripts/blueprint.mjs, Tzvi 1 Nov 2026) has RULES.md written from it here, so it is never stale
@@ -170,6 +174,8 @@ const CHECK_ONLY = process.argv.includes('--check');
     ['check-phone-opening.mjs', 'holds the scroll with its phone opening', 'R3ac.1'],
     // the home page has a rhythm: grounds change, one headline jumps in size, one section opens edge to edge (Tzvi, 17 Nov 2026, rules 3ad.3)
     ['check-rhythm.mjs', 'has a home page with no rhythm (one ground, one heading size, no edge-to-edge section)', 'R3ad.3'],
+    // beside the best of its kind: two grounds, one headline size, products as big photo cards (Tzvi, 19 Nov 2026, rules 3ag)
+    ['check-look.mjs', 'looks worse than the best sites of its kind (too many grounds or headline sizes, products too small)', 'R3ag.2'],
     // one part leads into the next: something crosses a section line, one object travels down with you (Tzvi, 18 Nov 2026, rules 3ae)
     ['check-seams.mjs', 'has a home page where nothing crosses a section line or travels with the visitor', 'R3ae.1'],
     // the page as an iPhone shows it: Safari's engine, where a film led only by seeking stands still (Tzvi, 14 Nov 2026, rules 3aa.30)

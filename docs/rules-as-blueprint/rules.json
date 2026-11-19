@@ -3346,6 +3346,60 @@
    "confirmed_by": "LOOK",
    "gremier_retry": false,
    "status": "planned"
+  },
+  {
+   "id": "R3ag.1",
+   "rule": "Product photos look shot for a shop: one plain ground, soft light, no foil, counter or flash; re-lit with relight_photo.py and checked beside the original",
+   "how": ["GEN", "EYE"],
+   "built_by": "Photo sheet at step 2 marks each photo shop-ready or not; the rest re-lit with scrollcraft/starter/relight_photo.py to one ground before layout",
+   "confirmed_by": "LOOK",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ag.2",
+   "rule": "Every priced product is a card led by its photo, 200 px or wider at a laptop",
+   "how": ["GEN"],
+   "built_by": "Section plan gives each priced product a photo card (photo, name and price, choices)",
+   "confirmed_by": "check-look SMALL -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ag.3",
+   "rule": "Home sections use two grounds taking turns, three at most",
+   "how": ["GEN"],
+   "built_by": "Section plan assigns each section one of two grounds, alternating, before build",
+   "confirmed_by": "check-look GROUNDS -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ag.4",
+   "rule": "The opening's words beside or under the product photo, never on a panel over it; the photo whole",
+   "how": ["GEN", "EYE"],
+   "built_by": "Opening plan: words at one side and the photo whole at the other on a laptop, photo then words on a phone",
+   "confirmed_by": "LOOK",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ag.5",
+   "rule": "One headline size for every section, a small label above each, plus 3ad.3's one jump",
+   "how": ["GEN"],
+   "built_by": "One --h token for section headlines and a label above each, set in the section plan",
+   "confirmed_by": "check-look HEADINGS -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ag.6",
+   "rule": "Before review, compare.jpg beside two top sites of the category and REFERENCES.md ## Compared",
+   "how": ["ASK", "EYE"],
+   "built_by": "Step 11: scripts/compare-sheet.mjs, then the ## Compared lines (difference -> what changed)",
+   "confirmed_by": "check-compared -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
   }
  ]
 }

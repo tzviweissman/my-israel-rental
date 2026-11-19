@@ -6,14 +6,14 @@ Sections (line each starts on; read with that offset):
 - 70: 1. Facts and words
 - 101: 2. Opening
 - 171: 3. Sections and worlds
-- 236: 4. Photos and media
-- 266: 5. Prices and savings
-- 288: 6. Order and booking flow
-- 314: 7. Motion
-- 343: 8. Phone
-- 359: 8b. From the seven videos, part two (29 Oct 2026)
-- 381: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 392: 9. Finish
+- 242: 4. Photos and media
+- 272: 5. Prices and savings
+- 294: 6. Order and booking flow
+- 320: 7. Motion
+- 349: 8. Phone
+- 365: 8b. From the seven videos, part two (29 Oct 2026)
+- 387: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 398: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -232,6 +232,12 @@ R3af.1 | One drawn mark taken from the business's own logo or product (or a masc
 R3af.2 | The owner speaks: a short note in their own words, signed with their name, beside their real photo and photos of the place or customers, planned on a "- owner:" line; missing words or photo are a content gap, never invented | 3af.2, 1.1 | LOOK: the note's words against what the owner gave
 R3af.3 | With four or more photos of their own work, one set is laid loose (tilted, overlapping, labelled by hand) and can be dragged or tapped to flip to what it is and its price; a tap is enough on a phone, still under reduced motion, planned on a "- loose:" line | 3af.3, 3s.27 | LOOK: tap and drag at laptop and phone, reduced motion on
 R3af.4 | Three or more kinds, styles or flavours: each on its own card in its own colour from that product, with its own cut-out picture and one line of character, planned on a "- cards:" line; never a grey list of names | 3af.4, 3g.19 | LOOK: the cards against the "- cards:" line
+R3ag.1 | Product photos look shot for a shop: one plain ground, one soft light, no foil, counter, hand or flash; owner phone photos re-lit with relight_photo.py, each checked beside the original with product-match-sheet.py, all to the same ground | 3ag.1, 3c.12 | LOOK: the photo sheet beside the originals
+R3ag.2 | Every product sold with its price is a card led by its photo, 200 px or wider at a laptop, never a small thumbnail beside a list | 3ag.2 | script: `node scripts/check-look.mjs <home url>` (SMALL)
+R3ag.3 | The home page's sections use two grounds taking turns, three at most | 3ag.3, 3ad.3 | script: `node scripts/check-look.mjs <home url>` (GROUNDS)
+R3ag.4 | The opening's words sit beside or under the product photo on their own ground, never on a panel over it; the photo whole | 3ag.4, 3g.13 | LOOK: 1366x800 and 390x844
+R3ag.5 | Every section headline is one size with a small label above it; the only other size is 3ad.3's one jump | 3ag.5 | script: `node scripts/check-look.mjs <home url>` (HEADINGS)
+R3ag.6 | Before review, compare.jpg puts screens.jpg beside two top sites of the same category, and REFERENCES.md has a ## Compared part naming each difference and what changed | 3ag.6 | script: `node scripts/check-compared.mjs <build>`
 
 ## 4. Photos and media
 

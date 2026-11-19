@@ -48,10 +48,10 @@ for (const p of pages) {
 }
 // the site-wide checks of rules 3v take every page at once (the same footer and menu on each)
 const all = pages.map((p) => `${base}/${folder}/${p}`);
-for (const s of ['check-footer', 'check-menu', 'check-facts', 'check-heights', 'check-film-video', 'check-film-clear', 'check-web-basics', 'check-says-offer']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), ...all]]);
+for (const s of ['check-footer', 'check-menu', 'check-facts', 'check-heights', 'check-film-video', 'check-film-clear', 'check-web-basics', 'check-says-offer', 'check-look']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), ...all]]);
 // a site built from a blueprint has RULES.md written from it first (scripts/blueprint.mjs)
 if (fs.existsSync(path.join(dir, 'BLUEPRINT.md'))) spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'blueprint.mjs'), '--rules', dir], { encoding: 'utf8' });
-for (const s of ['check-concept', 'check-fingerprints', 'check-rules']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), dir]]);
+for (const s of ['check-concept', 'check-fingerprints', 'check-compared', 'check-rules']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), dir]]);
 // the opening film as the visitor sees it (Tzvi, 1 Nov 2026: crumbs vanishing, a snap over in one frame); intended hard
 // cuts are listed in gen/film.sh as "# cuts: <seconds> ..." (times in gen/film/opening.mp4)
 {
