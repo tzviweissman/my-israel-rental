@@ -140,6 +140,8 @@ def test_owner_runs_the_order_from_whatsapp(world):
     assert text.await_args.kwargs["buttons"] == [("order_ready:o1", "Ready")]
     _post(_body("order_ready:o1", msg_id="wamid.b"))
     assert order["status"] == "ready"
+    # Nothing messages the customer on "ready": the reply must not say they were told.
+    assert "told" not in text.await_args.kwargs["body"]
     assert text.await_args.kwargs["buttons"] == [("order_done:o1", "Picked up")]
     _post(_body("order_done:o1", msg_id="wamid.c"))
     assert order["status"] == "done"
