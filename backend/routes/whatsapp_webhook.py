@@ -191,8 +191,10 @@ async def _handle_message(msg: dict[str, Any]) -> None:
         await tell_owner("Declined.", "ההזמנה נדחתה.")
         return
     if action == "order_ready":
-        # _transition tells the customer; the owner gets the last step.
-        await tell_owner(f"Marked ready. {who} was told.", f"סומנה כמוכנה. {who} קיבל/ה הודעה.",
+        # Nothing messages the customer on "ready" (_transition only texts on
+        # "done"); their order page shows it (code audit 19 Nov 2026). The owner gets the last step.
+        await tell_owner("Marked ready. It shows on the customer's order page.",
+                         "סומנה כמוכנה. זה מופיע בדף ההזמנה של הלקוח.",
                          (f"order_done:{order_id}", "Delivered" if delivery else "Picked up",
                           "נמסרה" if delivery else "נאספה"))
         return
