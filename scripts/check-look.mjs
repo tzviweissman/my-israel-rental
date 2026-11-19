@@ -39,7 +39,8 @@ for (const url of urls) {
     const money = /[₪$€£]\s?\d|\d\s?(₪|NIS|USD|EUR)/;
     const small = [];
     for (const img of root.querySelectorAll('img')) {
-      const b = img.getBoundingClientRect(); if (b.width < 48 || b.height < 48 || img.closest('header, footer, nav')) continue;
+      // a picture with empty alt is decoration (a logo mark on a card), never a product photo (Cakes by Tova, 19 Nov 2026)
+      const b = img.getBoundingClientRect(); if (b.width < 48 || b.height < 48 || img.closest('header, footer, nav') || img.getAttribute('alt') === '') continue;
       // the card: the nearest ancestor that holds a price, at most three levels up
       let card = img.parentElement; for (let i = 0; i < 3 && card && !money.test(card.textContent); i++) card = card.parentElement;
       if (card && money.test(card.textContent) && card.querySelectorAll('img').length <= 2 && b.width < 200) small.push(`${img.getAttribute('src')} is ${Math.round(b.width)}px wide`);
