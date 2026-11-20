@@ -33,24 +33,24 @@ Sections (line each starts on; read with that offset):
 - 2250: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
 - 2275: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
 - 2315: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2557: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2584: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2649: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2666: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2712: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2732: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2762: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2799: 4. What is reported to the owner instead (content gaps)
-- 2808: 5. How to write
-- 2857: 5a. Lessons from the practice pages
-- 2886: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2935: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2952: 6. Playbooks for the most common businesses
-- 3072: 7. Choosing the three options (automatic page builder only)
-- 3096: 8. Photos, video and the tools
-- 3322: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3390: 9. The scroll sections: what the practice pages become
-- 3425: 10. Open decisions (need Tzvi)
+- 2573: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2600: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2665: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2682: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2728: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2748: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2778: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2815: 4. What is reported to the owner instead (content gaps)
+- 2824: 5. How to write
+- 2873: 5a. Lessons from the practice pages
+- 2902: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2951: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2968: 6. Playbooks for the most common businesses
+- 3088: 7. Choosing the three options (automatic page builder only)
+- 3112: 8. Photos, video and the tools
+- 3338: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3406: 9. The scroll sections: what the practice pages become
+- 3441: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2553,6 +2553,22 @@ part where one exists, so it is there without being remembered.
     better angle that we discussed"). Once a still's framing is approved, every still of that scene keeps it: room for
     the words is made in the words (their size, their place, the dark the shot already has), never by reframing,
     shrinking or extending the picture. A framing change is a new approval, asked for before any credit.
+34. **Real and premium up close** (Tzvi, 20 Nov 2026: "their iron looks better, more real and more premium";
+    Burnt's iron beside docs/inspo/pinterest-burnt-2026-11-18/iron-lifted-beside-its-mark-walnut-wisp.jpg,
+    gen/fire/iron-close-vs-inspo.jpg). Every hero object, in any still, ad or film, is made to these six:
+    1. **Clean surfaces.** Each material one even finish (brushed steel, matte wood, glass); depth comes only from the
+       light, never from shading painted on the object. A smudge or glow on a surface is the first thing that reads fake.
+    2. **Crisp edges.** Every cut, letter and edge sharp; raised or sunk parts with hard lines and true black shadows,
+       never soft or glowing outlines.
+    3. **One hard light draws the edges.** A thin bright line along each edge and clearly darker sides: what makes a
+       thing look machined and heavy (3aa.33's one hard light, seen on the object).
+    4. **Real materials, real behaviour.** Steel as steel, never chrome-coated plastic; heat glows evenly as hot metal
+       does; each material has a real reference picture.
+    5. **Detail at the right scale.** A design fills its surface with a narrow margin and fine detail where a real maker
+       would put it; a big plain shape on a plain surface reads as a placeholder.
+    6. **Checked close up.** Before any still is shown, each hero object is cropped close and put beside its inspo at
+       the same size (scripts/inspo-beside.py on the crops), and the brief's `shot_seen` line answers the six. At full
+       frame both look fine; the close crop is where fake shows (Burnt's iron passed every full-frame look).
 
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
 

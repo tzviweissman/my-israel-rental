@@ -828,6 +828,16 @@
    "status": "built"
   },
   {
+   "id": "R3aa.36",
+   "rule": "Every hero object real and premium up close: clean surfaces, crisp edges, one hard light on the edges, real materials, detail at a maker's scale",
+   "how": [
+    "EYE"
+   ],
+   "built_by": "scripts/inspo-beside.py on close crops",
+   "confirmed_by": "LOOK: each hero object cropped close beside its inspo, shot_seen answering the six",
+   "status": "built"
+  },
+  {
    "id": "R3bb.1",
    "rule": "Pick at least three small touches from 3bb, named in CONCEPT.md",
    "how": [
@@ -3334,7 +3344,9 @@
   {
    "id": "R3af.1",
    "rule": "One drawn mark from the business's own logo or product does a job in three or more parts of the site",
-   "how": ["GEN"],
+   "how": [
+    "GEN"
+   ],
    "built_by": "CONCEPT.md ## Body '- mark:' line planned before build",
    "confirmed_by": "LOOK",
    "gremier_retry": false,
@@ -3343,7 +3355,9 @@
   {
    "id": "R3af.2",
    "rule": "The owner speaks in a short signed note beside their real photos; missing words are a content gap",
-   "how": ["ASK"],
+   "how": [
+    "ASK"
+   ],
    "built_by": "CONCEPT.md ## Body '- owner:' line; the owner asked for the words and a photo",
    "confirmed_by": "LOOK",
    "gremier_retry": false,
@@ -3352,7 +3366,9 @@
   {
    "id": "R3af.3",
    "rule": "With four or more work photos, one set is laid loose and flips or drags to show what it is",
-   "how": ["GEN"],
+   "how": [
+    "GEN"
+   ],
    "built_by": "CONCEPT.md ## Body '- loose:' line planned before build",
    "confirmed_by": "LOOK at laptop and phone, reduced motion on",
    "gremier_retry": false,
@@ -3361,7 +3377,9 @@
   {
    "id": "R3af.4",
    "rule": "Three or more kinds each get their own colour card, cut-out picture and one line of character",
-   "how": ["GEN"],
+   "how": [
+    "GEN"
+   ],
    "built_by": "CONCEPT.md ## Body '- cards:' line planned before build",
    "confirmed_by": "LOOK",
    "gremier_retry": false,
@@ -3370,7 +3388,10 @@
   {
    "id": "R3ag.1",
    "rule": "Product photos look shot for a shop: one plain ground, soft light, no foil, counter or flash; re-lit with relight_photo.py and checked beside the original",
-   "how": ["GEN", "EYE"],
+   "how": [
+    "GEN",
+    "EYE"
+   ],
    "built_by": "Photo sheet at step 2 marks each photo shop-ready or not; the rest re-lit with scrollcraft/starter/relight_photo.py to one ground before layout",
    "confirmed_by": "LOOK",
    "gremier_retry": false,
@@ -3379,7 +3400,9 @@
   {
    "id": "R3ag.2",
    "rule": "Every priced product is a card led by its photo, 200 px or wider at a laptop",
-   "how": ["GEN"],
+   "how": [
+    "GEN"
+   ],
    "built_by": "Section plan gives each priced product a photo card (photo, name and price, choices)",
    "confirmed_by": "check-look SMALL -> confirm only",
    "gremier_retry": false,
@@ -3388,7 +3411,9 @@
   {
    "id": "R3ag.3",
    "rule": "Home sections use two grounds taking turns, three at most",
-   "how": ["GEN"],
+   "how": [
+    "GEN"
+   ],
    "built_by": "Section plan assigns each section one of two grounds, alternating, before build",
    "confirmed_by": "check-look GROUNDS -> confirm only",
    "gremier_retry": false,
@@ -3397,7 +3422,10 @@
   {
    "id": "R3ag.4",
    "rule": "The opening's words beside or under the product photo, never on a panel over it; the photo whole",
-   "how": ["GEN", "EYE"],
+   "how": [
+    "GEN",
+    "EYE"
+   ],
    "built_by": "Opening plan: words at one side and the photo whole at the other on a laptop, photo then words on a phone",
    "confirmed_by": "LOOK",
    "gremier_retry": false,
@@ -3406,7 +3434,9 @@
   {
    "id": "R3ag.5",
    "rule": "One headline size for every section, a small label above each, plus 3ad.3's one jump",
-   "how": ["GEN"],
+   "how": [
+    "GEN"
+   ],
    "built_by": "One --h token for section headlines and a label above each, set in the section plan",
    "confirmed_by": "check-look HEADINGS -> confirm only",
    "gremier_retry": false,
@@ -3415,7 +3445,10 @@
   {
    "id": "R3ag.6",
    "rule": "Before review, compare.jpg beside two top sites of the category and REFERENCES.md ## Compared",
-   "how": ["ASK", "EYE"],
+   "how": [
+    "ASK",
+    "EYE"
+   ],
    "built_by": "Step 11: scripts/compare-sheet.mjs, then the ## Compared lines (difference -> what changed)",
    "confirmed_by": "check-compared -> confirm only",
    "gremier_retry": false,

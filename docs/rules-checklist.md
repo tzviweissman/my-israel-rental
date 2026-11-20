@@ -5,15 +5,15 @@ Sections (line each starts on; read with that offset):
 - 25: How to use it
 - 70: 1. Facts and words
 - 101: 2. Opening
-- 173: 3. Sections and worlds
-- 244: 4. Photos and media
-- 274: 5. Prices and savings
-- 296: 6. Order and booking flow
-- 322: 7. Motion
-- 351: 8. Phone
-- 367: 8b. From the seven videos, part two (29 Oct 2026)
-- 389: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 400: 9. Finish
+- 174: 3. Sections and worlds
+- 245: 4. Photos and media
+- 275: 5. Prices and savings
+- 297: 6. Order and booking flow
+- 323: 7. Motion
+- 352: 8. Phone
+- 368: 8b. From the seven videos, part two (29 Oct 2026)
+- 390: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 401: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -146,6 +146,7 @@ R3aa.32 | The whole film read in order by someone who did not write the prompts;
 R3aa.33 | The product shot like a premium product photo: close, low hero angle, one hard side light, its thickness and one hero part, the ground falling off; a Shot line from the inspo, each still beside it; each object's shape designed (not a plain default block), the idea taken, never copied | 3aa.33 | RUN: check-light-pool on the opening stills; LOOK: the brief's Shot and shot_seen lines, the inspo-beside sheet, each object's shape; n/a with no product picture in the opening
 R3aa.34 | The approved still's framing kept in every still of its scene; room for the words made in the words, never by reframing | 3aa.33 | LOOK: each still beside the approved one at the same size; n/a with no film when:film
 R3aa.35 | Every still of one scene from one base picture: the board, walnut and edges pixel for pixel the same | 3aa.17 | LOOK: the scene's stills blended in pairs, nothing but the asked change moves; n/a with no film when:film
+R3aa.36 | Every hero object real and premium up close: clean surfaces, crisp edges, one hard light on the edges, real materials, detail at a maker's scale | 3aa.34 | LOOK: each hero object cropped close beside its inspo at the same size, the shot_seen line answering the six; n/a with no product picture in the opening
 R3bb.1 | A new site picks at least three small touches from 3bb that fit its category and story, named on a "- touches:" line in CONCEPT.md, not the same three as the site built before; each shows only true facts | 3bb | LOOK: CONCEPT.md touches line and each touch on the site
 R3h.1 | The home page opens on a full-screen picture or film (at least 70% picture) and it is an event from their own thing (a film, or an event built in code), proposed with the first build, never after | 3h.1, 3n | script: site OPENING (home page) plus LOOK to confirm it is an event, not a drift
 R3n.1 | The owner's strongest real photo fills at least half the first screen on a laptop and on a phone, not a small card or cut-out shape | 3n.1 | LOOK: first screen at 1440x900 and 390x844
