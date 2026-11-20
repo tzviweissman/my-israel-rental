@@ -16,6 +16,9 @@ import sys
 from pymongo import MongoClient
 
 HIDE = re.compile(r"password|token|secret|otp|hash|api_key", re.I)
+# People's contact details print as [hidden], so reading the live database never puts a customer's phone,
+# email or address into a session (Tzvi, 20 Nov 2026). The field still shows, so you can see it is set.
+PRIVATE = re.compile(r"phone|e164|email|address|street|apartment|floor|entrance|lat$|lng$|lon$", re.I)
 
 
 def _railway_var(name: str) -> str:
@@ -27,7 +30,8 @@ def _railway_var(name: str) -> str:
 
 def _clean(x):
     if isinstance(x, dict):
-        return {k: _clean(v) for k, v in x.items() if not HIDE.search(k)}
+        return {k: ("[hidden]" if PRIVATE.search(k) and isinstance(v, (str, int, float, dict, list)) and v not in ("", None) and not isinstance(v, bool) else _clean(v))
+                for k, v in x.items() if not HIDE.search(k)}
     if isinstance(x, list):
         return [_clean(v) for v in x]
     return x
