@@ -33,24 +33,24 @@ Sections (line each starts on; read with that offset):
 - 2250: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
 - 2275: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
 - 2315: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2573: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2600: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2665: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2682: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2728: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2748: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2778: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2815: 4. What is reported to the owner instead (content gaps)
-- 2824: 5. How to write
-- 2873: 5a. Lessons from the practice pages
-- 2902: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2951: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2968: 6. Playbooks for the most common businesses
-- 3088: 7. Choosing the three options (automatic page builder only)
-- 3112: 8. Photos, video and the tools
-- 3338: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3406: 9. The scroll sections: what the practice pages become
-- 3441: 10. Open decisions (need Tzvi)
+- 2577: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2604: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2669: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2686: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2732: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2752: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2782: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2819: 4. What is reported to the owner instead (content gaps)
+- 2828: 5. How to write
+- 2877: 5a. Lessons from the practice pages
+- 2906: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2955: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2972: 6. Playbooks for the most common businesses
+- 3092: 7. Choosing the three options (automatic page builder only)
+- 3116: 8. Photos, video and the tools
+- 3342: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3410: 9. The scroll sections: what the practice pages become
+- 3445: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2553,6 +2553,10 @@ part where one exists, so it is there without being remembered.
     better angle that we discussed"). Once a still's framing is approved, every still of that scene keeps it: room for
     the words is made in the words (their size, their place, the dark the shot already has), never by reframing,
     shrinking or extending the picture. A framing change is a new approval, asked for before any credit.
+    **The hero fills its frame, or gets its own** (20 Nov 2026: Burnt's iron, a tenth of the approved wide frame, could
+    not look as premium as the inspo's, which fills it). The hero object fills at least a third of its frame. Where the
+    approved wide frame keeps it smaller, a step whose hero is the product gets a close shot of it as a frame of its
+    own beside the wide one, planned in the brief as two frames (a `close` and a `wide`), never one compromise frame.
 34. **Real and premium up close** (Tzvi, 20 Nov 2026: "their iron looks better, more real and more premium";
     Burnt's iron beside docs/inspo/pinterest-burnt-2026-11-18/iron-lifted-beside-its-mark-walnut-wisp.jpg,
     gen/fire/iron-close-vs-inspo.jpg). Every hero object, in any still, ad or film, is made to these six:

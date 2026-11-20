@@ -838,6 +838,16 @@
    "status": "built"
   },
   {
+   "id": "R3aa.37",
+   "rule": "The hero object fills a third of its frame, or a product step gets its own close frame beside the wide one",
+   "how": [
+    "EYE"
+   ],
+   "built_by": "the film brief's close and wide frames (3aa.33)",
+   "confirmed_by": "LOOK: the hero's share of each still",
+   "status": "built"
+  },
+  {
    "id": "R3bb.1",
    "rule": "Pick at least three small touches from 3bb, named in CONCEPT.md",
    "how": [
