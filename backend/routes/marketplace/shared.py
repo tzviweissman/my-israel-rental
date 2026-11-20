@@ -290,6 +290,24 @@ SUBCATEGORIES: dict[str, list[dict[str, str]]] = {
     # who needs a 7-seater to the airport at 5am and someone who wants a
     # chauffeur for a wedding were both searching "Transportation" and
     # reading past each other's listings.
+    # Added 2026-11-20 (Tzvi: "more subcategories for shops and products"). Shops are 27 of the 78 live
+    # listings and had no subcategory, so cinnamon buns, wigs and toys all sat in one list. The slugs follow
+    # what those 27 actually sell; scripts/check-shop-subcategories.mjs lists every shop still without one.
+    "shops-products": [
+        {"slug": "bakery",           "label": "Bakery & Cakes"},
+        {"slug": "boards-platters",  "label": "Boards & Platters"},
+        {"slug": "meals",            "label": "Meals & Shabbos Food"},
+        {"slug": "coffee-drinks",    "label": "Coffee & Drinks"},
+        {"slug": "pantry",           "label": "Dips, Spreads & Dough"},
+        {"slug": "gift-boxes",       "label": "Gift Boxes"},
+        {"slug": "judaica",          "label": "Judaica & Holidays"},
+        {"slug": "personalised",     "label": "Personalised & Art"},
+        {"slug": "toys",             "label": "Toys"},
+        {"slug": "clothing",         "label": "Clothing"},
+        {"slug": "jewelry",          "label": "Jewelry"},
+        {"slug": "hair-wigs",        "label": "Hair & Wigs"},
+        {"slug": "accessories",      "label": "Accessories"},
+    ],
     "transportation": [
         {"slug": "taxi",             "label": "Taxi"},
         {"slug": "airport-transfer", "label": "Airport Transfer"},

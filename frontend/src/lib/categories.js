@@ -91,6 +91,22 @@ export const SUBCATEGORIES = {
     { slug: 'legal',       label: 'Legal' },
     { slug: 'consulting',  label: 'Consulting' },
   ],
+  // 2026-11-20: shops sorted by what they sell (mirrors shared.py; scripts/check-shop-subcategories.mjs).
+  'shops-products': [
+    { slug: 'bakery',          label: 'Bakery & Cakes' },
+    { slug: 'boards-platters', label: 'Boards & Platters' },
+    { slug: 'meals',           label: 'Meals & Shabbos Food' },
+    { slug: 'coffee-drinks',   label: 'Coffee & Drinks' },
+    { slug: 'pantry',          label: 'Dips, Spreads & Dough' },
+    { slug: 'gift-boxes',      label: 'Gift Boxes' },
+    { slug: 'judaica',         label: 'Judaica & Holidays' },
+    { slug: 'personalised',    label: 'Personalised & Art' },
+    { slug: 'toys',            label: 'Toys' },
+    { slug: 'clothing',        label: 'Clothing' },
+    { slug: 'jewelry',         label: 'Jewelry' },
+    { slug: 'hair-wigs',       label: 'Hair & Wigs' },
+    { slug: 'accessories',     label: 'Accessories' },
+  ],
   transportation: [
     { slug: 'taxi',             label: 'Taxi' },
     { slug: 'airport-transfer', label: 'Airport Transfer' },

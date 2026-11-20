@@ -8,6 +8,7 @@ rules (docs/page-generation-rules.md).
 
 | Date | Source | Notes |
 |---|---|---|
+| 20 Nov 2026 | /businesses before, 8 browse pages from Mobbin, and the re-cut preview | [directory-2026-11-20/](directory-2026-11-20/README.md): category bar, rows by category, subcategory chips for shops, one film per row |
 | 17 Nov 2026 | Our 8 sites screen by screen, against the anatomy study and 4 YouTube videos | [sameness-2026-11-17/](sameness-2026-11-17/README.md): why every site matched after the opening (starter menu bar, `.sec`, steps, closing band); became page rules 3ad |
 | 4 Nov 2026 | Four YouTube videos: inspiration galleries, a flashlight hero, a 3D product site, brand kits | [videos-2026-11-04/](videos-2026-11-04/README.md): product to turn, counted numbers, compare cards, following light, new galleries; proposals wait for Tzvi |
 | 2 Nov 2026 | Pinterest ads, about 50 for every category on the site (24 folders, 1,194 ads; plus 8 idea folders, 267 ads, of what the free ad maker can draw) | [pinterest-ads-2026-11-02/](pinterest-ads-2026-11-02/README.md): each ad labelled by idea, how it could be made and how much it stands out; `index.html` filters them. Read before designing any ad |
