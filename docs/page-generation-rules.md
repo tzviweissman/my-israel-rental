@@ -33,24 +33,24 @@ Sections (line each starts on; read with that offset):
 - 2250: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
 - 2275: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
 - 2315: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2554: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2581: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2646: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2663: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2709: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2729: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2759: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2796: 4. What is reported to the owner instead (content gaps)
-- 2805: 5. How to write
-- 2854: 5a. Lessons from the practice pages
-- 2883: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2932: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2949: 6. Playbooks for the most common businesses
-- 3069: 7. Choosing the three options (automatic page builder only)
-- 3093: 8. Photos, video and the tools
-- 3319: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3387: 9. The scroll sections: what the practice pages become
-- 3422: 10. Open decisions (need Tzvi)
+- 2557: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2584: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2649: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2666: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2712: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2732: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2762: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2799: 4. What is reported to the owner instead (content gaps)
+- 2808: 5. How to write
+- 2857: 5a. Lessons from the practice pages
+- 2886: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2935: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2952: 6. Playbooks for the most common businesses
+- 3072: 7. Choosing the three options (automatic page builder only)
+- 3096: 8. Photos, video and the tools
+- 3322: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3390: 9. The scroll sections: what the practice pages become
+- 3425: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2538,7 +2538,10 @@ part where one exists, so it is there without being remembered.
     The brief has a `Shot:` line copied from the chosen inspo picture, naming its distance, angle, light direction,
     focus and hero, and the still prompt says the same in those words (Burnt: `low-hero` in gen/fire_stills.py). Before
     any still is shown, `python scripts/inspo-beside.py <inspo picture> <still>` puts it beside that picture at the same
-    height, and a `shot_seen` line in the brief says what was compared on the five points. `python
+    height, and a `shot_seen` line in the brief says what was compared on the five points, and also on each object's
+    shape: a prop or tool designed with an idea of its own, never the plain default (20 Nov 2026: Burnt's iron head
+    was a plain square block while the inspo's sweeps into its neck; Tzvi: "it doesn't need to match exactly the
+    inspo just use similar ideas like the fact that it's not a plain square"). Take the idea, never copy the shape. `python
     scripts/check-light-pool.py <stills> [--soft]` fails a picture whose edges are not darker than its middle (5); it
     cannot see 1 to 4, which the side-by-side sheet is for. For stills it is also the brightness check: the product
     itself must read 33 of 100 or more, while a dark ground on purpose passes (19 Nov 2026: brightness.py, made for
