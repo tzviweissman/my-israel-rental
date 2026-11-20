@@ -20,10 +20,17 @@ A tall (phone) frame is its wide still cropped close, the product running off bo
 third across of the rows 45% to 95% down (where the phone layout puts it, the words in the dark above), and its
 falloff is judged on the wide still. Exit 1 on a DARK product or a FLAT picture.
 Measured on Burnt, 19 Nov 2026: the flat top-down master, product 39 and ring 40 (FLAT); the low angled one, 34 and 18
-(pool). The angle itself (low, three-quarter, the product diagonal) is a LOOK line in the checklist."""
+(pool). The angle itself (low, three-quarter, the product diagonal) is a LOOK line in the checklist.
+A still whose product sits off-centre names its own box in product-boxes.json beside it ({"<file>": [x0, y0, x1, y1]},
+shares of the frame). Inside a named box the product reads the mean of its brighter three quarters, so a design cut
+into it as black recesses is not read as a dark product (20 Nov 2026: Burnt's close iron read 29 from its black flame
+and letters while its steel face was bright)."""
 import sys
 from pathlib import Path
 
+import json
+
+import numpy as np
 from PIL import Image, ImageStat
 
 argv = sys.argv[1:]
@@ -38,17 +45,21 @@ for a in args:
     p = Path(a)
     files += sorted(f for f in p.iterdir() if f.suffix.lower() in ('.png', '.jpg', '.jpeg', '.webp')) if p.is_dir() else [p]
 luma = lambda im: ImageStat.Stat(im).mean[0] / 2.55
+bright = lambda im: (lambda a: a[a >= np.percentile(a, 25)].mean() / 2.55)(np.asarray(im, np.float32))
+boxes = lambda f: (lambda j: json.loads(j.read_text(encoding='utf-8')).get(f.name) if j.exists() else None)(f.parent / 'product-boxes.json')
 dark = flat = 0
 for f in files:
     im = Image.open(f).convert('L')
     W, H = im.size
-    pbox = tuple(int(v * s) for v, s in zip(box, (W, H, W, H))) if box else None
+    own = None if box else boxes(f)
+    pbox = tuple(int(v * s) for v, s in zip(box or own, (W, H, W, H))) if (box or own) else None
+    read = bright if own else luma
     if H > W:                                   # a phone frame
-        prod = luma(im.crop(pbox or (W // 3, int(H * 0.45), 2 * W // 3, int(H * 0.95))))
+        prod = read(im.crop(pbox or (W // 3, int(H * 0.45), 2 * W // 3, int(H * 0.95))))
         ok_p = prod >= 33; dark += not ok_p
         print(f"{'ok  ' if ok_p else 'DARK'}  {f.name}: product {prod:.0f} (phone: its falloff judged on the wide still)")
         continue
-    prod = luma(im.crop(pbox or (W // 4, H // 4, 3 * W // 4, 3 * H // 4)))
+    prod = read(im.crop(pbox or (W // 4, H // 4, 3 * W // 4, 3 * H // 4)))
     parts = [im.crop((0, 0, W, H // 8)), im.crop((0, H - H // 8, W, H)), im.crop((0, 0, W // 10, H)), im.crop((W - W // 10, 0, W, H))]
     ring = sum(luma(p) * p.width * p.height for p in parts) / sum(p.width * p.height for p in parts)
     ok_p = prod >= 33
