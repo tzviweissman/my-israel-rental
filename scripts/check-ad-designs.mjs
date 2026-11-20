@@ -161,13 +161,26 @@ const drawOf = async (fn) => {
   return p.evaluate(() => window.__drawn.map(({ on, ...d }) => d));
 };
 
+// A click on a gallery, shape or language button that does not land is tried again before the run fails (18 Nov 2026:
+// one stuck click on "calling" waited two minutes and failed a 44-minute run; the next run passed untouched).
+async function tap(sel) {
+  for (let i = 1; ; i += 1) {
+    try { await p.locator(sel).click({ timeout: 40000 }); return; } catch (e) {
+      if (i === 3) throw e;
+      console.log(`retrying a stuck click on ${sel} (${i})`);
+      await p.locator(sel).scrollIntoViewIfNeeded().catch(() => {});
+      await p.waitForTimeout(1500);
+    }
+  }
+}
+
 // --- the owners' ad maker
 await p.goto(`${SITE}/dashboard?tab=advertising&as=owner`, { timeout: 180000 });
 await p.locator('[data-testid="ad-gallery"]').waitFor();
 let count = 0;
 for (const l of ['en', 'he']) {
   lang = l;
-  await p.locator(`[data-testid="ad-${l}"]`).click();
+  await tap(`[data-testid="ad-${l}"]`);
   await p.waitForFunction(() => document.querySelector('[data-testid="ad-g-behind"] img'));
   await p.waitForTimeout(2500);
   const keys = await p.locator('[data-testid="ad-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-g-', '')));
@@ -176,8 +189,8 @@ for (const l of ['en', 'he']) {
     if (only && !only.has(k)) continue;
     for (const f of (k === 'native' ? ['story'] : ['square', 'feed', 'story'])) {
       const drawn = await drawOf(async () => {
-        await p.locator(`[data-testid="ad-${f}"]`).click();
-        await p.locator(`[data-testid="ad-g-${k}"]`).click();
+        await tap(`[data-testid="ad-${f}"]`);
+        await tap(`[data-testid="ad-g-${k}"]`);
       });
       measure(`maker ${k} ${f} ${l}`, drawn, { square: 1080, feed: 1350, story: 1920 }[f], { price: k !== 'items', link: true, path: LONG_NAME, logo: true }); // Side by side: each item above its own price (rules 9b.3)
       count += 1;
@@ -251,10 +264,10 @@ if (!(await p.locator('[data-testid="ad-logo-unclear"]').count())) fails.push('l
 
 // The colour typed is the colour on the ad, dark or light (Tzvi, 6 Nov 2026), with words that still read.
 {
-  await p.locator('[data-testid="ad-story"]').click();
+  await tap('[data-testid="ad-story"]');
   const pickable = await p.locator('[data-testid="ad-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-g-', '')));
   for (const k of pickable) {
-    await p.locator(`[data-testid="ad-g-${k}"]`).click();
+    await tap(`[data-testid="ad-g-${k}"]`);
     await p.waitForTimeout(350);
     if (!(await p.locator('[data-testid="ad-colour-custom-hex"]').count())) continue;
     for (const [hex, rgb] of [['#FFE9A8', [255, 233, 168]], ['#7A1FA2', [122, 31, 162]]]) {
@@ -297,8 +310,8 @@ const pullTo = async (name, tx, ty) => {
 const dragKeys = await p.locator('[data-testid="ad-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-g-', '')));
 for (const k of dragKeys) {
   if (only && !only.has(k)) continue;
-  await p.locator('[data-testid="ad-story"]').click();
-  await p.locator(`[data-testid="ad-g-${k}"]`).click();
+  await tap('[data-testid="ad-story"]');
+  await tap(`[data-testid="ad-g-${k}"]`);
   await p.waitForTimeout(700);
   const names = await p.locator('[data-testid^="ad-piece-"]').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-piece-', '')));
   if (!names.includes('qr') || !names.includes('link')) fails.push(`drag ${k}: the code or link cannot be moved (${names})`);
@@ -402,9 +415,9 @@ const MOVING = async (qrBox) => {
   // Every shape on the first design; the rest in one shape, because each clip takes seconds.
   clips.push(['behind', 'feed'], ['behind', 'story']);
   for (const [k, f] of clips) {
-    if (f !== 'story' || k === 'native') await p.locator(`[data-testid="ad-${f}"]`).click();
-    else await p.locator('[data-testid="ad-story"]').click();
-    await p.locator(`[data-testid="ad-g-${k}"]`).click();
+    if (f !== 'story' || k === 'native') await tap(`[data-testid="ad-${f}"]`);
+    else await tap('[data-testid="ad-story"]');
+    await tap(`[data-testid="ad-g-${k}"]`);
     await p.waitForTimeout(900);
     await p.locator('[data-testid="ad-video"]').click();
     // Each frame is drawn in full: about half a minute a video on this machine.
@@ -479,7 +492,7 @@ console.log(`super admin: ${studio.length} designs`);
 await p.locator('[data-testid="ad-gallery"]').waitFor();
 if (await p.locator('[role="dialog"]').count()) fails.push('site maker: should be on the page, not in a pop-up');
 for (const l of ['en', 'he']) {
-  await p.locator(`[data-testid="ad-${l}"]`).click();
+  await tap(`[data-testid="ad-${l}"]`);
   await p.waitForFunction(() => document.querySelector('[data-testid="ad-g-behind"] img'));
   await p.waitForTimeout(2500);
   const keys = await p.locator('[data-testid="ad-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-g-', '')));
@@ -488,8 +501,8 @@ for (const l of ['en', 'he']) {
     if (only && !only.has(k)) continue;
     for (const f of (k === 'native' ? ['story'] : ['square', 'feed', 'story'])) {
       const drawn = await drawOf(async () => {
-        await p.locator(`[data-testid="ad-${f}"]`).click();
-        await p.locator(`[data-testid="ad-g-${k}"]`).click();
+        await tap(`[data-testid="ad-${f}"]`);
+        await tap(`[data-testid="ad-g-${k}"]`);
       });
       measure(`site ${k} ${f} ${l}`, drawn, { square: 1080, feed: 1350, story: 1920 }[f], { price: false, link: true });
       if (/[$₪€£]/.test(drawn.map((d) => d.t || '').join(' '))) fails.push(`site ${k} ${f} ${l}: price: the site has no price`);
