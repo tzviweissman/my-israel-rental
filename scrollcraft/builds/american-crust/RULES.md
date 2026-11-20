@@ -234,3 +234,5 @@ Re-checked 2026-11-20: gift section reserves its space while loading and scrolls
 Re-checked 2026-11-20: gift section reserves its space while loading and scrolls into view from the footer link; shop page re-checked
 
 Re-checked 2026-11-20: gift form three columns on laptops so the section fits one screen; space kept while it loads; footer link scrolls to it
+
+Re-checked 2026-11-20: gift section stops below the fixed menu bar when linked to

@@ -433,3 +433,5 @@ body:not(.no-js) section.sec#order.is-empty { padding-block: 1.4rem; }
   .gift .gift-done { grid-column: 1 / -1; grid-row: 1 / -1; }
   .gift[data-loading] [data-mir-gift-box] { display: block; grid-column: 1 / -1; grid-row: 2 / -1; min-height: 420px; }
 }
+/* the footer's Gift cards link stops below the fixed menu bar, not under it */
+.gift { scroll-margin-top: 72px; }
