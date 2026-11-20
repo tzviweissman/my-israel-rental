@@ -71,6 +71,19 @@ export const SUBCATEGORIES = {
     { slug: 'handyman',         label: 'Handyman' },
     { slug: 'appliance-repair', label: 'Appliance Repair' },
     { slug: 'interior-design',  label: 'Interior Design' },
+    { slug: 'kashering',        label: 'Kitchen Kashering' },
+    { slug: 'painting',         label: 'Painting' },
+  ],
+  'events-catering': [
+    { slug: 'catering',            label: 'Catering & Meals' },
+    { slug: 'cakes-desserts',      label: 'Cakes & Desserts' },
+    { slug: 'balloons-decor',      label: 'Balloons & Decor' },
+    { slug: 'music-entertainment', label: 'Music & Entertainment' },
+  ],
+  'personal-care': [
+    { slug: 'hair',   label: 'Hair & Wigs' },
+    { slug: 'makeup', label: 'Makeup' },
+    { slug: 'nails',  label: 'Nails' },
   ],
   'travel-tourism': [
     { slug: 'tour-guide',    label: 'Tour Guide' },

@@ -263,6 +263,21 @@ SUBCATEGORIES: dict[str, list[dict[str, str]]] = {
         {"slug": "handyman",        "label": "Handyman"},
         {"slug": "appliance-repair","label": "Appliance Repair"},
         {"slug": "interior-design", "label": "Interior Design"},
+        # 2026-11-20, for the /businesses rows: kitchen kashering and painters had nowhere to sit.
+        {"slug": "kashering",       "label": "Kitchen Kashering"},
+        {"slug": "painting",        "label": "Painting"},
+    ],
+    # 2026-11-20: caterers and bakers sit in Food on /businesses, balloons and music in Events.
+    "events-catering": [
+        {"slug": "catering",            "label": "Catering & Meals"},
+        {"slug": "cakes-desserts",      "label": "Cakes & Desserts"},
+        {"slug": "balloons-decor",      "label": "Balloons & Decor"},
+        {"slug": "music-entertainment", "label": "Music & Entertainment"},
+    ],
+    "personal-care": [
+        {"slug": "hair",   "label": "Hair & Wigs"},
+        {"slug": "makeup", "label": "Makeup"},
+        {"slug": "nails",  "label": "Nails"},
     ],
     "travel-tourism": [
         {"slug": "tour-guide",     "label": "Tour Guide"},

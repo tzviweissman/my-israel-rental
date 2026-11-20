@@ -32,12 +32,19 @@ export function useShowcase() {
 // for a frame and then stops (UI audit, 10 Oct 2026).
 const STILL = typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-function Preview({ slug, v }) {
+// `active` (optional): the row on /businesses decides which one tile plays (Tzvi, 20 Nov 2026: one film per
+// row, the rest show their still). Without it a tile plays whenever it is near the screen, as on /showcase.
+function Preview({ slug, v, active }) {
   const ref = useRef(null);
   useEffect(() => {
     const el = ref.current;
+    if (!el || STILL || active === undefined) return;
+    if (active) el.play().catch(() => {}); else el.pause();
+  }, [active]);
+  useEffect(() => {
+    const el = ref.current;
     if (!el) return undefined;
-    if (STILL) return undefined;
+    if (STILL || active !== undefined) return undefined;
     if (!('IntersectionObserver' in window)) return undefined;
     const io = new IntersectionObserver(([e]) => {
       if (e.isIntersecting) el.play().catch(() => {}); else el.pause();
@@ -61,14 +68,15 @@ function Mark({ item }) {
   );
 }
 
-export default function ShowcaseCard({ item }) {
+export default function ShowcaseCard({ item, active, onHover }) {
   const { i18n } = useTranslation();
   const he = (i18n.language || '').startsWith('he');
   return (
     // Named by its visible name and line, so screen readers and voice
     // control hear what is shown (UI audit, 10 Oct 2026).
-    <a className="sc-card" href={`/business/${item.slug}`}>
-      <div className="sc-tile"><Preview slug={item.slug} v={item.v} /></div>
+    <a className="sc-card" href={`/business/${item.slug}`} data-slug={item.slug}
+      onMouseEnter={onHover ? () => onHover(item.slug) : undefined} onMouseLeave={onHover ? () => onHover(null) : undefined}>
+      <div className="sc-tile"><Preview slug={item.slug} v={item.v} active={active} /></div>
       <div className="sc-meta">
         <Mark item={item} />
         <div className="sc-text">

@@ -40,6 +40,8 @@ import { SUBCATEGORIES, subcategoryLabel } from '../lib/categories';
 // place rather than deleted until 2c is approved.
 import ServicesHero from '../components/marketplace/ServicesHero';
 import FeaturedProviders from '../components/marketplace/FeaturedProviders';
+import { CategoryBar, AllRows, GroupView, sortIntoGroups } from '../components/marketplace/BrowseRows';
+import { groupById } from '../lib/browseGroups';
 
 const TEAL = 'var(--brand-primary)';
 const GOLD = 'var(--gold)';
@@ -162,6 +164,9 @@ const Services = () => {
   // View mode toggle — 'list' (default grid) vs 'map' (OSM pins). Held
   // in the URL so a shared "come see these gigs on the map" link works.
   const viewMode = searchParams.get('view') === 'map' ? 'map' : 'list';
+  // The browse rows (Tzvi, 20 Nov 2026): ?group=food&chip=bakery. Presentation only, filtered in the page.
+  const browseGroup = groupById(searchParams.get('group') || '') ? searchParams.get('group') : '';
+  const browseChip = searchParams.get('chip') || '';
 
   const state = readFilters(searchParams);
   const {
@@ -195,6 +200,7 @@ const Services = () => {
     return showcase.filter((x) => hit.has(x.business_id));
   }, [showcase, searching, displayGigs]);
   const regularGigs = useMemo(() => displayGigs.filter((g) => !showcaseIds.has(g.business_id)), [displayGigs, showcaseIds]);
+  const sortedGroups = useMemo(() => sortIntoGroups(displayGigs, pinnedPages), [displayGigs, pinnedPages]);
   const toggleAvailableNow = () => {
     const next = new URLSearchParams(searchParams);
     if (availableNowOnly) next.delete('available_now');
@@ -419,6 +425,39 @@ const Services = () => {
     return { title, description, path };
   }, [categories, locations, selectedCat, selectedLoc]);
 
+  // One listing card, used by the search grid and the browse rows alike.
+  const renderGig = (gig) => (
+    /* The admin feature-toggle is a SIBLING of the card, not a
+       child: GigCard renders a <button>, and a button inside a
+       button is invalid HTML that browsers reflow unpredictably
+       (and whose clicks fight each other). */
+    <div key={gig.id} className="relative">
+      <GigCard
+        gig={gig}
+        onClick={() => { saveReturnPath(); navigate(`/businesses/${gig.id}`); }}
+        i18n={i18n}
+        t={t}
+      />
+      {isAdmin && (
+        <button
+          type="button"
+          onClick={() => toggleFeatured(gig)}
+          className={`absolute top-2 end-2 z-10 px-2 py-1 rounded-full text-[10px] font-bold shadow transition-colors ${
+            gig.featured
+              ? 'bg-[var(--gold)] text-white'
+              : 'bg-white/95 text-gray-700 hover:bg-white'
+          }`}
+          data-testid={`services-feature-toggle-${gig.id}`}
+          aria-pressed={Boolean(gig.featured)}
+        >
+          {gig.featured
+            ? t('services.featured', 'Featured')
+            : t('services.feature', 'Feature')}
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div
       className="min-h-screen bg-[var(--bg)]"
@@ -545,13 +584,22 @@ const Services = () => {
         i18n={i18n}
       />
 
+      {viewMode !== 'map' && (
+        <div className="max-w-6xl mx-auto px-4">
+          <CategoryBar sorted={sortedGroups} total={pinnedPages.length + regularGigs.length} active={browseGroup}
+            onSelect={(id) => patchUrl({ group: id, chip: '' })} />
+        </div>
+      )}
+
       {/* Results header — Sort + Filters button + count */}
       <div id="services-results" className="max-w-6xl mx-auto px-4" style={{ scrollMarginTop: 88 }}>
         <div className="section-rhead flex items-center justify-between mb-4 gap-3 flex-wrap">
           <h2 className="text-gray-900">
             {selectedCat
               ? categories.find((c) => c.slug === selectedCat)?.label
-              : t('services.allServices', 'All services')}
+              : browseGroup
+                ? t(`browse.groups.${browseGroup}`, groupById(browseGroup).label)
+                : t('services.allServices', 'All services')}
             <span className="text-sm text-[var(--brand-muted)] font-normal ms-2" data-testid="services-count">
               ({pinnedPages.length + regularGigs.length})
             </span>
@@ -758,7 +806,8 @@ const Services = () => {
           sit under the location chips and the results bar, not above them
           (Tzvi, 1 Nov 2026), since they are the top of the same results. */}
       <div className="max-w-6xl mx-auto px-4">
-        <ShowcaseStrip items={pinnedPages} />
+        {/* With no search the business pages sit in their category rows (BrowseRows) instead. */}
+        {viewMode !== 'map' && searching && !browseGroup && <ShowcaseStrip items={pinnedPages} />}
       </div>
 
       {/* Gigs grid */}
@@ -929,6 +978,12 @@ const Services = () => {
               testId="services-peek"
             />
           </>
+        ) : browseGroup ? (
+          <GroupView groupId={browseGroup} chipId={browseChip} sorted={sortedGroups} renderGig={renderGig}
+            onChip={(id) => patchUrl({ chip: id })} />
+        ) : !searching ? (
+          <AllRows sorted={sortedGroups} renderGig={renderGig}
+            onOpen={(id) => { patchUrl({ group: id, chip: '' }); document.getElementById('services-results')?.scrollIntoView({ behavior: 'smooth' }); }} />
         ) : (
           <div
             /* S3 — one column fewer at every breakpoint above mobile.
@@ -941,40 +996,10 @@ const Services = () => {
                in full grids too. Now ~265px at lg and ~208px at xl. */
             className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-5 gap-y-8"
           >
-            {regularGigs.slice(0, shown).map((gig) => (
-              /* The admin feature-toggle is a SIBLING of the card, not a
-                 child: GigCard renders a <button>, and a button inside a
-                 button is invalid HTML that browsers reflow unpredictably
-                 (and whose clicks fight each other). */
-              <div key={gig.id} className="relative">
-                <GigCard
-                  gig={gig}
-                  onClick={() => { saveReturnPath(); navigate(`/businesses/${gig.id}`); }}
-                  i18n={i18n}
-                  t={t}
-                />
-                {isAdmin && (
-                  <button
-                    type="button"
-                    onClick={() => toggleFeatured(gig)}
-                    className={`absolute top-2 end-2 z-10 px-2 py-1 rounded-full text-[10px] font-bold shadow transition-colors ${
-                      gig.featured
-                        ? 'bg-[var(--gold)] text-white'
-                        : 'bg-white/95 text-gray-700 hover:bg-white'
-                    }`}
-                    data-testid={`services-feature-toggle-${gig.id}`}
-                    aria-pressed={Boolean(gig.featured)}
-                  >
-                    {gig.featured
-                      ? t('services.featured', 'Featured')
-                      : t('services.feature', 'Feature')}
-                  </button>
-                )}
-              </div>
-            ))}
+            {regularGigs.slice(0, shown).map(renderGig)}
           </div>
         )}
-        {viewMode !== 'map' && !loading && regularGigs.length > shown && (
+        {viewMode !== 'map' && !loading && searching && !browseGroup && regularGigs.length > shown && (
           <div className="flex justify-center mt-8">
             <button
               type="button"
