@@ -103,7 +103,8 @@ your reply, either "every check passes" or the problems it listed.
 6. **Concept and look.** CONCEPT.md: category (§3t), style sheet (§3g.1),
    three or more opening ideas with one "Own:" idea, the wow-gate answers
    (§3n), the effect budget (§3f.2) and `## Effects` with sources and the
-   `- touch:` line (§3p.5), and the `- showpiece:` line: one thing the visitor
+   `- touch:` line (§3p.5), the `- treatments:` line (three decorations at most,
+   §3ai), and the `- showpiece:` line: one thing the visitor
    does, adapted from a top site of the category (§3ah.5). Plan the opening as
    one headline naming every offer, one line, one button (§3ah.1), cards led by
    their photos with choices in the sheet (§3ah.2), a shop that opens on its
@@ -146,9 +147,9 @@ your reply, either "every check passes" or the problems it listed.
     step 6, not found here. Then a Sonnet subagent that did not build it, against
     `docs/page-review-checklist.md`; fix every FAIL, it looks again (§3r.2). Score
     the wow gate (§3n). Then a Sonnet judge that did not build it rates
-    compare.jpg from 1 to 5 against the references, and review.md gets
-    `Rating: N/5`; under 5, fix and judge again before anyone sees it (§3ah.7,
-    `check-build`). Planned well at steps 5 and 6, this is a 5 the first time.
+    the site from 1 to 5 beside two real top sites of its category, and
+    review.md gets `Rating: N/5`; under 4, fix and judge again before anyone
+    sees it (§3ah.7, `check-build`; real award winners score 4 to 4.5). Planned well at steps 5 and 6, this is a 5 the first time.
 12. **RULES.md.** Answer every line of `docs/rules-checklist.md` and pass
     `node scripts/check-rules.mjs <build>` before anyone sees the site (§6).
 13. **Report.** Ends with "Not done yet" and "For your call", after a

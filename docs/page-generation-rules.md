@@ -2,56 +2,57 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 124: 1. The job, in one line
-- 129: 2. What the AI gets, and the only facts it may use
-- 162: 3. Hard rules (checked: a page breaking one is thrown away and remade)
-- 199: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
-- 241: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
-- 309: 3b. The category checklist (from the Inspo study)
-- 348: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 481: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 576: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
-- 713: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 778: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 949: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
-- 1245: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 1283: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 1398: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 1477: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 1509: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 1536: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 1582: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 1619: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1693: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1718: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1755: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1872: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
-- 1893: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1964: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
-- 2049: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 2159: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 2251: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 2276: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 2316: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2581: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2608: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2673: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2690: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2736: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2756: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2786: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2830: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
-- 2888: 4. What is reported to the owner instead (content gaps)
-- 2897: 5. How to write
-- 2946: 5a. Lessons from the practice pages
-- 2975: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3024: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3041: 6. Playbooks for the most common businesses
-- 3161: 7. Choosing the three options (automatic page builder only)
-- 3185: 8. Photos, video and the tools
-- 3411: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3479: 9. The scroll sections: what the practice pages become
-- 3514: 10. Open decisions (need Tzvi)
+- 125: 1. The job, in one line
+- 130: 2. What the AI gets, and the only facts it may use
+- 163: 3. Hard rules (checked: a page breaking one is thrown away and remade)
+- 200: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
+- 242: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
+- 310: 3b. The category checklist (from the Inspo study)
+- 349: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 482: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 577: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
+- 714: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 779: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 950: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
+- 1246: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 1284: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 1399: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 1478: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 1510: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 1537: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 1583: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 1620: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1694: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1719: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1756: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1873: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
+- 1894: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1965: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+- 2050: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 2160: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 2252: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 2277: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 2317: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 2582: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2609: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2674: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2691: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2737: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2757: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2787: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2834: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
+- 2896: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
+- 2917: 4. What is reported to the owner instead (content gaps)
+- 2926: 5. How to write
+- 2975: 5a. Lessons from the practice pages
+- 3004: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3053: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3070: 6. Playbooks for the most common businesses
+- 3190: 7. Choosing the three options (automatic page builder only)
+- 3214: 8. Photos, video and the tools
+- 3440: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3508: 9. The scroll sections: what the practice pages become
+- 3543: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2825,7 +2826,10 @@ them. The fixes, made on her site the same day, are the rule. Not asked of a sit
    two of the best sites of the same category (from Pinterest, Awwwards or Inspo, saved in REFERENCES.md) in
    `compare.jpg` in the build folder (`node scripts/compare-sheet.mjs <build> <picture 1> <picture 2>`), and
    REFERENCES.md gets a `## Compared` part: each difference that makes ours look worse, and what was changed. The
-   reviewer reads both. Checked by `scripts/check-compared.mjs <build>`.
+   reviewer reads both. At least one of the two is a live, shipped site of the category, named by its address
+   (Tzvi, 20 Nov 2026): the two Pinterest bakery designs were concept mockups, studio-shot and never built, and when
+   judged beside real award winners they scored 4 and 3.5, below Sonoma Bakery's 4.5, after three rounds spent chasing
+   them. Checked by `scripts/check-compared.mjs <build>` (LIVE).
 
 ## 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
 
@@ -2880,10 +2884,35 @@ one of the judge's reasons. Not asked of a site published before 20 Nov 2026.
    Awwwards or Inspo, the pictures saved in the build or `docs/inspo/`) are studied and REFERENCES.md gets a
    `## Why they are a 5` part: at least five lines, each a thing they do that makes them a 5, and how this site will do
    it ("one headline and one button over one photo -> ..."). Fable's ideas step reads that part with this section.
-   At step 11, before the review, a Sonnet judge that did not build the site rates compare.jpg (3ag.6) from 1 to 5,
-   where 5 is "could sit among those references and not look out of place", and review.md gets its line
-   `Rating: N/5`. Anything under 5 is fixed and judged again before anyone sees the site. Checked by
-   `scripts/check-compared.mjs` (the part) and `scripts/check-build.mjs` (the rating, when compare.jpg exists).
+   At step 11, before the review, a Sonnet judge that did not build the site rates it from 1 to 5 beside two real top
+   sites of its category, and review.md gets its line `Rating: N/5`. **The bar is 4** (Tzvi, 20 Nov 2026: "Change bar
+   to 4"): rated by the same judge, the real award-winning bakery sites on Awwwards scored 4 (Bernice Bakery) and 4.5
+   (Sonoma Bakery), the Pinterest designs 4 and 3.5, and nothing scored 5, so a 5 bar blocked every site. 5 is
+   "one of the best sites of its kind anywhere", 4 "clearly professional, better than most", 3 "a decent small-business
+   site". Anything under 4 is fixed and judged again before anyone sees the site. Checked by
+   `scripts/check-compared.mjs` (the part) and `scripts/check-build.mjs` and publish-page (the rating, when compare.jpg
+   exists).
+
+## 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
+
+A judge put Cakes by Tova beside Sonoma Bakery (4.5, the best of five) and Bernice Bakery (4) and held her back for
+"many different treatments (dark bands, scalloped edges, tinted cards, polaroids, ribbons) side by side". Sonoma uses
+big photos on one quiet ground and almost nothing else. Each rule we had added brought one more decoration, and
+together they made the page busy.
+
+1. **A site uses three decorations at most** beyond its photos, its grounds and its type: a decoration is anything
+   added for looks, such as a scalloped or notched edge, a ribbon or badge label, tinted cards, tilted prints, a
+   pattern or texture, a drawn mark used as ornament, a travelling object, scallops under links or buttons. They are
+   chosen at step 6 from the references (3ag.6) and written in CONCEPT.md as
+   `- treatments: <one>; <two>; <three>`. A fourth needs Tzvi's yes, written on the line as `(Tzvi OK, <date>)`.
+2. **The rules that ask for a decoration are choices among the three**: the mark (3af.1), the travelling object
+   (3ae.2), the loose photos (3af.3) and the colour cards (3af.4) each count as one when used. A site that uses
+   all four asks Tzvi first. Labels above headings (3ag.5) are plain small type, not a ribbon or badge, and do not
+   count.
+3. Cakes by Tova, calmed the same day: the scalloped edges, the scallops under links and buttons, the ribbon labels
+   and the notched closing band were removed; the colour cards were softened (`docs/inspo/compare-2026-11-19/
+   calm-before-after.jpg`). Checked by `scripts/check-compared.mjs` (TREATMENTS); the count itself is LOOK. Not asked
+   of a site published before 20 Nov 2026.
 
 ## 4. What is reported to the owner instead (content gaps)
 

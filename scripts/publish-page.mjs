@@ -109,8 +109,8 @@ ${lp.stdout}${lp.stderr}`);
   if (isNew && !(fs.existsSync(review) && /^Verdict:\s*PASS\b/m.test(fs.readFileSync(review, 'utf8'))))
     problems.push('no independent review: review.md with "Verdict: PASS" from a Sonnet subagent that did not build the site (docs/page-review-checklist.md)');
   // judged a 5 beside the best of its kind before anyone sees it (Tzvi, 20 Nov 2026; rules 3ah.7)
-  if (isNew && fs.existsSync(path.join(SRC, 'compare.jpg')) && !(fs.existsSync(review) && /^Rating:\s*5\s*\/\s*5\b/m.test(fs.readFileSync(review, 'utf8'))))
-    problems.push('not judged a 5: review.md has no "Rating: 5/5" from a judge that did not build the site, rating compare.jpg (rules 3ah.7)');
+  if (isNew && fs.existsSync(path.join(SRC, 'compare.jpg')) && !(fs.existsSync(review) && /^Rating:\s*(4(\.5)?|5)\s*\/\s*5\b/m.test(fs.readFileSync(review, 'utf8'))))
+    problems.push('not judged 4 or more: review.md has no "Rating: 4/5" or better from a judge that did not build the site (rules 3ah.7)');
   if (rules.status !== 0) problems.push(`rules not all answered (check-rules):\n${rules.stdout.split('\n').filter((l) => /FAIL|problem/.test(l)).join('\n')}`);
   // and every page of it fits the screen, with no photo blown up past its size (rules 3c.12,
   // 3p.6; Tzvi, 20 Oct 2026: "make sure the rules will prevent this in the future"), has no

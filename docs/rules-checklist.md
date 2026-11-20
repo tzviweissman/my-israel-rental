@@ -6,14 +6,14 @@ Sections (line each starts on; read with that offset):
 - 70: 1. Facts and words
 - 101: 2. Opening
 - 175: 3. Sections and worlds
-- 253: 4. Photos and media
-- 283: 5. Prices and savings
-- 305: 6. Order and booking flow
-- 331: 7. Motion
-- 360: 8. Phone
-- 376: 8b. From the seven videos, part two (29 Oct 2026)
-- 398: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 409: 9. Finish
+- 254: 4. Photos and media
+- 284: 5. Prices and savings
+- 306: 6. Order and booking flow
+- 332: 7. Motion
+- 361: 8. Phone
+- 377: 8b. From the seven videos, part two (29 Oct 2026)
+- 399: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 410: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -241,14 +241,15 @@ R3ag.2 | Every product sold with its price is a card led by its photo, 200 px or
 R3ag.3 | The home page's sections use two grounds taking turns, three at most | 3ag.3, 3ad.3 | script: `node scripts/check-look.mjs <home url>` (GROUNDS)
 R3ag.4 | The opening photo fills the screen (3h.1) with the product whole, extended on its plain side, and the words stand on that plain ground, never on a panel over the product | 3ag.4, 3h.1, 3c.12 | LOOK: 1366x800 and 390x844
 R3ag.5 | Every section headline is one size with a small label above it; the only other size is 3ad.3's one jump | 3ag.5 | script: `node scripts/check-look.mjs <home url>` (HEADINGS)
-R3ag.6 | Before review, compare.jpg puts screens.jpg beside two top sites of the same category, and REFERENCES.md has a ## Compared part naming each difference and what changed | 3ag.6 | script: `node scripts/check-compared.mjs <build>`
+R3ag.6 | Before review, compare.jpg puts screens.jpg beside two top sites of the same category, at least one a live shipped site named by its address, and REFERENCES.md has a ## Compared part naming each difference and what changed | 3ag.6 | script: `node scripts/check-compared.mjs <build>` (LIVE)
 R3ah.1 | The first screen has one big headline naming every offer, one line under it and one main button, on one photo; no other text of 28 px or more | 3ah.1, 3g.13, 3g.18 | script: `node scripts/check-five.mjs <page urls>` (OPENING)
 R3ah.2 | Every product card is led by its photo edge to edge, then name, price and one short line (16 words at most besides them); choices in the item's sheet; a 3af.4 colour card's cut-out spans the card | 3ah.2, 3af.4, 3l.3 | script: `node scripts/check-five.mjs <page urls>` (CARDS)
 R3ah.3 | A page selling four or more products opens on pictures (a third of the laptop's first screen or more), every product photo 240 px wide or more | 3ah.3 | script: `node scripts/check-five.mjs <page urls>` (SHOPTOP)
 R3ah.4 | Paragraphs, product names and prices are 16 px or more at a laptop | 3ah.4 | script: `node scripts/check-five.mjs <page urls>` (TEXT)
 R3ah.5 | One showpiece section the visitor uses, adapted from a top site of the category, in CONCEPT.md as - showpiece: ... (from: ...), working by tap on a phone | 3ah.5 | script: `node scripts/check-compared.mjs <build>` (SHOWPIECE) + LOOK
 R3ah.6 | Every tier and product priced in the listings can be ordered on the site at that price, or is in not-sold.txt with why | 3ah.6 | script: `node scripts/check-listing-prices.mjs <build>`
-R3ah.7 | REFERENCES.md has ## Why they are a 5 (five lines or more) before any idea, and review.md says Rating: 5/5 from a judge that did not build the site | 3ah.7 | script: `node scripts/check-compared.mjs <build>` + `node scripts/check-build.mjs <build>` (rating)
+R3ah.7 | REFERENCES.md has ## Why they are a 5 (five lines or more) before any idea, and review.md says Rating: 4/5 or better from a judge that did not build the site, rating it beside two real top sites | 3ah.7 | script: `node scripts/check-compared.mjs <build>` + `node scripts/check-build.mjs <build>` (rating)
+R3ai.1 | Three decorations at most beyond photos, grounds and type, listed on CONCEPT.md's - treatments: line; a fourth only with (Tzvi OK, date); 3ae.2, 3af.1, 3af.3, 3af.4 count when used | 3ai | script: `node scripts/check-compared.mjs <build>` (TREATMENTS) + LOOK
 
 ## 4. Photos and media
 

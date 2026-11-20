@@ -81,8 +81,9 @@ await Promise.all(Array.from({ length: Math.min(4, runs.length) }, async () => {
   const why = !fs.existsSync(review) ? 'no review.md'
     : !/^Verdict:\s*PASS\b/m.test(fs.readFileSync(review, 'utf8')) ? 'review.md has no "Verdict: PASS" line'
     : fs.statSync(review).mtimeMs < newest ? 'the site changed after the review'
-    // rules 3ah.7: a site compared with the best of its kind (compare.jpg) is judged a 5 before anyone sees it
-    : fs.existsSync(path.join(site, 'compare.jpg')) && !/^Rating:\s*5\s*\/\s*5\b/m.test(fs.readFileSync(review, 'utf8')) ? 'review.md has no "Rating: 5/5" line (rules 3ah.7: a judge that did not build it rates compare.jpg; fix and judge again until 5)' : '';
+    // rules 3ah.7: a site compared with the best of its kind (compare.jpg) is judged 4 or more before anyone sees it
+    // (20 Nov 2026: real award-winning bakery sites score 4 to 4.5 with this judge; nothing scores 5)
+    : fs.existsSync(path.join(site, 'compare.jpg')) && !/^Rating:\s*(4(\.5)?|5)\s*\/\s*5\b/m.test(fs.readFileSync(review, 'utf8')) ? 'review.md has no "Rating: 4/5" or better (rules 3ah.7: a judge that did not build it rates the site beside two real top sites; fix and judge again until 4)' : '';
   results.push({ name: 'independent review', ok: !why, out: why && `${why}. Have a Sonnet subagent that did not build the site use it at laptop and phone size against docs/page-review-checklist.md and write ${dir}/review.md; fix every FAIL, then review again.` });
 }
 let failed = 0;

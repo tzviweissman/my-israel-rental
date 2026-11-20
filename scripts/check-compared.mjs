@@ -35,5 +35,13 @@ const concept = existsSync(join(dir, 'CONCEPT.md')) ? readFileSync(join(dir, 'CO
 const sp = /^- showpiece:\s*(.+)$/m.exec(concept);
 if (!sp) why.push('SHOWPIECE: CONCEPT.md has no "- showpiece: <what the visitor does> (from: <reference>)" line (3ah.5)');
 else if (!/from:/i.test(sp[1])) why.push('SHOWPIECE: the showpiece line names no reference ("from: <the top site it adapts>")');
+// at least one live, shipped site of the category among the references (rules 3ag.6, 20 Nov 2026: both Pinterest
+// references were concept mockups and scored 4 and 3.5 when judged beside real award winners)
+if (!/https?:\/\/(?!(www\.)?(pinterest|pin\.it|dribbble|behance))[^\s)]+/i.test((part || '') + (five || '')))
+  why.push('LIVE: "## Compared" or "## Why they are a 5" names no live site of the category (its address); a Pinterest or Dribbble design alone is a concept, not a site');
+// three decorations at most beyond the photos, grounds and type (rules 3ai)
+const tr = /^- treatments:\s*(.+)$/m.exec(concept);
+if (!tr) why.push('TREATMENTS: CONCEPT.md has no "- treatments: <one>; <two>; <three>" line (3ai: three decorations at most)');
+else if (tr[1].split(';').filter((x) => x.trim()).length > 3 && !/Tzvi OK/i.test(tr[1])) why.push(`TREATMENTS: ${tr[1].split(';').length} decorations; three at most, or "(Tzvi OK, <date>)" on the line (3ai)`);
 if (why.length) { console.log(`COMPARED  ${dir}\n  ${why.join('\n  ')}`); process.exit(1); }
 console.log(`${dir}: compared`);

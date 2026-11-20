@@ -3454,7 +3454,7 @@
   },
   {
    "id": "R3ag.6",
-   "rule": "Before review, compare.jpg beside two top sites of the category and REFERENCES.md ## Compared",
+   "rule": "Before review, compare.jpg beside two top sites of the category (one a live site) and REFERENCES.md ## Compared",
    "how": [
     "ASK",
     "EYE"
@@ -3534,13 +3534,25 @@
   },
   {
    "id": "R3ah.7",
-   "rule": "REFERENCES ## Why they are a 5 before any idea; review.md Rating: 5/5 from a judge before anyone sees it",
+   "rule": "REFERENCES ## Why they are a 5 before any idea; review.md Rating: 4/5 or better from a judge, beside two real top sites",
    "how": [
     "ASK",
     "EYE"
    ],
    "built_by": "Step 5 writes ## Why they are a 5; step 11 a Sonnet judge rates compare.jpg",
    "confirmed_by": "check-compared NOFIVE + check-build rating",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ai.1",
+   "rule": "Three decorations at most beyond photos, grounds and type, on CONCEPT's - treatments: line",
+   "how": [
+    "ASK",
+    "EYE"
+   ],
+   "built_by": "Step 6 picks up to three decorations from the references and writes the - treatments: line",
+   "confirmed_by": "check-compared TREATMENTS + LOOK",
    "gremier_retry": false,
    "status": "planned"
   }
