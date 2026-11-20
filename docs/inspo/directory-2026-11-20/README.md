@@ -34,3 +34,5 @@ subcategory chips, and the "All" view is rows by theme, each with "See all".
 and counts; "All" is one row per category (business pages first, then listings, "See all"); a category shows its
 subcategory chips with counts, business pages in a grid, then the listings. One film plays per row: the first
 business page fully in view, or the one under the pointer; the rest show their still.
+
+Tzvi, 20 Nov 2026: "Keep intros". In the "All" view every category row opens on an intro tile: four of its own product photos (never the website stills beside it), the category name in the serif, one short line, and the count; tapping it opens the category.
