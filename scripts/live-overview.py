@@ -11,6 +11,7 @@ never printed.
 import asyncio
 import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -19,8 +20,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _railway_var(name: str) -> str:
-    out = subprocess.run(["railway", "variables", "--service", "my-israel-rental Backend", "--kv"],
-                         capture_output=True, text=True, shell=True).stdout
+    # shutil.which finds railway.cmd on Windows; shell=True with a list ran only "railway" on Mac and Linux (code review 20 Nov 2026).
+    out = subprocess.run([shutil.which("railway") or "railway", "variables", "--service", "my-israel-rental Backend", "--kv"],
+                         capture_output=True, text=True).stdout
     return next((ln.split("=", 1)[1] for ln in out.splitlines() if ln.startswith(name + "=")), "")
 
 
