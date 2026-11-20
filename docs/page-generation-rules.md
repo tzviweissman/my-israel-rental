@@ -2,55 +2,56 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 123: 1. The job, in one line
-- 128: 2. What the AI gets, and the only facts it may use
-- 161: 3. Hard rules (checked: a page breaking one is thrown away and remade)
-- 198: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
-- 240: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
-- 308: 3b. The category checklist (from the Inspo study)
-- 347: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 480: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 575: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
-- 712: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 777: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 948: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
-- 1244: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 1282: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 1397: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 1476: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 1508: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 1535: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 1581: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 1618: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1692: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1717: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1754: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1871: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
-- 1892: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1963: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
-- 2048: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 2158: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 2250: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 2275: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 2315: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2577: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2604: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2669: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2686: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2732: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2752: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2782: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2819: 4. What is reported to the owner instead (content gaps)
-- 2828: 5. How to write
-- 2877: 5a. Lessons from the practice pages
-- 2906: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2955: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2972: 6. Playbooks for the most common businesses
-- 3092: 7. Choosing the three options (automatic page builder only)
-- 3116: 8. Photos, video and the tools
-- 3342: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3410: 9. The scroll sections: what the practice pages become
-- 3445: 10. Open decisions (need Tzvi)
+- 124: 1. The job, in one line
+- 129: 2. What the AI gets, and the only facts it may use
+- 162: 3. Hard rules (checked: a page breaking one is thrown away and remade)
+- 199: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
+- 241: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
+- 309: 3b. The category checklist (from the Inspo study)
+- 348: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 481: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 576: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
+- 713: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 778: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 949: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
+- 1245: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 1283: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 1398: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 1477: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 1509: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 1536: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 1582: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 1619: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1693: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1718: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1755: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1872: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
+- 1893: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1964: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+- 2049: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 2159: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 2251: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 2276: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 2316: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 2578: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2605: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2670: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2687: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2733: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2753: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2783: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2820: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
+- 2874: 4. What is reported to the owner instead (content gaps)
+- 2883: 5. How to write
+- 2932: 5a. Lessons from the practice pages
+- 2961: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3010: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3027: 6. Playbooks for the most common businesses
+- 3147: 7. Choosing the three options (automatic page builder only)
+- 3171: 8. Photos, video and the tools
+- 3397: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3465: 9. The scroll sections: what the practice pages become
+- 3500: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2815,6 +2816,60 @@ them. The fixes, made on her site the same day, are the rule. Not asked of a sit
    `compare.jpg` in the build folder (`node scripts/compare-sheet.mjs <build> <picture 1> <picture 2>`), and
    REFERENCES.md gets a `## Compared` part: each difference that makes ours look worse, and what was changed. The
    reviewer reads both. Checked by `scripts/check-compared.mjs <build>`.
+
+## 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
+
+Cakes by Tova met every rule through 3ag, passed 70 checks and five reviews, and a judge that had not built her put her
+beside the two Pinterest bakery designs and the Awwwards bakery sites of 3ag (`docs/inspo/compare-2026-11-19`) and gave
+her 3 of 5: photos 3, layout 3, type 3.5, colour 3.5, opening 3, shop 2.5. Tzvi did not want a loop of building,
+comparing and rebuilding: what a 5 has is planned before the build and checked while it is built. Each rule below is
+one of the judge's reasons. Not asked of a site published before 20 Nov 2026.
+
+1. **One statement opens the site.** The first screen has one big headline, one line under it (20 words at most) and
+   one main button, on one photo. A business with several kinds of offer names them inside that headline, in the
+   customer's words and as few as can say it ("Challah, doughnuts and gifts", within 3g.13's five words), and `<meta name="offers">`
+   uses the same words, so 3g.18's check still finds each. Never a stack of big tray names, tabs or lines beside it:
+   Tova's had her headline plus "Weekly bakes", "Chanukah treats" and "Gifts from abroad" in big type, which read as a
+   flyer. The headline keeps the scale's biggest size (`--t5`) on every laptop, short ones included, and its button is
+   large (56 px tall, `--t1` words): the second judge (3.5 of 5) found Tova's shrunk to `--t4` on an 800 px screen with a
+   small pink button. Checked by `scripts/check-five.mjs` (OPENING: one block of text 28 px or more on the first
+   screen, 4 s after load, at 1366x800 and 390x844).
+2. **A product card is its photo.** The photo runs the card's full width, edge to edge (85% of its width or more),
+   then the name, the price and one short line: 16 words at most besides the name and price. Flavours, sizes and
+   other choices live in the item's sheet (3l.3), never as rows of buttons on the card. A colour card (3af.4) is the
+   same: its cut-out stands big on the product's colour across the card's full width, never small in the middle of a
+   tile. Tova's cards were a small cut-out on a tan tile with every flavour as a button under it. Checked by `scripts/check-five.mjs` (CARDS).
+3. **A shop opens on its products.** On any page selling four or more products, pictures fill a third of the first
+   screen at a laptop or more (the products, or one big photo of them), and every product photo is 240 px wide or
+   more there: three or four to a row, never five small ones, and chosen so no row is left less than half full (six
+   bakes three to a row, not four and two). A page title and one line, then the products; the explanations go under
+   them or into the sheet. Product names in the heading face at `--t1`, prices bold at `--t1`. Tova's shop opened on a page of words above a row of small pictures
+   (11% pictures). Checked by `scripts/check-five.mjs` (SHOPTOP); Magnolia Bakery's cakes page passes (a banner photo
+   above its cards).
+4. **Words people read are 16 px or more.** At a laptop, paragraphs of four words or more, product names and prices
+   are 16 px or bigger (`--t0` in the starter's scale, never `--t-1` for them). Since 20 Nov 2026 the starter's `--t0`
+   is 18 px and `--t-1` 15 px: the judge still called 17 px "tiny and thin" in a rounded face (Varela Round). Small type is for labels of three
+   words or fewer, the footer and fine print. Tova's card lines and prices were 14 px, and the judge called them
+   "very small". Checked by `scripts/check-five.mjs` (TEXT).
+5. **One showpiece, taken from the best of its kind.** Each site has one section built round one thing the visitor
+   does, adapted from a top site of its own category, the moment people remember (the cake site's "choose your mood"
+   row that changes the cake; for Tova, an occasion chooser: Shabbat, Chanukah, a birthday, a gift from abroad, each
+   showing her bakes for it). It is planned at step 6 with the ideas, written in CONCEPT.md as
+   `- showpiece: <what the visitor does> (from: <the reference site>)`, and it works with a tap on a phone. Her page
+   was band after band of the same cream and dark sections with nothing to do. Checked by `scripts/check-compared.mjs`
+   (the CONCEPT line) and by the judge in 7.
+6. **Everything priced can be ordered.** Every tier and product with a price in the business's listings can be ordered
+   on the site at that price, or is named in `<build>/not-sold.txt` with why. Tova's "Specialty Decorated Cakes,
+   Cupcakes, and Cake Pops" at ₪140 was on her home page with a WhatsApp link but not in her shop, and Tzvi found it.
+   Checked by `scripts/check-listing-prices.mjs <build>`.
+7. **Planned against a 5, judged a 5.** At step 5, before any idea, the two best sites of the category (Pinterest,
+   Awwwards or Inspo, the pictures saved in the build or `docs/inspo/`) are studied and REFERENCES.md gets a
+   `## Why they are a 5` part: at least five lines, each a thing they do that makes them a 5, and how this site will do
+   it ("one headline and one button over one photo -> ..."). Fable's ideas step reads that part with this section.
+   At step 11, before the review, a Sonnet judge that did not build the site rates compare.jpg (3ag.6) from 1 to 5,
+   where 5 is "could sit among those references and not look out of place", and review.md gets its line
+   `Rating: N/5`. Anything under 5 is fixed and judged again before anyone sees the site. Checked by
+   `scripts/check-compared.mjs` (the part) and `scripts/check-build.mjs` (the rating, when compare.jpg exists).
 
 ## 4. What is reported to the owner instead (content gaps)
 

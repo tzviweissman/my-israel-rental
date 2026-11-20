@@ -2,47 +2,48 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 60: 0. Use the same tools (this is what gives the full capability)
-- 152: 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
-- 224: 1. Facts: only theirs
-- 294: 2. How to write
-- 337: 3. The category checklist (what the best real sites share)
-- 363: 3b. The sections every page has (Tzvi, 6 Oct 2026)
-- 386: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 430: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 465: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 495: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 555: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
-- 625: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 647: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 742: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 805: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 837: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 864: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 904: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 937: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 995: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1019: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1047: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1126: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
-- 1130: 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
-- 1142: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1152: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 1167: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 1178: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 1185: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 1196: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 1207: 3bb. Small touches (Tzvi, 12 Nov 2026)
-- 1219: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026)
-- 1226: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026)
-- 1239: 3ae. One part leads into the next (Tzvi, 18 Nov 2026)
-- 1247: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
-- 1258: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026)
-- 1269: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1277: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1311: 4. Design and story
-- 1341: 5. Build rules (each one shipped as a defect once)
-- 1364: 6. Look through it, fix it, then show it
+- 61: 0. Use the same tools (this is what gives the full capability)
+- 153: 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
+- 225: 1. Facts: only theirs
+- 295: 2. How to write
+- 338: 3. The category checklist (what the best real sites share)
+- 364: 3b. The sections every page has (Tzvi, 6 Oct 2026)
+- 387: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 431: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 466: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 496: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 556: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
+- 626: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 648: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 743: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 806: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 838: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 865: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 905: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 938: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 996: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1020: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1048: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1127: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
+- 1131: 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
+- 1143: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1153: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 1168: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 1179: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 1186: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 1197: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 1208: 3bb. Small touches (Tzvi, 12 Nov 2026)
+- 1220: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026)
+- 1227: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026)
+- 1240: 3ae. One part leads into the next (Tzvi, 18 Nov 2026)
+- 1248: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
+- 1259: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026)
+- 1270: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
+- 1282: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1290: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1324: 4. Design and story
+- 1354: 5. Build rules (each one shipped as a defect once)
+- 1377: 6. Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section numbers are unchanged, so "3g.13", "3h.11" and the like still point to the same text. The full rulebook is `full-rules.md`.
@@ -1265,6 +1266,18 @@ product-match-sheet.py. (2) Every priced product is a big photo card, 200 px+ at
 extended on its plain side, and the words stand on that plain ground, never on a panel over the product. (5) One headline size with a small label above, plus 3ad.3's one jump (check-look
 HEADINGS). (6) Before review: compare.jpg (compare-sheet.mjs) and a `## Compared` part in REFERENCES.md
 (check-compared). New sites only.
+
+## 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
+
+Full text: reference/full-rules.md section 3ah. Cakes by Tova met 3ag, passed every check and was still rated 3 of 5
+beside the best bakery sites; each rule is one reason. (1) One statement opens the site: one big headline naming every
+offer, one line, one button, one photo (check-five OPENING). (2) A product card is its photo, edge to edge, then name,
+price and one short line, 16 words at most; choices in the sheet (check-five CARDS). (3) A shop page opens on its
+products: pictures a third of the first screen, photos 240 px+ (check-five SHOPTOP). (4) Paragraphs, product names and
+prices 16 px+ at a laptop (check-five TEXT). (5) One showpiece from a top site of the category, `- showpiece:` in
+CONCEPT.md (check-compared). (6) Every priced listing item can be ordered, or is in not-sold.txt
+(check-listing-prices). (7) REFERENCES.md `## Why they are a 5` before any idea; a judge rates compare.jpg and
+review.md says `Rating: 5/5` before anyone sees it (check-build). New sites only.
 
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
 

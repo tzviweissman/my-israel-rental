@@ -48,10 +48,10 @@ for (const p of pages) {
 }
 // the site-wide checks of rules 3v take every page at once (the same footer and menu on each)
 const all = pages.map((p) => `${base}/${folder}/${p}`);
-for (const s of ['check-footer', 'check-menu', 'check-facts', 'check-heights', 'check-film-video', 'check-film-clear', 'check-web-basics', 'check-says-offer', 'check-look']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), ...all]]);
+for (const s of ['check-footer', 'check-menu', 'check-facts', 'check-heights', 'check-film-video', 'check-film-clear', 'check-web-basics', 'check-says-offer', 'check-look', 'check-five']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), ...all]]);
 // a site built from a blueprint has RULES.md written from it first (scripts/blueprint.mjs)
 if (fs.existsSync(path.join(dir, 'BLUEPRINT.md'))) spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'blueprint.mjs'), '--rules', dir], { encoding: 'utf8' });
-for (const s of ['check-concept', 'check-fingerprints', 'check-compared', 'check-rules']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), dir]]);
+for (const s of ['check-concept', 'check-fingerprints', 'check-compared', 'check-listing-prices', 'check-rules']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), dir]]);
 // the opening film as the visitor sees it (Tzvi, 1 Nov 2026: crumbs vanishing, a snap over in one frame); intended hard
 // cuts are listed in gen/film.sh as "# cuts: <seconds> ..." (times in gen/film/opening.mp4)
 {
@@ -80,7 +80,9 @@ await Promise.all(Array.from({ length: Math.min(4, runs.length) }, async () => {
     .reduce((m, f) => Math.max(m, fs.statSync(path.join(site, f)).mtimeMs), 0);
   const why = !fs.existsSync(review) ? 'no review.md'
     : !/^Verdict:\s*PASS\b/m.test(fs.readFileSync(review, 'utf8')) ? 'review.md has no "Verdict: PASS" line'
-    : fs.statSync(review).mtimeMs < newest ? 'the site changed after the review' : '';
+    : fs.statSync(review).mtimeMs < newest ? 'the site changed after the review'
+    // rules 3ah.7: a site compared with the best of its kind (compare.jpg) is judged a 5 before anyone sees it
+    : fs.existsSync(path.join(site, 'compare.jpg')) && !/^Rating:\s*5\s*\/\s*5\b/m.test(fs.readFileSync(review, 'utf8')) ? 'review.md has no "Rating: 5/5" line (rules 3ah.7: a judge that did not build it rates compare.jpg; fix and judge again until 5)' : '';
   results.push({ name: 'independent review', ok: !why, out: why && `${why}. Have a Sonnet subagent that did not build the site use it at laptop and phone size against docs/page-review-checklist.md and write ${dir}/review.md; fix every FAIL, then review again.` });
 }
 let failed = 0;

@@ -341,7 +341,11 @@ for (const url of urls) {
       await page.evaluate((first) => {
         const clickFirst = (sel) => { const e = document.querySelector(sel); if (e) e.click(); };
         // a shop with a delivery minimum needs enough in the basket: add twice (Bake Away, 14 Nov 2026: one ₪16 doughnut is under its ₪20 minimum)
-        if (first) for (let n = 0; n < 2; n++) { if (document.querySelector('#st-add')) clickFirst('#st-add'); else { const a = [...document.querySelectorAll('button')].find((b) => b.offsetParent !== null && (/^\s*add\b/i.test(b.textContent) || /^one more\b/i.test(b.getAttribute('aria-label') || ''))); if (a) a.click(); } }
+        if (first) for (let n = 0; n < 2; n++) { if (document.querySelector('#st-add')) clickFirst('#st-add'); else { const a = [...document.querySelectorAll('button')].find((b) => b.offsetParent !== null && (/^\s*add\b/i.test(b.textContent) || /^one more\b/i.test(b.getAttribute('aria-label') || ''))); if (a) a.click(); }
+          // an Add that opens the item's sheet to choose a flavour (Cakes by Tova, 20 Nov 2026: the first card has
+          // choices): choose its first one, press the sheet's Add and close it, as a visitor does
+          const sh = document.querySelector('dialog[open]');
+          if (sh) { const o = sh.querySelector('[role=radio], .chip'); if (o) o.click(); const ad = sh.querySelector('#sh-add') || [...sh.querySelectorAll('button')].find((b) => /^\s*add(?![a-z])/i.test(b.textContent)); if (ad) ad.click(); if (sh.open) sh.close(); } }
         if (first) clickFirst('#svcs input');
         const groups = {}; for (const r of document.querySelectorAll('form input[type=radio]')) if (!groups[r.name] && r.offsetParent !== null && r.name !== 'pack') { groups[r.name] = 1; r.click(); }
         // choices made with checkboxes (Chicken Munch's kinds of chicken): tick the first visible one of each group none of which is ticked

@@ -95,6 +95,10 @@ const CHECK_ONLY = process.argv.includes('--check');
     const cmp = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-compared.mjs'), SRC], { encoding: 'utf8' });
     if (cmp.status !== 0) problems.push(`not compared with the best of its kind (3ag.6):
 ${cmp.stdout}${cmp.stderr}`);
+    // everything priced in the listings can be ordered (Tzvi, 20 Nov 2026: Tova's decorated cakes were not in her shop; rules 3ah.6)
+    const lp = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-listing-prices.mjs'), SRC], { encoding: 'utf8' });
+    if (lp.status !== 0) problems.push(`something priced in the listings cannot be ordered (3ah.6):
+${lp.stdout}${lp.stderr}`);
   }
   // every line of the rules checklist answered in RULES.md, and answered after the last change. A site built from a
   // blueprint (scripts/blueprint.mjs, Tzvi 1 Nov 2026) has RULES.md written from it here, so it is never stale
@@ -104,6 +108,9 @@ ${cmp.stdout}${cmp.stderr}`);
   const review = path.join(SRC, 'review.md');
   if (isNew && !(fs.existsSync(review) && /^Verdict:\s*PASS\b/m.test(fs.readFileSync(review, 'utf8'))))
     problems.push('no independent review: review.md with "Verdict: PASS" from a Sonnet subagent that did not build the site (docs/page-review-checklist.md)');
+  // judged a 5 beside the best of its kind before anyone sees it (Tzvi, 20 Nov 2026; rules 3ah.7)
+  if (isNew && fs.existsSync(path.join(SRC, 'compare.jpg')) && !(fs.existsSync(review) && /^Rating:\s*5\s*\/\s*5\b/m.test(fs.readFileSync(review, 'utf8'))))
+    problems.push('not judged a 5: review.md has no "Rating: 5/5" from a judge that did not build the site, rating compare.jpg (rules 3ah.7)');
   if (rules.status !== 0) problems.push(`rules not all answered (check-rules):\n${rules.stdout.split('\n').filter((l) => /FAIL|problem/.test(l)).join('\n')}`);
   // and every page of it fits the screen, with no photo blown up past its size (rules 3c.12,
   // 3p.6; Tzvi, 20 Oct 2026: "make sure the rules will prevent this in the future"), has no
@@ -176,6 +183,8 @@ ${cmp.stdout}${cmp.stderr}`);
     ['check-rhythm.mjs', 'has a home page with no rhythm (one ground, one heading size, no edge-to-edge section)', 'R3ad.3'],
     // beside the best of its kind: two grounds, one headline size, products as big photo cards (Tzvi, 19 Nov 2026, rules 3ag)
     ['check-look.mjs', 'looks worse than the best sites of its kind (too many grounds or headline sizes, products too small)', 'R3ag.2'],
+    // a 5 the first time: one statement opens it, photo-led cards, a shop that opens on its products, words 16 px+ (Tzvi, 20 Nov 2026, rules 3ah)
+    ['check-five.mjs', 'falls short of a 5 beside the best of its kind (opening, cards, shop or small words)', 'R3ah.1'],
     // one part leads into the next: something crosses a section line, one object travels down with you (Tzvi, 18 Nov 2026, rules 3ae)
     ['check-seams.mjs', 'has a home page where nothing crosses a section line or travels with the visitor', 'R3ae.1'],
     // the page as an iPhone shows it: Safari's engine, where a film led only by seeking stands still (Tzvi, 14 Nov 2026, rules 3aa.30)

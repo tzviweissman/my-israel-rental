@@ -39,7 +39,7 @@ always with `?as=owner`, never a sign-in.
 - **Ideas on Fable.** Steps 5 to 7's ideas (opening ideas, the "Own:" idea,
   film stories, headlines) are written by one subagent with `model: "fable"`,
   given the record, the photo sheet, `REFERENCES.md` and the digest's §3g, §3h,
-  §3n, §3t and §3ag, plus the section rules a plan most often breaks (3b.3 one
+  §3n, §3t, §3ag and §3ah, with REFERENCES.md's `## Why they are a 5`, plus the section rules a plan most often breaks (3b.3 one
   solid button a screen, 3z.1 a card over an edge, 3u.3 the price a piece,
   check-fits' one screen a section). It writes them; you check them with the step's scripts as usual.
   This is the one exception to "subagents run on Sonnet".
@@ -89,14 +89,22 @@ your reply, either "every check passes" or the problems it listed.
    video-only rules out, unread, and the files are checked for video later);
    then plan each stage (`--check <build> <stage>`) before building it (§0b).
    Every rule left in the stages is read and planned; none is skipped.
-5. **Sources, then ideas.** `REFERENCES.md` and `node scripts/check-references.mjs <build>`;
-   then `IDEAS.md` (two saved pictures per idea, a kind no other site used) and
+5. **Sources, then ideas.** `REFERENCES.md` and `node scripts/check-references.mjs <build>`.
+   Before any idea, the two best sites of the category (Pinterest, Awwwards or
+   Inspo) go into `## Why they are a 5`: five lines or more, each what they do
+   and how this site will do it (§3ah.7). The site is planned to a 5 here, not
+   found short of one at step 11. Then `IDEAS.md` (two saved pictures per idea, a kind no other site used) and
    `node scripts/check-ideas.mjs <build>`. Both pass before any idea is shown
    or any credit spent; hooks enforce it (§0b.4).
 6. **Concept and look.** CONCEPT.md: category (§3t), style sheet (§3g.1),
    three or more opening ideas with one "Own:" idea, the wow-gate answers
    (§3n), the effect budget (§3f.2) and `## Effects` with sources and the
-   `- touch:` line (§3p.5). Write the look into `scrollcraft/fingerprints.json`;
+   `- touch:` line (§3p.5), and the `- showpiece:` line: one thing the visitor
+   does, adapted from a top site of the category (§3ah.5). Plan the opening as
+   one headline naming every offer, one line, one button (§3ah.1), cards led by
+   their photos with choices in the sheet (§3ah.2), a shop that opens on its
+   products (§3ah.3), and every priced listing item in the catalogue (§3ah.6,
+   `check-listing-prices`). Write the look into `scrollcraft/fingerprints.json`;
    `node scripts/check-fingerprints.mjs <build>` and `check-concept.mjs` pass
    (§3p, §3q). Choose it yourself and say why in one line.
 7. **Film, if there is one.** Sketch sheet first and Tzvi picks a row (§0b.5b);
@@ -133,7 +141,10 @@ your reply, either "every check passes" or the problems it listed.
     product cards, two grounds, one headline size are §3ag's, and planned from
     step 6, not found here. Then a Sonnet subagent that did not build it, against
     `docs/page-review-checklist.md`; fix every FAIL, it looks again (§3r.2). Score
-    the wow gate (§3n).
+    the wow gate (§3n). Then a Sonnet judge that did not build it rates
+    compare.jpg from 1 to 5 against the references, and review.md gets
+    `Rating: N/5`; under 5, fix and judge again before anyone sees it (§3ah.7,
+    `check-build`). Planned well at steps 5 and 6, this is a 5 the first time.
 12. **RULES.md.** Answer every line of `docs/rules-checklist.md` and pass
     `node scripts/check-rules.mjs <build>` before anyone sees the site (§6).
 13. **Report.** Ends with "Not done yet" and "For your call", after a

@@ -3463,6 +3463,86 @@
    "confirmed_by": "check-compared -> confirm only",
    "gremier_retry": false,
    "status": "planned"
+  },
+  {
+   "id": "R3ah.1",
+   "rule": "One headline naming every offer, one line, one large button on one photo; nothing else 28 px+ on the first screen",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Step 6 plans the opening as one statement; the offers named inside the headline and meta offers",
+   "confirmed_by": "check-five OPENING -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ah.2",
+   "rule": "Every product card led by its photo edge to edge, then name, price and one short line; choices in the sheet",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Section plan: photo or cut-out across the card, Add on the picture's corner, flavours in the item's sheet",
+   "confirmed_by": "check-five CARDS -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ah.3",
+   "rule": "A shop page opens on its products: pictures a third of the first screen, photos 240 px+, no half-empty rows",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Shop page: one-line title and line, no popular button above the cards, three or four to a row by the category's count",
+   "confirmed_by": "check-five SHOPTOP -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ah.4",
+   "rule": "Paragraphs, product names and prices 16 px+ at a laptop",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "The starter's scale (--t0 18 px); names and prices never at --t-1",
+   "confirmed_by": "check-five TEXT -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ah.5",
+   "rule": "One showpiece the visitor uses, adapted from a top site of the category",
+   "how": [
+    "ASK",
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "Step 6: the - showpiece: line in CONCEPT.md, planned with Fable from REFERENCES ## Why they are a 5",
+   "confirmed_by": "check-compared SHOWPIECE + LOOK",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ah.6",
+   "rule": "Every priced listing tier and product can be ordered on the site, or is in not-sold.txt",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Catalogue built from every listing tier and product (gen/catalog.py)",
+   "confirmed_by": "check-listing-prices -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ah.7",
+   "rule": "REFERENCES ## Why they are a 5 before any idea; review.md Rating: 5/5 from a judge before anyone sees it",
+   "how": [
+    "ASK",
+    "EYE"
+   ],
+   "built_by": "Step 5 writes ## Why they are a 5; step 11 a Sonnet judge rates compare.jpg",
+   "confirmed_by": "check-compared NOFIVE + check-build rating",
+   "gremier_retry": false,
+   "status": "planned"
   }
  ]
 }

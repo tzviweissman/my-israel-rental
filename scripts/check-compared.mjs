@@ -4,6 +4,10 @@
  * folder has compare.jpg (scripts/compare-sheet.mjs) and REFERENCES.md has a "## Compared" part with at least three
  * "- " lines, each a difference that made ours look worse and what was changed ("... -> ..." or "changed:").
  *
+ * Since 20 Nov 2026 (rules 3ah.5, 3ah.7) also: a "## Why they are a 5" part in REFERENCES.md with at least five "- "
+ * lines (what the references do and how this site does it, "... -> ..."), and a "- showpiece:" line in CONCEPT.md
+ * naming its reference ("from:").
+ *
  *   node scripts/check-compared.mjs <build folder>      exit 1 on a fault
  */
 import { existsSync, readFileSync } from 'node:fs';
@@ -22,5 +26,14 @@ else {
   const bare = lines.filter((l) => !/->|→|changed:/i.test(l));
   if (bare.length) why.push(`NOFIX: ${bare.length} line(s) name a difference but not what was changed ("... -> ..."): ${bare[0].slice(0, 80)}`);
 }
+const five = (/^## Why they are a 5\b[^\n]*\n([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(ref) || [])[1];
+const fl = five === undefined ? [] : five.split(/\r?\n/).filter((l) => /^- /.test(l));
+if (five === undefined) why.push('NOFIVE: REFERENCES.md has no "## Why they are a 5" part (rules 3ah.7): what the two best sites of the category do, and how this one does it');
+else if (fl.length < 5) why.push(`NOFIVE: "## Why they are a 5" has ${fl.length} line(s); name at least five (3ah.7)`);
+else if (fl.some((l) => !/->|→/.test(l))) why.push('NOFIVE: each "## Why they are a 5" line says how this site does it ("... -> ...")');
+const concept = existsSync(join(dir, 'CONCEPT.md')) ? readFileSync(join(dir, 'CONCEPT.md'), 'utf8') : '';
+const sp = /^- showpiece:\s*(.+)$/m.exec(concept);
+if (!sp) why.push('SHOWPIECE: CONCEPT.md has no "- showpiece: <what the visitor does> (from: <reference>)" line (3ah.5)');
+else if (!/from:/i.test(sp[1])) why.push('SHOWPIECE: the showpiece line names no reference ("from: <the top site it adapts>")');
 if (why.length) { console.log(`COMPARED  ${dir}\n  ${why.join('\n  ')}`); process.exit(1); }
 console.log(`${dir}: compared`);

@@ -13,7 +13,7 @@
   --r: 16px;
   /* one type scale and one spacing scale (rules 3x.13): every size on the site is one of these, nothing in between.
      Ratio 1.25 from a 17 px body; the display steps grow with the screen. */
-  --t-1: .875rem; --t0: 1.0625rem; --t1: 1.3125rem; --t2: 1.625rem; --t3: clamp(1.75rem, 1.4rem + 1.6vw, 2.25rem);
+  --t-1: .9375rem; --t0: 1.125rem; --t1: 1.3125rem; --t2: 1.625rem; --t3: clamp(1.75rem, 1.4rem + 1.6vw, 2.25rem);
   --t4: clamp(2.1rem, 1.5rem + 3vw, 3.25rem); --t5: clamp(2.6rem, 1.6rem + 5vw, 4.75rem);
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px; --s10: 128px;
   --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --top-h: 68px; --out: cubic-bezier(.2, .7, .2, 1);
