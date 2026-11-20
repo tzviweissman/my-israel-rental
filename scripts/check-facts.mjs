@@ -4,7 +4,7 @@
  * K8xl96nOyF4: "Delivery Friday · Kosher · Cancel any time" under the button). The facts are the owner's
  * own (price, delivery, lead time, payment, certificate), never invented.
  *
- * On the home page (index.html among the urls, else the first): a list with class "btn-facts" of exactly three items, all on the first
+ * On the home page (index.html among the urls; none, nothing is checked): a list with class "btn-facts" of exactly three items, all on the first
  * screen once the opening has played (or right under it when the opening is a scroll film), within
  * 160 px of a button or link to the order or booking page. Phone and laptop.
  *
@@ -12,8 +12,11 @@
  */
 import { chromium } from 'playwright';
 
-const all = process.argv.slice(2), url = all.find((u) => /\/index\.html$|\/$/.test(new URL(u).pathname)) || all[0];
-if (!url) { console.error('usage: node scripts/check-facts.mjs <home url>'); process.exit(2); }
+const all = process.argv.slice(2), url = all.find((u) => /\/index\.html$|\/$/.test(new URL(u).pathname)) || null;
+if (!all.length) { console.error('usage: node scripts/check-facts.mjs <home url>'); process.exit(2); }
+// publish-page passes only the pages that changed; with no home page among them, there is nothing to check here
+// (20 Nov 2026: a changed American Crust shop page was judged as its home page and failed for having no facts row).
+if (!url) { console.log('no home page among these pages: facts not checked'); process.exit(0); }
 const browser = await chromium.launch();
 let bad = 0;
 for (const [w, h, mobile] of [[390, 844, true], [1366, 800, false]]) {

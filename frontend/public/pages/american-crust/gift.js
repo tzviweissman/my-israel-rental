@@ -41,7 +41,7 @@
     return w;
   }
   fetch(API + '/marketplace/gift-cards/' + slug).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-    if (!d || !d.amounts || !d.amounts.length) return;
+    if (!d || !d.amounts || !d.amounts.length) { sec.hidden = true; return; }
     var box = sec.querySelector('[data-mir-gift-box]');
     var sym = d.currency === 'USD' ? '$' : '₪';
     box.appendChild(el('p', { 'class': 'lede' }, T.body(d.valid_years)));
@@ -90,13 +90,14 @@
     who.appendChild(to); form.appendChild(who);
 
     // the buyer
-    form.appendChild(field('gift-name', T.name, { maxlength: 80, autocomplete: 'name', required: '' }));
-    form.appendChild(field('gift-email', T.email, { type: 'email', maxlength: 200, autocomplete: 'email', required: '' }));
-    form.appendChild(field('gift-phone', T.phone, { type: 'tel', maxlength: 20, autocomplete: 'tel' }));
+    var you = el('div', { 'class': 'gift-you' }); form.appendChild(you);   // your details, one column on a laptop
+    you.appendChild(field('gift-name', T.name, { maxlength: 80, autocomplete: 'name', required: '' }));
+    you.appendChild(field('gift-email', T.email, { type: 'email', maxlength: 200, autocomplete: 'email', required: '' }));
+    you.appendChild(field('gift-phone', T.phone, { type: 'tel', maxlength: 20, autocomplete: 'tel' }));
 
-    var msg = el('p', { 'class': 'gift-msg', role: 'status' }); form.appendChild(msg);
-    send = el('button', { type: 'submit', 'class': 'btn' }); form.appendChild(send); label();
-    form.appendChild(el('p', { 'class': 'gift-note' }, T.noCharge));
+    var msg = el('p', { 'class': 'gift-msg', role: 'status' }); you.appendChild(msg);
+    send = el('button', { type: 'submit', 'class': 'btn' }); you.appendChild(send); label();
+    you.appendChild(el('p', { 'class': 'gift-note' }, T.noCharge));
 
     var val = function (id) { return (form.querySelector('#' + id).value || '').trim(); };
     form.addEventListener('submit', function (e) {
@@ -130,6 +131,8 @@
         done.setAttribute('tabindex', '-1'); done.focus();
       }).catch(function () { send.removeAttribute('aria-busy'); msg.textContent = T.failed; });
     });
-    sec.hidden = false;
-  }).catch(function () { /* the section stays hidden */ });
+    sec.hidden = false; sec.removeAttribute('data-loading');
+    // The footer's Gift cards link (#gift) arrives before the section is filled in: go there now (UI audit 18 Nov 2026).
+    if (location.hash === '#gift') requestAnimationFrame(function () { sec.scrollIntoView({ block: 'start' }); });
+  }).catch(function () { sec.hidden = true; });
 })();

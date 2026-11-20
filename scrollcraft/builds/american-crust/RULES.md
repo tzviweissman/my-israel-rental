@@ -228,3 +228,9 @@ R3v.14 pass: Dough from ₪27, Delivery ₪25 in Ramat Eshkol, Cash or Zelle (fr
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
 <!-- 13 Nov 2026: the shop page only: both doughs and their own Add (Add turns into - n +) above the photo on a phone, the phone bar only once something is in the basket, an empty basket is one line. Prices, words and every other page unchanged; re-read against the shop page on phone and laptop, and the page checks (check-site, check-fits, check-order) are run on it. -->
 <!-- 14 Nov 2026: the "Added" pop-up is heard by screen readers but not shown: on a phone it covered the page heading; the - n + on the product and the basket bar show the add. Nothing else changed. -->
+
+Re-checked 2026-11-20: gift section reserves its space while loading and scrolls into view from the footer link; shop page re-checked, no rule affected
+
+Re-checked 2026-11-20: gift section reserves its space while loading and scrolls into view from the footer link; shop page re-checked
+
+Re-checked 2026-11-20: gift form three columns on laptops so the section fits one screen; space kept while it loads; footer link scrolls to it

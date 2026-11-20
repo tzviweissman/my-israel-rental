@@ -1,5 +1,35 @@
 [
  {
+  "kind": "ad_made",
+  "business_id": "fe453110-5383-4be0-9fac-afb105036047",
+  "at": "2026-11-18T20:49:17+02:00",
+  "ref": "la-cholent-chain-moving"
+ },
+ {
+  "kind": "ad_made",
+  "business_id": "a07a929a-90d8-46a0-9023-d93371c1e464",
+  "at": "2026-11-17T19:35:36+02:00",
+  "ref": "chicken-munch-moving"
+ },
+ {
+  "kind": "ad_made",
+  "business_id": "1d92c69d-89cb-42e7-b2bf-e1d076ed9e41",
+  "at": "2026-11-16T19:48:49+02:00",
+  "ref": "american-crust-moving"
+ },
+ {
+  "kind": "ad_made",
+  "business_id": "b6c83b18-f01f-41b7-af91-bf2a4c84febd",
+  "at": "2026-11-16T15:48:16+02:00",
+  "ref": "ls-fruit-platter-moving"
+ },
+ {
+  "kind": "ad_made",
+  "business_id": "fe453110-5383-4be0-9fac-afb105036047",
+  "at": "2026-11-16T15:48:16+02:00",
+  "ref": "la-cholent-moving"
+ },
+ {
   "kind": "site_built",
   "business_id": "2804c4e6-7fed-49b0-8ecf-7cd3b1c7cc01",
   "at": "2026-11-16T00:07:23+02:00",

@@ -411,3 +411,25 @@ body:not(.no-js) section.sec#order.is-empty { padding-block: 1.4rem; }
 
 /* three cards on a short laptop screen (1280x650): the picker keeps inside the screen */
 @media (min-width: 861px) and (max-height: 720px) { .pk { padding: .3rem .45rem; } .pk-sel { min-height: 44px; } }
+
+/* Gift cards: the section keeps its filled height while gift.js asks whether they are on, so nothing under it jumps when
+   it fills in (publish check, layout shift 0.295, 20 Nov 2026); it collapses only if they are switched off. */
+.gift[data-loading] [data-mir-gift-box] { min-height: 1128px; visibility: hidden; }
+@media (max-width: 600px) { .gift[data-loading] [data-mir-gift-box] { min-height: 1260px; } }
+/* On a laptop the gift card form is three columns (the amount, who it is for, your details), so the whole section fits one
+   screen (page rules 3c.12; publish check 20 Nov 2026: 1429px on a 650px screen). Phones keep the one column. */
+.gift-you { display: grid; gap: 1.6rem; }
+@media (min-width: 1000px) {
+  section.sec.gift { padding-block: clamp(2rem, 5vh, 3.5rem); }
+  .gift .wrap { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto auto 1fr; column-gap: clamp(1.6rem, 3vw, 3rem); align-items: start; }
+  .gift [data-mir-gift-box], .gift .gift-form { display: contents; }
+  .gift .wrap > h2 { grid-column: 1; grid-row: 1; }
+  .gift .lede { grid-column: 1; grid-row: 2; margin: .6rem 0 1.2rem; }
+  .gift .gift-form > fieldset:first-of-type { grid-column: 1; grid-row: 3; }
+  .gift .gift-form > fieldset:nth-of-type(2) { grid-column: 2; grid-row: 1 / -1; gap: .6rem; }
+  .gift .gift-you { grid-column: 3; grid-row: 1 / -1; gap: .9rem; }
+  .gift .gift-you .btn { justify-self: start; }
+  .gift .gift-field textarea { min-height: 72px; height: 72px; }
+  .gift .gift-done { grid-column: 1 / -1; grid-row: 1 / -1; }
+  .gift[data-loading] [data-mir-gift-box] { display: block; grid-column: 1 / -1; grid-row: 2 / -1; min-height: 420px; }
+}
