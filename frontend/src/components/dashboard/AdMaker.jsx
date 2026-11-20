@@ -28,6 +28,8 @@ import { toast } from 'sonner';
 import { Copy, Download, ExternalLink, Film, Layers, Loader2, Printer, RefreshCw, Save, Share2, X } from 'lucide-react';
 import { regularShown, holidayShown, formatShownPrice, priceSymbol } from '../../utils/listingPrice';
 import { areaLabel } from '../../utils/areaNames';
+// the logo reads on the ad (A4.6): its letters 30px tall, or the owner is told (utils/logoWordmark.js)
+import { logoLetterShare, logoReads, LOGO_LETTER_PX } from '../../utils/logoWordmark';
 
 const SITE = 'https://myisraelrental.com';
 const FORMATS = { square: [1080, 1080], feed: [1080, 1350], story: [1080, 1920] };
@@ -3112,10 +3114,14 @@ function extras(canvas, a) {
     };
     const edge = Math.round(W * 0.045);
     const y0 = story ? 236 : edge;
+    // Tall enough that its letters are 30px (A4.6, 18 Nov 2026), up to a fifth of the width; a small-lettered badge
+    // stays at the usual size and the owner is told (logoReads).
+    const share = logoLetterShare(img);
+    const base = share && logoReads(img) ? Math.max(W * 0.085, (LOGO_LETTER_PX / share) * 1.1 + m * 2) : W * 0.085;
     let got = null;
     for (const skipProduct of [false, true]) {
-      for (const sh of [1, 0.8]) {
-        const [tw, th] = sizeAt(W * 0.085 * sh);
+      for (const sh of base > W * 0.085 ? [1, 0.92] : [1, 0.8]) {
+        const [tw, th] = sizeAt(base * sh);
         const corners = [[W - edge - tw, y0], [edge, y0], [(W - tw) / 2, y0]];
         if (a.rtl) corners.unshift(corners.splice(1, 1)[0]);
         const at = corners.find(([bx, by]) => free(bx, by, tw, th, skipProduct));
@@ -3413,9 +3419,12 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   useEffect(() => {
     let gone = false;
     setLogoImg(null);
-    if (target.logo_url) loadImage(target.logo_url).then((img) => { if (!gone) setLogoImg(img); });
+    // The name-only version the owner made for ads (ad_logo_url, lifted out of a badge in their business details)
+    // comes first; their own logo otherwise (A4.6, 18 Nov 2026).
+    const src = target.ad_logo_url || target.logo_url;
+    if (src) loadImage(src).then((img) => { if (!gone) setLogoImg(img); });
     return () => { gone = true; };
-  }, [target.logo_url]);
+  }, [target.ad_logo_url, target.logo_url]);
   const [deal, setDeal] = useState({ text: '', until: '' });
   const [canStrip, setCanStrip] = useState(false);
   const [videoPct, setVideoPct] = useState(null);
@@ -4470,6 +4479,11 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                     <input type="checkbox" checked={logoOn} onChange={(e) => setLogoOn(e.target.checked)} data-testid="ad-logo" />
                     {t('ads.withLogo', 'Show my logo')}
                   </label>
+                )}
+                {logoImg && logoOn && !logoReads(logoImg) && (
+                  <p className="basis-full rounded-lg px-2.5 py-2" style={{ background: '#FFF4E5', color: '#7A4100' }} role="status" data-testid="ad-logo-unclear">
+                    {t('ads.logoUnclear', 'The letters in your logo are too small to read on a phone. Open your business details: we can make a version with just your name for your ads.')}
+                  </p>
                 )}
                 {reviews.length > 0 && design !== 'review' && (
                   <label className="inline-flex items-center gap-1.5">

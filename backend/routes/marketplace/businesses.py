@@ -272,6 +272,9 @@ class BusinessPatch(BaseModel):
     areas: Optional[list[str]] = None
     serves_nationwide: Optional[bool] = None
     logo_url: Optional[str] = None
+    # Their name lifted out of a badge or flyer logo, for ads only (ad rule A4.6, 18 Nov 2026): a round badge's thin
+    # letters cannot read in an ad's corner. The page, cards and search keep logo_url. "" clears it.
+    ad_logo_url: Optional[str] = None
     # Cover photo behind the business name. Optional, and the page is
     # designed to look finished without one.
     cover_url: Optional[str] = None
@@ -371,6 +374,7 @@ def _public(
         "description": doc.get("description") or "",
         "description_he": doc.get("description_he") or "",
         "logo_url": doc.get("logo_url"),
+        "ad_logo_url": doc.get("ad_logo_url"),
         "categories": doc.get("categories") or [],
         "areas": doc.get("areas") or [],
         "serves_nationwide": bool(doc.get("serves_nationwide")),
@@ -704,7 +708,7 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
     biz = await _owned(business_id, user)
     update: dict[str, Any] = {}
 
-    for field in ("description", "description_he", "logo_url", "categories"):
+    for field in ("description", "description_he", "logo_url", "ad_logo_url", "categories"):
         value = getattr(payload, field)
         if value is not None:
             update[field] = value.strip() if isinstance(value, str) else value

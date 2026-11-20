@@ -189,6 +189,10 @@ for (const l of ['en', 'he']) {
   }
 }
 
+// A logo whose letters cannot read (A4.6, 18 Nov 2026): the test logo is M and N's oval medal, letters 3% of its
+// height (L.A. Cholent's badge is 5%), so the owner is told to upload a version that is just the name.
+if (!(await p.locator('[data-testid="ad-logo-unclear"]').count())) fails.push('logo: a medal logo with tiny letters was drawn with no note to the owner');
+
 // A headline about one product brings that product's picture with it.
 {
   await p.click('[data-testid="ad-g-clean"]');

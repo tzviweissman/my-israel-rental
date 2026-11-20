@@ -5,7 +5,8 @@
 // first second, one that stalls in the middle, and one that never holds still at the end. The good one must pass and
 // each broken one must fail with its own reason. Free, no generation; takes a few minutes (six recordings). The fifth shows its QR from the start and must fail (M6); the sixth keeps a box moving in its
 // window.LIVING area after the words stop and must pass (M8).
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFile, execFileSync, spawnSync } from 'node:child_process';
+import { promisify } from 'node:util';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -28,8 +29,16 @@ const CASES = {
   // a living ending (M8): the words stop at 6 s but a box in window.LIVING moves to the very end; it must pass
   'living-end': { motion: 'K.cl(t / 6)', want: null, living: true },
 };
-let bad = 0;
-for (const [name, c] of Object.entries(CASES)) {
+// The six recordings run side by side (Tzvi, 18 Nov 2026: the self-test had grown to 30 minutes one after another).
+// Each is its own browser and ffmpeg; RECORD_PARALLEL=1 runs them one at a time again.
+const run = promisify(execFile);
+const LANES = Number(process.env.RECORD_PARALLEL) || Object.keys(CASES).length;
+const queue = Object.entries(CASES);
+const lane = async () => {
+  for (let next = queue.shift(); next; next = queue.shift()) await caseOf(...next);
+};
+const results = [];
+async function caseOf(name, c) {
   const dir = path.join(TESTS, `_check-${name}`);
   fs.mkdirSync(dir, { recursive: true });
   fs.copyFileSync(path.join(TESTS, 'qr.png'), path.join(dir, 'qr.png'));
@@ -49,13 +58,20 @@ for (const [name, c] of Object.entries(CASES)) {
 };
 ${c.living ? 'window.LIVING = [200, 700, 880, 1100];' : ''}`);
   fs.writeFileSync(path.join(dir, 'ad.html'), html);
-  execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'record-moving-ad.mjs'), dir, name],
-    { stdio: 'pipe', env: { ...process.env, RECORD_FPS: '15' } });   // test ads at 15 a second: half the time
+  try {
+    await run(process.execPath, [path.join(ROOT, 'scripts', 'record-moving-ad.mjs'), dir, name],
+      { env: { ...process.env, RECORD_FPS: '15' }, maxBuffer: 1 << 24 });   // test ads at 15 a second: half the time
+  } catch (e) {
+    results.push({ name, ok: false, line: `BAD  ${name}: the recording failed\n${e.stderr || e.message}` });
+    return;
+  }
   const r = spawnSync(path.join(ROOT, 'backend', '.venv', 'Scripts', 'python'),
     [path.join(ROOT, 'scripts', 'check-moving-ad.py'), path.join(dir, `${name}.mp4`)], { encoding: 'utf8' });
   const out = r.stdout + r.stderr;
   const ok = c.want ? r.status !== 0 && out.includes(c.want) : r.status === 0;
-  console.log(`${ok ? 'ok  ' : 'BAD '} ${name}: ${c.want ? `must fail with "${c.want}"` : 'must pass'}${ok ? '' : `\n${out}`}`);
-  if (!ok) bad++;
+  results.push({ name, ok, line: `${ok ? 'ok  ' : 'BAD '} ${name}: ${c.want ? `must fail with "${c.want}"` : 'must pass'}${ok ? '' : `\n${out}`}` });
 }
-process.exit(bad ? 1 : 0);
+await Promise.all(Array.from({ length: LANES }, lane));
+const order = Object.keys(CASES);
+results.sort((p, q) => order.indexOf(p.name) - order.indexOf(q.name)).forEach((x) => console.log(x.line));
+process.exit(results.every((x) => x.ok) && results.length === order.length ? 0 : 1);

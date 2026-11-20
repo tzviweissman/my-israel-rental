@@ -13,6 +13,7 @@ import WebAddressField from './WebAddressField';
 import OwnDomainField from './OwnDomainField';
 import ShareLinkRow from './ShareLinkRow';
 import WebsiteButton from './WebsiteButton';
+import { logoReads, liftWordmark } from '../../utils/logoWordmark';
 
 /**
  * Edit the facts behind a business's "Good to know" band (spec C6).
@@ -62,6 +63,8 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
   const logoInputRef = useRef(null);
   const [form, setForm] = useState({
     logo_url: b.logo_url || '',
+    // Their name lifted out of a badge logo, used on ads only (A4.6, 18 Nov 2026). See the logo field below.
+    ad_logo_url: b.ad_logo_url || '',
     description: b.description || '',
     description_he: b.description_he || '',
     hours: b.hours || '',
@@ -137,11 +140,47 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
       // Straight to Cloudinary, like the cover photo in the page editor;
       // the URL is stored on Save, so cancelling the form discards it.
       const url = await uploadOneFile(file, API, token);
-      set({ logo_url: url });
+      // a name lifted from the old logo belongs to the old logo
+      set({ logo_url: url, ad_logo_url: '' });
     } catch (err) {
       toast.error(err?.message || t('businesses.logoFailed', 'Could not upload that image'));
     } finally {
       setUploadingLogo(false);
+    }
+  };
+
+  // A logo whose letters cannot read on an ad (a round badge, a seal, a flyer: L.A. Cholent's letters are 5% of its
+  // height) gets its name lifted out for ads, shown here for the owner to take or leave (A4.6, Tzvi 18 Nov 2026).
+  // 'reads' | 'lifted' | 'unclear' (nothing clean came out) | null while measuring or with no logo.
+  const [logoFit, setLogoFit] = useState(null);
+  const [lifted, setLifted] = useState(null);   // { blob, url } of the name-only version on offer
+  const [usingLift, setUsingLift] = useState(false);
+  useEffect(() => {
+    let gone = false;
+    setLogoFit(null);
+    setLifted(null);
+    if (!form.logo_url || form.ad_logo_url) return undefined;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = async () => {
+      if (gone) return;
+      if (logoReads(img)) { setLogoFit('reads'); return; }
+      const blob = await liftWordmark(img).catch(() => null);
+      if (gone) return;
+      if (blob) { setLifted({ blob, url: URL.createObjectURL(blob) }); setLogoFit('lifted'); } else setLogoFit('unclear');
+    };
+    img.src = form.logo_url;
+    return () => { gone = true; };
+  }, [form.logo_url, form.ad_logo_url]);
+  const takeLifted = async () => {
+    setUsingLift(true);
+    try {
+      const url = await uploadOneFile(new File([lifted.blob], 'logo-name.png', { type: 'image/png' }), API, token);
+      set({ ad_logo_url: url });
+    } catch (err) {
+      toast.error(err?.message || t('businesses.logoFailed', 'Could not upload that image'));
+    } finally {
+      setUsingLift(false);
     }
   };
 
@@ -165,6 +204,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
         // field, so an EMPTY STRING is how a removed logo is cleared —
         // the public page and the checklist both test truthiness.
         logo_url: form.logo_url || '',
+        ad_logo_url: form.ad_logo_url || '',
         description: form.description.trim(),
         // Empty string clears it, so a removed Hebrew text stops showing.
         description_he: form.description_he.trim(),
@@ -382,6 +422,37 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
             <p className="mt-1 text-[11px]" style={{ color: 'var(--brand-muted)' }}>
               {t('businesses.logoHint', 'Square works best. Shown on your page, in search results and on your cards.')}
             </p>
+            {/* Its name, lifted for ads (A4.6): only ads use it; the page and cards keep the logo above. */}
+            {form.ad_logo_url ? (
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs" data-testid="biz-details-ad-logo">
+                <span style={{ color: 'var(--brand-muted)' }}>{t('businesses.adLogo', 'On your ads:')}</span>
+                <img src={form.ad_logo_url} alt="" className="h-8 max-w-[180px] object-contain rounded bg-white px-1.5 py-1 border" style={{ borderColor: 'var(--brand-border)' }} />
+                <button type="button" onClick={() => set({ ad_logo_url: '' })} className="font-semibold" style={{ color: 'var(--brand-muted)' }} data-testid="biz-details-ad-logo-remove">
+                  {t('businesses.adLogoRemove', 'Use my full logo instead')}
+                </button>
+              </div>
+            ) : logoFit === 'lifted' && lifted ? (
+              <div className="mt-2 rounded-lg px-3 py-2.5 text-xs space-y-2" style={{ background: '#FFF4E5', color: '#7A4100' }} role="status" data-testid="biz-details-logo-lift">
+                <p className="font-semibold">{t('businesses.logoLiftTitle', 'The letters in your logo are too small to read on an ad. Here is your name on its own, for your ads:')}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <img src={lifted.url} alt="" className="h-10 max-w-[220px] object-contain rounded bg-white px-2 py-1" />
+                  <img src={lifted.url} alt="" className="h-10 max-w-[220px] object-contain rounded px-2 py-1" style={{ background: '#1d1915' }} />
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <button type="button" onClick={takeLifted} disabled={usingLift || saving} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-white disabled:opacity-60" style={{ background: '#000' }} data-testid="biz-details-logo-lift-use">
+                    {usingLift && <Loader2 size={13} className="animate-spin" />}
+                    {t('businesses.logoLiftUse', 'Use it on my ads')}
+                  </button>
+                  <button type="button" onClick={() => setLogoFit('reads')} className="font-semibold underline" data-testid="biz-details-logo-lift-no">
+                    {t('businesses.logoLiftNo', 'No thanks')}
+                  </button>
+                </div>
+              </div>
+            ) : logoFit === 'unclear' ? (
+              <p className="mt-2 rounded-lg px-3 py-2 text-xs" style={{ background: '#FFF4E5', color: '#7A4100' }} role="status" data-testid="biz-details-logo-unclear">
+                {t('businesses.logoUnclear', 'The letters in your logo are too small to read on an ad. If you have a version that is just your name, wide and bold, upload it here.')}
+              </p>
+            ) : null}
           </div>
 
           <div data-testid="biz-details-links">
