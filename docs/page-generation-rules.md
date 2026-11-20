@@ -2,55 +2,55 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 119: 1. The job, in one line
-- 124: 2. What the AI gets, and the only facts it may use
-- 157: 3. Hard rules (checked: a page breaking one is thrown away and remade)
-- 194: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
-- 236: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
-- 304: 3b. The category checklist (from the Inspo study)
-- 343: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 476: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 571: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
-- 708: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 773: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 944: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
-- 1240: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 1278: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 1393: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 1472: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 1504: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 1531: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 1577: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 1614: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1688: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1713: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1750: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1867: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
-- 1888: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1959: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
-- 2044: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 2154: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 2246: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 2271: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 2311: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2550: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2577: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2642: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2659: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2705: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2725: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2755: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2792: 4. What is reported to the owner instead (content gaps)
-- 2801: 5. How to write
-- 2850: 5a. Lessons from the practice pages
-- 2879: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 2928: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 2945: 6. Playbooks for the most common businesses
-- 3065: 7. Choosing the three options (automatic page builder only)
-- 3089: 8. Photos, video and the tools
-- 3315: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3383: 9. The scroll sections: what the practice pages become
-- 3418: 10. Open decisions (need Tzvi)
+- 123: 1. The job, in one line
+- 128: 2. What the AI gets, and the only facts it may use
+- 161: 3. Hard rules (checked: a page breaking one is thrown away and remade)
+- 198: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
+- 240: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
+- 308: 3b. The category checklist (from the Inspo study)
+- 347: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 480: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 575: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
+- 712: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 777: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 948: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
+- 1244: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 1282: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 1397: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 1476: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 1508: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 1535: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 1581: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 1618: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1692: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1717: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1754: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1871: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
+- 1892: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1963: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+- 2048: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 2158: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 2250: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 2275: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 2315: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 2554: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2581: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2646: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2663: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2709: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2729: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2759: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2796: 4. What is reported to the owner instead (content gaps)
+- 2805: 5. How to write
+- 2854: 5a. Lessons from the practice pages
+- 2883: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 2932: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 2949: 6. Playbooks for the most common businesses
+- 3069: 7. Choosing the three options (automatic page builder only)
+- 3093: 8. Photos, video and the tools
+- 3319: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3387: 9. The scroll sections: what the practice pages become
+- 3422: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -88,7 +88,11 @@ new rule, or a fix that will become one, goes through these steps before it is w
    and no two lines disagree.
 2. **Show it working before writing it**: a before and after picture on the site that caused it, at a
    laptop and a phone size. Tzvi says yes to the picture, not to a description. A fix that is our own
-   design choice, not what Tzvi asked for, is a proposal until he has seen it.
+   design choice, not what Tzvi asked for, is a proposal until he has seen it. **The after state passes
+   every older check too** (19 Nov 2026: the first 3ag.4 put the opening's words beside a box, and the
+   site then failed 3h.1's full-screen photo in check-site and check-says-offer, so the rule was rewritten
+   the same day): run `node scripts/check-build.mjs <that site>` on the after state before writing the
+   rule, and a rule that breaks an older one is changed, or the older one is changed in the same edit.
 3. **Try it on every live site it covers** (`frontend/public/pages/pages.json`): run its check, or look,
    on each, and list the ones that fail. A rule that fails sites Tzvi is happy with is wrong, not the
    sites. **A new rule does not hold up a site that is already made** (Tzvi, 29 Oct 2026: "new rules

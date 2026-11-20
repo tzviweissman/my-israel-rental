@@ -142,7 +142,15 @@
     tAdd = setTimeout(function () { if (a) a.classList.remove('just'); if (bar) bar.classList.remove('just'); barBtn(); }, 1600);
   });
   var set0 = window.siteBasket.set; window.siteBasket.set = function (b) { set0(b); barBtn(); }; barBtn();
-  // the phone bar steps aside at the closing band, which has its own button
-  var cl = document.querySelector('.close'), br = document.getElementById('bar');
-  if (cl && br && 'IntersectionObserver' in window) new IntersectionObserver(function (es) { br.classList.toggle('off', es[0].isIntersecting); }).observe(cl);
+  // the phone bar steps aside at the closing band, which has its own button, over the footer (it covered
+  // the footer's lines) and over the opening (it covered the opening's own button; Cakes by Tova, 19 Nov 2026)
+  var br = document.getElementById('bar'), seen = new Map();
+  var watch = [document.querySelector('.close'), document.querySelector('footer'), document.getElementById('film')].filter(Boolean);
+  if (br && watch.length && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { seen.set(e.target, e.isIntersecting); });
+      br.classList.toggle('off', Array.from(seen.values()).some(Boolean));
+    });
+    watch.forEach(function (el) { io.observe(el); });
+  }
 })();

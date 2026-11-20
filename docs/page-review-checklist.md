@@ -22,6 +22,12 @@ For each item answer PASS or FAIL with where and what you saw.
 
 ## Things respond the way they look
 4. Anything that looks pressable responds (cursor, hover, press state).
+4a. Use every interactive piece in every state at laptop, tablet and phone
+    size: open, flip, turn, choose and close each one (cards that turn over,
+    box choices, sheets, menus), and look at the result. Its words fit, nothing
+    overlaps it or is cut off, and it closes again (Cakes by Tova, 19 Nov 2026:
+    the backs of the turning photos overflowed on phones, found only on the
+    fourth look).
 5. A list beside a big photo changes the photo when you point at or tap an
    item (if the photo shows one item, it shows the one you are on).
 6. Every choice the visitor must make appears right under the thing it
