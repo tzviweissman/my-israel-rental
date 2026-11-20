@@ -794,7 +794,8 @@ const CSS = `
 .pe-dock .pe-group { background: none; box-shadow: none; padding: 0; gap: 0; }
 .pe-dock .pe-tool { flex: 1 0 auto; flex-direction: column; gap: 2px; min-height: 52px; min-width: 52px; padding: 4px 6px; justify-content: center; border: 0; border-radius: 10px; font-size: .72rem; }
 .pe-dock .pe-icon { min-height: 52px; }
-.pe-frame-wrap { position: relative; flex: none; }
+/* direction: ltr keeps a scaled frame (transform-origin 0 0) at the start of its box; in Hebrew it sat at the far end and slid onto the phone view (UI audit 20 Nov 2026). */
+.pe-frame-wrap { position: relative; flex: none; direction: ltr; }
 .pe-frame { border: 0; background: var(--surface); transform-origin: 0 0; display: block; box-shadow: 0 1px 2px rgb(17 24 39 / .06), 0 18px 40px -20px rgb(17 24 39 / .3); }
 .pe-frame.phone { border-radius: 28px; }
 .pe-cover { position: absolute; inset: 0; display: grid; place-items: center; background: rgb(249 250 251 / .85); color: var(--brand-muted); }
