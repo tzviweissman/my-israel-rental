@@ -34,6 +34,14 @@
         // (Tzvi, 17 Nov 2026: owners add deals without us); mir-catalog.js draws its card
         if (!it && p.id && p.name && Number(p.price) > 0 && p.price_kind !== 'quote') {
           it = by[p.id] = { id: p.id, name: p.name, price: Number(p.price), desc: p.description || '', size: '', img: p.image || '', w: 800, h: 800, live: true };
+          // its sizes or choices, picked in the product sheet like a typed-in product's (Tzvi, 20 Nov 2026: "show the size
+          // picker"); without one the order API refused it at the last step ("Pick a choice"). Names are the owner's, escaped.
+          var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+          var zs = (p.options || []).filter(function (o) { return o && o.id && o.name; }).map(function (o) {
+            var z = { id: p.id + '::' + o.id, name: esc(o.name), price: Number(o.price) > 0 ? Number(o.price) : Number(p.price), out: o.in_stock === false, pid: p.id };
+            z.label = p.name + ' (' + o.name + ')'; by[z.id] = z; return z;
+          });
+          if (zs.length) it.sizes = zs;
           CAT.items.push(it);
         }
         if (!it) return;

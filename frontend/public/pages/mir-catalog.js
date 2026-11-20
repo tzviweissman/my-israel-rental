@@ -47,6 +47,9 @@
   function priceText(p, ask) {
     // a price of 0, or a product priced on request (price_kind quote): ask, never "$0"
     if (p.price_kind === 'quote' || !(Number(p.price) > 0)) return ask;
+    // sizes at different prices: "from" the cheapest one in stock (20 Nov 2026)
+    var zp = (p.options || []).filter(function (o) { return o.in_stock !== false; }).map(function (o) { return Number(o.price) > 0 ? Number(o.price) : Number(p.price); });
+    if (zp.length > 1 && Math.min.apply(null, zp) !== Math.max.apply(null, zp)) return (HE ? 'החל מ-' : 'from ') + money(Math.min.apply(null, zp), p.currency);
     var t = money(p.price, p.currency);
     if (p.price_to != null && Number(p.price_to) > Number(p.price)) t += (HE ? ' עד ' : ' to ') + money(p.price_to, p.currency);
     else if (p.price_kind === 'from') t = (HE ? 'החל מ-' : 'from ') + t;

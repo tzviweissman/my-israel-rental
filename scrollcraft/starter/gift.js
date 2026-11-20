@@ -131,5 +131,7 @@
       }).catch(function () { send.removeAttribute('aria-busy'); msg.textContent = T.failed; });
     });
     sec.hidden = false;
+    // The section shows only after this answer, so a link to #gift (the footer's Gift cards) has already missed it: go there now.
+    if (location.hash === '#gift') requestAnimationFrame(function () { sec.scrollIntoView({ block: 'start' }); });
   }).catch(function () { /* the section stays hidden */ });
 })();

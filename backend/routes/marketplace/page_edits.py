@@ -354,6 +354,11 @@ async def get_page_edits(slug_or_id: str):
                     "group": (p.get("group") or "").strip() or None,
                     "in_stock": bool(p.get("in_stock", True)),
                     "pickup_only": bool(p.get("pickup_only")),
+                    # sizes or choices, so a designed shop can let the customer pick one (20 Nov 2026)
+                    "options": [
+                        {"id": o.get("id"), "name": o.get("name"), "price": o.get("price"), "in_stock": bool(o.get("in_stock", True))}
+                        for o in (p.get("options") or []) if isinstance(o, dict) and o.get("id") and o.get("name")
+                    ],
                 })
         for row in (g.get("products") or []) + (g.get("tiers") or []):
             if row.get("price_kind") == "quote":
