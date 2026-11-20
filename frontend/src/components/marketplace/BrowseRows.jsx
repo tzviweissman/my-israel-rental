@@ -242,6 +242,8 @@ const CSS = `
 .bw-pages { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px 20px; }
 @media (max-width: 1024px) { .bw-strip { grid-auto-columns: calc((100% - 2 * 18px) / 3.3); } .bw-pages { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 640px) {
+  /* the phone's site bar is taller and floats; a sticky bar slid under it (checked 20 Nov 2026) */
+  .bw-cats { position: static; }
   .bw-strip { grid-auto-columns: 72%; gap: 12px; }
   .bw-pages { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; }
   .bw-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }

@@ -601,7 +601,9 @@ const Services = () => {
                 ? t(`browse.groups.${browseGroup}`, groupById(browseGroup).label)
                 : t('services.allServices', 'All services')}
             <span className="text-sm text-[var(--brand-muted)] font-normal ms-2" data-testid="services-count">
-              ({pinnedPages.length + regularGigs.length})
+              ({browseGroup
+                ? sortedGroups[browseGroup].pages.length + sortedGroups[browseGroup].gigs.length
+                : pinnedPages.length + regularGigs.length})
             </span>
           </h2>
           <div className="flex items-center gap-2">
