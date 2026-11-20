@@ -368,7 +368,7 @@ const SignupJoin = () => {
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
                       className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 pe-11 text-sm focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
-                      placeholder={t('signupJoin.passwordPh', '6+ characters')}
+                      placeholder={t('signupJoin.passwordPh', '6 or more')}
                       data-testid="signup-password-input"
                     />
                     <button

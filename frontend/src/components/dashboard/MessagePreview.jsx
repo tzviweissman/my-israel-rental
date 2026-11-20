@@ -31,7 +31,7 @@ export default function MessagePreview({ loaded, templates, note }) {
 
   const Tab = ({ value, current, set, children, id }) => (
     <button type="button" onClick={() => set(value)} aria-pressed={current === value} data-testid={id}
-            className="px-3 min-h-[36px] rounded-full text-[13px] font-semibold"
+            className="px-3 min-h-[44px] rounded-full text-[13px] font-semibold"
             style={current === value ? { background: 'var(--ink)', color: '#fff' } : { color: 'var(--ink)' }}>{children}</button>
   );
   const Photo = () => (product?.image || loaded.logo_url) ? (

@@ -57,7 +57,7 @@ export default function VisitBreakdown({ API, token, everyone = false, className
       </p>
       {d.contact_taps_all > 0 && (
         <p className="mb-4 rounded-lg px-3 py-2 text-sm" style={{ background: 'var(--surface-muted)', color: 'var(--ink)' }} data-testid="visits-contact-taps">
-          {t('visits.contactTaps', 'People tapped to WhatsApp, call or email you {{n}} times in the last {{days}} days, and {{all}} times in all.', { n: d.contact_taps, days: d.days, all: d.contact_taps_all })}
+          {t('visits.contactTaps', 'Taps to WhatsApp, call or email you: {{n}} in the last {{days}} days, {{all}} in all.', { n: d.contact_taps, days: d.days, all: d.contact_taps_all })}
         </p>
       )}
       {!everyone && fromOrders > 0 && (

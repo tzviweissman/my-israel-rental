@@ -1413,7 +1413,7 @@ const CreateGig = () => {
                 type="button"
                 onClick={readSocials}
                 disabled={socialsReading || !Object.values(socials).some((v) => String(v || '').trim())}
-                className="btn-primary px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
+                className="btn-primary px-4 py-2 min-h-[44px] rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
                 data-testid="wizard-socials-read"
               >
                 {socialsReading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
@@ -1517,7 +1517,7 @@ const CreateGig = () => {
                 type="button"
                 onClick={() => fillFromAd()}
                 disabled={adReading || !adText.trim()}
-                className="btn-primary px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
+                className="btn-primary px-4 py-2 min-h-[44px] rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
                 data-testid="wizard-paste-ad-btn"
               >
                 {adReading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}

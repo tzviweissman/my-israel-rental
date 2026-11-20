@@ -486,6 +486,12 @@ export default function OrderPage() {
               <StoreIcon size={14} aria-hidden="true" /> {t('order.pickupOnly', 'Pickup only')}
             </p>
           )}
+          {/* The store delivers, but something in the basket is pickup only: say which, so the vanished choice makes sense (UI audit 18 Nov 2026). */}
+          {pickupOnlyBasket && !!data.settings.delivery_on && (
+            <p className="text-sm" style={{ color: 'var(--brand-muted)' }} data-testid="order-pickup-only-why">
+              {t('order.pickupOnlyBecause', '{{name}} is pickup only, so this order is a pickup.', { name: lines.find((l) => l.product.pickup_only).product.name })}
+            </p>
+          )}
           {deliveryPossible && (
           <div className="grid grid-cols-2 gap-1 rounded-lg p-1" style={{ background: 'var(--surface-muted)' }} role="radiogroup">
             {[['pickup', StoreIcon, t('orders.pickup', 'Pickup')], ['delivery', Bike, t('orders.delivery', 'Delivery')]].map(([v, Icon, lbl]) => (

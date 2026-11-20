@@ -753,8 +753,9 @@ function RequestPanel({ businessId, token, auth, t, dirty, onClose, onApplied })
 const CSS = `
 .pe { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; background: var(--surface-muted); }
 .pe-loading { min-height: 100vh; display: grid; place-items: center; color: var(--brand-muted); }
-.pe-bar { user-select: none; display: flex; align-items: center; gap: 10px; padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--brand-border); }
-.pe-title { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; margin-inline-end: auto; }
+/* Wraps when it does not fit (tablets, narrow windows), so Save never goes off the screen (UI audit 20 Nov 2026). */
+.pe-bar { user-select: none; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--brand-border); }
+.pe-title { display: flex; flex-direction: column; line-height: 1.2; min-width: 120px; margin-inline-end: auto; }
 .pe-title strong { font-size: 1rem; color: var(--ink); }
 .pe-title span { font-size: .85rem; color: var(--brand-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pe-group { display: flex; gap: 4px; padding: 3px; border-radius: 12px; background: var(--surface-muted); box-shadow: inset 0 0 0 1px var(--brand-border); }
@@ -776,7 +777,7 @@ const CSS = `
 .pe-btn:focus-visible, .pe-seg:focus-visible, .pe-icon:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 .pe-stage { flex: 1; min-height: 0; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; gap: 24px; padding: 16px; }
 .pe-side { flex: none; display: flex; flex-direction: column; gap: 8px; }
-.pe-side-head { display: flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 4px; font-size: .85rem; font-weight: 600; color: var(--brand-muted); background: none; border-radius: 8px; }
+.pe-side-head { display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 4px; font-size: .85rem; font-weight: 600; color: var(--brand-muted); background: none; border-radius: 8px; }
 .pe-side-head b { margin-inline-start: auto; color: var(--gold); font-weight: 600; }
 .pe-side-head:hover b { text-decoration: underline; }
 .pe-side-head:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }

@@ -67,7 +67,7 @@ export default function CategoryPicker({
                   type="button"
                   aria-pressed={selected}
                   onClick={() => onChange(c.slug)}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${
+                  className={`px-3 py-2 min-h-[44px] rounded-lg text-xs font-semibold border transition-colors ${
                     selected ? skin.on : skin.off
                   }`}
                   data-testid={`${testidPrefix}-${c.slug}`}
