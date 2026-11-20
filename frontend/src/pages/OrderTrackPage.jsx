@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { PageLoading, LoadFailed } from '../components/common/LoadState';
 import { StarInput } from '../components/reviews/ReviewsSection';
-import { Loader2, ClipboardList, Bike, Store as StoreIcon, Clock, MapPin, Truck, RotateCcw } from 'lucide-react';
+import { Loader2, ClipboardList, Bike, Store as StoreIcon, Clock, MapPin, Truck, RotateCcw, ThumbsUp } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import { money } from '../utils/currency';
 import ReferralCard from '../components/forms/ReferralCard';
@@ -192,7 +192,7 @@ export default function OrderTrackPage() {
         {/* The business's photo of the order being made, until the delivery photo replaces it. */}
         {data.making_photo_url && !data.delivered_photo_url && (
           <section className="rounded-2xl border bg-white p-4 mt-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="track-making-photo">
-            <p className="text-xs font-semibold mb-2" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.makingTitle', 'Your order, being made')}</p>
+            <p className="text-xs font-semibold mb-2" style={{ color: 'var(--brand-muted)' }}>{data.status === 'done' ? t('orders.track.makingTitleDone', 'Your order, as it was made') : t('orders.track.makingTitle', 'Your order, being made')}</p>
             <a href={data.making_photo_url} target="_blank" rel="noopener noreferrer"><img src={data.making_photo_url} alt={t('orders.track.makingAlt', 'Photo of your order being made')} className="w-full rounded-xl object-cover aspect-[4/3] max-h-72" /></a>
             {data.making_photo_note && <p className="text-sm mt-2" style={{ color: 'var(--ink)' }} dir="auto" data-testid="track-making-note">{data.making_photo_note}</p>}
             {/* One tap back to the business (orders.py like_making_photo); no sign-in. */}
@@ -201,7 +201,7 @@ export default function OrderTrackPage() {
               className="mt-3 inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold border disabled:opacity-100"
               style={data.making_photo_liked ? { borderColor: 'transparent', background: '#E6F4EA', color: '#2E7D4F' } : { borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
               data-testid="track-making-like">
-              {data.making_photo_liked ? t('orders.track.likedPhoto', 'Thanks, the business will see it') : t('orders.track.likePhoto', 'Looks great 👍')}
+              {data.making_photo_liked ? t('orders.track.likedPhoto', 'Thanks, the business will see it') : <><ThumbsUp size={16} aria-hidden="true" />{t('orders.track.likePhoto', 'Looks great')}</>}
             </button>
           </section>
         )}

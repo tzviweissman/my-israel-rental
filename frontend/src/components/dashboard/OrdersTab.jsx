@@ -331,8 +331,10 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
       const { data } = await axios.post(`${API}/marketplace/orders/${order.id}/making-photo`, { photo_url: url, note }, auth);
       setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
       toast.success(t('orders.makingPhotoSent', 'Photo added to the customer\'s order page'));
+      return true;
     } catch (err) {
       toast.error(apiErrorMessage(err, t('orders.courier.photoFailed', 'Could not upload the photo'), t));
+      return false;
     } finally {
       setBusyId(null);
     }

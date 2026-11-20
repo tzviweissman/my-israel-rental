@@ -9,7 +9,7 @@
  */
 import React, { useState } from 'react';
 import {
-  Loader2, Phone, MapPin, Store as StoreIcon, Bike, Pencil, ChevronDown, Undo2, MessageCircle, Camera, Repeat, Zap, Truck,
+  Loader2, Phone, MapPin, Store as StoreIcon, Bike, Pencil, ChevronDown, Undo2, MessageCircle, Camera, Repeat, Zap, Truck, ThumbsUp,
 } from 'lucide-react';
 import { buildWhatsAppLink } from '../../utils/whatsappLink';
 import { money } from '../../utils/currency';
@@ -301,15 +301,17 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
           )}
           {/* A photo of it being made, for the customer's tracking page and WhatsApp (orders.py send_making_photo). */}
           {onMakingPhoto && o.track_token && (
-            <>
-              <input ref={photoRef} type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onMakingPhoto(o, f, photoNote.trim()); }} data-testid="order-making-photo-input" />
+            // Its own full-width row, so the line reads as belonging to the photo button and its hint is not cut (UI audit 19 Nov 2026).
+            <div className="flex flex-wrap items-center gap-2 basis-full">
+              {/* The line is cleared once its photo is sent, so it does not go out again with the next one (UI audit 19 Nov 2026). */}
+              <input ref={photoRef} type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) Promise.resolve(onMakingPhoto(o, f, photoNote.trim())).then((ok) => { if (ok) setPhotoNote(''); }); }} data-testid="order-making-photo-input" />
               {/* text-base: 16px, so iPhones do not zoom in on focus. */}
-              <input type="text" value={photoNote} onChange={(e) => setPhotoNote(e.target.value)} maxLength={120} placeholder={t('orders.makingNote', 'A line under the photo (optional)')} className="px-3 min-h-[44px] rounded-full text-base border min-w-0 flex-1 basis-48" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-making-note" />
+              <input type="text" value={photoNote} onChange={(e) => setPhotoNote(e.target.value)} maxLength={120} aria-label={t('orders.makingNote', 'A line under the photo (optional)')} placeholder={t('orders.makingNote', 'A line under the photo (optional)')} className="px-3 min-h-[44px] rounded-full text-base border min-w-0 flex-1 basis-64" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-making-note" />
               <button type="button" disabled={busy} onClick={() => photoRef.current?.click()} className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-making-photo">
                 <Camera size={12} /> {o.making_photo ? t('orders.makingPhotoAgain', 'Send another photo') : t('orders.makingPhoto', 'Send the customer a photo')}
               </button>
-              {o.making_photo?.liked_at && <span className="inline-flex items-center px-3 min-h-[44px] text-xs font-semibold" style={{ color: '#2E7D4F' }} data-testid="order-making-liked">{t('orders.makingLiked', 'The customer liked your photo 👍')}</span>}
-            </>
+              {o.making_photo?.liked_at && <span className="inline-flex items-center px-3 min-h-[44px] text-xs font-semibold" style={{ color: '#2E7D4F' }} data-testid="order-making-liked"><ThumbsUp size={14} aria-hidden="true" className="me-1" />{t('orders.makingLiked', 'The customer liked your photo')}</span>}
+            </div>
           )}
           {o.track_token && o.customer_phone_e164 && (() => {
             const url = `${window.location.origin}/orders/track/${o.track_token}`;

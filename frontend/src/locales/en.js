@@ -289,7 +289,7 @@ const en = {
         // Phase 4 (spec O7): the customer's status link.
         sendTrack: 'Send status link',
         makingPhoto: 'Send the customer a photo',
-        makingLiked: 'The customer liked your photo 👍',
+        makingLiked: 'The customer liked your photo',
         makingNote: 'A line under the photo (optional)',
         makingPhotoAgain: 'Send another photo',
         makingPhotoSent: "Photo added to the customer's order page",
@@ -320,7 +320,8 @@ const en = {
           badLinkTitle: 'This link no longer works',
           photoTitle: 'Delivered {{time}}',
           makingTitle: 'Your order, being made',
-          likePhoto: 'Looks great 👍',
+          makingTitleDone: 'Your order, as it was made',
+          likePhoto: 'Looks great',
           likedPhoto: 'Thanks, the business will see it',
           makingAlt: 'Photo of your order being made',
           reviewAsk: 'How was your order?',
