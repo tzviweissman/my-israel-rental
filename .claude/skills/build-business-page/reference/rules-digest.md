@@ -38,12 +38,12 @@ Sections (line each starts on; read with that offset):
 - 1240: 3ae. One part leads into the next (Tzvi, 18 Nov 2026)
 - 1248: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
 - 1259: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026)
-- 1270: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
-- 1282: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1290: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1324: 4. Design and story
-- 1354: 5. Build rules (each one shipped as a defect once)
-- 1377: 6. Look through it, fix it, then show it
+- 1271: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
+- 1284: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1292: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1326: 4. Design and story
+- 1356: 5. Build rules (each one shipped as a defect once)
+- 1379: 6. Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section numbers are unchanged, so "3g.13", "3h.11" and the like still point to the same text. The full rulebook is `full-rules.md`.
@@ -1261,7 +1261,8 @@ weapon". New sites only.
 Full text: reference/full-rules.md section 3ag; the picture in docs/inspo/compare-2026-11-19. Cakes by Tova passed every
 check and still looked worse than real bakery sites. (1) Product photos look shot for a shop: plain ground, soft
 light, no foil, counter or flash; re-light the owner's photos with relight_photo.py, check each with
-product-match-sheet.py. (2) Every priced product is a big photo card, 200 px+ at a laptop (check-look SMALL).
+product-match-sheet.py. Decided at step 2: each photo shop-ready, re-light, or styled shot (the same bake in a styled
+scene of the references); the opening and showpiece photos styled unless hers already match the references. (2) Every priced product is a big photo card, 200 px+ at a laptop (check-look SMALL).
 (3) Two grounds taking turns, three at most (check-look GROUNDS). (4) The opening photo still fills the screen (3h.1),
 extended on its plain side, and the words stand on that plain ground, never on a panel over the product. (5) One headline size with a small label above, plus 3ad.3's one jump (check-look
 HEADINGS). (6) Before review: compare.jpg (compare-sheet.mjs) and a `## Compared` part in REFERENCES.md
@@ -1273,7 +1274,8 @@ Full text: reference/full-rules.md section 3ah. Cakes by Tova met 3ag, passed ev
 beside the best bakery sites; each rule is one reason. (1) One statement opens the site: one big headline naming every
 offer, one line, one button, one photo (check-five OPENING). (2) A product card is its photo, edge to edge, then name,
 price and one short line, 16 words at most; choices in the sheet (check-five CARDS). (3) A shop page opens on its
-products: pictures a third of the first screen, photos 240 px+ (check-five SHOPTOP). (4) Paragraphs, product names and
+products: pictures a third of the first screen, photos 240 px+ (check-five SHOPTOP); build it with the starter's
+shop_page(featured=True), one big photo of the popular item beside the title. (4) Paragraphs, product names and
 prices 16 px+ at a laptop (check-five TEXT). (5) One showpiece from a top site of the category, `- showpiece:` in
 CONCEPT.md (check-compared). (6) Every priced listing item can be ordered, or is in not-sold.txt
 (check-listing-prices). (7) REFERENCES.md `## Why they are a 5` before any idea; a judge rates compare.jpg and

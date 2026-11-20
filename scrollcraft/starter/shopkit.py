@@ -104,10 +104,15 @@ def card(it: dict, lazy: bool = True) -> str:
 
 
 def shop_page(site, items: list[dict], cats: list[str], *, popular: str, wa: str, gig: str, lede: str, title_html: str,
-              delivery_hint: str, lead_days: int = 1, addon: str = '', addon_line: str = '', note_label: str = 'Anything else') -> str:
+              delivery_hint: str, lead_days: int = 1, addon: str = '', addon_line: str = '', note_label: str = 'Anything else',
+              featured: bool = False, popular_said: bool = False) -> str:
     """The shop page body: head, the most popular item's Add (the order test's #st-add), chips, groups, the product sheet,
     the three-step order. wa: the WhatsApp number in digits; gig: the listing's order form id; popular: an item id the
-    owner calls most popular; addon: an item id offered once in the basket (3j.2), with addon_line its short reason."""
+    owner calls most popular; addon: an item id offered once in the basket (3j.2), with addon_line its short reason.
+    featured (20 Nov 2026, new sites; rules 3ah.3): the popular item opens the shop as one big photo with its name,
+    price, line and Add, as the Baked Fresh reference does, instead of the one-line "Our most popular" button. Off by
+    default, so a site already built keeps its shop as it was. Its small "Our most popular" label shows only with
+    popular_said=True, when the owner said so (1.1: never a claim of ours)."""
     by = {i['id']: i for i in items}
     pop = by[popular]
     # the layout follows the number of products (shop research, 13 Nov 2026); shop.js keeps it right for the live list
@@ -120,6 +125,15 @@ def shop_page(site, items: list[dict], cats: list[str], *, popular: str, wa: str
         f'<div class="grp" data-c="{escape(c, True)}"><h2 data-f="group">{escape(c)}</h2><ul class="cards four" data-f="items">'
         + ''.join(card(i, not (k == 0 and n < 4)) for n, i in enumerate([x for x in items if x['cat'] == c])) + '</ul></div>'
         for k, c in enumerate(cats))
+    kicker = ('הכי מבוקש' if he else 'Our most popular') if popular_said else ''
+    # featured: the page opens as one big photo of the popular item beside the page title, its line, and the item's name,
+    # price and Add, so pictures fill a third of the first screen or more (check-five SHOPTOP)
+    feat_html = (f'<header class="page-head feat-head"><div class="wrap"><div class="feat">'
+                 f'<a class="feat-ph" href="shop.html?p={pop["id"]}"><img src="assets/p/{pop["id"]}.webp" alt="{escape(pop["name"], True)}" width="{pop["w"]}" height="{pop["h"]}" fetchpriority="high"></a>'
+                 f'<div class="feat-t"><h1>{title_html}</h1><p class="lede">{lede}</p>'
+                 f'<div class="feat-i">{f"<p class=\"feat-k\">{kicker}</p>" if kicker else ""}<h2 id="feat-h">{escape(pop["name"])}</h2>{price_row(pop)}'
+                 f'{"<p class=\"feat-d\">" + escape(pop["desc"]) + "</p>" if pop.get("desc") else ""}'
+                 f'<button class="btn" id="st-add" type="button" data-add="{pop["id"]}">{"הוספה" if he else "Add"} {escape(pop["name"])}, {money_html(pop["price"])}</button></div></div></div></div></header>\n')
     add_html = ''
     if addon:
         a = by[addon]
@@ -129,8 +143,8 @@ def shop_page(site, items: list[dict], cats: list[str], *, popular: str, wa: str
               <p><b>{escape(addon_line)}</b>{escape(a['name'])}, {money_html(a['price'])}</p>
               <span class="addon-b"><button class="btn btn-sm" type="button" data-add="{a['id']}" aria-label="Add {escape(a['name'], True)}">Add</button><button class="btn-line" type="button" id="addon-no">No thanks</button></span>
             </div>'''
-    return f'''{site.page_head(title_html, lede)}
-  <div class="wrap"><p class="st-top">Our most popular: <button class="btn-line" id="st-add" type="button" data-add="{pop['id']}">Add {escape(pop['name'])}, {money_html(pop['price'])}</button></p></div>
+    return f'''{feat_html if featured else site.page_head(title_html, lede)}
+  {'' if featured else f'<div class="wrap"><p class="st-top">Our most popular: <button class="btn-line" id="st-add" type="button" data-add="{pop["id"]}">Add {escape(pop["name"])}, {money_html(pop["price"])}</button></p></div>'}
   <div class="wrap">
     <div class="filters" id="filters" role="group" aria-label="Go to a kind"><div class="chips">{chips}</div></div>
     <div id="cat" class="{size}" data-mir-popular data-mir-catalog data-href="shop.html?add={{name}}" data-other="More from {escape(site.short, True)}" data-out="Out of stock">

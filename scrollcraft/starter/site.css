@@ -422,3 +422,24 @@ body:not(.no-js) #order.is-empty .osteps, body:not(.no-js) #order.is-empty .form
 
 /* a product in the basket is for pickup only (shop.js pickupOnly) */
 .ful .chip.is-off { opacity: .45; cursor: not-allowed; }
+
+/* the shop's featured product (shopkit featured=True, rules 3ah.3, 20 Nov 2026): the page opens as one big photo of the
+   popular item, as tall as the screen allows, beside the page title and the item's name, price, line and Add, as the
+   Baked Fresh reference opens its shop */
+.feat-head { padding-top: calc(var(--top-h) + var(--s4)); }
+.feat { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s7); align-items: center; }
+.feat-ph { display: block; border-radius: var(--r); overflow: hidden; }
+.feat-ph img { display: block; height: calc(100svh - var(--top-h) - var(--s8)); max-height: 760px; width: auto; aspect-ratio: 3 / 4; object-fit: cover; transition: transform 500ms var(--out, ease); }
+.feat-ph:hover img { transform: scale(1.03); }
+.feat-t h1 { margin: 0; }
+.feat-i { margin-top: var(--s6); padding-top: var(--s5); border-top: 1px solid var(--line); }
+.feat-k { margin: 0 0 var(--s2); color: var(--soft); font-size: var(--t-1); letter-spacing: .04em; text-transform: uppercase; }
+.feat h2 { margin: 0; font-size: var(--t3); line-height: 1.1; }
+.feat .pr-row { font-size: var(--t1); margin: var(--s2) 0; }
+.feat-d { margin: 0 0 var(--s4); color: var(--soft); max-width: 30rem; }
+@media (max-width: 760px) {
+  .feat { grid-template-columns: 1fr; gap: var(--s4); }
+  .feat-ph { justify-self: center; }   /* the photo whole, never cropped to the phone's width (check-fits) */
+  .feat-ph img { height: 44svh; }
+}
+@media (prefers-reduced-motion: reduce) { .feat-ph img { transition: none; } }

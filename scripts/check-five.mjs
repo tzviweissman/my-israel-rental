@@ -37,6 +37,8 @@ function measure() {
   const fixed = (el) => { for (let e = el; e && e !== document.body; e = e.parentElement) if (getComputedStyle(e).position === 'fixed') return true; return false; };
   const own = (el) => [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join(' ').replace(/\s+/g, ' ').trim();
   const root = document.querySelector('main') || document.body;
+  // the site's own bars, not a page's title block: a <header> inside <main> (a shop's featured photo) counts
+  const chrome = (el) => !!el.closest('footer, nav, dialog') || (!!el.closest('header') && !el.closest('main'));
   // big statements on the first screen: elements whose own words are 28 px or more, outside the menu bar and fixed bars
   const big = [];
   for (const el of root.querySelectorAll('*')) {
@@ -47,9 +49,10 @@ function measure() {
   // product cards
   const cards = [];
   for (const img of root.querySelectorAll('img')) {
-    const b = img.getBoundingClientRect(); if (b.width < 48 || b.height < 48 || img.getAttribute('alt') === '' || img.closest('dialog, header, footer, nav') || !vis(img)) continue;
-    // a photo half the screen wide or more is an opening or a banner, never a card (its section may hold a price)
-    if (b.width >= innerWidth * 0.5) continue;
+    const b = img.getBoundingClientRect(); if (b.width < 48 || b.height < 48 || img.getAttribute('alt') === '' || chrome(img) || !vis(img)) continue;
+    // a photo over a third of the screen wide is an opening, a banner or a shop's featured product (shopkit featured,
+    // photo beside its words), never a grid card (its section may hold a price)
+    if (b.width >= innerWidth * 0.35) continue;
     let card = img.parentElement; for (let i = 0; i < 4 && card && !money.test(card.textContent); i++) card = card.parentElement;
     if (!card || !money.test(card.textContent) || card.querySelectorAll('img:not([alt=""])').length > 1) continue;
     // a block of 60 words or more round a picture is a section with a price in it, not a product card (a contact page)
@@ -71,7 +74,7 @@ function measure() {
   // how much of the first screen is pictures (each clipped to the screen)
   let pic = 0;
   for (const img of root.querySelectorAll('img, video')) {
-    if (img.closest('dialog, header, footer, nav') || !vis(img)) continue;
+    if (chrome(img) || !vis(img)) continue;
     const q = img.getBoundingClientRect(), w = Math.min(q.right, innerWidth) - Math.max(q.left, 0), hh = Math.min(q.bottom, innerHeight) - Math.max(q.top, 0);
     if (w > 0 && hh > 0) pic += w * hh;
   }

@@ -18,12 +18,25 @@ const browser = await chromium.launch();
 const p = await browser.newPage({ viewport: { width: W, height: H } });
 await p.goto(url, { waitUntil: 'load', timeout: 60000 });
 await p.waitForTimeout(1200);
-const total = await p.evaluate(() => document.documentElement.scrollHeight);
-const n = Math.min(MAX, Math.max(1, Math.ceil(total / H)));
+// each screen starts where a section starts, just under the fixed menu bar, as a visitor stops there (20 Nov 2026: cut
+// at even steps, a judge read "headings clipped under the menu bar" that were only the sheet's cuts); a section taller
+// than the screen gets a further stop every screen. Too many stops: an even sample of them.
+const stops = await p.evaluate((H) => {
+  const bar = [...document.querySelectorAll('header, nav, .top')].find((e) => getComputedStyle(e).position === 'fixed' && e.getBoundingClientRect().top <= 0);
+  const barH = bar ? bar.getBoundingClientRect().height : 0, max = document.documentElement.scrollHeight - innerHeight;
+  const root = document.querySelector('main') || document.body, out = [0];
+  for (const el of [...root.children, document.querySelector('footer')].filter(Boolean)) {
+    if (el.offsetHeight < 60 || getComputedStyle(el).position === 'fixed') continue;
+    const top = el.getBoundingClientRect().top + scrollY - barH;
+    for (let y = top; y < top + el.offsetHeight - 80; y += H - barH) out.push(Math.max(0, Math.min(max, Math.round(y))));
+  }
+  return [...new Set(out)].sort((a, b) => a - b).filter((y, i, a) => !i || y - a[i - 1] > 120);
+}, H);
+const n = Math.min(MAX, stops.length);
+const pick = stops.length <= MAX ? stops : Array.from({ length: n }, (_, i) => stops[Math.round((i * (stops.length - 1)) / (n - 1))]);
 const shots = [];
-for (let i = 0; i < n; i++) {
-  // even steps from top to bottom, so a long page is still covered in MAX screens
-  await p.evaluate((y) => window.scrollTo(0, y), Math.round((i * (total - H)) / Math.max(1, n - 1)));
+for (const y of pick) {
+  await p.evaluate((y) => window.scrollTo(0, y), y);
   await p.waitForTimeout(600);
   shots.push((await p.screenshot({ type: 'jpeg', quality: 70 })).toString('base64'));
 }

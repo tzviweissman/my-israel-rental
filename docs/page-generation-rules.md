@@ -40,18 +40,18 @@ Sections (line each starts on; read with that offset):
 - 2733: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
 - 2753: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
 - 2783: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2820: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
-- 2874: 4. What is reported to the owner instead (content gaps)
-- 2883: 5. How to write
-- 2932: 5a. Lessons from the practice pages
-- 2961: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3010: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3027: 6. Playbooks for the most common businesses
-- 3147: 7. Choosing the three options (automatic page builder only)
-- 3171: 8. Photos, video and the tools
-- 3397: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3465: 9. The scroll sections: what the practice pages become
-- 3500: 10. Open decisions (need Tzvi)
+- 2827: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
+- 2885: 4. What is reported to the owner instead (content gaps)
+- 2894: 5. How to write
+- 2943: 5a. Lessons from the practice pages
+- 2972: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3021: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3038: 6. Playbooks for the most common businesses
+- 3158: 7. Choosing the three options (automatic page builder only)
+- 3182: 8. Photos, video and the tools
+- 3408: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3476: 9. The scroll sections: what the practice pages become
+- 3511: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2795,6 +2795,13 @@ them. The fixes, made on her site the same day, are the rule. Not asked of a sit
    owner's photo (`scripts/product-match-sheet.py`, the 9 Nov rule) and the original kept if anything changed. All of a
    site's photos are re-lit to the same ground and light, so they read as one shoot. Tova's 24 photos, 19 Nov 2026:
    about 1 credit each. LOOK, on the photo sheet.
+   **Decided at step 2, not after the build** (20 Nov 2026): re-lit phone photos still scored 3 of 5 for photos with two
+   judges, and every redesign round of Cakes by Tova stopped at 3.5 overall because of them. So at step 2 each photo is
+   marked one of three: shop-ready, re-light, or styled shot. "Styled shot" means the photo cannot reach a 5 even re-lit
+   (flat angle, mixed ground, a casual tray): the same bake, checked piece by piece against hers, placed in a styled
+   scene of the category's references (a cake on a stand with soft side light, loaves on a board), made through the
+   API with its price read first. The opening photo and the showpiece's photos (3ah.5) are always styled shots unless
+   the owner's own already look like the references. The plan and its credits go in the step 2 report, before layout.
 2. **Products are shown big.** Wherever a product is sold with its price, it is a card led by its photo, at least
    200 px wide at a laptop: the photo, then the name and price, then its choices. Never a small round thumbnail beside a
    list of words. Checked by `scripts/check-look.mjs` (SMALL).
@@ -2843,7 +2850,11 @@ one of the judge's reasons. Not asked of a site published before 20 Nov 2026.
    screen at a laptop or more (the products, or one big photo of them), and every product photo is 240 px wide or
    more there: three or four to a row, never five small ones, and chosen so no row is left less than half full (six
    bakes three to a row, not four and two). A page title and one line, then the products; the explanations go under
-   them or into the sheet. Product names in the heading face at `--t1`, prices bold at `--t1`. Tova's shop opened on a page of words above a row of small pictures
+   them or into the sheet. Product names in the heading face at `--t1`, prices bold at `--t1`. A new shop is built
+   with `shop_page(..., featured=True)` in the starter (20 Nov 2026, from the Baked Fresh reference): the page opens as
+   one big photo of the popular item, as tall as the screen allows, beside the page title and that item's name, price,
+   line and Add (`popular_said=True` adds "Our most popular" only when the owner said it). Off by default, so a shop
+   already built keeps its page. Tova's shop opened on a page of words above a row of small pictures
    (11% pictures). Checked by `scripts/check-five.mjs` (SHOPTOP); Magnolia Bakery's cakes page passes (a banner photo
    above its cards).
 4. **Words people read are 16 px or more.** At a laptop, paragraphs of four words or more, product names and prices
