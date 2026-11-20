@@ -3555,6 +3555,28 @@
    "confirmed_by": "check-compared TREATMENTS + LOOK",
    "gremier_retry": false,
    "status": "planned"
+  },
+  {
+   "id": "R3e.16b",
+   "rule": "Controls answer in 300 ms or less, ease out, never from scale(0), no bounce, pressed buttons shrink to 0.97",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "The starter's control transitions (160 ms) and :active scale(.97); a site's own effects keep to it",
+   "confirmed_by": "check-motion-feel -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3e.11b",
+   "rule": "Long names, four-digit prices and a missing photo never break a card or scroll the page sideways",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Cards wrap their names, prices sit in their own row, photo boxes have a fixed shape",
+   "confirmed_by": "check-break-ui -> confirm only",
+   "gremier_retry": false,
+   "status": "planned"
   }
  ]
 }

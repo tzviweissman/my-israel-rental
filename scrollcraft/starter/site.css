@@ -41,7 +41,7 @@ h1, h2, h3 { font-family: var(--font-head); margin: 0; line-height: 1.04; }
 /* built in (12 Nov 2026, rules as a blueprint): a hover and a press on every control, so no site ships without them;
    the site's own button effect below adds to these, never removes them */
 .btn:hover, .btn:focus-visible { filter: brightness(1.08); box-shadow: 0 8px 20px -10px color-mix(in srgb, var(--accent) 70%, transparent); }
-.btn:active, .btn-line:active, .menu-btn:active, button:active { transform: translateY(2px); }
+.btn:active, .btn-line:active, .menu-btn:active, button:active { transform: scale(.97); }   /* pressed: a slight shrink (3e.16b, Emil Kowalski) */
 .btn-line:hover, .btn-line:focus-visible { background: var(--ink); color: var(--ground); }
 .menu-btn:hover { border-color: var(--ink); }
 .btn, .btn-line, .menu-btn { min-height: 44px; }

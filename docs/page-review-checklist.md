@@ -59,5 +59,13 @@ For each item answer PASS or FAIL with where and what you saw.
 14. The page has at least one small touch only this business would have
     (rules 3p.5), and it works.
 
+## Calm (20 Nov 2026: a blind judge held Cakes by Tova back for "many different treatments side by side")
+15. Count the decorations beyond photos, grounds and type (edges, ribbons, badges, tinted cards, tilted prints,
+    patterns, a mark used as ornament, a travelling object, hover flourishes). More than three fails (rules 3ai).
+16. Name the loudest thing on each screen that is not a product or the main button. If it pulls the eye from the
+    product, it fails: say what to tone down.
+17. Name anything a visitor would not miss: a line repeating a heading, a second way to the same place, a decoration
+    with no job. Each is a FAIL with "remove".
+
 Report: a numbered list of FAILs only, each with page, screen size, what you
 saw and what would fix it. Say "all pass" if none.

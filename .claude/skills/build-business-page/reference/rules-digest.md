@@ -10,41 +10,41 @@ Sections (line each starts on; read with that offset):
 - 365: 3b. The sections every page has (Tzvi, 6 Oct 2026)
 - 388: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
 - 432: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 467: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 497: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 557: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
-- 627: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 649: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 744: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 807: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 839: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 866: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 906: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 939: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 997: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1021: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1049: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1128: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
-- 1132: 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
-- 1144: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1154: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 1169: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 1180: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 1187: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 1198: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 1209: 3bb. Small touches (Tzvi, 12 Nov 2026)
-- 1221: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026)
-- 1228: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026)
-- 1241: 3ae. One part leads into the next (Tzvi, 18 Nov 2026)
-- 1249: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
-- 1260: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026)
-- 1272: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
-- 1286: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
-- 1293: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1301: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1335: 4. Design and story
-- 1365: 5. Build rules (each one shipped as a defect once)
-- 1388: 6. Look through it, fix it, then show it
+- 469: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 499: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 559: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
+- 629: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 651: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 746: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 809: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 841: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 868: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 908: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 941: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 999: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1023: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1051: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1130: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
+- 1134: 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
+- 1146: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1156: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 1171: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 1182: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 1189: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 1200: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 1211: 3bb. Small touches (Tzvi, 12 Nov 2026)
+- 1223: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026)
+- 1230: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026)
+- 1243: 3ae. One part leads into the next (Tzvi, 18 Nov 2026)
+- 1251: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
+- 1262: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026)
+- 1274: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
+- 1288: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
+- 1295: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1303: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1337: 4. Design and story
+- 1367: 5. Build rules (each one shipped as a defect once)
+- 1390: 6. Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section numbers are unchanged, so "3g.13", "3h.11" and the like still point to the same text. The full rulebook is `full-rules.md`.
@@ -453,7 +453,9 @@ Full text, sources and the rejected list: `reference/full-rules.md` §3e.
 6. **System**: 4 px spacing grid, related close and unrelated apart; one body
    family, up to three weights, six sizes; headings tightened about -2% with 110-120% line height (test
    Hebrew first); one radius for images and buttons.
-7. **Motion**: never linear, grows from the tap, under 0.5 s. Carousels show
+7. **Motion**: never linear, grows from the tap, under 0.5 s. Controls (3e.16b, check-motion-feel): 300 ms or
+   less, ease out, never from scale(0), no bounce, pressed buttons shrink to 0.97. Worst content (3e.11b,
+   check-break-ui): long names, four-digit prices and a missing photo never break a card. Carousels show
    the next card's edge and have buttons or dots (mirrored in Hebrew); sheets
    close by swipe AND a button. Ambient background video only (a film opening follows 3h): locked camera,
    ~6 s loop, poster, reduced-motion still.

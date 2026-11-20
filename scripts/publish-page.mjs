@@ -185,6 +185,9 @@ ${lp.stdout}${lp.stderr}`);
     ['check-look.mjs', 'looks worse than the best sites of its kind (too many grounds or headline sizes, products too small)', 'R3ag.2'],
     // a 5 the first time: one statement opens it, photo-led cards, a shop that opens on its products, words 16 px+ (Tzvi, 20 Nov 2026, rules 3ah)
     ['check-five.mjs', 'falls short of a 5 beside the best of its kind (opening, cards, shop or small words)', 'R3ah.1'],
+    // controls move like a designer made them, and the worst content breaks nothing (Tzvi, 20 Nov 2026, Emil Kowalski's rules)
+    ['check-motion-feel.mjs', 'has controls that are slow, bounce, pop from nothing or give no press', 'R3e.16b'],
+    ['check-break-ui.mjs', 'breaks with a long name, a big price or a missing photo', 'R3e.11b'],
     // one part leads into the next: something crosses a section line, one object travels down with you (Tzvi, 18 Nov 2026, rules 3ae)
     ['check-seams.mjs', 'has a home page where nothing crosses a section line or travels with the visitor', 'R3ae.1'],
     // the page as an iPhone shows it: Safari's engine, where a film led only by seeking stands still (Tzvi, 14 Nov 2026, rules 3aa.30)
