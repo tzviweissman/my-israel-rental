@@ -72,7 +72,7 @@ export default function MessagePreview({ loaded, templates, note }) {
       ? (he ? `ההזמנה שלך #1042 מ${biz} אושרה` : `Your order #1042 from ${biz} is confirmed`)
       : (he ? 'הזמנה חדשה #1042 מדנה' : 'New order #1042 from Dana');
     body = (
-      <div className="p-3 min-h-[220px] text-[13px]" style={{ background: '#fff', color: '#111' }} dir="auto">
+      <div className="p-3 min-h-[220px] text-[13px]" style={{ background: '#fff', color: '#111' }} dir={he ? 'rtl' : 'ltr'}>
         <p className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>{who === 'customer' ? `${biz} · myisraelrental` : 'myisraelrental'}</p>
         <p className="font-bold mb-2">{subject}</p>
         <div className="rounded-lg border p-3" style={{ borderColor: 'var(--brand-border)' }}>
