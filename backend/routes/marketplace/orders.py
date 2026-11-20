@@ -258,6 +258,9 @@ def _phone_fields(raw: Optional[str]) -> dict[str, Any]:
     }
 
 
+MAKING_PHOTO_GAP_MIN = 10
+
+
 def _now_iso() -> str:
     return datetime.now(_IL_TZ).replace(microsecond=0).isoformat()
 
@@ -1389,11 +1392,18 @@ async def send_making_photo(order_id: str, payload: MakingPhotoIn, user=Depends(
     order = await _owned_order(order_id, user)
     if order.get("status") not in OPEN_STATUSES:
         raise HTTPException(status_code=400, detail="This order is already closed")
+    # A new photo always replaces the one on the page, but the customer gets at most one WhatsApp
+    # message about it every 10 minutes, so nervous taps are not five paid messages (code review 18 Nov 2026).
+    last = (order.get("making_photo") or {}).get("at")
+    try:
+        recent = bool(last) and datetime.now(_IL_TZ) - datetime.fromisoformat(last) < timedelta(minutes=MAKING_PHOTO_GAP_MIN)
+    except (TypeError, ValueError):
+        recent = False
     await db.store_orders.update_one({"_id": order_id}, {"$set": {
         "making_photo": {"url": payload.photo_url, "note": payload.note.strip(), "at": _now_iso(), "by": user["user_id"]}, "updated_at": _now_iso()}})
     fresh = await db.store_orders.find_one({"_id": order_id})
     phone = fresh.get("customer_phone_e164") or fresh.get("customer_phone")
-    if phone and fresh.get("track_token"):
+    if phone and fresh.get("track_token") and not recent:
         from utils.bg_tasks import spawn
         from utils.whatsapp import send_order_making_to_customer
         biz = await db.businesses.find_one({"_id": fresh.get("business_id")}, {"name": 1}) or {}

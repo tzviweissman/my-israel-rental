@@ -778,7 +778,14 @@ _PHOTO_EXT = (".mp4", ".mov", ".webm", ".m4v")
 
 # How big an item is, for its ad (Tzvi, 18 Nov 2026: the Grand and Supreme boxes "dont say what size it is like
 # the mini does"): the owner's own "serves", else the sentence of the description that says it ("Feeds 8 to 10.").
-_SIZE_RE = re.compile(r"[^.!\n]*\b(?:feeds|serves|for \d+ (?:people|guests))\b[^.!\n]*|[^.!\n]*(?:מספיק ל|ל-?\s?\d+\s*(?:סועדים|אנשים|איש)|מנות)[^.!\n]*", re.I)
+# A sentence piece: a dot between digits (4.50) is a price, not the end of a sentence; מנות counts only with a number
+# (code review 19 Nov 2026: "כל המנות מוכנות טריות" and "Price 4.50 serves 2" gave wrong sizes).
+_PIECE = r"(?:[^.!\n]|(?<=\d)\.(?=\d))*"
+_SIZE_RE = re.compile(
+    _PIECE + r"\b(?:feeds|serves|for \d+ (?:people|guests))\b" + _PIECE
+    + r"|" + _PIECE + r"(?:מספיק ל|ל-?\s?\d+\s*(?:סועדים|אנשים|איש)|\d+\s*מנות)" + _PIECE,
+    re.I,
+)
 
 
 def _item_size(row: dict) -> str:
