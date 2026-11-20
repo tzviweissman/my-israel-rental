@@ -33,25 +33,25 @@ Sections (line each starts on; read with that offset):
 - 2251: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
 - 2276: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
 - 2316: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2578: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2605: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2670: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2687: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2733: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2753: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2783: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2827: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
-- 2885: 4. What is reported to the owner instead (content gaps)
-- 2894: 5. How to write
-- 2943: 5a. Lessons from the practice pages
-- 2972: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3021: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3038: 6. Playbooks for the most common businesses
-- 3158: 7. Choosing the three options (automatic page builder only)
-- 3182: 8. Photos, video and the tools
-- 3408: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3476: 9. The scroll sections: what the practice pages become
-- 3511: 10. Open decisions (need Tzvi)
+- 2581: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2608: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2673: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2690: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2736: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2756: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2786: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2830: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
+- 2888: 4. What is reported to the owner instead (content gaps)
+- 2897: 5. How to write
+- 2946: 5a. Lessons from the practice pages
+- 2975: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3024: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3041: 6. Playbooks for the most common businesses
+- 3161: 7. Choosing the three options (automatic page builder only)
+- 3185: 8. Photos, video and the tools
+- 3411: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3479: 9. The scroll sections: what the practice pages become
+- 3514: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2574,6 +2574,9 @@ part where one exists, so it is there without being remembered.
     6. **Checked close up.** Before any still is shown, each hero object is cropped close and put beside its inspo at
        the same size (scripts/inspo-beside.py on the crops), and the brief's `shot_seen` line answers the six. At full
        frame both look fine; the close crop is where fake shows (Burnt's iron passed every full-frame look).
+    A mark and the tool that made it match: the same design at the same size, the tool standing at or beside its own
+    mark so one glance reads "this made that" (20 Nov 2026: Burnt's burned mark was half again the size of the iron's
+    face and sat apart from it; the inspo's iron stands at the edge of its exact mark).
 
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
 
