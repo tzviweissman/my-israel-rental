@@ -1360,6 +1360,8 @@ const he = {
         button: 'לפתוח את הפרסום',
       },
       wizard: {
+        pickCategory: "בחרו קטגוריה",
+        pickSubcategory: "בחרו מה אתם עושים",
         siteFound: "מצאנו גם את זה. בדקו ושנו מה שצריך:",
         address: "כתובת",
         addressHint: "רחוב, מספר, עיר",

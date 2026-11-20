@@ -51,7 +51,7 @@ import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { compressImage as shrinkPhoto } from '../utils/fastUpload';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
-import CategoryPicker from '../components/marketplace/CategoryPicker';
+import { CategoryDropdowns } from '../components/marketplace/CategoryPicker';
 import ServiceCard from '../components/marketplace/ServiceCard';
 import AvailabilityStep, { DAYS } from '../components/marketplace/AvailabilityStep';
 import { SUBCATEGORIES, subcategoryLabel } from '../lib/categories';
@@ -1633,48 +1633,19 @@ const CreateGig = () => {
               {/* Grouped (spec N2). Same testids as the flat grid it
                   replaced — `wizard-cat-<slug>` — so nothing that
                   referenced them needs to change. */}
-              <div className="mt-2">
-                <CategoryPicker
-                  categories={categories}
-                  value={form.category}
-                  onChange={(slug) => set({ category: slug, subcategory: '' })}
-                  testidPrefix="wizard-cat"
-                  variant="primary"
-                />
-              </div>
+              {/* Two dropdowns (Tzvi, 20 Nov 2026): the category, then its subcategory, which is what
+                  /businesses sorts its rows and chips by. Same SUBCATEGORIES list the filter reads. */}
+              <CategoryDropdowns
+                categories={categories}
+                value={form.category}
+                onChange={(slug) => set({ category: slug, subcategory: '' })}
+                sub={form.subcategory}
+                subs={(SUBCATEGORIES[form.category] || []).map((s) => ({ slug: s.slug, label: subcategoryLabel(s, t) }))}
+                onSubChange={(slug) => set({ subcategory: slug })}
+                subLabel={t('services.specificType', 'Specific type')}
+                testidPrefix="wizard-cat"
+              />
             </div>
-            {/* The four merged categories carry sub-buckets, and the board
-                already filters on them. Same chips and the same
-                SUBCATEGORIES list the filter reads, so the two cannot
-                offer different options. Never required. */}
-            {SUBCATEGORIES[form.category] && (
-              <div>
-                <label className="text-sm font-semibold text-gray-700">
-                  {t('services.specificType', 'Specific type')}
-                </label>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {t('services.specificTypeProviderHint', 'Optional - customers filter by this, so it helps the right ones find you.')}
-                </p>
-                <div className="flex flex-wrap gap-2 mt-2" data-testid="wizard-subcategory-row">
-                  {SUBCATEGORIES[form.category].map((sub) => (
-                    <button
-                      key={sub.slug}
-                      type="button"
-                      onClick={() => set({ subcategory: form.subcategory === sub.slug ? '' : sub.slug })}
-                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                        form.subcategory === sub.slug
-                          ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--brand-primary)]'
-                      }`}
-                      aria-pressed={form.subcategory === sub.slug}
-                      data-testid={`wizard-sub-${sub.slug}`}
-                    >
-                      {subcategoryLabel(sub, t)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 

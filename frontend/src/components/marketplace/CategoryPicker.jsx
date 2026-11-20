@@ -36,6 +36,42 @@ const VARIANTS = {
   },
 };
 
+/**
+ * The add-a-business form's version (Tzvi, 20 Nov 2026: "make them choose from a drop down their category and
+ * then a new drop down appears for the subcategory"). Native selects: the phone's own picker, nothing to scroll
+ * past, and the same groups as the grid as <optgroup>s. The second one appears only for a category that has
+ * subcategories (lib/categories.js SUBCATEGORIES), which are what /businesses sorts its rows and chips by.
+ * 16 px text so an iPhone does not zoom in on focus.
+ */
+export function CategoryDropdowns({ categories, value, sub, subs, onChange, onSubChange, subLabel, testidPrefix }) {
+  const { t } = useTranslation();
+  const groups = useMemo(() => groupCategories(categories, t), [categories, t]);
+  const cls = 'w-full mt-1 px-3 py-2.5 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] text-[16px]';
+  return (
+    <div className="space-y-3">
+      <select id={`${testidPrefix}-select`} value={value || ''} onChange={(e) => onChange(e.target.value)} className={cls}
+        aria-label={t('wizard.category', 'Category')} data-testid={`${testidPrefix}-select`}>
+        <option value="" disabled>{t('wizard.pickCategory', 'Choose your category')}</option>
+        {groups.map((g) => (
+          <optgroup key={g.id} label={g.label}>
+            {g.items.map((c) => <option key={c.slug} value={c.slug} data-testid={`${testidPrefix}-${c.slug}`}>{c.label}</option>)}
+          </optgroup>
+        ))}
+      </select>
+      {subs && subs.length > 0 && (
+        <div>
+          <label htmlFor={`${testidPrefix}-sub-select`} className="text-sm font-semibold text-gray-700">{subLabel}</label>
+          <select id={`${testidPrefix}-sub-select`} value={sub || ''} onChange={(e) => onSubChange(e.target.value)} className={cls}
+            data-testid={`${testidPrefix}-sub-select`}>
+            <option value="">{t('wizard.pickSubcategory', 'Choose what you do')}</option>
+            {subs.map((s) => <option key={s.slug} value={s.slug}>{s.label}</option>)}
+          </select>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CategoryPicker({
   categories,
   value,

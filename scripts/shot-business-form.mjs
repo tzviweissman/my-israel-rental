@@ -42,7 +42,7 @@ try {
           if (step > 1) await page.goto(`${APP}/businesses/add?step=${step}`, { waitUntil: 'domcontentloaded' });
           await page.waitForTimeout(2000);
           await page.evaluate(() => document.querySelectorAll('#webpack-dev-server-client-overlay').forEach((e) => e.remove()));
-          if (step === 1 && !(await page.locator('[data-testid^="wizard-cat-"]:not([data-testid*="group"])').count())) {
+          if (step === 1 && !(await page.locator('[data-testid="wizard-cat-select"] option[value]:not([value=""])').count())) {
             failures.push(`${lang} ${d} ${type}: the category list is empty (see the note at the top)`);
           }
           const sw = await page.evaluate(() => document.documentElement.scrollWidth);
