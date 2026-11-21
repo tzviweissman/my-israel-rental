@@ -3577,6 +3577,18 @@
    "confirmed_by": "check-break-ui -> confirm only",
    "gremier_retry": false,
    "status": "planned"
+  },
+  {
+   "id": "R3e.16c",
+   "rule": "Motion planned in five moments (opening in order, cards in turn, chooser swap, sheet grow, Add pop); hover only on mouse devices",
+   "how": [
+    "GEN",
+    "ASK"
+   ],
+   "built_by": "Step 6 writes CONCEPT - motion:; built within 3e.16b's limits",
+   "confirmed_by": "check-compared MOTION + check-motion-feel STAGGER, HOVER",
+   "gremier_retry": false,
+   "status": "planned"
   }
  ]
 }

@@ -10,49 +10,49 @@ Sections (line each starts on; read with that offset):
 - 310: 3b. The category checklist (from the Inspo study)
 - 349: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
 - 482: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 589: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
-- 726: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 791: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 962: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
-- 1258: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 1296: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 1411: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 1490: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 1522: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 1549: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 1595: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 1632: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1706: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1731: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1768: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1885: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
-- 1906: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1977: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
-- 2062: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 2172: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 2264: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 2289: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 2329: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2594: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2621: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2686: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2703: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2749: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2769: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2799: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2846: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
-- 2908: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
-- 2929: 4. What is reported to the owner instead (content gaps)
-- 2938: 5. How to write
-- 2987: 5a. Lessons from the practice pages
-- 3016: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3065: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3082: 6. Playbooks for the most common businesses
-- 3202: 7. Choosing the three options (automatic page builder only)
-- 3226: 8. Photos, video and the tools
-- 3452: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3520: 9. The scroll sections: what the practice pages become
-- 3555: 10. Open decisions (need Tzvi)
+- 599: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
+- 736: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 801: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 972: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
+- 1268: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 1306: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 1421: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 1500: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 1532: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 1559: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 1605: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 1642: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1716: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1741: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1778: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1895: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
+- 1916: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1987: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+- 2072: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 2182: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 2274: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 2299: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 2339: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 2604: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2631: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2696: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2713: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2759: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2779: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2809: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2856: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
+- 2918: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
+- 2939: 4. What is reported to the owner instead (content gaps)
+- 2948: 5. How to write
+- 2997: 5a. Lessons from the practice pages
+- 3026: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3075: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3092: 6. Playbooks for the most common businesses
+- 3212: 7. Choosing the three options (automatic page builder only)
+- 3236: 8. Photos, video and the tools
+- 3462: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3530: 9. The scroll sections: what the practice pages become
+- 3565: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -540,6 +540,16 @@ draft with sources: `docs/ui-videos/draft-rules.md`.
     you scroll and an opening are not controls and keep 16's 0.5 s. Stricter than the award-winning bakeries it was
     tried on (Sonoma Bakery 500 ms, Bernice Bakery 800 ms, neither has a pressed state): Tzvi chose it. Checked by
     `scripts/check-motion-feel.mjs` (SLOW, POP, BOUNCE, EASEIN, PRESS). Not asked of a site published before 20 Nov 2026.
+16c. **Motion planned where it helps** (Tzvi, 21 Nov 2026: "add it to the rules", after seeing Cakes by Tova with Emil
+    Kowalski's find-animation-opportunities, choreograph and animate skills applied). 16b only limits motion; this
+    places it. At step 6, CONCEPT.md gets a `- motion:` line naming five moments, each built within 16b's limits:
+    (1) the opening's parts arrive in order, about 60 to 80 ms apart; (2) cards and reveals rise in turn, about 50 ms
+    apart; (3) any chooser or tab swaps its photo and list with one eased change, the list cascading; (4) the product
+    sheet or pop-up fades and grows from 0.96 (slides up on a phone); (5) Add and the basket count give one small pop.
+    Hover lifts only under `@media (hover: hover)`, so nothing stays raised after a tap. Under reduced motion,
+    movement drops and short fades stay. Nothing animates on actions repeated quickly (a counter's + and -). Worked
+    example: the Cakes by Tova test copy, MOTION.md. Checked by `scripts/check-compared.mjs` (MOTION: the line) and
+    `scripts/check-motion-feel.mjs` (STAGGER: three or more first-screen parts with different delays); hover is LOOK. Not asked of a site published before 21 Nov 2026.
 11b. **Tested with the worst content** (same day, Emil Kowalski's "break-ui"): rule 11 said it since 8 Oct 2026 but
     nothing tested it. The first six product cards get a very long name, a four-digit price and a photo that fails to
     load, at a laptop and a phone: the page never scrolls sideways, nothing runs out of its card, the name never runs

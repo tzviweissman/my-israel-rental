@@ -60,6 +60,15 @@ for (const url of urls) {
       }
     };
     for (const ss of document.styleSheets) { try { walk(ss.cssRules); } catch { /* another site's sheet */ } }
+    // STAGGER: the first screen's parts arrive in order (3e.16c); HOVER: hover transforms only under (hover: hover)
+    const firstParts = [...document.querySelectorAll('main h1, main h1 ~ *, main h1 + *, main .btn')].filter((e) => e.getBoundingClientRect().top < innerHeight);
+    out.delays = new Set(firstParts.map((e) => { const c = getComputedStyle(e); return c.animationDelay + '|' + c.transitionDelay; })).size;
+    out.hover = [];
+    const walkH = (rules, inHover) => { for (const r of rules) {
+      if (r instanceof CSSMediaRule) { walkH(r.cssRules, inHover || /hover:\s*hover/.test(r.conditionText || r.media.mediaText)); continue; }
+      if (r.selectorText && /:hover/.test(r.selectorText) && /transform\s*:/.test(r.cssText) && !inHover && !/^(button|\.btn)/.test(r.selectorText)) out.hover.push(r.selectorText.slice(0, 50));
+    } };
+    for (const ss of document.styleSheets) { try { walkH(ss.cssRules, false); } catch { /* other site */ } }
     out.pop = [...new Set(out.pop)]; out.bounce = [...new Set(out.bounce)]; out.easein = [...new Set(out.easein)];
     return out;
   });
@@ -68,6 +77,7 @@ for (const url of urls) {
   for (const s of r.pop.slice(0, 4)) why.push(`POP: ${s} grows from scale(0); start at 0.9 to 0.95 (3e.16b)`);
   for (const s of r.bounce.slice(0, 4)) why.push(`BOUNCE: ${s} overshoots; no bounce or elastic easing (3e.16b)`);
   for (const s of r.easein.slice(0, 4)) why.push(`EASEIN: ${s} eases in; arrivals and exits ease out (3e.16b)`);
+  if (/index\.html$|\/$/.test(new URL(url).pathname) && r.delays < 3) why.push(`STAGGER: the first screen's parts arrive together (${r.delays} timing(s)); bring them in order, about 60 to 80 ms apart (3e.16c)`);
   if (!r.press) why.push('PRESS: no pressed state on buttons; a pressed button shrinks to about scale(0.97) (3e.16b)');
   if (why.length) { bad++; console.log(`FEEL  ${url}\n  ${why.join('\n  ')}`); }
   console.log(`${url}: checked`);

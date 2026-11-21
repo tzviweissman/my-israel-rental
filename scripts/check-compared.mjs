@@ -43,5 +43,7 @@ if (!/https?:\/\/(?!(www\.)?(pinterest|pin\.it|dribbble|behance))[^\s)]+/i.test(
 const tr = /^- treatments:\s*(.+)$/m.exec(concept);
 if (!tr) why.push('TREATMENTS: CONCEPT.md has no "- treatments: <one>; <two>; <three>" line (3ai: three decorations at most)');
 else if (tr[1].split(';').filter((x) => x.trim()).length > 3 && !/Tzvi OK/i.test(tr[1])) why.push(`TREATMENTS: ${tr[1].split(';').length} decorations; three at most, or "(Tzvi OK, <date>)" on the line (3ai)`);
+// motion planned where it helps (rules 3e.16c, 21 Nov 2026)
+if (!/^- motion:\s*\S/m.test(concept)) why.push('MOTION: CONCEPT.md has no "- motion:" line naming the five moments (opening in order, cards in turn, chooser swap, sheet grow, Add pop; 3e.16c)');
 if (why.length) { console.log(`COMPARED  ${dir}\n  ${why.join('\n  ')}`); process.exit(1); }
 console.log(`${dir}: compared`);

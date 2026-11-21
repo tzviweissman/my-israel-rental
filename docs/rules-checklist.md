@@ -10,10 +10,10 @@ Sections (line each starts on; read with that offset):
 - 284: 5. Prices and savings
 - 306: 6. Order and booking flow
 - 332: 7. Motion
-- 363: 8. Phone
-- 379: 8b. From the seven videos, part two (29 Oct 2026)
-- 401: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 412: 9. Finish
+- 364: 8. Phone
+- 380: 8b. From the seven videos, part two (29 Oct 2026)
+- 402: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 413: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -340,6 +340,7 @@ R3g.4 | Every motion has one job (guide, confirm, reveal); loops start and end o
 R3e.16 | No linear easing (ease-out or a spring); a transition grows from what was tapped and finishes under 0.5 s | 3e.16 | LOOK: grep css/js for `linear`, check durations
 R3e.16b | Controls answer in 300 ms or less, ease out, never grow from scale(0), never bounce, and a pressed button shrinks a little (scale 0.97) | 3e.16b | script: `node scripts/check-motion-feel.mjs <page urls>`
 R3e.11b | With a very long name, a four-digit price and a missing photo on its first six cards, no page scrolls sideways, nothing runs out of its card or into its price or Add, and a card keeps its shape | 3e.11b, 3e.11 | script: `node scripts/check-break-ui.mjs <page urls>`
+R3e.16c | CONCEPT.md - motion: plans the opening arriving in order, cards in turn, chooser swap, sheet growing from 0.96 and Add's pop; hover only under (hover: hover); reduced motion keeps fades | 3e.16c | script: `node scripts/check-compared.mjs <build>` (MOTION) + `node scripts/check-motion-feel.mjs <page urls>` (STAGGER) + LOOK hover on a phone
 R3e.17 | A carousel shows a sliver of the next card, with visible buttons or dots (mirrored in Hebrew); a bottom sheet closes by swipe-down AND a close button | 3e.17 | LOOK; n/a if none
 R3e.18 | Ambient background video only: camera locked, subtle, seamless loop of about 6 s, still poster, still for reduced motion | 3e.18 | LOOK; n/a if none when:film
 R3a.2 | Nothing moves without a reason: a clip behind text holds still except its subject; text never re-wraps while its container animates; no in-between state looks unfinished (checked at the middle of every transition) | 3a table, 3h.5 | LOOK: frames mid-transition
