@@ -41,18 +41,18 @@ Sections (line each starts on; read with that offset):
 - 2779: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
 - 2809: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
 - 2856: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
-- 2918: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
-- 2939: 4. What is reported to the owner instead (content gaps)
-- 2948: 5. How to write
-- 2997: 5a. Lessons from the practice pages
-- 3026: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3075: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3092: 6. Playbooks for the most common businesses
-- 3212: 7. Choosing the three options (automatic page builder only)
-- 3236: 8. Photos, video and the tools
-- 3462: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3530: 9. The scroll sections: what the practice pages become
-- 3565: 10. Open decisions (need Tzvi)
+- 2931: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
+- 2952: 4. What is reported to the owner instead (content gaps)
+- 2961: 5. How to write
+- 3010: 5a. Lessons from the practice pages
+- 3039: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3088: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3105: 6. Playbooks for the most common businesses
+- 3225: 7. Choosing the three options (automatic page builder only)
+- 3249: 8. Photos, video and the tools
+- 3475: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3543: 9. The scroll sections: what the practice pages become
+- 3578: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2862,9 +2862,11 @@ comparing and rebuilding: what a 5 has is planned before the build and checked w
 one of the judge's reasons. Not asked of a site published before 20 Nov 2026.
 
 1. **One statement opens the site.** The first screen has one big headline, one line under it (20 words at most) and
-   one main button, on one photo. A business with several kinds of offer names them inside that headline, in the
-   customer's words and as few as can say it ("Challah, doughnuts and gifts", within 3g.13's five words), and `<meta name="offers">`
-   uses the same words, so 3g.18's check still finds each. Never a stack of big tray names, tabs or lines beside it:
+   one main button, on one photo. The headline carries a feeling ("Baked for your table"), and a business with several
+   kinds of offer names them in the line directly under it, in the customer's words ("Challah, Chanukah doughnuts and
+   gifts from abroad, baked to order by Tova in Jerusalem"); `<meta name="offers">` uses the same words, and 3g.18's
+   check reads the headline and that line together (Tzvi, 21 Nov 2026, "its way better", after the Cake Truffle
+   mock-up; until then the offers had to be in the headline itself, which made it read as a menu, not a moment). Never a stack of big tray names, tabs or lines beside it:
    Tova's had her headline plus "Weekly bakes", "Chanukah treats" and "Gifts from abroad" in big type, which read as a
    flyer. The headline keeps the scale's biggest size (`--t5`) on every laptop, short ones included, and its button is
    large (56 px tall, `--t1` words): the second judge (3.5 of 5) found Tova's shrunk to `--t4` on an 800 px screen with a
@@ -2914,6 +2916,17 @@ one of the judge's reasons. Not asked of a site published before 20 Nov 2026.
    site". Anything under 4 is fixed and judged again before anyone sees the site. Checked by
    `scripts/check-compared.mjs` (the part) and `scripts/check-build.mjs` and publish-page (the rating, when compare.jpg
    exists).
+
+8. **The opening is a staged moment** (Tzvi, 21 Nov 2026: "its way better we should always make it more like this.
+   but maybe add a wow", after Cakes by Tova's opening was rebuilt from the Cake Truffle reference). The first screen is
+   one of the business's own products, made into a styled hero shot (3ag.1's styled shot: the same piece, checked
+   against the owner's photo) with dramatic side light on a deep ground of the product's own colour world (chocolate
+   for a bakery, its own for others), the product whole on one side and the dark plain side for the words in light
+   type. A flat object is shown lying flat (Tova's first try stood her letter cake on its edge). Then one wow as it
+   arrives, under 2 s and once: Tova's cake waits in shadow and a soft side light sweeps across to reveal it as the
+   words come in (`gen/tova.css`, `.rack .pics::after`, a radial shade moved with `@property`); still under reduced
+   motion. One API picture, about 1 credit. The old daylight-on-linen opening scored 4 of 5; this one is what Tzvi
+   chose. LOOK at 1366x800 and 390x844, with check-arrival and check-says-offer.
 
 ## 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
 

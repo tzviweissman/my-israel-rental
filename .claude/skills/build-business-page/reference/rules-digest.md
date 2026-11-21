@@ -39,12 +39,12 @@ Sections (line each starts on; read with that offset):
 - 1253: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
 - 1264: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026)
 - 1276: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
-- 1290: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
-- 1297: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1305: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1339: 4. Design and story
-- 1369: 5. Build rules (each one shipped as a defect once)
-- 1392: 6. Look through it, fix it, then show it
+- 1292: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
+- 1299: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1307: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1341: 4. Design and story
+- 1371: 5. Build rules (each one shipped as a defect once)
+- 1394: 6. Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section numbers are unchanged, so "3g.13", "3h.11" and the like still point to the same text. The full rulebook is `full-rules.md`.
@@ -1276,8 +1276,10 @@ HEADINGS). (6) Before review: compare.jpg (compare-sheet.mjs) and a `## Compared
 ## 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
 
 Full text: reference/full-rules.md section 3ah. Cakes by Tova met 3ag, passed every check and was still rated 3 of 5
-beside the best bakery sites; each rule is one reason. (1) One statement opens the site: one big headline naming every
-offer, one line, one button, one photo (check-five OPENING). (2) A product card is its photo, edge to edge, then name,
+beside the best bakery sites; each rule is one reason. (1) One statement opens the site: one big headline with a feeling,
+the offers in the line under it, one button, one photo (check-five OPENING). (8) The opening is a staged moment: the
+owner's own product as a styled hero, side-lit on a deep ground, words on the dark side, and one wow as it arrives
+(Tova: a light sweeps across her cake), under 2 s. (2) A product card is its photo, edge to edge, then name,
 price and one short line, 16 words at most; choices in the sheet (check-five CARDS). (3) A shop page opens on its
 products: pictures a third of the first screen, photos 240 px+ (check-five SHOPTOP); build it with the starter's
 shop_page(featured=True), one big photo of the popular item beside the title. (4) Paragraphs, product names and

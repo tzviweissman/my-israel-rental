@@ -36,7 +36,10 @@ for (const [w, h, mobile] of [[1366, 800, false], [390, 844, true]]) {
       return true;
     };
     const big = [...document.querySelectorAll('h1, h2, h3')].filter((e) => seen(e) && (e.tagName === 'H1' || parseFloat(getComputedStyle(e).fontSize) >= (innerWidth < 760 ? 28 : 40)));
-    return { offers: document.querySelector('meta[name="offers"]')?.content || '', big: big.map((e) => e.innerText.replace(/\s+/g, ' ').trim()).join(' / ') };
+    // the line directly under the h1 counts with it (rules 3ah.1, 21 Nov 2026: a headline with a feeling, the offers under it)
+    const h1 = big.find((e) => e.tagName === 'H1'); let line = h1 && h1.nextElementSibling;
+    const under = line && line.tagName === 'P' && seen(line) ? ' / ' + line.innerText.replace(/\s+/g, ' ').trim() : '';
+    return { offers: document.querySelector('meta[name="offers"]')?.content || '', big: big.map((e) => e.innerText.replace(/\s+/g, ' ').trim()).join(' / ') + under };
   })); }
   const r = { offers: reads[0].offers, big: [...new Set(reads.map((x) => x.big).filter(Boolean))].join(' / ') };
   await c.close();

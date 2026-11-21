@@ -3466,7 +3466,7 @@
   },
   {
    "id": "R3ah.1",
-   "rule": "One headline naming every offer, one line, one large button on one photo; nothing else 28 px+ on the first screen",
+   "rule": "One big headline with a feeling, the offers in the line under it, one large button, one photo",
    "how": [
     "GEN"
    ],
@@ -3587,6 +3587,18 @@
    ],
    "built_by": "Step 6 writes CONCEPT - motion:; built within 3e.16b's limits",
    "confirmed_by": "check-compared MOTION + check-motion-feel STAGGER, HOVER",
+   "gremier_retry": false,
+   "status": "planned"
+  },
+  {
+   "id": "R3ah.8",
+   "rule": "The opening is a staged moment: owner's product as a styled, side-lit hero on a deep ground, plus one wow as it arrives",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "Step 2 plans the hero styled shot; step 6 the wow (Tova: a light sweep)",
+   "confirmed_by": "LOOK + check-arrival",
    "gremier_retry": false,
    "status": "planned"
   }

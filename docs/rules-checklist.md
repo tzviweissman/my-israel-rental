@@ -6,14 +6,14 @@ Sections (line each starts on; read with that offset):
 - 70: 1. Facts and words
 - 101: 2. Opening
 - 175: 3. Sections and worlds
-- 254: 4. Photos and media
-- 284: 5. Prices and savings
-- 306: 6. Order and booking flow
-- 332: 7. Motion
-- 364: 8. Phone
-- 380: 8b. From the seven videos, part two (29 Oct 2026)
-- 402: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 413: 9. Finish
+- 255: 4. Photos and media
+- 285: 5. Prices and savings
+- 307: 6. Order and booking flow
+- 333: 7. Motion
+- 365: 8. Phone
+- 381: 8b. From the seven videos, part two (29 Oct 2026)
+- 403: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 414: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -242,7 +242,8 @@ R3ag.3 | The home page's sections use two grounds taking turns, three at most | 
 R3ag.4 | The opening photo fills the screen (3h.1) with the product whole, extended on its plain side, and the words stand on that plain ground, never on a panel over the product | 3ag.4, 3h.1, 3c.12 | LOOK: 1366x800 and 390x844
 R3ag.5 | Every section headline is one size with a small label above it; the only other size is 3ad.3's one jump | 3ag.5 | script: `node scripts/check-look.mjs <home url>` (HEADINGS)
 R3ag.6 | Before review, compare.jpg puts screens.jpg beside two top sites of the same category, at least one a live shipped site named by its address, and REFERENCES.md has a ## Compared part naming each difference and what changed | 3ag.6 | script: `node scripts/check-compared.mjs <build>` (LIVE)
-R3ah.1 | The first screen has one big headline naming every offer, one line under it and one main button, on one photo; no other text of 28 px or more | 3ah.1, 3g.13, 3g.18 | script: `node scripts/check-five.mjs <page urls>` (OPENING)
+R3ah.1 | The first screen has one big headline with a feeling, the offers named in the line directly under it, and one main button, on one photo; no other text of 28 px or more | 3ah.1, 3g.13, 3g.18 | script: `node scripts/check-five.mjs <page urls>` (OPENING) + check-says-offer
+R3ah.8 | The opening is a staged moment: the owner's own product as a styled hero, side-lit on a deep ground, words on the dark side, and one wow as it arrives (under 2 s, once, still under reduced motion) | 3ah.8, 3ag.1 | LOOK: 1366x800 and 390x844 + check-arrival
 R3ah.2 | Every product card is led by its photo edge to edge, then name, price and one short line (16 words at most besides them); choices in the item's sheet; a 3af.4 colour card's cut-out spans the card | 3ah.2, 3af.4, 3l.3 | script: `node scripts/check-five.mjs <page urls>` (CARDS)
 R3ah.3 | A page selling four or more products opens on pictures (a third of the laptop's first screen or more), every product photo 240 px wide or more | 3ah.3 | script: `node scripts/check-five.mjs <page urls>` (SHOPTOP)
 R3ah.4 | Paragraphs, product names and prices are 16 px or more at a laptop | 3ah.4 | script: `node scripts/check-five.mjs <page urls>` (TEXT)
