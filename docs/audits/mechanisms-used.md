@@ -149,3 +149,4 @@ regardless, per the brief.
 should read and extend this file rather than re-reading every report.
 treat it as used and do not repeat it.
 which is a different report type). Flagged as documentation drift, same as the
+2026-11-21 - marginal value theorem (information foraging: people leave a patch where it runs out) - end of each category row on /businesses (BrowseRows.jsx)
