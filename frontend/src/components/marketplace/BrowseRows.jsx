@@ -96,7 +96,7 @@ function Intro({ group, items, onOpen }) {
       <span className="bw-intro-txt">
         <b>{L.group(group)}</b>
         <span>{L.line(group)}</span>
-        <i>{L.t('browse.count', { count: n, defaultValue: '{{count}} businesses' })} →</i>
+        <i>{L.t('browse.count', { count: n, defaultValue: '{{count}} businesses' })} <span className="bw-arr" aria-hidden="true">→</span></i>
       </span>
     </button>
   );
@@ -229,6 +229,9 @@ const CSS = `
 .bw-intro-txt b { font-family: var(--font-head); font-size: 1.55rem; line-height: 1.05; font-weight: 700; }
 .bw-intro-txt span { font-size: .85rem; opacity: .92; }
 .bw-intro-txt i { font-style: normal; font-size: .78rem; font-weight: 700; margin-top: 6px; }
+/* the arrow points the way the row reads: left in Hebrew (UI audit 21 Nov 2026) */
+.bw-arr { display: inline-block; }
+[dir="rtl"] .bw-arr { transform: scaleX(-1); }
 .bw-intro:focus-visible, .bw-cat:focus-visible, .bw-chip:focus-visible, .bw-seeall:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 .bw-cell .sc-tile { border-radius: 28px; }
 .bw-group { display: grid; gap: 22px; }
@@ -249,6 +252,8 @@ const CSS = `
   .bw-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
   .bw-chips::-webkit-scrollbar { display: none; }
   .bw-chip { flex: none; }
+  /* 44px taps on phones (UI audit 21 Nov 2026: See all was 34px, chips 39px) */
+  .bw-seeall, .bw-chip { min-height: 44px; display: inline-flex; align-items: center; }
   .bw-intro, .bw-cell .sc-tile { border-radius: 22px; }
   .bw-intro-txt b { font-size: 1.3rem; }
 }

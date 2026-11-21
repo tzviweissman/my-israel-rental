@@ -794,7 +794,9 @@ def _item_size(row: dict) -> str:
         return f"Feeds {int(serves)}"
     if isinstance(serves, str) and serves.strip():
         return serves.strip()[:30]
-    m = _SIZE_RE.search(str(row.get("description") or ""))
+    # Only the first 1,500 characters: the search is quadratic in a long sentence and runs on the event loop, and a
+    # product's description has no length limit (code review 20 Nov 2026: 20,000 letters took 18 s).
+    m = _SIZE_RE.search(str(row.get("description") or "")[:1500])
     return " ".join(m.group(0).split())[:30] if m else ""
 
 
