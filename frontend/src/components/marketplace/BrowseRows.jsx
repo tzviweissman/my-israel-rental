@@ -252,6 +252,8 @@ const CSS = `
   .bw-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
   .bw-chips::-webkit-scrollbar { display: none; }
   .bw-chip { flex: none; }
+  /* 44px taps on phones (UI audit 21 Nov 2026: See all was 34px, chips 39px) */
+  .bw-seeall, .bw-chip { min-height: 44px; display: inline-flex; align-items: center; }
   .bw-intro, .bw-cell .sc-tile { border-radius: 22px; }
   .bw-intro-txt b { font-size: 1.3rem; }
 }
