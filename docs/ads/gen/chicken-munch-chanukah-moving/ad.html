@@ -4,7 +4,7 @@
      "make there more details ... make the munch box actually look behind him ... they are 3d and full of detail".
      Five 3D shots (gen3d.py) each made to move (clip3d.py), played frame by frame from c1/ to c5/ (made from out/c*.mp4
      with ffmpeg fps=30 scale=1080:1920). The drawn first version is ad-drawn.html.
-     Words wait (M6): one line per beat, then the headline, logo, foot and QR from 6.4 s; they eat to the end (M8).
+     Words wait (M6): one line per beat, then the headline, logo, foot and QR from 6.55 s; they eat to the end (M8).
      Record: RECORD_LEN=10 node scripts/record-moving-ad.mjs docs/ads/gen/chicken-munch-chanukah-moving chicken-munch-chanukah-moving -->
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@500;700&display=block" rel="stylesheet">
 <style>
@@ -43,11 +43,15 @@ K.foot();
 const $ = (id) => document.getElementById(id);
 // the cut: each shot's start in the ad, its clip, where in the clip it starts and how fast it plays
 const SHOTS = [
-  { at: 0.0, dir: 'c1', from: 0.4, speed: 1.25, line: 'Looking for the oil...' },
-  { at: 1.7, dir: 'c2', from: 0.9, speed: 1.5, line: 'Found it!' },
-  { at: 3.3, dir: 'c3', from: 0.4, speed: 1.6, line: 'Hard decision.' },
-  { at: 5.1, dir: 'c4', from: 0.0, speed: 1.4, line: '' },
-  { at: 6.2, dir: 'c5', from: 0.0, speed: 1.0, line: '' },
+  // no words during the story (Tzvi, 22 Nov 2026: "it doesn't need to say what he's doing, it's obvious")
+  { at: 0.0, dir: 'c1', from: 0.4, speed: 1.4, line: '' },
+  { at: 1.4, dir: 'c2', from: 0.9, speed: 1.6, line: '' },
+  { at: 2.6, dir: 'c3', from: 0.4, speed: 1.8, line: '' },
+  // the toss again with two arms in sight (c4b; the first toss looked like a third arm), then he walks out holding
+  // the box with his friends behind him, so his choice is seen (c6), then they eat (c5) under the words
+  { at: 4.0, dir: 'c4b', from: 0.3, speed: 1.2, line: '' },
+  { at: 5.1, dir: 'c6', from: 0.0, speed: 1.6, line: '' },
+  { at: 6.6, dir: 'c5', from: 0.0, speed: 1.0, line: '' },
 ];
 const show = async (dir, sec) => {
   const n = Math.max(1, Math.min(198, Math.floor(sec * 30) + 1));
@@ -64,7 +68,7 @@ window.render = async (t) => {
   const s = SHOTS[i];
   await show(s.dir, s.from + (t - s.at) * s.speed);
   const end = i === SHOTS.length - 1;
-  const HOLD = 7.3, hold = $('hold');
+  const HOLD = 7.8, hold = $('hold');
   if (t >= HOLD) {
     const n = Math.floor((s.from + (HOLD - s.at) * s.speed) * 30) + 1;
     const src = `${s.dir}/${String(n).padStart(4, '0')}.jpg`;
@@ -72,13 +76,13 @@ window.render = async (t) => {
   }
   hold.style.opacity = t >= HOLD ? 1 : 0;
   $('topshade').style.opacity = end ? K.at(t, s.at, 0.4) : 0.35;
-  $('footshade').style.opacity = end ? K.at(t, 6.4, 0.4) : 0;
+  $('footshade').style.opacity = end ? K.at(t, 6.55, 0.4) : 0;
   const ln = $('line');
   ln.textContent = s.line;
   if (s.line) slam(ln, t, s.at + 0.1); else ln.style.opacity = 0;
-  slam($('h1'), t, 6.6); slam($('h2'), t, 6.9);
-  $('small').style.opacity = K.at(t, 7.2, 0.3);
-  $('logo').style.opacity = K.at(t, 6.4, 0.4);
-  K.footIn(t, 6.4);
+  slam($('h1'), t, 6.9); slam($('h2'), t, 7.2);
+  $('small').style.opacity = K.at(t, 7.4, 0.3);
+  $('logo').style.opacity = K.at(t, 6.55, 0.4);
+  K.footIn(t, 6.55);   // the QR is whole by 6.95 s and still for over 3 s (A10.3)
 };
 </script></body></html>

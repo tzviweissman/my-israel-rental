@@ -45,6 +45,18 @@ SHOTS = {
            "He rubs his chin with his other hand, thinking hard." + NO),
     "s4": (["hero", "s1"], LOOK + HERO + "Medium shot: grinning, he tosses the small terracotta oil jug back over his "
            "shoulder without looking; the jug is in the air behind him; he steps forward toward the camera." + NO),
+    # the toss again (Tzvi, 22 Nov 2026: "it looks like he's growing a 3rd arm"): the jug starts in his hand at the
+    # shoulder, so the clip only has to flick it back, and both arms are in plain sight
+    "s4b": (["hero", "s1"], LOOK + HERO + "Medium shot, facing the camera, grinning: he holds the small terracotta oil "
+            "jug in his right hand, raised beside his right shoulder, about to flick it backwards; his left arm hangs "
+            "relaxed at his side; one foot forward. Exactly two arms, both clearly visible." + NO),
+    # the ending shows his choice (Tzvi, 22 Nov 2026: "he should be walking out holding it")
+    "s6": (["hero", "friends", "s1", "box"], LOOK + "Medium-wide shot, facing the camera: the hero from the character "
+           "sheet walks toward the camera between the temple pillars, proudly holding " + BOXTXT + "open in both hands in "
+           "front of his chest, the box big, sharp and facing the camera, the tenders clearly visible; a huge happy grin. "
+           "Just behind him, his two friends from the friends sheet (blue plume with a moustache, yellow plume with curly "
+           "hair and a green cape) follow him, laughing and reaching toward the box. Lit menorah and oil lamps behind. "
+           "The top third of the frame is the dark temple, plain, for words; the bottom fifth is plain floor." + NO),
     "s5": (["hero", "friends", "s1", "box"], LOOK + "Wide shot: three Maccabee friends sit on cushions around a low "
            "carved stone table, eating happily: the hero from the character sheet in the middle, his friend with a blue "
            "plume and a moustache at the left, his stocky curly-haired friend with a yellow plume and green cape at the "

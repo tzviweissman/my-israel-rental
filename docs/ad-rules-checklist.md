@@ -35,6 +35,8 @@ A9f.1 | The angle, by name: a real moment and why ours wins there, or the exact 
 A9g.9 | Is this a different-looking ad from the last ones for this business, and not the same design with another headline? | 7, 9b, 9f.6, 9g.9 | decide
 A9g.10 | The gallery of one business looks varied at a glance: its designs do not share one colour or one layout, and each starts on its own product where there are several. | 9g, Tzvi 5 Nov | auto:variety
 A27.1 | The site's brand: for a business with a custom site, name its scrollcraft/builds/<folder>/BRAND.md and say which of its colours and fonts this ad uses and which of its bans it keeps; or "n/a: no custom site". | 27, page rules 3ak.3 | decide since:2026-11-22
+A28.1 | The look is chosen before anything is built: one cheap sample still of the same moment in each look that fits the idea (drawn flat, 3D animated film, real photo), shown to Tzvi side by side; the answer names the look he chose and the sample sheet. | 28, Tzvi 22 Nov | decide since:2026-11-22
+A28.2 | A product rebuilt in a generated scene keeps its own label: the real label or sticker, cut from their photo, is laid over the rebuilt one on the still ad and on frames where it holds still. The answer names the label file, or n/a: the product is their own photo. | 28, Tzvi 22 Nov | decide since:2026-11-22
 
 ## 2. The words
 

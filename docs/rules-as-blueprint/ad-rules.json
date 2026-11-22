@@ -1014,6 +1014,24 @@
    "confirmed_by": "scripts/ad-blueprint.mjs BRAND_RULES (the named BRAND.md exists) + LOOK",
    "retried": false,
    "status": "planned"
+  },
+  {
+   "id": "A28.1",
+   "rule": "The look (drawn, 3D, photo) is chosen from sample stills side by side before anything is built",
+   "how": ["ASK"],
+   "built_by": "docs/static-ad-rules.md section 28; one cheap still per look in the ad's gen script",
+   "confirmed_by": "the blueprint answer names the look Tzvi chose and the sheet",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A28.2",
+   "rule": "A product rebuilt in a generated scene keeps its real label laid over it where it holds still",
+   "how": ["ASK"],
+   "built_by": "docs/static-ad-rules.md section 28; the label cut from their photo, laid in code",
+   "confirmed_by": "LOOK at the still beside their photo",
+   "retried": false,
+   "status": "planned"
   }
  ]
 }

@@ -144,3 +144,6 @@ When a cut joins two round things (pot to bowl, cup to cup), measure before buil
 `backend/.venv/Scripts/python scripts/match-shots.py <shot A> <shot B> <sheet.jpg>` finds the rim in each and prints
 the transform that puts B's circle on A's at the cut, then B eases to its own place. The sheet shows one circle when
 the cut will land. Within 40px and 10% B is used as it is; the cholent's first bowl was 241px off and was remade by eye.
+
+Each shot's look is chosen before any shot is made (A28.1): Chicken Munch's Chanukah ad went drawn first, then 3D. And a
+product rebuilt in the generated shots keeps its real label laid over it wherever it holds still (A28.2).

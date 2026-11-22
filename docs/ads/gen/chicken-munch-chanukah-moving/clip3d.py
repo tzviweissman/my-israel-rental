@@ -26,6 +26,13 @@ CLIPS = {
            "sharp." + KEEP),
     "c4": ("s4.jpg", "Grinning, he flicks the oil jug back over his shoulder; it tumbles away out of frame behind him; he "
            "strides happily toward the camera." + KEEP),
+    "c4b": ("s4b.jpg", "With a flick of his right wrist he tosses the oil jug backwards over his right shoulder; the jug "
+            "tumbles away behind him and out of frame; his right hand comes back down to his side and he walks happily "
+            "toward the camera. He has exactly two arms the whole time: his right arm throws, his left arm swings "
+            "naturally at his side; no other hand or arm appears." + KEEP),
+    "c6": ("s6.jpg", "He walks slowly and proudly toward the camera carrying the open takeaway box in both hands, grinning; "
+           "his two friends walk behind him, laughing and reaching toward the box; the lamps flicker; the camera slowly "
+           "pulls back with them. The box stays sharp and exactly the same, held steady in front of his chest." + KEEP),
     "c5": ("s5.jpg", "The three friends eat happily: they bite their chicken tenders, chew, laugh and nod to each other; the "
            "menorah flames flicker; the box stays still and sharp on the table; the camera holds still." + KEEP),
 }

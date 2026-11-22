@@ -2,42 +2,43 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 69: 0. The one idea
-- 87: 1. Anatomy: three layers, in this order
-- 109: 2. The headline carries the ad
-- 132: 3. The picture
-- 159: 4. The body: points, price, proof
-- 188: 5. Honesty: what an ad may never do
-- 214: 6. Words are kept apart from the picture
-- 229: 7. Variations: test different ideas, not different commas
-- 242: 8. Making it work on a phone
-- 270: 9. What this means for the ad maker
-- 304: 9b. Standing out (12 more videos, 1 Nov 2026)
-- 374: 9c. How ads are worded (12 more videos, 1 Nov 2026)
-- 403: 9d. Ideas, not layouts (1,194 Pinterest ads, 2 Nov 2026)
-- 427: 9e. What the best ads share (second look, 2 Nov 2026)
-- 490: 9f. Three more videos (4 Nov 2026)
-- 551: 9h. What makes it look designed (Tzvi, 6 Nov 2026: "can we make the ads better")
-- 557: 9g. Three more videos: why an ad catches the eye (4 Nov 2026)
-- 602: 10. What to discount from the videos
-- 621: Sources
-- 656: 11. Moving ads (Tzvi, 6 Nov 2026)
-- 670: 12. Never bland (Tzvi, 8 Nov 2026)
-- 678: 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
-- 686: 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
-- 702: 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
-- 714: 16. The headline says the offer (Tzvi, 10 Nov 2026)
-- 724: 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
-- 740: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
-- 752: 19. A 5 every time (Tzvi, 10 Nov 2026)
-- 763: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
-- 787: 21. The drawing is kept (Tzvi, 16 Nov 2026)
-- 794: 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
-- 802: 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
-- 819: 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
-- 829: 25. Every listing photo in an ad is clean (Tzvi, 17 Nov 2026)
-- 838: 26. Memorable, not one template (Tzvi, 18 Nov 2026: "All ten")
-- 859: 27. The site's brand in its ads (Tzvi, 22 Nov 2026)
+- 70: 0. The one idea
+- 88: 1. Anatomy: three layers, in this order
+- 110: 2. The headline carries the ad
+- 133: 3. The picture
+- 160: 4. The body: points, price, proof
+- 189: 5. Honesty: what an ad may never do
+- 215: 6. Words are kept apart from the picture
+- 230: 7. Variations: test different ideas, not different commas
+- 243: 8. Making it work on a phone
+- 271: 9. What this means for the ad maker
+- 305: 9b. Standing out (12 more videos, 1 Nov 2026)
+- 375: 9c. How ads are worded (12 more videos, 1 Nov 2026)
+- 404: 9d. Ideas, not layouts (1,194 Pinterest ads, 2 Nov 2026)
+- 428: 9e. What the best ads share (second look, 2 Nov 2026)
+- 491: 9f. Three more videos (4 Nov 2026)
+- 552: 9h. What makes it look designed (Tzvi, 6 Nov 2026: "can we make the ads better")
+- 558: 9g. Three more videos: why an ad catches the eye (4 Nov 2026)
+- 603: 10. What to discount from the videos
+- 622: Sources
+- 657: 11. Moving ads (Tzvi, 6 Nov 2026)
+- 671: 12. Never bland (Tzvi, 8 Nov 2026)
+- 679: 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
+- 687: 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
+- 703: 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
+- 715: 16. The headline says the offer (Tzvi, 10 Nov 2026)
+- 725: 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
+- 741: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
+- 753: 19. A 5 every time (Tzvi, 10 Nov 2026)
+- 764: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
+- 788: 21. The drawing is kept (Tzvi, 16 Nov 2026)
+- 795: 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
+- 803: 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
+- 820: 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
+- 830: 25. Every listing photo in an ad is clean (Tzvi, 17 Nov 2026)
+- 839: 26. Memorable, not one template (Tzvi, 18 Nov 2026: "All ten")
+- 860: 27. The site's brand in its ads (Tzvi, 22 Nov 2026)
+- 871: 28. The look is chosen first, and a rebuilt product keeps its own label (Tzvi, 22 Nov 2026)
 <!-- /contents -->
 
 The rules for every still advert MyIsraelRental makes: the ad maker on the
@@ -866,3 +867,16 @@ keeps (A27.1). An ad and its site then read as one brand. A business with no cus
 the business's colours. Rejected: choosing an ad's colours from the photo alone when the site already has a brand
 sheet (the ad and the site looked like two brands).
 
+
+## 28. The look is chosen first, and a rebuilt product keeps its own label (Tzvi, 22 Nov 2026)
+
+Chicken Munch's Chanukah ad was built twice. Its first version was drawn flat on their yellow; Tzvi then sent three 3D
+animated videos ("they are 3d and full of detail") and it was rebuilt in 3D, after two paid pictures and three test
+recordings had gone into the drawn one. So before anything is built, the look is chosen from one sample frame of each
+kind that fits the idea (drawn flat, 3D animated film, real photo), each a cheap still of the same moment, shown side by
+side; the chosen one is written in the blueprint (A28.1).
+
+When a generated scene rebuilds the business's product (their box in the temple), the model redraws its label or
+sticker, and close up it comes out slightly wrong. The real label, cut from their own photo, is laid over it on the
+still ad and on any frame where it holds still, so the brand reads exactly where people look last (A28.2). L.A.
+Cholent's tub label is the worked example.
