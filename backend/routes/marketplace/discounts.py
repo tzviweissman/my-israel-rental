@@ -68,6 +68,8 @@ class CodeIn(BaseModel):
     once_per_customer: bool = True
     first_order_only: bool = False
     active: bool = True
+    # advertised in a bar on the business's order and listing pages (free-delivery codes, 22 Nov 2026)
+    show_on_page: bool = False
 
 
 def _check_in(b: CodeIn) -> str:
@@ -77,8 +79,10 @@ def _check_in(b: CodeIn) -> str:
     if b.kind == "free_delivery":
         # delivery is only on orders; value and currency mean nothing here
         b.applies_to, b.value, b.currency = "orders", 0, "ILS"
-    elif b.value <= 0:
-        raise HTTPException(status_code=422, detail="Enter how much the code takes off")
+    else:
+        b.show_on_page = False   # only a free-delivery code is advertised
+        if b.value <= 0:
+            raise HTTPException(status_code=422, detail="Enter how much the code takes off")
     if b.kind == "percent" and b.value > 100:
         raise HTTPException(status_code=422, detail="A percentage can be at most 100")
     if b.starts_on and b.ends_on and b.ends_on < b.starts_on:
@@ -91,6 +95,7 @@ def _out(d: dict[str, Any]) -> dict[str, Any]:
             "starts_on": d.get("starts_on"), "ends_on": d.get("ends_on"), "min_order": d.get("min_order"),
             "max_uses": d.get("max_uses"), "once_per_customer": d.get("once_per_customer", True),
             "first_order_only": d.get("first_order_only", False), "active": d.get("active", True),
+            "show_on_page": d.get("show_on_page", False),
             "uses": d.get("uses", 0), "discount_given": round(d.get("discount_given", 0.0), 2), "created_at": d.get("created_at")}
 
 
@@ -341,6 +346,29 @@ async def code_box(gig_id: str):
     if not gig or gig.get("status", "published") != "published" or not biz or not biz.get("active", True):
         raise HTTPException(status_code=404, detail="This listing is not taking orders")
     return {"business": {"id": biz["_id"]}, "has_codes": await has_codes(biz), "paused": pause_of(biz)}
+
+
+@router.get("/gigs/{gig_id}/promo")
+async def page_promo(gig_id: str):
+    """The free-delivery code a business chose to show on its pages (Tzvi, 22 Nov 2026), for the bar on its order page
+    and listing (FreeDeliveryBar.jsx): live today, not used up, and only when the business delivers. None otherwise."""
+    from .orders import offers_delivery
+    gig = await db.marketplace_gigs.find_one({"_id": gig_id}, {"business_id": 1, "status": 1, "gig_type": 1, "products": 1, "description": 1, "title": 1})
+    biz = await db.businesses.find_one({"_id": gig.get("business_id")}) if gig and gig.get("business_id") else None
+    if not gig or not biz or not biz.get("active", True):
+        return {"promo": None}
+    if not offers_delivery(biz.get("order_settings") or {}, biz, gig):
+        return {"promo": None}
+    today = datetime.now(IL).date().isoformat()
+    async for c in db.discount_codes.find({"business_id": biz["_id"], "kind": "free_delivery", "show_on_page": True, "active": True,
+                                           "deleted": {"$ne": True}}).sort("created_at", -1):
+        if (c.get("starts_on") and today < c["starts_on"]) or (c.get("ends_on") and today > c["ends_on"]):
+            continue
+        if c.get("max_uses") and c.get("uses", 0) >= c["max_uses"]:
+            continue
+        return {"promo": {"code": c["code"], "min_order": c.get("min_order"), "ends_on": c.get("ends_on"),
+                          "first_order_only": bool(c.get("first_order_only"))}}
+    return {"promo": None}
 
 
 @router.post("/businesses/{business_id}/discount-codes/check")

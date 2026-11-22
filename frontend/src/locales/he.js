@@ -7618,6 +7618,12 @@ const he = {
         hintThin: "רק {{m}} רווח ליחידה ({{p}}%). אולי להעלות מחיר?",
       },
       // Discount codes (backend discounts.py).
+      freeBar: {
+        text: "משלוח חינם עם הקוד",
+        over: "בהזמנה מעל {{n}}",
+        first: "בהזמנה הראשונה",
+        until: "עד {{date}}",
+      },
       discounts: {
         title: "קודי הנחה",
         new: "קוד חדש",
@@ -7653,6 +7659,7 @@ const he = {
         removeConfirm: "למחוק את הקוד {{code}}? הזמנות שהשתמשו בו ישמרו אותו.",
         offPercent: "{{v}}% הנחה",
         freeDelivery: "משלוח חינם",
+        showOnPage: "להציג בעמוד שלי",
         orderLineFree: "{{code}}: משלוח חינם",
         freeWithCode: "חינם עם {{code}}",
         freeNeedsDelivery: "הקוד {{code}} נותן משלוח חינם: בחרו משלוח כדי להשתמש בו.",

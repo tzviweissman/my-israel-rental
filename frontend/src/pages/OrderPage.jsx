@@ -53,6 +53,7 @@ import KeepExploring from '../components/orders/KeepExploring';
 import DateField, { toISODate } from '../components/common/DateField';
 import CustomFieldInputs from '../components/forms/CustomFieldInputs';
 import DiscountCodeInput, { discountOn } from '../components/forms/DiscountCodeInput';
+import FreeDeliveryBar from '../components/forms/FreeDeliveryBar';
 import NoticeBar from '../components/marketplace/NoticeBar';
 import { countStep } from '../utils/tapKind';
 import WhatsAppAboutThis, { whatsAppHref, orderMessage, reserveWhatsAppTab } from '../components/marketplace/WhatsAppAboutThis';
@@ -398,6 +399,7 @@ export default function OrderPage() {
         {data.business.logo_url && <img src={data.business.logo_url} alt="" className="w-11 h-11 rounded-xl object-cover" />}
         <h1 className="text-xl font-bold" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>{t('order.title', 'Order from {{name}}', { name: bizName })}</h1>
       </div>
+      {!table && <FreeDeliveryBar gigId={gigId} currency={currency} className="mb-4" />}
       {table && (
         <p className="mb-4 rounded-2xl px-4 py-3 text-sm font-semibold" style={{ background: 'var(--ink)', color: 'var(--action-ink)' }} data-testid="order-table">
           {t('tableOrder.banner', 'Table {{n}}: order here and it is brought to your table.', { n: table })}

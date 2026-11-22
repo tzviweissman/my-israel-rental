@@ -7,6 +7,7 @@
  * modal — driven by `gig.booking_mode`.
  */
 import React, { useContext, useEffect, useMemo, useState } from 'react';
+import FreeDeliveryBar from '../components/forms/FreeDeliveryBar';
 import { useHandBuilt } from '../utils/handBuiltPages';
 import ProofLine from '../components/marketplace/ProofLine';
 import ReviewsSection from '../components/reviews/ReviewsSection';
@@ -1017,6 +1018,8 @@ const GigDetail = () => {
                 </div>
               )}
               <Highlights items={gig.highlights} t={t} className="mt-3" testid="gig-highlights" />
+              {/* a free-delivery code the business shows on its pages (FreeDeliveryBar.jsx, 22 Nov 2026) */}
+              {(gig.gig_type || 'deliverable') === 'store' && <FreeDeliveryBar gigId={gig.id} currency={(gig.products || [])[0]?.currency || 'ILS'} className="mt-3" />}
               {/* The offer, directly under the name of the business running
                   it. The full form here rather than the card's chip: this is
                   the page where someone decides, so what the offer is for and

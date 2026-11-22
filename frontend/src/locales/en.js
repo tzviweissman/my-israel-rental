@@ -7745,6 +7745,12 @@ const en = {
         hintThin: "Only {{m}} profit each ({{p}}%). Worth a higher price?",
       },
       // Discount codes (backend discounts.py).
+      freeBar: {
+        text: "Free delivery with code",
+        over: "on orders over {{n}}",
+        first: "on your first order",
+        until: "until {{date}}",
+      },
       discounts: {
         title: "Discount codes",
         new: "New code",
@@ -7780,6 +7786,7 @@ const en = {
         removeConfirm: "Delete the code {{code}}? Orders that used it keep it.",
         offPercent: "{{v}}% off",
         freeDelivery: "Free delivery",
+        showOnPage: "Show it on my page",
         orderLineFree: "{{code}}: free delivery",
         freeWithCode: "Free with {{code}}",
         freeNeedsDelivery: "Code {{code}} gives free delivery: choose delivery to use it.",
