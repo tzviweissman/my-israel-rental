@@ -1117,7 +1117,7 @@
    "status": "planned"
   },
   {
-   "id": "R0b.4i",
+   "id": "R0b.15",
    "rule": "Opening ideas from saved sources, none a kind another site uses",
    "how": [
     "GEN"
@@ -1186,7 +1186,7 @@
   },
   {
    "id": "R3p.5",
-   "rule": "One small touch only this business would have",
+   "rule": "One small touch only this business would have; when seen, it is the first of the three decorations",
    "how": [
     "ASK",
     "EYE"
@@ -3295,11 +3295,11 @@
   },
   {
    "id": "R3af.2",
-   "rule": "When the owner gave the words and a photo, a short signed note beside their real photos; not a decoration; missing words are a content gap",
+   "rule": "Every owner is asked for a short signed note and a photo in the first message; shown beside their real photos when given, never invented",
    "how": [
     "ASK"
    ],
-   "built_by": "CONCEPT.md ## Body '- owner:' line; the owner asked for the words and a photo",
+   "built_by": "message-to-owner.md asks for the note and a photo; CONCEPT.md ## Body '- owner:' line",
    "confirmed_by": "LOOK",
    "gremier_retry": false,
    "status": "planned"
@@ -3374,11 +3374,11 @@
   },
   {
    "id": "R3ag.5",
-   "rule": "One headline size for every section, a small label above each, plus 3ad.3's one jump",
+   "rule": "One headline size for every section, plus 3ad.3's one jump; a label only where it adds a fact, never on every section",
    "how": [
     "GEN"
    ],
-   "built_by": "One --h token for section headlines and a label above each, set in the section plan",
+   "built_by": "One --h token for section headlines, set in the section plan; labels named there only where they add a fact",
    "confirmed_by": "check-look HEADINGS -> confirm only",
    "gremier_retry": false,
    "status": "planned"
@@ -3477,7 +3477,7 @@
   },
   {
    "id": "R3ai.1",
-   "rule": "Three decorations at most beyond photos, grounds and type, on CONCEPT's - treatments: line",
+   "rule": "Three decorations at most beyond photos, grounds and type, the one touch first among them, on CONCEPT's - treatments: line",
    "how": [
     "ASK",
     "EYE"
@@ -3499,7 +3499,7 @@
   },
   {
    "id": "R3aj.2",
-   "rule": "Three first screens, one per reference, only the layout different; Tzvi picks",
+   "rule": "Three first screens, one per reference, the layout different, one of them the staged deep-ground opening; Tzvi picks",
    "how": [
     "KIT",
     "ASK"
@@ -3712,7 +3712,7 @@
    "status": "planned"
   },
   {
-   "id": "R3e.16b",
+   "id": "R3e.26",
    "rule": "Controls answer in 300 ms or less, ease out, never from scale(0), no bounce, pressed buttons shrink to 0.97",
    "how": [
     "GEN"
@@ -3723,7 +3723,7 @@
    "status": "planned"
   },
   {
-   "id": "R3e.11b",
+   "id": "R3e.27",
    "rule": "Long names, four-digit prices and a missing photo never break a card or scroll the page sideways",
    "how": [
     "GEN"
@@ -3734,7 +3734,7 @@
    "status": "planned"
   },
   {
-   "id": "R3e.16c",
+   "id": "R3e.28",
    "rule": "Motion planned in five moments (opening in order, cards in turn, chooser swap, sheet grow, Add pop); hover only on mouse devices",
    "how": [
     "GEN",
@@ -3747,7 +3747,7 @@
   },
   {
    "id": "R3ah.8",
-   "rule": "The opening is a staged moment: owner's product as a styled, side-lit hero on a deep ground, plus one wow as it arrives",
+   "rule": "The opening is a staged moment: owner's product as a styled hero lit from one side, words on its plain side, one wow as it arrives; the deep dark ground is one of the three first screens",
    "how": [
     "GEN",
     "EYE"

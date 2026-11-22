@@ -197,8 +197,8 @@ ${lp.stdout}${lp.stderr}`);
     // a 5 the first time: one statement opens it, photo-led cards, a shop that opens on its products, words 16 px+ (Tzvi, 20 Nov 2026, rules 3ah)
     ['check-five.mjs', 'falls short of a 5 beside the best of its kind (opening, cards, shop or small words)', 'R3ah.1'],
     // controls move like a designer made them, and the worst content breaks nothing (Tzvi, 20 Nov 2026, Emil Kowalski's rules)
-    ['check-motion-feel.mjs', 'has controls that are slow, bounce, pop from nothing or give no press', 'R3e.16b'],
-    ['check-break-ui.mjs', 'breaks with a long name, a big price or a missing photo', 'R3e.11b'],
+    ['check-motion-feel.mjs', 'has controls that are slow, bounce, pop from nothing or give no press', 'R3e.26'],
+    ['check-break-ui.mjs', 'breaks with a long name, a big price or a missing photo', 'R3e.27'],
     // a keyboard user sees where they are, toggles are real, prices line up (Tzvi, 22 Nov 2026, Vercel's guidelines; rules 3aj.7)
     ['check-keyboard.mjs', 'hides focused controls under a bar, draws fake toggles or misaligns prices', 'R3aj.7'],
     // one part leads into the next: something crosses a section line, one object travels down with you (Tzvi, 18 Nov 2026, rules 3ae)

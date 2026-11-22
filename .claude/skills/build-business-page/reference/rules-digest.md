@@ -39,15 +39,15 @@ Sections (line each starts on; read with that offset):
 - 1270: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
 - 1281: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026)
 - 1293: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
-- 1308: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
-- 1322: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
-- 1347: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
-- 1359: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 1381: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1389: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1423: 4. Design and story
-- 1453: 5. Build rules (each one shipped as a defect once)
-- 1476: 6. Look through it, fix it, then show it
+- 1309: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
+- 1323: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
+- 1349: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
+- 1361: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 1383: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1391: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1425: 4. Design and story
+- 1455: 5. Build rules (each one shipped as a defect once)
+- 1478: 6. Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section numbers are unchanged, so "3g.13", "3h.11" and the like still point to the same text. The full rulebook is `full-rules.md`.
@@ -119,7 +119,7 @@ learned with. Check what is connected in this session first.
   component, with five business palettes to switch between: 12 buttons (B1 to
   B12), 6 links and arrows (L), 7 tiles (T), 6 prices (P), 4 headings (H), each
   marked with what it suits. B2 and T1 are on Michal Yodaiken's page; B5 (flips
-  to the price) is liked and kept for another business. Pick per business, never
+  to the price) is not used on a new site (3ak.4: the price stays in view). Pick per business, never
   the same set twice in a row, and add every new 21st piece you rebuild here.
   **Search 21st fresh on every build first** (Tzvi: "look by each build so you
   will have many more options"): see 3g.17. The library is a shelf of tested
@@ -1273,7 +1273,7 @@ Full text: reference/full-rules.md section 3af; examples in docs/inspo/awwwards-
 line in CONCEPT.md `## Body` before layout, judged by LOOK. (1) `- mark:` one drawn detail from their logo or product
 (or a mascot from them) doing a job in 3+ places (bullets, pointer, chosen state, dividers), never stock icons; Burrito
 Madre, Buck's Sauce. (2) `- owner:` a short signed note in the owner's own words beside their real photos, like Pizza
-Amici's letter; missing words are a content gap, never invented. (3) `- loose:` with 4+ work photos, one set laid loose
+Amici's letter; every owner is asked for it in the first message; missing words are a content gap, never invented. (3) `- loose:` with 4+ work photos, one set laid loose
 (tilted, overlapping, labelled by hand), tap to flip to what it is and its price; Sunbeam Bagels. (4) `- cards:` 3+
 kinds each on its own colour card with its cut-out and one line of character, never a grey list; Buck's "Choose your
 weapon". New sites only.
@@ -1286,7 +1286,7 @@ light, no foil, counter or flash; re-light the owner's photos with relight_photo
 product-match-sheet.py. Marked in phase 1, paid for in phase 6 after the first screen is picked: each photo shop-ready, re-light, or styled shot (the same bake in a styled
 scene of the references); the opening and showpiece photos styled unless hers already match the references. (2) Every priced product is a big photo card, 200 px+ at a laptop (check-look SMALL).
 (3) Two grounds taking turns, three at most (check-look GROUNDS). (4) The opening photo still fills the screen (3h.1),
-extended on its plain side, and the words stand on that plain ground, never on a panel over the product. (5) One headline size with a small label above, plus 3ad.3's one jump (check-look
+extended on its plain side, and the words stand on that plain ground, never on a panel over the product. (5) One headline size, plus 3ad.3's one jump; a small label only where it adds a fact, never on every section (5b.6) (check-look
 HEADINGS). (6) Before review: compare.jpg (compare-sheet.mjs) and a `## Compared` part in REFERENCES.md
 (check-compared). New sites only.
 
@@ -1295,8 +1295,9 @@ HEADINGS). (6) Before review: compare.jpg (compare-sheet.mjs) and a `## Compared
 Full text: reference/full-rules.md section 3ah. Cakes by Tova met 3ag, passed every check and was still rated 3 of 5
 beside the best bakery sites; each rule is one reason. (1) One statement opens the site: one big headline with a feeling,
 the offers in the line under it, one button, one photo (check-five OPENING). (8) The opening is a staged moment: the
-owner's own product as a styled hero, side-lit on a deep ground, words on the dark side, and one wow as it arrives
-(Tova: a light sweeps across her cake), under 2 s. (2) A product card is its photo, edge to edge, then name,
+owner's own product as a styled hero, lit from one side, words on its plain side, and one wow as it arrives
+(Tova: a light sweeps across her cake), under 2 s. The deep dark ground is one of the three first screens, always
+shown, used when Tzvi picks it; otherwise the ground follows the category (3t). (2) A product card is its photo, edge to edge, then name,
 price and one short line, 16 words at most; choices in the sheet (check-five CARDS). (3) A shop page opens on its
 products: pictures a third of the first screen, photos 240 px+ (check-five SHOPTOP); build it with the starter's
 shop_page(featured=True), one big photo of the popular item beside the title. (4) Paragraphs, product names and
@@ -1316,15 +1317,16 @@ an edge (3z.1), live art in code (3ak.1), the openings and effects of 3al.7, a c
 is there for looks. One not picked is `n/a: not picked (treatments)`. Not counted:
 the owner's note (3af.2), a touch that only states a true fact, plain labels above headings. Still asked of every
 new site: order flow, basket, menu bar, footer, three facts, two signature sections (the showpiece may be one), the
-rhythm, the one touch (3p.5), and every honesty, phone, speed and accessibility rule. check-compared TREATMENTS.
+rhythm, the one touch (3p.5), which counts as the first of the three when it is something seen and is written first on the treatments line, and every honesty, phone, speed and accessibility rule. check-compared TREATMENTS.
 New sites only.
 
 ## 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
 
 Full text: reference/full-rules.md section 3aj. Not asked of a site published before 22 Nov 2026.
 1. Each REFERENCES.md picture an idea cites says `Take:` and `Skip:` (check-ideas).
-2. In phase 4, three first screens are made as plain HTML, one per reference: same colours, fonts, words and photos,
-   grey boxes for pictures to be generated, only the layout differs. They are part B of the design board (8), Tzvi picks one, and
+2. In phase 4, three first screens are made as plain HTML, one per reference: same fonts, words and photos,
+   grey boxes for pictures to be generated, the layout differs, and one is always the staged opening on a deep ground
+   (3ah.8). They are part B of the design board (8), Tzvi picks one, and
    CONCEPT.md quotes him: `- first screens: a b c; Tzvi: "..."` (check-concept). This is the one options page 7.1
    allows.
 3. Before any idea, read docs/category-mistakes.md ("every kind" plus the business's kind). CONCEPT.md gets

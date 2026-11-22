@@ -2,60 +2,60 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 131: 1. The job, in one line
-- 136: 2. What the AI gets, and the only facts it may use
-- 169: 3. Hard rules (checked: a page breaking one is thrown away and remade)
-- 206: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
-- 248: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
-- 316: 3b. The category checklist (from the Inspo study)
-- 355: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 488: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 605: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
-- 753: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 818: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 999: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
-- 1298: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 1336: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 1451: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 1530: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 1562: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 1589: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 1637: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 1674: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1748: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1773: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1810: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1927: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
-- 1948: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 2019: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
-- 2104: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 2214: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 2308: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 2333: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 2373: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2646: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2673: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2741: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2758: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2804: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2827: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2859: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2906: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
-- 2981: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
-- 3021: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3107: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3146: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3231: 4. What is reported to the owner instead (content gaps)
-- 3240: 5. How to write
-- 3289: 5a. Lessons from the practice pages
-- 3318: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3367: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3384: 6. Playbooks for the most common businesses
-- 3504: 7. Choosing the three options (automatic page builder only)
-- 3528: 8. Photos, video and the tools
-- 3754: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3822: 9. The scroll sections: what the practice pages become
-- 3857: 10. Open decisions (need Tzvi)
+- 133: 1. The job, in one line
+- 138: 2. What the AI gets, and the only facts it may use
+- 171: 3. Hard rules (checked: a page breaking one is thrown away and remade)
+- 208: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
+- 250: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
+- 318: 3b. The category checklist (from the Inspo study)
+- 357: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 490: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 607: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
+- 755: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 820: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 1001: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
+- 1300: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 1338: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 1453: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 1532: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 1564: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 1591: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 1639: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 1676: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1750: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1775: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1812: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1929: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
+- 1950: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 2021: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+- 2106: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 2216: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 2310: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 2335: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 2375: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 2648: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2675: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2743: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2760: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2806: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2829: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2863: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2912: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
+- 2992: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
+- 3035: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
+- 3122: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3161: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3246: 4. What is reported to the owner instead (content gaps)
+- 3255: 5. How to write
+- 3304: 5a. Lessons from the practice pages
+- 3333: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3382: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3399: 6. Playbooks for the most common businesses
+- 3519: 7. Choosing the three options (automatic page builder only)
+- 3543: 8. Photos, video and the tools
+- 3769: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3838: 9. The scroll sections: what the practice pages become
+- 3873: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -106,7 +106,9 @@ new rule, or a fix that will become one, goes through these steps before it is w
    sites. **A new rule does not hold up a site that is already made** (Tzvi, 29 Oct 2026: "new rules
    shouldnt affect already made sites"): a site is held to the checklist rules that existed when it was
    first published, plus any later rule its RULES.md answers. check-rules lists a newer unanswered rule as
-   "not required" and publish-page does not run that rule's check (`scripts/rule-dates.mjs`). Show Tzvi
+   "not required" and publish-page does not run that rule's check (`scripts/rule-dates.mjs`). A build not yet
+   published is held to every rule, unless Tzvi spares it by name: its folder and the time its rules were frozen go
+   in `scrollcraft/rules-as-of.json`, with his words (22 Nov 2026: Krysp and Aaron Kaluszyner). Show Tzvi
    which live sites fail it; they change only if he asks. So a new check gets its own script, with its
    rule id in publish-page's list, never a new test inside an existing script.
 4. **The check must catch the original mistake**: run it on the before state (it fails) and the after
@@ -2843,8 +2845,10 @@ The owner's note (2) is used whenever the owner gave the words and a photo; it i
 2. **The owner speaks, signed, with real faces.** A short note in the owner's own words (three sentences or so, asked of
    them, never written for them, 1.1), signed with their name, beside their real photo and photos of the place or the
    customers, set like a letter: Pizza Amici's "Ciao!" letter with stamp-edged photos (`pizza-amici-1-letter-and-stamps.webp`).
-   When the owner has not given the words or a photo, it is a content gap (section 4), asked for, never filled with
-   invented words. Planned on a `- owner:` line (the words' source and the photos).
+   Every owner is asked for it in the first message, with a photo of themselves (decided 22 Nov 2026: only they can
+   write it, and a line in a message already being sent costs nothing; asked later it is a second round). When the
+   owner has not given the words or a photo, it is a content gap (section 4), never filled with invented words, and
+   the site is not held back for it. Planned on a `- owner:` line (the words' source and the photos).
 3. **Their photos you can play with.** When the site has four or more photos of the business's own work, at least one
    set is laid loose instead of a tidy grid: tilted, overlapping prints or polaroids with a handwritten label (the shade,
    the dish), that can be dragged or tapped to flip and show what it is and its price (Sunbeam Bagels,
@@ -2891,9 +2895,11 @@ them. The fixes, made on her site the same day, are the rule. Not asked of a sit
    plain cloth, table or wall at the other for the words, and a phone has the product on top and the plain ground
    under it. A box beside the words fails 3h.1 (Cakes by Tova, 19 Nov 2026, tried it first: check-site OPENING, 32%
    picture). 3g.13 and the 40% phone rule still hold. LOOK, at 1366x800 and 390x844.
-5. **One headline size.** Every section's headline is one size, with a small label above it (Tova's ribbon:
-   "Chanukah", "From abroad"), and 3ad.3's one jump is the only other size. Hers were 36, 36, 76 and 52 px, and it read
-   as untidy. Checked by `scripts/check-look.mjs` (HEADINGS: at most 2 sizes within 3 px).
+5. **One headline size.** Every section's headline is one size, and 3ad.3's one jump is the only other size. Hers
+   were 36, 36, 76 and 52 px, and it read as untidy. A small label above a headline is used only where it adds a
+   fact the headline lacks (Tova's "Chanukah", "From abroad"), in plain small type, and never on every section
+   (5b.6; changed 22 Nov 2026: this rule asked for a label on every headline, which 5b.6 bans and which marks a page
+   as AI-made). Checked by `scripts/check-look.mjs` (HEADINGS: at most 2 sizes within 3 px); the labels are a LOOK.
 6. **Compared before review.** Before the independent review (phase 9), the home page's `screens.jpg` is put beside
    two of the best sites of the same category (from Pinterest, Awwwards or Inspo, saved in REFERENCES.md) in
    `compare.jpg` in the build folder (`node scripts/compare-sheet.mjs <build> <picture 1> <picture 2>`), and
@@ -2975,8 +2981,13 @@ one of the judge's reasons. Not asked of a site published before 20 Nov 2026.
    type. A flat object is shown lying flat (Tova's first try stood her letter cake on its edge). Then one wow as it
    arrives, under 2 s and once: Tova's cake waits in shadow and a soft side light sweeps across to reveal it as the
    words come in (`gen/tova.css`, `.rack .pics::after`, a radial shade moved with `@property`); still under reduced
-   motion. One API picture, about 1 credit. The old daylight-on-linen opening scored 4 of 5; this one is what Tzvi
-   chose. LOOK at 1366x800 and 390x844, with check-arrival and check-says-offer.
+   motion. One API picture, its price from get_cost. The old daylight-on-linen opening scored 4 of 5; this one is
+   what Tzvi chose. LOOK at 1366x800 and 390x844, with check-arrival and check-says-offer.
+   **What is asked of every site, and what is a choice** (decided 22 Nov 2026). Asked of every site: the product as
+   a styled hero shot, whole, lit from one side, the words on its plain side, and the one wow as it arrives. A
+   choice: the deep dark ground. It is always one of the three first screens (3aj.2), so Tzvi can pick it on every
+   build, and it is used when he does. Otherwise the ground follows the category and the brand (3t: a food shop is
+   bright, the owner's own look wins). Asked of every site it gave every business the same first screen.
 
 ## 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
 
@@ -3005,12 +3016,15 @@ together they made the page busy.
      wipe, the light switch or cursor flashlight, a custom cursor and the photo sphere (3al.7), each by the category
      fit of 3t;
    - any small touch of 3bb that is there for looks.
+   The one small touch of 3p.5 is the first of the three (decided 22 Nov 2026): when it is something the visitor sees
+   (a pointer, a sweep, a mark), it is written first on the `- treatments:` line as `touch: <what>`, so a site has
+   that touch and two more at most. A touch that is only words or a true fact does not count.
    One that is not picked is answered `n/a: not picked (treatments)`. A site that wants a fourth asks Tzvi first.
    These do not count: the owner's signed note (3af.2), which is words and photos and is used whenever the owner
    gave them; a 3bb touch that only states a true fact; labels above headings (3ag.5), which are plain small type.
    Still asked of every new site, because they are how a site works or what makes it its own: the order flow, the
    basket, the menu bar and the footer (3k, 3v.1, 3v.2); the three facts (3v.14); two signature sections, one of
-   which may be the showpiece (3ad.1, 3ah.5); the rhythm (3ad.3); the one small touch (3p.5); and every honesty,
+   which may be the showpiece (3ad.1, 3ah.5); the rhythm (3ad.3); the one small touch (3p.5, counted above); and every honesty,
    phone, speed and accessibility rule. Rejected: asking each of them of every site (check-seams' own header: eight
    real shops were tried and none crossed a section line).
 3. Cakes by Tova, calmed the same day: the scalloped edges, the scallops under links and buttons, the ribbon labels
@@ -3033,8 +3047,9 @@ is asked of a site published before 22 Nov 2026.
 2. **Three first screens, one per reference, and Tzvi picks.**
    - In phase 4, before the rest of the site and before any paid picture for the first screen, the first screen is
      built three times as plain HTML in the build. One reference leads each version.
-   - The three share the same colours, fonts, words and the owner's real photos, with grey boxes where a picture will
-     be generated. Only the layout differs.
+   - The three share the same fonts, words and the owner's real photos, with grey boxes where a picture will
+     be generated. The layout differs, and one of the three is always the staged opening on a deep ground (3ah.8);
+     the other two keep the brand's own ground.
    - They are shown side by side as part B of the design board (8), and Tzvi picks one.
    - CONCEPT.md gets `- first screens: gen/board/first-a.html gen/board/first-b.html gen/board/first-c.html; Tzvi:
      "<his words>"`.
@@ -3781,7 +3796,8 @@ switchable between five business palettes (trainer, bakery, cleaner, tour guide,
 handyman): 12 buttons, 6 links and arrows, 7 tiles, 6 prices, 4 headings, each
 marked with the businesses it suits. Choose per business so two pages in a row
 never share the same set; a piece Tzvi likes but did not choose is kept for
-another business (B5, the button that flips to show the price). Every new piece
+another business. B5, the button that flips to show the price, is not used on a
+new site since 22 Nov 2026 (3ak.4: the price stays in view). Every new piece
 rebuilt from 21st is added to the library.
 
 **The library never replaces the search** (Tzvi, 7 Oct 2026: "why build now

@@ -2,7 +2,8 @@
  * A new rule does not hold up a site that was already made (Tzvi, 29 Oct 2026: "new rules shouldnt affect
  * already made sites"). A site is held to a checklist rule when the rule was in docs/rules-checklist.md on the
  * day the site was first published, or when its RULES.md answers it (it took the rule on). A site never
- * published is held to every rule. check-rules and publish-page both ask here.
+ * published is held to every rule, unless Tzvi spared it: scrollcraft/rules-as-of.json then names the time its
+ * rules were frozen. check-rules and publish-page both ask here.
  *
  *   ruleAdded(root)       Map id -> ms when the id first appeared in the checklist (git history)
  *   siteMade(root, dir)   ms of the first publish of the build in dir (scrollcraft/published.json + git), or null
@@ -42,6 +43,13 @@ export function siteMade(root, dir) {
     const first = git(root, ['log', '--diff-filter=A', '--format=%ct', '--', `frontend/public/pages/${slug}/index.html`]).trim().split('\n').pop();
     if (first) made = Math.min(made ?? Infinity, Number(first) * 1000);
   }
+  // a build Tzvi spared from later rules before it was published (scrollcraft/rules-as-of.json: "<folder>": { "as_of":
+  // "<time>", "why": "Tzvi, <date>: ..." }) is held to the rules as they were at that time, then and after it is published
+  // (22 Nov 2026: Krysp and Aaron Kaluszyner keep the rules of before that day)
+  try {
+    const asOf = Date.parse(JSON.parse(fs.readFileSync(path.join(root, 'scrollcraft', 'rules-as-of.json'), 'utf8'))[folder]?.as_of);
+    if (asOf) made = Math.min(made ?? Infinity, asOf);
+  } catch { /* no such file, or no entry: held to every rule */ }
   return made;
 }
 

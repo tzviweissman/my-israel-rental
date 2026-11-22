@@ -49,6 +49,9 @@ for (const l of read('docs/rules-checklist.md').split('\n')) {
   let reg = [];
   try { reg = JSON.parse(read('docs/rules-as-blueprint/rules.json')).rules || []; } catch (e) { bad.push(`docs/rules-as-blueprint/rules.json: cannot be read (${e.message})`); }
   const byId = new Map(reg.map((r) => [r.id, r]));
+  // an id ends in a number: blueprint, check-rules and rule-dates cannot read one that ends in a letter, so such a rule
+  // was never planned, answered or dated (R3e.16b and three more, found 22 Nov 2026)
+  for (const m of read('docs/rules-checklist.md').matchAll(/^(R[0-9][0-9a-z]*\.[0-9]+[a-z]+)\s*\|/gm)) bad.push(`${m[1]}: a checklist id must end in a number (take the next free one; the third column names the rule)`);
   const checklist = [...read('docs/rules-checklist.md').matchAll(/^(R[0-9][0-9a-z]*\.[0-9]+[a-z]?)\s*\|/gm)].map((m) => m[1]);
   for (const id of checklist) {
     const r = byId.get(id);
