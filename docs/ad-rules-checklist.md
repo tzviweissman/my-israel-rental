@@ -17,6 +17,8 @@ stage until the stage before it is answered.
   paid picture is generated.
 - **A new ad rule:** add it to `docs/static-ad-rules.md` as a numbered section (or inside the numbered section it
   belongs to) and here in the same commit, its line naming that section number, tried on the real designs first.
+  Its line says when it applies, and any rule on the same subject gets a "when" so the two combine (static-ad-rules,
+  "Every rule says when it applies").
   `node scripts/check-rule-homes.mjs` refuses an unnumbered section or a step that names none. A rule added after a design shipped does not block that design (designs listed under "Made before the
   blueprint" in `scripts/ad-blueprint.mjs`), but the `auto` lines still measure it.
 

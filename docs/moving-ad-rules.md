@@ -9,6 +9,14 @@ regular video ads (CGI and AI product commercials, food, drink, dessert and snac
 two references, Kenetik (t01) and Lay's (t02). Codes in brackets are rows in that library. The steps that are
 followed are A10.1 to A10.14 in `docs/ad-rules-checklist.md`; `docs/static-ad-rules.md` section 24 points here.
 
+**Every rule says when it applies** (Tzvi, 22 Nov 2026: "make sure we have when phrase in the future", after an
+audit of the page rules found 21 "contradictions" of which only 5 were real). A rule names the ads, the part of the
+picture or the situation it is for. Before a rule is written it is compared with the rules on the same subject; where
+two could seem to clash, each gets a "when" so the maker knows how they combine. Nothing is called a contradiction
+until both rules' sources are traced (Tzvi's words, the ads or videos they cite, or the commit that added them): a
+true conflict is one real ad that cannot satisfy both. An old line that a newer decision replaced is fixed the same
+day.
+
 ## What a moving ad keeps from the still-ad rules
 
 All of these apply unchanged, to the whole film and above all to its last frame:
