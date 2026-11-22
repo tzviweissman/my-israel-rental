@@ -134,3 +134,30 @@ def test_order_form_says_when_a_code_could_be_held(shop):
     r = requests.post(base, headers=h, json={"code": "NEW10", "value": 10, "first_order_only": True}, timeout=30)
     assert r.status_code == 200, r.text
     assert form() is True
+
+
+def test_free_delivery_code(shop):
+    """A free-delivery code (Tzvi, 22 Nov 2026): the goods cost the same, the delivery fee goes, and it only works on a
+    delivery; it is for orders only, whatever the form asked."""
+    h = _auth(shop["owner"])
+    assert requests.patch(f"{BASE}/marketplace/businesses/{shop['biz']}", json={"serves_nationwide": True}, headers=h, timeout=30).status_code == 200
+    r = requests.put(f"{BASE}/marketplace/businesses/{shop['biz']}/orders/settings", json={"delivery_on": True, "delivery_fee": 25}, headers=h, timeout=30)
+    assert r.status_code == 200, r.text
+    c = _code(shop, code="freeship", kind="free_delivery", applies_to="both")
+    assert c.status_code == 200, c.text
+    assert c.json()["applies_to"] == "orders" and c.json()["kind"] == "free_delivery"
+    day = (date.today() + timedelta(days=3)).isoformat()
+    order = lambda fulfil, code, phone: requests.post(f"{BASE}/marketplace/order-form/{shop['gig']}/orders", json={
+        "lines": [{"product_id": shop["prod"], "qty": 1}], "fulfilment": fulfil, "date": day, "address": "1 Herzl St",
+        "customer_name": "Dana", "customer_phone": phone, "discount_code": code}, timeout=30)
+    plain = order("delivery", None, "0547770001")
+    assert plain.status_code == 200, plain.text
+    assert plain.json()["delivery_fee"] == 25 and plain.json()["total"] == 125
+    pick = order("pickup", "FREESHIP", "0547770002")
+    assert pick.status_code == 400 and "delivery" in pick.json()["detail"]
+    free = order("delivery", "FREESHIP", "0547770002")
+    assert free.status_code == 200, free.text
+    assert free.json()["delivery_fee"] == 0 and free.json()["total"] == 100
+    assert free.json()["discount"]["free_delivery"] is True and free.json()["discount"]["delivery_off"] == 25
+    row = next(x for x in requests.get(f"{BASE}/marketplace/businesses/{shop['biz']}/discount-codes", headers=h, timeout=30).json() if x["code"] == "FREESHIP")
+    assert row["uses"] == 1 and row["discount_given"] == 25

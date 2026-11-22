@@ -22,8 +22,8 @@
   'use strict';
   var he = document.documentElement.lang === 'he';
   var T = he
-    ? { open: 'יש לך קוד הנחה?', ph: 'קוד', apply: 'הפעלה', code: 'קוד הנחה', remove: 'הסרה', on: 'הקוד הופעל', off: 'הנחה', fail: 'לא הצלחנו לבדוק את הקוד. נסו שוב.', paused: 'איננו מקבלים הזמנות כרגע.', back: 'איננו מקבלים הזמנות עד ' }
-    : { open: 'Have a discount code?', ph: 'Code', apply: 'Apply', code: 'Discount code', remove: 'Remove', on: 'applied', off: 'Discount', fail: 'Could not check the code. Try again.', paused: 'We are not taking orders right now.', back: 'We are not taking orders until ' };
+    ? { open: 'יש לך קוד הנחה?', ph: 'קוד', apply: 'הפעלה', code: 'קוד הנחה', remove: 'הסרה', on: 'הקוד הופעל', off: 'הנחה', free: 'משלוח חינם: דמי המשלוח יורדים כשההזמנה נשמרת', freeShort: 'משלוח חינם', fail: 'לא הצלחנו לבדוק את הקוד. נסו שוב.', paused: 'איננו מקבלים הזמנות כרגע.', back: 'איננו מקבלים הזמנות עד ' }
+    : { open: 'Have a discount code?', ph: 'Code', apply: 'Apply', code: 'Discount code', remove: 'Remove', on: 'applied', off: 'Discount', free: 'free delivery: the delivery fee comes off when your order is saved', freeShort: 'free delivery', fail: 'Could not check the code. Try again.', paused: 'We are not taking orders right now.', back: 'We are not taking orders until ' };
   var o = null, box = null, business = null, askedGig = '', applied = null, opened = false, error = '', busy = false, lastKey = '', timer = 0, pausedNow = null;
 
   var esc = function (s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
@@ -69,7 +69,9 @@
     if (!business) { box.innerHTML = ''; return; }
     if (applied) {
       var m = moneyOf(off(o.goods()));
-      box.innerHTML = '<p class="mirc-on" data-testid="mir-code-applied"><span>' + (he ? T.on + ' ' + esc(applied.code) : 'Code ' + esc(applied.code) + ' ' + T.on) + (m ? ', −' + esc(m) : '') + '</span> <button type="button" class="mirc-link" data-a="remove">' + T.remove + '</button></p>';
+      // a free-delivery code (22 Nov 2026): the page's own delivery line stays, the server drops the fee (orders.py)
+      if (applied.kind === 'free_delivery') m = '';
+      box.innerHTML = '<p class="mirc-on" data-testid="mir-code-applied"><span>' + (he ? T.on + ' ' + esc(applied.code) : 'Code ' + esc(applied.code) + ' ' + T.on) + (m ? ', −' + esc(m) : '') + (applied.kind === 'free_delivery' ? ', ' + T.free : '') + '</span> <button type="button" class="mirc-link" data-a="remove">' + T.remove + '</button></p>';
     } else if (!opened) {
       box.innerHTML = '<button type="button" class="mirc-link mirc-open" data-a="open" data-testid="mir-code-open"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12 12 20l-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>' + T.open + '</button>';
     } else {
@@ -149,9 +151,11 @@
     },
     refresh: refresh,
     code: function () { return applied ? applied.code : null; },
+    freeDelivery: function () { return !!(applied && applied.kind === 'free_delivery'); },
     after: function (amount) { return round(amount - off(amount)); },
     text: function (amount) {
       if (!applied) return '';
+      if (applied.kind === 'free_delivery') return T.code + ': ' + applied.code + ' (' + T.freeShort + ')';
       var m = moneyOf(off(amount));
       return m ? T.off + ' ' + applied.code + ': −' + m : T.code + ': ' + applied.code;
     }

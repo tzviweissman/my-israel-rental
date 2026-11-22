@@ -1115,7 +1115,7 @@ function OrdersTable({ orders, busyId, onStatus, onEdit, t }) {
                   {o.address && <div className="text-[11px]" dir="auto" style={{ color: 'var(--brand-muted)' }}>{o.address}</div>}
                 </td>
                 <td className="py-2 px-2 text-end tabular-nums whitespace-nowrap" style={{ color: 'var(--ink)' }}>{o.total != null ? money(o.total, o.currency) : ''}
-                  {o.discount && <div className="text-[11px] font-semibold" dir="ltr" style={{ color: '#2E7D4F' }} data-testid="order-code-used">{t('discounts.orderLine', '{{code}}: -{{v}}', { code: o.discount.code, v: money(o.discount.amount, o.currency) })}</div>}
+                  {o.discount && <div className="text-[11px] font-semibold" dir="ltr" style={{ color: '#2E7D4F' }} data-testid="order-code-used">{o.discount.free_delivery ? t('discounts.orderLineFree', '{{code}}: free delivery', { code: o.discount.code }) : t('discounts.orderLine', '{{code}}: -{{v}}', { code: o.discount.code, v: money(o.discount.amount, o.currency) })}</div>}
                 </td>
                 <td className="py-2 px-2 whitespace-nowrap">
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border" style={pillStyle(o.status, false)}>{t(`orders.status.${o.status}`, o.status)}</span>

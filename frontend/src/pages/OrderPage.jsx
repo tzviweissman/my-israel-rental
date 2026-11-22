@@ -226,7 +226,9 @@ export default function OrderPage() {
     const area = (data.settings.area_fees || {})[c];
     return Number(area === undefined || area === null ? data.settings.delivery_fee || 0 : area);
   };
-  const fee = fulfilment === 'delivery' ? feeFor(city) : 0;
+  // A free-delivery code (backend discounts.py, 22 Nov 2026) takes the fee off; it only works on a delivery.
+  const freeCode = code && code.kind === 'free_delivery';
+  const fee = fulfilment === 'delivery' && !freeCode ? feeFor(city) : 0;
   const total = lines.length ? subtotal - discount + fee : null;
   const minOrder = Number(data.settings.min_order || 0);
   const belowMin = fulfilment === 'delivery' && minOrder > 0 && subtotal < minOrder;
@@ -287,7 +289,7 @@ export default function OrderPage() {
         address: !table && fulfilment === 'delivery' ? address.trim() : null,
         customer_name: name.trim(), customer_phone: phone.trim(), customer_email: email.trim() || null,
         answers,
-        discount_code: code ? code.code : null,
+        discount_code: code && !(freeCode && fulfilment !== 'delivery') ? code.code : null,
         birthday: data.business.birthday_on ? birthdayOrNull(birthday) : null,
         lang: lang === 'he' ? 'he' : 'en',
       };
@@ -622,6 +624,8 @@ export default function OrderPage() {
             <ul className="text-sm mb-2" style={{ color: 'var(--ink)' }} data-testid="order-summary">
               {lines.map((l) => <li key={l.key} className="flex justify-between"><span dir="auto">{l.qty} × {l.name}</span><span className="tabular-nums">{money(Number(l.price) * l.qty, currency)}</span></li>)}
               {discount > 0 && <li className="flex justify-between" style={{ color: '#1F5F3A' }} data-testid="order-discount"><span>{t('discounts.line', 'Discount {{code}}', { code: code.code })}</span><span className="tabular-nums">−{money(discount, currency)}</span></li>}
+              {freeCode && fulfilment === 'delivery' && <li className="flex justify-between" style={{ color: '#1F5F3A' }} data-testid="order-free-delivery-code"><span>{t('order.deliveryFee', 'Delivery')}</span><span>{t('discounts.freeWithCode', 'Free with {{code}}', { code: code.code })}</span></li>}
+              {freeCode && fulfilment !== 'delivery' && <li className="text-xs" style={{ color: 'var(--brand-muted)' }} data-testid="order-free-delivery-pickup">{t('discounts.freeNeedsDelivery', 'Code {{code}} gives free delivery: choose delivery to use it.', { code: code.code })}</li>}
               {fee > 0 && <li className="flex justify-between"><span>{t('order.deliveryFee', 'Delivery')}</span><span className="tabular-nums">{money(fee, currency)}</span></li>}
               <li className="flex justify-between font-bold border-t mt-1 pt-1" style={{ borderColor: 'var(--brand-border)' }}><span>{fromLines.length ? t('priceKind.totalFrom', 'Total, starting at') : t('order.total', 'Total')}</span><span className="tabular-nums" data-testid="order-total">{money(total, currency)}</span></li>
             </ul>

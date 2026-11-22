@@ -39,22 +39,24 @@ function CodeForm({ initial, onSave, onCancel, saving }) {
                  className={`${field} tracking-wider`} style={fieldStyle} placeholder="FIRST10" data-testid="code-code" />
         </L>
         <L label={t('discounts.kind', 'Discount')}>
-          <select value={c.kind === 'percent' ? 'percent' : `amount:${c.currency || 'ILS'}`} onChange={(e) => { const [kind, currency = 'ILS'] = e.target.value.split(':'); setC({ ...c, kind, currency }); }} className={field} style={fieldStyle} data-testid="code-kind">
+          <select value={c.kind === 'amount' ? `amount:${c.currency || 'ILS'}` : c.kind} onChange={(e) => { const [kind, currency = 'ILS'] = e.target.value.split(':'); setC({ ...c, kind, currency, ...(kind === 'free_delivery' ? { applies_to: 'orders', value: '' } : {}) }); }} className={field} style={fieldStyle} data-testid="code-kind">
             <option value="percent">{t('discounts.percent', 'Percent off (%)')}</option>
             <option value="amount:ILS">{t('discounts.amount', 'Amount off (₪)')}</option>
             <option value="amount:USD">{t('discounts.amountUsd', 'Amount off ($)')}</option>
+            {/* Tzvi, 22 Nov 2026: a code for free delivery (backend discounts.py); orders only, nothing to fill in */}
+            <option value="free_delivery">{t('discounts.freeDelivery', 'Free delivery')}</option>
           </select>
         </L>
-        <L label={c.kind === 'percent' ? t('discounts.valuePercent', 'How many percent') : c.currency === 'USD' ? t('discounts.valueAmountUsd', 'How many dollars') : t('discounts.valueAmount', 'How many shekels')}>
+        {c.kind !== 'free_delivery' && <L label={c.kind === 'percent' ? t('discounts.valuePercent', 'How many percent') : c.currency === 'USD' ? t('discounts.valueAmountUsd', 'How many dollars') : t('discounts.valueAmount', 'How many shekels')}>
           <input required type="number" min="1" max={c.kind === 'percent' ? 100 : 100000} step="any" value={c.value} onChange={set('value')} className={field} style={fieldStyle} data-testid="code-value" />
-        </L>
-        <L label={t('discounts.appliesTo', 'Works on')}>
+        </L>}
+        {c.kind !== 'free_delivery' && <L label={t('discounts.appliesTo', 'Works on')}>
           <select value={c.applies_to} onChange={set('applies_to')} className={field} style={fieldStyle}>
             <option value="both">{t('discounts.both', 'Orders and memberships')}</option>
             <option value="orders">{t('discounts.orders', 'Orders only')}</option>
             <option value="memberships">{t('discounts.memberships', 'Memberships only')}</option>
           </select>
-        </L>
+        </L>}
         <L label={t('discounts.startsOn', 'From (optional)')}><input type="date" value={c.starts_on || ''} onChange={set('starts_on')} className={field} style={fieldStyle} /></L>
         <L label={t('discounts.endsOn', 'Until (optional)')}><input type="date" value={c.ends_on || ''} onChange={set('ends_on')} className={field} style={fieldStyle} data-testid="code-ends" /></L>
         <L label={t('discounts.minOrder', 'Minimum order {{s}} (optional)', { s: symbolFor(c.kind === 'amount' ? c.currency : 'ILS') })}><input type="number" min="0" step="any" value={c.min_order ?? ''} onChange={set('min_order')} className={field} style={fieldStyle} /></L>
@@ -120,7 +122,7 @@ export default function DiscountsTab({ API, token }) {
     load();
   };
   const describe = (c) => {
-    const parts = [c.kind === 'percent' ? t('discounts.offPercent', '{{v}}% off', { v: c.value }) : t('discounts.offAmount', '{{v}} off', { v: money(c.value, c.currency) })];
+    const parts = [c.kind === 'free_delivery' ? t('discounts.freeDelivery', 'Free delivery') : c.kind === 'percent' ? t('discounts.offPercent', '{{v}}% off', { v: c.value }) : t('discounts.offAmount', '{{v}} off', { v: money(c.value, c.currency) })];
     if (c.applies_to !== 'both') parts.push(c.applies_to === 'orders' ? t('discounts.orders', 'Orders only') : t('discounts.memberships', 'Memberships only'));
     if (c.min_order) parts.push(t('discounts.minShort', 'from {{v}}', { v: money(c.min_order, c.currency) }));
     if (c.ends_on) parts.push(t('discounts.until', 'until {{d}}', { d: fmt(c.ends_on) }));

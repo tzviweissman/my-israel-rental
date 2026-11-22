@@ -167,7 +167,7 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
             </p>
           )}
           {o.discount && (
-            <p dir="ltr" className="text-xs mt-1 font-semibold text-start" style={{ color: '#2E7D4F' }} data-testid="order-code-used">{t('discounts.orderLine', '{{code}}: -{{v}}', { code: o.discount.code, v: money(o.discount.amount, o.currency) })}</p>
+            <p dir="ltr" className="text-xs mt-1 font-semibold text-start" style={{ color: '#2E7D4F' }} data-testid="order-code-used">{o.discount.free_delivery ? t('discounts.orderLineFree', '{{code}}: free delivery', { code: o.discount.code }) : t('discounts.orderLine', '{{code}}: -{{v}}', { code: o.discount.code, v: money(o.discount.amount, o.currency) })}</p>
           )}
           {notesWithoutCode(o) && (
             <p dir="auto" className="text-xs mt-1 italic" style={{ color: 'var(--brand-muted)' }}>{notesWithoutCode(o)}</p>

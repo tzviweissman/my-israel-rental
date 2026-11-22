@@ -2735,10 +2735,15 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         except CodeRefused as e:
             await _put_back(gig["_id"], stock_taken)
             raise HTTPException(status_code=400, detail=say(str(e), payload.lang)) from e
+        if code_doc["kind"] == "free_delivery" and payload.fulfilment != "delivery":
+            await _put_back(gig["_id"], stock_taken)
+            raise HTTPException(status_code=400, detail=say("This code is for free delivery: choose delivery to use it", payload.lang))
         if not dry_run and not await redeem(code_doc, off, payload.customer_phone):
             await _put_back(gig["_id"], stock_taken)
             raise HTTPException(status_code=400, detail="This code has been used up")
         discount = {"code": code_doc["code"], "amount": off}
+        if code_doc["kind"] == "free_delivery":
+            discount["free_delivery"] = True
 
     items_text = "\n".join(f"{ln['qty']} × {ln['name']}" for ln in lines)
     if payload.extra_items:
@@ -2756,9 +2761,15 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         needed_by = now.strftime("%Y-%m-%dT%H:%M")
     if payload.fulfilment == "delivery":
         fee = delivery_fee_for(st, payload.city, subtotal - (discount["amount"] if discount else 0))
+        if discount and discount.get("free_delivery"):
+            # a free-delivery code: the fee it saved is what the code gave (discounts.py)
+            discount["delivery_off"], fee = fee, 0.0
+            if discount["delivery_off"] and not dry_run:
+                await db.discount_codes.update_one({"_id": code_doc["_id"]}, {"$inc": {"discount_given": discount["delivery_off"]}})
     total = round(subtotal - (discount["amount"] if discount else 0) + fee, 2) if lines else None
     if discount:
-        notes = (notes + "\n" if notes else "") + f"Discount {discount['code']}: -{sym}{discount['amount']:g}"
+        notes = (notes + "\n" if notes else "") + (f"Discount {discount['code']}: free delivery" if discount.get("free_delivery")
+                                                    else f"Discount {discount['code']}: -{sym}{discount['amount']:g}")
     if to_confirm:
         notes = (notes + "\n" if notes else "") + "Priced from: confirm the final price on this order"
 

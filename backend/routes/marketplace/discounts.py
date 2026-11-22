@@ -1,6 +1,7 @@
 """Discount codes (Tzvi, 15 Oct 2026: the Shopify idea, "discount codes").
 
-A business makes a code ("FIRST10", "SHABBAT20") for 10% or ₪20 off, and
+A business makes a code ("FIRST10", "SHABBAT20") for 10% or ₪20 off, or for
+free delivery ("FREESHIP": the delivery fee is not charged, Tzvi, 22 Nov 2026), and
 customers type it on the order form (orders.py) or the membership sign-up
 (memberships.py). The site takes no payment yet, so a discount changes the
 total the business sees and charges: it is recorded on the order or the
@@ -55,10 +56,10 @@ async def _owned(business_id: str, user: dict[str, Any]) -> dict[str, Any]:
 
 class CodeIn(BaseModel):
     code: str = Field(..., min_length=3, max_length=24)
-    kind: Literal["percent", "amount"] = "percent"
+    kind: Literal["percent", "amount", "free_delivery"] = "percent"
     # An amount off is money in one currency (Tzvi, 6 Nov 2026); a percentage fits any total.
     currency: Literal["ILS", "USD"] = "ILS"
-    value: float = Field(..., gt=0, le=100000)
+    value: float = Field(0, ge=0, le=100000)   # unused by free delivery
     applies_to: Literal["orders", "memberships", "both"] = "both"
     starts_on: Optional[date] = None
     ends_on: Optional[date] = None
@@ -73,6 +74,11 @@ def _check_in(b: CodeIn) -> str:
     code = norm_code(b.code)
     if not _CODE.match(code):
         raise HTTPException(status_code=422, detail="A code is 3 to 24 letters or numbers (English letters), no spaces")
+    if b.kind == "free_delivery":
+        # delivery is only on orders; value and currency mean nothing here
+        b.applies_to, b.value, b.currency = "orders", 0, "ILS"
+    elif b.value <= 0:
+        raise HTTPException(status_code=422, detail="Enter how much the code takes off")
     if b.kind == "percent" and b.value > 100:
         raise HTTPException(status_code=422, detail="A percentage can be at most 100")
     if b.starts_on and b.ends_on and b.ends_on < b.starts_on:
@@ -208,6 +214,8 @@ async def evaluate(business_id: str, code: str, form: Literal["orders", "members
         raise CodeRefused("You have already used this code")
     if c.get("first_order_only") and await _is_returning(business_id, e164):
         raise CodeRefused("This code is for first-time customers")
+    if c["kind"] == "free_delivery":
+        return c, 0.0   # nothing off the goods: orders.py drops the delivery fee
     off = amount * c["value"] / 100 if c["kind"] == "percent" else c["value"]
     return c, round(max(0.0, min(off, amount)), 2)
 
@@ -240,6 +248,8 @@ _HE = {
     "This is your own code: send it to a friend": "זה הקוד שלך: שלחו אותו לחבר או חברה",
     "You have already used this code": "כבר השתמשת בקוד הזה",
     "This code is for first-time customers": "הקוד הזה מיועד ללקוחות חדשים",
+    "This code is for free delivery on an order": "הקוד הזה נותן משלוח חינם בהזמנה",
+    "This code is for free delivery: choose delivery to use it": "הקוד הזה נותן משלוח חינם: בחרו משלוח כדי להשתמש בו",
     "This gift card has been used up": "יתרת שובר המתנה נוצלה",
     "This gift card has expired": "תוקף שובר המתנה הסתיים",
     "This code is in dollars and this total is not, so it cannot be used here": "הקוד הזה בדולרים והסכום כאן לא, ולכן אי אפשר להשתמש בו",
@@ -265,6 +275,8 @@ async def use_code(business_id: Optional[str], code: str, amount: Optional[float
     an accepted price keeps. Raises CodeRefused. No price yet (amount None or 0): the
     code is still noted with what it gives, for the business to take off its own price."""
     c, off = await evaluate(business_id, code, "orders", amount or 0, phone, currency)
+    if c["kind"] == "free_delivery":
+        raise CodeRefused("This code is for free delivery on an order")
     if not await redeem(c, off, phone):
         raise CodeRefused("This code has been used up")
     return {"id": c["_id"], "code": c["code"], "amount": off, "kind": c["kind"], "value": c["value"],
