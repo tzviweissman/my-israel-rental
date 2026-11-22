@@ -1312,7 +1312,7 @@ Full text: reference/full-rules.md section 3ai. Beyond photos, grounds and type,
 plan (phase 5) and listed on CONCEPT.md's `- treatments:` line; a fourth needs Tzvi's yes. **They are a menu, not a
 list to complete** (22 Nov 2026): pick from what the picked first screen and the references do. The menu: a crossing
 (3ae.1), a travelling object (3ae.2), a drawn mark (3af.1), loose photos (3af.3), colour cards (3af.4), a card over
-an edge (3z.1), live art in code (3ak.1), the six openings and effects of 3al.7 (by category fit), a 3bb touch that
+an edge (3z.1), live art in code (3ak.1), the openings and effects of 3al.7, a custom cursor and the photo sphere among them (by category fit), a 3bb touch that
 is there for looks. One not picked is `n/a: not picked (treatments)`. Not counted:
 the owner's note (3af.2), a touch that only states a true fact, plain labels above headings. Still asked of every
 new site: order flow, basket, menu bar, footer, three facts, two signature sections (the showpiece may be one), the

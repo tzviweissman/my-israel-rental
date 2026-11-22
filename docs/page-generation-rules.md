@@ -42,20 +42,20 @@ Sections (line each starts on; read with that offset):
 - 2856: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
 - 2903: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
 - 2978: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
-- 3017: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3103: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3142: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3219: 4. What is reported to the owner instead (content gaps)
-- 3228: 5. How to write
-- 3277: 5a. Lessons from the practice pages
-- 3306: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3355: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3372: 6. Playbooks for the most common businesses
-- 3492: 7. Choosing the three options (automatic page builder only)
-- 3516: 8. Photos, video and the tools
-- 3742: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3810: 9. The scroll sections: what the practice pages become
-- 3845: 10. Open decisions (need Tzvi)
+- 3018: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
+- 3104: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3143: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3228: 4. What is reported to the owner instead (content gaps)
+- 3237: 5. How to write
+- 3286: 5a. Lessons from the practice pages
+- 3315: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3364: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3381: 6. Playbooks for the most common businesses
+- 3501: 7. Choosing the three options (automatic page builder only)
+- 3525: 8. Photos, video and the tools
+- 3751: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3819: 9. The scroll sections: what the practice pages become
+- 3854: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2999,7 +2999,8 @@ together they made the page busy.
    - one card over the edge of the next section (3z.1);
    - live art drawn in code behind the words (3ak.1);
    - the split opening, the branching hero, layered parallax from one photo, the video-to-layers handoff, the panel
-     wipe, and the light switch or cursor flashlight (3al.7), each by the category fit of 3t;
+     wipe, the light switch or cursor flashlight, a custom cursor and the photo sphere (3al.7), each by the category
+     fit of 3t;
    - any small touch of 3bb that is there for looks.
    One that is not picked is answered `n/a: not picked (treatments)`. A site that wants a fourth asks Tzvi first.
    These do not count: the owner's signed note (3af.2), which is words and photos and is used whenever the owner
@@ -3203,6 +3204,14 @@ as his credit prices or model verdicts. Frames below are in that folder. None is
      `MJojygFwGjA-panel-rises-wipes-over-image-labels-up.png`).
    - **The light switch and the cursor flashlight,** only for a business whose story is light or mood (a restaurant,
      a hotel, a lamp shop) (video 21; `SLnGJ9iezYo-sommers-toggle-dark-start.png`).
+   - **A custom cursor** (Tzvi, 22 Nov 2026, "add them to the menu"; The Whipped Cup's cloud pointer is the worked
+     example): a pointer drawn from the business's world. Its pointing spot is plain and sits where the eye expects
+     it, so buttons are as easy to hit as with the arrow; it becomes the normal text cursor in fields; laptops only
+     (phones have no cursor, so nothing depends on it); off under reduced motion if it moves on its own (video 26).
+   - **The photo sphere** (same day): a ball of the business's own photos that turns as you drag it, cards facing
+     the viewer, the logo inside (video 23; `mRYHgnnrCks-clares-photo-sphere-around-logo-a.png`). Only for a business whose work is many good photos
+     (events, decor, balloons); never on the shop or near prices; a plain grid of the same photos on phones and under
+     reduced motion.
    Checked by LOOK, and the count by check-compared TREATMENTS as for every decoration.
 
 8. **Restraint.** An intro plays on the first visit only and lasts a few seconds. No intro or reveal on an
