@@ -3641,6 +3641,102 @@
    "status": "built"
   },
   {
+   "id": "R3al.1",
+   "rule": "Each clip's end still made first with the room for the words named in its prompt; a light-only clip says static locked-off camera",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "The film brief: each clip's end still is generated first, its prompt naming the words' room; clips where only light moves carry the locked-camera phrase",
+   "confirmed_by": "LOOK: each end still and its prompt in the brief",
+   "status": "planned"
+  },
+  {
+   "id": "R3al.2",
+   "rule": "The scroll film eases its playback rate down onto a sharp resting frame, never a hard stop or a freeze",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "The film's last clip ends on a sharp frame chosen in the brief; to build: film.js eases the rate down at the end",
+   "confirmed_by": "LOOK: the opening scrolled to its end, laptop and phone",
+   "status": "planned"
+  },
+  {
+   "id": "R3al.3",
+   "rule": "Every played clip has a poster, no sound, a phone version, WebM with MP4 fallback where the starter plays a file; the headline is real HTML",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "starter film.js and slides.js set muted and a poster on every video; encode makes the phone version; to build: a WebM copy beside the MP4",
+   "confirmed_by": "LOOK: network panel and the page with video off",
+   "status": "planned"
+  },
+  {
+   "id": "R3al.4",
+   "rule": "The - motion: line gives durations, distances or scales, stagger, what waits until the previous step has settled, and alignments in pixels",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "The page plan writes CONCEPT.md - motion: with numbers (3e.16c, 3al.4)",
+   "confirmed_by": "node scripts/check-compared.mjs <build> (MOTION: three numbers with units) + LOOK",
+   "status": "built"
+  },
+  {
+   "id": "R3al.5",
+   "rule": "Each scroll-tied effect planned as three pictures on the design board: start, midpoint, end",
+   "how": [
+    "ASK",
+    "EYE"
+   ],
+   "built_by": "The design board gets a start, midpoint and end picture for each scroll-tied effect before it is built",
+   "confirmed_by": "LOOK: the three pictures beside the effect at 0, 50 and 100 percent",
+   "status": "planned"
+  },
+  {
+   "id": "R3al.6",
+   "rule": "BRAND.md ## Image style pasted at the end of every image prompt; one image model per set; one change per edit",
+   "how": [
+    "GEN",
+    "ASK"
+   ],
+   "built_by": "BRAND.md is written with its ## Image style paragraph; every image brief ends with it",
+   "confirmed_by": "LOOK: BRAND.md and the end of each prompt",
+   "status": "planned"
+  },
+  {
+   "id": "R3al.7",
+   "rule": "The split opening, branching hero, layered parallax, video-to-layers handoff, panel wipe and light switch are menu choices counted in 3ai's three, by category fit",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "The - treatments: line picks from the menu of 3ai, which lists them",
+   "confirmed_by": "check-compared TREATMENTS + LOOK",
+   "status": "planned"
+  },
+  {
+   "id": "R3al.8",
+   "rule": "Intros on the first visit only and a few seconds long; none on menu, prices or shop pages; parallax off on phones",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "The page plan puts intros on the home page only; to build: the starter remembers a first visit and turns parallax off under (hover: none)",
+   "confirmed_by": "LOOK: second visit, shop and menu pages, phone",
+   "status": "planned"
+  },
+  {
+   "id": "R3al.9",
+   "rule": "Before a risky change the builder writes back what it understood; each section built from its own reference picture, still first, motion second",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "SKILL.md's build step names both habits",
+   "confirmed_by": "LOOK: the build's notes",
+   "status": "planned"
+  },
+  {
    "id": "R3e.16b",
    "rule": "Controls answer in 300 ms or less, ease out, never from scale(0), no bounce, pressed buttons shrink to 0.97",
    "how": [

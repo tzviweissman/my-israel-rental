@@ -8,10 +8,15 @@
  * lines (what the references do and how this site does it, "... -> ..."), and a "- showpiece:" line in CONCEPT.md
  * naming its reference ("from:").
  *
+ * Since 22 Nov 2026 (rules 3al.4) the "- motion:" line has at least three numbers with a unit (s, ms, px or %).
+ *
  *   node scripts/check-compared.mjs <build folder>      exit 1 on a fault
  */
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
+import { newerRules } from './rule-dates.mjs';
+
+const ROOT = resolve(dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 
 const dir = process.argv[2];
 if (!dir) { console.error('usage: node scripts/check-compared.mjs <build folder>'); process.exit(2); }
@@ -44,6 +49,13 @@ const tr = /^- treatments:\s*(.+)$/m.exec(concept);
 if (!tr) why.push('TREATMENTS: CONCEPT.md has no "- treatments: <one>; <two>; <three>" line (3ai: three decorations at most)');
 else if (tr[1].split(';').filter((x) => x.trim()).length > 3 && !/Tzvi OK/i.test(tr[1])) why.push(`TREATMENTS: ${tr[1].split(';').length} decorations; three at most, or "(Tzvi OK, <date>)" on the line (3ai)`);
 // motion planned where it helps (rules 3e.16c, 21 Nov 2026)
-if (!/^- motion:\s*\S/m.test(concept)) why.push('MOTION: CONCEPT.md has no "- motion:" line naming the five moments (opening in order, cards in turn, chooser swap, sheet grow, Add pop; 3e.16c)');
+const mo = /^- motion:\s*(\S.*)$/m.exec(concept);
+if (!mo) why.push('MOTION: CONCEPT.md has no "- motion:" line naming the five moments (opening in order, cards in turn, chooser swap, sheet grow, Add pop; 3e.16c)');
+// written with numbers, so the same motion comes back every time (rules 3al.4, 22 Nov 2026); a site made before is spared
+else if ((mo[1].match(/\d+(?:\.\d+)?\s?(?:ms|s|px|%)(?![a-z])/gi) || []).length < 3) {
+  let newer = new Set();
+  try { newer = newerRules(ROOT, dir); } catch { /* no git: hold the build to it */ }
+  if (!newer.has('R3al.4')) why.push('MOTION: the "- motion:" line has fewer than three numbers with a unit ("over 1.2 s", "120 ms apart", "rise 24 px", "scale from 96%"); give each moment its duration, distance or scale and stagger (3al.4)');
+}
 if (why.length) { console.log(`COMPARED  ${dir}\n  ${why.join('\n  ')}`); process.exit(1); }
 console.log(`${dir}: compared`);

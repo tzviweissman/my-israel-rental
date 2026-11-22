@@ -137,7 +137,11 @@ your reply, either "every check passes" or the problems it listed.
    category checklist (§3, §3b), design and persuasion (§3c, §3e, §3g, §3i,
    §3s), honest deals (§3j), similar products (§3l), owner-filled places (§3m),
    design and story (§4), build rules (§5). The day the form first sends,
-   `node scripts/check-order-data.mjs <form page>` (§0b.8a).
+   `node scripts/check-order-data.mjs <form page>` (§0b.8a). Two habits
+   (§3al.9): before a risky change (a new layout, a scroll effect, anything
+   touching the order flow), write back in two or three lines what you
+   understood, then build; and build each section from its own reference
+   picture, the still version first and its motion second.
 9. **Whole page right with a still, then the film.** Build and check with a
    still where the film goes, then put it in and check again; new motion tried
    on `scrollcraft/starter/kit/test.html` first (§0b.6a).

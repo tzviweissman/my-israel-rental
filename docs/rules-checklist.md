@@ -6,14 +6,14 @@ Sections (line each starts on; read with that offset):
 - 70: 1. Facts and words
 - 101: 2. Opening
 - 176: 3. Sections and worlds
-- 263: 4. Photos and media
-- 293: 5. Prices and savings
-- 315: 6. Order and booking flow
-- 341: 7. Motion
-- 373: 8. Phone
-- 389: 8b. From the seven videos, part two (29 Oct 2026)
-- 411: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 422: 9. Finish
+- 272: 4. Photos and media
+- 302: 5. Prices and savings
+- 324: 6. Order and booking flow
+- 350: 7. Motion
+- 382: 8. Phone
+- 398: 8b. From the seven videos, part two (29 Oct 2026)
+- 420: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 431: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -259,6 +259,15 @@ R3aj.4 | Two fresh judges score six areas beside compare.jpg; median per area pl
 R3aj.5 | Each opening still's colour measured against its inspo (inspo-beside.py) and quoted in shot_seen | 3aj.5 | RUN: scripts/inspo-beside.py; LOOK: the shot_seen line; n/a with no product picture in the opening
 R3aj.6 | FEEDBACK.md holds Tzvi's exact corrections; none open, each done one with a proof file | 3aj.6 | script: `node scripts/judges.mjs <build>` (in check-build and publish-page)
 R3aj.7 | Focus never under a sticky bar, toggles are real checkboxes or switches, prices in tabular digits | 3aj.7 | script: `node scripts/check-keyboard.mjs <page urls>`
+R3al.1 | Each clip's end still was made first, its prompt naming the room for the words; a clip where only light, smoke or steam moves says "static locked-off camera, nothing moves except the light" | 3al.1 | LOOK: each clip's end still and its prompt in the brief; n/a with no film when:film
+R3al.2 | The scroll film lands softly: the playback rate eases down onto a sharp resting frame with no motion blur, never a hard stop or a pause that reads as a freeze | 3al.2 | LOOK: the opening scrolled to its end, laptop and phone, the frame it holds; n/a with no film when:film
+R3al.3 | Every played clip has a poster (never a black box) and no sound track, a smaller phone version, WebM with an MP4 fallback where the starter plays a file; the headline stays real HTML text | 3al.3 | LOOK: the network panel, laptop and phone, and the page with video off; n/a with no film when:film
+R3al.4 | CONCEPT.md's - motion: line gives each moment its duration, distance or scale and stagger, says which step waits until the previous one has settled, and names alignments in pixels | 3al.4, 3e.16c | script: `node scripts/check-compared.mjs <build>` (MOTION: three numbers with s, ms, px or %) + LOOK
+R3al.5 | Each scroll-tied effect was planned as three pictures on the design board, start, midpoint and end, before it was built | 3al.5 | LOOK: the three pictures beside the effect scrolled to 0, 50 and 100 percent; n/a with no scroll-tied effect
+R3al.6 | BRAND.md has an ## Image style paragraph (light, colour, mood, three colours given to three named objects) pasted at the end of every image prompt; one image model per set of pictures; one change per edit | 3al.6, 3x.7 | LOOK: the paragraph in BRAND.md and at the end of each prompt in the brief; n/a with no generated picture
+R3al.7 | A split opening, branching hero, layered parallax, video-to-layers handoff, panel wipe, light switch or cursor flashlight is used only when picked on the - treatments: line, counted in 3ai's three and fitting the category (3t); the light switch and flashlight only for a business whose story is light or mood; n/a when none is used | 3al.7, 3ai, 3t | LOOK: CONCEPT.md treatments line against the site + script: `node scripts/check-compared.mjs <build>` (TREATMENTS)
+R3al.8 | An intro plays on the first visit only and lasts a few seconds; no intro or reveal on an information page (menu, prices, shop); parallax off on phones | 3al.8, 3ac, 3ai | LOOK: a second visit, the shop and menu pages, and a phone
+R3al.9 | Before each risky change the builder wrote back what it understood; each section was built from its own reference picture, still first, motion second | 3al.9 | LOOK: the build's notes
 
 ## 4. Photos and media
 

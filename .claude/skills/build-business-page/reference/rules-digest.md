@@ -2,50 +2,51 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 63: 0. Use the same tools (this is what gives the full capability)
-- 155: 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
-- 227: 1. Facts: only theirs
-- 297: 2. How to write
-- 340: 3. The category checklist (what the best real sites share)
-- 366: 3b. The sections every page has (Tzvi, 6 Oct 2026)
-- 389: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 433: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 472: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 502: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 562: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
-- 632: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 654: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 749: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 812: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 844: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 871: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 911: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 944: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1002: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1026: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1054: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1133: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
-- 1137: 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
-- 1149: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1159: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 1174: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 1185: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 1192: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 1203: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 1214: 3bb. Small touches (Tzvi, 12 Nov 2026)
-- 1226: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026)
-- 1233: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026)
-- 1246: 3ae. One part leads into the next (Tzvi, 18 Nov 2026)
-- 1254: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
-- 1265: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026)
-- 1277: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
-- 1293: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
-- 1300: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
-- 1320: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1328: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1362: 4. Design and story
-- 1392: 5. Build rules (each one shipped as a defect once)
-- 1415: 6. Look through it, fix it, then show it
+- 64: 0. Use the same tools (this is what gives the full capability)
+- 156: 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
+- 228: 1. Facts: only theirs
+- 298: 2. How to write
+- 341: 3. The category checklist (what the best real sites share)
+- 367: 3b. The sections every page has (Tzvi, 6 Oct 2026)
+- 390: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 434: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 473: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 503: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 563: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
+- 633: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 655: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 750: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 813: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 845: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 872: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 912: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 945: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1003: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1027: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1055: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1134: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
+- 1138: 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
+- 1150: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1160: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 1175: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 1186: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 1193: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 1204: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 1215: 3bb. Small touches (Tzvi, 12 Nov 2026)
+- 1227: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026)
+- 1234: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026)
+- 1247: 3ae. One part leads into the next (Tzvi, 18 Nov 2026)
+- 1255: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
+- 1266: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026)
+- 1278: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
+- 1294: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
+- 1301: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
+- 1321: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 1343: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1351: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1385: 4. Design and story
+- 1415: 5. Build rules (each one shipped as a defect once)
+- 1438: 6. Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section numbers are unchanged, so "3g.13", "3h.11" and the like still point to the same text. The full rulebook is `full-rules.md`.
@@ -1316,6 +1317,28 @@ Full text: reference/full-rules.md section 3aj. Not asked of a site published be
    shown or published with one open (judges.mjs).
 7. check-keyboard: focus never under a sticky bar, real toggles, tabular-digit prices (the starter's site.css does
    all three).
+
+## 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+
+Full text: reference/full-rules.md section 3al; frames in docs/inspo/videos-ruben-stom-2026-11-22. New sites only.
+1. End frame first: each clip's end still is made first, its prompt naming the room for the words ("clear sky above
+   the roof for the headline"); a clip where only light, smoke or steam moves says "static locked-off camera, nothing
+   moves except the light".
+2. A scroll film lands softly: the playback rate eases down onto a sharp resting frame, no motion blur; never a hard
+   stop or a pause that reads as a freeze.
+3. Every played clip: a poster (never a black box), no sound, a smaller phone version, WebM with an MP4 fallback where
+   the starter plays a file; the headline stays real HTML text.
+4. The `- motion:` line (3e.16c) is written with numbers: duration, distance or scale, stagger; which step waits
+   "until the previous one has settled"; alignments in pixels (check-compared MOTION: three numbers with s, ms, px or %).
+5. Each scroll-tied effect is planned as three pictures on the design board: start, midpoint, end.
+6. BRAND.md `## Image style` (light, colour, mood, three colours given to three named objects) pasted at the END of
+   every image prompt; one image model per set; one change per edit.
+7. On the menu of 3ai, each one of its three, chosen by 3t's category fit, never required: the split opening, the
+   branching hero (two offers), layered parallax from one photo (name behind the subject, PNG layers), the
+   video-to-layers handoff, the panel wipe, and the light switch or cursor flashlight (only when the story is light).
+8. Intros on the first visit only, a few seconds; none on a menu, prices or the shop; parallax off on phones.
+9. Before a risky change, write back what you understood; build each section from its own reference picture, still
+   first, motion second.
 
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
 
