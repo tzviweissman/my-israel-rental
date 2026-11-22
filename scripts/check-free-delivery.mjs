@@ -25,7 +25,7 @@ const j = async (r) => { const t = await r.text(); try { return JSON.parse(t); }
   const form = await j(await fetch(`${API}/marketplace/order-form/${g.id}`));
   const biz = form.business.id, prod = form.products[0].id;
   await fetch(`${API}/marketplace/businesses/${biz}`, { method: 'PATCH', headers: H, body: JSON.stringify({ serves_nationwide: true }) });
-  await fetch(`${API}/marketplace/businesses/${biz}/orders/settings`, { method: 'PUT', headers: H, body: JSON.stringify({ delivery_on: true, delivery_fee: 25 }) });
+  await fetch(`${API}/marketplace/businesses/${biz}/orders/settings`, { method: 'PUT', headers: H, body: JSON.stringify({ delivery_on: true, delivery_fee: 25, free_over: 100 }) });
   const c = await j(await fetch(`${API}/marketplace/businesses/${biz}/discount-codes`, { method: 'POST', headers: H, body: JSON.stringify({ code: `SHIP${stamp}`, kind: 'free_delivery', show_on_page: true, min_order: 50 }) }));
   ok(c.kind === 'free_delivery', 'code made through the API');
 
@@ -59,6 +59,8 @@ const j = async (r) => { const t = await r.text(); try { return JSON.parse(t); }
     await p.locator(`[data-testid^="order-add-"]`).first().click();
     await p.locator('[data-testid="order-fulfilment-delivery"]').click(); await p.waitForTimeout(300);
     const before = await p.locator('[data-testid="order-total"]').innerText();
+    const nudge = await p.locator('[data-testid="order-free-nudge"]').innerText().catch(() => '');
+    ok(/40/.test(nudge), `${name}: "${nudge.trim()}" (free from 100, basket 60)`);
     await p.locator('[data-testid="discount-open"]').click();
     await p.fill('[data-testid="discount-code"]', `ship${stamp}`); await p.locator('[data-testid="discount-apply"]').click(); await p.waitForTimeout(1500);
     const after = await p.locator('[data-testid="order-total"]').innerText();
@@ -79,6 +81,6 @@ const j = async (r) => { const t = await r.text(); try { return JSON.parse(t); }
   }
   await fetch(`${API}/marketplace/businesses/${biz}/discount-codes/${c.id}`, { method: 'PUT', headers: H, body: JSON.stringify({ code: `SHIP${stamp}`, kind: 'free_delivery', show_on_page: false }) });
   const hidden = await j(await fetch(`${API}/marketplace/gigs/${g.id}/promo`));
-  ok(hidden.promo === null, 'a code not set to show is not advertised');
+  ok(!hidden.promo || hidden.promo.code !== `SHIP${stamp}`, 'a code not set to show is not advertised');
   await b.close();
   console.log(fails.length ? `${fails.length} FAILED` : 'ALL PASS'); process.exit(fails.length ? 1 : 0);

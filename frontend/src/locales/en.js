@@ -412,6 +412,8 @@ const en = {
         extraLabel: 'Something not on the list?',
         freeOver: "Free delivery from {{n}}",
         freeDelivery: "Free delivery on this order",
+        addForFree: "Add {{n}} more for free delivery",
+        addForFreeCode: "Add {{n}} more for free delivery with code {{code}}",
         left_one: "{{count}} left",
         left_other: "{{count}} left",
         extraPh: 'e.g. 1 gluten-free challah',

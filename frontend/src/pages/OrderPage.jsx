@@ -80,6 +80,7 @@ export default function OrderPage() {
   // The store's own questions (backend custom_fields.py).
   const [answers, setAnswers] = useState({});
   const [code, setCode] = useState(null);         // a checked discount code
+  const [promo, setPromo] = useState(null);       // an advertised free-delivery code (FreeDeliveryBar)
   const [fulfilment, setFulfilment] = useState('pickup');
   const [date, setDate] = useState('');
   const [windowKey, setWindowKey] = useState('');
@@ -230,6 +231,16 @@ export default function OrderPage() {
   // A free-delivery code (backend discounts.py, 22 Nov 2026) takes the fee off; it only works on a delivery.
   const freeCode = code && code.kind === 'free_delivery';
   const fee = fulfilment === 'delivery' && !freeCode ? feeFor(city) : 0;
+  // "Add ₪20 more for free delivery" (Tzvi, 22 Nov 2026): the nearest way to free delivery still ahead, the store's own
+  // free-from amount or an advertised free-delivery code's minimum (which then names the code).
+  const goods = subtotal - discount;
+  const nudge = (() => {
+    if (fulfilment !== 'delivery' || fee <= 0 || !lines.length) return null;
+    const ways = [];
+    if (freeOver > goods) ways.push({ need: freeOver - goods });
+    if (promo && Number(promo.min_order) > subtotal && !promo.first_order_only) ways.push({ need: Number(promo.min_order) - subtotal, code: promo.code });
+    return ways.sort((a, b) => a.need - b.need)[0] || null;
+  })();
   const total = lines.length ? subtotal - discount + fee : null;
   const minOrder = Number(data.settings.min_order || 0);
   const belowMin = fulfilment === 'delivery' && minOrder > 0 && subtotal < minOrder;
@@ -399,7 +410,7 @@ export default function OrderPage() {
         {data.business.logo_url && <img src={data.business.logo_url} alt="" className="w-11 h-11 rounded-xl object-cover" />}
         <h1 className="text-xl font-bold" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>{t('order.title', 'Order from {{name}}', { name: bizName })}</h1>
       </div>
-      {!table && <FreeDeliveryBar gigId={gigId} currency={currency} className="mb-4" />}
+      {!table && <FreeDeliveryBar gigId={gigId} currency={currency} className="mb-4" onPromo={setPromo} />}
       {table && (
         <p className="mb-4 rounded-2xl px-4 py-3 text-sm font-semibold" style={{ background: 'var(--ink)', color: 'var(--action-ink)' }} data-testid="order-table">
           {t('tableOrder.banner', 'Table {{n}}: order here and it is brought to your table.', { n: table })}
@@ -628,6 +639,9 @@ export default function OrderPage() {
               {discount > 0 && <li className="flex justify-between" style={{ color: '#1F5F3A' }} data-testid="order-discount"><span>{t('discounts.line', 'Discount {{code}}', { code: code.code })}</span><span className="tabular-nums">−{money(discount, currency)}</span></li>}
               {freeCode && fulfilment === 'delivery' && <li className="flex justify-between" style={{ color: '#1F5F3A' }} data-testid="order-free-delivery-code"><span>{t('order.deliveryFee', 'Delivery')}</span><span>{t('discounts.freeWithCode', 'Free with {{code}}', { code: code.code })}</span></li>}
               {freeCode && fulfilment !== 'delivery' && <li className="text-xs" style={{ color: 'var(--brand-muted)' }} data-testid="order-free-delivery-pickup">{t('discounts.freeNeedsDelivery', 'Code {{code}} gives free delivery: choose delivery to use it.', { code: code.code })}</li>}
+              {nudge && <li className="text-xs font-semibold" style={{ color: 'var(--ink)' }} data-testid="order-free-nudge">{nudge.code
+                ? t('order.addForFreeCode', 'Add {{n}} more for free delivery with code {{code}}', { n: money(Math.ceil(nudge.need * 100) / 100, currency), code: nudge.code })
+                : t('order.addForFree', 'Add {{n}} more for free delivery', { n: money(Math.ceil(nudge.need * 100) / 100, currency) })}</li>}
               {fee > 0 && <li className="flex justify-between"><span>{t('order.deliveryFee', 'Delivery')}</span><span className="tabular-nums">{money(fee, currency)}</span></li>}
               <li className="flex justify-between font-bold border-t mt-1 pt-1" style={{ borderColor: 'var(--brand-border)' }}><span>{fromLines.length ? t('priceKind.totalFrom', 'Total, starting at') : t('order.total', 'Total')}</span><span className="tabular-nums" data-testid="order-total">{money(total, currency)}</span></li>
             </ul>

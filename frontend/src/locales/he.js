@@ -393,6 +393,8 @@ const he = {
         extraLabel: 'משהו שלא ברשימה?',
         freeOver: "משלוח חינם מ־{{n}}",
         freeDelivery: "משלוח חינם בהזמנה הזו",
+        addForFree: "עוד {{n}} ומקבלים משלוח חינם",
+        addForFreeCode: "עוד {{n}} ומקבלים משלוח חינם עם הקוד {{code}}",
         left_one: "נשאר אחד",
         left_two: "נשארו {{count}}",
         left_other: "נשארו {{count}}",

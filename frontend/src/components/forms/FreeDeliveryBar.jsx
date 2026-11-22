@@ -11,12 +11,13 @@ import { Truck } from 'lucide-react';
 import { API } from '../../lib/apiBase';
 import { money } from '../../utils/currency';
 
-export default function FreeDeliveryBar({ gigId, currency = 'ILS', className = '' }) {
+export default function FreeDeliveryBar({ gigId, currency = 'ILS', className = '', onPromo }) {
   const { t, i18n } = useTranslation();
   const [promo, setPromo] = useState(null);
   useEffect(() => {
     if (!gigId) return;
-    axios.get(`${API}/marketplace/gigs/${gigId}/promo`).then((r) => setPromo(r.data.promo)).catch(() => setPromo(null));
+    axios.get(`${API}/marketplace/gigs/${gigId}/promo`).then((r) => { setPromo(r.data.promo); if (onPromo) onPromo(r.data.promo); }).catch(() => setPromo(null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gigId]);
   if (!promo) return null;
   const until = promo.ends_on
