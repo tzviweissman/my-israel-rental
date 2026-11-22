@@ -115,7 +115,8 @@ your reply, either "every check passes" or the problems it listed.
 7. **Film, if there is one.** Sketch sheet first and Tzvi picks a row (§0b.5b);
    a physically possible story, every object's source and end listed (rules 3h.18);
    confirm the motion as numbered steps; plan the phone frame; three concept
-   stills; `brightness.py` on every still and clip; check-clip on every clip
+   stills; the whole film as one sheet of stills, his yes before any clip
+   (3aa.35); `brightness.py` on every still and clip; check-clip on every clip
    (§3h, §3o.1, §1). Generate in the background while writing the page.
    Before the sketch sheet, plan every film rule in BLUEPRINT.md
    (`node scripts/blueprint.mjs --check <build> film`: rules 3aa and every film

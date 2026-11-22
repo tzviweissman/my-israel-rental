@@ -33,26 +33,26 @@ Sections (line each starts on; read with that offset):
 - 2274: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
 - 2299: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
 - 2339: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2604: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2631: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2696: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2713: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2759: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2779: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2809: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2856: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
-- 2931: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
-- 2952: 4. What is reported to the owner instead (content gaps)
-- 2961: 5. How to write
-- 3010: 5a. Lessons from the practice pages
-- 3039: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3088: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3105: 6. Playbooks for the most common businesses
-- 3225: 7. Choosing the three options (automatic page builder only)
-- 3249: 8. Photos, video and the tools
-- 3475: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3543: 9. The scroll sections: what the practice pages become
-- 3578: 10. Open decisions (need Tzvi)
+- 2612: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2639: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2704: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2721: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2767: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2787: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2817: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2864: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
+- 2939: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
+- 2960: 4. What is reported to the owner instead (content gaps)
+- 2969: 5. How to write
+- 3018: 5a. Lessons from the practice pages
+- 3047: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3096: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3113: 6. Playbooks for the most common businesses
+- 3233: 7. Choosing the three options (automatic page builder only)
+- 3257: 8. Photos, video and the tools
+- 3483: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3551: 9. The scroll sections: what the practice pages become
+- 3586: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2600,6 +2600,14 @@ part where one exists, so it is there without being remembered.
     A mark and the tool that made it match: the same design at the same size, the tool standing at or beside its own
     mark so one glance reads "this made that" (20 Nov 2026: Burnt's burned mark was half again the size of the iron's
     face and sat apart from it; the inspo's iron stands at the edge of its exact mark).
+35. **The whole film seen as stills before any clip** (Tzvi, 22 Nov 2026: "Do both", after Burnt's film lost two clips,
+    24 credits, to scenes set up the way he did not want: the iron pressing mid-board, then the iron lying on the board
+    among the meat). Before the first clip is paid for, Tzvi sees one sheet of the whole film in order: each clip's
+    start and end still, laptop beside phone, with one line under each saying what moves. He says yes to how every
+    scene is set up (what is where, what is on the board, what has left); a clip is never the first place a setup is
+    seen. A changed setup is a new sheet and a new yes. Checked by `clipchain.py make`: it refuses a new clip until
+    chain.json's `beats_seen` line names the sheet and quotes his yes; a build that makes its clips with its own script
+    puts the same line in its film brief.
 
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
 

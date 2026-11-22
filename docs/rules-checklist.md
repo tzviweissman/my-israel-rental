@@ -5,15 +5,15 @@ Sections (line each starts on; read with that offset):
 - 25: How to use it
 - 70: 1. Facts and words
 - 101: 2. Opening
-- 175: 3. Sections and worlds
-- 255: 4. Photos and media
-- 285: 5. Prices and savings
-- 307: 6. Order and booking flow
-- 333: 7. Motion
-- 365: 8. Phone
-- 381: 8b. From the seven videos, part two (29 Oct 2026)
-- 403: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 414: 9. Finish
+- 176: 3. Sections and worlds
+- 256: 4. Photos and media
+- 286: 5. Prices and savings
+- 308: 6. Order and booking flow
+- 334: 7. Motion
+- 366: 8. Phone
+- 382: 8b. From the seven videos, part two (29 Oct 2026)
+- 404: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 415: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -148,6 +148,7 @@ R3aa.34 | The approved still's framing kept in every still of its scene; room fo
 R3aa.35 | Every still of one scene from one base picture: the board, walnut and edges pixel for pixel the same | 3aa.17 | LOOK: the scene's stills blended in pairs, nothing but the asked change moves; n/a with no film when:film
 R3aa.36 | Every hero object real and premium up close: clean surfaces, crisp edges, one hard light on the edges, real materials, detail at a maker's scale; a mark matches the tool that made it in design and size, the tool at its mark | 3aa.34 | LOOK: each hero object cropped close beside its inspo at the same size, the shot_seen line answering the six, a mark beside its tool; n/a with no product picture in the opening
 R3aa.37 | The hero object fills a third of its frame, or a product step gets its own close frame beside the wide one, planned as two frames | 3aa.33 | LOOK: the hero's share of each still, the brief's close and wide frames; n/a with no product picture in the opening
+R3aa.38 | Before any clip, Tzvi saw one sheet of the whole film as stills (each clip's start and end, laptop beside phone) and his yes is quoted in beats_seen | 3aa.35 | RUN: clipchain.py make (refuses without it); LOOK: the brief's beats_seen line; n/a with no film when:film
 R3bb.1 | A new site picks at least three small touches from 3bb that fit its category and story, named on a "- touches:" line in CONCEPT.md, not the same three as the site built before; each shows only true facts | 3bb | LOOK: CONCEPT.md touches line and each touch on the site
 R3h.1 | The home page opens on a full-screen picture or film (at least 70% picture) and it is an event from their own thing (a film, or an event built in code), proposed with the first build, never after | 3h.1, 3n | script: site OPENING (home page) plus LOOK to confirm it is an event, not a drift
 R3n.1 | The owner's strongest real photo fills at least half the first screen on a laptop and on a phone, not a small card or cut-out shape | 3n.1 | LOOK: first screen at 1440x900 and 390x844

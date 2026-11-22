@@ -116,6 +116,12 @@ def make():
     import re
     if SPEC.get('aspect') != '9:16' and not re.search(r'["“][^"”]{2,}["”]', str(SPEC.get('phone_plan', ''))):
         sys.exit('chain.json phone_plan does not quote the answer Tzvi gave: ask him first, tall 9:16 clips (their get_cost credits) or the whole width on the ground, and put his words in quotes (3aa.26)')
+    # the whole film is seen as stills before any clip (rules 3aa.35; Burnt 20 Nov 2026: two clips, 24 credits, set the scene
+    # as Tzvi did not want it, the iron pressing mid-board and the iron among the meat): his yes to the sheet is quoted
+    if SPEC.get('aspect') != '9:16' and any(not (W / f"{st['name']}.mp4").exists() for st in SPEC['steps']) \
+            and not re.search(r'["“][^"”]{2,}["”]', str(SPEC.get('beats_seen', ''))):
+        sys.exit('chain.json has no "beats_seen" line: show Tzvi one sheet of every clip start and end still in order, '
+                 'laptop beside phone, and quote his yes to how each scene is set up (3aa.35)')
     for step in SPEC['steps']:
         out = W / f"{step['name']}.mp4"
         if not out.exists():

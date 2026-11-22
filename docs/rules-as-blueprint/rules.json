@@ -848,6 +848,17 @@
    "status": "built"
   },
   {
+   "id": "R3aa.38",
+   "rule": "Before any clip, Tzvi saw one sheet of the whole film as stills and his yes is quoted in beats_seen",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "scrollcraft/starter/clipchain.py make refuses a new clip without beats_seen (3aa.35)",
+   "confirmed_by": "RUN: clipchain.py make; LOOK: the brief's beats_seen line",
+   "status": "built"
+  },
+  {
    "id": "R3bb.1",
    "rule": "Pick at least three small touches from 3bb, named in CONCEPT.md",
    "how": [
