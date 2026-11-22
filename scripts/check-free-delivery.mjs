@@ -61,8 +61,11 @@ const j = async (r) => { const t = await r.text(); try { return JSON.parse(t); }
     const before = await p.locator('[data-testid="order-total"]').innerText();
     const nudge = await p.locator('[data-testid="order-free-nudge"]').innerText().catch(() => '');
     ok(/40/.test(nudge), `${name}: "${nudge.trim()}" (free from 100, basket 60)`);
-    await p.locator('[data-testid="discount-open"]').click();
-    await p.fill('[data-testid="discount-code"]', `ship${stamp}`); await p.locator('[data-testid="discount-apply"]').click(); await p.waitForTimeout(1500);
+    // the code shows by the code box: one tap applies it (Tzvi, 22 Nov 2026: "like Shopify shops")
+    const chip = p.locator(`[data-testid="discount-offer-SHIP${stamp}"]`);
+    ok(await chip.count() === 1, `${name}: the code is offered by the code box`);
+    if (OUT) await p.locator('[data-testid="discount-offers"]').screenshot({ path: `${OUT}/fd-offers-${name}.png` });
+    await chip.click(); await p.waitForTimeout(1500);
     const after = await p.locator('[data-testid="order-total"]').innerText();
     ok(/85/.test(before) && /60/.test(after), `${name}: total ${before.trim()} becomes ${after.trim()}`);
     ok(await p.locator('[data-testid="order-free-delivery-code"]').count() === 1, `${name}: "Delivery: Free with the code" line`);

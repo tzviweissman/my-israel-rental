@@ -39,7 +39,7 @@ function CodeForm({ initial, onSave, onCancel, saving }) {
                  className={`${field} tracking-wider`} style={fieldStyle} placeholder="FIRST10" data-testid="code-code" />
         </L>
         <L label={t('discounts.kind', 'Discount')}>
-          <select value={c.kind === 'amount' ? `amount:${c.currency || 'ILS'}` : c.kind} onChange={(e) => { const [kind, currency = 'ILS'] = e.target.value.split(':'); setC({ ...c, kind, currency, ...(kind === 'free_delivery' ? { applies_to: 'orders', value: '', show_on_page: true } : { show_on_page: false }) }); }} className={field} style={fieldStyle} data-testid="code-kind">
+          <select value={c.kind === 'amount' ? `amount:${c.currency || 'ILS'}` : c.kind} onChange={(e) => { const [kind, currency = 'ILS'] = e.target.value.split(':'); setC({ ...c, kind, currency, ...(kind === 'free_delivery' ? { applies_to: 'orders', value: '', show_on_page: true } : {}) }); }} className={field} style={fieldStyle} data-testid="code-kind">
             <option value="percent">{t('discounts.percent', 'Percent off (%)')}</option>
             <option value="amount:ILS">{t('discounts.amount', 'Amount off (₪)')}</option>
             <option value="amount:USD">{t('discounts.amountUsd', 'Amount off ($)')}</option>
@@ -66,7 +66,7 @@ function CodeForm({ initial, onSave, onCancel, saving }) {
         <label className="inline-flex items-center gap-2 min-h-[44px]"><input type="checkbox" checked={c.once_per_customer} onChange={set('once_per_customer')} /> {t('discounts.oncePer', 'Once per customer')}</label>
         <label className="inline-flex items-center gap-2 min-h-[44px]"><input type="checkbox" checked={c.first_order_only} onChange={set('first_order_only')} /> {t('discounts.firstOnly', 'New customers only')}</label>
         {/* a bar on the order and listing pages tells customers about it (FreeDeliveryBar.jsx, 22 Nov 2026) */}
-        {c.kind === 'free_delivery' && <label className="inline-flex items-center gap-2 min-h-[44px]"><input type="checkbox" checked={!!c.show_on_page} onChange={set('show_on_page')} data-testid="code-show" /> {t('discounts.showOnPage', 'Show it on my page')}</label>}
+        <label className="inline-flex items-center gap-2 min-h-[44px]"><input type="checkbox" checked={!!c.show_on_page} onChange={set('show_on_page')} data-testid="code-show" /> {c.kind === 'free_delivery' ? t('discounts.showOnPage', 'Show it on my page') : t('discounts.showAtCheckout', 'Show it at checkout for customers to pick')}</label>
         <label className="inline-flex items-center gap-2 min-h-[44px]"><input type="checkbox" checked={c.active} onChange={set('active')} /> {t('discounts.active', 'On')}</label>
       </div>
       <div className="flex gap-2">

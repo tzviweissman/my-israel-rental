@@ -80,7 +80,8 @@ export default function OrderPage() {
   // The store's own questions (backend custom_fields.py).
   const [answers, setAnswers] = useState({});
   const [code, setCode] = useState(null);         // a checked discount code
-  const [promo, setPromo] = useState(null);       // an advertised free-delivery code (FreeDeliveryBar)
+  const [shown, setShown] = useState(null);       // the codes the business shows (FreeDeliveryBar loads them)
+  const promo = shown && shown.promo;
   const [fulfilment, setFulfilment] = useState('pickup');
   const [date, setDate] = useState('');
   const [windowKey, setWindowKey] = useState('');
@@ -410,7 +411,7 @@ export default function OrderPage() {
         {data.business.logo_url && <img src={data.business.logo_url} alt="" className="w-11 h-11 rounded-xl object-cover" />}
         <h1 className="text-xl font-bold" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>{t('order.title', 'Order from {{name}}', { name: bizName })}</h1>
       </div>
-      {!table && <FreeDeliveryBar gigId={gigId} currency={currency} className="mb-4" onPromo={setPromo} />}
+      {!table && <FreeDeliveryBar gigId={gigId} currency={currency} className="mb-4" onPromo={setShown} />}
       {table && (
         <p className="mb-4 rounded-2xl px-4 py-3 text-sm font-semibold" style={{ background: 'var(--ink)', color: 'var(--action-ink)' }} data-testid="order-table">
           {t('tableOrder.banner', 'Table {{n}}: order here and it is brought to your table.', { n: table })}
@@ -630,7 +631,7 @@ export default function OrderPage() {
         <div className="rounded-2xl border bg-white p-3" style={{ borderColor: 'var(--brand-border)' }}>
           {lines.length > 0 && (
             <div className="mb-2">
-              <DiscountCodeInput businessId={data.business.id} form="orders" amount={subtotal} phone={phone} currency={currency} applied={code} onApplied={setCode} initialCode={params.get('ref')} />
+              <DiscountCodeInput businessId={data.business.id} form="orders" amount={subtotal} phone={phone} currency={currency} applied={code} onApplied={setCode} initialCode={params.get('ref')} offers={(shown && shown.offers) || []} />
             </div>
           )}
           {lines.length > 0 && (

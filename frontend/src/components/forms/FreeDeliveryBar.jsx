@@ -16,7 +16,7 @@ export default function FreeDeliveryBar({ gigId, currency = 'ILS', className = '
   const [promo, setPromo] = useState(null);
   useEffect(() => {
     if (!gigId) return;
-    axios.get(`${API}/marketplace/gigs/${gigId}/promo`).then((r) => { setPromo(r.data.promo); if (onPromo) onPromo(r.data.promo); }).catch(() => setPromo(null));
+    axios.get(`${API}/marketplace/gigs/${gigId}/promo`).then((r) => { setPromo(r.data.promo); if (onPromo) onPromo(r.data); }).catch(() => setPromo(null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gigId]);
   if (!promo) return null;
