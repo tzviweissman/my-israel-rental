@@ -88,6 +88,8 @@ your reply, either "every check passes" or the problems it listed.
    which number takes WhatsApp (§3o.4), prices against their menu (§0b.3).
    List every live-site write the build needs in the same message. Start
    building the moment it goes out; no placeholders on the page (§0b.2a).
+   Open FEEDBACK.md now: every correction Tzvi gives, his exact words, open
+   until a picture or clip proves it fixed (§3aj.6).
 4. **Blueprint.** `node scripts/blueprint.mjs <build>` writes BLUEPRINT.md;
    answer "This site has" (`--has film=yes|no <build>`: a "no" takes the 17
    video-only rules out, unread, and the files are checked for video later);
@@ -97,7 +99,9 @@ your reply, either "every check passes" or the problems it listed.
    Before any idea, the two best sites of the category (Pinterest, Awwwards or
    Inspo) go into `## Why they are a 5`: five lines or more, each what they do
    and how this site will do it (§3ah.7). The site is planned to a 5 here, not
-   found short of one at step 11. Then `IDEAS.md` (two saved pictures per idea, a kind no other site used) and
+   found short of one at step 11. Read `docs/category-mistakes.md` for the
+   kind (§3aj.3). Each picture an idea cites gets `Take:` and `Skip:` in
+   REFERENCES.md (§3aj.1). Then `IDEAS.md` (two saved pictures per idea, a kind no other site used) and
    `node scripts/check-ideas.mjs <build>`. Both pass before any idea is shown
    or any credit spent; hooks enforce it (§0b.4).
 6. **Concept and look.** CONCEPT.md: category (§3t), style sheet (§3g.1),
@@ -111,7 +115,11 @@ your reply, either "every check passes" or the problems it listed.
    products (§3ah.3), and every priced listing item in the catalogue (§3ah.6,
    `check-listing-prices`). Write the look into `scrollcraft/fingerprints.json`;
    `node scripts/check-fingerprints.mjs <build>` and `check-concept.mjs` pass
-   (§3p, §3q). Choose it yourself and say why in one line.
+   (§3p, §3q). Choose it yourself and say why in one line, with one
+   exception: the first screen is built three times as plain HTML, one per
+   reference, only the layout different, shown side by side, and Tzvi picks
+   before the rest is built or any picture for it is paid for (§3aj.2). Add the
+   `- avoids:` line (§3aj.3).
 7. **Film, if there is one.** Sketch sheet first and Tzvi picks a row (§0b.5b);
    a physically possible story, every object's source and end listed (rules 3h.18);
    confirm the motion as numbered steps; plan the phone frame; three concept
@@ -147,10 +155,12 @@ your reply, either "every check passes" or the problems it listed.
     product cards, two grounds, one headline size are §3ag's, and planned from
     step 6, not found here. Then a Sonnet subagent that did not build it, against
     `docs/page-review-checklist.md`; fix every FAIL, it looks again (§3r.2). Score
-    the wow gate (§3n). Then a Sonnet judge that did not build it rates
-    the site from 1 to 5 beside two real top sites of its category, and
-    review.md gets `Rating: N/5`; under 4, fix and judge again before anyone
-    sees it (§3ah.7, `check-build`; real award winners score 4 to 4.5). Planned well at steps 5 and 6, this is a 5 the first time.
+    the wow gate (§3n). Then two Sonnet judges that did not build it each
+    score layout, light, colour, type, detail and motion from 1 to 5 beside
+    compare.jpg, one `Judge N:` line each in review.md; the median per area plus
+    Tzvi's calibration is the `Rating:`, 4 or more with no area under 3.5, or
+    fix and judge again (§3aj.4, `scripts/judges.mjs`). Each time Tzvi gives his
+    own verdict on a judged site, add it to `docs/judge-calibration.json`. Planned well at steps 5 and 6, this is a 5 the first time.
 12. **RULES.md.** Answer every line of `docs/rules-checklist.md` and pass
     `node scripts/check-rules.mjs <build>` before anyone sees the site (§6).
 13. **Report.** Ends with "Not done yet" and "For your call", after a

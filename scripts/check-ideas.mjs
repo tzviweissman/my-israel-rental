@@ -30,6 +30,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { checkReferences } from './check-references.mjs';
+import { newerRules } from './rule-dates.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const INSPO = path.join(ROOT, 'docs', 'inspo');
@@ -64,6 +65,8 @@ export function checkIdeas(dir) {
   if (blocks.length < 3) problems.push(`only ${blocks.length} ideas; show at least three`);
   if (!blocks.some((b) => /^Own\b/i.test(b) || /^[A-Z]\.\s*Own\b/i.test(b))) problems.push('no idea headed "Own" (from the business\'s own words or world, rule 3q)');
   const kinds = {};
+  let takeSkip = true;
+  try { takeSkip = !newerRules(ROOT, dir).has('R3aj.1'); } catch { /* no git: hold the build to it */ }
   for (const b of blocks) {
     const name = b.split('\n')[0].trim();
     const field = (k) => (new RegExp(`^\\s*-\\s*${k}\\s*:\\s*(.*)$`, 'im').exec(b) || [])[1]?.trim() || '';
@@ -82,6 +85,13 @@ export function checkIdeas(dir) {
       if (!pics.has(base)) problems.push(`${name}: ${c} is not in docs/inspo`);
       else folders.add(pics.get(base));
       if (!refs.toLowerCase().includes(base)) problems.push(`${name}: ${path.basename(c)} is not named in REFERENCES.md`);
+      // what to take AND what to leave out of each picture (rules 3aj.1, Tzvi 22 Nov 2026: without the notes the same
+      // references came back as one patchwork site; Burnt's iron copied its inspo until "use similar ideas")
+      else if (takeSkip) {
+        const lines = refs.split(/\r?\n/), at = lines.findIndex((l) => l.toLowerCase().includes(base));
+        const note = lines.slice(at, at + 3).join(' ');
+        if (!/\btake:/i.test(note) || !/\bskip:/i.test(note)) problems.push(`${name}: REFERENCES.md's line for ${path.basename(c)} needs "Take:" (what this site uses from it) and "Skip:" (what it leaves out) (3aj.1)`);
+      }
     }
     if (cited.length < 2 || folders.size < 2) problems.push(`${name}: cite at least two saved pictures from two different saved sources`);
     if ((field('steps').match(/\b\d+[.)]?\s/g) || []).length < 3) problems.push(`${name}: write its steps (at least three, numbered)`);

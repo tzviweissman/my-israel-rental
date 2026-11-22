@@ -19,7 +19,8 @@
   --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --top-h: 68px; --out: cubic-bezier(.2, .7, .2, 1);
 }
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: 88px; scroll-padding-bottom: 96px; }   /* a focused control never hides under the menu bar or the phone bar (rules 3aj.7, check-keyboard OBSCURED) */
+body { font-variant-numeric: tabular-nums; }   /* prices line up (rules 3aj.7, DIGITS) */
 body { margin: 0; background: var(--ground); color: var(--ink); font: 400 var(--t0)/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
 img { display: block; max-width: 100%; }
 h1, h2, h3 { font-family: var(--font-head); margin: 0; line-height: 1.04; }

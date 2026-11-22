@@ -6,14 +6,14 @@ Sections (line each starts on; read with that offset):
 - 70: 1. Facts and words
 - 101: 2. Opening
 - 176: 3. Sections and worlds
-- 256: 4. Photos and media
-- 286: 5. Prices and savings
-- 308: 6. Order and booking flow
-- 334: 7. Motion
-- 366: 8. Phone
-- 382: 8b. From the seven videos, part two (29 Oct 2026)
-- 404: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 415: 9. Finish
+- 263: 4. Photos and media
+- 293: 5. Prices and savings
+- 315: 6. Order and booking flow
+- 341: 7. Motion
+- 373: 8. Phone
+- 389: 8b. From the seven videos, part two (29 Oct 2026)
+- 411: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 422: 9. Finish
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -252,6 +252,13 @@ R3ah.5 | One showpiece section the visitor uses, adapted from a top site of the 
 R3ah.6 | Every tier and product priced in the listings can be ordered on the site at that price, or is in not-sold.txt with why | 3ah.6 | script: `node scripts/check-listing-prices.mjs <build>`
 R3ah.7 | REFERENCES.md has ## Why they are a 5 (five lines or more) before any idea, and review.md says Rating: 4/5 or better from a judge that did not build the site, rating it beside two real top sites | 3ah.7 | script: `node scripts/check-compared.mjs <build>` + `node scripts/check-build.mjs <build>` (rating)
 R3ai.1 | Three decorations at most beyond photos, grounds and type, listed on CONCEPT.md's - treatments: line; a fourth only with (Tzvi OK, date); 3ae.2, 3af.1, 3af.3, 3af.4 count when used | 3ai | script: `node scripts/check-compared.mjs <build>` (TREATMENTS) + LOOK
+R3aj.1 | Each REFERENCES.md picture an idea cites says Take: and Skip: | 3aj.1 | script: `node scripts/check-ideas.mjs <build>`
+R3aj.2 | Three first screens as plain HTML, one per reference, only the layout different, shown side by side; Tzvi's pick quoted on CONCEPT.md's - first screens: line | 3aj.2 | script: `node scripts/check-concept.mjs <build>` (First screens)
+R3aj.3 | docs/category-mistakes.md read for the business's kind before any idea; CONCEPT.md's - avoids: line says how | 3aj.3 | script: `node scripts/check-concept.mjs <build>` (Avoids)
+R3aj.4 | Two fresh judges score six areas beside compare.jpg; median per area plus Tzvi's calibration is 4 or more, no area under 3.5 | 3aj.4 | script: `node scripts/judges.mjs <build>` (in check-build and publish-page)
+R3aj.5 | Each opening still's colour measured against its inspo (inspo-beside.py) and quoted in shot_seen | 3aj.5 | RUN: scripts/inspo-beside.py; LOOK: the shot_seen line; n/a with no product picture in the opening
+R3aj.6 | FEEDBACK.md holds Tzvi's exact corrections; none open, each done one with a proof file | 3aj.6 | script: `node scripts/judges.mjs <build>` (in check-build and publish-page)
+R3aj.7 | Focus never under a sticky bar, toggles are real checkboxes or switches, prices in tabular digits | 3aj.7 | script: `node scripts/check-keyboard.mjs <page urls>`
 
 ## 4. Photos and media
 
@@ -313,7 +320,7 @@ R3k.6 | The basket lives between pages: an Add on any page puts the item in and 
 R3k.9 | Every order or booking is POSTed to MyIsraelRental (the business's order form) before WhatsApp opens; every product on the site is a product of the listing with the same name and price | 3k | check-site SAVE (also fails product ids the live shop does not list); LOOK: the saved order in the owner's dashboard names real products
 R3k.10 | The order form arrives filled in: the day field holds the first day the business can do (lead time, closures), quantity 1, the owner's most common choice pre-chosen; all changeable, a customer's pick never overwritten | 3k.8 | script: check-prefill
 R3.15 | What the brief asks visitors to do has a place to do it (book or order needs the services block, message needs contact, visit needs hours and address) | 3 action | LOOK
-R7.1 | Three options are for the automatic page builder only; a hand build picks one direction itself and says why in one line in CONCEPT.md, with no options page put to Tzvi or the owner unless asked | 3, 7, 3c.1, 8a | LOOK: CONCEPT.md names the pick and the reason
+R7.1 | Three options are for the automatic page builder only; a hand build picks one direction itself and says why in one line in CONCEPT.md, with no options page put to Tzvi or the owner unless asked, except the three first screens of 3aj.2 | 3, 7, 3c.1, 8a | LOOK: CONCEPT.md names the pick and the reason
 R8.5 | Every main button goes to the quickest route to a finished order the business has: its order page, then its price list, only then WhatsApp; WhatsApp stays the quiet secondary; the how-to-order steps describe the real path | 8 (The quickest way to order) | LOOK: follow every main button
 R0b.13 | The order saves with a tracking link before opening WhatsApp, and the order reaches the owner complete | 0b.3, 3l.5 | LOOK: send a test order and read what arrives
 R3l.1 | For every family of similar items the owner was asked what a customer can choose and how many | 3l.1 | LOOK: `message-to-owner.md`

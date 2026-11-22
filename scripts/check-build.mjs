@@ -20,6 +20,8 @@ import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { newerRules } from './rule-dates.mjs';
+import { judgeReview, feedbackProblems } from './judges.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const dir = process.argv[2];
@@ -48,7 +50,7 @@ for (const p of pages) {
 }
 // the site-wide checks of rules 3v take every page at once (the same footer and menu on each)
 const all = pages.map((p) => `${base}/${folder}/${p}`);
-for (const s of ['check-footer', 'check-menu', 'check-facts', 'check-heights', 'check-film-video', 'check-film-clear', 'check-web-basics', 'check-says-offer', 'check-look', 'check-five', 'check-motion-feel', 'check-break-ui']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), ...all]]);
+for (const s of ['check-footer', 'check-menu', 'check-facts', 'check-heights', 'check-film-video', 'check-film-clear', 'check-web-basics', 'check-says-offer', 'check-look', 'check-five', 'check-motion-feel', 'check-break-ui', 'check-keyboard']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), ...all]]);
 // a site built from a blueprint has RULES.md written from it first (scripts/blueprint.mjs)
 if (fs.existsSync(path.join(dir, 'BLUEPRINT.md'))) spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'blueprint.mjs'), '--rules', dir], { encoding: 'utf8' });
 for (const s of ['check-concept', 'check-fingerprints', 'check-compared', 'check-listing-prices', 'check-rules']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), dir]]);
@@ -76,6 +78,7 @@ await Promise.all(Array.from({ length: Math.min(4, runs.length) }, async () => {
 }));
 {
   const site = path.join(ROOT, dir), review = path.join(site, 'review.md');
+  const newer = newerRules(ROOT, site), twoJudges = !newer.has('R3aj.4');
   const newest = fs.readdirSync(site).filter((f) => /\.(html|css|js)$/.test(f))
     .reduce((m, f) => Math.max(m, fs.statSync(path.join(site, f)).mtimeMs), 0);
   const why = !fs.existsSync(review) ? 'no review.md'
@@ -83,8 +86,15 @@ await Promise.all(Array.from({ length: Math.min(4, runs.length) }, async () => {
     : fs.statSync(review).mtimeMs < newest ? 'the site changed after the review'
     // rules 3ah.7: a site compared with the best of its kind (compare.jpg) is judged 4 or more before anyone sees it
     // (20 Nov 2026: real award-winning bakery sites score 4 to 4.5 with this judge; nothing scores 5)
+    // rules 3aj.4 (22 Nov 2026): two judges per area, the median, corrected by Tzvi's own verdicts (scripts/judges.mjs)
+    : twoJudges ? judgeReview(fs.readFileSync(review, 'utf8')).why
     : fs.existsSync(path.join(site, 'compare.jpg')) && !/^Rating:\s*(4(\.5)?|5)\s*\/\s*5\b/m.test(fs.readFileSync(review, 'utf8')) ? 'review.md has no "Rating: 4/5" or better (rules 3ah.7: a judge that did not build it rates the site beside two real top sites; fix and judge again until 4)' : '';
   results.push({ name: 'independent review', ok: !why, out: why && `${why}. Have a Sonnet subagent that did not build the site use it at laptop and phone size against docs/page-review-checklist.md and write ${dir}/review.md; fix every FAIL, then review again.` });
+}
+// Tzvi's corrections kept until each is proved fixed (rules 3aj.6)
+if (!newerRules(ROOT, path.join(ROOT, dir)).has('R3aj.6')) {
+  const fb = feedbackProblems(path.join(ROOT, dir));
+  results.push({ name: 'feedback', ok: !fb.length, out: fb.join(' | ') });
 }
 let failed = 0;
 for (const { name, ok, out } of results) {

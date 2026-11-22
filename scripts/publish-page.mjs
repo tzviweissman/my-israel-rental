@@ -109,8 +109,19 @@ ${lp.stdout}${lp.stderr}`);
   if (isNew && !(fs.existsSync(review) && /^Verdict:\s*PASS\b/m.test(fs.readFileSync(review, 'utf8'))))
     problems.push('no independent review: review.md with "Verdict: PASS" from a Sonnet subagent that did not build the site (docs/page-review-checklist.md)');
   // judged a 5 beside the best of its kind before anyone sees it (Tzvi, 20 Nov 2026; rules 3ah.7)
-  if (isNew && fs.existsSync(path.join(SRC, 'compare.jpg')) && !(fs.existsSync(review) && /^Rating:\s*(4(\.5)?|5)\s*\/\s*5\b/m.test(fs.readFileSync(review, 'utf8'))))
-    problems.push('not judged 4 or more: review.md has no "Rating: 4/5" or better from a judge that did not build the site (rules 3ah.7)');
+  {
+    // two judges per area, corrected by Tzvi (rules 3aj.4, 22 Nov 2026); a site made before keeps 3ah.7's one rating
+    const { newerRules: nr } = await import('./rule-dates.mjs');
+    const { judgeReview, feedbackProblems } = await import('./judges.mjs');
+    const older = nr(ROOT, SRC);
+    if (isNew && !older.has('R3aj.4')) {
+      const j = fs.existsSync(review) ? judgeReview(fs.readFileSync(review, 'utf8')) : { why: 'no review.md' };
+      if (j.why) problems.push(`not judged 4 or more by two judges (rules 3aj.4): ${j.why}`);
+    } else if (isNew && fs.existsSync(path.join(SRC, 'compare.jpg')) && !(fs.existsSync(review) && /^Rating:\s*(4(\.5)?|5)\s*\/\s*5\b/m.test(fs.readFileSync(review, 'utf8'))))
+      problems.push('not judged 4 or more: review.md has no "Rating: 4/5" or better from a judge that did not build the site (rules 3ah.7)');
+    // Tzvi's corrections each proved fixed (rules 3aj.6)
+    if (!older.has('R3aj.6')) problems.push(...feedbackProblems(SRC).map((p) => `${p} (rules 3aj.6)`));
+  }
   if (rules.status !== 0) problems.push(`rules not all answered (check-rules):\n${rules.stdout.split('\n').filter((l) => /FAIL|problem/.test(l)).join('\n')}`);
   // and every page of it fits the screen, with no photo blown up past its size (rules 3c.12,
   // 3p.6; Tzvi, 20 Oct 2026: "make sure the rules will prevent this in the future"), has no
@@ -188,6 +199,8 @@ ${lp.stdout}${lp.stderr}`);
     // controls move like a designer made them, and the worst content breaks nothing (Tzvi, 20 Nov 2026, Emil Kowalski's rules)
     ['check-motion-feel.mjs', 'has controls that are slow, bounce, pop from nothing or give no press', 'R3e.16b'],
     ['check-break-ui.mjs', 'breaks with a long name, a big price or a missing photo', 'R3e.11b'],
+    // a keyboard user sees where they are, toggles are real, prices line up (Tzvi, 22 Nov 2026, Vercel's guidelines; rules 3aj.7)
+    ['check-keyboard.mjs', 'hides focused controls under a bar, draws fake toggles or misaligns prices', 'R3aj.7'],
     // one part leads into the next: something crosses a section line, one object travels down with you (Tzvi, 18 Nov 2026, rules 3ae)
     ['check-seams.mjs', 'has a home page where nothing crosses a section line or travels with the visitor', 'R3ae.1'],
     // the page as an iPhone shows it: Safari's engine, where a film led only by seeking stands still (Tzvi, 14 Nov 2026, rules 3aa.30)

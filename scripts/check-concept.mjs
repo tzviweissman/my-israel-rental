@@ -34,6 +34,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { checkReferences } from './check-references.mjs';
 import { checkIdeas } from './check-ideas.mjs';
+import { newerRules } from './rule-dates.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 
@@ -81,6 +82,27 @@ export function checkConcept(dir) {
   if (!/mobbin\.com\//i.test(wow) || !/(docs\/inspo\/|inspo:|inspo\s)/i.test(wow)) problems.push('Wow gate: name where the wow came from, a Mobbin link and an Inspo or docs/inspo reference (and the 21st search when it answers)');
   if (!fx.some((l) => /^\s*[-*]\s*touch:\s*(?!none)\S/i.test(l))) problems.push('Effects: no "- touch:" line, a small detail only this business would have (The Whipped Cup: a cloud for a mouse pointer; Elisheva: the sweep in the chosen shade)');
   if (!/different from all \d+ other pages/.test(part('Not alike'))) problems.push('Not alike: paste the passing line from scripts/check-fingerprints.mjs');
+  // Tzvi, 22 Nov 2026 ("All 7", from two design videos): rules 3aj.2 and 3aj.3, not asked of a site made before them
+  let newer = new Set();
+  try { newer = newerRules(ROOT, dir); } catch { /* no git: hold the build to them */ }
+  if (!newer.has('R3aj.2')) {
+    // three first screens, one per reference, the same colours and fonts, Tzvi's pick quoted
+    const fs3 = (/^\s*[-*]\s*first screens\s*:(.*)$/im.exec(s) || [])[1] || '';
+    const files = [...fs3.matchAll(/[\w./-]+\.(?:html|png|jpe?g|webp)/gi)].map((m) => m[0]);
+    const lost = files.filter((f) => !fs.existsSync(path.join(dir, f)));
+    if (files.length < 3) problems.push('First screens: no "- first screens: <a> <b> <c>; Tzvi: \\"<his pick>\\"" line naming three first-screen versions in the build, one per reference, only the layout different (3aj.2)');
+    else if (lost.length) problems.push(`First screens: these versions are not in the build: ${lost.join(', ')} (3aj.2)`);
+    else if (!/["“][^"”]+["”]/.test(fs3)) problems.push('First screens: quote Tzvi\'s pick on the line ("- first screens: ...; Tzvi: \\"B, with the big word\\"") (3aj.2)');
+  }
+  if (!newer.has('R3aj.3')) {
+    // the mistakes every AI-made site of this kind makes, read before the ideas
+    const av = (/^\s*[-*]\s*avoids\s*:\s*([^:\n]+):?(.*)$/im.exec(s) || []);
+    const kinds = (fs.existsSync(path.join(ROOT, 'docs', 'category-mistakes.md')) ? fs.readFileSync(path.join(ROOT, 'docs', 'category-mistakes.md'), 'utf8') : '')
+      .split(/\r?\n/).filter((l) => /^## /.test(l)).map((l) => l.slice(3).trim().toLowerCase());
+    if (!av[1]) problems.push('Avoids: no "- avoids: <kind>: how this site avoids each" line naming a part of docs/category-mistakes.md (3aj.3)');
+    else if (!kinds.includes(av[1].trim().toLowerCase())) problems.push(`Avoids: "${av[1].trim()}" is not a part of docs/category-mistakes.md (${kinds.join(', ')}); add the kind there first (3aj.3)`);
+    else if ((av[2] || '').trim().split(/\s+/).length < 8) problems.push('Avoids: say how this site avoids that kind\'s mistakes, in a few words each (3aj.3)');
+  }
   return problems;
 }
 

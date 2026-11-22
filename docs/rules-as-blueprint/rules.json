@@ -3568,6 +3568,79 @@
    "status": "planned"
   },
   {
+   "id": "R3aj.1",
+   "rule": "Each REFERENCES.md picture an idea cites says Take: and Skip:",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "check-ideas refuses an idea citing a picture without both notes",
+   "confirmed_by": "node scripts/check-ideas.mjs <build>",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.2",
+   "rule": "Three first screens, one per reference, only the layout different; Tzvi picks",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "Step 6 builds first-screens/a-c.html and shows them side by side; check-concept wants the - first screens: line with his pick",
+   "confirmed_by": "node scripts/check-concept.mjs <build>",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.3",
+   "rule": "The kind's AI mistakes read before any idea; - avoids: line",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "docs/category-mistakes.md; check-concept wants the - avoids: line",
+   "confirmed_by": "node scripts/check-concept.mjs <build>",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.4",
+   "rule": "Two fresh judges per area, median plus Tzvi's calibration: 4 or more, no area under 3.5",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "scripts/judges.mjs read by check-build and publish-page; docs/judge-calibration.json",
+   "confirmed_by": "node scripts/judges.mjs <build>",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.5",
+   "rule": "Each opening still's colour measured against its inspo, quoted in shot_seen",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "scripts/inspo-beside.py prints the colour grid",
+   "confirmed_by": "RUN: inspo-beside.py; LOOK: shot_seen",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.6",
+   "rule": "FEEDBACK.md: Tzvi's exact corrections, none open, each closed with proof",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "scripts/judges.mjs in check-build and publish-page",
+   "confirmed_by": "node scripts/judges.mjs <build>",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.7",
+   "rule": "Focus never under a sticky bar, real toggles, tabular-digit prices",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "scripts/check-keyboard.mjs in check-build and publish-page; starter site.css",
+   "confirmed_by": "node scripts/check-keyboard.mjs <page urls>",
+   "status": "built"
+  },
+  {
    "id": "R3e.16b",
    "rule": "Controls answer in 300 ms or less, ease out, never from scale(0), no bounce, pressed buttons shrink to 0.97",
    "how": [
