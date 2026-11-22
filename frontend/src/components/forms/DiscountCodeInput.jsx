@@ -63,7 +63,7 @@ export default function DiscountCodeInput({ businessId, form, amount, phone, cur
           <button key={o.code} type="button" onClick={() => apply(o.code)} disabled={busy}
                   className="inline-flex items-center gap-1.5 px-3 min-h-[44px] rounded-full border text-sm" style={{ borderColor: 'var(--ink)', color: 'var(--ink)', borderStyle: 'dashed' }}
                   data-testid={`discount-offer-${o.code}`}>
-            <Tag size={13} aria-hidden="true" /> <b dir="ltr" className="tracking-wider">{o.code}</b> <span>{what(o)}{o.min_order ? ` · ${t('discounts.overShort', 'over {{n}}', { n: `${o.currency === 'USD' ? '$' : '₪'}${o.min_order}` })}` : ''}</span>
+            <Tag size={13} aria-hidden="true" /> <b dir="ltr" className="tracking-wider">{o.code}</b> <span>{what(o)}{o.min_order ? ` · ${t('discounts.overShort', 'over {{n}}', { n: `${(currency || o.currency) === 'USD' ? '$' : '₪'}${o.min_order}` })}` : ''}</span>
           </button>
         ))}
       </div>
