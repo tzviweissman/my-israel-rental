@@ -39,23 +39,23 @@ Sections (line each starts on; read with that offset):
 - 2760: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
 - 2806: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
 - 2829: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2863: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2912: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
-- 2992: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
-- 3035: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3122: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3161: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3246: 4. What is reported to the owner instead (content gaps)
-- 3255: 5. How to write
-- 3304: 5a. Lessons from the practice pages
-- 3333: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3382: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3399: 6. Playbooks for the most common businesses
-- 3519: 7. Choosing the three options (automatic page builder only)
-- 3543: 8. Photos, video and the tools
-- 3769: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3838: 9. The scroll sections: what the practice pages become
-- 3873: 10. Open decisions (need Tzvi)
+- 2862: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2911: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
+- 2995: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
+- 3038: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
+- 3125: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3166: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3251: 4. What is reported to the owner instead (content gaps)
+- 3260: 5. How to write
+- 3309: 5a. Lessons from the practice pages
+- 3338: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3387: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3404: 6. Playbooks for the most common businesses
+- 3524: 7. Choosing the three options (automatic page builder only)
+- 3548: 8. Photos, video and the tools
+- 3774: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3843: 9. The scroll sections: what the practice pages become
+- 3878: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2834,7 +2834,7 @@ company (blue icon cards, "Your plan in three steps"), Elisheva never shows her 
 tidy grid, and Chicken Munch's seven styles are a grey word list. Four things the best do. Not asked of a site published
 before 18 Nov 2026 (rule-dates.mjs). Each is planned in CONCEPT.md's `## Body` before layout and judged by LOOK.
 **Since 22 Nov 2026 the mark (1), the loose photos (3) and the colour cards (4) are choices from the menu of 3ai.2.
-The owner's note (2) is used whenever the owner gave the words and a photo; it is not a decoration.**
+The owner's note (2) is optional and not asked for: used only when the owner offers it; it is not a decoration.**
 
 1. **One mark of their own runs through the site.** One drawn detail taken from the business's own logo or product (Clean
    Plus's sparkle, a bun's sesame seed, a balloon's knot), or a small mascot drawn from them, appears in at least three
@@ -2845,10 +2845,9 @@ The owner's note (2) is used whenever the owner gave the words and a photo; it i
 2. **The owner speaks, signed, with real faces.** A short note in the owner's own words (three sentences or so, asked of
    them, never written for them, 1.1), signed with their name, beside their real photo and photos of the place or the
    customers, set like a letter: Pizza Amici's "Ciao!" letter with stamp-edged photos (`pizza-amici-1-letter-and-stamps.webp`).
-   Every owner is asked for it in the first message, with a photo of themselves (decided 22 Nov 2026: only they can
-   write it, and a line in a message already being sent costs nothing; asked later it is a second round). When the
-   owner has not given the words or a photo, it is a content gap (section 4), never filled with invented words, and
-   the site is not held back for it. Planned on a `- owner:` line (the words' source and the photos).
+   Optional (Tzvi, 22 Nov 2026: "if they want to add one they can but its fine without it"): owners are not asked
+   for it. It is used only when an owner offers their own words and a photo; a site without it is complete, and it
+   is never written for them. Planned on a `- owner:` line when used, `n/a` otherwise.
 3. **Their photos you can play with.** When the site has four or more photos of the business's own work, at least one
    set is laid loose instead of a tidy grid: tilted, overlapping prints or polaroids with a handwritten label (the shade,
    the dish), that can be dragged or tapped to flip and show what it is and its price (Sunbeam Bagels,
@@ -2973,7 +2972,7 @@ one of the judge's reasons. Not asked of a site published before 20 Nov 2026.
    `scripts/check-compared.mjs` (the part) and `scripts/check-build.mjs` and publish-page (the rating, when compare.jpg
    exists).
 
-8. **The opening is a staged moment** (Tzvi, 21 Nov 2026: "its way better we should always make it more like this.
+8. **The opening is dramatic and premium** (Tzvi, 21 Nov 2026: "its way better we should always make it more like this.
    but maybe add a wow", after Cakes by Tova's opening was rebuilt from the Cake Truffle reference). The first screen is
    one of the business's own products, made into a styled hero shot (3ag.1's styled shot: the same piece, checked
    against the owner's photo) with dramatic side light on a deep ground of the product's own colour world (chocolate
@@ -2983,11 +2982,15 @@ one of the judge's reasons. Not asked of a site published before 20 Nov 2026.
    words come in (`gen/tova.css`, `.rack .pics::after`, a radial shade moved with `@property`); still under reduced
    motion. One API picture, its price from get_cost. The old daylight-on-linen opening scored 4 of 5; this one is
    what Tzvi chose. LOOK at 1366x800 and 390x844, with check-arrival and check-says-offer.
-   **What is asked of every site, and what is a choice** (decided 22 Nov 2026). Asked of every site: the product as
-   a styled hero shot, whole, lit from one side, the words on its plain side, and the one wow as it arrives. A
-   choice: the deep dark ground. It is always one of the three first screens (3aj.2), so Tzvi can pick it on every
-   build, and it is used when he does. Otherwise the ground follows the category and the brand (3t: a food shop is
-   bright, the owner's own look wins). Asked of every site it gave every business the same first screen.
+   **What this asks of every site** (Tzvi, 22 Nov 2026: "i meant it should be more like that to make it more
+   dramatic and premium but there are many types of openings a site can have ... some effects work better for
+   different sites. i didnt mean that all new sites should be the same"). Every opening is as dramatic and premium
+   as Tova's, and it opens on an event, not a still. HOW it does that is chosen per business: the staged side-lit
+   product shot is one type among many. Others: the scroll film (3aa), the light reveal, the split opening, the
+   branching hero, layered parallax from one photo, the panel wipe (3al.7), live art in code (3ak.1), the push into
+   a detail. Choose by what fits the business (3t; a cleaner or a rental has work or a place to show, not a product
+   to stage). The three first screens (3aj.2) are three different opening types, so Tzvi chooses between real
+   alternatives, never three versions of one look.
 
 ## 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
 
@@ -3048,8 +3051,8 @@ is asked of a site published before 22 Nov 2026.
    - In phase 4, before the rest of the site and before any paid picture for the first screen, the first screen is
      built three times as plain HTML in the build. One reference leads each version.
    - The three share the same fonts, words and the owner's real photos, with grey boxes where a picture will
-     be generated. The layout differs, and one of the three is always the staged opening on a deep ground (3ah.8);
-     the other two keep the brand's own ground.
+     be generated. Each is a different opening type that fits the business (3ah.8: a staged side-lit product, a
+     light reveal, a split opening, a film, layered parallax and so on), so Tzvi picks between real alternatives.
    - They are shown side by side as part B of the design board (8), and Tzvi picks one.
    - CONCEPT.md gets `- first screens: gen/board/first-a.html gen/board/first-b.html gen/board/first-c.html; Tzvi:
      "<his words>"`.
@@ -3155,7 +3158,9 @@ None is asked of a site published before 22 Nov 2026 (rule-dates.mjs).
 4. **Prices and order controls stay calm.** No tilt, 3D turn, parallax or scroll-tied effect on a price, a total,
    a quantity stepper, an Add button or the order button. They may arrive once with their section and answer a
    press within 3e.16b's limits. A highlight behind a price on hover (3bb, touch 11) is fine: it does not move the
-   price. A button that flips or turns to show its price is not used on a new site. Checked by LOOK: point at,
+   price. A button that flips to show its price (B5) is fine on a laptop, where pointing at it flips it, when the
+   price is also printed on the card; on a phone (no hover) it does not flip and the price simply shows (Tzvi,
+   22 Nov 2026: "why cant it stay for desktop and just not be applied for phones"). Checked by LOOK: point at,
    press and scroll past every price and order control, laptop and phone.
 
 ## 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
@@ -3796,8 +3801,8 @@ switchable between five business palettes (trainer, bakery, cleaner, tour guide,
 handyman): 12 buttons, 6 links and arrows, 7 tiles, 6 prices, 4 headings, each
 marked with the businesses it suits. Choose per business so two pages in a row
 never share the same set; a piece Tzvi likes but did not choose is kept for
-another business. B5, the button that flips to show the price, is not used on a
-new site since 22 Nov 2026 (3ak.4: the price stays in view). Every new piece
+another business. B5, the button that flips to show the price, flips on a laptop
+only, with the price also on the card; on a phone the price just shows (3ak.4). Every new piece
 rebuilt from 21st is added to the library.
 
 **The library never replaces the search** (Tzvi, 7 Oct 2026: "why build now

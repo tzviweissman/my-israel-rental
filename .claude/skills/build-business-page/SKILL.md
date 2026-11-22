@@ -103,8 +103,7 @@ Prices are read with `get_cost` at the time, never from memory.
 1. **Look, ask once, start the working parts (free).** Look at every photo: duplicates, screenshots, small
    sizes, kinds (§3o.6, §3o.7). Mark each one shop-ready, re-light or styled shot (§3ag.1), and note any big
    photo of the wrong shape (§0b.2b). These are decisions only. Nothing is paid for yet. Send the owner one
-   message, only about their business: missing facts, more photos, a short note in their own words with a photo
-   of themselves (§3af), guarantee (§3j.1), FAQ with 5 to 8 example
+   message, only about their business: missing facts, more photos, guarantee (§3j.1), FAQ with 5 to 8 example
    questions (§3b.4), per-item choices for similar products (§3l.1), which number takes WhatsApp (§3o.4),
    prices against their menu (§0b.3), and every live-site write the build needs. Then build what never changes
    with the design: load the products, the order form, the basket, and run
@@ -131,9 +130,9 @@ Prices are read with `get_cost` at the time, never from memory.
    The hooks block any paid generation until check-ideas does (§0b.4).
 4. **Three first screens (free, then Tzvi).** Read the blueprint's Opening stage first. Build the first screen
    three times as plain HTML in `gen/board/` (`first-a.html`, `first-b.html`, `first-c.html`), one per
-   reference. Same fonts from BRAND.md, same words, the owner's photos as they are. The layout differs, and one
-   of the three is always the staged opening on a deep ground (§3ah): Tzvi chose that look, so he can pick it on
-   every build, but a bright business is not forced into it. A picture still to be made is a plain grey picture
+   reference. Same fonts from BRAND.md, same words, the owner's photos as they are. Each is a different opening
+   type that fits the business (§3ah.8: a staged side-lit product, a light reveal, a split opening, a film,
+   layered parallax...), each as dramatic and premium as Tova's, so Tzvi picks between real alternatives. A picture still to be made is a plain grey picture
    of its final shape. A photo of the wrong shape
    sits whole, with grey where it will be extended. Show each as a laptop frame beside a phone frame (§3aa).
    Run `check-says-offer.mjs`, `check-five.mjs` and `readable.mjs` on each; fix or drop one that fails. They

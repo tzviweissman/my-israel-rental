@@ -119,7 +119,7 @@ learned with. Check what is connected in this session first.
   component, with five business palettes to switch between: 12 buttons (B1 to
   B12), 6 links and arrows (L), 7 tiles (T), 6 prices (P), 4 headings (H), each
   marked with what it suits. B2 and T1 are on Michal Yodaiken's page; B5 (flips
-  to the price) is not used on a new site (3ak.4: the price stays in view). Pick per business, never
+  to the price) flips on a laptop only, the price also on the card; on a phone the price just shows (3ak.4). Pick per business, never
   the same set twice in a row, and add every new 21st piece you rebuild here.
   **Search 21st fresh on every build first** (Tzvi: "look by each build so you
   will have many more options"): see 3g.17. The library is a shelf of tested
@@ -1273,7 +1273,7 @@ Full text: reference/full-rules.md section 3af; examples in docs/inspo/awwwards-
 line in CONCEPT.md `## Body` before layout, judged by LOOK. (1) `- mark:` one drawn detail from their logo or product
 (or a mascot from them) doing a job in 3+ places (bullets, pointer, chosen state, dividers), never stock icons; Burrito
 Madre, Buck's Sauce. (2) `- owner:` a short signed note in the owner's own words beside their real photos, like Pizza
-Amici's letter; every owner is asked for it in the first message; missing words are a content gap, never invented. (3) `- loose:` with 4+ work photos, one set laid loose
+Amici's letter; optional: owners are not asked, it is used only when they offer it, never invented. (3) `- loose:` with 4+ work photos, one set laid loose
 (tilted, overlapping, labelled by hand), tap to flip to what it is and its price; Sunbeam Bagels. (4) `- cards:` 3+
 kinds each on its own colour card with its cut-out and one line of character, never a grey list; Buck's "Choose your
 weapon". New sites only.
@@ -1294,10 +1294,10 @@ HEADINGS). (6) Before review: compare.jpg (compare-sheet.mjs) and a `## Compared
 
 Full text: reference/full-rules.md section 3ah. Cakes by Tova met 3ag, passed every check and was still rated 3 of 5
 beside the best bakery sites; each rule is one reason. (1) One statement opens the site: one big headline with a feeling,
-the offers in the line under it, one button, one photo (check-five OPENING). (8) The opening is a staged moment: the
-owner's own product as a styled hero, lit from one side, words on its plain side, and one wow as it arrives
-(Tova: a light sweeps across her cake), under 2 s. The deep dark ground is one of the three first screens, always
-shown, used when Tzvi picks it; otherwise the ground follows the category (3t). (2) A product card is its photo, edge to edge, then name,
+the offers in the line under it, one button, one photo (check-five OPENING). (8) The opening is dramatic and premium,
+as Tova's, and opens on an event (her light sweep across the cake, under 2 s). HOW is chosen per business: a staged
+side-lit product, the film, a light reveal, a split opening, layered parallax, live art and more (3al.7, 3ak.1, 3t);
+never one look for every site. (2) A product card is its photo, edge to edge, then name,
 price and one short line, 16 words at most; choices in the sheet (check-five CARDS). (3) A shop page opens on its
 products: pictures a third of the first screen, photos 240 px+ (check-five SHOPTOP); build it with the starter's
 shop_page(featured=True), one big photo of the popular item beside the title. (4) Paragraphs, product names and
@@ -1325,7 +1325,7 @@ New sites only.
 Full text: reference/full-rules.md section 3aj. Not asked of a site published before 22 Nov 2026.
 1. Each REFERENCES.md picture an idea cites says `Take:` and `Skip:` (check-ideas).
 2. In phase 4, three first screens are made as plain HTML, one per reference: same fonts, words and photos,
-   grey boxes for pictures to be generated, the layout differs, and one is always the staged opening on a deep ground
+   grey boxes for pictures to be generated, and each is a different opening type that fits the business
    (3ah.8). They are part B of the design board (8), Tzvi picks one, and
    CONCEPT.md quotes him: `- first screens: a b c; Tzvi: "..."` (check-concept). This is the one options page 7.1
    allows.

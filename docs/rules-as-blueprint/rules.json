@@ -3295,11 +3295,11 @@
   },
   {
    "id": "R3af.2",
-   "rule": "Every owner is asked for a short signed note and a photo in the first message; shown beside their real photos when given, never invented",
+   "rule": "Optional owner note: not asked for; used only when the owner offers their own words and a photo, never invented",
    "how": [
     "ASK"
    ],
-   "built_by": "message-to-owner.md asks for the note and a photo; CONCEPT.md ## Body '- owner:' line",
+   "built_by": "CONCEPT.md ## Body '- owner:' line when the owner offers a note, n/a otherwise",
    "confirmed_by": "LOOK",
    "gremier_retry": false,
    "status": "planned"
@@ -3499,7 +3499,7 @@
   },
   {
    "id": "R3aj.2",
-   "rule": "Three first screens, one per reference, the layout different, one of them the staged deep-ground opening; Tzvi picks",
+   "rule": "Three first screens, each a different opening type that fits the business; Tzvi picks",
    "how": [
     "KIT",
     "ASK"
@@ -3747,12 +3747,12 @@
   },
   {
    "id": "R3ah.8",
-   "rule": "The opening is a staged moment: owner's product as a styled hero lit from one side, words on its plain side, one wow as it arrives; the deep dark ground is one of the three first screens",
+   "rule": "The opening is dramatic and premium and opens on an event; its type is chosen per business (staged product, film, light reveal, split opening, parallax, live art), never one look for all",
    "how": [
     "GEN",
     "EYE"
    ],
-   "built_by": "Phase 1 marks the hero as a styled shot, phase 6 makes it; phase 3 plans the wow (Tova: a light sweep)",
+   "built_by": "The three first screens are three different opening types; Tzvi picks one; its pictures are made after the pick",
    "confirmed_by": "LOOK + check-arrival",
    "gremier_retry": false,
    "status": "planned"
