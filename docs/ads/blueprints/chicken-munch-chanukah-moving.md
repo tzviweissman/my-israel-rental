@@ -55,7 +55,7 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
 - [ ] A3.2 A rental or a place: only the owner's real photos. A generated room does not exist. Say where each picture comes from.
   plan: n/a: a product.
 - [ ] A3.3 A generated picture of a product keeps the real product: rebuilt around its real photo, its traits unchanged, compared beside that photo. Describe the reference scene in full, never "swap the product".
-  plan: their box is their own photo frontend/public/pages/chicken-munch/assets/box-yellow.webp, cut out and laid on, never generated; the Maccabees and the temple are drawn.
+  plan: 3D version (Tzvi, 22 Nov 2026): their box rebuilt in the 3D scenes from their own photo assets/box-yellow.webp (kraft box, windowed lid, cornflake tenders, crunchy bites, their CHICKEN MUNCH sauce cups) and checked beside it: docs/ads/chicken-munch-chanukah-box-vs-real.jpg.
 - [ ] A3.4 Another shape than the screen: the background is extended, never cropped or zoomed.
   plan: made 9:16; the box photo is cut out and placed, not stretched.
 - [ ] A3.5 Sharp and bright; one colour that stands out on a white and a dark feed, from our palette or the owner's own photo and logo.
@@ -139,7 +139,7 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
 - [ ] A9.3 The owner can change every word and the price stays right.
   plan: ...
 - [ ] A9.4 Cost read from the API before any generation, and the spend reported.
-  plan: no price lookup exists. Spent: 2 stills on marketing-studio/image/sunburst (the hero pose sheet and the friends sheet), first takes used; no clips.
+  plan: no price lookup exists. Spent: 2 stills for the drawn first version (hero and friends sheets), then for the 3D version Tzvi asked for: 5 stills on marketing-studio/image/sunburst (s1 to s5) and 5 clips of 6 s 2K on minimax/h3/image-to-video (c1 to c5), all first takes.
 - [ ] A9.5 Never bland: before anyone sees it, the ad sits beside the pro ads at the same size (python scripts/ad_vs_pros.py, references in docs/inspo/pro-references). Five yes-or-no: the product is the hero, close and big (about half the width or more); one strong light or bold colour, not flat even light; something happens (a moment, motion, a surprise, an idea); the headline is part of the design, big, not a small line in a corner; it holds its own beside the pros. Any no: remade, not shown.
   plan: ...
 - [ ] A9.6 Every copy of the product the picture adds (pieces in the air, a second item, a stack, a pour) matches the real photo in shape, size, colour and coating, with nothing round it the real product would not make (crumbs, drops, glow). The prompt names those traits; the sheet from backend/.venv/Scripts/python scripts/product-match-sheet.py <picture> <real photo> <sheet.jpg> is looked at piece by piece. The answer names the sheet file, or n/a when no copies are added.
@@ -185,7 +185,7 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
 - [ ] A10.4 An MP4 video (H.264) at the shape's full 1080-wide size, about 6 seconds, no sound needed to follow it.
   plan: measured by check-ad-designs (moving)
 - [ ] A10.5 A hand-made moving ad passes backend/.venv/Scripts/python scripts/check-moving-ad.py <ad.mp4> before anyone sees it: H.264 1080 wide, 5 to 10 seconds, a first frame that is already an ad, moving within its first second and never stalling over a second before the end (moving-ad rulebook M2, M5), still for 1.5 seconds or more at the end, and the QR code read and still for over 3 seconds. The answer quotes its line, or n/a for a still or a maker design (check-ad-designs measures those).
-  plan: docs/ads/chicken-munch-chanukah-moving.mp4: 1080x1920 h264, 8.0s, words 2.6s outside living (0, 720, 1080, 1505), QR still 3.4s, logo lettering 48px
+  plan: docs/ads/chicken-munch-chanukah-moving.mp4: 1080x1920 h264, 10.0s, words 2.5s outside living (0, 712, 1080, 1518), QR still 3.2s, logo lettering 56px
 - [ ] A10.6 A hand-made ad is committed as soon as it is sent: the ad, its page or script, its pictures, its sheets and this blueprint, by name, with node scripts/ad-blueprint.mjs --note <name> as a line of the commit message (its library score, and "sent as it is" under 5). The answer says so, or n/a for a maker design.
   plan: ...
 - [ ] A10.7 The last frame is planned before the moving ad is built: sketched (scripts/ad-layout-sketch.py, or the page's still at its end) and put beside the library with python scripts/ad-vs-library.py <sketch> <kind>[+<kind>] <sheet.jpg>. The idea has to be in the picture, not only in words over a photo. Before the full recording, a few test frames are drawn (node scripts/record-moving-ad.mjs <folder> <name> '' <t,t,t,7.9>) and the last one scored, so a hidden joke is found in seconds, not after a five-minute recording (Chicken Munch's drips, 17 Nov 2026). The answer names the sheet and 'Score: N'; under 5 the idea changes before anything moves (or 'Sent as it is: Tzvi, <date>').
@@ -195,7 +195,7 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
 - [ ] A10.9 Starts from the kit: node scripts/new-moving-ad.mjs <name> <business slug> writes docs/ads/gen/<name>/ with the business's name, logo, link and QR, the timing helpers and window.render(t); the ad adds only its idea. The answer says so.
   plan: started from the kit (new-moving-ad.mjs), K.footIn for the foot.
 - [ ] A10.10 Real things move as real footage: steam, a pour, bubbles, a bite or the product turning is a generated clip of their own product (docs/ads/gen/<name>/clip.py, its price read through the API first), played frame by frame under the words by the kit's clip layer; code draws the words, the logo and the QR. The answer names the clip, or n/a: why code looks as real.
-  plan: n/a: no real footage; the Maccabees are drawn poses (gen.py, cut.py) and their box is their own photo.
+  plan: c1 to c5 are image-to-video clips of the five 3D shots (clip3d.py), played frame by frame from c1/ to c5/; their box was rebuilt in 3D from box-yellow.webp and checked beside it (docs/ads/chicken-munch-chanukah-box-vs-real.jpg).
 - [ ] A10.11 The idea is named from the moving-ad rulebook's table (build, morph, tap or swap, grow or stack, split and re-form, drop, chain, swap surroundings, reveal) with a library 5 that does it, and why it fits this offer: flavours or varieties are never shown as sizes and sizes never as a tap. One idea per ad.
   plan: chain (search, choose, eat), Tzvi's idea, after library 5 d09 (a drawn figure acting on real food).
 - [ ] A10.12 Before anything is built, one sentence says what moves in depth or what physically causes each beat (a pulse swings the ring, the pour falls through the word); tiles sliding in just to arrive is a 3 (the MyIsraelRental first cut, 17 Nov 2026). Everything moves for a reason the viewer can see (a drop, a cut, a tap, a pour), and the product fills half the screen's width or more through the action, centred and sharp.
@@ -207,4 +207,4 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
 - [ ] A10.15 Someone does something to the product: a hand, a person or a small drawn character on the real photo acts (taps, lifts, sneaks one out, climbs in), never a generated customer. Name the actor and what it does, with the library ad it follows (d09, t02), or n/a: why nobody acting is stronger.
   plan: the Maccabee searches, holds up the jug, throws it, and eats with his friends (drawn figures, never a generated customer), after d09.
 - [ ] A10.16 Several shots for a product made, cooked or used in steps: two to four shots, each its own picture of the same product, cut on a beat (d01, n04). A cut that joins two round things is lined up with scripts/match-shots.py, its transform used at the cut. List the shots, or n/a: the idea is one continuous action in one picture (a pour, a build, a morph).
-  plan: two shots: the search in the temple, then the three of them eating round the box, cut on the throw at 4.0 s.
+  plan: five shots: searching the jars, the jug glowing, thinking beside the box on the table, tossing the jug, the three friends eating round the box.

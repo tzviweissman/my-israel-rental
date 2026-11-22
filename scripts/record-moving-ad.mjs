@@ -14,7 +14,8 @@ const q = process.argv[4] || '';
 const only = process.argv[5];
 const name = process.argv[3];
 // RECORD_FPS=15 halves a recording for test-only ads (test-moving-ad-checks.mjs); ads that go out are always 30
-const FPS = Number(process.env.RECORD_FPS) || 30, LEN = 8;
+// RECORD_LEN: a story in several shots may run to 10 s (M11, check-moving-ad allows 5 to 10); 8 by default
+const FPS = Number(process.env.RECORD_FPS) || 30, LEN = Math.min(10, Number(process.env.RECORD_LEN) || 8);
 // Plan first, then build (Tzvi 17 Nov 2026): the MyIsraelRental ad's first cut was drawn before its blueprint's
 // stages 1 to 4 were answered and did not match the plan. A folder named _something is a kit test, not an ad.
 const AD = path.basename(HERE);
