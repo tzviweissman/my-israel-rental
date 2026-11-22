@@ -1,0 +1,6 @@
+{"shape": "square", "ground": "#00B140",
+ "boxes": [{"what": "friend one sitting biting chicken", "x": 0.04, "y": 0.04, "w": 0.43, "h": 0.43, "colour": "#c8a46a"},
+           {"what": "friend one sitting chewing", "x": 0.53, "y": 0.04, "w": 0.43, "h": 0.43, "colour": "#c8a46a"},
+           {"what": "friend two sitting biting chicken", "x": 0.04, "y": 0.53, "w": 0.43, "h": 0.43, "colour": "#c8a46a"},
+           {"what": "friend two sitting chewing", "x": 0.53, "y": 0.53, "w": 0.43, "h": 0.43, "colour": "#c8a46a"}],
+ "keep_empty": []}

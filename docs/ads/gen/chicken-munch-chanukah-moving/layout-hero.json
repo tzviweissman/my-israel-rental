@@ -1,0 +1,11 @@
+{"shape": "square", "ground": "#00B140",
+ "boxes": [{"what": "maccabee tipping a tall clay jar to look inside", "x": 0.03, "y": 0.03, "w": 0.29, "h": 0.29, "colour": "#c8a46a"},
+           {"what": "maccabee holding a small oil jug up high", "x": 0.355, "y": 0.03, "w": 0.29, "h": 0.29, "colour": "#c8a46a"},
+           {"what": "maccabee hand on chin thinking", "x": 0.68, "y": 0.03, "w": 0.29, "h": 0.29, "colour": "#c8a46a"},
+           {"what": "maccabee throwing jug back over his shoulder", "x": 0.03, "y": 0.355, "w": 0.29, "h": 0.29, "colour": "#c8a46a"},
+           {"what": "maccabee sitting biting chicken", "x": 0.355, "y": 0.355, "w": 0.29, "h": 0.29, "colour": "#c8a46a"},
+           {"what": "maccabee sitting chewing happy", "x": 0.68, "y": 0.355, "w": 0.29, "h": 0.29, "colour": "#c8a46a"},
+           {"what": "tall clay jar", "x": 0.06, "y": 0.69, "w": 0.22, "h": 0.28, "colour": "#a0663a"},
+           {"what": "tall clay jar", "x": 0.39, "y": 0.69, "w": 0.22, "h": 0.28, "colour": "#a0663a"},
+           {"what": "small clay oil jug", "x": 0.75, "y": 0.78, "w": 0.15, "h": 0.17, "colour": "#a0663a"}],
+ "keep_empty": []}

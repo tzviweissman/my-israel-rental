@@ -1,0 +1,117 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- Chicken Munch Chanukah moving ad (docs/ads/blueprints/chicken-munch-chanukah-moving.md), from the kit (A10.9).
+     Tzvi's idea, 22 Nov 2026: the Maccabee looks for the oil and finds it glowing, turns and sees the Munch box,
+     thinks hard, throws the oil behind him, and then he and his friends eat the chicken. Drawn Maccabees
+     (gen.py, cut.py into sprites/), their real box (box.png from assets/box-yellow.webp, on its own yellow).
+     Words wait (M6): one line per beat, then the headline, logo, foot and QR from 4.2 s. They munch to the end (M8).
+     Record: node scripts/record-moving-ad.mjs docs/ads/gen/chicken-munch-chanukah-moving chicken-munch-chanukah-moving -->
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@500;700&display=block" rel="stylesheet">
+<style>
+html,body{margin:0;background:#111}
+/* the ground is their box photo's own yellow round the box, so the photo melts into it (BRAND.md, A27.1) */
+#ad{position:relative;width:1080px;height:1920px;overflow:hidden;background:#FBE32D;font-family:Manrope,sans-serif;color:#0E0D0C}
+.s{position:absolute;transform-origin:50% 100%}
+#temple,#menorah{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#line{position:absolute;left:60px;right:60px;top:600px;font:110px/1 Anton,sans-serif;text-transform:uppercase;color:#0E0D0C}
+#glow{position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(#fffbe0 0,#fff1a0cc 22%,#ffd84a66 45%,#ffd84a00 70%);pointer-events:none}
+#shot2{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#box{position:absolute;left:243px;top:760px;width:594px}
+.h{position:absolute;left:60px;font:118px/1 Anton,sans-serif;text-transform:uppercase;color:#0E0D0C}
+#h1{top:400px}#h2{top:524px}
+#small{position:absolute;left:62px;top:660px;font-weight:700;font-size:40px}
+#logo{position:absolute;left:375px;top:236px;width:330px;height:auto;background:#0E0D0C;border-radius:22px;padding:14px 22px;box-sizing:border-box}
+#foot{position:absolute;left:48px;top:1540px;width:780px}
+#foot .n{font-weight:700;font-size:40px}
+#foot .s{position:static;font-weight:500;font-size:30px;margin-top:14px}
+#foot .u{font-weight:700;font-size:30px;margin-top:14px}
+#qr{position:absolute;left:868px;top:1520px;width:170px;height:170px;background:#fff;border-radius:14px;padding:8px;box-sizing:border-box}
+#qr img{width:100%;height:100%}
+</style></head><body>
+<div id="ad">
+  <!-- the temple: columns drawn tone on tone, the Chanukah setting is the background itself -->
+  <svg id="temple" viewBox="0 0 1080 1920" fill="none" stroke="#C9A20A" stroke-width="6" opacity=".55">
+    <path d="M0 520 H1080 M0 540 H1080"/>
+    <g id="cols"></g>
+    <path d="M0 1500 H1080" stroke-width="8"/>
+  </svg>
+  <svg id="menorah" viewBox="0 0 1080 1920" fill="none" stroke="#C9A20A" stroke-width="7" stroke-linecap="round"></svg>
+  <div id="glow"></div>
+  <img id="jar1" class="s" src="sprites/jar1.png" alt="">
+  <img id="jar2" class="s" src="sprites/jar2.png" alt="">
+  <img id="hero" class="s" src="sprites/search.png" alt="">
+  <img id="jug" class="s" src="sprites/jug.png" alt="">
+  <img id="box1" class="s" src="box.png" alt="">
+  <div id="line"></div>
+  <div id="shot2">
+    <img id="box" src="box.png" alt="">
+    <img id="eatA" class="s" src="sprites/bite.png" alt="">
+    <img id="eatB" class="s" src="sprites/f1-bite.png" alt="">
+    <img id="eatC" class="s" src="sprites/f2-bite.png" alt="">
+  </div>
+  <div id="h1" class="h">Not all decisions</div><div id="h2" class="h">need to be hard.</div>
+  <div id="small">Get Chicken Munch for your next Chanukah party.</div>
+</div>
+<script src="../_kit/kit.js"></script>
+<script>
+window.AD = {"name":"Chicken Munch","lines":["Kosher, hechsher of Rav Akiva Dershowitz · Jerusalem"],"link":"myisraelrental.com/p/chicken-munch","logo":"logo-mark.png"};
+K.foot();
+const $ = (id) => document.getElementById(id);
+// columns along the temple
+$('cols').innerHTML = [90, 330, 750, 990].map((x) => `<path d="M${x - 34} 540 H${x + 34} M${x - 26} 560 V1500 M${x + 26} 560 V1500 M${x} 570 V1490"/>`).join('');
+// at the end a small lit menorah stands at the left, beside the box: eight flames and the shamash
+const M = { x: 130, y: 1040, d: 24 };
+$('menorah').innerHTML = `<path d="M${M.x} ${M.y - 120} V${M.y + 30} M${M.x - 60} ${M.y + 30} H${M.x + 60}"/>`
+  + [1, 2, 3, 4].map((i) => `<path d="M${M.x - i * M.d} ${M.y - 100} V${M.y - 60} Q${M.x - i * M.d} ${M.y - 10} ${M.x} ${M.y - 10} Q${M.x + i * M.d} ${M.y - 10} ${M.x + i * M.d} ${M.y - 60} V${M.y - 100}"/>`).join('')
+  + [-4, -3, -2, -1, 1, 2, 3, 4, 0].map((i) => `<path class="fl" d="M${M.x + i * M.d} ${M.y - (i ? 106 : 128)} q-8 -18 0 -32 q8 14 0 32" fill="#E8590C" stroke="none"/>`).join('');
+const place = (id, x, y, w, extra = '') => { const e = $(id); e.style.left = `${x}px`; e.style.top = `${y}px`; e.style.width = `${w}px`; e.style.transform = extra; };
+const swap = (id, src) => { const e = $(id); if (!e.src.endsWith(src)) e.src = src; };
+const slam = (el, t, at) => { const k = K.at(t, at, 0.22); el.style.opacity = k > 0 ? 1 : 0; el.style.transform = `scale(${1.4 - 0.4 * K.outCubic(k)})`; el.style.transformOrigin = 'left center'; };
+const CUT = 4.0;
+window.LIVING = [0, 720, 1080, 1505];   // they munch to the end (M8); words, logo, foot and QR stay outside
+window.render = async (t) => {
+  const one = t < CUT;
+  ['jar1', 'jar2', 'hero', 'box1', 'line'].forEach((id) => { $(id).style.opacity = one ? 1 : 0; });
+  $('temple').style.opacity = one ? 1 : 0.6;   // the temple stays behind the end frame too: Chanukah is the place
+  $('temple').style.clipPath = one ? 'none' : 'inset(730px 0 0 0)';   // but never through the headline
+  $('shot2').style.opacity = one ? 0 : 1;
+  $('menorah').style.opacity = one ? 0 : 0.9;
+  // shot one, big: the jars at the left, the hero searching, their box waiting at the right (M4)
+  place('jar1', -30, 1000, 330);
+  place('jar2', 170, 1060, 290);
+  place('box1', 560, 860, 560);
+  const bob = Math.sin(t * 9) * 8;
+  let pose = 'search', hx = 230, w = 400, flip = 1, line = 'Looking for the oil...';
+  if (t >= 1.4) { pose = 'jug-up'; hx = 250; w = 330; line = 'Found it!'; }
+  if (t >= 2.3) { pose = 'think'; hx = 290; w = 300; flip = -1; line = 'Hard decision.'; }
+  if (t >= 3.3) { pose = 'throw'; hx = 230; w = 440; flip = 1; line = ''; }
+  swap('hero', `sprites/${pose}.png`);
+  place('hero', hx, 900 + (pose === 'search' ? bob : 0), w, `scaleX(${flip})`);
+  // the oil jug: by his hand while he thinks, glowing; thrown far behind him (the jug-up pose holds its own)
+  let jx = 240, jy = 1180, jr = 0, jo = 0;
+  if (t >= 2.3 && t < 3.3) jo = 1;
+  if (t >= 3.3 && t < CUT) { const f = K.at(t, 3.35, 0.6); jx = 280 - f * 560; jy = 1060 - Math.sin(Math.PI * f) * 560 + f * 140; jr = -f * 540; jo = 1 - K.at(t, 3.8, 0.2); }
+  place('jug', jx, jy, 120, `rotate(${jr}deg)`);
+  $('jug').style.opacity = one ? jo : 0;
+  // the glow when he finds it (the jug-up pose holds the jug at its top left), and softer while he thinks
+  const g = t >= 1.4 && t < 2.3 ? 0.8 + 0.2 * Math.sin(t * 14) : t >= 2.3 && t < 3.3 ? 0.5 : 0;
+  Object.assign($('glow').style, { opacity: one ? g : 0, left: `${(t < 2.3 ? 300 : 300) - 260}px`, top: `${(t < 2.3 ? 930 : 1240) - 260}px`, transform: `scale(${0.9 + 0.1 * Math.sin(t * 10)})` });
+  const ln = $('line');
+  ln.textContent = line;
+  if (line) slam(ln, t, { 'Looking for the oil...': 0.1, 'Found it!': 1.4, 'Hard decision.': 2.3 }[line]); else ln.style.opacity = 0;
+  // shot two: the box and the three of them eating round it, chewing in turns
+  const k2 = K.outCubic(K.at(t, CUT, 0.35));
+  $('box').style.transform = `scale(${1.08 - 0.08 * k2})`;
+  const chew = (id, who, off) => swap(id, `sprites/${who}-${Math.floor((t - CUT) * 2.6 + off) % 2 ? 'chew' : 'bite'}.png`.replace('/hero-', '/'));
+  chew('eatA', 'hero', 0); chew('eatB', 'f1', 1); chew('eatC', 'f2', 0);
+  place('eatA', 10, 1105, 300, `translateY(${(1 - k2) * 60}px)`);
+  place('eatB', 790, 1135, 280, `translateY(${(1 - k2) * 60}px)`);
+  place('eatC', 820, 735, 230, `translateY(${(1 - k2) * 60}px)`);
+  document.querySelectorAll('#menorah .fl').forEach((f, i) => { f.style.opacity = 0.7 + 0.3 * Math.sin(t * 11 + i * 1.7); });
+  // words wait: the headline and small line, then the logo, foot and QR
+  slam($('h1'), t, 4.5); slam($('h2'), t, 4.8);
+  $('small').style.opacity = K.at(t, 5.1, 0.3);
+  $('logo').style.opacity = K.at(t, 4.2, 0.4);
+  K.footIn(t, 4.2);
+};
+</script></body></html>

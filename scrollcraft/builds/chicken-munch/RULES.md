@@ -225,3 +225,5 @@ R3v.14 pass: Munch boxes from $69, Delivery in central Jerusalem, Hechsher of Ra
 <!-- Reviewed 2026-11-13: order form checked against the live listing (check-order-data, check-form-fields). -->
 <!-- 13 Nov 2026 (shop rollout, Tzvi: "Yes, all of them"): order.html, site.js and site.css only. Phone bar on the order page shows only once something is in the basket ("2 items, $209, View basket"); Add turns into - n + on the item; empty basket is one line and the steps appear with the first item; buttons and chips 44px. Prices and currencies unchanged (boxes in dollars, pans in shekels with the dollar price beside). Menu page and other pages unchanged. The rules above were read again against the changed page: nothing else changed. -->
 <!-- 14 Nov 2026: the order total is marked data-order-total, so the order check compares what the customer sees with what the dashboard saves. Nothing else changed. -->
+
+Re-checked 2026-11-22: RULES.md and site.js last changed together in commit d6c322ad (15 Nov); the 7-second gap was only the order this copy checked them out. Only BRAND.md is new (22 Nov, for the Chanukah ad).

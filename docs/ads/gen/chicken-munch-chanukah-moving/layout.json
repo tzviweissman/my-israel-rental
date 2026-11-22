@@ -1,0 +1,9 @@
+{"shape": "story", "ground": "#FFD34E",
+ "boxes": [{"what": "drawn temple columns and lit menorah, faint", "x": 0.04, "y": 0.33, "w": 0.3, "h": 0.2, "colour": "#e8b52a"},
+           {"what": "their real Munch box", "x": 0.14, "y": 0.4, "w": 0.72, "h": 0.33, "colour": "#b98a4e"},
+           {"what": "maccabee eating, left of box", "x": 0.0, "y": 0.52, "w": 0.24, "h": 0.22, "colour": "#c8a46a"},
+           {"what": "friend eating, right of box", "x": 0.76, "y": 0.52, "w": 0.24, "h": 0.22, "colour": "#c8a46a"},
+           {"what": "friend eating, front", "x": 0.38, "y": 0.66, "w": 0.24, "h": 0.12, "colour": "#c8a46a"}],
+ "keep_empty": [{"what": "logo", "x": 0.25, "y": 0.123, "w": 0.5, "h": 0.06},
+                {"what": "headline", "x": 0.05, "y": 0.2, "w": 0.9, "h": 0.12},
+                {"what": "foot", "x": 0.04, "y": 0.8, "w": 0.92, "h": 0.09}]}
