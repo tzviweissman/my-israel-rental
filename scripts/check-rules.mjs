@@ -163,14 +163,18 @@ for (const w of contradicted(dir, fs.readFileSync(rulesFile, 'utf8'))) problems.
 const name = path.basename(dir);
 console.log(`${name}: ${items.length} rules in the checklist`);
 console.log(`  pass ${counts.pass}   n/a ${counts.na}   fix ${counts.fix}   todo ${counts.todo}   missing ${counts.missing}   malformed ${counts.bad}`);
+// an unknown id (a typo, a removed rule) is printed first, so it is never lost in a long list (Tzvi, 22 Nov 2026)
+const unknown = problems.filter((p) => p.includes('not in docs/rules-checklist.md'));
+if (unknown.length) { console.log(`  UNKNOWN ids in RULES.md (${unknown.length}):`); for (const p of unknown) console.log('  FAIL ' + p); }
+for (const p of unknown) problems.splice(problems.indexOf(p), 1);
 if (skipped.length) console.log(`  not required, added after ${name} was made: ${skipped.join(' ')}`);
-if (problems.length) {
+if (problems.length || unknown.length) {
   console.log('');
   for (const [g, ids] of byGroup) console.log(`  ${g}: ${ids.length} open (${ids.slice(0, 12).join(' ')}${ids.length > 12 ? ' ...' : ''})`);
   console.log('');
   for (const p of problems.slice(0, 60)) console.log('  FAIL ' + p);
   if (problems.length > 60) console.log(`  ... and ${problems.length - 60} more`);
-  console.error(`\n${problems.length} problem(s). Do not show or publish ${name} until check-rules passes (docs/rules-checklist.md).`);
+  console.error(`\n${problems.length + unknown.length} problem(s). Do not show or publish ${name} until check-rules passes (docs/rules-checklist.md).`);
   process.exit(1);
 }
 console.log(`rules: every one of ${items.length - skipped.length} rules answered for ${name}`);

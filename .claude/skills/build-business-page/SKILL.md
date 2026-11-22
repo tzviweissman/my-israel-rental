@@ -134,7 +134,10 @@ Prices are read with `get_cost` at the time, never from memory.
    differs. A picture still to be made is a plain grey picture of its final shape. A photo of the wrong shape
    sits whole, with grey where it will be extended. Show each as a laptop frame beside a phone frame (§3aa).
    Run `check-says-offer.mjs`, `check-five.mjs` and `readable.mjs` on each; fix or drop one that fails. They
-   are part B of the board.
+   are part B of the board. On the next new site (Tzvi, 22 Nov 2026), one of the three tries the split
+   opening and one the panel wipe (§3al.7), both free code, set beside Ruben Stom's frames
+   (`docs/inspo/videos-ruben-stom-2026-11-22/Op5kncXOL-A-split-intro-halves-opening.png`,
+   `MJojygFwGjA-panel-rises-wipes-over-image-labels-up.png`), to see whether they stop our openings looking alike.
    **Gate, yes 1:** CONCEPT.md has
    `- first screens: gen/board/first-a.html gen/board/first-b.html gen/board/first-c.html; Tzvi: "<his pick>"`
    (§3aj.2). Then plan the Opening stage: `node scripts/blueprint.mjs --check <build> 4` passes.
