@@ -81,7 +81,7 @@ export function checkConcept(dir) {
   // all three sources on every build (Tzvi, 22 Oct 2026: "have you been using mobbin and 21st for your builds"; 12 of 17 sites had no Mobbin search)
   const src = s + (fs.existsSync(path.join(dir, 'REFERENCES.md')) ? fs.readFileSync(path.join(dir, 'REFERENCES.md'), 'utf8') : '');   // REFERENCES.md is the one home of the sources
   if (!/mobbin\.com\//i.test(src)) problems.push('Sources: no Mobbin search named with a mobbin.com link (search Mobbin for this category on every build, rule 3c.1)');
-  if (!/21st[^\n]{0,40}("[^"]+"|search)/i.test(src)) problems.push('Sources: no 21st search named (search 21st fresh for this business on every build, name the component, rule 3c.1)');
+  if (!/21st[^\n]{0,40}("[^"]+"|search)/i.test(src)) problems.push('Sources: no 21st search named (the one study a build includes 21st; name the component, rule 3g.17)');
   // the wow comes from research (Tzvi, 23 Oct 2026: "for the wow use mobbin and our inspo and 21st for inspiration")
   const wow = part('Wow gate');
   if (!/mobbin\.com\//i.test(wow) || !/(docs\/inspo\/|inspo:|inspo\s)/i.test(wow)) problems.push('Wow gate: name where the wow came from, a Mobbin link and an Inspo or docs/inspo reference (and the 21st search when it answers)');

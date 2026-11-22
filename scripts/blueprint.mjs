@@ -39,7 +39,7 @@ const ID = /^(R[0-9][0-9a-z]*\.[0-9]+)\s*\|\s*(.*)$/;
 // build order: what is decided first comes first. The checklist's own sections, re-ordered.
 // 22 Nov 2026: the stages follow the phases of SKILL.md. Paid pictures (4) come after the opening and the page plan.
 const ORDER = ['1', '6', '5', '2', '3', '8c', '4', '7', '8', '8b', '9'];
-const STAGE_NAMES = { '1': 'Facts and words', '4': 'Photos and media', '2': 'Opening', '3': 'Sections', '8c': 'Site structure (menu, footer, facts, layouts)', '5': 'Prices and savings', '6': 'Order and booking flow', '7': 'Motion', '8': 'Phone', '8b': 'Order details and report', '9': 'Finish' };
+const STAGE_NAMES = { '1': 'Facts and words', '4': 'Photos and media', '2': 'Opening', '3': 'Sections', '8c': 'Site structure (menu, footer, facts, layouts)', '5': 'Prices and savings', '6': 'Order and booking flow', '7': 'Motion', '8': 'Phone', '8b': 'Build habits and report', '9': 'Finish' };
 
 const args = process.argv.slice(2);
 const mode = (['--check', '--done', '--rules', '--update', '--has'].find((m) => args.includes(m)) || '--write').slice(2);

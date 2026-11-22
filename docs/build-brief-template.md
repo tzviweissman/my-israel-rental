@@ -1,5 +1,8 @@
 # Builder brief (copy for every site build or rework)
 
+**Retired 22 Nov 2026.** Builds now follow the phases of `.claude/skills/build-business-page/SKILL.md` and their
+`BLUEPRINT.md` (page rules 0b.0). Kept as history; do not start a build from it.
+
 The one brief every builder gets (Tzvi, 24 Oct 2026: "make future builds better, faster and have less errors"). Fill in the brackets, delete nothing else. Each line is a mistake that already reached Tzvi once.
 
 ---

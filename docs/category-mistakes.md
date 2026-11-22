@@ -6,7 +6,8 @@ one default for another, so the list names the actual defaults.
 
 Read the part for the business's kind (the `site-category` of rules 3t) before writing any idea. CONCEPT.md gets
 `- avoids: <kind>: <how this site avoids each>`, and check-concept refuses it without that line. A new kind gets its
-own part here the first time it is built.
+own part here the first time it is built. The parts the rules ask of every site stay (footer 3v.1, gallery place 3m.1,
+product cards 3ag.2, the category's ground 3t); the mistake is the same order and the default form of each.
 
 The first part is for every kind. It comes from our own 21 sites, studied on 17 Nov 2026
 (`docs/inspo/videos-2026-11-17/README.md`).

@@ -2230,17 +2230,6 @@
    "status": "planned"
   },
   {
-   "id": "R0b.13",
-   "rule": "Order saves with tracking link before WhatsApp; reaches owner complete",
-   "how": [
-    "KIT"
-   ],
-   "built_by": "K4 does POST then tracking link in the message",
-   "confirmed_by": "LOOK -> confirm only (test order)",
-   "gremier_retry": false,
-   "status": "planned"
-  },
-  {
    "id": "R0b.14",
    "rule": "Form sends the listing's BOOKING fields; ASK FIRST lines open the owner questions",
    "how": [
@@ -2363,17 +2352,6 @@
    "built_by": "K10 always appends None/Other; out-of-stock shows next item",
    "confirmed_by": "LOOK -> confirm only",
    "gremier_retry": false,
-   "status": "planned"
-  },
-  {
-   "id": "R3s.25",
-   "rule": "Form sends nothing when empty; filled sends WhatsApp with total",
-   "how": [
-    "KIT"
-   ],
-   "built_by": "K4",
-   "confirmed_by": "check-site FLOW -> confirm only",
-   "gremier_retry": true,
    "status": "planned"
   },
   {
