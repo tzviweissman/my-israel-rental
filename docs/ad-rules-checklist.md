@@ -34,6 +34,7 @@ A9e.3 | The idea, by name: the product stands in for a familiar object, or sits 
 A9f.1 | The angle, by name: a real moment and why ours wins there, or the exact reader, or an honest trade-off, or the want behind the feature, or a moment in the day, or a real review. | 9f | decide
 A9g.9 | Is this a different-looking ad from the last ones for this business, and not the same design with another headline? | 7, 9b, 9f.6, 9g.9 | decide
 A9g.10 | The gallery of one business looks varied at a glance: its designs do not share one colour or one layout, and each starts on its own product where there are several. | 9g, Tzvi 5 Nov | auto:variety
+A27.1 | The site's brand: for a business with a custom site, name its scrollcraft/builds/<folder>/BRAND.md and say which of its colours and fonts this ad uses and which of its bans it keeps; or "n/a: no custom site". | 27, page rules 3ak.3 | decide since:2026-11-22
 
 ## 2. The words
 

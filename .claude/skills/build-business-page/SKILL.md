@@ -26,25 +26,26 @@ memory of it. Every rule there is a defect that once reached Tzvi.
 
 ## Tools
 
-Check what is connected first. Skills: `design-kit:scroll-craft` for any page
-where scrolling drives the story, `design-kit:design-pipeline` if unsure which,
-others as §0 lists. Before designing: Inspo, Mobbin, 21st (searched fresh on
-every build, §3g.17) and our own `docs/inspo/`. Generation: Higgsfield through
-the API, `get_cost` first; standing OK to generate what looks significantly
-better than code, spend in the report (§0, §1). Browser pane for previews,
-always with `?as=owner`, never a sign-in.
+Check what is connected first. The site and its opening are built with the
+starter (`scrollcraft/starter`); `design-kit:scroll-craft` is read for ideas
+and used only for a scroll scene the kit does not have. This file is the
+router: no other skill runs a whole build (§0). Before designing: Inspo,
+Mobbin, 21st, Pinterest and our own `docs/inspo/`, one study a build (§3g.17).
+Generation: Higgsfield through the API only, `get_cost` first; standing OK to
+generate what looks significantly better than code, spend in the report (§0,
+§1). Browser pane for previews, always with `?as=owner`, never a sign-in.
 
 ## Models (Tzvi, 15 Nov 2026)
 
-- **Ideas on Fable.** Steps 5 to 7's ideas (opening ideas, the "Own:" idea,
+- **Ideas on Fable.** Phase 3's ideas (opening ideas, the "Own:" idea,
   film stories, headlines) are written by one subagent with `model: "fable"`,
   given the record, the photo sheet, `REFERENCES.md` and the digest's §3g, §3h,
   §3n, §3t, §3ag and §3ah, with REFERENCES.md's `## Why they are a 5`, plus the section rules a plan most often breaks (3b.3 one
   solid button a screen, 3z.1 a card over an edge, 3u.3 the price a piece,
   check-fits' one screen a section). It writes them; you check them with the step's scripts as usual.
   This is the one exception to "subagents run on Sonnet".
-- **Building on this session's model** (Opus, medium effort). Searches and the
-  step 11 review stay on Sonnet.
+- **Building on this session's model** (Opus, medium effort). Searches, and
+  phase 9's reviewer and judges, stay on Sonnet.
 - **Never switch the model mid-chat.** It pays for the whole chat again and a
   smaller model loses the bigger one's thinking. A new kind of job gets a
   handoff and a fresh chat.
@@ -64,122 +65,163 @@ your reply, either "every check passes" or the problems it listed.
 
 ## The steps
 
-1. **Fresh copy, then fetch the record.** Work in a new worktree of origin/main
-   (§0b.1a) and turn its checks on: `git -C ../mir-<slug> config core.hooksPath
-   .githooks`. `scrollcraft/starter/fetch_business.py`, real slug from the live
-   record, every photo on one numbered sheet. Read everything they already told
-   us; never re-ask it (§1, §0b.1). Its last lines (`record_facts.py`) say what
-   the order form must send and what to ask first (§0b.1b).
-2. **Look at every photo.** Duplicates, screenshots, small sizes, kinds (§3o.6,
-   §3o.7). A big photo of the wrong shape is extended with
-   `scrollcraft/starter/extend_photo.py`, never zoomed or cropped (§0b.2b, rules 3c.12).
-   Mark each photo shop-ready, re-light, or styled shot (§3ag.1): a photo that
-   cannot reach a 5 even re-lit (flat angle, mixed ground, casual tray) becomes
-   a styled shot of the same bake, checked against hers; the opening and the
-   showpiece always are, unless hers already look like the references. Plan
-   it and its credits now, never after the build (Cakes by Tova stopped at
-   3.5 of 5 on her photos). Re-light (`relight_photo.py`), then extend. The first screen must be at least 70%
-   picture (3h.1, `check-site` OPENING), so plan now which opening photos get
-   a plain side for the words (§3ag.4); a box beside the words fails (Cakes by
-   Tova, 17 and 19 Nov 2026: the opening was built twice, then a third time).
-3. **Ask the owner, once, then build while waiting.** Only about their
-   business: missing facts, more photos, guarantee (§3j.1), FAQ with 5 to 8
-   example questions (§3b.4), per-item choices for similar products (§3l.1),
-   which number takes WhatsApp (§3o.4), prices against their menu (§0b.3).
-   List every live-site write the build needs in the same message. Start
-   building the moment it goes out; no placeholders on the page (§0b.2a).
-   Open FEEDBACK.md now: every correction Tzvi gives, his exact words, open
-   until a picture or clip proves it fixed (§3aj.6).
-4. **Blueprint.** `node scripts/blueprint.mjs <build>` writes BLUEPRINT.md;
-   answer "This site has" (`--has film=yes|no <build>`: a "no" takes the 17
-   video-only rules out, unread, and the files are checked for video later);
-   then plan each stage (`--check <build> <stage>`) before building it (§0b).
-   Every rule left in the stages is read and planned; none is skipped.
-5. **Sources, then ideas.** `REFERENCES.md` and `node scripts/check-references.mjs <build>`.
-   Before any idea, the two best sites of the category (Pinterest, Awwwards or
-   Inspo) go into `## Why they are a 5`: five lines or more, each what they do
-   and how this site will do it (§3ah.7). The site is planned to a 5 here, not
-   found short of one at step 11. Read `docs/category-mistakes.md` for the
-   kind (§3aj.3). Each picture an idea cites gets `Take:` and `Skip:` in
-   REFERENCES.md (§3aj.1). Then `IDEAS.md` (two saved pictures per idea, a kind no other site used) and
-   `node scripts/check-ideas.mjs <build>`. Both pass before any idea is shown
-   or any credit spent; hooks enforce it (§0b.4).
-6. **Concept and look.** CONCEPT.md: category (§3t), style sheet (§3g.1),
-   three or more opening ideas with one "Own:" idea, the wow-gate answers
-   (§3n), the effect budget (§3f.2) and `## Effects` with sources and the
-   `- touch:` line (§3p.5), the `- treatments:` line (three decorations at most,
-   §3ai), and the `- showpiece:` line: one thing the visitor
-   does, adapted from a top site of the category (§3ah.5). Plan the opening as
-   one headline naming every offer, one line, one button (§3ah.1), cards led by
-   their photos with choices in the sheet (§3ah.2), a shop that opens on its
-   products (§3ah.3), and every priced listing item in the catalogue (§3ah.6,
-   `check-listing-prices`). Write the look into `scrollcraft/fingerprints.json`;
-   `node scripts/check-fingerprints.mjs <build>` and `check-concept.mjs` pass
-   (§3p, §3q). Choose it yourself and say why in one line, with one
-   exception: the first screen is built three times as plain HTML, one per
-   reference, only the layout different, shown side by side, and Tzvi picks
-   before the rest is built or any picture for it is paid for (§3aj.2). Add the
-   `- avoids:` line (§3aj.3).
-7. **Film, if there is one.** Sketch sheet first and Tzvi picks a row (§0b.5b);
-   a physically possible story, every object's source and end listed (rules 3h.18);
-   confirm the motion as numbered steps; plan the phone frame; three concept
-   stills; the whole film as one sheet of stills, his yes before any clip
-   (3aa.35); `brightness.py` on every still and clip; check-clip on every clip
-   (§3h, §3o.1, §1). Generate in the background while writing the page.
-   Before the sketch sheet, plan every film rule in BLUEPRINT.md
-   (`node scripts/blueprint.mjs --check <build> film`: rules 3aa and every film
-   line) and draw the sketches to them; a row that breaks one names the rule for
-   Tzvi. The film gate refuses paid clips until it passes.
-8. **Build from the starter** (`scrollcraft/starter`, §3p.1) as a website,
-   not a page: pages by kind, one menu bar, full footer, Shop with steps, basket
-   between pages, orders saved before WhatsApp (§3k, §3v). While building,
-   follow: facts and claims (§1), copy (§2), the first screen (§3g.13), the
-   category checklist (§3, §3b), design and persuasion (§3c, §3e, §3g, §3i,
-   §3s), honest deals (§3j), similar products (§3l), owner-filled places (§3m),
-   design and story (§4), build rules (§5). The day the form first sends,
-   `node scripts/check-order-data.mjs <form page>` (§0b.8a). Two habits
-   (§3al.9): before a risky change (a new layout, a scroll effect, anything
-   touching the order flow), write back in two or three lines what you
-   understood, then build; and build each section from its own reference
-   picture, the still version first and its motion second.
-9. **Whole page right with a still, then the film.** Build and check with a
-   still where the film goes, then put it in and check again; new motion tried
-   on `scrollcraft/starter/kit/test.html` first (§0b.6a).
-10. **Check it.** Render at the six sizes of §3p.6, both languages, reduced
-    motion, phones as phones (§6.1, §6.2). Run every check on every page:
-    `readable.mjs`, `clipped.mjs`, `cutoff.mjs`, `scroll-finish.mjs` for each
-    scroll-tied effect, `overlay-truth.mjs` for anything placed on a picture,
-    `cutout.py --check` for cut-outs (§6.3), and `check-fits`, `check-site`,
-    `check-motion`, `check-text-fits` (§3r, §3s). Fix and run again until a full pass is clean.
-11. **Beside the best of its kind, then someone else reviews it.** First put the home
-    page's screens.jpg beside two of the best sites of its category (Pinterest,
-    Awwwards or Inspo): `node scripts/compare-sheet.mjs <build> <pic 1> <pic 2>`,
-    then REFERENCES.md `## Compared` with each difference and what you changed
-    (`check-compared`; §3ag). Photos shot for a shop (`relight_photo.py`), big
-    product cards, two grounds, one headline size are §3ag's, and planned from
-    step 6, not found here. Then a Sonnet subagent that did not build it, against
-    `docs/page-review-checklist.md`; fix every FAIL, it looks again (§3r.2). Score
-    the wow gate (§3n). Then two Sonnet judges that did not build it each
-    score layout, light, colour, type, detail and motion from 1 to 5 beside
-    compare.jpg, one `Judge N:` line each in review.md; the median per area plus
-    Tzvi's calibration is the `Rating:`, 4 or more with no area under 3.5, or
-    fix and judge again (§3aj.4, `scripts/judges.mjs`). Each time Tzvi gives his
-    own verdict on a judged site, add it to `docs/judge-calibration.json`. Planned well at steps 5 and 6, this is a 5 the first time.
-12. **RULES.md.** Answer every line of `docs/rules-checklist.md` and pass
-    `node scripts/check-rules.mjs <build>` before anyone sees the site (§6).
-13. **Report.** Ends with "Not done yet" and "For your call", after a
-    shorter-version pass on every long line (§0b.10a). Videos for Tzvi at 1.5x
-    with an HTML link, recorded with `scripts/record.mjs` from the live page,
-    contact sheet looked at first (§3c.11). A video for the owner plays at
-    normal speed (`--speed 1`); send its `-whatsapp.mp4` copy.
-14. **Publish.** `node scripts/publish-page.mjs <folder> <slug> --check` lists
-    every problem; then publish (it re-records the preview clip). Afterwards
-    `check-showcase-previews.mjs` and `check-business-pages` on live (§0b.12).
-    Run publish-page in the background (`run_in_background`), never in the
-    foreground: re-recording the preview passes 10 minutes on long sites and the
-    run gets cut off (The Gift Boutique, 16 Nov 2026). Pushing to main runs
-    `check-push-rules` (.githooks/pre-push): push a new rule together with the
-    sites whose RULES.md answer it.
+Twelve phases, in this order (Tzvi, 22 Nov 2026: "the order is just as important as the rules themselves").
+The cheap things come first: words, sketches, grey-box HTML. A paid picture waits for his pick of the first
+screen. A paid clip waits for his yes to the film as stills. He says yes four times, each just before the next
+costly thing. Every phase ends at a gate: a script, or his quoted words, never the builder's own opinion.
+
+Rule text written before 22 Nov 2026 may name the old steps: step 2 is phase 1, step 5 is phase 2, step 6 is
+phases 3 to 5, step 7 is phases 5, 6 and 8, step 11 is phase 9.
+
+**The design board (§3aj.8).** One artifact a build, "Design board: <business>", made from
+`gen/board/index.html` and republished from that same file each time, so its link never changes. Put the link
+on CONCEPT.md's `- board:` line. Four parts, filled as the phases pass: A the references (phase 2), B three
+first screens (phase 4), C the grey-box page, the film sketch and each scroll-tied effect as start, midpoint
+and end pictures (phase 5, §3al.5), D the film as stills (phase 6). Tzvi answers in his own words, and they are copied to the line each gate names. A "no" or a change goes into
+FEEDBACK.md first. Before he sees a part, the free scripts for that part have passed.
+
+| Phase | Cost | Tzvi |
+|---|---|---|
+| 0 to 3 | free | none |
+| 4 | free | yes 1: the first screen |
+| 5 | free | yes 2: the page plan and the film sketch |
+| 6 | paid, small (pictures and stills) | yes 3: the film as stills |
+| 7 | free | none |
+| 8 | paid, the largest (clips) | none |
+| 9 | free | none |
+| 10 | free | yes 4: the finished site |
+| 11 | free | none |
+
+Prices are read with `get_cost` at the time, never from memory.
+
+0. **Set up and fetch (free).** A new worktree of origin/main (§0b.1a), then `node scripts/setup-worktree.mjs`
+   inside it. `scrollcraft/starter/fetch_business.py`: the real slug from the live record, every photo on one
+   numbered sheet. Read everything they already told us; never re-ask it (§1, §0b.1). Read the last lines
+   (`record_facts.py`): what the order form must send and what to ask first (§0b.1b). Create FEEDBACK.md with
+   `- none yet` (§3aj.6). `node scripts/blueprint.mjs <build>`, then `--has film=yes|no <build>`.
+   **Gate:** the record, the photo sheet, FEEDBACK.md and BLUEPRINT.md exist.
+1. **Look, ask once, start the working parts (free).** Look at every photo: duplicates, screenshots, small
+   sizes, kinds (§3o.6, §3o.7). Mark each one shop-ready, re-light or styled shot (§3ag.1), and note any big
+   photo of the wrong shape (§0b.2b). These are decisions only. Nothing is paid for yet. Send the owner one
+   message, only about their business: missing facts, more photos, guarantee (§3j.1), FAQ with 5 to 8 example
+   questions (§3b.4), per-item choices for similar products (§3l.1), which number takes WhatsApp (§3o.4),
+   prices against their menu (§0b.3), and every live-site write the build needs. Then build what never changes
+   with the design: load the products, the order form, the basket, and run
+   `node scripts/check-order-data.mjs <form page>` the day the form first sends (§0b.2a, §0b.8a). Plan
+   blueprint stages 1 to 3 (facts and words, order flow, prices).
+   **Gate:** `message-to-owner.md` is sent, OWNER-QUESTIONS.md holds every ASK FIRST line, and
+   `node scripts/blueprint.mjs --check <build> 3` passes.
+2. **Study the kind of business (free).** Name the category (§3t). Read `docs/category-mistakes.md` first, the
+   "every kind" part and the business's own (§3aj.3). Then `reference/playbooks.md`, `docs/inspo/`, Inspo,
+   Mobbin, 21st and Pinterest: one study a build (§3g.17, §3aa.7). Write REFERENCES.md: a line for every
+   source, `Take:` and `Skip:` on each kept picture (§3aj.1), and `## Why they are a 5` from the two best
+   sites of the kind, one of them a live site named by its address (§3ah.7, §3ag). Start the board with part A.
+   **Gate:** `node scripts/check-references.mjs <build>` passes.
+3. **Ideas in words, and the brand sheet (free).** One Fable subagent (see Models) writes the opening ideas,
+   the "Own:" idea, the film stories and the headlines into IDEAS.md. Run the one-sentence test on the words:
+   "you land and ___ happens" must be about the business (§3n). Write BRAND.md: colours with their uses, two
+   fonts, one radius, motion limits, the design bans taken from `docs/category-mistakes.md` (§3x.7), its
+   `## For ads` part, which every ad for the business will read (§3ak), and its `## Image style` paragraph
+   (light, colour, mood, three colours given to three named objects), pasted at the end of every image prompt
+   of the build (§3al.6).
+   Write the look into `scrollcraft/fingerprints.json` (§3p). Start CONCEPT.md: the category, the chosen idea
+   and why, the `- avoids:` line.
+   **Gate:** `node scripts/check-ideas.mjs <build>` and `node scripts/check-fingerprints.mjs <build>` pass.
+   The hooks block any paid generation until check-ideas does (§0b.4).
+4. **Three first screens (free, then Tzvi).** Read the blueprint's Opening stage first. Build the first screen
+   three times as plain HTML in `gen/board/` (`first-a.html`, `first-b.html`, `first-c.html`), one per
+   reference. Same colours and fonts from BRAND.md, same words, the owner's photos as they are. Only the layout
+   differs. A picture still to be made is a plain grey picture of its final shape. A photo of the wrong shape
+   sits whole, with grey where it will be extended. Show each as a laptop frame beside a phone frame (§3aa).
+   Run `check-says-offer.mjs`, `check-five.mjs` and `readable.mjs` on each; fix or drop one that fails. They
+   are part B of the board.
+   **Gate, yes 1:** CONCEPT.md has
+   `- first screens: gen/board/first-a.html gen/board/first-b.html gen/board/first-c.html; Tzvi: "<his pick>"`
+   (§3aj.2). Then plan the Opening stage: `node scripts/blueprint.mjs --check <build> 4` passes.
+5. **The page in grey boxes, and the film in sketches (free, then Tzvi).** Write CONCEPT.md `## Body`: the
+   `- sections:` line (§3ad), two `- signature:` lines, one of which may be the showpiece (§3ad, §3ah), the
+   `- showpiece:` line, the `- treatments:` line, three at most, picked from the menu (§3ai, which lists
+   3ak.1 and the choices of §3al.7), and the `- motion:` line (§3e), written with numbers: each moment's
+   duration, distance or scale and stagger, what waits until the previous step has settled, alignments in
+   pixels (§3al.4). No intro on a menu, prices or shop page, intros on the first visit only, parallax off on
+   phones (§3al.8). Each scroll-tied effect gets a start, midpoint and end picture on the board (§3al.5).
+   Write `## Effects` with its `- touch:` line (§3p). Build the home page from the starter with real words and real prices, and a plain grey picture, at the final shape, wherever a picture is
+   still to be made. Run the sameness checks now, while a change costs nothing: `check-body-alike.mjs`,
+   `check-rhythm.mjs`, `check-heights.mjs`, `check-signature-body.mjs`, `check-fits.mjs`.
+   With a film (`film=yes`): `node scripts/blueprint.mjs --check <build> film`, then the sketch sheet
+   `gen/storyboard.png`, a row per concept, drawn to those rules (§0b.5b); the motion as numbered steps
+   (§0b.5); every object's source and end (rules 3h.18); the scroll timeline, a line for each scene saying
+   where in the scroll it starts and ends, what moves, and when its words come and go (§3ak); and the
+   question of how phones get the film (3aa.26). The grey-box page and the sketch sheet are part C of the board.
+   **Gate, yes 2:** CONCEPT.md has `- page plan: Tzvi: "<his words>"` (§3aj.8). With a film, the brief quotes
+   his picked row and its "Phones asked:" line. `node scripts/check-concept.mjs <build>` and
+   `node scripts/blueprint.mjs --check <build> 6` pass.
+6. **The pictures, then the film as stills (paid, small, then Tzvi).** Only now are pictures paid for: re-light
+   (`scrollcraft/starter/relight_photo.py`), extend to the shape the picked layout needs
+   (`scrollcraft/starter/extend_photo.py`), and the styled shots (§3ag.1). A brief before every paid picture
+   (rules 8), `get_cost` first, one made and checked before the rest. `scripts/product-match-sheet.py` for
+   every re-lit or styled product. Plan the Photos stage: `node scripts/blueprint.mjs --check <build> 7`.
+   With a film: make each clip's start and end still, all of one scene from one base picture
+   (`scrollcraft/starter/keep_change.py`, 3aa.17). The end still first, its prompt naming the room for the words;
+   a clip where only light, smoke or steam moves says "static locked-off camera, nothing moves except the light"
+   (§3al.1). One image model for the set, one change per edit (§3al.6). Check each still alone, in this order:
+   `scripts/check-light-pool.py` (for stills it is the brightness check); `scripts/inspo-beside.py` with its
+   colour grid and the `shot_seen` line (§3aj.5); a close crop of each hero object beside its inspo (3aa.34);
+   then read the picture's `Skip:` line again against the still. Then one sheet of the whole film as stills:
+   each clip's start and end, laptop beside phone, what moves (3aa.35). It is part D of the board.
+   **Gate, yes 3:** `beats_seen` quotes his yes to every setup; `clipchain.py make` refuses a clip without it.
+   A site with no film has no part D and no yes here: its gate is the product-match sheets.
+7. **Build the real site, with the stills where the film goes (free).** Plan the last stages first
+   (`node scripts/blueprint.mjs --check <build>`), and tick lines as they are built. Build from the starter
+   (`scrollcraft/starter`, §3p.1) as a website, not a page: pages by kind, one menu bar, full footer, Shop with
+   steps, basket between pages, orders saved before WhatsApp (§3k, §3v). While building, follow: facts and
+   claims (§1), copy (§2), the first screen (§3g.13, §3ah), the category checklist (§3, §3b), design and
+   persuasion (§3c, §3e, §3g, §3i, §3s), honest deals and calm prices (§3j, §3ak), similar products (§3l),
+   owner-filled places
+   (§3m), design and story (§4), build rules (§5). The approved stills sit in the real opening
+   (`kit.opening_slides`, `slides.js`), so the film can be scrolled as stills before any clip exists (§0b.6a).
+   New motion is tried on `scrollcraft/starter/kit/test.html` first. Two habits (§3al.9): before a risky
+   change (a new layout, a scroll effect, anything touching the order flow), write back in two or three lines
+   what you understood, then build; and build each section from its own reference picture, still first, motion
+   second. Hold the built first screen to the mockup Tzvi picked with the repo's `visual-diff` skill. No grey picture is left on any page.
+   **Gate:** with `scripts/serve-builds.mjs` running, `node scripts/check-build.mjs scrollcraft/builds/<folder>`
+   passes every line except `independent review`, `check-compared` and, with a film, the film checks. A real
+   test order went through (§3g.12).
+8. **The clips (paid, the largest spend; film only).** May start once yes 3 is in and the opening passes
+   `check-photo-clear.mjs`, `readable.mjs` and `check-fits.mjs` with the stills in place. It runs in the
+   background while phase 7 goes on. `scrollcraft/starter/clipchain.py`, one clip first. On every clip:
+   `scripts/check-clip.mjs`, `brightness.py`, and its `end_seen` line. Two tries at most (§3w). A clip that
+   fails changes the story, not only the prompt (rules 3h.19). Then `clipchain.py story`, read by someone who
+   did not write the prompts (3aa.32), and encode: a poster for every clip, no sound, a smaller phone version,
+   WebM beside the MP4 where the starter plays a file, the headline real HTML (§3al.3). Put the film in. At its
+   end the film eases its playback rate down onto a sharp resting frame, never a hard stop or a freeze (§3al.2).
+   **Gate:** `check-film-video.mjs`, `check-film-clear.mjs`, `check-opening-scroll.mjs`,
+   `check-phone-opening.mjs` and `check-iphone.mjs` pass.
+9. **Judged by people who did not build it (free).** Render at the six sizes of §3p.6, both languages, reduced
+   motion, phones as phones (§6). `node scripts/compare-sheet.mjs <build> <pic 1> <pic 2>` puts screens.jpg
+   beside two of the best sites of its kind, and REFERENCES.md gets `## Compared` (§3ag). A Sonnet subagent
+   that did not build the site uses it against `docs/page-review-checklist.md`; fix every FAIL, it looks again
+   (§3r.2). Two Sonnet judges that did not build it score layout, light, colour, type, detail and motion beside
+   compare.jpg, one `Judge N:` line each in review.md; the median plus Tzvi's calibration is the `Rating:`, 4
+   or more with no area under 3.5 (§3aj.4). Finish the wow-gate answers (§3n). Do not also run
+   `design-kit:design-loop` or `design-kit:page-conversion-review`: the reviewer and the judges do their job.
+   **Gate:** `node scripts/check-build.mjs scrollcraft/builds/<folder>` prints "all N checks pass". It runs
+   every script on every page, writes RULES.md from the blueprint, and runs check-rules, the judges and the
+   feedback check, so none of them is run by hand.
+10. **Tzvi sees the site (Tzvi).** Send the link to the local preview and a video at 1.5x with an HTML link,
+    recorded with the skill's `scripts/record.mjs`, its contact sheet looked at first (§3c.11). New words from
+    him go into FEEDBACK.md first, then the work goes back to the phase they belong to. Each time he gives a
+    verdict on a judged site, add it to `docs/judge-calibration.json`.
+    **Gate, yes 4:** his yes to publish, quoted in the report.
+11. **Publish, check it live, report (free).** `node scripts/publish-page.mjs <folder> <slug> --check` lists
+    every problem. Then publish in the background (`run_in_background`), never in the foreground: re-recording
+    the preview passes 10 minutes on long sites (The Gift Boutique, 16 Nov 2026). Pushing is Tzvi's call; it
+    runs `check-push-rules` (.githooks/pre-push), so push a new rule together with the sites whose RULES.md
+    answer it, then `node scripts/wait-deploy.mjs`. On live: `check-showcase-previews.mjs` and
+    `check-business-pages` (§0b.12). The owner's video comes last, from the live page, at normal speed
+    (`--speed 1`); send its `-whatsapp.mp4` copy. The report is written only after the change is seen live. It
+    ends with "Not done yet", "For your call" and "How we can do better", after a shorter-version pass on every
+    long line (§0b.10a), and it states the credits spent.
 
 ## Fixing a fault on a site already live
 
@@ -202,3 +244,7 @@ builds read, so keep it short), and its line in `docs/rules-checklist.md`
 naming that section. Run `node scripts/check-rule-copies.mjs --sync` (copies the
 full rulebook into `reference/full-rules.md` and this skill to the loaded copy)
 and `node scripts/check-rule-homes.mjs`; the commit is refused until both pass.
+
+A rule merged into another is never deleted: its checklist line moves to `## Retired` at the end of
+`docs/rules-checklist.md` (`- R<old> -> R<new> (date): why`) and its record leaves
+`docs/rules-as-blueprint/rules.json`. Live sites answered it, and the checks ignore a retired answer.

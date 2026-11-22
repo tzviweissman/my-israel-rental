@@ -25,6 +25,8 @@
  *   plus "- touch:", one small detail only this business would have (never none)
  *   ## Not alike
  *   the line printed by scripts/check-fingerprints.mjs for this build
+ * Since 22 Nov 2026 a build with IDEAS.md needs no "## Ideas" part here, the Mobbin and 21st sources may be named in
+ * REFERENCES.md, and a new build has "- board:" and "- page plan:" lines (rules 3aj.8).
  *
  *   node scripts/check-concept.mjs <build-folder>     exit 1 with what is missing
  *
@@ -53,13 +55,15 @@ export function checkConcept(dir) {
   if (!published.includes(path.basename(path.resolve(dir))) || fs.existsSync(path.join(dir, 'IDEAS.md'))) {
     problems.push(...checkIdeas(dir).filter((p) => !p.startsWith('References: ')).map((p) => `Ideas: ${p}`));
   }
+  // IDEAS.md is the one home of the ideas (0b.4); a build that has it needs no "## Ideas" copy here (22 Nov 2026)
+  const ideasFile = fs.existsSync(path.join(dir, 'IDEAS.md'));
   const ideas = part('Ideas');
   const refs = [...ideas.matchAll(/docs\/inspo\/[^\s)]+\.(?:webp|png|jpe?g)/gi)].map((m) => m[0]);
   const missing = refs.filter((r) => !fs.existsSync(path.join(ROOT, r)));
   const uniqueRefs = new Set(refs.filter((r) => !missing.includes(r)));
-  if (uniqueRefs.size < 3) problems.push(`Ideas: ${uniqueRefs.size} inspo pictures cited that exist (needs 3 or more, each idea from a real saved effect)`);
-  if (missing.length) problems.push(`Ideas: these cited pictures do not exist: ${missing.join(', ')}`);
-  if (!/^\s*[-*]\s*Own:/im.test(ideas)) problems.push('Ideas: no idea from the business\'s own words or world (a line starting "- Own:")');
+  if (!ideasFile && uniqueRefs.size < 3) problems.push(`Ideas: ${uniqueRefs.size} inspo pictures cited that exist (needs 3 or more, each idea from a real saved effect)`);
+  if (!ideasFile && missing.length) problems.push(`Ideas: these cited pictures do not exist: ${missing.join(', ')}`);
+  if (!ideasFile && !/^\s*[-*]\s*Own:/im.test(ideas)) problems.push('Ideas: no idea from the business\'s own words or world (a line starting "- Own:")');
   if (part('Chosen').length < 40) problems.push('Chosen: say which idea and why');
   const gate = part('Wow gate');
   const answers = [1, 2, 3, 4, 5].filter((n) => new RegExp(`^\\s*${n}[.)]\\s*\\S{3,}`, 'm').test(gate));
@@ -75,8 +79,9 @@ export function checkConcept(dir) {
   // and one small touch only this business would have (Tzvi, 20 Oct 2026, on the cloud pointer and
   // the polish-shade sweep: "we need to do more unique things like that")
   // all three sources on every build (Tzvi, 22 Oct 2026: "have you been using mobbin and 21st for your builds"; 12 of 17 sites had no Mobbin search)
-  if (!/mobbin\.com\//i.test(s)) problems.push('Sources: no Mobbin search named with a mobbin.com link (search Mobbin for this category on every build, rule 3c.1)');
-  if (!/21st[^\n]{0,40}("[^"]+"|search)/i.test(s)) problems.push('Sources: no 21st search named (search 21st fresh for this business on every build, name the component, rule 3c.1)');
+  const src = s + (fs.existsSync(path.join(dir, 'REFERENCES.md')) ? fs.readFileSync(path.join(dir, 'REFERENCES.md'), 'utf8') : '');   // REFERENCES.md is the one home of the sources
+  if (!/mobbin\.com\//i.test(src)) problems.push('Sources: no Mobbin search named with a mobbin.com link (search Mobbin for this category on every build, rule 3c.1)');
+  if (!/21st[^\n]{0,40}("[^"]+"|search)/i.test(src)) problems.push('Sources: no 21st search named (search 21st fresh for this business on every build, name the component, rule 3c.1)');
   // the wow comes from research (Tzvi, 23 Oct 2026: "for the wow use mobbin and our inspo and 21st for inspiration")
   const wow = part('Wow gate');
   if (!/mobbin\.com\//i.test(wow) || !/(docs\/inspo\/|inspo:|inspo\s)/i.test(wow)) problems.push('Wow gate: name where the wow came from, a Mobbin link and an Inspo or docs/inspo reference (and the 21st search when it answers)');
@@ -102,6 +107,13 @@ export function checkConcept(dir) {
     if (!av[1]) problems.push('Avoids: no "- avoids: <kind>: how this site avoids each" line naming a part of docs/category-mistakes.md (3aj.3)');
     else if (!kinds.includes(av[1].trim().toLowerCase())) problems.push(`Avoids: "${av[1].trim()}" is not a part of docs/category-mistakes.md (${kinds.join(', ')}); add the kind there first (3aj.3)`);
     else if ((av[2] || '').trim().split(/\s+/).length < 8) problems.push('Avoids: say how this site avoids that kind\'s mistakes, in a few words each (3aj.3)');
+  }
+  if (!newer.has('R3aj.8')) {
+    // one design board a build, and Tzvi's yes to the grey-box page before the real site (rules 3aj.8, 22 Nov 2026)
+    const board = (/^\s*[-*]\s*board\s*:\s*(\S+)/im.exec(s) || [])[1] || '';
+    const plan = (/^\s*[-*]\s*page plan\s*:(.*)$/im.exec(s) || [])[1] || '';
+    if (!fs.existsSync(path.join(dir, 'gen', 'board', 'index.html')) || !/^https?:\/\//.test(board)) problems.push('Board: no gen/board/index.html, or no "- board: <its artifact link>" line in CONCEPT.md (3aj.8: one design board a build, the same link throughout)');
+    if (!/["“][^"”]+["”]/.test(plan)) problems.push('Page plan: quote Tzvi\'s yes to the grey-box page ("- page plan: Tzvi: \\"yes, swap the third and fourth\\"") (3aj.8)');
   }
   return problems;
 }

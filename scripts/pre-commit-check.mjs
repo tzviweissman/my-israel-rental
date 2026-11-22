@@ -143,7 +143,7 @@ for (const slug of live) {
 // built on a branch from 29 Oct and missed 27 rules made on main since: "make sure these issues dont happen in the
 // future"). Any rule on main (local or origin) that this checkout's checklist lacks refuses the commit: merge main first.
 if (builds.size) {
-  const ids = (s) => new Set([...s.matchAll(/^(R[0-9][0-9a-z]*\.[0-9]+)\s*\|/gm)].map((m) => m[1]));
+  const ids = (s) => new Set([...s.matchAll(/^(?:- )?(R[0-9][0-9a-z]*\.[0-9]+)\s*(?:\||->)/gm)].map((m) => m[1]));
   const mine = ids(fs.readFileSync(path.join(ROOT, 'docs', 'rules-checklist.md'), 'utf8'));
   const behind = new Set();
   for (const ref of ['main', 'origin/main']) {
@@ -157,7 +157,7 @@ if (builds.size) {
 // passed, and every other checkout was refused). The checklist is read as it will be committed (the index), not from disk.
 {
   const idx = spawnSync('git', ['show', ':docs/rules-checklist.md'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 });
-  const known = new Set([...(idx.stdout || '').matchAll(/^(R[0-9][0-9a-z]*\.[0-9]+)\s*\|/gm)].map((m) => m[1]));
+  const known = new Set([...(idx.stdout || '').matchAll(/^(?:- )?(R[0-9][0-9a-z]*\.[0-9]+)\s*(?:\||->)/gm)].map((m) => m[1]));
   for (const f of staged.filter((x) => /^scrollcraft\/builds\/[^/]+\/RULES\.md$/.test(x))) {
     const r = spawnSync('git', ['show', `:${f}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 });
     const unknown = [...new Set([...(r.stdout || '').matchAll(/^(R[0-9][0-9a-z]*\.[0-9]+)\s+(?:pass|n\/a|fix|todo)\b/gm)].map((m) => m[1]))].filter((id) => !known.has(id));

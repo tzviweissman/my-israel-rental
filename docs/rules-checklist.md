@@ -2,18 +2,19 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 25: How to use it
-- 70: 1. Facts and words
-- 101: 2. Opening
-- 176: 3. Sections and worlds
-- 272: 4. Photos and media
-- 302: 5. Prices and savings
-- 324: 6. Order and booking flow
-- 350: 7. Motion
-- 382: 8. Phone
-- 398: 8b. From the seven videos, part two (29 Oct 2026)
-- 420: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 431: 9. Finish
+- 26: How to use it
+- 76: 1. Facts and words
+- 107: 2. Opening
+- 180: 3. Sections and worlds
+- 275: 4. Photos and media
+- 306: 5. Prices and savings
+- 329: 6. Order and booking flow
+- 355: 7. Motion
+- 387: 8. Phone
+- 402: 8b. From the seven videos, part two (29 Oct 2026)
+- 424: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 435: 9. Finish
+- 440: Retired
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -50,6 +51,11 @@ The steps below are how sites made before then keep their RULES.md.
 
 **A rule added to `docs/page-generation-rules.md` (or to the skill's SKILL.md) must be added to
 this file the same day, with a HOW. A rule with no way to check it is not finished.**
+
+**A rule merged into another is never deleted.** Its line moves to `## Retired` at the end of this file as
+`- R<old> -> R<new> (date): why`, and its record leaves `docs/rules-as-blueprint/rules.json`. Live sites answered
+it, and the checks ignore a retired answer; a deleted one would refuse them. An id's number is not always the
+rule's number (R3aa.38 is rule 3aa.35): the third column names the rule.
 
 Ids are `R<section>.<number>` using the rules doc's own numbering (`R3g.13` = section 3g, rule 13).
 Where a rule is an unnumbered paragraph its number continues after the last numbered one.
@@ -102,7 +108,6 @@ R4.1 | Missing data reads as deliberate ("Ask for a quote" instead of a missing 
 
 R3g.13 | The first screen holds a picture, a headline of 2 to 5 words that says what the customer gets, at most one short line (where the business is: the line or the small label, not both; trust goes there or right under the button) and one button; the header does not count | 3g.13, 3 hero, 5b.1, 3b.1, 3e.2, 3t.3 | LOOK: 1440x900 and 390x844 screenshots of every page's first screen, counting the pieces of text
 R3g.18 | The first screen shows what the business offers before any scroll: one kind may be shown by the picture or the words; two or more different kinds are each named in the headline or big words; the home page lists them in <meta name="offers"> | 3g.18 | script: check-says-offer plus LOOK: with one kind, a stranger can say what is sold from the 1366x800 and 390x844 first screens
-R3b.1 | The first screen answers: what it is, where, why trust it, what to do next | 3b.1 | LOOK: same screenshots
 R3b.2 | Proof (price, credential or rating) touches the main button; for food a kosher band sits just after the opening, not crowding the button, and the certificate is stated at most twice as a sentence or band (a small identical kosher tag on items does not count) | 3b.2, 3b, 3s.9 | LOOK: first screen and the next; count the kosher sentences and bands on every page
 R3b.3 | One solid action per screen: header button and phone bar repeat it; the header button is outline when the hero shows a solid one; everything else is outline, link or tile | 3b.3 | LOOK: every screen position while scrolling
 R3h.20 | A scroll-driven opening runs at 60 fps, is at least 3 screens long, shows the product on a plain ground of its own world (never on a photo of the same kind of product), keeps the product and photos whole, and loads the first screen first | 3h (smooth, slow enough, clean) | script: check-opening-scroll (SMOOTH, SLOW); LOOK at the sheet for ground, cut-offs and late pictures
@@ -117,7 +122,7 @@ R3aa.3 | One ground, the page's own colour, and one light through the whole film
 R3aa.4 | Whatever carries the product stays the same object from the first frame to the last; nothing swapped between scenes | 3aa.4 | LOOK: each seam; n/a with no film when:film
 R3aa.5 | One or two huge words per step in the clear space of the picture, at most one short line under them, never small labels on the film | 3aa.5 | LOOK: each step, laptop and phone
 R3aa.6 | One large subject, each step held about a screen of scrolling, three to five steps | 3aa.6 | LOOK: scroll the opening at a steady pace
-R3aa.7 | Pinterest searched on every build beside Inspo, Mobbin, 21st and docs/inspo; kept pictures saved to docs/inspo; REFERENCES.md says what was taken and why | 3aa.7 | LOOK: REFERENCES.md has a pinterest line
+R3aa.7 | REFERENCES.md names every saved source, Inspo, Mobbin, 21st and Pinterest, with what was taken and why, 3 to 5 real screens of the same kind of business among them; kept pictures saved to docs/inspo | 3aa.7, 3c.1 | script: check-references (concept runs it) plus LOOK: REFERENCES.md has a pinterest line
 R3aa.8 | Every film step shows its object whole and large on a plain ground of the page colour, about half to two thirds of the frame height; never a close-up of one part for a whole clip, never a far room photo; a frame line per chain.json step | 3aa.8 | LOOK: each step at laptop and phone size; n/a with no film when:film
 R3aa.9 | A step's big word is huge, nearly the frame width, behind the object with one part in front so they interlock, set into the still in code (never painted by the image model); never a small label in a box | 3aa.9 | LOOK: each step; n/a with no film when:film
 R3aa.10 | Where the product has parts or a process, one step shows it taken apart or opened in the air | 3aa.10 | LOOK; n/a when the product has no parts or process
@@ -149,12 +154,11 @@ R3aa.35 | Every still of one scene from one base picture: the board, walnut and 
 R3aa.36 | Every hero object real and premium up close: clean surfaces, crisp edges, one hard light on the edges, real materials, detail at a maker's scale; a mark matches the tool that made it in design and size, the tool at its mark | 3aa.34 | LOOK: each hero object cropped close beside its inspo at the same size, the shot_seen line answering the six, a mark beside its tool; n/a with no product picture in the opening
 R3aa.37 | The hero object fills a third of its frame, or a product step gets its own close frame beside the wide one, planned as two frames | 3aa.33 | LOOK: the hero's share of each still, the brief's close and wide frames; n/a with no product picture in the opening
 R3aa.38 | Before any clip, Tzvi saw one sheet of the whole film as stills (each clip's start and end, laptop beside phone) and his yes is quoted in beats_seen | 3aa.35 | RUN: clipchain.py make (refuses without it); LOOK: the brief's beats_seen line; n/a with no film when:film
-R3bb.1 | A new site picks at least three small touches from 3bb that fit its category and story, named on a "- touches:" line in CONCEPT.md, not the same three as the site built before; each shows only true facts | 3bb | LOOK: CONCEPT.md touches line and each touch on the site
-R3h.1 | The home page opens on a full-screen picture or film (at least 70% picture) and it is an event from their own thing (a film, or an event built in code), proposed with the first build, never after | 3h.1, 3n | script: site OPENING (home page) plus LOOK to confirm it is an event, not a drift
-R3n.1 | The owner's strongest real photo fills at least half the first screen on a laptop and on a phone, not a small card or cut-out shape | 3n.1 | LOOK: first screen at 1440x900 and 390x844
+R3ak.2 | Every scroll film has a scroll timeline: each chain.json step has a scroll line saying where in the scroll it starts and ends, what moves, and when its words come and go; no step's words show outside its scene | 3ak.2, 3aa.20 | LOOK: each step's scroll line against the opening at 20, 50 and 80 percent, laptop and phone; n/a with no film when:film
+R3bb.1 | A choice (3ai.2): any small touch used comes from 3bb's list or the site's own references, is not one the site built before it used, and shows only true facts; a touch that is there for looks is named on the "- treatments:" line and counts as one of the three; no number is asked; n/a when none is used | 3bb, 3ai | LOOK: CONCEPT.md treatments line and each touch on the site
+R3h.1 | The home page opens on a full-screen picture or film (at least 70% picture): the owner's strongest real photo, or the styled shot of it (3ag.1). It is an event from their own thing (a film, or an event built in code), proposed with the first build, never after | 3h.1, 3n | script: site OPENING (home page) plus LOOK to confirm it is an event, not a drift
 R3n.2 | One signature moment only this business could have, driven by the visitor (scroll scene or a choice) | 3n.2, 5a.6 | LOOK: name it in one line and say why no other business could have it
 R3n.3 | The visitor's choice changes the page (colour, hero, order), not just one picture | 3n.3, 3i.2 | script: motion (switch is smooth, takes the colour) plus LOOK that the hero itself changes
-R3n.4 | Side by side with the closest reference in docs/inspo for this kind of business, ours is not plainly weaker | 3n.4 | LOOK: put the two first-screen screenshots next to each other
 R3n.5 | The one-sentence test, told to someone else and run on the first five seconds and the first full scroll: "you land and ___ happens" is about the business, not a decoration ("nothing", "the camera moves", "it fades in" fail) | 3n.5, 3n | LOOK: write the sentence; a decoration ("a cloud puffs") fails
 R3g.15 | The opening is made for this business at full quality: never a flyer crop or low-resolution photo, and a generated setting is never presented as their real premises | 3g.15 | script: fits (no photo over 1.35x its size) plus LOOK
 R3h.2 | A film opening goes from where the product comes from to their real product and the button, every step true | 3h.2 | LOOK: n/a if no film; walk the film when:film
@@ -162,35 +166,33 @@ R3h.3 | A film is full screen, crisp, drawn as sharp frames or near-lossless vid
 R3h.5 | A film's chapter lines are 2 to 6 words, small, at an edge, at most a third of the screen's height, on a soft edge shade only, never over the action | 3h.5, 3h.9 | script: readable, plus LOOK at every scene for what the words cover; n/a if no film when:film
 R3h.7 | A film's seams are checked: each join compared, a jumping clip regenerated | 3h.7 | LOOK: frames either side of every join; n/a if no film when:film
 R3h.8 | The section after a lit film changes the mood boldly | 3h.8 | LOOK: n/a if no film when:film
-R3h.11 | Every film and generated still set is bright: middle third at least 33, whole frame at least 22, average at least 30; the subject is the brightest thing; viewed on a phone in daylight | 3h.11, 3i.1 | script: brightness.py on every film and still set, plus LOOK on a phone screen
+R3h.11 | Every film and generated still set is bright: middle third at least 33, whole frame at least 22, average at least 30; the subject is the brightest thing; viewed on a phone in daylight. Opening stills of a product on a ground that is dark on purpose are measured by check-light-pool instead (R3aa.33) | 3h.11, 3i.1, 3aa.33 | script: brightness.py on every film and still set (check-light-pool for the opening stills), plus LOOK on a phone screen
 R3h.13 | One cause, one motion: the cause and its result are one clip, code pieces start on the cause frame and match the film's material, and the effect passes a 4 fps watch (no fall-then-fly, no pause, no blocks for flakes, no heap from nowhere, nothing wrong played backwards) | 3h.13, 3h.15, 3h.16 | LOOK: frames at 4 fps or more; n/a if no such effect
 R3h.14 | The product stays recognisable through the whole effect; a moving camera never loses it; on a phone the frame widens if pieces travel past the crop | 3h.14 | LOOK: n/a if no film effect
 R3h.18 | The film is physically possible: every object on screen is listed with where it comes from and where it goes (in frame, enters or leaves past an edge, cut from something seen); nothing appears, turns into something else or vanishes in a way that looks off at normal speed (something filling in naturally is fine: Tzvi, 26 Oct); list shown with the steps before generating | 3h.18 | LOOK: the object list in gen/<film>-brief.md, then every clip at 8 fps checked object by object; n/a if no generated film when:film
 R3h.19 | Generate once, by choosing a physically possible story before generating (a better prompt only helps a little; a failed clip changes the story, not just the prompt): each clip's start and end frames hold the same objects (or they enter or leave past an edge), one kind of action per clip, clips chained by stills made and checked before any video, frame 1 / middle / last written in the brief first, at most two tries per clip | 3h.19 | LOOK: the clip plan in gen/<film>-brief.md and the number of generations; n/a if no generated film when:film
 R3h.17 | Words and film take turns: a giant name sits on plain ground, the film appears as letters part, the film moves aside before the headline arrives | 3h.17 | script: readable; n/a if the page does not use it when:film
 R3x.5 | A following light is used only for a dark-world business, has an off button, sweeps once by itself on a phone and with reduced motion, and never dims the words or main button | 3x.5 | LOOK on laptop and phone; n/a if not used
-R3z.2 | The first screen has three layers: a real photo, the film or a soft shape of the business's colour at the back, the words and any card in the middle, the main button in front with the only soft shadow | 3z.2 | LOOK: same screenshots
+R3z.2 | When the picked first screen (3aj.2) is layered, it has three layers: a real photo, the film or a soft shape of the business's colour at the back, the words and any card in the middle, the main button in front with the only soft shadow; n/a when it is not layered | 3z.2, 3aj.2 | LOOK: same screenshots
 R3z.6 | The h1 or the line under it holds the words a customer searches for this business and its place, the search words named in its BLUEPRINT.md plan line | 3z.6 | LOOK: read the h1 against BLUEPRINT.md
 R3ab.4 | A real rating sits on the first screen beside the headline or main button with its score, count and source; with no real rating nothing stands in its place | 3ab.4, 3c.2 | LOOK: first screen at laptop and phone; n/a with no real rating
 
 ## 3. Sections and worlds
 
 R3.12 | Sections every page has: a dramatic hero, a features section (one scannable item per product or service with price and what is included), a call-to-action section of its own near the end with the proof beside the button | 3 (cont.) 1 to 3 | LOOK
-R3c.1 | References came first: 3 to 5 real screens of businesses of the same kind kept, each with its source link in CONCEPT.md; the builder chose and said in one line what was picked and why (fresh searches per piece: R3g.17) | 3c.1, 3e.24 | script: concept (needs cited pictures) plus LOOK that named searches are real
-R3g.17 | Every piece (button, arrow, each card or list effect, each section) came from a fresh Mobbin, 21st and Inspo search for this business, with the source named; nothing reused from the last two pages; each effect has a reason (says what a control does) | 3g.17, 3c.1, 0b.4 | script: concept (every effect has "from") and prints (effects), plus LOOK at the sources
+R3g.17 | One study a build: Mobbin, 21st, Inspo, Pinterest and docs/inspo searched once for this business (REFERENCES.md), with a fresh search of its own only for the first screen, the showpiece and the product card; every other piece from the kit or the effects library with its source named; nothing reused from the last two pages; each effect has a reason (says what a control does) | 3g.17, 3c.1, 0b.4 | script: concept (every effect has "from") and prints (effects), plus LOOK at the sources
 R3g.19 | Shops (food-shop, fashion-shop): the main buttons are in the product's own colour, taken from its photo (meta product-colour with data-from, in BRAND.md), text 4.5:1 on it, and each button stands out 3:1 from what is behind it; n/a for other categories | 3g.19, 3g.3 | script: check-button-colour
 R0b.4i | The opening ideas came from the saved sources (two pictures from two sources each, opened by the builder, named in REFERENCES.md) and none is a kind of event another site uses; the chosen kind is in scrollcraft/motions.json | 0b.4 | script: check-ideas (also run by concept)
 R3c.2 | No AI default look: not cream + serif + one italic word (unless their brand), no default font, purple or two-colour gradient, exactly three identical cards, frosted glass used everywhere, default "premium" palette; at least one section on a contrasting ground | 3c.2, 3g.2, 5b.4 | LOOK: whole page at laptop width
-R3g.1 | A style sheet exists in CONCEPT.md before building (accent, ink, ground, two faces plus at most a third for one label style, one radius, motion limits) and every section follows it | 3g.1 | LOOK: CONCEPT.md against the page's computed styles
 R3g.3 | The accent colour is used for the main button only; prices and everything else are in the main text colour, prices bold and large; at most one emphasised word per screen, set apart by weight or style in the text colour | 3g.3, 3e.10, 5.5 | LOOK: every screen position while scrolling; computed colour of every price
 R3g.7 | At most one closing signature (giant cropped name, or one playful moment in the footer/404), never in the way of the order path | 3g.7 | LOOK: footer and 404
 R3g.11 | Fonts come from the approved Latin + Hebrew list, licence checked | 3g.11 | LOOK: faces in site.css against `reference/design-rules.md`
 R3p.3 | Not alike: no heading face shared with another site, no shared body face plus script, no two brand colours alike, design different on at least 4 of 6, effects overlap at most 2 points | 3p.2, 3p.3, 3p.4 | script: prints
 R3p.5 | One small touch only this business would have, from their product, tagline or craft | 3p.5 | script: concept (the `- touch:` line) plus LOOK that it works
-R3q.1 | CONCEPT.md is complete: 3 or more ideas each citing a saved effect picture, an "Own:" idea, which was chosen, the five wow answers, an Effects line per kind, the "Not alike" line | 3q | script: concept
+R3q.1 | CONCEPT.md is complete: which idea was chosen and why (the ideas are in IDEAS.md), the five wow answers, an Effects line per kind, the "Not alike" line, and the first screens, avoids, board and page plan lines | 3q | script: concept
 R5a.7 | One signature idea and one peak per page; at most one signature scroll section; the ending resolves on the action; not carried over from another business | 5a.6, 5a.7, 9, 3 signature | LOOK: name the one signature and the one peak
 R9.1 | The page's signature section is used only when their own photos or items support it; a page without the right material stays still | 9 | LOOK
-R3f.2 | The effect budget is filled and ticked on captured frames: one signature moment (held where it fits 1280x650, otherwise playing as the page scrolls), at least three accents (arriving opening, a scroll-tied detail mid-page, a closing payoff), quiet touches | 3f.2 | LOOK: CONCEPT.md list against frames
+R3f.2 | The effect budget is written in CONCEPT.md and ticked on captured frames: one signature moment (held where it fits 1280x650, otherwise playing as the page scrolls), the opening's arrival, the five moments of the motion line (3e.16c) and any picked treatment that moves; no number of accents is asked | 3f.2, 3ai | LOOK: CONCEPT.md list against frames
 R3m.1 | A gallery place on every designed page (`data-mir-gallery` with template), and priced products inside `data-mir-catalog` with `data-mir-list`, group and item templates | 3m.1, 3m.2, 8 | LOOK: grep the html
 R3m.3 | Details the owner changes (hours, areas and fees, guarantee, FAQ, reviews) sit in fixed places with length limits, never free text boxes | 3m.3 | LOOK
 R3k.1 | The site is pages by kind of business; the menu and the order are ONE page (the Shop, or Book); old Menu/Order addresses forward to it | 3k.1 | LOOK: file list and addresses
@@ -213,7 +215,6 @@ R3s.11 | One true sentence beside the price says why it costs that (handmade, th
 R5b.6 | No scroll cues, no "01/06" counters, no label above every section | 5b.6, 9 | LOOK
 R3.13 | Structure: no doubled contact, facts or gallery; no two dividers in a row, no ending on one; only their own photos that exist; a photo gallery has at least 3 | 3 structure, images | LOOK
 R3a.1 | The page was rendered as a visitor meets it (the six sizes of 3p.6, each language, normal and reduced motion), every screen looked at, a scroll page walked at several positions per section, every payoff checked at its start and finish on a phone and laptop | 3a.1 to 3a.5, 3a | LOOK: write which sizes and states you walked
-R3r.1 | Every script above was run on EVERY page of the site, not only the home page | 3r.1, 3k.7, 0b.10 | LOOK: list the pages and the scripts run on each
 R3r.2 | Someone who did not build the page used it against `docs/page-review-checklist.md`, the builder fixed every FAIL and the reviewer looked again | 3r.2 | LOOK: note the reviewer and the result
 R3g.12 | A real test went through every form and order button (to a test business, never the owner's live inbox) before the owner saw it | 3g.12 | LOOK: say what was ordered and what arrived
 R0b.12 | The business's pages-list preview clip shows the current version of the page | 0b.12 (skill) | script: `node scripts/check-showcase-previews.mjs`; n/a before publishing
@@ -222,21 +223,21 @@ R3x.2 | A counted number is a real figure from the record, counts once, ends exa
 R3x.3 | Tabs for sizes or packages change one panel in place: picture, price and facts stay in the same spot | 3x.3, 3s.27 | LOOK: switch every tab; n/a with no tabs
 R3x.4 | With two or more sizes or packages, each is a card with its picture, price and the same measures in the same order | 3x.4 | LOOK; n/a with one size and no packages
 R3x.11 | A product to turn passed the suitability check, was made from a grey-ground source of the owner's photo as two candidates reviewed from four angles, has two or three light buttons named for the business, and keeps touch-action pan-y on a phone | 3x.11 | LOOK: the review sheet and a phone swipe; n/a if not used
-R3z.1 | One card the visitor would use (open slots, order card, price from, facts or a review) hangs a third to a half over the edge of the next section on the home page, the only thing that crosses an edge; on a phone it is whole and readable | 3z.1 | LOOK: laptop and phone screenshots of the edge
+R3z.1 | A choice (3ai.2): when picked, one card the visitor would use (open slots, order card, price from, facts or a review) hangs a third to a half over the edge of the next section on the home page, the only thing that crosses an edge; on a phone it is whole and readable; n/a when not picked | 3z.1, 3ai | LOOK: laptop and phone screenshots of the edge
 R3z.5 | A site on a dark ground has one light section (questions, prices or how ordering works) joined by a clean edge, not a fade | 3z.5 | LOOK; n/a on a light site
 R3ab.1 | Every h1 to h3 says what the visitor gets on its own, never only a section label ("How it works", "Our services", "Why choose us" and their Hebrew); "Questions" and contact headings allowed | 3ab.1 | script: `node scripts/check-headings.mjs <urls>`
 R3ab.2 | Real reviews are stacked and fully shown on a phone, never in a swiping row, moving ribbon or fold-out | 3ab.2 | script: `node scripts/check-reviews-open.mjs <urls>`; n/a with no reviews
 R3ab.3 | Each review shows the first name the owner may show and where it was left (with a link when the source has one), a photo only with permission; a press mention is the outlet's own sentence, never a bare logo | 3ab.3 | LOOK: read every review; n/a with no reviews
 R3ad.4 | Planned before any layout: each home section named for the business's own things, from its category in docs/inspo/awwwards-anatomy-2026-10-22 with the real site it follows, on a "- sections:" line in CONCEPT.md "## Body"; no slot names ("How it works", "Gallery", "About") | 3ad.4, 3t | LOOK: CONCEPT.md ## Body against the home page
-R3ad.1 | At least two sections after the opening take a form only this business could have, shaped by its own data or main task (not a card grid in new colours), each on a "- signature:" line (its #id, what the visitor does or sees, and from: what data or task) in CONCEPT.md "## Body" | 3ad.1 | script: `node scripts/check-signature-body.mjs <build>` plus LOOK that each is this business's own
+R3ad.1 | At least two sections after the opening take a form only this business could have, shaped by its own data or main task (not a card grid in new colours), each on a "- signature:" line (its #id, what the visitor does or sees, and from: what data or task) in CONCEPT.md "## Body"; the showpiece (R3ah.5) may be one of the two | 3ad.1, 3ah.5 | script: `node scripts/check-signature-body.mjs <build>` plus LOOK that each is this business's own
 R3ad.2 | The menu bar, steps and closing band are written for this site, not the starter's markup in new colours (60% or more of a part's classed elements shared with a live page fails) | 3ad.2, 3p.1 | script: `node scripts/check-body-alike.mjs <build>`
 R3ad.3 | The home page has a rhythm after the opening: two or more changes of ground, one headline at least 1.6x the others, one edge-to-edge picture or film or a collage of different sizes | 3ad.3, 3v.6 | script: `node scripts/check-rhythm.mjs <urls>`
-R3ae.1 | At least one of the business's own pictures, films or objects sits across the line between two neighbouring home sections, 48 px or more into each | 3ae.1 | script: `node scripts/check-seams.mjs <urls>` (CROSS)
-R3ae.2 | One object of the business's own, marked data-travel and planned on a "- travels:" line in CONCEPT.md "## Body", stays in view for a screen and a half of scroll and reaches another section, never covering words | 3ae.2, 3h.25 | script: `node scripts/check-seams.mjs <urls>` (TRAVEL) plus LOOK that it moves well
-R3af.1 | One drawn mark taken from the business's own logo or product (or a mascot drawn from them) appears in three or more parts of the site doing a job (bullets, pointer, chosen state, dividers, confirmation), planned on a "- mark:" line in CONCEPT.md "## Body"; never a stock icon set | 3af.1 | LOOK: the mark in each place listed on the "- mark:" line, laptop and phone
-R3af.2 | The owner speaks: a short note in their own words, signed with their name, beside their real photo and photos of the place or customers, planned on a "- owner:" line; missing words or photo are a content gap, never invented | 3af.2, 1.1 | LOOK: the note's words against what the owner gave
-R3af.3 | With four or more photos of their own work, one set is laid loose (tilted, overlapping, labelled by hand) and can be dragged or tapped to flip to what it is and its price; a tap is enough on a phone, still under reduced motion, planned on a "- loose:" line | 3af.3, 3s.27 | LOOK: tap and drag at laptop and phone, reduced motion on
-R3af.4 | Three or more kinds, styles or flavours: each on its own card in its own colour from that product, with its own cut-out picture and one line of character, planned on a "- cards:" line; never a grey list of names | 3af.4, 3g.19 | LOOK: the cards against the "- cards:" line
+R3ae.1 | A choice (3ai.2): when picked on the "- treatments:" line, one of the business's own pictures, films or objects, marked data-cross, sits across the line between two neighbouring home sections, 48 px or more into each; n/a when not picked | 3ae.1, 3ai | script: `node scripts/check-seams.mjs <urls>` (CROSS, judged when the page has data-cross)
+R3ae.2 | A choice (3ai.2): when picked, one object of the business's own, marked data-travel and planned on a "- travels:" line in CONCEPT.md "## Body", stays in view for a screen and a half of scroll and reaches another section, never covering words; n/a when not picked | 3ae.2, 3h.25, 3ai | script: `node scripts/check-seams.mjs <urls>` (TRAVEL, judged when the page has data-travel) plus LOOK that it moves well
+R3af.1 | A choice (3ai.2): when picked, one drawn mark taken from the business's own logo or product (or a mascot drawn from them) appears in three or more parts of the site doing a job (bullets, pointer, chosen state, dividers, confirmation), planned on a "- mark:" line in CONCEPT.md "## Body"; never a stock icon set; n/a when not picked | 3af.1, 3ai | LOOK: the mark in each place listed on the "- mark:" line, laptop and phone
+R3af.2 | When the owner gave the words and a photo: a short note in their own words, signed with their name, beside their real photo and photos of the place or customers, planned on a "- owner:" line; never invented, and not a decoration; n/a, and asked for as a content gap, when they have not | 3af.2, 1.1 | LOOK: the note's words against what the owner gave
+R3af.3 | A choice (3ai.2): when picked, and the site has four or more photos of their own work, one set is laid loose (tilted, overlapping, labelled by hand) and can be dragged or tapped to flip to what it is and its price; a tap is enough on a phone, still under reduced motion, planned on a "- loose:" line; n/a when not picked | 3af.3, 3s.27, 3ai | LOOK: tap and drag at laptop and phone, reduced motion on
+R3af.4 | A choice (3ai.2): when picked, and there are three or more kinds, styles or flavours, each is on its own card in its own colour from that product, with its own cut-out picture and one line of character, planned on a "- cards:" line; n/a when not picked. Whatever is picked, kinds are never a grey list of names | 3af.4, 3g.19, 3ai | LOOK: the cards against the "- cards:" line
 R3ag.1 | Product photos look shot for a shop: one plain ground, one soft light, no foil, counter, hand or flash; owner phone photos re-lit with relight_photo.py, each checked beside the original with product-match-sheet.py, all to the same ground | 3ag.1, 3c.12 | LOOK: the photo sheet beside the originals
 R3ag.2 | Every product sold with its price is a card led by its photo, 200 px or wider at a laptop, never a small thumbnail beside a list | 3ag.2 | script: `node scripts/check-look.mjs <home url>` (SMALL)
 R3ag.3 | The home page's sections use two grounds taking turns, three at most | 3ag.3, 3ad.3 | script: `node scripts/check-look.mjs <home url>` (GROUNDS)
@@ -250,8 +251,8 @@ R3ah.3 | A page selling four or more products opens on pictures (a third of the 
 R3ah.4 | Paragraphs, product names and prices are 16 px or more at a laptop | 3ah.4 | script: `node scripts/check-five.mjs <page urls>` (TEXT)
 R3ah.5 | One showpiece section the visitor uses, adapted from a top site of the category, in CONCEPT.md as - showpiece: ... (from: ...), working by tap on a phone | 3ah.5 | script: `node scripts/check-compared.mjs <build>` (SHOWPIECE) + LOOK
 R3ah.6 | Every tier and product priced in the listings can be ordered on the site at that price, or is in not-sold.txt with why | 3ah.6 | script: `node scripts/check-listing-prices.mjs <build>`
-R3ah.7 | REFERENCES.md has ## Why they are a 5 (five lines or more) before any idea, and review.md says Rating: 4/5 or better from a judge that did not build the site, rating it beside two real top sites | 3ah.7 | script: `node scripts/check-compared.mjs <build>` + `node scripts/check-build.mjs <build>` (rating)
-R3ai.1 | Three decorations at most beyond photos, grounds and type, listed on CONCEPT.md's - treatments: line; a fourth only with (Tzvi OK, date); 3ae.2, 3af.1, 3af.3, 3af.4 count when used | 3ai | script: `node scripts/check-compared.mjs <build>` (TREATMENTS) + LOOK
+R3ah.7 | REFERENCES.md has ## Why they are a 5 (five lines or more, each with how this site does it) before any idea; the rating itself is R3aj.4's | 3ah.7 | script: `node scripts/check-compared.mjs <build>` (NOFIVE)
+R3ai.1 | Three decorations at most beyond photos, grounds and type, picked from the menu of 3ai.2 and the site's references and listed on CONCEPT.md's - treatments: line; a fourth only with (Tzvi OK, date) | 3ai | script: `node scripts/check-compared.mjs <build>` (TREATMENTS) + LOOK
 R3aj.1 | Each REFERENCES.md picture an idea cites says Take: and Skip: | 3aj.1 | script: `node scripts/check-ideas.mjs <build>`
 R3aj.2 | Three first screens as plain HTML, one per reference, only the layout different, shown side by side; Tzvi's pick quoted on CONCEPT.md's - first screens: line | 3aj.2 | script: `node scripts/check-concept.mjs <build>` (First screens)
 R3aj.3 | docs/category-mistakes.md read for the business's kind before any idea; CONCEPT.md's - avoids: line says how | 3aj.3 | script: `node scripts/check-concept.mjs <build>` (Avoids)
@@ -259,6 +260,8 @@ R3aj.4 | Two fresh judges score six areas beside compare.jpg; median per area pl
 R3aj.5 | Each opening still's colour measured against its inspo (inspo-beside.py) and quoted in shot_seen | 3aj.5 | RUN: scripts/inspo-beside.py; LOOK: the shot_seen line; n/a with no product picture in the opening
 R3aj.6 | FEEDBACK.md holds Tzvi's exact corrections; none open, each done one with a proof file | 3aj.6 | script: `node scripts/judges.mjs <build>` (in check-build and publish-page)
 R3aj.7 | Focus never under a sticky bar, toggles are real checkboxes or switches, prices in tabular digits | 3aj.7 | script: `node scripts/check-keyboard.mjs <page urls>`
+R3aj.8 | One design board a build: gen/board/index.html published as one artifact, its link on CONCEPT.md's - board: line, and Tzvi's yes to the grey-box page plan quoted on the - page plan: line before the real site is built | 3aj.8 | script: `node scripts/check-concept.mjs <build>` (Board, Page plan)
+R3ak.1 | A choice (3ai.2): when picked, live art drawn in code behind the words is seeded from the business's name, uses only the site's colours, bends round the pointer on mouse devices only, has fewer lines on a phone, holds still under reduced motion, is aria-hidden and is never on the product photo, prices or order form; n/a when not picked | 3ak.1, 3ai | LOOK: laptop and phone, reduced motion on, plus script: readable for the words over it
 R3al.1 | Each clip's end still was made first, its prompt naming the room for the words; a clip where only light, smoke or steam moves says "static locked-off camera, nothing moves except the light" | 3al.1 | LOOK: each clip's end still and its prompt in the brief; n/a with no film when:film
 R3al.2 | The scroll film lands softly: the playback rate eases down onto a sharp resting frame with no motion blur, never a hard stop or a pause that reads as a freeze | 3al.2 | LOOK: the opening scrolled to its end, laptop and phone, the frame it holds; n/a with no film when:film
 R3al.3 | Every played clip has a poster (never a black box) and no sound track, a smaller phone version, WebM with an MP4 fallback where the starter plays a file; the headline stays real HTML text | 3al.3 | LOOK: the network panel, laptop and phone, and the page with video off; n/a with no film when:film
@@ -295,7 +298,8 @@ R3e.8 | Every word is at least 12 px (14 px for a sentence on a phone) and 4.5:1
 R3s.24 | Media is light and sized: no photo over 600 KB, every `<img>` has width and height, every video has a poster, nothing stays hidden with motion off | 3s MEDIA | script: site MEDIA
 R3p.6 | Fits on one screen: every section fits below the menu bar at the laptop sizes; no photo taller than the screen at any of the six sizes; no photo shown over 1.35x its own size; a big photo of another shape than its box is extended to the box's shape (padded, the new edges generated, the original pasted back), never zoomed or framed (3c.12, Tzvi 27 Oct) | 3c.12, 3p.6, 3a | script: fits on every page
 R3o.5 | Every special character (₪, arrows, Hebrew, dots) renders in the font used for it | 3o.5, 3s GLYPH | script: site GLYPH
-R3x.7 | BRAND.md in the build folder (colours with their uses, two fonts, logo on light and dark, textures, Design bans) was written before any picture was generated, and the site uses it | 3x.7 | LOOK: BRAND.md against the CSS
+R3x.7 | BRAND.md in the build folder (colours with their uses, two fonts plus at most a third for one label style, one radius, motion limits, logo on light and dark, textures, Design bans) was written before any picture was generated, and every section follows it; CONCEPT.md points to it | 3x.7, 3g.1 | LOOK: BRAND.md against the CSS and the page's computed styles
+R3ak.3 | BRAND.md has a "## For ads" part (the colours an ad uses, the two fonts, the logo file, the bans an ad keeps), and every ad for the business names it in its blueprint (ad step A27.1) | 3ak.3, 3x.7 | LOOK: BRAND.md's For ads part; the ad side is checked by `node scripts/ad-blueprint.mjs --check <name> 1`
 R3z.4 | No dark layer or gradient over a whole photo or film; a shade only behind the words where measured contrast needs it | 3z.4 | LOOK: every photo and film with words on it
 R3z.7 | Card pictures generated without owner photos were made as one set from a saved screenshot of a real site's grid (path in docs/inspo), each tile checked as R8.1 | 3z.7 | LOOK; n/a when every card has the owner's photo
 
@@ -319,6 +323,7 @@ R3j.12 | An owner's own savings claim the prices contradict is not printed; the 
 R3j.13 | With three or more sizes, every saving is against the smallest size bought as many times as it takes to feed the same (Large = 2 Mediums, Kiddush = 4 Mediums), never the size below, so the saving rises with the size; only the struck price and the percentage show, no line naming the sizes | 3j (Every size against the smallest) | LOOK: work each saving out against the smallest size
 R3j.14 | Every price shown and every total sent comes from the listing: prices.json names each price the page shows, an order total reads window.MIR_PRICES first, a saving is worked out from those prices, never typed | 3j (Every price comes from the listing) | LOOK: change a price in the local listing; every place it shows, each saving and the order total follow
 R3.14 | Loud prices only when prices exist, never on a premium or quote-based business | 3 prices | LOOK
+R3ak.4 | Prices and order controls stay calm: no tilt, 3D turn, parallax or scroll-tied effect on a price, a total, a quantity stepper, Add or the order button; a hover highlight behind a price is fine | 3ak.4, 3e.16b | LOOK: point at, press and scroll past every price and order control, laptop and phone
 R3z.3 | Where the answer depends on a choice, a free taste of at most three questions ends on a real answer and price from the record and carries it into the order; no contact details asked | 3z.3 | LOOK: answer every path; n/a with one product at one price
 
 ## 6. Order and booking flow
@@ -391,7 +396,6 @@ R3s.26 | No words sit on other words anywhere on the page, pinned scenes include
 R3t.1 | The site declares its category (CONCEPT.md and a site-category meta on every page) and follows that category's row of the 3t table: ground and colour, pictures, how it sells, type | 3t | check-site CATEGORY; LOOK: compare the home and shop pages with the category's screenshots in docs/inspo/awwwards-anatomy-2026-10-22/
 R3t.2 | food-shop and fashion-shop: a price and an Add or Order control within the first two screens; every product card has photo, name, size or servings, price and a button | 3t | check-site BUY; LOOK: every card
 R3t.3 | trainer: at least a third of sections are picture, never three plain sections in a row | 3t | check-site WORLDS
-R3t.4 | A real footer on every page, identical: a last big line, the button, link columns, contact, the MyIsraelRental line (since 1 Nov 2026 the full footer of R3v.1) | 3t, 3k.3 | LOOK: footer of every page
 R3a.7 | Every state is checked on the device that shows it (touch emulation for phones, never a narrow desktop window; hover-only looks have a touch version) | 3a table, 3e.9 | LOOK: record which emulation was used
 R3a.8 | A line of items separated by dots never wraps | 3a table | LOOK at 360x640
 
@@ -430,5 +434,18 @@ R3x.13 | One type scale and one spacing scale: every text size is a step of --t-
 
 ## 9. Finish
 
-R3r.3 | `check-rules` passes, every script above passed on every page after the last edit, and a fix was checked on the screen it was for | 3a.4, 3r | script: check-rules (this file)
+R3r.3 | check-build passes after the last edit (it runs every script on every page, then check-rules), and a fix was checked on the screen it was for | 3a.4, 3r | script: check-build (runs check-rules, this file)
 R3r.4 | A rule Tzvi had to point out twice has a script or a line in this file the same day | 3r.3 | LOOK: any new Tzvi correction since the last build is in this file
+
+## Retired
+
+Merged into another line on the date shown. A site's RULES.md may still answer one; check-rules, the commit check
+and the push check ignore that answer. A retired id is never used again.
+
+- R3n.1 -> R3h.1 (22 Nov 2026): the strongest photo, big. 3h.1's 70% picture is the stricter measure, and a script.
+- R3n.4 -> R3ag.6, R3aj.4 (22 Nov 2026): beside a reference. The compare sheet and the two judges do it once.
+- R3b.1 -> R3ah.1, R3v.14 (22 Nov 2026): what, where, trust, next. The one statement and the three facts say them.
+- R3c.1 -> R3aa.7, R7.1 (22 Nov 2026): references first. REFERENCES.md is their one home.
+- R3g.1 -> R3x.7 (22 Nov 2026): the style sheet. BRAND.md is its one home.
+- R3r.1 -> R3r.3 (22 Nov 2026): every script on every page. check-build runs them all.
+- R3t.4 -> R3v.1 (22 Nov 2026): the footer. check-footer measures it.

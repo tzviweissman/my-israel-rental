@@ -10,6 +10,8 @@
  *           section under the middle of the screen is a different one when it is last seen than when it is first
  *           seen: one object that goes down the page with you (3ae.2)
  * A page of fewer than three such sections is not judged.
+ * Since 22 Nov 2026 both are choices (rules 3ai.2): CROSS is judged only on a page with a data-cross mark, TRAVEL
+ * only on one with data-travel. A page that marks neither passes.
  *
  * Passes on: none found yet (18 Nov 2026: Graza, Omsom, Blue Bottle, Diaspora, Flamingo Estate, Brightland,
  * Boomball and Monarque fail CROSS; Era Residence passed but its picture showed only a loading screen). Look at
@@ -81,7 +83,7 @@ async function judge(browser, url) {
       }
       if (first) Object.assign(travel, { span: last.at - first.at, from: first.under, to: last.under });
     }
-    return { url, cross, travel, needSpan: 1.5 * 800 };
+    return { url, cross, crossMarked: await p.$('[data-cross]') !== null, travel, needSpan: 1.5 * 800 };
   } catch (e) { return { url, error: e.message.split('\n')[0] }; } finally { await p.close(); }
 }
 
@@ -89,10 +91,10 @@ function report(r) {
   if (r.error) { console.log(`SEAMS  ${r.url}\n  LOAD: ${r.error}`); return false; }
   if (r.skip) { console.log(`${r.url}: fewer than three sections, not judged`); return true; }
   const why = [];
-  if (!r.cross) why.push(`CROSS: nothing sits across a line between two sections (a picture or object at least ${INTO} px into each, 3ae.1)`);
+  // 3ae is a choice since 22 Nov 2026 (rules 3ai.2): each is judged only when the page marks it (data-cross, data-travel)
+  if (!r.cross && r.crossMarked) why.push(`CROSS: the page marks data-cross, but nothing sits across a line between two sections (a picture or object at least ${INTO} px into each, 3ae.1)`);
   const t = r.travel;
-  if (!t.marked) why.push('TRAVEL: no element marked data-travel (one object that goes down the page with you, 3ae.2)');
-  else if (t.span < r.needSpan || !t.from || t.from === t.to) why.push(`TRAVEL: [data-travel] is in view for ${t.span} px of scroll (${t.from} to ${t.to}); it must stay ${r.needSpan} px and reach another section (3ae.2)`);
+  if (t.marked && (t.span < r.needSpan || !t.from || t.from === t.to)) why.push(`TRAVEL: [data-travel] is in view for ${t.span} px of scroll (${t.from} to ${t.to}); it must stay ${r.needSpan} px and reach another section (3ae.2)`);
   if (r.cross) why.push(`(crosses ${r.cross})`);
   if (why.length > (r.cross ? 1 : 0)) { console.log(`SEAMS  ${r.url}\n  ${why.join('\n  ')}`); return false; }
   console.log(`${r.url}: checked (crosses ${r.cross}; travels ${t.from} to ${t.to})`);
@@ -110,7 +112,9 @@ if (process.argv[2] === '--self-test') {
   const g = await judge(browser, pathToFileURL(path.join(dir, 'good-index.html')).href);
   const b = await judge(browser, pathToFileURL(path.join(dir, 'bad', 'index.html')).href);
   await browser.close(); fs.rmSync(dir, { recursive: true, force: true });
-  const ok = g.cross && g.travel.span >= g.needSpan && g.travel.from !== g.travel.to && !b.cross && !(b.travel.span >= b.needSpan && b.travel.from !== b.travel.to);
+  // a page that marks neither is not judged; one that marks data-travel and does not travel still fails
+  const plain = { url: 'plain', cross: null, crossMarked: false, travel: { marked: false, span: 0, from: null, to: null }, needSpan: 1200 };
+  const ok = g.cross && g.travel.span >= g.needSpan && g.travel.from !== g.travel.to && !b.cross && !(b.travel.span >= b.needSpan && b.travel.from !== b.travel.to) && report(plain) && !report(b);
   console.log(ok ? 'self-test: passes the page with both, fails the page with neither' : `self-test FAILED\n${JSON.stringify({ g, b }, null, 1)}`);
   process.exit(ok ? 0 : 1);
 }

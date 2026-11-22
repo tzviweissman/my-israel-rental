@@ -122,7 +122,10 @@ for (const it of items) {
   if (/not (been )?(judged|checked|looked at|re-?judged|verified|reviewed)|not judged in|earlier build unchanged|was not (run|looked)|skipped|no time|assumed|probably fine/i.test(why)) { note(it, `"${why.slice(0, 50)}" is not a reason: n/a and pass are only for a rule that was looked at (pass) or that the site has nothing for (n/a)`, 'bad'); continue; }
   counts[kind === 'pass' ? 'pass' : 'na']++;
 }
-for (const id of answers.keys()) if (!seen.has(id)) { problems.push(`${id}: not in docs/rules-checklist.md (typo, or the rule was removed)`); counts.bad++; }
+// a rule merged into another is listed under "## Retired" in the checklist ("- R3n.4 -> R3ag.6 (date): why"); a site
+// made before the merge still answers it, and that answer is ignored, never refused (22 Nov 2026)
+const retired = new Set([...fs.readFileSync(CHECKLIST, 'utf8').matchAll(/^- (R[0-9][0-9a-z]*\.[0-9]+) ->/gm)].map((m) => m[1]));
+for (const id of answers.keys()) if (!seen.has(id) && !retired.has(id)) { problems.push(`${id}: not in docs/rules-checklist.md (typo, or the rule was removed)`); counts.bad++; }
 
 // stale: RULES.md older than the newest page file. A file with no uncommitted change is dated by its last commit,
 // not its mtime: a fresh clone or worktree stamps every file with the moment of checkout, in no set order, so

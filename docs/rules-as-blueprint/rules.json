@@ -341,17 +341,6 @@
    "status": "planned"
   },
   {
-   "id": "R3b.1",
-   "rule": "First screen answers what, where, trust, next",
-   "how": [
-    "KIT"
-   ],
-   "built_by": "K2 slots: what (h1), where (line), trust (facts), next (button); all required args",
-   "confirmed_by": "LOOK -> confirm only",
-   "gremier_retry": false,
-   "status": "planned"
-  },
-  {
    "id": "R3b.2",
    "rule": "Proof touches main button; kosher band after opening; certificate stated at most twice",
    "how": [
@@ -514,12 +503,12 @@
   },
   {
    "id": "R3aa.7",
-   "rule": "Pinterest searched on every build, saved, named in REFERENCES.md",
+   "rule": "REFERENCES.md names every saved source, Inspo, Mobbin, 21st and Pinterest, 3 to 5 screens of the same kind among them",
    "how": [
     "ASK"
    ],
    "built_by": "to build: the blueprint sources stage asks for the Pinterest search and its saved pictures",
-   "confirmed_by": "LOOK",
+   "confirmed_by": "check-references + LOOK",
    "gremier_retry": true,
    "status": "planned"
   },
@@ -860,19 +849,19 @@
   },
   {
    "id": "R3bb.1",
-   "rule": "Pick at least three small touches from 3bb, named in CONCEPT.md",
+   "rule": "A choice (3ai.2): any small touch used is from 3bb or the references, counts toward the three when it is there for looks; no number is asked",
    "how": [
     "ASK",
     "KIT"
    ],
-   "built_by": "scripts/blueprint.mjs asks it at the concept stage; to build: starter parts for the code-only touches (progress line, footer fill, price highlight, chapter counter, tag pill, corner join card)",
+   "built_by": "Phase 5 - treatments: line names the touches picked; to build: starter parts for the code-only touches (progress line, footer fill, price highlight, chapter counter, tag pill, corner join card)",
    "confirmed_by": "LOOK",
    "gremier_retry": false,
    "status": "planned"
   },
   {
    "id": "R3h.1",
-   "rule": "Home opens on full-screen picture/film (>=70%), an event from their own thing",
+   "rule": "Home opens on full-screen picture/film (>=70%), the strongest real photo or its styled shot, an event from their own thing",
    "how": [
     "KIT",
     "ASK"
@@ -880,18 +869,6 @@
    "built_by": "K2/K3 stage is 100svh full-bleed by construction; Question: which event (from G9 idea list)",
    "confirmed_by": "check-site OPENING + LOOK (event stays)",
    "gremier_retry": true,
-   "status": "planned"
-  },
-  {
-   "id": "R3n.1",
-   "rule": "Strongest real photo fills half the first screen on laptop and phone",
-   "how": [
-    "KIT",
-    "ASK"
-   ],
-   "built_by": "K2 picture slot >=60% area; G5 picks the highest-resolution photo; Question: which photo",
-   "confirmed_by": "LOOK -> confirm only",
-   "gremier_retry": false,
    "status": "planned"
   },
   {
@@ -916,18 +893,6 @@
    "built_by": "K10 kit.choice(target=hero) updates hero, colour var, order; Question: what is the choice",
    "confirmed_by": "check-motion + LOOK -> confirm only",
    "gremier_retry": true,
-   "status": "planned"
-  },
-  {
-   "id": "R3n.4",
-   "rule": "Side by side with closest reference, ours not weaker",
-   "how": [
-    "GEN",
-    "EYE"
-   ],
-   "built_by": "G10 makes the side-by-side sheet of our first screen vs the saved reference",
-   "confirmed_by": "LOOK (stays)",
-   "gremier_retry": false,
    "status": "planned"
   },
   {
@@ -1014,12 +979,12 @@
   },
   {
    "id": "R3h.11",
-   "rule": "Film and stills bright (thirds 33, whole 22, avg 30), subject brightest",
+   "rule": "Films and still sets bright (thirds 33, whole 22, avg 30), subject brightest; opening stills by check-light-pool",
    "how": [
     "GEN"
    ],
    "built_by": "G7 brightness.py gate per still/clip; prompt template adds bright-light words",
-   "confirmed_by": "brightness.py -> confirm only",
+   "confirmed_by": "brightness.py on clips and still sets, check-light-pool on opening stills -> confirm only",
    "gremier_retry": true,
    "status": "planned"
   },
@@ -1095,7 +1060,7 @@
   },
   {
    "id": "R3z.2",
-   "rule": "First screen has three layers: photo, film or shape, words, button in front",
+   "rule": "When the picked first screen is layered: photo, film or shape, words, button in front",
    "how": [
     "KIT"
    ],
@@ -1128,20 +1093,8 @@
    "status": "planned"
   },
   {
-   "id": "R3c.1",
-   "rule": "References first: 3-5 real screens with sources in CONCEPT.md",
-   "how": [
-    "GEN",
-    "EYE"
-   ],
-   "built_by": "G12 source log writes REFERENCES.md and CONCEPT.md skeleton from each Mobbin/21st/Inspo search made",
-   "confirmed_by": "check-concept/check-references -> confirm only; LOOK (stays: pick)",
-   "gremier_retry": false,
-   "status": "planned"
-  },
-  {
    "id": "R3g.17",
-   "rule": "Every piece from a fresh search for this business, nothing reused from last two pages",
+   "rule": "One study a build, a fresh search only for the first screen, the showpiece and the product card; nothing reused from the last two pages",
    "how": [
     "GEN",
     "EYE"
@@ -1183,17 +1136,6 @@
    ],
    "built_by": "G4 palette/fonts picked from logo+photos and checked against banned combos; kit has no default gradient/frosted",
    "confirmed_by": "LOOK (stays: whole page)",
-   "gremier_retry": false,
-   "status": "planned"
-  },
-  {
-   "id": "R3g.1",
-   "rule": "Style sheet in CONCEPT.md before building; every section follows it",
-   "how": [
-    "GEN"
-   ],
-   "built_by": "G4 writes tokens to BRAND.md AND site.css :root from one file; sections only use var()",
-   "confirmed_by": "LOOK -> confirm only (computed-style diff)",
    "gremier_retry": false,
    "status": "planned"
   },
@@ -1256,7 +1198,7 @@
   },
   {
    "id": "R3q.1",
-   "rule": "CONCEPT.md complete: 3 ideas citing pictures, Own idea, five wow answers, effects line, Not alike",
+   "rule": "CONCEPT.md complete: chosen idea and why (ideas in IDEAS.md), wow answers, Effects lines, Not alike, first screens, avoids, board, page plan",
    "how": [
     "GEN"
    ],
@@ -1290,7 +1232,7 @@
   },
   {
    "id": "R3f.2",
-   "rule": "Effect budget filled: one signature, >=3 accents, quiet touches, on captured frames",
+   "rule": "Effect budget written and ticked on frames: one signature, the opening's arrival, the motion line's five moments, any picked treatment that moves; no number of accents",
    "how": [
     "GEN",
     "EYE"
@@ -1551,17 +1493,6 @@
    "status": "planned"
   },
   {
-   "id": "R3r.1",
-   "rule": "Every script run on every page",
-   "how": [
-    "GEN"
-   ],
-   "built_by": "check-build already runs every check on every page; G1 lists pages from Site.pages",
-   "confirmed_by": "check-build -> confirm only",
-   "gremier_retry": false,
-   "status": "planned"
-  },
-  {
    "id": "R3r.2",
    "rule": "Someone who did not build the page reviewed it",
    "how": [
@@ -1655,7 +1586,7 @@
   },
   {
    "id": "R3z.1",
-   "rule": "One card hangs over the edge of next section on home page, whole on phone",
+   "rule": "A choice (3ai.2): when picked, one card hangs over the edge of the next section on the home page, whole on a phone",
    "how": [
     "KIT",
     "ASK"
@@ -1953,7 +1884,7 @@
   },
   {
    "id": "R3x.7",
-   "rule": "BRAND.md written before any picture; the site uses it",
+   "rule": "BRAND.md written before any picture (colours, fonts, one radius, motion limits, bans); every section follows it",
    "how": [
     "GEN"
    ],
@@ -2869,17 +2800,6 @@
    "status": "planned"
   },
   {
-   "id": "R3t.4",
-   "rule": "Real footer on every page, identical",
-   "how": [
-    "KIT"
-   ],
-   "built_by": "Site.full_footer (exists)",
-   "confirmed_by": "check-footer -> confirm only",
-   "gremier_retry": false,
-   "status": "planned"
-  },
-  {
    "id": "R3a.7",
    "rule": "Every state checked on the device that shows it",
    "how": [
@@ -3215,7 +3135,7 @@
   },
   {
    "id": "R3r.3",
-   "rule": "check-rules passes after last edit; fix checked on its screen",
+   "rule": "check-build passes after the last edit (every script on every page, then check-rules); fix checked on its screen",
    "how": [
     "GEN"
    ],
@@ -3307,7 +3227,7 @@
   },
   {
    "id": "R3ad.1",
-   "rule": "At least two sections after the opening take a form only this business could have, from its own data or main task",
+   "rule": "At least two sections after the opening take a form only this business could have; the showpiece may be one of the two",
    "how": [
     "ASK",
     "EYE"
@@ -3342,29 +3262,29 @@
   },
   {
    "id": "R3ae.1",
-   "rule": "One of the business's own pictures or objects crosses the line between two home sections, 48 px into each",
+   "rule": "A choice (3ai.2): when picked, one of the business's own pictures or objects, marked data-cross, crosses the line between two home sections, 48 px into each",
    "how": [
     "GEN"
    ],
-   "built_by": "Section plan names the object and the seam it crosses before build",
-   "confirmed_by": "check-seams CROSS -> confirm only",
+   "built_by": "Phase 5 - treatments: line names it and the seam it crosses; the object is marked data-cross",
+   "confirmed_by": "check-seams CROSS (only when data-cross is on the page) -> confirm only",
    "gremier_retry": false,
    "status": "planned"
   },
   {
    "id": "R3ae.2",
-   "rule": "One object of the business's own (data-travel, '- travels:' in CONCEPT.md) goes down the page with the visitor for 1.5 screens into another section",
+   "rule": "A choice (3ai.2): when picked, one object of the business's own (data-travel, '- travels:' in CONCEPT.md) goes down the page with the visitor for 1.5 screens into another section",
    "how": [
     "GEN"
    ],
    "built_by": "CONCEPT.md ## Body '- travels:' line planned before build",
-   "confirmed_by": "check-seams TRAVEL -> confirm only, LOOK for the motion",
+   "confirmed_by": "check-seams TRAVEL (only when data-travel is on the page) -> confirm only, LOOK for the motion",
    "gremier_retry": false,
    "status": "planned"
   },
   {
    "id": "R3af.1",
-   "rule": "One drawn mark from the business's own logo or product does a job in three or more parts of the site",
+   "rule": "A choice (3ai.2): when picked, one drawn mark from the business's own logo or product does a job in three or more parts of the site",
    "how": [
     "GEN"
    ],
@@ -3375,7 +3295,7 @@
   },
   {
    "id": "R3af.2",
-   "rule": "The owner speaks in a short signed note beside their real photos; missing words are a content gap",
+   "rule": "When the owner gave the words and a photo, a short signed note beside their real photos; not a decoration; missing words are a content gap",
    "how": [
     "ASK"
    ],
@@ -3386,7 +3306,7 @@
   },
   {
    "id": "R3af.3",
-   "rule": "With four or more work photos, one set is laid loose and flips or drags to show what it is",
+   "rule": "A choice (3ai.2): when picked, with four or more work photos, one set is laid loose and flips or drags to show what it is",
    "how": [
     "GEN"
    ],
@@ -3397,7 +3317,7 @@
   },
   {
    "id": "R3af.4",
-   "rule": "Three or more kinds each get their own colour card, cut-out picture and one line of character",
+   "rule": "A choice (3ai.2): when picked, three or more kinds each get their own colour card, cut-out picture and one line of character",
    "how": [
     "GEN"
    ],
@@ -3413,7 +3333,7 @@
     "GEN",
     "EYE"
    ],
-   "built_by": "Photo sheet at step 2 marks each photo shop-ready or not; the rest re-lit with scrollcraft/starter/relight_photo.py to one ground before layout",
+   "built_by": "Photo sheet in phase 1 marks each photo shop-ready, re-light or styled shot; paid for in phase 6, after the first screen is picked, with scrollcraft/starter/relight_photo.py to one ground",
    "confirmed_by": "LOOK",
    "gremier_retry": false,
    "status": "planned"
@@ -3470,7 +3390,7 @@
     "ASK",
     "EYE"
    ],
-   "built_by": "Step 11: scripts/compare-sheet.mjs, then the ## Compared lines (difference -> what changed)",
+   "built_by": "Phase 9: scripts/compare-sheet.mjs, then the ## Compared lines (difference -> what changed)",
    "confirmed_by": "check-compared -> confirm only",
    "gremier_retry": false,
    "status": "planned"
@@ -3481,7 +3401,7 @@
    "how": [
     "GEN"
    ],
-   "built_by": "Step 6 plans the opening as one statement; the offers named inside the headline and meta offers",
+   "built_by": "Phase 4 builds the opening three ways as one statement; the offers in the line under the headline and in meta offers",
    "confirmed_by": "check-five OPENING -> confirm only",
    "gremier_retry": false,
    "status": "planned"
@@ -3527,7 +3447,7 @@
     "GEN",
     "EYE"
    ],
-   "built_by": "Step 6: the - showpiece: line in CONCEPT.md, planned with Fable from REFERENCES ## Why they are a 5",
+   "built_by": "Phase 5: the - showpiece: line in CONCEPT.md, planned with Fable from REFERENCES ## Why they are a 5",
    "confirmed_by": "check-compared SHOWPIECE + LOOK",
    "gremier_retry": false,
    "status": "planned"
@@ -3545,13 +3465,13 @@
   },
   {
    "id": "R3ah.7",
-   "rule": "REFERENCES ## Why they are a 5 before any idea; review.md Rating: 4/5 or better from a judge, beside two real top sites",
+   "rule": "REFERENCES ## Why they are a 5 before any idea; the rating is R3aj.4's",
    "how": [
     "ASK",
     "EYE"
    ],
-   "built_by": "Step 5 writes ## Why they are a 5; step 11 a Sonnet judge rates compare.jpg",
-   "confirmed_by": "check-compared NOFIVE + check-build rating",
+   "built_by": "Phase 2 writes ## Why they are a 5",
+   "confirmed_by": "check-compared NOFIVE",
    "gremier_retry": false,
    "status": "planned"
   },
@@ -3562,7 +3482,7 @@
     "ASK",
     "EYE"
    ],
-   "built_by": "Step 6 picks up to three decorations from the references and writes the - treatments: line",
+   "built_by": "Phase 5 picks up to three decorations from the menu of 3ai.2 and the references and writes the - treatments: line",
    "confirmed_by": "check-compared TREATMENTS + LOOK",
    "gremier_retry": false,
    "status": "planned"
@@ -3584,7 +3504,7 @@
     "KIT",
     "ASK"
    ],
-   "built_by": "Step 6 builds first-screens/a-c.html and shows them side by side; check-concept wants the - first screens: line with his pick",
+   "built_by": "Phase 4 builds gen/board/first-a.html to first-c.html and shows them as part B of the design board; check-concept wants the - first screens: line with his pick",
    "confirmed_by": "node scripts/check-concept.mjs <build>",
    "status": "built"
   },
@@ -3639,6 +3559,61 @@
    "built_by": "scripts/check-keyboard.mjs in check-build and publish-page; starter site.css",
    "confirmed_by": "node scripts/check-keyboard.mjs <page urls>",
    "status": "built"
+  },
+  {
+   "id": "R3aj.8",
+   "rule": "One design board a build (gen/board/index.html, one artifact link), and Tzvi's yes to the grey-box page plan quoted before the real site is built",
+   "how": [
+    "KIT",
+    "ASK"
+   ],
+   "built_by": "Phases 2, 4, 5 and 6 fill gen/board/index.html; check-concept wants the - board: and - page plan: lines",
+   "confirmed_by": "node scripts/check-concept.mjs <build>",
+   "status": "built"
+  },
+  {
+   "id": "R3ak.1",
+   "rule": "A choice (3ai.2): live art drawn in code behind the words, seeded from the business's name, quieter on phones, still under reduced motion",
+   "how": [
+    "ASK",
+    "KIT"
+   ],
+   "built_by": "Phase 5 - treatments: line picks it; to build: a starter part kit.live_art(seed, colours) that does the seed, the phone and the reduced-motion versions",
+   "confirmed_by": "LOOK + readable.mjs",
+   "status": "planned"
+  },
+  {
+   "id": "R3ak.2",
+   "rule": "Every scroll film has a scroll timeline: a scroll line per chain.json step (start and end in the scroll, what moves, when its words come and go)",
+   "how": [
+    "ASK",
+    "EYE"
+   ],
+   "built_by": "Phase 5 writes the timeline with the sketch sheet; phase 6 copies it into gen/chain.json as each step's scroll line",
+   "confirmed_by": "LOOK: the scroll lines against the opening at 20, 50 and 80 percent",
+   "status": "planned"
+  },
+  {
+   "id": "R3ak.3",
+   "rule": "BRAND.md has a ## For ads part, and every ad for the business names it (ad step A27.1)",
+   "how": [
+    "GEN",
+    "ASK"
+   ],
+   "built_by": "Phase 3 writes BRAND.md with its ## For ads part; ad-blueprint stage 1 asks for it (A27.1)",
+   "confirmed_by": "LOOK on the site side; scripts/ad-blueprint.mjs BRAND_RULES on the ad side",
+   "status": "planned"
+  },
+  {
+   "id": "R3ak.4",
+   "rule": "Prices and order controls stay calm: no tilt, 3D, parallax or scroll effect on them",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "The starter's price row, stepper and Add carry no transform or scroll effect; the build adds none",
+   "confirmed_by": "LOOK at laptop and phone",
+   "status": "planned"
   },
   {
    "id": "R3al.1",
@@ -3765,7 +3740,7 @@
     "GEN",
     "ASK"
    ],
-   "built_by": "Step 6 writes CONCEPT - motion:; built within 3e.16b's limits",
+   "built_by": "Phase 5 writes CONCEPT - motion:; built within 3e.16b's limits",
    "confirmed_by": "check-compared MOTION + check-motion-feel STAGGER, HOVER",
    "gremier_retry": false,
    "status": "planned"
@@ -3777,7 +3752,7 @@
     "GEN",
     "EYE"
    ],
-   "built_by": "Step 2 plans the hero styled shot; step 6 the wow (Tova: a light sweep)",
+   "built_by": "Phase 1 marks the hero as a styled shot, phase 6 makes it; phase 3 plans the wow (Tova: a light sweep)",
    "confirmed_by": "LOOK + check-arrival",
    "gremier_retry": false,
    "status": "planned"

@@ -1005,6 +1005,15 @@
    "confirmed_by": "moving-ad-vs-library.py sheet looked at by eye",
    "retried": false,
    "status": "planned"
+  },
+  {
+   "id": "A27.1",
+   "rule": "For a business with a custom site, the ad names its BRAND.md and the colours, fonts and bans taken from it",
+   "how": ["ASK"],
+   "built_by": "ad-blueprint stage 1 asks for the site's BRAND.md (## For ads); to build: AdMaker reads the business's brand colours",
+   "confirmed_by": "scripts/ad-blueprint.mjs BRAND_RULES (the named BRAND.md exists) + LOOK",
+   "retried": false,
+   "status": "planned"
   }
  ]
 }

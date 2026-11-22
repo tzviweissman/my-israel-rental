@@ -144,3 +144,63 @@ Two things are new:
 2. **Anti-patterns by kind of business.** BRAND.md bans are written per site. A short list per category (bakery,
    butcher, jeweller) of the moves every AI-made site of that kind makes would stop them before the build, as UI UX Pro
    Max does.
+
+## The Create With AI channel (Tzvi: "I like this channel, go through a bunch of their videos")
+
+The channel has eight videos. Video 3 above is one of them. Three more are about building sites, read here. The other
+four are about general Claude use, a model comparison and command lists, so they were skipped.
+- **"This Claude Skill Changed Web Design Forever!"** (youtu.be/85Avki4ihNE, 10:33): yt-dlp captions and four frames.
+- **"How To Make 3D Animated Website Using Claude In 11 Minutes"** (youtu.be/i_Fua_tPZZ8, 11:39): captions and two
+  frames.
+- **"9 Claude Skills to 10x Your Claude Code"** (youtu.be/Dy70TSGnQz8, 12:01): captions only. It's a round-up.
+
+**Driftwave (85Avki4ihNE).** He gave one brief, then layered three skills on it, then folded everything into a brand
+skill.
+- **taste-skill.** It picks the palette, fonts and hero for the kind of business, then checks the result in a
+  browser.
+- **algorithmic-art (Anthropic).** A p5.js flow field of thousands of thin lines behind the hero that bend round the
+  pointer "like water around a finger" (`cwai-flow-field-hero.png`).
+  - It is **seeded**: the same number always draws the same art, so a pattern you love can be kept (seed 1407).
+  - It stuttered on a phone, and the fix was fewer lines on small screens.
+  - Under reduced motion it calms down.
+- **A 3D section (three.js and GSAP).** A liquid-silver shape that breathes and **morphs into a new shape per
+  section**, with the text timed to the scroll (`cwai-liquid-shape-morphs.png`).
+- **His fix list:** "keep pricing calm". A pricing section that spins in 3D "would be fun once, but pretty annoying
+  when you're just trying to read the prices."
+- **Brand skill.** Skill Creator turned the finished design into a brand skill. An About page built with it passed 12
+  of 12 brand checks, against 8 without it.
+- **The before/after frame** (`cwai-driftwave-before-after.png`): the dark, centred, three-card baseline next to a
+  light page with a big 3D object and a soundscape list.
+
+**Halo Orbital (i_Fua_tPZZ8).** A spec before any build.
+- spec.md names the tools (three.js, GSAP ScrollTrigger, Lenis) and a **scroll timeline**: for every scene a start
+  and end point, what the camera does and what the text does, "so the 3D and the text can never fall out of sync"
+  (`cwai-scroll-timeline.png`).
+- Three criteria he took from Awwwards winners:
+  - It tells a story as you scroll.
+  - One thing to look at per scene, and the whole idea in three words ("scroll to launch").
+  - It is the kind of site people screen-record and share.
+- The first build had a generic purple, a headline over the Earth on a laptop, a stutter in the asteroid field and two
+  cards going blank on scroll-up. UI UX Pro Max's design system fixed the look; the bugs were fixed by name.
+- Extras: a 0 to 100 loader, film grain, word-by-word headline, warp streaks on fast scroll, particles morphing into
+  the rocket and then the logo, tilting price cards, a magnetic cursor.
+
+**The round-up (Dy70TSGnQz8).** Most of it is not for us. Two points are:
+- Playwright self-QA found the page **scrolling behind an open dialog**, tap targets too small and failed contrast.
+  Our starter already locks the page behind the product sheet (shop.js), and check-site has TAP.
+- Claude **made up testimonial names** and flagged them. Our rule 1 already bans that.
+
+Discount: the channel ends every video with like-and-subscribe. Results are the presenter's own judgement on made-up
+brands with no owner, no products and no ordering. Driftwave's "agency level" is a claim, not a measurement.
+
+What is new to us:
+1. **Live art drawn in code, behind the words.** Seeded, it bends round the pointer, uses fewer lines on phones and
+   holds still under reduced motion. Free to make, and no two businesses get the same pattern. It isn't in our rules;
+   "something alive" (touch 34) names only leaf shadows and a jellyfish.
+2. **A scroll timeline in the film plan.** For each scene: where in the scroll it starts and ends, what moves, and
+   when its words come and go. Our chain.json plans each clip but not the scroll positions.
+3. **The site's brand carried into its ads.** The ad checklist never reads the site's BRAND.md, so a business's ad
+   and its site can look like two brands.
+4. **Prices stay calm.** No tilt, 3D or scroll effect on prices or the order controls.
+
+All four approved by Tzvi, 22 Nov 2026: page rules 3ak.1 to 3ak.4 and ad step A27.1.

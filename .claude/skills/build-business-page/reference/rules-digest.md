@@ -2,51 +2,52 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 64: 0. Use the same tools (this is what gives the full capability)
-- 156: 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
-- 228: 1. Facts: only theirs
-- 298: 2. How to write
-- 341: 3. The category checklist (what the best real sites share)
-- 367: 3b. The sections every page has (Tzvi, 6 Oct 2026)
-- 390: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 434: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 473: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 503: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 563: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
-- 633: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 655: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 750: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 813: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 845: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 872: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 912: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 945: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1003: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1027: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1055: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1134: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
-- 1138: 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
-- 1150: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1160: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 1175: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 1186: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 1193: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 1204: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 1215: 3bb. Small touches (Tzvi, 12 Nov 2026)
-- 1227: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026)
-- 1234: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026)
-- 1247: 3ae. One part leads into the next (Tzvi, 18 Nov 2026)
-- 1255: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
-- 1266: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026)
-- 1278: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
-- 1294: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
-- 1301: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
-- 1321: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 1343: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1351: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1385: 4. Design and story
-- 1415: 5. Build rules (each one shipped as a defect once)
-- 1438: 6. Look through it, fix it, then show it
+- 65: 0. Use the same tools (this is what gives the full capability)
+- 159: 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
+- 237: 1. Facts: only theirs
+- 307: 2. How to write
+- 350: 3. The category checklist (what the best real sites share)
+- 376: 3b. The sections every page has (Tzvi, 6 Oct 2026)
+- 399: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 443: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 482: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 512: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 573: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
+- 643: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 665: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 760: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 823: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 855: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 882: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 924: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 957: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1015: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1039: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1067: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1146: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
+- 1150: 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
+- 1162: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1172: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 1187: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 1199: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 1206: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 1218: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 1229: 3bb. Small touches (Tzvi, 12 Nov 2026)
+- 1241: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026)
+- 1248: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026)
+- 1261: 3ae. One part leads into the next (Tzvi, 18 Nov 2026)
+- 1270: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
+- 1281: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026)
+- 1293: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
+- 1308: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
+- 1322: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
+- 1347: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
+- 1359: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 1381: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1389: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1423: 4. Design and story
+- 1453: 5. Build rules (each one shipped as a defect once)
+- 1476: 6. Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section numbers are unchanged, so "3g.13", "3h.11" and the like still point to the same text. The full rulebook is `full-rules.md`.
@@ -66,32 +67,34 @@ of your own.**
 Invoke these rather than improvising; each is what the rules below were
 learned with. Check what is connected in this session first.
 
-**Skills (design-kit plugin)**
-- `design-kit:design-pipeline`: the router; start here if unsure which to use.
-- `design-kit:scroll-craft`: **the scroll cinematic.** Any page where
-  scrolling drives the story (pinned scenes, scrubbed video, split stage, a
-  signature move). It brings the engine (`scrollcraft.js/.css`), the eight
-  grammars, devices, feeling curve, the uniqueness registry (FINGERPRINTS),
-  asset generation through kie.ai, `encode.sh`, `shoot.mjs` and its own verify
-  steps. Build the cinematic with it, then hold the result to this skill.
-- `design-kit:taste-skill` (anti-generic design), `design-kit:brandkit`
-  (identity from their logo and photos), `design-kit:redesign-skill`
-  (upgrading an existing page), `design-kit:image-to-code-skill` (from a mockup).
-- Grading, by something other than the maker: `design-kit:page-conversion-review`
-  (honest persuasion), `design-kit:design-loop` (critic loop and checks),
-  `design-kit:visual-diff` (against a mockup), `design-kit:dead-ends`.
-- `interview-me`: only when there is no brief and the facts aren't available.
+**Skills**
+- This skill is the router and the builder. The site and its opening are built with the starter
+  (`scrollcraft/starter`: `sitekit.py`, `kit.opening_slides`, `slides.js`, `clipchain.py`).
+- `design-kit:scroll-craft`: read for ideas, and used only for a scroll scene the starter's kit does not have.
+  Its interview, its FINGERPRINTS list and its kie.ai generation are not used: the record answers the questions,
+  `scrollcraft/fingerprints.json` is our list, and pictures come from the Higgsfield API.
+- `design-kit:taste-skill` or `premium-web-design`: may draft one of the three first screens (3aj.2), so three
+  hands give three layouts. Never a whole build: that gives their default look, not the reference's.
+- The repo's `visual-diff` holds the built first screen to the mockup Tzvi picked. The repo's `dead-ends` checks
+  that every control goes where it says. Use the repo's copies, not design-kit's: they know this project.
+- `design-kit:image-to-code-skill`: only to read a mockup's screenshot. `motion-design-patterns`: read once, when
+  the `- motion:` line is written (3e.16c).
+- Not used in a site build: `design-kit:design-pipeline` (this skill is the router), `design-kit:redesign-skill`,
+  `design-kit:brandkit` (BRAND.md is ours, 3x.7), `design-kit:design-loop` and
+  `design-kit:page-conversion-review` (the reviewer of 3r.2 and the two judges of 3aj.4 do their job),
+  `interview-me` and `superpowers:brainstorming` (section 1: never re-ask what the record answers; the owner
+  message and Tzvi's four yeses replace them).
 
 **Connections (MCP)**
 - **Inspo**: before designing, study the category: one `recommend`, one or
   two `search_screens`, `get_screen` on 3 to 5 keepers. Take composition,
-  not looks. The six-point checklist in section 3 came from this study.
+  not looks. The six-point checklist in section 3 came from this study. One study a build (3g.17).
 - **Mobbin**: how a category's flows and sections work (devices, not mood).
-- **Higgsfield**, connected two ways: the **MCP connection** for one-off
-  stills, clips and upscales while building, and the **API** (Python SDK
-  `higgsfield-client`, key in `HF_KEY` in a gitignored `.env.local`, never
-  printed; worked example `backend/higgsfield_demo/main.py` in the
-  MyIsraelRental repo) when a site or script must generate on its own. API
+- **Higgsfield, through the API only** (Tzvi, 2 Nov 2026; the hook
+  `~/.claude/hooks/higgsfield-api-only.mjs` refuses a paid call through the
+  MCP connection): the Python SDK `higgsfield-client`, key in `HF_KEY` in a
+  gitignored `.env.local`, never printed; worked example
+  `backend/higgsfield_demo/main.py` in the MyIsraelRental repo. API
   credits are prepaid and separate from the web plan; every call is billable,
   so check its price with get_cost first. **Standing OK for build media**
   (Tzvi, 4 Nov 2026: "always do what you can with code ... and whatever will
@@ -155,6 +158,11 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 
 ## 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
 
+**The order itself is SKILL.md's twelve phases (22 Nov 2026).** The numbered lessons below keep their numbers,
+because rules and the checklist cite them. Where a lesson's timing has changed, it says so. The short version: decide
+with words, sketches and grey-box HTML first; pay for pictures only after Tzvi picks the first screen (3aj.2); pay for
+clips only after his yes to the film as stills (3aa.35); one design board a build (3aj.8).
+
 **Build from the blueprint, never check afterwards** (Tzvi, 1 Nov 2026): after fetching the record,
 `node scripts/blueprint.mjs <build>` writes BLUEPRINT.md, every checklist rule as a step in build order with
 what the record decides filled in. Plan each stage (`--check <build> <stage>` passes) before building it,
@@ -175,11 +183,12 @@ tick lines as built; RULES.md is written from it at check-build and publish. Ful
    leave out what only their answers can fill; no placeholders on the page.
    Ask only for what is needed, or what would make the page significantly
    better (more photos, a menu detail). When answers come, slot them in.
-2b. Check every big photo's shape before the first draft (Tzvi, 27 Oct
-   2026). An opening or full-screen photo that is not 16:9 (laptop) or 9:16
-   (phone) is extended with `scrollcraft/starter/extend_photo.py` (pad, one
-   nano_banana_2 fill per shape at ~1.5 credits, paste, ultra; rules 3c.12),
-   never zoomed or framed. A real place keeps a crop and `data-crop-ok`.
+2b. Check every big photo's shape when the photos are first looked at (Tzvi,
+   27 Oct 2026). An opening or full-screen photo that is not 16:9 (laptop) or
+   9:16 (phone) is extended once the first screen is picked (3aj.2), with
+   `scrollcraft/starter/extend_photo.py` (pad, one nano_banana_2 fill per
+   shape, price from get_cost, paste, ultra; rules 3c.12), never zoomed or
+   framed. A real place keeps a crop and `data-crop-ok`.
 3. List every live-site write the build needs; ask for all at once. Check the
    listing's prices and currency against their menu first and flag mismatches;
    load the real menu with fixed product ids so the page's order form saves
@@ -187,7 +196,7 @@ tick lines as built; RULES.md is written from it at check-build and publish. Ful
    A listing with price tiers but no products cannot take orders at all (the
    order form 404s): load the products in the same build, and check-site SAVE
    fails a POST whose product ids the live shop does not list (Bake away, 28 Oct 2026).
-4. Mobbin and 21st per section before building (3g.17). **Every source before any idea**
+4. One study a build before building (3g.17). **Every source before any idea**
    (Tzvi, 28 Oct 2026): `REFERENCES.md` names every `docs/inspo` source, Inspo, Mobbin, 21st and the
    fingerprints, and `node scripts/check-references.mjs <build>` passes before any idea is shown or
    credit spent; a hook blocks Higgsfield generation until it does (full rules 0b.4).
@@ -199,8 +208,8 @@ tick lines as built; RULES.md is written from it at check-build and publish. Ful
    Confirm the motion as numbered steps ("1 floats, 2 snaps, 3 blasts apart,
    4 flies back, 5 drops in") and generate only once they are confirmed; ask
    whenever not 100% sure what is wanted.
-6. Generate in the background while writing the page; scripts keep the job
-   number and retry slow status checks.
+6. Clips only after Tzvi's yes to the film as stills (3aa.35) and after the opening passes with those stills (6a);
+   then in the background while the site is finished; scripts keep the job number and retry slow status checks.
 6a. **The whole page is right before the film goes in** (3u.11): build and check it with a still
    where the film will be, then put the film in and run the checks again. New motion is tried on a
    test page with buttons first (3u.12, `scrollcraft/starter/kit/test.html`).
@@ -426,7 +435,7 @@ Full text and reasons: `reference/full-rules.md` §3c.
     that part are drawn again and the rest are reused (Tzvi, 18 Oct 2026; a full
     take 4 min, a redo of one section 30 s). It records everything if the page's
     length or the stops changed. Paid
-    generation waits for the owner's yes on two or three style frames.
+    generation waits for its yes on the design board (3aj.8).
 12. **Everything fits on one screen**: each photo seen whole with its words
     and price, no block taller than the screen. Held screens: section 5 (pinned
     row); the measured check and the six screen sizes: 3p.6.
@@ -478,9 +487,9 @@ ribbon untied before the photos arrived, and the page had one effect.
 1. **A scroll effect plays while its subject is wholly on screen**: hold it
    on a stage that fits, or start once it is all in view. Never key it to the
    subject entering. Capture 0/25/50/75/100% on laptop, short laptop, phone.
-2. **Fill the effect budget**: one signature moment in steps, held where it fits 1280x650, otherwise playing as the page scrolls (a 3h film opening is that signature); at least
-   three accents (an arriving opening, a scroll-tied detail mid-page, a
-   closing payoff that answers the signature); quiet touches (eased reveals,
+2. **Fill the effect budget**: one signature moment in steps, held where it fits 1280x650, otherwise playing as the page scrolls (a 3h film opening is that signature);
+   the opening's arrival, the motion line's five moments (3e.16c) and any picked treatment that moves, no number
+   of accents asked; quiet touches (eased reveals,
    hover and press, tile lift). Listed in CONCEPT.md, ticked on the frames.
 3. **A held stage** is the screen minus the header and the phone bar;
    anything that travels out of it sits outside clipping frames.
@@ -505,7 +514,7 @@ ribbon untied before the photos arrived, and the page had one effect.
 Full text, timestamps and frames: `reference/full-rules.md` §3g, `docs/ui-videos/notes/`.
 
 1. **Style sheet first**: accent, ink, ground, two faces (headline and text; at most a third for one
-   label style), one radius, motion limits, in CONCEPT.md; every section follows it.
+   label style), one radius, motion limits, in CONCEPT.md; every section follows it. Since 22 Nov 2026 it is written in BRAND.md (3x.7), its one home; CONCEPT.md points to it.
 2. **AI-look tells banned**: default font, purple/two-colour gradient,
    exactly three identical cards, frosted glass everywhere, a headline a
    competitor could use.
@@ -551,11 +560,12 @@ Full text, timestamps and frames: `reference/full-rules.md` §3g, `docs/ui-video
 16. **The opening has a wow: something happens**: the rule, the test and the
     gate are 3n, the single home. The film that delivers it is 3h.
 
-17. **Unique effects from fresh Mobbin, 21st and Inspo searches** (the single
-    home of the fresh-search rule): one of each for every piece (the button,
-    the arrow, each card or list effect, each section), for this business,
-    before the effects library is opened; say for each pick where it came from
-    (a new search, named, or the library) in CONCEPT.md and the reply. An effect
+17. **Unique effects, from one study a build** (the single home of the
+    fresh-search rule; changed 22 Nov 2026): Mobbin, 21st, Inspo and Pinterest
+    are searched once for this business (REFERENCES.md), with a fresh search of
+    its own only for the first screen, the showpiece and the product card.
+    Other pieces come from the kit or the effects library; say for each pick
+    where it came from in CONCEPT.md and the reply. An effect
     needs its reason: one that says what a control does passes, one that only
     decorates does not. Nothing reused from the last two pages (check
     FINGERPRINTS).
@@ -578,7 +588,7 @@ bowl, flat wall, soft) lost to a site whose film fills the screen and travels.
 5. **Chapter lines**: 2 to 6 words per scene over the film (small, at an edge, see 9), their words,
    per section 4 (5b.3), measured at the brightest frame (amends "Nothing moves
    without a reason" for the film opening only).
-6. **Three concept stills before any clip**, the chosen one challenged once.
+6. **Concepts as a sketch sheet** (0b.5b), never as paid stills; the picked row becomes the film as stills, seen whole before any clip (3aa.35).
 7. **Seams checked** after rendering; a jumping join is regenerated.
 8. **After a lit film, a bold colour block** right after it.
 9. **Bright, and words off the action**: brightness is settled in 3h.11; lines
@@ -589,7 +599,7 @@ bowl, flat wall, soft) lost to a site whose film fills the screen and travels.
    (one shoot, one photo per option, sharp at its size), words and button.
 11. **Light it bright from the start, then measure**: prompts ask for bright,
    warm, soft light, subject fully lit, mid or light ground (never "dark" or
-   "moody" by default); run `scripts/brightness.py` on every film and still
+   "moody" by default); run `scripts/brightness.py` on every film and still (opening stills of a product: `check-light-pool.py` instead, 3aa.33)
    set (middle 33+, whole 22+, average 30+ of 100) and grade up or regenerate
    before building; view it on a phone in daylight. A dark ground only when the
    business's own look is dark, and then the subject is still lit; a product
@@ -891,7 +901,9 @@ written into the build notes with one line of proof each:
    colour, the hero, the order).
 4. **Side by side with a reference.** A screenshot of the first screen next to
    the closest Awwwards reference in docs/inspo for that kind of business; if
-   ours is plainly weaker, it is not shown.
+   ours is plainly weaker, it is not shown. Since 22 Nov 2026 this is done once,
+   by the compare sheet (3ag.6) and the two judges (3aj.4): the answer names
+   compare.jpg and the rating.
 5. **The one-sentence test, told to someone else**: "you land and ___
    happens". If the sentence is about a decoration ("a cloud puffs"), it
    fails; it must be about them ("you pick a shade and her real work fills the
@@ -1008,10 +1020,10 @@ rules." The originality that worked came from the business's own words (The
 Whipped Cup's "your cup, your cloud" became a walk on the clouds), and the
 bland versions were built without opening the saved inspiration at all.
 
-Before any section is built, the build folder gets `CONCEPT.md`: three or
-more opening ideas, each citing a saved effect from `docs/inspo` by its
-picture; one idea marked "Own:" from the business's own words or world (its
-tagline, its process, its place); which was chosen and why; the five wow-gate
+Before any section is built, the build folder gets `CONCEPT.md`: which idea
+was chosen and why (the ideas themselves, three or more with one "Own:", live
+in IDEAS.md, 0b.4; only a build with no IDEAS.md keeps them here under
+`## Ideas`); the five wow-gate
 answers (3n); a `## Effects` line per kind with its id and where it came from
 (a named 21st, Mobbin or Inspo search, or a `docs/inspo` picture); and the
 passing line from check-fingerprints (3p).
@@ -1020,8 +1032,8 @@ refuses to put a NEW page live without it. Read the saved effects for the
 kind of business (the part files' "For ..." sections and pictures) every
 time; never design from defaults.
 
-CONCEPT.md is also where the style sheet (3g.1), the effect budget (3f.2) and
-the effect sources (3g.17) are written. `BRIEF.md` is retired: CONCEPT.md
+CONCEPT.md is also where the effect budget (3f.2) and the effect sources
+(3g.17) are written. The style sheet is BRAND.md (3x.7), its one home. `BRIEF.md` is retired: CONCEPT.md
 replaces it everywhere (Tzvi, 22 Oct 2026).
 
 ## 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
@@ -1178,7 +1190,8 @@ Full text: reference/full-rules.md section 3x. A product you can turn, made from
 3x.11); numbers that count, real figures only (3x.2); tabs that change one panel in place (3x.3); choices side by
 side with the same measures (3x.4); a light that follows the visitor, dark sites only, with an off button (3x.5);
 at most one sentence that lights up as you read (3x.6); **BRAND.md before the first picture** (3x.7: colours and
-their uses, two fonts, logo, textures, design bans); **web basics on every page** (3x.8: skip link, one h1, focus
+their uses, two fonts, logo, textures, design bans; since 22 Nov 2026 also `## For ads`, 3ak.3, and
+`## Image style`, 3al.6); **web basics on every page** (3x.8: skip link, one h1, focus
 rings, labelled fields; check-web-basics); a request form that writes its summary as you fill it (3x.9); the price
 stays in view while the form is filled (3x.10); a thin progress line only on long pages (3x.12); one type scale
 and one spacing scale (3x.13); gift cards bought on the page (3x.14).
@@ -1192,9 +1205,10 @@ not a longer description (3y.3).
 
 ## 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
 
-Full text: reference/full-rules.md section 3z; frames in docs/inspo/videos-2026-11-10/sites. One card the visitor
-would use hangs a third to a half over the edge of the next section on the home page, whole on a phone (3z.1). The
-first screen is three layers: a real photo, film or shape at the back, words and card in the middle, the main
+Full text: reference/full-rules.md section 3z; frames in docs/inspo/videos-2026-11-10/sites. A choice from the menu
+of 3ai: one card the visitor would use hangs a third to a half over the edge of the next section on the home page,
+whole on a phone (3z.1). When the picked first screen is layered, it
+is three layers: a real photo, film or shape at the back, words and card in the middle, the main
 button in front with the only soft shadow (3z.2). Where the answer depends on a choice, a free taste of at most
 three questions ends on a real answer and price from the record and carries it into the order (3z.3). Photos and
 films at their own brightness, a shade only behind words where contrast needs it (3z.4). A dark site has one light
@@ -1215,9 +1229,9 @@ Built by kit.opening_slides, slides.js and clipchain.py.
 ## 3bb. Small touches (Tzvi, 12 Nov 2026)
 
 Full text: reference/full-rules.md section 3bb; the 29 touches with their pictures in
-docs/inspo/subtle-touches-2026-11-12.md. Each new site picks at least three that fit its category and story, names them
-on a `- touches:` line in CONCEPT.md, never the same three as the site before; only true facts in them; never added to a
-site already live. Among them: the ground colour travelling with the product, a thin progress line with a live number,
+docs/inspo/subtle-touches-2026-11-12.md. A menu: a new site may pick the ones that fit its category and story; no
+number is asked. A touch that is there for looks counts as one of 3ai's three and is named on the `- treatments:`
+line. Never the same as the site before; only true facts in them; never added to a site already live. Among them: the ground colour travelling with the product, a thin progress line with a live number,
 a line that draws itself, one section flipping light to dark, the footer headline filling in, a highlight behind a price
 on hover, one signature button shape, cookie words in the brand's voice, a chapter counter in the corner, a small tag on
 the product picture, a small join card in the corner, who models the size. From Pinterest (docs/inspo/pinterest-touches-2026-11-12): the product as a letter of the word, the product handled
@@ -1236,7 +1250,7 @@ openings do it themselves. Every site, live ones included. Script: check-phone-o
 Full text: reference/full-rules.md section 3ad; the eight sites side by side in docs/inspo/sameness-2026-11-17. After
 the opening our sites were all the starter: same menu bar, card grids, three steps, dark closing band.
 (1) At least two sections after the opening take a form only this business could have, shaped by its own data or main
-task, each on a `- signature: #id | what | from: ...` line in CONCEPT.md `## Body` (check-signature-body).
+task, each on a `- signature: #id | what | from: ...` line in CONCEPT.md `## Body` (check-signature-body); the showpiece (3ah.5) may be one of the two.
 (2) The menu bar, steps and closing band are written for this site, never the starter's markup in new colours
 (check-body-alike: SAME at 60% shared classed elements; footer excepted, 3v.1).
 (3) Home page rhythm after the opening: 2+ changes of ground, one headline 1.6x the others, one edge-to-edge picture or
@@ -1246,15 +1260,16 @@ its category in the anatomy study, on a `- sections:` line in `## Body`; no slot
 
 ## 3ae. One part leads into the next (Tzvi, 18 Nov 2026)
 
-Full text: reference/full-rules.md section 3ae. Our sections all stop at a straight edge.
-(1) At least one of the business's own pictures or objects sits across the line between two home sections, 48 px into
-each (mark a non-picture `data-cross`). (2) One object of the business's own, marked `data-travel` and planned on a
+Full text: reference/full-rules.md section 3ae. Our sections all stop at a straight edge. Both are choices from the
+menu of 3ai, judged only when the page marks them.
+(1) One of the business's own pictures or objects, marked `data-cross`, sits across the line between two home
+sections, 48 px into each. (2) One object of the business's own, marked `data-travel` and planned on a
 `- travels:` line in `## Body`, goes down the page with the visitor for a screen and a half and reaches another
 section, never covering words; still under reduced motion. Both checked by check-seams (CROSS, TRAVEL). New sites only.
 
 ## 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
 
-Full text: reference/full-rules.md section 3af; examples in docs/inspo/awwwards-food-2026-10-18. Each planned on its
+Full text: reference/full-rules.md section 3af; examples in docs/inspo/awwwards-food-2026-10-18. (1), (3) and (4) are choices from the menu of 3ai; (2) is used whenever the owner gave the words and a photo. Each planned on its
 line in CONCEPT.md `## Body` before layout, judged by LOOK. (1) `- mark:` one drawn detail from their logo or product
 (or a mascot from them) doing a job in 3+ places (bullets, pointer, chosen state, dividers), never stock icons; Burrito
 Madre, Buck's Sauce. (2) `- owner:` a short signed note in the owner's own words beside their real photos, like Pizza
@@ -1268,7 +1283,7 @@ weapon". New sites only.
 Full text: reference/full-rules.md section 3ag; the picture in docs/inspo/compare-2026-11-19. Cakes by Tova passed every
 check and still looked worse than real bakery sites. (1) Product photos look shot for a shop: plain ground, soft
 light, no foil, counter or flash; re-light the owner's photos with relight_photo.py, check each with
-product-match-sheet.py. Decided at step 2: each photo shop-ready, re-light, or styled shot (the same bake in a styled
+product-match-sheet.py. Marked in phase 1, paid for in phase 6 after the first screen is picked: each photo shop-ready, re-light, or styled shot (the same bake in a styled
 scene of the references); the opening and showpiece photos styled unless hers already match the references. (2) Every priced product is a big photo card, 200 px+ at a laptop (check-look SMALL).
 (3) Two grounds taking turns, three at most (check-look GROUNDS). (4) The opening photo still fills the screen (3h.1),
 extended on its plain side, and the words stand on that plain ground, never on a panel over the product. (5) One headline size with a small label above, plus 3ad.3's one jump (check-look
@@ -1287,23 +1302,29 @@ products: pictures a third of the first screen, photos 240 px+ (check-five SHOPT
 shop_page(featured=True), one big photo of the popular item beside the title. (4) Paragraphs, product names and
 prices 16 px+ at a laptop (check-five TEXT). (5) One showpiece from a top site of the category, `- showpiece:` in
 CONCEPT.md (check-compared). (6) Every priced listing item can be ordered, or is in not-sold.txt
-(check-listing-prices). (7) REFERENCES.md `## Why they are a 5` before any idea; a judge rates the site beside two
-real top sites and review.md says `Rating: 4/5` or better before anyone sees it (check-build; real award winners score 4 to
-4.5). New sites only.
+(check-listing-prices). (7) REFERENCES.md `## Why they are a 5` before any idea (check-compared). The rating is
+3aj.4's two judges; real award winners score 4 to 4.5. New sites only.
 
 ## 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
 
 Full text: reference/full-rules.md section 3ai. Beyond photos, grounds and type, a site uses three decorations at most
-(edges, ribbons, tinted cards, tilted prints, patterns, a mark as ornament, a travelling object), chosen at step 6 from
-the references and listed on CONCEPT.md's `- treatments:` line; a fourth needs Tzvi's yes. 3ae.2, 3af.1, 3af.3 and 3af.4
-each count as one when used. Labels above headings are plain small type. check-compared TREATMENTS. New sites only.
+(edges, ribbons, tinted cards, tilted prints, patterns, a mark as ornament, a travelling object), chosen with the page
+plan (phase 5) and listed on CONCEPT.md's `- treatments:` line; a fourth needs Tzvi's yes. **They are a menu, not a
+list to complete** (22 Nov 2026): pick from what the picked first screen and the references do. The menu: a crossing
+(3ae.1), a travelling object (3ae.2), a drawn mark (3af.1), loose photos (3af.3), colour cards (3af.4), a card over
+an edge (3z.1), live art in code (3ak.1), the six openings and effects of 3al.7 (by category fit), a 3bb touch that
+is there for looks. One not picked is `n/a: not picked (treatments)`. Not counted:
+the owner's note (3af.2), a touch that only states a true fact, plain labels above headings. Still asked of every
+new site: order flow, basket, menu bar, footer, three facts, two signature sections (the showpiece may be one), the
+rhythm, the one touch (3p.5), and every honesty, phone, speed and accessibility rule. check-compared TREATMENTS.
+New sites only.
 
 ## 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
 
 Full text: reference/full-rules.md section 3aj. Not asked of a site published before 22 Nov 2026.
 1. Each REFERENCES.md picture an idea cites says `Take:` and `Skip:` (check-ideas).
-2. At step 6, three first screens are made as plain HTML, one per reference: same colours, fonts, words and photos,
-   grey boxes for pictures to be generated, only the layout differs. They are shown side by side, Tzvi picks one, and
+2. In phase 4, three first screens are made as plain HTML, one per reference: same colours, fonts, words and photos,
+   grey boxes for pictures to be generated, only the layout differs. They are part B of the design board (8), Tzvi picks one, and
    CONCEPT.md quotes him: `- first screens: a b c; Tzvi: "..."` (check-concept). This is the one options page 7.1
    allows.
 3. Before any idea, read docs/category-mistakes.md ("every kind" plus the business's kind). CONCEPT.md gets
@@ -1317,6 +1338,23 @@ Full text: reference/full-rules.md section 3aj. Not asked of a site published be
    shown or published with one open (judges.mjs).
 7. check-keyboard: focus never under a sticky bar, real toggles, tabular-digit prices (the starter's site.css does
    all three).
+8. One design board a build: `gen/board/index.html`, one artifact, the same link, on CONCEPT.md's `- board:` line.
+   Parts: A references, B three first screens, C the grey-box page and the film sketch (with its scroll timeline and
+   each scroll effect's start, midpoint and end, 3al.5), D the film as stills (end stills first, 3al.1). Tzvi says
+   yes four times: first screen, page plan and sketch (`- page plan: Tzvi: "..."`), film as stills, finished site.
+   Pictures are paid for after yes 1, clips after yes 3 (check-concept).
+
+## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
+
+Full text: reference/full-rules.md section 3ak. New sites only.
+1. A choice from the menu of 3ai: live art drawn in code behind the words, seeded from the business's name, in the
+   site's colours; bends round the pointer on mouse devices only, fewer lines on phones, still under reduced motion,
+   aria-hidden, words over it pass readable.mjs.
+2. Every scroll film has a scroll timeline: a `scroll` line per chain.json step (where in the scroll it starts and
+   ends, what moves, when its words come and go), written with the sketch sheet.
+3. BRAND.md has a `## For ads` part (colours, fonts, logo file, bans). Every ad for the business reads it (ad step
+   A27.1; ad-blueprint refuses an answer naming no BRAND.md that exists).
+4. No tilt, 3D, parallax or scroll effect on prices, totals, steppers, Add or the order button.
 
 ## 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
 
@@ -1333,7 +1371,7 @@ Full text: reference/full-rules.md section 3al; frames in docs/inspo/videos-rube
 5. Each scroll-tied effect is planned as three pictures on the design board: start, midpoint, end.
 6. BRAND.md `## Image style` (light, colour, mood, three colours given to three named objects) pasted at the END of
    every image prompt; one image model per set; one change per edit.
-7. On the menu of 3ai, each one of its three, chosen by 3t's category fit, never required: the split opening, the
+7. On the menu of 3ai (listed there), each one of its three, chosen by 3t's category fit, never required: the split opening, the
    branching hero (two offers), layered parallax from one photo (name behind the subject, PNG layers), the
    video-to-layers handoff, the panel wipe, and the light switch or cursor flashlight (only when the story is light).
 8. Intros on the first visit only, a few seconds; none on a menu, prices or the shop; parallax off on phones.

@@ -15,7 +15,7 @@ import { execFileSync } from 'child_process';
 const ref = process.argv[2] || 'HEAD';
 const base = process.argv[3];
 const git = (...a) => execFileSync('git', a, { encoding: 'utf8', maxBuffer: 1 << 28 });
-const list = new Set([...git('show', `${ref}:docs/rules-checklist.md`).matchAll(/^(R[0-9][0-9a-z]*\.[0-9]+)\s*\|/gm)].map((m) => m[1]));
+const list = new Set([...git('show', `${ref}:docs/rules-checklist.md`).matchAll(/^(?:- )?(R[0-9][0-9a-z]*\.[0-9]+)\s*(?:\||->)/gm)].map((m) => m[1]));
 const problems = [];
 const files = base ? git('diff', '--name-only', base, ref, '--', 'scrollcraft/builds') : git('ls-tree', '-r', '--name-only', ref, 'scrollcraft/builds');
 for (const f of files.split('\n').filter((f) => /^scrollcraft\/builds\/[^/]+\/RULES\.md$/.test(f))) {

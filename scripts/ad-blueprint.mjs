@@ -46,6 +46,7 @@ function read(file) {
 const SHEET_RULES = new Set(['A9.6']);
 const FIT_RULES = new Set(['A3.9']);
 const LOGO_RULES = new Set(['A4.6']);
+const BRAND_RULES = new Set(['A27.1']);   // the site's BRAND.md, read before any picture (page rules 3ak.3, 22 Nov 2026)
 const STRANGER_RULES = new Set(['A2.10']);
 const HEADLINE_RULES = new Set(['A2.11']);
 const SCORE_RULES = new Set(['A9.7', 'A10.7', 'A10.8']);
@@ -102,6 +103,11 @@ function problems(name, upTo, finished) {
       if (LOGO_RULES.has(it.id) && !/^(n\/a: no logo|built by )/i.test(g.plan)) {
         const files = [...g.plan.matchAll(/([\w./-]+\.(?:jpg|jpeg|png|webp|svg))/gi)].map((x) => x[1]);
         if (!files.some((f) => fs.existsSync(path.resolve(ROOT, f)))) out.push(`stage ${s.n}, ${it.id}: name the business's logo file on the ad (none of ${files.length ? files.join(', ') : 'no file'} exists), or "n/a: no logo"`);
+      }
+      // the site's brand carried into its ads: the answer names the site's BRAND.md, and that file exists
+      if (BRAND_RULES.has(it.id) && !/^(n\/a: no custom site|built by )/i.test(g.plan)) {
+        const files = [...g.plan.matchAll(/([\w./-]*BRAND\.md)/g)].map((x) => x[1]);
+        if (!files.some((f) => fs.existsSync(path.resolve(ROOT, f)))) out.push(`stage ${s.n}, ${it.id}: name the site's BRAND.md (scrollcraft/builds/<folder>/BRAND.md) and what this ad takes from it, or "n/a: no custom site"`);
       }
       if (SHEET_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
         const files = [...g.plan.matchAll(/([\w./-]+\.(?:jpg|jpeg|png|webp))/gi)].map((x) => x[1]);
