@@ -54,11 +54,11 @@ const $ = (id) => document.getElementById(id);
 const CM = '../chicken-munch-chanukah-moving/';
 // the Chicken Munch film's cut, with their bagels in the shots where the product is
 const SHOTS = [
-  { at: 0.0, dir: CM + 'c1', from: 0.4, speed: 1.4 },    // he searches the jars
-  { at: 1.4, dir: CM + 'c2', from: 0.9, speed: 1.6 },    // and finds the glowing oil
-  { at: 2.6, dir: 'd3', from: 0.3, speed: 1.2 },         // and turns: their bagels on the table; he weighs it
-  { at: 4.2, dir: CM + 'c4b', from: 0.3, speed: 1.2 },   // and tosses the oil over his shoulder
-  { at: 5.3, dir: 'd6', from: 0.0, speed: 1.4 },         // and walks out holding their pack with the bagels
+  { at: 0.0, dir: CM + 'c1', from: 0.4, speed: 1.5 },    // he searches the jars
+  { at: 1.1, dir: CM + 'c2', from: 0.9, speed: 1.7 },    // and finds the glowing oil
+  { at: 2.1, dir: 'd3', from: 0.3, speed: 1.0 },         // and turns: their bagels on the table; he weighs it, long enough to read (Tzvi 23 Nov)
+  { at: 4.8, dir: CM + 'c4b', from: 0.3, speed: 1.3 },   // and tosses the oil over his shoulder
+  { at: 5.7, dir: 'd6', from: 0.0, speed: 1.6 },         // and walks out holding their pack with the bagels
   { at: 6.6, dir: 'c5', from: 0.0, speed: 1.0 },         // and the three eat
 ];
 const show = async (dir, sec) => {
@@ -81,17 +81,20 @@ window.render = async (t) => {
     if (!hold.src.endsWith(src)) { hold.src = src; await hold.decode().catch(() => {}); }
   }
   hold.style.opacity = t >= HOLD ? 1 : 0;
-  // the bubble pops up while he thinks: the jug, then the bagels, then the bagels win (it pops at 4.0)
-  const b = $('bubble'), inB = K.outBack(K.at(t, 2.85, 0.3)), outB = K.at(t, 3.95, 0.2);
-  b.style.opacity = t >= 2.85 && t < 4.2 ? Math.min(1, inB * 1.5) * (1 - outB) : 0;
-  b.style.transform = `scale(${(0.4 + 0.6 * inB) * (1 + 0.25 * outB)})`;
-  const bag = t >= 3.4;                                   // jug first, then the bagels
+  // the bubble while he weighs it: oil, bagels, oil, bagels, then the bagels win and it pops (Tzvi 23 Nov:
+  // "it doesn't show the decision for much"). Each swap wobbles the bubble so the back-and-forth reads.
+  const b = $('bubble'), inB = K.outBack(K.at(t, 2.3, 0.3)), outB = K.at(t, 4.55, 0.2);
+  const SW = [2.3, 2.9, 3.45, 3.95], k = SW.filter((x) => t >= x).length - 1;
+  const wob = k >= 0 ? Math.sin(Math.min(1, (t - SW[k]) / 0.25) * Math.PI) * (k === 3 ? 0.12 : 0.06) : 0;
+  b.style.opacity = t >= 2.3 && t < 4.8 ? Math.min(1, inB * 1.5) * (1 - outB) : 0;
+  b.style.transform = `scale(${(0.4 + 0.6 * inB) * (1 + wob + 0.25 * outB)}) rotate(${(k % 2 ? 1 : -1) * wob * 30}deg)`;
+  const bag = k % 2 === 1;                                // oil, bagels, oil, bagels
   $('bjug').style.opacity = bag ? 0 : 1; $('bbag').style.opacity = bag ? 1 : 0;
   $('topshade').style.opacity = end ? K.at(t, s.at, 0.4) : 0;
   $('footshade').style.opacity = end ? K.at(t, 6.6, 0.4) : 0;
-  slam($('h1'), t, 6.9); slam($('h2'), t, 7.2);
+  slam($('h1'), t, 6.8); slam($('h2'), t, 7.1);
 
-  $('logo').style.opacity = K.at(t, 6.45, 0.4);
-  K.footIn(t, 6.45);   // the QR is whole by 6.85 s and still for over 3 s (A10.3)
+  $('logo').style.opacity = K.at(t, 6.4, 0.4);
+  K.footIn(t, 6.4);   // the QR is whole by 6.8 s and still for over 3 s (A10.3)
 };
 </script></body></html>
