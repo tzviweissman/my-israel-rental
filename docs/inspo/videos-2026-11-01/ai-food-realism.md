@@ -120,3 +120,15 @@ Per-line origin: shot/lens/camera (1, 3), single action and end-frame (3, 2), te
 
 ## Handoff note
 Frame work was at 640 px; fine detail (e.g. whether syrup reads glassy at full 4K) was judged at that size. Model names in the Dan Kieft transcript are auto-caption mangled ("Cidence", "Flux 3", "Sea Dream", "Clink"); version numbers like Seedance 2.5, Kling 3.0/4.0 are as heard and may not match real products.
+
+## Added 23 Nov 2026: hands come from the far side (Burnt Meatboards)
+
+At a three-quarter camera (the board seen from the front and above, about 35 degrees), hands that enter from the
+camera's side, the bottom edge, have to pass right in front of the lens. MiniMax H3 drew them huge, with bare
+forearms across the frame, and each hand hid the spot it was laying, so pieces seemed to appear under it. Asking for
+small hands and long gloves made it worse: whole black arms filled the frame. What worked: the hands reach in over
+the board's far edge, "from a cook standing across the table facing the camera, out of frame above". They stay at
+true size, the board stays in view, and each piece is seen landing. Top-down shots (pin 08 in
+`docs/inspo/pinterest-burnt-reveal-2026-11-23`) can bring hands in from any side. The prompts are in
+`scrollcraft/builds/burnt-meatboards/gen/fire_clip.py` (HANDS, takes 1 to 3 noted above it). On a tall phone frame the
+dark space above the board still shows the forearms coming down.

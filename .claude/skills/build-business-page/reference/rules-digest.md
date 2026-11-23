@@ -1183,7 +1183,7 @@ picture (3w.8). **The prompt shape (3w.9):** shot length, lens, camera path, lig
 it lands, texture words, "Do not" lines; start from a proven prompt in docs/prompts/README.md. **Spend on the
 pictures, generate the clip once (3w.10):** stills made right first, one clip at full quality, simple motion in
 code, a nearly-right clip trimmed not remade, and the brief's "## Clip plan" written before the first clip
-(film-gate refuses without it); two tries at most. A refused close-up gets a step back, not new words (3w.11);
+(film-gate refuses without it); two tries at most; two or more clips of an unproven move: one first, checked, then the rest. A refused close-up gets a step back, not new words (3w.11);
 biting and chewing are not solved (3w.12). **On the page:** the scrub ends where the motion ends (3w.13); the
 film's last frame is the next section's picture (3w.14). **Places and materials (3w.15):** a generated place or
 material is checked beside a real photograph at full size before any clip ("## Looks real" in the brief).
@@ -1384,7 +1384,7 @@ Full text: reference/full-rules.md section 3al; frames in docs/inspo/videos-rube
    every image prompt; one image model per set; one change per edit.
 7. On the menu of 3ai (listed there), each one of its three, chosen by 3t's category fit, never required: the split opening, the
    branching hero (two offers), layered parallax from one photo (name behind the subject, PNG layers), the
-   video-to-layers handoff, the panel wipe, the light switch or cursor flashlight (only when the story is light), a custom cursor and the photo sphere.
+   video-to-layers handoff, the panel wipe, the light switch or cursor flashlight (only when the story is light), a custom cursor, the photo sphere, and made by hand (hands from the far side lay a film's pieces, for businesses that make things by hand).
 8. Intros (a screen before the page, not the opening's arrival, a film's first event or a phone clock) on the first visit only, a few seconds; none on a menu, prices or the shop; parallax off on phones.
 9. Before a risky change, write back what you understood; build each section from its own reference picture, still
    first, motion second.

@@ -29,33 +29,33 @@ Sections (line each starts on; read with that offset):
 - 1960: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
 - 2031: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
 - 2115: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 2226: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 2320: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 2345: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 2385: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2662: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2689: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2757: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2774: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2820: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2843: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2876: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2925: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
-- 3009: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
-- 3053: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3154: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3194: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3280: 4. What is reported to the owner instead (content gaps)
-- 3289: 5. How to write
-- 3338: 5a. Lessons from the practice pages
-- 3369: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3418: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3435: 6. Playbooks for the most common businesses
-- 3555: 7. Choosing the three options (automatic page builder only)
-- 3579: 8. Photos, video and the tools
-- 3804: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3874: 9. The scroll sections: what the practice pages become
-- 3910: 10. Open decisions (need Tzvi)
+- 2232: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 2326: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 2351: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 2391: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 2668: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2695: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2763: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2780: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2826: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2849: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2882: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2931: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
+- 3015: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
+- 3059: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
+- 3160: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3200: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3295: 4. What is reported to the owner instead (content gaps)
+- 3304: 5. How to write
+- 3353: 5a. Lessons from the practice pages
+- 3384: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3433: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3450: 6. Playbooks for the most common businesses
+- 3570: 7. Choosing the three options (automatic page builder only)
+- 3594: 8. Photos, video and the tools
+- 3819: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3889: 9. The scroll sections: what the practice pages become
+- 3925: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2195,6 +2195,12 @@ before paying, frosted or shaded text over film, the phone loop) is not repeated
        - If it is nearly right: what gets trimmed or dissolved from the still instead of a new clip.
        A clip that fails twice means the idea is wrong (rule 3h.19): stop and take it back to Tzvi
        rather than a third roll.
+    6. **One clip of a new move first** (Tzvi, 23 Nov 2026, "do all 3", after Burnt): when a film needs two or
+       more clips of a move whose prompt is not yet proven in `docs/prompts/README.md` (hands laying pieces, a
+       pour, a new camera path), make one of them, check it at 4+ fps, and only then roll the rest with what it
+       taught. Clips of a proven move, and a film of one clip, are rolled as planned. Burnt's eight hand clips went
+       out at once and all eight had the same fault (hands huge, from the camera's side): 96 credits, where one
+       test clip would have cost 12.
 11. **A refused close-up gets a step back, not new words.** Macro shots of warm, soft surfaces were refused
     as unsafe twice. If a food close-up is refused, move the camera back a little. (1 video.)
 12. **Biting, chewing and tearing are not solved.** None of the seventeen shows a convincing one; the one
@@ -3264,6 +3270,15 @@ as his credit prices or model verdicts. Frames below are in that folder. None is
      the viewer, the logo inside (video 23; `mRYHgnnrCks-clares-photo-sphere-around-logo-a.png`). Only for a business whose work is many good photos
      (events, decor, balloons); never on the shop or near prices; a plain grid of the same photos on phones and under
      reduced motion.
+   - **Made by hand** (Tzvi, 23 Nov 2026, Burnt Meatboards: "Option b with hand setting it up like the inspo",
+     "Gloved"; Burnt is the worked example): when a film has to bring a product's pieces onto the scene (a board,
+     a cake, a bouquet, a tray), hands lay them into place in a few short moves instead of the pieces falling or
+     appearing. The hands reach in from the far side of the frame (from behind the table, like someone serving
+     across it), so they stay small and the product stays in view; each piece is seen as it touches down; each move
+     is one clip between two stills of the arrangement (made by lifting groups off the finished still with an image
+     edit, keeping only what the edit took away). Gloves (matte black for meat and grill) unless the owner's own
+     hands are filmed. Only for a business that makes things by hand; never as a decoration on a page that has no
+     film (pin `docs/inspo/pinterest-burnt-reveal-2026-11-23/08.jpg`; `docs/inspo/product-films-2026-10-21/platter-build-9.jpg`).
    Checked by LOOK, and the count by check-compared TREATMENTS as for every decoration.
 
 8. **Restraint.** An intro (a screen shown before the page; not the opening's arrival, a film's first event or a phone opening's clock, which play on every visit) plays on the first visit only and lasts a few seconds. No intro or reveal on an
