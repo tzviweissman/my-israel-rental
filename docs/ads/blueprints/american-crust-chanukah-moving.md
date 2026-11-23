@@ -25,7 +25,9 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
 - [ ] A28.1 The look is chosen before anything is built: one cheap sample still of the same moment in each look that fits the idea (drawn flat, 3D animated film, real photo), shown to Tzvi side by side; the answer names the look he chose and the sample sheet.
   plan: the look was chosen by Tzvi on 22 Nov 2026 as the same 3D animated film look as the Chicken Munch Chanukah ad ("make a similar gif video", "just make it an american crust film"); the glowing-jar still is made first and checked before the rest.
 - [ ] A28.2 A product rebuilt in a generated scene keeps its own label: the real label or sticker, cut from their photo, is laid over the rebuilt one on the still ad and on frames where it holds still. The answer names the label file, or n/a: the product is their own photo.
-  plan: their real label cut from frontend/public/pages/american-crust/assets/bagel-dough.webp, laid over the rebuilt pack on the still ad and where it holds still.
+  plan: their real label (label.png) cut from frontend/public/pages/american-crust/assets/bagel-dough.webp, laid over the rebuilt pack on the still ad; in the moving shots (d3, d6, c5) fitted frame by frame with scripts/label-fit.py onto the clip's own label, in the room's light (Tzvi, 23 Nov: the flat paste looked off).
+- [ ] A28.3 When a generated still or clip shows their product: their real product photo is given to the model as a reference image, and the prompt asks for the product with a plain panel in the label's main colour, the label's shape and place, and no writing on it. The answer names the product photo and the panel colour, or n/a: no product in a generated shot.
+  plan: their pack photo bagel-dough.webp was given as the reference (gen3d.py FILES "pack"); the stills were made before this rule, so the model drew its own lookalike label, which label-fit covers. Next remake asks for a plain #FDB225 panel.
 
 ## 2. The words
 

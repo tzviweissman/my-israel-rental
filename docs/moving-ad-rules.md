@@ -154,7 +154,8 @@ the transform that puts B's circle on A's at the cut, then B eases to its own pl
 the cut will land. Within 40px and 10% B is used as it is; the cholent's first bowl was 241px off and was remade by eye.
 
 Each shot's look is chosen before any shot is made (A28.1): Chicken Munch's Chanukah ad went drawn first, then 3D. And a
-product rebuilt in the generated shots keeps its real label laid over it wherever it holds still (A28.2).
+product rebuilt in the generated shots keeps its real label laid over it wherever it holds still (A28.2), fitted
+frame by frame with scripts/label-fit.py onto a plain panel the still was asked to draw (A28.3).
 
 ## M15. A story flows, shot into shot (Tzvi, 23 Nov 2026)
 
@@ -171,10 +172,15 @@ hero, and every shot starts where the last one left off.
   that needs "meanwhile" or "suddenly, elsewhere" is cut or set up earlier.
 - **The payoff comes from inside the story.** What we end on (food on the table, the product in his hands) has been seen
   before it is used: the box on the table before he picks it up, the bagels on the table before they are eaten.
-- **A choice is shown.** When the idea is a decision, we see him weigh it (a thought bubble or his look going from one
-  to the other), then act on it, then hold what he chose.
+- **A choice is shown, in words.** When the idea is a decision, we see him weigh it for at least 2.5 seconds: a comic
+  thought cloud with words that ask the question ("Hmm... the oil or the bagels?"), then its answer ("Bagels!"),
+  then he acts on it and holds what he chose. Pictures alone in the bubble did not read as a decision, and 1.6 seconds
+  was too short to notice (Tzvi, 23 Nov 2026: "it should be a normal thought bubble with words").
 - **The same shots carry a new business.** A story that works is kept and re-cast with the next business's product,
   remaking only the shots their product is in (American Crust's film reused Chicken Munch's search, glow and toss).
 
 Checked by eye on the test frames before the full recording: lay the shots side by side and read them as one sentence
-(A10.17).
+(A10.17). Then, before the film is shown to anyone, watch the whole recording as a contact sheet, two frames a second,
+plus close-ups of the product wherever it shows, and fix what is seen first. The American Crust film was sent with its
+label pasted on flat and the drawn label showing under it, which one look at the sheet showed (Tzvi, 23 Nov 2026:
+"before you show me the video you should watch it").

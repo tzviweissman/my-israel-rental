@@ -888,3 +888,15 @@ When a generated scene rebuilds the business's product (their box in the temple)
 sticker, and close up it comes out slightly wrong. The real label, cut from their own photo, is laid over it on the
 still ad and on any frame where it holds still, so the brand reads exactly where people look last (A28.2). L.A.
 Cholent's tub label is the worked example.
+
+In a moving shot the label is fitted, not pasted. American Crust's first Chanukah film laid their label flat into a
+hand-tracked box: it looked stuck on, sat brighter than the lamp-lit room, and the model's own blurry label showed out
+from under it as he walked toward us. `backend/.venv/Scripts/python scripts/label-fit.py <clip.mp4> <frames> <label.png>`
+finds the clip's own label in every frame, warps the real one onto its four corners, a touch larger, and gives it that
+label's shading, a warm tint and the shine on top (A28.2).
+
+Better still, the fault is not made in the first place (A28.3): the still the clip starts from is generated with their
+real product photo as a reference image, and the prompt asks for a plain panel in the label's main colour where the
+label goes, with no writing. The model then draws no fake words to hide, the panel already turns and takes the light
+as he moves, and label-fit finds it every frame. This is also how the best 3D product films in our inspo look: the
+real pack in the hero's hands, not a lookalike.

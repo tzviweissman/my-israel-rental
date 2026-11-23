@@ -1,21 +1,27 @@
-"""Lay the real label onto the pack the clip already drew, frame by frame.
-The label is warped onto the corners of the clip's own yellow label (so it covers it whole, at its angle),
-then takes that label's light: its shading, its warm tint, its softness, and some of the plastic's shine.
-Usage: python label_fit.py out/d6.mp4 d6   (writes d6/0001.jpg ...)"""
-import sys, os, subprocess, cv2, numpy as np
+"""Lay a business's real label onto the product a generated clip drew, frame by frame (A28.2).
+The label is warped onto the corners of the clip's own label (so it covers it whole, at its angle), then takes that
+label's light: its shading, its warm tint, its softness, and some of the shine on top. A flat label pasted into a fixed
+or hand-tracked box looked stuck on, and the drawn label showed out from under it (American Crust, Tzvi 23 Nov 2026).
+The clip's own label is found by colour: a whole, filled, label-shaped patch of the label's main colour, so the still
+the clip starts from shows a plain panel in that colour where the label goes (A28.3).
+Usage: backend/.venv/Scripts/python scripts/label-fit.py <clip.mp4> <out frame folder> <label.png> [hue_lo hue_hi]
+  (hue in OpenCV's 0-180 scale; default 16 30, a golden yellow). Prints how many frames found it; the rest are
+  filled in from their neighbours, so check a contact sheet of the frames the ad uses."""
+import sys, os, shutil, subprocess, cv2, numpy as np
 
-src, dst = sys.argv[1], sys.argv[2]
+src, dst, lab_path = sys.argv[1], sys.argv[2], sys.argv[3]
+H_LO, H_HI = (int(sys.argv[4]), int(sys.argv[5])) if len(sys.argv) > 5 else (16, 30)
 os.makedirs(dst, exist_ok=True)
 tmp = dst + '_raw'
 os.makedirs(tmp, exist_ok=True)
 subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', src, '-vf', 'fps=30,scale=1080:1920', f'{tmp}/%04d.jpg'], check=True)
-label = cv2.imread(os.path.join(os.path.dirname(__file__) or '.', 'label.png'))
+label = cv2.imread(lab_path)
 lh, lw = label.shape[:2]
 names = sorted(os.listdir(tmp))
 
 def quad(img):
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    m = cv2.inRange(hsv, (16, 170, 170), (30, 255, 255))
+    m = cv2.inRange(hsv, (H_LO, 170, 170), (H_HI, 255, 255))
     m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
     cs, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     best = None
@@ -62,4 +68,5 @@ for i, n in enumerate(names):
     hi = np.clip((img.astype(np.float32) - 200) * 1.5, 0, 255) * 0.35
     out = img.astype(np.float32) * (1 - mask) + (lab + hi) * mask
     cv2.imwrite(f'{dst}/{n}', np.clip(out, 0, 255).astype(np.uint8), [cv2.IMWRITE_JPEG_QUALITY, 92])
+shutil.rmtree(tmp)
 print(dst, len(names), 'frames,', len(idx), 'found')

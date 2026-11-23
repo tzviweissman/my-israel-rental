@@ -1026,19 +1026,28 @@
   },
   {
    "id": "A28.2",
-   "rule": "A product rebuilt in a generated scene keeps its real label laid over it where it holds still",
+   "rule": "A product rebuilt in a generated scene keeps its real label laid over it; in a moving shot fitted with scripts/label-fit.py onto the clip's own label, never pasted flat",
    "how": ["ASK"],
-   "built_by": "docs/static-ad-rules.md section 28; the label cut from their photo, laid in code",
-   "confirmed_by": "LOOK at the still beside their photo",
+   "built_by": "docs/static-ad-rules.md section 28; scripts/label-fit.py for moving shots",
+   "confirmed_by": "LOOK at the still beside their photo, and at close-ups of the product on the contact sheet",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A28.3",
+   "rule": "A generated shot of their product starts from their real product photo, with a plain panel in the label's colour where the label goes",
+   "how": ["ASK"],
+   "built_by": "docs/static-ad-rules.md section 28; the gen script passes the product photo and asks for the blank panel",
+   "confirmed_by": "LOOK at the still: their product, a clean panel, no made-up writing",
    "retried": false,
    "status": "planned"
   },
   {
    "id": "A10.17",
-   "rule": "A moving ad's story flows: one place, one hero, each cut caused by the shot before, the payoff set up first",
+   "rule": "A moving ad's story flows: one place, one hero, each cut caused, the payoff set up first, a choice asked in words for 2.5s+, and the whole film watched as a contact sheet before it is shown",
    "how": ["ASK"],
    "built_by": "docs/moving-ad-rules.md M15; the story written as one 'and then' sentence per shot before any picture",
-   "confirmed_by": "LOOK: the test frames read side by side as that sentence",
+   "confirmed_by": "LOOK: the test frames read side by side as that sentence; the finished film's contact sheet and product close-ups",
    "retried": false,
    "status": "planned"
   }

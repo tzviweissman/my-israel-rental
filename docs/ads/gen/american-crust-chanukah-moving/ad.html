@@ -16,11 +16,12 @@ html,body{margin:0;background:#111}
 .l{position:absolute;left:0;top:0;width:1080px;height:1920px;object-fit:cover}
 #topshade{background:linear-gradient(#0a0d18e6 0,#0a0d18b8 720px,#0a0d1800 900px)}
 #footshade{background:linear-gradient(#14141400 1380px,#141414d8 1560px,#141414f2 1920px)}
-/* the thought bubble while he decides: the oil jug, then their bagels (M15: a choice is shown) */
-#bubble{position:absolute;left:470px;top:250px;width:420px;height:330px;opacity:0;transform-origin:20% 100%}
-#bubble .cloud{position:absolute;inset:0;background:#fff;border-radius:50%;box-shadow:0 10px 40px #0007}
-#bubble .p{position:absolute;left:70px;top:25px;width:280px;height:280px;border-radius:50%}
-#bubble .dot{position:absolute;background:#fff;border-radius:50%;box-shadow:0 6px 20px #0006}
+/* a comic thought cloud with words while he decides (M15; Tzvi 23 Nov: "a normal thought bubble with words") */
+#bubble{position:absolute;left:400px;top:230px;width:560px;height:330px;opacity:0;transform-origin:15% 100%;filter:drop-shadow(0 10px 30px #0008)}
+#bubble .c{position:absolute;background:#fff;border-radius:50%}
+#bubble .t{position:absolute;left:40px;right:40px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;color:#141414;font:700 58px/1.05 Barlow,sans-serif}
+#bubble .t b{font:92px/0.95 'League Gothic',Impact,sans-serif;text-transform:uppercase}
+#bubble .t.win b{color:#C98A00;font-size:120px}
 .h{position:absolute;left:0;right:0;text-align:center;font:156px/0.9 'League Gothic',Impact,sans-serif;text-transform:uppercase;color:#FEF7E5;text-shadow:0 6px 30px #000b}
 #h1{top:478px}#h2{top:618px;color:#FDB225}
 #small{position:absolute;left:40px;right:40px;top:700px;text-align:center;font-weight:700;font-size:40px;color:#FEF7E5;text-shadow:0 3px 14px #000c}
@@ -38,10 +39,15 @@ html,body{margin:0;background:#111}
   <div id="topshade" class="l"></div>
   <div id="footshade" class="l"></div>
   <div id="bubble">
-    <div class="dot" style="left:-60px;top:330px;width:44px;height:44px"></div>
-    <div class="dot" style="left:-10px;top:290px;width:66px;height:66px"></div>
-    <div class="cloud"></div>
-    <img id="bjug" class="p" src="think-jug.png" alt=""><img id="bbag" class="p" src="think-bagels.png" alt="">
+    <div class="c" style="left:-40px;top:350px;width:40px;height:40px"></div>
+    <div class="c" style="left:10px;top:300px;width:62px;height:62px"></div>
+    <div class="c" style="left:40px;top:60px;width:260px;height:230px"></div>
+    <div class="c" style="left:170px;top:0;width:250px;height:220px"></div>
+    <div class="c" style="left:300px;top:50px;width:250px;height:240px"></div>
+    <div class="c" style="left:110px;top:110px;width:330px;height:210px"></div>
+    <div class="c" style="left:0;top:120px;width:200px;height:170px"></div>
+    <div id="tq" class="t"><span>Hmm... the oil</span><b>or the bagels?</b></div>
+    <div id="tw" class="t win"><b>Bagels!</b></div>
   </div>
   <div id="h1" class="h">Not all decisions</div><div id="h2" class="h">need to be hard.</div>
 
@@ -84,12 +90,12 @@ window.render = async (t) => {
   // the bubble while he weighs it: oil, bagels, oil, bagels, then the bagels win and it pops (Tzvi 23 Nov:
   // "it doesn't show the decision for much"). Each swap wobbles the bubble so the back-and-forth reads.
   const b = $('bubble'), inB = K.outBack(K.at(t, 2.3, 0.3)), outB = K.at(t, 4.55, 0.2);
-  const SW = [2.3, 2.9, 3.45, 3.95], k = SW.filter((x) => t >= x).length - 1;
+  const SW = [2.3, 2.95, 3.5, 3.95], k = SW.filter((x) => t >= x).length - 1;
   const wob = k >= 0 ? Math.sin(Math.min(1, (t - SW[k]) / 0.25) * Math.PI) * (k === 3 ? 0.12 : 0.06) : 0;
   b.style.opacity = t >= 2.3 && t < 4.8 ? Math.min(1, inB * 1.5) * (1 - outB) : 0;
   b.style.transform = `scale(${(0.4 + 0.6 * inB) * (1 + wob + 0.25 * outB)}) rotate(${(k % 2 ? 1 : -1) * wob * 30}deg)`;
-  const bag = k % 2 === 1;                                // oil, bagels, oil, bagels
-  $('bjug').style.opacity = bag ? 0 : 1; $('bbag').style.opacity = bag ? 1 : 0;
+  const win = t >= 3.95;                                  // the question, then the answer
+  $('tq').style.opacity = win ? 0 : 1; $('tw').style.opacity = win ? 1 : 0;
   $('topshade').style.opacity = end ? K.at(t, s.at, 0.4) : 0;
   $('footshade').style.opacity = end ? K.at(t, 6.6, 0.4) : 0;
   slam($('h1'), t, 6.8); slam($('h2'), t, 7.1);
