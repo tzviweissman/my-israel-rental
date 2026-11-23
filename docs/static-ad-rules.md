@@ -892,8 +892,11 @@ Cholent's tub label is the worked example.
 In a moving shot the label is fitted, not pasted. American Crust's first Chanukah film laid their label flat into a
 hand-tracked box: it looked stuck on, sat brighter than the lamp-lit room, and the model's own blurry label showed out
 from under it as he walked toward us. `backend/.venv/Scripts/python scripts/label-fit.py <clip.mp4> <frames> <label.png>`
-finds the clip's own label in every frame, warps the real one onto its four corners, a touch larger, and gives it that
-label's shading, a warm tint and the shine on top (A28.2).
+finds the clip's own label once, warps the real one onto its four corners, a touch larger, and gives it that
+label's shading, a warm tint and the shine on top (A28.2). From there it follows the pack itself, tracking points on
+the pack from frame to frame, never the colour patch again: finding the patch afresh in every frame made the label
+slide and wobble on the pack, because the patch changes shape with hands, steam and shine (Tzvi 23 Nov: "the sticker
+is still moving around"). Tracked, it slid 0.3px a frame instead of 0.75, and never more than 1.1px instead of 3.6.
 
 Better still, the fault is not made in the first place (A28.3): the still the clip starts from is generated with their
 real product photo as a reference image, and the prompt asks for a plain panel in the label's main colour where the
