@@ -37,6 +37,7 @@ import path from 'node:path';
 import { checkReferences } from './check-references.mjs';
 import { checkIdeas } from './check-ideas.mjs';
 import { newerRules } from './rule-dates.mjs';
+import { judgeReview } from './judges.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 
@@ -114,6 +115,18 @@ export function checkConcept(dir) {
     const plan = (/^\s*[-*]\s*page plan\s*:(.*)$/im.exec(s) || [])[1] || '';
     if (!fs.existsSync(path.join(dir, 'gen', 'board', 'index.html')) || !/^https?:\/\//.test(board)) problems.push('Board: no gen/board/index.html, or no "- board: <its artifact link>" line in CONCEPT.md (3aj.8: one design board a build, the same link throughout)');
     if (!/["“][^"”]+["”]/.test(plan)) problems.push('Page plan: quote Tzvi\'s yes to the grey-box page ("- page plan: Tzvi: \\"yes, swap the third and fourth\\"") (3aj.8)');
+  }
+  if (!newer.has('R3aj.10')) {
+    // the mock-ups are judged before Tzvi sees them (rules 3aj.10, 23 Nov 2026): the newest judging in
+    // gen/board/judged.md rates 4 or more
+    const jf = path.join(dir, 'gen', 'board', 'judged.md');
+    const why = fs.existsSync(jf) ? judgeReview(fs.readFileSync(jf, 'utf8')).why : 'no gen/board/judged.md';
+    if (why) problems.push(`Judged: ${why}. Two fresh judges (judges.mjs --brief) score each first screen and the grey-box page before Tzvi sees them, one "## <what, date>" heading each in gen/board/judged.md with its Judge lines and "Rating: N/5" (3aj.10)`);
+  }
+  if (!newer.has('R3aj.11')) {
+    // a picture with words on it is planned around where the words sit (rules 3aj.11)
+    const w = (/^\s*[-*]\s*words on pictures\s*:(.*)$/im.exec(s) || [])[1] || '';
+    if (w.trim().split(/\s+/).length < 6) problems.push('Words on pictures: no "- words on pictures: <picture>: <where the words sit, and on what>" line, or "none" with why; a shade over a picture is the last resort (3aj.11)');
   }
   return problems;
 }

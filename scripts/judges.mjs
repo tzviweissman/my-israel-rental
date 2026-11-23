@@ -22,6 +22,7 @@
  *
  *   node scripts/judges.mjs --brief             prints the brief every judge is given, word for word
  *   node scripts/judges.mjs <build-folder>      prints the rating and the feedback state; exit 1 on a problem.
+ *   node scripts/judges.mjs <file.md>           rates one judging file, such as gen/board/judged.md (rules 3aj.10).
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -99,6 +100,13 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(im
   if (process.argv[2] === '--brief') { console.log(JUDGE_BRIEF); process.exit(0); }
   const dir = process.argv[2] && (fs.existsSync(process.argv[2]) ? process.argv[2] : path.join(ROOT, 'scrollcraft', 'builds', process.argv[2]));
   if (!dir) { console.error('usage: node scripts/judges.mjs <build-folder>'); process.exit(2); }
+  // a judging file on its own, such as a build's gen/board/judged.md (rules 3aj.10): only the rating, no feedback check
+  if (/\.md$/i.test(dir)) {
+    const j = judgeReview(fs.readFileSync(dir, 'utf8'));
+    console.log(j.rating !== undefined ? `rating ${j.rating}/5 (calibration ${j.off.toFixed(2)})` : 'no rating yet');
+    if (j.why) console.log(`- ${j.why}`);
+    process.exit(j.why ? 1 : 0);
+  }
   const review = path.join(dir, 'review.md');
   const j = fs.existsSync(review) ? judgeReview(fs.readFileSync(review, 'utf8')) : { why: 'no review.md' };
   const fb = feedbackProblems(dir);

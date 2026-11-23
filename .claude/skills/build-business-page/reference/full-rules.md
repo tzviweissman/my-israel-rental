@@ -43,19 +43,19 @@ Sections (line each starts on; read with that offset):
 - 2931: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
 - 3015: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
 - 3059: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3160: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3200: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3295: 4. What is reported to the owner instead (content gaps)
-- 3304: 5. How to write
-- 3353: 5a. Lessons from the practice pages
-- 3384: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3433: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3450: 6. Playbooks for the most common businesses
-- 3570: 7. Choosing the three options (automatic page builder only)
-- 3594: 8. Photos, video and the tools
-- 3819: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3889: 9. The scroll sections: what the practice pages become
-- 3925: 10. Open decisions (need Tzvi)
+- 3198: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3238: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3333: 4. What is reported to the owner instead (content gaps)
+- 3342: 5. How to write
+- 3391: 5a. Lessons from the practice pages
+- 3422: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3471: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3488: 6. Playbooks for the most common businesses
+- 3608: 7. Choosing the three options (automatic page builder only)
+- 3632: 8. Photos, video and the tools
+- 3857: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3927: 9. The scroll sections: what the practice pages become
+- 3963: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -3156,6 +3156,44 @@ is asked of a site published before 22 Nov 2026.
    and were one rebuild from being lost. `node scripts/check-built.mjs <build>` runs the script in place, compares, and
    puts the folder back (in check-build). Applies to sites first published after this rule; older sites drift from
    the starter and are spared.
+
+10. **The mock-ups are judged before Tzvi sees them, and before anything is built** (Tzvi, 23 Nov 2026: "is there a way to make it a 4-5 the first time without needing to redo it several times", then "Yes add all 4").
+   - When: the three first screens (2) and the grey-box page (8, part C), on every site started after this rule.
+   - Each is scored by two fresh judges given `node scripts/judges.mjs --brief`, beside the two top sites, exactly as
+     the finished site is (4). A first screen or page plan under 4 is fixed or replaced before Tzvi sees it.
+   - `gen/board/judged.md` holds one `## <what was judged, date>` heading per judging with its `Judge N:` lines and
+     `Rating: N/5`. The newest judging must rate 4 or more with no area under 3.5 (`node scripts/judges.mjs
+     <build>/gen/board/judged.md`).
+   - Why: Clean Plus was built from a preview nobody judged, scored 3.43, and the judges named the dim opening the
+     preview already showed; the fix then cost a rebuild and a full re-check instead of minutes of plain HTML.
+   - Checked by `scripts/check-concept.mjs` (Judged).
+
+11. **A picture with words on it is planned around where the words sit** (Tzvi, 23 Nov 2026: "is there a way to make it a 4-5 the first time without needing to redo it several times", then "Yes add all 4").
+   - When: a generated, re-lit or extended picture that words sit on or overlap (an opening, a band, a card).
+   - Its brief says where the words go and what is behind them: a quiet, even area (a shaded wall, plain floor, sky)
+     that keeps the words readable with no shade on top, or a layout where the words sit on their own ground (a
+     panel or card beside the picture). A shade over the picture is the last resort and never covers its light.
+   - Why: Clean Plus's sunlit wall sat behind the headline, so the words needed a 90% navy shade, which hid the sun
+     the photo was made for and kept "light" at 3.
+   - Checked by `scripts/check-concept.mjs`: CONCEPT.md's `- words on pictures:` line names, for each such picture,
+     where the words sit and on what.
+
+12. **The showpiece is full size in the mock-up** (Tzvi, 23 Nov 2026: "is there a way to make it a 4-5 the first time without needing to redo it several times", then "Yes add all 4").
+   - When: the grey-box page (8, part C) and every judging of it.
+   - The `- showpiece:` moment is drawn at its final size and place, with its motion described, never a small
+     placeholder, so the judges score it at its real strength.
+   - Why: Clean Plus's Jerusalem map was the idea every judge remembered, but it began as a small line in the close
+     band and reached full size only after two judgings.
+   - Checked by eye at the page-plan judging; the judges are told which part is the showpiece.
+
+13. **The reviewer is told what Tzvi already chose** (Tzvi, 23 Nov 2026: "is there a way to make it a 4-5 the first time without needing to redo it several times", then "Yes add all 4").
+   - When: the independent review (3r.2) of a site Tzvi has said yes to in parts.
+   - The reviewer's brief lists CONCEPT.md's quoted yeses, FEEDBACK.md's done items and the parts every site must
+     keep (three facts, the full footer, the menu, 3v). An item that only repeats one of those is written
+     "PASS (Tzvi chose: ...)" or "PASS (every-site rule: ...)", never FAIL; a real fault inside a chosen part still fails.
+   - Why: Clean Plus's reviewer failed the varied tiles Tzvi had chosen that day and the three facts and full footer
+     every site must have, which would have undone his choice or broken the rules.
+   - Checked by the review brief in SKILL.md phase 9.
 
 ## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
 

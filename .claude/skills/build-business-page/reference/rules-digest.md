@@ -41,13 +41,13 @@ Sections (line each starts on; read with that offset):
 - 1297: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
 - 1313: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
 - 1327: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
-- 1357: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
-- 1370: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 1392: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1400: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1433: 5a. Design and story (from rules 5a, 5b and 8)
-- 1463: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
-- 1486: 3a. (cont.) Look through it, fix it, then show it
+- 1364: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
+- 1377: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 1399: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1407: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1440: 5a. Design and story (from rules 5a, 5b and 8)
+- 1470: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
+- 1493: 3a. (cont.) Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section and item numbers match the full rulebook (since 22 Nov 2026), so "3g.13", "3h.11", "3b.2" and the like
@@ -1353,6 +1353,13 @@ Full text: reference/full-rules.md section 3aj. Not asked of a site published be
 
 9. A site made with gen/build.py is changed in its source and rebuilt, never in the files it writes (check-built,
    in check-build; sites published after 23 Nov 2026).
+10. The three first screens and the grey-box page are each judged by two fresh judges (judges.mjs --brief) before
+   Tzvi sees them; under 4 is fixed first. gen/board/judged.md, newest judging 4 or more (check-concept, Judged).
+11. A picture with words on it: its brief says where the words sit and on what, a quiet area or their own panel, so
+   no shade hides its light (CONCEPT.md `- words on pictures:`, check-concept).
+12. The showpiece is drawn full size, with its motion, in the grey-box page the judges score.
+13. The reviewer is given Tzvi's quoted yeses and the every-site parts; repeating one is "PASS (Tzvi chose: ...)".
+   (10 to 13: Tzvi, 23 Nov 2026; sites started after.)
 
 ## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
 

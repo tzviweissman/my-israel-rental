@@ -141,8 +141,11 @@ Prices are read with `get_cost` at the time, never from memory.
    layered parallax...), each as dramatic and premium as Tova's, so Tzvi picks between real alternatives. A picture still to be made is a plain grey picture
    of its final shape. A photo of the wrong shape
    sits whole, with grey where it will be extended. Show each as a laptop frame beside a phone frame (§3aa).
-   Run `check-says-offer.mjs`, `check-five.mjs` and `readable.mjs` on each; fix or drop one that fails. They
-   are part B of the board. On the next new site (Tzvi, 22 Nov 2026), one of the three tries the split
+   Plan each picture that words will sit on around where they sit (a quiet area or their own panel, never a shade
+   over the light), on CONCEPT.md's `- words on pictures:` line (§3aj.11).
+   Run `check-says-offer.mjs`, `check-five.mjs` and `readable.mjs` on each; fix or drop one that fails. Then two
+   fresh Sonnet judges score each screen with `judges.mjs --brief` beside the two top sites; fix any under 4 and
+   judge again before Tzvi sees them, the lines in `gen/board/judged.md` (§3aj.10). They are part B of the board. On the next new site (Tzvi, 22 Nov 2026), one of the three tries the split
    opening and one the panel wipe (§3al.7), both free code, set beside Ruben Stom's frames
    (`docs/inspo/videos-ruben-stom-2026-11-22/Op5kncXOL-A-split-intro-halves-opening.png`,
    `MJojygFwGjA-panel-rises-wipes-over-image-labels-up.png`), to see whether they stop our openings looking alike.
@@ -159,7 +162,8 @@ Prices are read with `get_cost` at the time, never from memory.
    phones (§3al.8). Each scroll-tied effect gets a start, midpoint and end picture on the board (§3al.5).
    Write `## Effects` with its `- touch:` line (§3p). Write the five wow answers (§3n); the fourth names the two sites
    and is finished at the judging. Build the home page from the starter with real words and real prices, and a plain grey picture, at the final shape, wherever a picture is
-   still to be made. Run the sameness checks now, while a change costs nothing: `check-body-alike.mjs`,
+   still to be made. Draw the showpiece at its final size and place, with its motion written beside it, never a small
+   placeholder (§3aj.12). Run the sameness checks now, while a change costs nothing: `check-body-alike.mjs`,
    `check-rhythm.mjs`, `check-heights.mjs`, `check-signature-body.mjs`, `check-fits.mjs`.
    With a film (`film=yes`): `node scripts/blueprint.mjs --check <build> film`, then the sketch sheet
    `gen/storyboard.png`, a row per concept, drawn to those rules (§0b.5b); the motion as numbered steps
@@ -167,6 +171,8 @@ Prices are read with `get_cost` at the time, never from memory.
    its own clip (rules 3h.21); the Enough line (3aa.31); the scroll timeline, a line for each scene saying
    where in the scroll it starts and ends, what moves, and when its words come and go (§3ak); and the
    question of how phones get the film (3aa.26). The grey-box page and the sketch sheet are part C of the board.
+   Two fresh judges score the grey-box page (told which part is the showpiece) before Tzvi sees it; under 4 is
+   fixed and judged again (§3aj.10, `gen/board/judged.md`, its newest judging 4 or more).
    **Gate, yes 2:** CONCEPT.md has `- page plan: Tzvi: "<his words>"` (§3aj.8). With a film, the brief quotes
    his picked row and its "Phones asked:" line. `node scripts/check-concept.mjs <build>` and
    `node scripts/blueprint.mjs --check <build> 6` pass, `check-compared.mjs` prints no SHOWPIECE, TREATMENTS or MOTION
@@ -230,7 +236,9 @@ Prices are read with `get_cost` at the time, never from memory.
    that did not build it score layout, light, colour, type, detail and motion from compare.jpg and the preview's
    contact sheet, one `Judge N:` line each in review.md; the median plus Tzvi's calibration is the `Rating:`, 4 or
    more with no area under 3.5 (§3aj.4). Then a Sonnet subagent that did not build the site uses it against
-   `docs/page-review-checklist.md`; fix every FAIL, it looks again (§3r.2). Finish the wow-gate answers (§3n). Do not also run
+   `docs/page-review-checklist.md`; fix every FAIL, it looks again (§3r.2). Its brief lists CONCEPT.md's quoted
+   yeses, FEEDBACK.md's done items and the every-site parts (three facts, full footer, menu): an item that only
+   repeats one of those is "PASS (Tzvi chose: ...)", never FAIL (§3aj.13). Finish the wow-gate answers (§3n). Do not also run
    `design-kit:design-loop` or `design-kit:page-conversion-review`: the reviewer and the judges do their job.
    **Gate:** `node scripts/check-build.mjs scrollcraft/builds/<folder>` prints "all N checks pass". It runs
    every script on every page, writes RULES.md from the blueprint, and runs check-rules, the judges and the

@@ -3560,6 +3560,47 @@
    "status": "built"
   },
   {
+   "id": "R3aj.10",
+   "rule": "The three first screens and the grey-box page are judged by two fresh judges before Tzvi sees them; under 4 is fixed first",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "Phases 4 and 5: judges.mjs --brief on each mock-up, lines in gen/board/judged.md",
+   "confirmed_by": "node scripts/check-concept.mjs <build> (Judged)",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.11",
+   "rule": "A picture with words on it is planned around where the words sit, so no shade hides its light",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Phase 6: the picture brief names where the words go and what is behind them; CONCEPT.md - words on pictures:",
+   "confirmed_by": "node scripts/check-concept.mjs <build> (Words on pictures) + readable",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.12",
+   "rule": "The showpiece is drawn full size, with its motion, in the grey-box page the judges score",
+   "how": [
+    "EYE"
+   ],
+   "built_by": "Phase 5: the grey-box page",
+   "confirmed_by": "LOOK at the page-plan judging",
+   "status": "planned"
+  },
+  {
+   "id": "R3aj.13",
+   "rule": "The reviewer is given Tzvi's quoted yeses and the every-site parts; a chosen part is never failed for being chosen",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "Phase 9: the reviewer's brief",
+   "confirmed_by": "LOOK at review.md",
+   "status": "built"
+  },
+  {
    "id": "R3ak.1",
    "rule": "A choice (3ai.2): live art drawn in code behind the words, seeded from the business's name, quieter on phones, still under reduced motion",
    "how": [
