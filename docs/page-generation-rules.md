@@ -43,19 +43,19 @@ Sections (line each starts on; read with that offset):
 - 2925: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
 - 3009: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
 - 3053: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3140: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3180: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3266: 4. What is reported to the owner instead (content gaps)
-- 3275: 5. How to write
-- 3324: 5a. Lessons from the practice pages
-- 3355: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3404: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3421: 6. Playbooks for the most common businesses
-- 3541: 7. Choosing the three options (automatic page builder only)
-- 3565: 8. Photos, video and the tools
-- 3790: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3860: 9. The scroll sections: what the practice pages become
-- 3896: 10. Open decisions (need Tzvi)
+- 3147: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3187: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3273: 4. What is reported to the owner instead (content gaps)
+- 3282: 5. How to write
+- 3331: 5a. Lessons from the practice pages
+- 3362: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3411: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3428: 6. Playbooks for the most common businesses
+- 3548: 7. Choosing the three options (automatic page builder only)
+- 3572: 8. Photos, video and the tools
+- 3797: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3867: 9. The scroll sections: what the practice pages become
+- 3903: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -3136,6 +3136,13 @@ is asked of a site published before 22 Nov 2026.
    - Checked by `scripts/check-concept.mjs` (Board, Page plan). Worked example: the first site built to it.
    - Rejected: paying for pictures at the photo step (Cakes by Tova's opening was built three times), and three
      photoreal concept stills (two were paid for and thrown away).
+
+9. **The site's files are what its build script writes** (Tzvi, 23 Nov 2026: "Do all 3"). A site made with
+   `gen/build.py` is changed in its source (`gen/build.py`, `gen/own.css`, `gen/*.js`), then rebuilt, never in the
+   files it writes (index.html, site.css, site.js...): Clean Plus's fixes went straight into site.css and index.html
+   and were one rebuild from being lost. `node scripts/check-built.mjs <build>` runs the script in place, compares, and
+   puts the folder back (in check-build). Applies to sites first published after this rule; older sites drift from
+   the starter and are spared.
 
 ## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
 

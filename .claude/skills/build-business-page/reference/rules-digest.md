@@ -41,13 +41,13 @@ Sections (line each starts on; read with that offset):
 - 1297: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
 - 1313: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
 - 1327: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
-- 1353: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
-- 1366: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 1388: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1396: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1429: 5a. Design and story (from rules 5a, 5b and 8)
-- 1459: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
-- 1482: 3a. (cont.) Look through it, fix it, then show it
+- 1356: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
+- 1369: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 1391: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1399: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1432: 5a. Design and story (from rules 5a, 5b and 8)
+- 1462: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
+- 1485: 3a. (cont.) Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section and item numbers match the full rulebook (since 22 Nov 2026), so "3g.13", "3h.11", "3b.2" and the like
@@ -1349,6 +1349,9 @@ Full text: reference/full-rules.md section 3aj. Not asked of a site published be
    each scroll effect's start, midpoint and end, 3al.5), D the film as stills (end stills first, 3al.1). Tzvi says
    yes four times: first screen, page plan and sketch (`- page plan: Tzvi: "..."`), film as stills, finished site.
    Pictures are paid for after yes 1, clips after yes 3 (check-concept).
+
+9. A site made with gen/build.py is changed in its source and rebuilt, never in the files it writes (check-built,
+   in check-build; sites published after 23 Nov 2026).
 
 ## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
 

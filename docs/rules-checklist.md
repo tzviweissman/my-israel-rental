@@ -6,15 +6,15 @@ Sections (line each starts on; read with that offset):
 - 76: 1. Facts and words
 - 107: 2. Opening
 - 190: 3. Sections and worlds
-- 288: 4. Photos and media
-- 319: 5. Prices and savings
-- 342: 6. Order and booking flow
-- 368: 7. Motion
-- 400: 8. Phone
-- 415: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
-- 422: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 433: 9. Finish
-- 438: Retired
+- 289: 4. Photos and media
+- 320: 5. Prices and savings
+- 343: 6. Order and booking flow
+- 369: 7. Motion
+- 401: 8. Phone
+- 416: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
+- 423: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 434: 9. Finish
+- 439: Retired
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -271,6 +271,7 @@ R3aj.5 | Each opening still's colour measured against its inspo (inspo-beside.py
 R3aj.6 | FEEDBACK.md holds Tzvi's exact corrections; none open, each done one with a proof file | 3aj.6 | script: `node scripts/judges.mjs <build>` (in check-build and publish-page)
 R3aj.7 | Focus never under a sticky bar, toggles are real checkboxes or switches, prices in tabular digits | 3aj.7 | script: `node scripts/check-keyboard.mjs <page urls>`
 R3aj.8 | One design board a build: gen/board/index.html published as one artifact, its link on CONCEPT.md's - board: line, and Tzvi's yes to the grey-box page plan quoted on the - page plan: line before the real site is built | 3aj.8 | script: `node scripts/check-concept.mjs <build>` (Board, Page plan)
+R3aj.9 | Every file the site's gen/build.py writes is what it writes now: changes made in the source, then rebuilt | 3aj.9 | script: `node scripts/check-built.mjs <build>` (in check-build)
 R3ak.1 | A choice (3ai.2): when picked, live art drawn in code behind the words is seeded from the business's name, uses only the site's colours, bends round the pointer on mouse devices only, has fewer lines on a phone, holds still under reduced motion, is aria-hidden and is never on the product photo, prices or order form; n/a when not picked | 3ak.1, 3ai | LOOK: laptop and phone, reduced motion on, plus script: readable for the words over it
 R3al.1 | Each clip's end still (made first: R3aa.27) names in its prompt the room for the words; a clip where only light, smoke or steam moves says "static locked-off camera, nothing moves except the light" | 3al.1 | LOOK: each clip's end still and its prompt in the brief; n/a with no film when:film
 R3al.2 | The scroll film lands softly: the playback rate eases down onto a sharp resting frame with no motion blur, never a hard stop or a pause that reads as a freeze | 3al.2 | LOOK: the opening scrolled to its end, laptop and phone, the frame it holds; n/a with no film when:film

@@ -20,7 +20,8 @@
  *   - done: "the iron floats away..." (22 Nov 2026) proof: gen/fire/film-sheet.jpg
  * A build with an open item, or a done item whose proof file is missing, is not shown or published.
  *
- *   node scripts/judges.mjs <build-folder>      prints the rating and the feedback state; exit 1 on a problem
+ *   node scripts/judges.mjs <build-folder>      prints the rating and the feedback state; exit 1 on a problem.
+ *                                              Run it before judging too: a NO PROOF line means ask the owner first.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -55,6 +56,21 @@ export function judgeReview(text) {
   return { why, rating, med, off };
 }
 
+// Does the home page show any proof (reviews, ratings) a visitor can see? Every top site we compare with does, and
+// without it the judges have not reached 4: Clean Plus was judged twice on 23 Nov 2026 (3.25, then about 3.25 again
+// after new pictures), both times marked down first for "no reviews, ratings or people". Said before judging, so the
+// owner is asked first instead of judging again (Tzvi, 23 Nov 2026: "Do all 3").
+export function proofGap(dir) {
+  const f = path.join(dir, 'index.html');
+  if (!fs.existsSync(f)) return '';
+  const seen = fs.readFileSync(f, 'utf8')
+    .replace(/<template[\s\S]*?<\/template>/gi, '')
+    .replace(/<(section|div)\b[^>]*\shidden\b[^>]*>[\s\S]*?<\/\1>/gi, '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ');
+  if (/\breviews?\b|★|\brated\b|\bstars?\b|\btestimonial/i.test(seen)) return '';
+  return 'NO PROOF: the home page shows no reviews or ratings; both top references show them and a 4 has not been reached without them. Ask the owner for reviews and their own photos (OWNER-QUESTIONS.md) before judging again';
+}
+
 export function feedbackProblems(dir) {
   const f = path.join(dir, 'FEEDBACK.md');
   if (!fs.existsSync(f)) return ['no FEEDBACK.md: Tzvi\'s corrections about this build, his exact words, one "- open:" or "- done: ... proof: <file>" line each, or "- none yet" (3aj.6)'];
@@ -75,5 +91,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(im
   const fb = feedbackProblems(dir);
   console.log(j.rating !== undefined ? `rating ${j.rating}/5 (calibration ${j.off.toFixed(2)})` : 'no rating yet');
   for (const p of [j.why, ...fb].filter(Boolean)) console.log(`- ${p}`);
+  const gap = proofGap(dir);
+  if (gap) console.log(`- ${gap}`);
   process.exitCode = j.why || fb.length ? 1 : 0;
 }

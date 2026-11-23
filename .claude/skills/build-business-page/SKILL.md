@@ -192,7 +192,8 @@ Prices are read with `get_cost` at the time, never from memory.
    A site with no film has no part D and no yes here: its gate is the product-match sheets.
 7. **Build the real site, with the stills where the film goes (free).** Plan the last stages first
    (`node scripts/blueprint.mjs --check <build>`), and tick lines as they are built. Build from the starter
-   (`scrollcraft/starter`, §3p.1) as a website, not a page: pages by kind, one menu bar, full footer, Shop with
+   (`scrollcraft/starter`, §3p.1) as a website, not a page. A site made by `gen/build.py` is changed in `gen/build.py`,
+   `gen/own.css` or `gen/*.js` and rebuilt, never in the files it writes (§3aj.9, check-built): pages by kind, one menu bar, full footer, Shop with
    steps, basket between pages, orders saved before WhatsApp (§3k, §3v). While building, follow: facts and
    claims (§2), copy (§5), the first screen (§3g.13, §3ah), the category checklist and the sections every page has (§3b, §3), design and
    persuasion (§3c, §3e, §3g, §3i, §3s), honest deals and calm prices (§3j, §3ak), similar products (§3l),
@@ -223,7 +224,8 @@ Prices are read with `get_cost` at the time, never from memory.
    look at its contact sheet. Render at the six sizes of §3p.6, both languages, reduced motion, phones as phones
    (§3a). Run `node scripts/compare-sheet.mjs <build> <pic 1> <pic 2>` again, with the same two sites as
    `## Why they are a 5`, only if the page changed since phase 7, and bring REFERENCES.md's `## Compared` up to
-   date (§3ag). Two Sonnet judges
+   date (§3ag). First `node scripts/judges.mjs <build>`: a NO PROOF line (no reviews or ratings on the page) means ask the
+   owner for them before judging, since no site has reached 4 without. Two Sonnet judges
    that did not build it score layout, light, colour, type, detail and motion from compare.jpg and the preview's
    contact sheet, one `Judge N:` line each in review.md; the median plus Tzvi's calibration is the `Rating:`, 4 or
    more with no area under 3.5 (§3aj.4). Then a Sonnet subagent that did not build the site uses it against

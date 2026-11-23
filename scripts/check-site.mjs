@@ -184,10 +184,11 @@ for (const url of urls) {
         document.documentElement.style.scrollBehavior = 'auto';
         const b = document.querySelector(`[data-site-c="${i}"]`); if (!b) return null; const own = b.closest('section') || document.body;
         const after = [...document.querySelectorAll('section')].filter((s) => s !== own && (own.compareDocumentPosition(s) & Node.DOCUMENT_POSITION_FOLLOWING));
-        const before = after.map((s) => s.getBoundingClientRect().top + scrollY);
+        // a section with no height before and after (hidden, empty) is not seen moving (Clean Plus's empty gift section, 23 Nov 2026)
+        const before = after.map((s) => [s.getBoundingClientRect().top + scrollY, s.offsetHeight]);
         b.click(); await new Promise((r) => setTimeout(r, 1400));
-        const now = after.map((s) => s.getBoundingClientRect().top + scrollY);
-        const d = now.map((y, k) => Math.abs(y - before[k])); const m = Math.max(0, ...d);
+        const now = after.map((s) => [s.getBoundingClientRect().top + scrollY, s.offsetHeight]);
+        const d = now.map(([y, h], k) => (h || before[k][1] ? Math.abs(y - before[k][0]) : 0)); const m = Math.max(0, ...d);
         return m > 4 && !b.closest('.plans, #plans, .mix') ? [m, (b.getAttribute('aria-label') || b.textContent).trim().slice(0, 30)] : null;
       }, i);
       if (moved) fail(url, 'SHIFT', `choosing "${moved[1]}" moves the page below it by ${Math.round(moved[0])} px (keep the space fixed)`);

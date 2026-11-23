@@ -3550,6 +3550,16 @@
    "status": "built"
   },
   {
+   "id": "R3aj.9",
+   "rule": "Every file a site's gen/build.py writes is what it writes now: changes are made in the source and rebuilt",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "Phase 7: change gen/build.py, gen/own.css or gen/*.js, then python gen/build.py",
+   "confirmed_by": "node scripts/check-built.mjs <build> (in check-build)",
+   "status": "built"
+  },
+  {
    "id": "R3ak.1",
    "rule": "A choice (3ai.2): live art drawn in code behind the words, seeded from the business's name, quieter on phones, still under reduced motion",
    "how": [

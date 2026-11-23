@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { newerRules } from './rule-dates.mjs';
-import { judgeReview, feedbackProblems } from './judges.mjs';
+import { judgeReview, feedbackProblems, proofGap } from './judges.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const dir = process.argv[2];
@@ -54,6 +54,9 @@ for (const s of ['check-footer', 'check-menu', 'check-facts', 'check-heights', '
 // a site built from a blueprint has RULES.md written from it first (scripts/blueprint.mjs)
 if (fs.existsSync(path.join(dir, 'BLUEPRINT.md'))) spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'blueprint.mjs'), '--rules', dir], { encoding: 'utf8' });
 for (const s of ['check-concept', 'check-fingerprints', 'check-compared', 'check-listing-prices', 'check-rules']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), dir]]);
+// rules 3aj.9: the files gen/build.py writes are changed in its source, never by hand (older sites drift from the
+// starter and are spared). Run alone after the rest: it rebuilds the folder in place for a moment.
+const builtCheck = !newerRules(ROOT, path.join(ROOT, dir)).has('R3aj.9');
 // the opening film as the visitor sees it (Tzvi, 1 Nov 2026: crumbs vanishing, a snap over in one frame); intended hard
 // cuts are listed in gen/film.sh as "# cuts: <seconds> ..." (times in gen/film/opening.mp4)
 {
@@ -76,6 +79,7 @@ let next = 0;
 await Promise.all(Array.from({ length: Math.min(4, runs.length) }, async () => {
   while (next < runs.length) { const i = next++; results[i] = await run1(runs[i]); }
 }));
+if (builtCheck) results.push(await run1(['check-built', [path.join(ROOT, 'scripts', 'check-built.mjs'), dir]]));
 {
   const site = path.join(ROOT, dir), review = path.join(site, 'review.md');
   const newer = newerRules(ROOT, site), twoJudges = !newer.has('R3aj.4');
@@ -89,7 +93,8 @@ await Promise.all(Array.from({ length: Math.min(4, runs.length) }, async () => {
     // rules 3aj.4 (22 Nov 2026): two judges per area, the median, corrected by Tzvi's own verdicts (scripts/judges.mjs)
     : twoJudges ? judgeReview(fs.readFileSync(review, 'utf8')).why
     : fs.existsSync(path.join(site, 'compare.jpg')) && !/^Rating:\s*(4(\.5)?|5)\s*\/\s*5\b/m.test(fs.readFileSync(review, 'utf8')) ? 'review.md has no "Rating: 4/5" or better (rules 3ah.7: a judge that did not build it rates the site beside two real top sites; fix and judge again until 4)' : '';
-  results.push({ name: 'independent review', ok: !why, out: why && `${why}. Have a Sonnet subagent that did not build the site use it at laptop and phone size against docs/page-review-checklist.md and write ${dir}/review.md; fix every FAIL, then review again.` });
+  const gap = why && /rated/.test(why) ? proofGap(site) : '';
+  results.push({ name: 'independent review', ok: !why, out: why && `${gap ? gap + '. ' : ''}${why}. Have a Sonnet subagent that did not build the site use it at laptop and phone size against docs/page-review-checklist.md and write ${dir}/review.md; fix every FAIL, then review again.` });
 }
 // Tzvi's corrections kept until each is proved fixed (rules 3aj.6)
 if (!newerRules(ROOT, path.join(ROOT, dir)).has('R3aj.6')) {
