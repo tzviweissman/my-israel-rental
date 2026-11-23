@@ -149,3 +149,4 @@ regardless, per the brief.
 should read and extend this file rather than re-reading every report.
 treat it as used and do not repeat it.
 which is a different report type). Flagged as documentation drift, same as the
+2026-11-23 - zero-price effect - order page Pickup/Delivery switch with a free-delivery code (OrderPage.jsx:514)
