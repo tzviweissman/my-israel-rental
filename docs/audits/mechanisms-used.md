@@ -160,3 +160,4 @@ which is a different report type). Flagged as documentation drift, same as the
 2026-11-19 - operational transparency (labour illusion) - order card, photo button while preparing (OrderCard.jsx)
 2026-11-20 - operant reinforcement (immediate, real feedback) - owner's order card photo button (OrderCard.jsx:308-311)
 2026-11-21 - marginal value theorem (information foraging: people leave a patch where it runs out) - end of each category row on /businesses (BrowseRows.jsx)
+2026-11-23 - zero-price effect - order page Pickup/Delivery switch with a free-delivery code (OrderPage.jsx:514)

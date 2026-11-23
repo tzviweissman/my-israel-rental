@@ -567,3 +567,7 @@ Main moved on after PR #24 was opened (the sign-up work stream was rewritten), s
 - [Low] Tooling: `scripts/check-shop-subcategories.mjs` reads myisraelrental.com by default, with no option for a local API, so audits cannot run it. First seen 22 Nov 2026 (2026-11-22-dead-ends.md).
 - Still open, re-checked 22 Nov: "Add common questions" opens the services list (15 Nov); renter "Add a listing to start counting" (2 Oct); sales "Worth keeping?" hints without a link (15 Nov); admin "Preview public page" (15 Nov, half fixed on the unmerged branch); `/notifications/preferences` unread (1 Nov).
 - Waiting to merge (claude/audit-merge-s1ynp7): "Choose how people reach you" at the WhatsApp card and the manager page's "Page not found", both clicked again on today's main with the commits applied and working.
+
+## UI audit of 23 Nov 2026
+- [Low] Order page: a code (free delivery, or any code with a minimum) stays "applied" after the basket drops under its minimum; the page shows the lower total and "Delivery: Free", then the send is refused ("This code needs an order of at least N"). Made likely by the one-tap checkout codes (2c03fb4). First seen 23 Nov 2026 (2026-11-23-ui-audit.md). Report only (discounts).
+- Still open, 23 Nov: chip currency fix (claude/exciting-bell-ds4iyv) and PR #29 not on main; test-i18n-parity fails the same 3 checks; MongoDB download 403 and Playwright chromium 1234 (worked around with the in-memory API and a browser link).
