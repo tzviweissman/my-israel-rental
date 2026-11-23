@@ -18,6 +18,12 @@ KEEP = (" Keep the 3D animated film look, the characters, their costumes, the te
         "are. Smooth, natural, expressive cartoon animation. Every character has exactly two arms. No text, no new people, "
         "no cuts.")
 CLIPS = {
+    "d3": ("t3.jpg", "He turns his head from the oil jug in his hand to the bagels and the pack on the table and back, "
+           "rubbing his chin, thinking very hard; the camera slowly moves past his shoulder toward the table; the pack and "
+           "the bagels stay still and sharp; steam rises from the bagels." + KEEP),
+    "d6": ("t6.jpg", "He walks slowly and proudly toward the camera carrying the pack with the bagels on top in both hands, "
+           "grinning; his two friends walk behind him, laughing and reaching toward the bagels; the lamps flicker; the "
+           "camera slowly pulls back with them. The pack is held steady in front of his chest." + KEEP),
     "c1": ("s1.jpg", "He lifts the big jar upside down, shakes it, nothing falls out; he drops it on its side and it rolls "
            "away; he hurries to the next jar; the lamps flicker." + KEEP),
     "c2": ("s2.jpg", "He slowly lifts the lid of the small jar; warm golden light pours out and grows brighter on his "

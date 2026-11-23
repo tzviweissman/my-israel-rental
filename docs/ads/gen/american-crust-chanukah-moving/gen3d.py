@@ -23,10 +23,12 @@ OUT = HERE / "out"
 CM = ROOT / "docs" / "ads" / "gen" / "chicken-munch-chanukah-moving" / "out"
 AC = ROOT / "frontend" / "public" / "pages" / "american-crust" / "assets"
 FILES = {"hero": CM / "hero.jpg", "friends": CM / "friends.jpg", "look": CM / "s1.jpg", "pack": AC / "bagel-dough.webp",
-         "bagels": AC / "baked-bagels.webp", "layout": HERE / "layout.png"}
+         "bagels": AC / "baked-bagels.webp", "layout": HERE / "layout.png", "cm3": CM / "s3.jpg", "cm6": CM / "s6.jpg"}
 NAMES = {"hero": "the character sheet", "friends": "the friends sheet", "look": "a frame of the same film (match its look, "
          "its temple and its warm lamp light exactly)", "pack": "the bagel dough pack photo", "bagels": "the baked bagels photo",
-         "layout": "the layout sketch (follow where its boxes are)"}
+         "layout": "the layout sketch (follow where its boxes are)",
+         "cm3": "the film frame to remake (same camera, set and light; only the food on the table changes)",
+         "cm6": "the film frame to remake (same camera, set and light; only what he carries changes)"}
 LOOK = ("A frame from a modern 3D animated feature film, vertical 9:16, cinematic: rich detailed textures, soft global "
         "illumination, warm oil-lamp light, shallow depth of field, expressive cartoon faces. Inside an ancient stone temple "
         "hall at night: carved stone pillars, bronze oil lamps, a woven rug. ")
@@ -37,6 +39,18 @@ PACK = ("their bagel dough pack exactly as in the pack photo: a clear plastic cl
         "a big mustard-yellow label across its lid (the label's printing left as plain dark blocks, no readable words). ")
 NO = " No readable text or captions anywhere, no extra people, no modern objects but the pack."
 SHOTS = {
+    # Tzvi, 23 Nov 2026: "each scene isnt connected ... just use the ad we made for chicken munch and put his bagels
+    # instead": the Chicken Munch film's shots with their bagels; these two are remade, the others reused from it.
+    # The Chicken Munch shot 3 frame is the look reference, so the table, the light and the turn match exactly.
+    "t3": (["hero", "cm3", "pack", "bagels"], LOOK + HERO + "Medium shot from behind his shoulder, the same as the film "
+           "frame: holding the small oil jug in one hand, he has just turned around and sees, on the same carved stone "
+           "table lit by two oil lamps, " + PACK + "beside a wooden board of six golden baked everything bagels exactly "
+           "like the bagels photo, steam rising from them; big, sharp, the hero objects of the shot. He rubs his chin with "
+           "his other hand, thinking hard; the space above his head is plain dark wall." + NO),
+    "t6": (["hero", "friends", "cm6", "pack", "bagels"], LOOK + "The same shot as the film frame, facing the camera: the "
+           "hero walks toward the camera between the temple pillars, proudly holding " + PACK + "in both hands in front of "
+           "his chest, with a few baked everything bagels stacked on top of it, big and sharp; a huge happy grin. His two "
+           "friends follow him, laughing and reaching toward the bagels. Lit menorah and oil lamps behind." + NO),
     "s1": (["hero", "look"], LOOK + HERO + "Medium shot: a row of big terracotta clay jars along the hall; he tips one upside "
            "down with both hands, peering under it, frustrated; two jars already lie empty on their sides behind him." + NO),
     "s2": (["hero", "look"], LOOK + HERO + "Close shot: at the end of the row stands one smaller clay jar with a lid; warm "

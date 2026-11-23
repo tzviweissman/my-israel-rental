@@ -155,3 +155,26 @@ the cut will land. Within 40px and 10% B is used as it is; the cholent's first b
 
 Each shot's look is chosen before any shot is made (A28.1): Chicken Munch's Chanukah ad went drawn first, then 3D. And a
 product rebuilt in the generated shots keeps its real label laid over it wherever it holds still (A28.2).
+
+## M15. A story flows, shot into shot (Tzvi, 23 Nov 2026)
+
+"Each scene isnt connected to the next, it needs to flow like a story ... it just is jumping around." The first American
+Crust Chanukah film cut from the jars to the pack in his hands to an oven no one had seen to a different room, and the
+bagels were never seen coming out of anything. The Chicken Munch Chanukah film flows, and is the model: one place, one
+hero, and every shot starts where the last one left off.
+
+- **One place and one line of action.** The shots stay in one set, lit the same, and the hero carries the action from
+  shot to shot (he holds the jug, then turns to the table, then walks out with what he chose). No shot jumps to a new
+  room, object or person that was not set up in an earlier shot.
+- **Each cut is caused.** The last moment of a shot leads into the next: he turns, and we see what he turned to; he
+  throws, and he walks on. Write the story as one sentence per shot, joined by "and then", before any picture; a shot
+  that needs "meanwhile" or "suddenly, elsewhere" is cut or set up earlier.
+- **The payoff comes from inside the story.** What we end on (food on the table, the product in his hands) has been seen
+  before it is used: the box on the table before he picks it up, the bagels on the table before they are eaten.
+- **A choice is shown.** When the idea is a decision, we see him weigh it (a thought bubble or his look going from one
+  to the other), then act on it, then hold what he chose.
+- **The same shots carry a new business.** A story that works is kept and re-cast with the next business's product,
+  remaking only the shots their product is in (American Crust's film reused Chicken Munch's search, glow and toss).
+
+Checked by eye on the test frames before the full recording: lay the shots side by side and read them as one sentence
+(A10.17).

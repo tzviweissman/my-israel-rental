@@ -1032,6 +1032,15 @@
    "confirmed_by": "LOOK at the still beside their photo",
    "retried": false,
    "status": "planned"
+  },
+  {
+   "id": "A10.17",
+   "rule": "A moving ad's story flows: one place, one hero, each cut caused by the shot before, the payoff set up first",
+   "how": ["ASK"],
+   "built_by": "docs/moving-ad-rules.md M15; the story written as one 'and then' sentence per shot before any picture",
+   "confirmed_by": "LOOK: the test frames read side by side as that sentence",
+   "retried": false,
+   "status": "planned"
   }
  ]
 }
