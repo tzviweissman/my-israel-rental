@@ -31,6 +31,8 @@ for (const [w, h] of sizes) {
       Promise.all(document.getAnimations().filter((a) => a.playState === 'running' && Number.isFinite(a.effect?.getComputedTiming?.().endTime)).map((a) => a.finished.catch(() => {}))),
       new Promise((r) => setTimeout(r, 3000)),
     ]));
+    // one look at every line: its size, colour and the worst pixels behind it
+    const measure = async () => {
     const items = await p.evaluate(() => {
       const out = [];
       const seen = new Set();
@@ -91,7 +93,7 @@ for (const [w, h] of sizes) {
       }
       return out;
     });
-    if (!items.length) continue;
+    if (!items.length) return { items, res: [] };
     await p.addStyleTag({ content: '* { color: transparent !important; text-shadow: none !important; caret-color: transparent !important; } svg text { fill: transparent !important; }' });
     await p.waitForTimeout(150);
     const bg = (await p.screenshot()).toString('base64');
@@ -120,6 +122,19 @@ for (const [w, h] of sizes) {
         return Math.round(worst * 100) / 100;
       });
     }, { bg, items });
+    return { items, res };
+    };
+    let { items, res } = await measure();
+    if (!items.length) continue;
+    // a line still moving in (a delayed fade, a label landing with its block) is looked at again once it has settled,
+    // and only a fault seen both times counts (Clean Plus's '4 hours', caught mid-fade at 1:1, 23 Nov 2026)
+    const low = (it, r) => r < (it.px >= 24 || (it.bold && it.px >= 18.66) ? 3 : 4.5);
+    if (items.some((it, k) => low(it, res[k]))) {
+      await p.waitForTimeout(1500);
+      const again = await measure();
+      const later = new Map(again.items.map((it, k) => [it.text, again.res[k]]));
+      res = res.map((r, k) => (low(items[k], r) && later.has(items[k].text) ? Math.max(r, later.get(items[k].text)) : r));
+    }
     items.forEach((it, k) => {
       const large = it.px >= 24 || (it.bold && it.px >= 18.66);
       const need = large ? 3 : 4.5;
