@@ -20,14 +20,36 @@
  *   - done: "the iron floats away..." (22 Nov 2026) proof: gen/fire/film-sheet.jpg
  * A build with an open item, or a done item whose proof file is missing, is not shown or published.
  *
+ *   node scripts/judges.mjs --brief             prints the brief every judge is given, word for word
  *   node scripts/judges.mjs <build-folder>      prints the rating and the feedback state; exit 1 on a problem.
- *                                              Run it before judging too: a NO PROOF line means ask the owner first.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
-const AREAS = ['layout', 'light', 'colour', 'type', 'detail', 'motion'];
+const AREAS = ['layout', 'light', 'colour', 'type', 'detail', 'motion', 'wow'];
+// wow joined on 23 Nov 2026; a review judged before it has six areas and is read with six
+const OLD = AREAS.slice(0, 6);
+
+// The brief every judge is given, word for word (Tzvi, 23 Nov 2026: "I want the judgement to be mainly based off of how
+// the actual site actually looks more than if there's reviews. I'll want my sites to look unique, memorable and
+// beautiful with amazing eye catching effects like our inspo and websites sources and Pinterest"). Two judges were
+// marking Clean Plus down first for having no reviews, which only the owner can give and no design change can fix.
+export const JUDGE_BRIEF = `You are a design judge. You did not build this site and have no stake in it.
+You are shown our site beside the best sites of its kind and the inspiration it was built from (our studied sites,
+website sources and Pinterest picks). Judge only how our site LOOKS and MOVES: is it unique, memorable and beautiful,
+with eye-catching effects a visitor would remember, as good as those references?
+Do NOT mark it down for missing reviews, ratings, testimonials, press logos, team photos, FAQs or for how much content
+it has: those come from the owner later. Judge the design of what is there.
+Score seven areas from 1 to 5 (half points allowed):
+  layout (composition, rhythm, variety between sections), light (depth, photography, light and shadow),
+  colour, type, detail (finish, craft, small touches), motion (effects and how things move and react),
+  wow (unique, memorable, eye-catching: would someone remember this site tomorrow and show it to a friend?).
+Scale: 5 one of the most striking sites of its kind anywhere; 4 clearly professional and memorable, level with the
+references; 3 a decent but forgettable small-business site. Be strict; compare directly with the references.
+Answer with one line first, exactly:
+Judge: layout N, light N, colour N, type N, detail N, motion N, wow N
+then up to 5 short bullets: what would most make the site more striking, naming the screen.`;
 const median = (v) => { const s = [...v].sort((a, b) => a - b), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
 
 export function calibration() {
@@ -39,36 +61,26 @@ export function calibration() {
 }
 
 export function judgeReview(text) {
-  const judges = [...text.matchAll(/^Judge\s*\d+\s*:(.*)$/gim)].map((m) => Object.fromEntries(AREAS.map((a) => [a, Number((new RegExp(`${a}\\s*(\\d(?:\\.\\d+)?)`, 'i').exec(m[1]) || [])[1])])));
+  const lines = [...text.matchAll(/^Judge\s*\d+\s*:(.*)$/gim)];
+  // the newest judging only: the lines after the last heading that holds a Judge line
+  const last = text.lastIndexOf('\n## ', lines.length ? lines[lines.length - 1].index : 0);
+  const now = lines.filter((m) => m.index > last);
+  const areas = now.every((m) => /\bwow\s*\d/i.test(m[1])) ? AREAS : OLD;
+  const judges = now.map((m) => Object.fromEntries(areas.map((a) => [a, Number((new RegExp(`${a}\\s*(\\d(?:\\.\\d+)?)`, 'i').exec(m[1]) || [])[1])])));
   if (judges.length < 2) return { why: `review.md has ${judges.length} "Judge N: layout .., light .., colour .., type .., detail .., motion .." lines; two judges that did not build the site (3aj.4)` };
-  const missing = judges.flatMap((j, i) => AREAS.filter((a) => !(j[a] >= 1 && j[a] <= 5)).map((a) => `judge ${i + 1} ${a}`));
+  const missing = judges.flatMap((j, i) => areas.filter((a) => !(j[a] >= 1 && j[a] <= 5)).map((a) => `judge ${i + 1} ${a}`));
   if (missing.length) return { why: `review.md judges miss a score from 1 to 5 for: ${missing.join(', ')} (3aj.4)` };
-  const apart = AREAS.filter((a) => Math.max(...judges.map((j) => j[a])) - Math.min(...judges.map((j) => j[a])) > 1);
+  const apart = areas.filter((a) => Math.max(...judges.map((j) => j[a])) - Math.min(...judges.map((j) => j[a])) > 1);
   if (apart.length && judges.length < 3) return { why: `the judges differ by more than 1 on ${apart.join(', ')}: ask a third judge (3aj.4)` };
-  const med = Object.fromEntries(AREAS.map((a) => [a, median(judges.map((j) => j[a]))]));
+  const med = Object.fromEntries(areas.map((a) => [a, median(judges.map((j) => j[a]))]));
   const off = calibration();
-  const rating = Math.round((AREAS.reduce((s, a) => s + med[a], 0) / AREAS.length + off) * 100) / 100;
-  const low = AREAS.filter((a) => med[a] + off < 3.5);
+  const rating = Math.round((areas.reduce((s, a) => s + med[a], 0) / areas.length + off) * 100) / 100;
+  const low = areas.filter((a) => med[a] + off < 3.5);
   const said = Number((/^Rating:\s*(\d(?:\.\d+)?)\s*\/\s*5/m.exec(text) || [])[1]);
-  const why = rating < 4 ? `rated ${rating} of 5 after calibration ${off.toFixed(2)} (areas ${AREAS.map((a) => `${a} ${med[a]}`).join(', ')}): fix the lowest and judge again until 4 (3aj.4)`
+  const why = rating < 4 ? `rated ${rating} of 5 after calibration ${off.toFixed(2)} (areas ${areas.map((a) => `${a} ${med[a]}`).join(', ')}): fix the lowest and judge again until 4 (3aj.4)`
     : low.length ? `${low.join(', ')} under 3.5 after calibration: one weak area cannot hide behind the rest (3aj.4)`
     : !(Math.abs(said - rating) < 0.06) ? `review.md's "Rating:" line must say ${rating}/5 (median per area, calibration ${off.toFixed(2)})` : '';
   return { why, rating, med, off };
-}
-
-// Does the home page show any proof (reviews, ratings) a visitor can see? Every top site we compare with does, and
-// without it the judges have not reached 4: Clean Plus was judged twice on 23 Nov 2026 (3.25, then about 3.25 again
-// after new pictures), both times marked down first for "no reviews, ratings or people". Said before judging, so the
-// owner is asked first instead of judging again (Tzvi, 23 Nov 2026: "Do all 3").
-export function proofGap(dir) {
-  const f = path.join(dir, 'index.html');
-  if (!fs.existsSync(f)) return '';
-  const seen = fs.readFileSync(f, 'utf8')
-    .replace(/<template[\s\S]*?<\/template>/gi, '')
-    .replace(/<(section|div)\b[^>]*\shidden\b[^>]*>[\s\S]*?<\/\1>/gi, '')
-    .replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ');
-  if (/\breviews?\b|★|\brated\b|\bstars?\b|\btestimonial/i.test(seen)) return '';
-  return 'NO PROOF: the home page shows no reviews or ratings; both top references show them and a 4 has not been reached without them. Ask the owner for reviews and their own photos (OWNER-QUESTIONS.md) before judging again';
 }
 
 export function feedbackProblems(dir) {
@@ -84,6 +96,7 @@ export function feedbackProblems(dir) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'))) {
+  if (process.argv[2] === '--brief') { console.log(JUDGE_BRIEF); process.exit(0); }
   const dir = process.argv[2] && (fs.existsSync(process.argv[2]) ? process.argv[2] : path.join(ROOT, 'scrollcraft', 'builds', process.argv[2]));
   if (!dir) { console.error('usage: node scripts/judges.mjs <build-folder>'); process.exit(2); }
   const review = path.join(dir, 'review.md');
@@ -91,7 +104,5 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(im
   const fb = feedbackProblems(dir);
   console.log(j.rating !== undefined ? `rating ${j.rating}/5 (calibration ${j.off.toFixed(2)})` : 'no rating yet');
   for (const p of [j.why, ...fb].filter(Boolean)) console.log(`- ${p}`);
-  const gap = proofGap(dir);
-  if (gap) console.log(`- ${gap}`);
   process.exitCode = j.why || fb.length ? 1 : 0;
 }

@@ -43,19 +43,19 @@ Sections (line each starts on; read with that offset):
 - 2925: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
 - 3009: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
 - 3053: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3147: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3187: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3273: 4. What is reported to the owner instead (content gaps)
-- 3282: 5. How to write
-- 3331: 5a. Lessons from the practice pages
-- 3362: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3411: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3428: 6. Playbooks for the most common businesses
-- 3548: 7. Choosing the three options (automatic page builder only)
-- 3572: 8. Photos, video and the tools
-- 3797: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3867: 9. The scroll sections: what the practice pages become
-- 3903: 10. Open decisions (need Tzvi)
+- 3154: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3194: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3280: 4. What is reported to the owner instead (content gaps)
+- 3289: 5. How to write
+- 3338: 5a. Lessons from the practice pages
+- 3369: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3418: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3435: 6. Playbooks for the most common businesses
+- 3555: 7. Choosing the three options (automatic page builder only)
+- 3579: 8. Photos, video and the tools
+- 3804: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3874: 9. The scroll sections: what the practice pages become
+- 3910: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -3082,7 +3082,14 @@ is asked of a site published before 22 Nov 2026.
 4. **Two judges, scored per area, corrected by Tzvi.** This replaces 3ah.7's single rating.
    - At the review, two fresh Sonnet subagents that did not build the site each score it beside the two top sites
      (compare.jpg). They are given compare.jpg, the preview video's contact sheet for the motion score, and the scale, never the builder's opinion.
-   - Each scores six areas from 1 to 5: layout, light, colour, type, detail and motion.
+   - Each scores seven areas from 1 to 5: layout, light, colour, type, detail, motion and wow (unique, memorable,
+     eye-catching; added 23 Nov 2026).
+   - **What is judged is the look** (Tzvi, 23 Nov 2026: "I want the judgement to be mainly based off of how the actual
+     site actually looks more than if there's reviews. I'll want my sites to look unique, memorable and beautiful with
+     amazing eye catching effects like our inspo and websites sources and Pinterest"). Every judge gets the same words,
+     `node scripts/judges.mjs --brief`, with compare.jpg and the build's kept inspo and Pinterest pictures. No judge
+     marks a site down for missing reviews, ratings, team photos or how much content it has: those come from the owner.
+     Applies to every judging from 23 Nov 2026; a review judged before then is read with its six areas.
    - review.md gets one line per judge: `Judge 1: layout 4, light 4, colour 3.5, type 4, detail 4, motion 4`.
    - When two judges differ by more than 1 on an area, a third is asked.
    - The median of each area is taken, and their average plus the calibration is the `Rating:`.

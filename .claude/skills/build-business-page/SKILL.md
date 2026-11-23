@@ -224,8 +224,9 @@ Prices are read with `get_cost` at the time, never from memory.
    look at its contact sheet. Render at the six sizes of §3p.6, both languages, reduced motion, phones as phones
    (§3a). Run `node scripts/compare-sheet.mjs <build> <pic 1> <pic 2>` again, with the same two sites as
    `## Why they are a 5`, only if the page changed since phase 7, and bring REFERENCES.md's `## Compared` up to
-   date (§3ag). First `node scripts/judges.mjs <build>`: a NO PROOF line (no reviews or ratings on the page) means ask the
-   owner for them before judging, since no site has reached 4 without. Two Sonnet judges
+   date (§3ag). Two Sonnet judges, each given only the brief `node scripts/judges.mjs --brief` prints
+   (the look, never reviews or how much content; seven areas with wow), compare.jpg, the build's kept inspo and
+   Pinterest pictures and
    that did not build it score layout, light, colour, type, detail and motion from compare.jpg and the preview's
    contact sheet, one `Judge N:` line each in review.md; the median plus Tzvi's calibration is the `Rating:`, 4 or
    more with no area under 3.5 (§3aj.4). Then a Sonnet subagent that did not build the site uses it against

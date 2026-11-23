@@ -41,13 +41,13 @@ Sections (line each starts on; read with that offset):
 - 1297: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
 - 1313: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
 - 1327: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
-- 1356: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
-- 1369: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 1391: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1399: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1432: 5a. Design and story (from rules 5a, 5b and 8)
-- 1462: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
-- 1485: 3a. (cont.) Look through it, fix it, then show it
+- 1357: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
+- 1370: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 1392: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1400: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1433: 5a. Design and story (from rules 5a, 5b and 8)
+- 1463: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
+- 1486: 3a. (cont.) Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section and item numbers match the full rulebook (since 22 Nov 2026), so "3g.13", "3h.11", "3b.2" and the like
@@ -1335,7 +1335,8 @@ Full text: reference/full-rules.md section 3aj. Not asked of a site published be
    allows.
 3. Before any idea, read docs/category-mistakes.md ("every kind" plus the business's kind). CONCEPT.md gets
    `- avoids: <kind>: how` (check-concept).
-4. Two fresh judges score layout, light, colour, type, detail and motion from 1 to 5 from compare.jpg and, for motion, the preview video's contact sheet, one
+4. Two fresh judges, given `judges.mjs --brief` (the look only, never reviews or amount of content), score layout, light, colour, type, detail,
+   motion and wow (unique, memorable, eye-catching) from 1 to 5 from compare.jpg, the kept inspo and Pinterest pictures and, for motion, the preview video's contact sheet, one
    `Judge N:` line each; a third judge when two differ by more than 1. The median per area plus Tzvi's calibration
    (docs/judge-calibration.json, his verdicts) gives `Rating:`: 4 or more, no area under 3.5 (scripts/judges.mjs).
 5. inspo-beside.py measures colour against the inspo on a 4x4 grid; shot_seen quotes it (greyer than -0.08 or more

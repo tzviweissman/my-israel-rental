@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { newerRules } from './rule-dates.mjs';
-import { judgeReview, feedbackProblems, proofGap } from './judges.mjs';
+import { judgeReview, feedbackProblems } from './judges.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const dir = process.argv[2];
@@ -93,8 +93,7 @@ if (builtCheck) results.push(await run1(['check-built', [path.join(ROOT, 'script
     // rules 3aj.4 (22 Nov 2026): two judges per area, the median, corrected by Tzvi's own verdicts (scripts/judges.mjs)
     : twoJudges ? judgeReview(fs.readFileSync(review, 'utf8')).why
     : fs.existsSync(path.join(site, 'compare.jpg')) && !/^Rating:\s*(4(\.5)?|5)\s*\/\s*5\b/m.test(fs.readFileSync(review, 'utf8')) ? 'review.md has no "Rating: 4/5" or better (rules 3ah.7: a judge that did not build it rates the site beside two real top sites; fix and judge again until 4)' : '';
-  const gap = why && /rated/.test(why) ? proofGap(site) : '';
-  results.push({ name: 'independent review', ok: !why, out: why && `${gap ? gap + '. ' : ''}${why}. Have a Sonnet subagent that did not build the site use it at laptop and phone size against docs/page-review-checklist.md and write ${dir}/review.md; fix every FAIL, then review again.` });
+  results.push({ name: 'independent review', ok: !why, out: why && `${why}. Have a Sonnet subagent that did not build the site use it at laptop and phone size against docs/page-review-checklist.md and write ${dir}/review.md; fix every FAIL, then review again.` });
 }
 // Tzvi's corrections kept until each is proved fixed (rules 3aj.6)
 if (!newerRules(ROOT, path.join(ROOT, dir)).has('R3aj.6')) {
