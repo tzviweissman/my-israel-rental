@@ -236,3 +236,5 @@ Re-checked 2026-11-20: gift section reserves its space while loading and scrolls
 Re-checked 2026-11-20: gift form three columns on laptops so the section fits one screen; space kept while it loads; footer link scrolls to it
 
 Re-checked 2026-11-20: gift section stops below the fixed menu bar when linked to
+
+Re-checked 2026-11-23: Only BRAND.md is new (22 Nov, for the Chanukah ad); the site's files are unchanged since its last check.

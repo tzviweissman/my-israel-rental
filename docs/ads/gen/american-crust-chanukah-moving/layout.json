@@ -1,0 +1,6 @@
+{"shape": "story", "ground": "#2a1a10",
+ "boxes": [{"what": "dark night sky through a stone arch, plain", "x": 0.0, "y": 0.0, "w": 1.0, "h": 0.4, "colour": "#16203a"},
+           {"what": "three friends round a low stone table", "x": 0.02, "y": 0.42, "w": 0.96, "h": 0.36, "colour": "#a67c52"},
+           {"what": "bagel dough pack on the table", "x": 0.3, "y": 0.6, "w": 0.4, "h": 0.12, "colour": "#fdb225"}],
+ "keep_empty": [{"what": "logo and headline", "x": 0.05, "y": 0.12, "w": 0.9, "h": 0.26, "over": ["dark night sky through a stone arch, plain"]},
+                {"what": "foot", "x": 0.04, "y": 0.8, "w": 0.92, "h": 0.09}]}
