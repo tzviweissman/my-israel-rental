@@ -155,12 +155,12 @@
     });
   });
   // the opening film (rule 3h), chosen by scroll as on The Brown Box (Tzvi: "once the video ends they cant see it again"):
-  // 150 frames on a canvas, loaded in passes (every 8th, then 4th, 2nd, all) so it scrubs early and sharpens; each word
-  // lights on its chapter (Boil from the start, Bake at 0.40, Brag at 0.59: the joins of gen/film.sh)
+  // 233 frames on a canvas (150 to the bagels, then the pie, 23 Nov 2026), loaded in passes (every 8th, then 4th, 2nd, all) so it scrubs early and sharpens; each word
+  // lights on its chapter (Boil from the start, Bake at 0.26, Brag at 0.38: the joins of gen/film.sh; Brag holds through the pie)
   var film = document.getElementById('film'), cv = document.getElementById('cv');
   if (film && cv) {
     var cx = cv.getContext('2d'), still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var kind = innerWidth <= 760 ? 'm' : 'd', N = 150, imgs = new Array(N), p = 0;
+    var kind = innerWidth <= 760 ? 'm' : 'd', N = 233, imgs = new Array(N), p = 0;
     var url = function (i) { return 'assets/film/' + kind + '/' + String(i + 1).padStart(4, '0') + '.webp'; };
     cv.style.background = '#141414 url(' + url(still ? N - 1 : 0) + ') center / cover no-repeat';
     var order = [], seen = {};
@@ -211,7 +211,7 @@
       raf = 0;
       var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight;
       p = still ? 1 : Math.min(1, Math.max(0, -r.top / Math.max(1, span)));
-      film.classList.toggle('c2', p >= .4); film.classList.toggle('c3', p >= .59);
+      film.classList.toggle('c2', p >= .26); film.classList.toggle('c3', p >= .38);
       draw();
     };
     addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(paint); }, { passive: true });

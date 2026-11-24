@@ -156,7 +156,7 @@ h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
 .sym { font-size: .55em; }
 
 /* the opening (rule 3h): their dough boiled, baked and bragged about, a full-screen film the scroll drives; each word lights on its chapter */
-.open { position: relative; height: 380vh; background: var(--night); color: var(--cream); }
+.open { position: relative; height: 540vh; background: var(--night); color: var(--cream); }
 .open .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 #cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .open .stage::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, rgba(20, 20, 20, .88) 0%, rgba(20, 20, 20, .72) 34%, rgba(20, 20, 20, .3) 52%, rgba(20, 20, 20, 0) 68%), linear-gradient(0deg, rgba(20, 20, 20, .6), rgba(20, 20, 20, 0) 35%); }
