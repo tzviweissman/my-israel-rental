@@ -20,7 +20,8 @@ import path from 'node:path';
 
 const APP = process.env.APP_ORIGIN || 'http://localhost:3210';
 const OUT = path.join('screenshots', 'business-form');
-const TYPES = { store: 0, deliverable: 1, appointment: 2 };
+// Each listing type and the sign-up answer that makes it (24 Nov 2026: "What can customers do with you?").
+const TYPES = { store: 'order', deliverable: 'quote', appointment: 'book' };
 await mkdir(OUT, { recursive: true });
 
 const browser = await chromium.launch();
@@ -28,7 +29,7 @@ const failures = [];
 try {
   for (const lang of ['en', 'he']) {
     for (const [w, h, d] of [[1280, 800, 'laptop'], [390, 844, 'phone']]) {
-      for (const [type, index] of Object.entries(TYPES)) {
+      for (const [type, offer] of Object.entries(TYPES)) {
         for (const step of [1, 2, 3, 4]) {
           const ctx = await browser.newContext({ viewport: { width: w, height: h } });
           await ctx.addInitScript((l) => { try { localStorage.setItem('i18nextLng', l); } catch { /* private mode */ } }, lang);
@@ -36,9 +37,7 @@ try {
           const errors = [];
           page.on('pageerror', (e) => errors.push(String(e)));
           await page.goto(`${APP}/businesses/add?step=1`, { waitUntil: 'domcontentloaded', timeout: 60000 });
-          await page.locator('[data-testid="wizard-type-picker"]').waitFor({ timeout: 30000 });
-          // The cards sit in the same order in both languages: store, deliverable, appointment.
-          await page.locator('[data-testid="wizard-type-picker"] button').nth(index).click();
+          await page.locator(`[data-testid="wizard-offer-${offer}"]`).click({ timeout: 30000 });
           if (step > 1) await page.goto(`${APP}/businesses/add?step=${step}`, { waitUntil: 'domcontentloaded' });
           await page.waitForTimeout(2000);
           await page.evaluate(() => document.querySelectorAll('#webpack-dev-server-client-overlay').forEach((e) => e.remove()));

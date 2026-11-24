@@ -15,8 +15,8 @@ try {
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.goto(`${APP}/businesses/add?step=1`, { waitUntil: 'domcontentloaded', timeout: 60000 });
-  await page.locator('[data-testid="wizard-type-picker"]').waitFor({ timeout: 30000 });
-  await page.locator('[data-testid="wizard-type-picker"] button').nth(1).click(); // deliverable
+  // "Ask for a quote or a job" is a deliverable listing (the sign-up question since 24 Nov 2026).
+  await page.locator('[data-testid="wizard-offer-quote"]').click({ timeout: 30000 });
   await page.goto(`${APP}/businesses/add?step=2`, { waitUntil: 'domcontentloaded' });
   const add = page.locator('[data-testid="wizard-tier-add"]');
   await add.waitFor({ timeout: 30000 });
@@ -52,7 +52,7 @@ try {
   await p2.goto(`${APP}/dashboard?as=owner&lng=en`, { waitUntil: 'domcontentloaded', timeout: 60000 });
   await p2.waitForFunction(() => !location.search.includes('as='), null, { timeout: 30000 });
   await p2.goto(`${APP}/businesses/add?step=1`, { waitUntil: 'domcontentloaded' });
-  await p2.locator('[data-testid="wizard-type-picker"] button').nth(1).click();
+  await p2.locator('[data-testid="wizard-offer-quote"]').click({ timeout: 30000 });
   await p2.goto(`${APP}/businesses/add?step=2`, { waitUntil: 'domcontentloaded' });
   await p2.locator('[data-testid="wizard-services-paste-toggle"]').click();
   await p2.locator('[data-testid="wizard-services-paste"]').fill('menu');

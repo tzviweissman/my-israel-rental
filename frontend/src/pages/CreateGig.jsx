@@ -43,7 +43,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Loader2, Plus, Trash2, ArrowLeft, ArrowRight, X,
-  Store, Package, CalendarClock, ImagePlus, Copy, Sparkles, Camera, Search, MapPin, Check, PartyPopper, ChevronDown,
+  Store, CalendarClock, MessageSquareQuote, ImagePlus, Copy, Sparkles, Camera, Search, MapPin, Check, PartyPopper, ChevronDown,
 } from 'lucide-react';
 import QrShareCard from '../components/common/QrShareCard';
 import AdMaker from '../components/dashboard/AdMaker';
@@ -68,32 +68,17 @@ import { useTranslation } from 'react-i18next';
 import { PriceKindPicker } from '../components/forms/PriceKind';
 import { countStep } from '../utils/tapKind';
 
-// ---- Gig type registry ------------------------------------------------------
-// Central definition of every gig-type-aware behaviour so the wizard, the
-// dynamic step 4, and the label copy all read from one place.
-const GIG_TYPES = [
-  {
-    id: 'store',
-    icon: Store,
-    label: 'Store',
-    tagline: 'Showcase products for sale',
-    examples: 'Furniture store, boutique, gift shop, jewelry',
-  },
-  {
-    id: 'deliverable',
-    icon: Package,
-    label: 'Deliverable service',
-    tagline: 'Priced work with a turnaround time',
-    examples: 'Logo design, translation, cleaning, moving, video editing',
-  },
-  {
-    id: 'appointment',
-    icon: CalendarClock,
-    label: 'Appointment service',
-    tagline: 'Book a specific day + time',
-    examples: 'Barber, salon, massage, personal trainer, tutor',
-  },
+// "What can customers do with you?" (Tzvi, 24 Nov 2026: one kind of business, the features it needs;
+// docs/plans/one-business-type-signup.md, phase 1). Several can be ticked. Each maps onto today's listing type;
+// the first ticked in this order is the listing made now, the others are offered right after publishing.
+const OFFERS = [
+  { id: 'order', type: 'store', icon: Store, label: 'Order items', noun: 'ordering', hint: 'A menu, products, trays, boxes' },
+  { id: 'book', type: 'appointment', icon: CalendarClock, label: 'Book a time', noun: 'booking', hint: 'A haircut, lesson, class or visit' },
+  { id: 'quote', type: 'deliverable', icon: MessageSquareQuote, label: 'Ask for a quote or a job', noun: 'quotes', hint: 'A move, a clean, an event, a design' },
 ];
+const offerOf = (type) => OFFERS.find((o) => o.type === type)?.id;
+// Ticked for them from the category, never silently: a shop orders, personal care and lessons book.
+const OFFER_BY_CATEGORY = { 'shops-products': 'order', 'personal-care': 'book', 'health-fitness': 'book', 'education-tutoring': 'book' };
 
 const emptyWeekly = () => DAYS.reduce((acc, d) => ({ ...acc, [d.k]: [] }), {});
 
@@ -267,7 +252,10 @@ const CreateGig = () => {
      draft?" makes someone decide about work they never chose to lose,
      and the answer is always yes. */
   const [form, setForm] = useState(() => readDraft('create-gig')?.form || {
-    gig_type: 'deliverable',
+    // No type until they answer: 'deliverable' was the silent default, and food sellers landed in it.
+    // ?offer=book comes from "Add booking too" after publishing.
+    gig_type: OFFERS.find((o) => o.id === searchParams.get('offer'))?.type || '',
+    offers: OFFERS.some((o) => o.id === searchParams.get('offer')) ? [searchParams.get('offer')] : [],
     title: '',
     category: '',
     subcategory: '',
@@ -352,7 +340,11 @@ const CreateGig = () => {
   const setGigType = (id) => {
     setForm((f) => {
       const prevCurrency = f.tiers[0]?.currency || f.products[0]?.currency || 'ILS';
-      const next = { ...f, gig_type: id };
+      // A type set by a reader or a lookup ticks its answer too.
+      const off = offerOf(id);
+      const offers = f.offers || (offerOf(f.gig_type) ? [offerOf(f.gig_type)] : []);
+      const next = { ...f, gig_type: id, offers: !off || offers.includes(off) ? offers : [off, ...offers] };
+      if (!id) return next;
       if (id === 'store') {
         next.products = f.products.length ? f.products : [emptyProduct(prevCurrency)];
         next.tiers = [];
@@ -369,6 +361,15 @@ const CreateGig = () => {
       }
       return next;
     });
+  };
+
+  // Tick or untick an answer; the listing made now is the first ticked in OFFERS order.
+  const toggleOffer = (id) => {
+    const cur = form.offers || (offerOf(form.gig_type) ? [offerOf(form.gig_type)] : []);
+    const offers = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id];
+    const main = OFFERS.find((o) => offers.includes(o.id));
+    if ((main?.type || '') !== form.gig_type) setGigType(main?.type || '');
+    setForm((f) => ({ ...f, offers }));
   };
 
   // ---- Tier helpers (deliverable + appointment) -----------------------------
@@ -580,6 +581,7 @@ const CreateGig = () => {
               onClick: () => setForm((f) => ({
                 ...f,
                 gig_type: 'store',
+                offers: ['order', ...(f.offers || []).filter((x) => x !== 'quote' && x !== 'order')],
                 products: f.tiers.map((x) => ({
                   ...emptyProduct(x.currency || 'ILS'),
                   name: x.name || '', price: x.price || '', description: x.description || '', images: x.images || [],
@@ -664,6 +666,7 @@ const CreateGig = () => {
       const next = {
         ...f,
         gig_type: type,
+        offers: [...new Set([offerOf(type), ...(f.offers || [])].filter(Boolean))],
         title: data.title || f.title,
         category: data.category || f.category,
         subcategory: data.category ? (data.subcategory || '') : f.subcategory,
@@ -926,7 +929,7 @@ const CreateGig = () => {
     if (canNext()) return '';
     if (step === 1) {
       if (!token && !emailOk) return t('wizard.reasonEmail', 'Add your email at the top, so your progress is saved.');
-      if (!form.gig_type) return t('wizard.reasonType', 'Pick a listing type to continue.');
+      if (!form.gig_type) return t('wizard.reasonType', 'Tick what customers can do with you.');
       if (!form.title.trim()) return t('wizard.reasonTitle', 'Add a title above.');
       if (!form.category) return t('wizard.reasonCategory', 'Pick a category above.');
       if (firstBusiness && bizName.trim().length < 2) return t('wizard.reasonBizName', 'Add your business name above.');
@@ -1110,6 +1113,8 @@ const CreateGig = () => {
         bizId: data.business_id || payload.business_id || '',
         name: bizName.trim() || form.title,
         next: firstBusiness ? '/dashboard?tour=first' : `/businesses/${data.id}`,
+        // The other ticked answers, each its own listing under the same business (plan phase 1).
+        more: OFFERS.filter((o) => (form.offers || []).includes(o.id) && o.type !== form.gig_type).map((o) => o.id),
       });
     } catch (err) {
       // apiErrorMessage: a refused field comes back as a list, which a toast cannot show (salon, 25 Oct 2026).
@@ -1168,7 +1173,7 @@ const CreateGig = () => {
   // page is started and a listing type is picked by default.
   const readiness = [
     { k: 'started', ok: true, step: 1, label: t('wizard.todoStarted', 'Start your page') },
-    { k: 'type', ok: !!form.gig_type, step: 1, label: t('wizard.todoType', 'Choose your listing type') },
+    { k: 'type', ok: !!form.gig_type, step: 1, label: t('wizard.todoType', 'Say what customers can do with you') },
     { k: 'name', ok: !!form.title.trim(), step: 1, label: t('wizard.todoName', 'Name what you offer') },
     { k: 'category', ok: !!form.category, step: 1, label: t('wizard.todoCategory', 'Pick a category') },
     { k: 'description', ok: (form.description || '').trim().length >= 20, step: 2, label: t('wizard.todoDescription', 'Describe what you offer') },
@@ -1274,6 +1279,21 @@ const CreateGig = () => {
           <div className="text-start mb-6">
             <QrShareCard url={pageUrl} filename="my-page-qr" testidPrefix="wizard-live-qr" />
           </div>
+          {(published.more || []).map((id) => {
+            const o = OFFERS.find((x) => x.id === id);
+            const Icon = o.icon;
+            return (
+              <button key={id} type="button"
+                // A full load: the form starts clean for the next listing, with its answer ticked.
+                onClick={() => window.location.assign(`/businesses/add?business=${encodeURIComponent(published.bizId)}&offer=${id}`)}
+                className="w-full mb-3 h-12 rounded-full font-semibold inline-flex items-center justify-center gap-2 border-2"
+                style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
+                data-testid={`wizard-live-add-${id}`}>
+                <Icon size={18} aria-hidden="true" />
+                {t('wizard.liveAddOffer', { what: t(`wizard.offer_${id}_noun`, o.noun), defaultValue: 'Now add {{what}}' })}
+              </button>
+            );
+          })}
           <button
             type="button"
             onClick={() => navigate(published.next)}
@@ -1595,44 +1615,43 @@ const CreateGig = () => {
           </div>
         )}
 
-        {/* --- Step 1: Gig type picker --- */}
+        {/* --- Step 1: what customers can do (several answers; replaces the three type cards) --- */}
         {step === 1 && (
-          <div className="space-y-3 mb-6" data-testid="wizard-type-picker">
-            <p className="text-sm text-gray-600 mb-3">
-              {t('wizard.typeIntro', 'Choose the type of listing that best fits your business. This changes what we ask next, so we only ask what is relevant.')}
-            </p>
-            {GIG_TYPES.map((gt) => {
-              const Icon = gt.icon;
-              const active = form.gig_type === gt.id;
-              return (
-                <button
-                  key={gt.id}
-                  type="button"
-                  onClick={() => setGigType(gt.id)}
-                  className={`w-full text-start rounded-2xl border-2 p-4 flex gap-4 items-start transition-all ${
-                    active
-                      ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 shadow-md'
-                      : 'border-gray-200 bg-white hover:border-[var(--gold)] hover:shadow-sm'
-                  }`}
-                  data-testid={`wizard-type-${gt.id}`}
-                >
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    active ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-100 text-gray-700'
-                  }`}>
-                    <Icon size={22} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-bold text-sm text-gray-900">{t(`wizard.type_${gt.id}`, gt.label)}</div>
-                    <div className="text-sm text-gray-700 mt-0.5">{t(`wizard.type_${gt.id}_tagline`, gt.tagline)}</div>
-                    <div className="text-xs text-gray-500 mt-1">{t('wizard.examples', 'Examples:')} {t(`wizard.type_${gt.id}_examples`, gt.examples)}</div>
-                  </div>
-                  {active && (
-                    <div className="w-5 h-5 rounded-full bg-[var(--brand-primary)] text-white flex items-center justify-center text-xs">✓</div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          <fieldset className="mb-6" data-testid="wizard-offers">
+            <legend className="text-sm font-semibold text-gray-800 mb-1">{t('wizard.offersQ', 'What can customers do with you?')}</legend>
+            <p className="text-xs text-gray-500 mb-3">{t('wizard.offersHelp', 'Tick all that fit. We only ask what you need.')}</p>
+            <div className="grid gap-2">
+              {OFFERS.map((o) => {
+                const Icon = o.icon;
+                const on = (form.offers || []).includes(o.id);
+                return (
+                  <button key={o.id} type="button" aria-pressed={on} onClick={() => toggleOffer(o.id)}
+                    className={`w-full text-start rounded-2xl border-2 px-4 py-3 min-h-[56px] flex gap-3 items-center transition-colors ${
+                      on ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/0.05)]' : 'border-gray-200 bg-white hover:border-[var(--gold)]'}`}
+                    data-testid={`wizard-offer-${o.id}`}>
+                    <span className={`w-10 h-10 rounded-xl grid place-content-center shrink-0 ${on ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-100 text-gray-700'}`}>
+                      <Icon size={20} aria-hidden="true" />
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block font-bold text-sm text-gray-900">{t(`wizard.offer_${o.id}`, o.label)}</span>
+                      <span className="block text-xs text-gray-500 mt-0.5">{t(`wizard.offer_${o.id}_hint`, o.hint)}</span>
+                    </span>
+                    <span className={`w-6 h-6 rounded-md border-2 grid place-content-center shrink-0 ${on ? 'bg-[var(--brand-primary)] border-[var(--brand-primary)] text-white' : 'border-gray-300'}`} aria-hidden="true">
+                      {on && <Check size={14} />}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {(form.offers || []).length > 1 && (
+              <p className="text-xs text-gray-600 mt-2" data-testid="wizard-offers-more">
+                {(() => {
+                  const ticked = OFFERS.filter((o) => form.offers.includes(o.id)).map((o) => t(`wizard.offer_${o.id}_noun`, o.noun));
+                  return t('wizard.offersMore', { first: ticked[0], rest: ticked.slice(1).join(', '), defaultValue: 'We set up {{first}} first. After you publish, add {{rest}} in one tap.' });
+                })()}
+              </p>
+            )}
+          </fieldset>
         )}
 
         {/* --- Screen 1, continued: overview (title + category) --- */}
@@ -1682,7 +1701,11 @@ const CreateGig = () => {
               <CategoryDropdowns
                 categories={categories}
                 value={form.category}
-                onChange={(slug) => set({ category: slug, subcategory: '' })}
+                onChange={(slug) => {
+                  set({ category: slug, subcategory: '' });
+                  // Nothing ticked yet: tick what this category usually does, which they can change above.
+                  if (!(form.offers || []).length && OFFER_BY_CATEGORY[slug]) toggleOffer(OFFER_BY_CATEGORY[slug]);
+                }}
                 sub={form.subcategory}
                 subs={(SUBCATEGORIES[form.category] || []).map((s) => ({ slug: s.slug, label: subcategoryLabel(s, t) }))}
                 onSubChange={(slug) => set({ subcategory: slug })}
