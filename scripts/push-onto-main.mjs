@@ -35,6 +35,7 @@ const babel = createRequire(join(root, 'frontend', 'package.json'))('@babel/pars
 const py = join(root, 'backend', '.venv', 'Scripts', 'python');
 let bad = 0;
 for (const f of changed) {
+  if (!/\.(jsx?|mjs|py)$/.test(f)) continue; // only code is parsed; a big video read here overflowed the buffer (24 Nov 2026)
   const src = git(['show', `${base}:${f}`]);
   try {
     if (/\.(jsx?|mjs)$/.test(f)) babel.parse(src, { sourceType: 'module', plugins: ['jsx'] });
