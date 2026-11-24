@@ -1,0 +1,36 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- MyIsraelRental businesses ad, "the magnifier" (docs/ads/blueprints/myisraelrental-magnifier-status.md; Tzvi, 24 Nov
+     2026: magnifier idea from Pinterest pin 8e43e0, the 3D look, headline "Be found"). A grey street of shops; our blue
+     search glass picks one out in warm colour. The picture is gen.py's 3d-3.jpg (golden light) laid by
+     ad-fit-picture.py (ground.jpg); rim.py cuts the glass's top arc into rim.png, laid over the headline (A11.2).
+     Every word, the logo and the QR are drawn here (A3.7, A9.8).
+     Still: node scripts/record-moving-ad.mjs docs/ads/gen/myisraelrental-magnifier-status myisraelrental-magnifier-status '' 7.9 -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,600&family=Manrope:wght@500;700;800&display=block" rel="stylesheet">
+<style>
+html,body{margin:0;background:#111}
+#ad{position:relative;width:1080px;height:1920px;overflow:hidden;background:#e4e8ee url(ground.jpg) 0 0/1080px 1920px no-repeat;font-family:Manrope,sans-serif;color:#111827}
+#h1{position:absolute;left:0;right:0;top:300px;text-align:center;font:700 210px/1 'Playfair Display',serif;letter-spacing:-4px}
+#h1 b{color:#167AB8;font-weight:700}
+#h2{position:absolute;left:0;right:0;top:206px;text-align:center;font:italic 600 62px/1.1 'Playfair Display',serif;color:#0F5E8F}
+#rim{position:absolute;left:0;top:0;width:1080px;height:1920px;pointer-events:none}
+#logo{position:absolute;left:48px;top:1506px;width:104px;height:104px;border-radius:24px;background:#0F2A4A;object-fit:contain;padding:14px;box-sizing:border-box}
+#foot{position:absolute;left:176px;top:1504px;width:670px;color:#111827}
+#foot .n{font-weight:800;font-size:48px}
+#foot .s{font-weight:500;font-size:30px;margin-top:10px;color:#374151}
+#foot .u{font-weight:700;font-size:30px;margin-top:10px;color:#0F5E8F}
+#qr{position:absolute;left:868px;top:1500px;width:172px;height:172px;background:#fff;border-radius:14px;padding:8px;box-sizing:border-box;box-shadow:0 6px 20px #0002}
+#qr img{width:100%;height:100%}
+</style></head><body>
+<div id="ad">
+  <div id="h1">Be <b>found.</b></div>
+  <div id="h2">Add your business, free.</div>
+  <img id="rim" src="rim.png" alt="">
+</div>
+<script src="../_kit/kit.js"></script>
+<script>
+window.AD = {"name":"MyIsraelRental","lines":["Your own page. No listing fee, no commission."],"link":"myisraelrental.com/businesses/add","logo":"logo-mark.png"};
+K.foot();
+window.render = async () => {};
+</script>
+</body></html>

@@ -1,0 +1,70 @@
+{
+ "shape": "story",
+ "ground": "#dfe2e8",
+ "boxes": [
+  {
+   "what": "row of small shopfronts",
+   "x": 0.0,
+   "y": 0.33,
+   "w": 1.0,
+   "h": 0.43,
+   "colour": "#a4abb4"
+  },
+  {
+   "what": "pavement",
+   "x": 0.0,
+   "y": 0.76,
+   "w": 1.0,
+   "h": 0.24,
+   "colour": "#c9ced4"
+  },
+  {
+   "what": "magnifying glass lens",
+   "form": "ring",
+   "band": 0.055,
+   "x": 0.06,
+   "y": 0.25,
+   "w": 0.88,
+   "h": 0.495,
+   "colour": "#167AB8"
+  },
+  {
+   "what": "handle",
+   "x": 0.83,
+   "y": 0.725,
+   "w": 0.065,
+   "h": 0.06,
+   "colour": "#167AB8",
+   "angle": 35
+  }
+ ],
+ "keep_empty": [
+  {
+   "what": "headline",
+   "x": 0.05,
+   "y": 0.11,
+   "w": 0.9,
+   "h": 0.13
+  },
+  {
+   "what": "foot",
+   "x": 0.04,
+   "y": 0.785,
+   "w": 0.62,
+   "h": 0.095,
+   "over": [
+    "pavement"
+   ]
+  },
+  {
+   "what": "qr",
+   "x": 0.79,
+   "y": 0.785,
+   "w": 0.17,
+   "h": 0.095,
+   "over": [
+    "pavement"
+   ]
+  }
+ ]
+}
