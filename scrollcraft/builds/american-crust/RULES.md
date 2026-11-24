@@ -238,3 +238,5 @@ Re-checked 2026-11-20: gift form three columns on laptops so the section fits on
 Re-checked 2026-11-20: gift section stops below the fixed menu bar when linked to
 
 Re-checked 2026-11-23: Only BRAND.md is new (22 Nov, for the Chanukah ad); the site's files are unchanged since its last check.
+
+Re-checked 2026-11-23: pickup bundle card under the two doughs on home: deal in money like for like (2x30+2x27=114 vs 105), shekels only, shown only while the listing sells a bundle, phone and laptop seen, no sideways scroll

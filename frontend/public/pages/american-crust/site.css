@@ -435,3 +435,10 @@ body:not(.no-js) section.sec#order.is-empty { padding-block: 1.4rem; }
 }
 /* the footer's Gift cards link stops below the fixed menu bar, not under it */
 .gift { scroll-margin-top: 72px; }
+
+/* the pickup bundle, a wide card under the two doughs (23 Nov 2026): the deal in money, like for like */
+.pc.deal { grid-column: 1 / -1; grid-template-columns: minmax(130px, 34%) minmax(0, 1fr); background: var(--cream); }
+.pc.deal[hidden] { display: none; }
+.pc.deal .tag { margin: 0 0 .3rem; align-self: flex-start; padding: .2rem .7rem; border-radius: 999px; background: var(--night); color: var(--mustard); font: 700 .875rem/1.4 var(--font-body); }
+.pc.deal .was { font-size: .5em; color: var(--soft); margin-left: .3em; }
+@media (max-width: 760px) { .pc.deal { grid-template-columns: 150px minmax(0, 1fr); } .pc.deal .tag { grid-column: 2; justify-self: start; } .pc.deal .ph { grid-row: 1 / span 4; } }

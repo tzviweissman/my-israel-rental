@@ -1,6 +1,18 @@
 [
  {
   "kind": "ad_made",
+  "business_id": "1d92c69d-89cb-42e7-b2bf-e1d076ed9e41",
+  "at": "2026-11-23T09:05:17+02:00",
+  "ref": "american-crust-chanukah-moving"
+ },
+ {
+  "kind": "ad_made",
+  "business_id": "a07a929a-90d8-46a0-9023-d93371c1e464",
+  "at": "2026-11-22T20:20:38+02:00",
+  "ref": "chicken-munch-chanukah-moving"
+ },
+ {
+  "kind": "ad_made",
   "business_id": "fe453110-5383-4be0-9fac-afb105036047",
   "at": "2026-11-18T20:49:17+02:00",
   "ref": "la-cholent-chain-moving"

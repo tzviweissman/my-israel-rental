@@ -56,6 +56,17 @@
           <div class="row"><span class="pr"><span class="sym">₪</span>27</span><button class="btn" type="button" data-buy="pizza" aria-label="Add Classic American pizza dough to your order, ₪27"><i class="chip" aria-hidden="true"></i><span>Add</span></button></div>
         </div>
       </article>
+      <!-- the owner's pickup bundle under the two doughs (Tzvi for the owner, 23 Nov 2026); shown only while the listing sells it, as on the shop page -->
+      <article class="pc deal" data-tilt hidden><script>(function(){var P=window.MIR_PRICES||{};try{JSON.parse((document.getElementById('mir-live-prices')||{}).textContent||'{}',function(k,v){if(k&&typeof v==='number')P[k]=v;return v})}catch(e){}if(Object.keys(P).some(function(k){return /bundle/i.test(k)}))document.currentScript.parentNode.hidden=false})()</script>
+        <div class="ph"><img src="assets/bundle.webp" alt="The pickup bundle: American style bagel dough in its tray beside classic American pizza dough in its tub" width="1200" height="896" loading="lazy"></div>
+        <div class="info">
+          <p class="tag">Save <span class="sym">₪</span>9</p>
+          <h3>Pickup bundle</h3>
+          <p class="sub">2 pizza doughs and 2 bagel doughs</p>
+          <p class="mk">Makes 12 bagels and 4 personal pies. Pickup in Sanhedria</p>
+          <div class="row"><span class="pr"><span class="sym">₪</span>105 <s class="was"><span class="sym">₪</span>114</s></span><button class="btn" type="button" data-buy="bundle" aria-label="Add the pickup bundle to your order, ₪105"><i class="chip" aria-hidden="true"></i><span>Add</span></button></div>
+        </div>
+      </article>
     </div>
   </section>
 
@@ -136,7 +147,7 @@
 <script src="site.js"></script>
 <script>
 (function () {
-  var NAMES = { bagel: 'American style bagel dough', pizza: 'Classic American pizza dough' };
+  var NAMES = { bagel: 'American style bagel dough', pizza: 'Classic American pizza dough', bundle: 'Pickup bundle' };
   [].forEach.call(document.querySelectorAll('[data-buy]'), function (b) {
     b.addEventListener('click', function () {
       var k = b.dataset.buy, bk = window.siteBasket.get(); bk[k] = Math.min(20, (+bk[k] || 0) + 1); window.siteBasket.set(bk);
