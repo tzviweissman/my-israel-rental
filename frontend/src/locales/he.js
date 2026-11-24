@@ -4822,6 +4822,8 @@ const he = {
         family: { lead: "מראות בולטים", screens: "מסכים ורשימות", words: "מילים שמדברות אליהם", simple: "פשוט" },
         ctaSite: "הוסיפו את העסק שלכם, בחינם",
         noHoliday: "בלי חג",
+        holidayDecor: "העיצוב שלי, מקושט",
+        holidayFull: "צבעי החג",
         nudgeItem: "המודעה שלכם ל{{item}} מוכנה",
         nudgeVisits: "כניסות מהמודעות שלכם השבוע: {{n}}",
         situationL: "רגע אמיתי",

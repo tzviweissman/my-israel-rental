@@ -1349,6 +1349,126 @@ function menorahLights(ctx, W, H, rtl) {
   }
   ctx.restore();
 }
+// A holiday on the owner's own design (Tzvi, 24 Nov 2026: "choose a specific design they like and then add a
+// festive feel like add chanukah themed things around the page not just a strip"). The design, its colour and its
+// words stay as picked; real-looking props, photographed alone and cut out (docs/ads/gen/scenes/decor.py), are tucked
+// into its edges and corners where nothing is written, the ground gets soft holiday lights, and a few sparkles go in
+// the empty spaces. Holidays with no props yet keep only the full holiday look.
+export const DECOR = { chanukah: ['dreidel', 'sufganiya', 'gelt', 'gift'] };
+const DECOR_GLOW = { chanukah: ['255,214,120', '150,190,255'] };
+const seeded = (key) => {
+  let s = [...key].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+  return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+};
+function festiveGround(ctx, W, H, holiday) {
+  const cols = DECOR_GLOW[holiday];
+  if (!cols) return;
+  const rnd = seeded(`${holiday}${W}x${H}`);
+  ctx.save();
+  for (let i = 0; i < 16; i += 1) {
+    const x = rnd() * W;
+    const y = rnd() * H;
+    const r = W * (0.025 + rnd() * 0.05);
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    const c = cols[i % cols.length];
+    g.addColorStop(0, `rgba(${c},.32)`);
+    g.addColorStop(0.6, `rgba(${c},.12)`);
+    g.addColorStop(1, `rgba(${c},0)`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+// Where the props go: along the edges, half off the ad like props on a styled shoot, never on a word, the link, the
+// code or the logo, and over at most a corner of the product. Worked out on the still, so in a moving ad they stay put.
+function placeDecor(W, H, boxes, texts, pics, format, key, names) {
+  const pad = 16;
+  // The full photo design is often the owner's own flyer, with its own writing we cannot see: nothing goes on it.
+  if (key.startsWith('fullphoto')) return { props: [], sparks: [] };
+  const isPic = (n) => n === 'photo' || n.startsWith('product');
+  const hard = [...texts, ...Object.entries(boxes).filter(([n]) => !isPic(n)).map(([, b]) => b)];
+  // Pictures the design draws (tiles, photos), but not one filling most of the ad: that is its ground.
+  const soft = [...Object.entries(boxes).filter(([n]) => isPic(n)).map(([, b]) => b),
+    ...pics.filter((b) => b[2] * b[3] < W * H * 0.6 && b[2] > 60 && b[3] > 60)];
+  const inter = (r, b) => Math.max(0, Math.min(r[0] + r[2], b[0] + b[2] + pad) - Math.max(r[0], b[0] - pad))
+    * Math.max(0, Math.min(r[1] + r[3], b[1] + b[3] + pad) - Math.max(r[1], b[1] - pad));
+  const seen = (r) => [Math.max(0, r[0]), Math.max(0, r[1]), Math.min(W, r[0] + r[2]) - Math.max(0, r[0]), Math.min(H, r[1] + r[3]) - Math.max(0, r[1])];
+  const y0 = format === 'story' ? H * 0.09 : 0;
+  const y1 = format === 'story' ? H * 0.88 : H;
+  const fits = (r) => {
+    const v = seen(r);
+    const area = v[2] * v[3];
+    return area > 0 && hard.every((b) => inter(v, b) === 0) && soft.every((b) => inter(v, b) < area * 0.3);
+  };
+  const rnd = seeded(key);
+  const order = names.slice();
+  for (let i = order.length - 1; i > 0; i -= 1) { const j = Math.floor(rnd() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  const spots = [];
+  for (const s of [0.26, 0.21, 0.16, 0.13]) {
+    const sz = W * s;
+    const off = sz * 0.3; // how far a prop hangs off the edge
+    for (let f = 0; f <= 1.0001; f += 0.0625) {
+      const x = f * (W - sz);
+      const y = y0 + f * (y1 - y0 - sz);
+      spots.push([x, y0 - off, sz], [x, y1 - sz + off, sz], [-off, y, sz], [W - sz + off, y, sz]);
+    }
+  }
+  // Corners first, then the middles of the sides.
+  const corner = (p) => Math.min(Math.hypot(p[0], p[1] - y0), Math.hypot(W - p[0] - p[2], p[1] - y0),
+    Math.hypot(p[0], y1 - p[1] - p[2]), Math.hypot(W - p[0] - p[2], y1 - p[1] - p[2]));
+  spots.sort((p, q) => q[2] - p[2] || corner(p) - corner(q));
+  const out = [];
+  for (const p of spots) {
+    if (out.length >= Math.min(4, order.length)) break;
+    const r = [p[0], p[1], p[2], p[2]];
+    if (!fits(r) || out.some((o) => inter(r, [o.x, o.y, o.s, o.s]) > 0)) continue;
+    out.push({ name: order[out.length], x: p[0], y: p[1], s: p[2], rot: (rnd() - 0.5) * 0.4, flip: p[0] + p[2] / 2 > W / 2 });
+  }
+  // Sparkles in the empty spaces, anywhere on the ad.
+  const sparks = [];
+  for (let i = 0; i < 80 && sparks.length < 9; i += 1) {
+    const sz = W * (0.018 + rnd() * 0.022);
+    const r = [rnd() * (W - sz), y0 + rnd() * (y1 - y0 - sz), sz, sz];
+    if (fits(r) && soft.every((b) => inter(r, b) === 0) && out.every((o) => inter(r, [o.x, o.y, o.s, o.s]) === 0)) sparks.push(r);
+  }
+  return { props: out, sparks };
+}
+function sparkle(ctx, x, y, r) {
+  ctx.beginPath();
+  for (let i = 0; i < 8; i += 1) {
+    const a = (i * Math.PI) / 4;
+    const d = i % 2 ? r * 0.22 : r;
+    ctx.lineTo(x + Math.cos(a) * d, y + Math.sin(a) * d);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+function paintDecor(ctx, at, imgs) {
+  ctx.save();
+  for (const p of at.props) {
+    const img = imgs[p.name];
+    if (!img) continue;
+    const k = Math.min(p.s / img.naturalWidth, p.s / img.naturalHeight);
+    const w = img.naturalWidth * k;
+    const h = img.naturalHeight * k;
+    ctx.save();
+    ctx.translate(p.x + p.s / 2, p.y + p.s / 2);
+    ctx.rotate(p.rot);
+    if (p.flip) ctx.scale(-1, 1);
+    ctx.shadowColor = 'rgba(0,0,0,.35)';
+    ctx.shadowBlur = 26;
+    ctx.shadowOffsetY = 12;
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+  ctx.shadowColor = 'rgba(255,214,120,.9)';
+  ctx.shadowBlur = 14;
+  ctx.fillStyle = '#FFF3C4';
+  for (const r of at.sparks) sparkle(ctx, r[0] + r[2] / 2, r[1] + r[3] / 2, r[2] / 2);
+  ctx.restore();
+}
 function paintScene(ctx, W, H, img) {
   // Made for this shape. The feed set is 3:4 against the feed's 4:5: it fills the width and loses a strip of
   // plain wall at the top, never the table or its props (extending the sides showed as dark bars).
@@ -1381,7 +1501,7 @@ function paintGround(ctx, W, H) {
   if (PARTS && PARTS.scene) { paintScene(ctx, W, H, PARTS.scene); return; }
   ctx.fillRect(0, 0, W, H);
   const img = PARTS && PARTS.photo;
-  if (!img) return;
+  if (!img) { if (PARTS && PARTS.festive) festiveGround(ctx, W, H, PARTS.festive); return; }
   const k = Math.max(W / img.naturalWidth, H / img.naturalHeight);
   const w = img.naturalWidth * k;
   const h = img.naturalHeight * k;
@@ -1389,6 +1509,7 @@ function paintGround(ctx, W, H) {
   ctx.globalAlpha = 0.62;
   ctx.fillRect(0, 0, W, H);
   ctx.globalAlpha = 1;
+  if (PARTS.festive) festiveGround(ctx, W, H, PARTS.festive);
 }
 function isMoved(name) {
   const m = PARTS && PARTS.moves[name];
@@ -3246,6 +3367,23 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
     return fill.call(this, s, x, y, ...r);
   };
 }
+// Every picture a design draws, where it lands, so holiday props are not laid over a photo tile (only while measuring).
+if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.__adPics) {
+  const draw = CanvasRenderingContext2D.prototype.drawImage;
+  CanvasRenderingContext2D.prototype.__adPics = true;
+  CanvasRenderingContext2D.prototype.drawImage = function adDraw(img, ...r) {
+    const P = PARTS && PARTS.pics;
+    if (P && this === PARTS.ctx && (r.length === 4 || r.length === 8)) {
+      const [x, y, w, h] = r.length === 4 ? r : r.slice(4);
+      const m = this.getTransform();
+      const pts = [[x, y], [x + w, y], [x, y + h], [x + w, y + h]].map(([px, py]) => m.transformPoint(new DOMPoint(px, py)));
+      const xs = pts.map((q) => q.x);
+      const ys = pts.map((q) => q.y);
+      P.push([Math.min(...xs), Math.min(...ys), Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)]);
+    }
+    return draw.call(this, img, ...r);
+  };
+}
 function render(target, design, a0) {
   let a = a0;
   if (a.scene?.floor && !a.sceneMeasure && !a.sceneAt) {
@@ -3255,6 +3393,15 @@ function render(target, design, a0) {
     const b = boxes.product;
     if (b) a = { ...a, sceneAt: b[1] + b[3] * 0.975 };
   }
+  if (a.festive && a.decor && !a.decorAt && !a.sceneMeasure && !a.decorMeasure) {
+    // Drawn once as a still to learn where every word and piece lands, then the props go where none is.
+    const boxes = {};
+    const texts = [];
+    const pics = [];
+    render(target, design, { ...a, decorMeasure: true, boxes, textsOut: texts, picsOut: pics, anim: null, stats: null });
+    const c = sharpCanvas(target, a.scale || 1);
+    a = { ...a, decorAt: placeDecor(c.width, c.height, boxes, texts, pics, a.format, `${design}|${a.format}|${a.rtl}`, DECOR[a.festive] || []) };
+  }
   const canvas = sharpCanvas(target, a.scale || 1);
   const [layout, lookKey] = design.split(':');
   const look = lookKey || a.look;
@@ -3263,12 +3410,14 @@ function render(target, design, a0) {
     ctx.shadowColor = 'transparent';
     if (a.grain) paintGrain(ctx, canvas.width, canvas.height);
     PARTS.later.forEach((paint) => paint());
+    if (a.textsOut) a.textsOut.push(...PARTS.texts);
+    if (a.decorAt) paintDecor(ctx, a.decorAt, a.decor);
     if (anim && anim.cover > 0) hookCard(ctx, canvas.width, canvas.height, anim, a);
   };
   if (THEMED[layout]) {
-    PARTS = { texts: [], ctx: canvas.getContext('2d'), moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: a.font || null, ink: a.ink || null, photo: a.photo || null, tilt: TILT[layout] || 0, anim, strips: !!a.strips, stats: a.stats || null,
+    PARTS = { texts: [], pics: a.picsOut || null, ctx: canvas.getContext('2d'), moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: a.font || null, ink: a.ink || null, photo: a.photo || null, tilt: TILT[layout] || 0, anim, strips: !!a.strips, stats: a.stats || null,
       scene: a.scene?.img || null, sceneLight: !!a.scene?.light, sceneLights: !!a.scene?.lights, sceneRtl: a.rtl,
-      sceneFloor: a.scene?.floor || 0, sceneAt: a.sceneAt || 0 };
+      sceneFloor: a.scene?.floor || 0, sceneAt: a.sceneAt || 0, festive: a.festive || '' };
     try {
       THEMED[layout](canvas, look ? { ...a, look } : a);
       extras(canvas, look ? { ...a, look } : a);
@@ -3281,7 +3430,7 @@ function render(target, design, a0) {
     return undefined;
   }
   // One look each, so no font or word colour here; pieces move all the same.
-  PARTS = { texts: [], ctx: canvas.getContext('2d'), moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: null, ink: null, photo: a.photo || null, col: a.col || null, anim, strips: !!a.strips, stats: a.stats || null };
+  PARTS = { texts: [], pics: a.picsOut || null, ctx: canvas.getContext('2d'), moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: null, ink: null, photo: a.photo || null, col: a.col || null, anim, strips: !!a.strips, stats: a.stats || null };
   try {
     const fixed = { phone: drawPhone, torn: drawTorn, review: drawReview, native: drawStory, colour: drawColour,
       bigwords: drawBigWords, grid: drawGrid, items: drawItems, note: drawNote, question: drawQuestion }[design];
@@ -3329,7 +3478,19 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   // The owner's own choices (Tzvi, 4 Nov 2026): one card per layout in the
   // gallery, and the colour, font and word colour picked here instead.
   const [lookBy, setLookBy] = useState({});
-  const [holidayPick, setHolidayPick] = useState(HOLIDAYS.includes(start?.look) ? start.look : '');
+  const [holidayPick, setHolidayPick] = useState(HOLIDAYS.includes(start?.look) ? start.look : (start?.festive || ''));
+  // 'decor': the owner's own design with the holiday's props around it; 'full': the holiday's own colours and set.
+  const [holidayStyle, setHolidayStyle] = useState(HOLIDAYS.includes(start?.look) ? 'full' : 'decor');
+  const holidayFull = !!holidayPick && (holidayStyle === 'full' || !DECOR[holidayPick]);
+  const decorOn = !!holidayPick && !holidayFull;
+  const [decorImgs, setDecorImgs] = useState({});
+  useEffect(() => {
+    if (!decorOn) return undefined;
+    let alive = true;
+    Promise.all((DECOR[holidayPick] || []).map(async (n) => [n, await loadImage(`/ad-scenes/decor/decor-${n}.png`)]))
+      .then((rows) => { if (alive) setDecorImgs(Object.fromEntries(rows.filter(([, img]) => img))); });
+    return () => { alive = false; };
+  }, [decorOn, holidayPick]);
   const [customBy, setCustomBy] = useState({});
   const [photoBy, setPhotoBy] = useState({});
   const [pickBy, setPickBy] = useState({});
@@ -3395,12 +3556,12 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   // The holiday's photographed sets, every shape, loaded when the holiday is picked.
   const [sceneImgs, setSceneImgs] = useState({});
   useEffect(() => {
-    const names = (SCENES[holidayPick] || []).filter((n) => SCENE_FILES.has(n));
+    const names = holidayFull ? (SCENES[holidayPick] || []).filter((n) => SCENE_FILES.has(n)) : [];
     let alive = true;
     Promise.all(names.flatMap((n) => ['square', 'feed', 'story'].map(async (f) => [`${n}-${f}`, await loadImage(`/ad-scenes/${n}-${f}.jpg`)])))
       .then((rows) => { if (alive) setSceneImgs(Object.fromEntries(rows.filter(([, img]) => img))); });
     return () => { alive = false; };
-  }, [holidayPick, words?.scene]);
+  }, [holidayPick, holidayFull, words?.scene]);
   // Product photos (utils/ad_shots.py): made on the server, about a minute each, a few a day per business.
   const [shots, setShots] = useState([]);
   const [shotsLeft, setShotsLeft] = useState(null);
@@ -3522,8 +3683,9 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     setDesignRaw(row.design);
     if (st.format) setFormat(st.format);
     const savedLayout = (row.design || '').split(':')[0];
-    if (HOLIDAYS.includes(st.look)) { setHolidayPick(st.look); } else {
-      setHolidayPick('');
+    if (HOLIDAYS.includes(st.look)) { setHolidayPick(st.look); setHolidayStyle('full'); } else {
+      setHolidayPick(st.festive || '');
+      setHolidayStyle('decor');
       if (st.look) setLookBy((m) => ({ ...m, [savedLayout]: st.look }));
     }
     setCustomBy((m) => ({ ...m, [savedLayout]: st.customHex || '' }));
@@ -3606,7 +3768,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     // The owner's pick, else the product the headline talks about: never bagel words over a pizza photo.
     // The product photo design starts on a product already photographed for this shape and holiday.
     const shotFor = l === 'shoot' && !pickBy[l] && from.find((it) => shots.some((x) => x.status === 'ready' && shotImgs[x.id] && x.item === it.name
-      && x.shape === format && x.occasion === (holidayPick === 'chanukah' ? 'chanukah' : '')));
+      && x.shape === format && x.occasion === (holidayFull && holidayPick === 'chanukah' ? 'chanukah' : '')));
     const asked = pickBy[l] || (shotFor && shotFor.name) || start?.item || wordsFor(l)?.item;
     // A cut-out looks better than a boxed photo, so the layouts start on one; any product can still be picked.
     const first = THEMED[l] && l !== 'fullphoto' && cutItems.length ? cutItems : from;
@@ -3615,7 +3777,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const featured = itemFor(design);
   // A product photo is made for one product, one shape and one setting: the business's kind, or the holiday
   // (the holiday's own background, never only its words).
-  const shotOccasion = holidayPick === 'chanukah' ? 'chanukah' : '';
+  const shotOccasion = holidayFull && holidayPick === 'chanukah' ? 'chanukah' : '';
   // Saved words from before the AI named a setting have none: the server then reads the kind off the listing.
   const shotKind = words?.scene || '';
   // One idea in the picture, or the plain shoot (Tzvi, 12 Nov 2026: "tiny people at work", from the library's 5s).
@@ -3745,11 +3907,11 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     .sort(([a], [b]) => FAMILIES.flatMap(([, keys]) => keys).indexOf(a) - FAMILIES.flatMap(([, keys]) => keys).indexOf(b));
   const layout = design.split(':')[0];
   const themed = !!THEMED[layout];
-  const lookFor = (l) => holidayPick || lookBy[l] || START_LOOK[l] || 'cream';
+  const lookFor = (l) => (holidayFull ? holidayPick : '') || lookBy[l] || START_LOOK[l] || 'cream';
   const look = lookFor(layout);
   const customHex = customBy[layout] || '';
-  const setLook = (k) => { setHolidayPick(''); setLookBy((m) => ({ ...m, [layout]: k })); };
-  const setCustomHex = (v) => { setHolidayPick(''); setCustomBy((m) => ({ ...m, [layout]: v })); };
+  const setLook = (k) => { if (holidayFull) setHolidayPick(''); setLookBy((m) => ({ ...m, [layout]: k })); };
+  const setCustomHex = (v) => { if (holidayFull) setHolidayPick(''); setCustomBy((m) => ({ ...m, [layout]: v })); };
   const brandHex = customHex || target.brand_color || null;
   const lookNow = customHex ? 'brand' : look;
   const fontPair = FONTS[fontIdx] || FONTS[0];
@@ -3787,7 +3949,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     const today = new Date().toISOString().slice(0, 10);
     const dealOn = deal.text.trim() && deal.until && deal.until >= today;
     // The holiday's own set behind the product; the product photo design is photographed in it already.
-    const sets = !hex && THEMED[l] && l !== 'custom' && l !== 'shoot' ? SCENES[holidayPick] : null;
+    const sets = !hex && THEMED[l] && l !== 'custom' && l !== 'shoot' && holidayFull ? SCENES[holidayPick] : null;
     const setName = sets && sets[LIGHT_SCENE.has(l) && sets[1] ? 1 : 0];
     const shape = d === 'native' ? 'story' : format;
     const sceneImg = setName && (sceneImgs[`${setName}-${shape}`] || sceneImgs[`${setName}-feed`]);
@@ -3804,6 +3966,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       callingLabel: lt('ads.isCalling', 'is calling…'), acceptLabel: lt('ads.callAccept', 'Order'),
       todayLabel: lt('ads.today', 'Today'), brand: hex || target.brand_color || null, look: lk, bg,
       font: fontIdx ? fontCss : null, ink: ink || null,
+      festive: decorOn ? holidayPick : '', decor: decorOn ? decorImgs : null,
       greeting: HOLIDAYS.includes(lk) ? lt(`ads.greeting.${lk}`) : '', searchKicker: lt('ads.searchKicker', 'Someone near you is searching for:'),
       review, faq: faqs.length ? faqs[faqIdx % faqs.length] : null,
       sourceLabel: review?.source === 'google' ? lt('ads.googleReview', 'Google review') : '',
@@ -3862,7 +4025,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [words, format, design, imgs, itemImgs, cutItems, pickBy, rtl, eyebrow, cta, shortUrl, reviews, reviewIdx, faqs, faqIdx,
-    lookBy, holidayPick, customBy, photoBy, fontIdx, ink, bg, moves, situationIdx, strips, withReview, logoOn, logoImg, priceOn, deal, sceneImgs, shotImgs, shots]);
+    lookBy, holidayPick, holidayStyle, decorImgs, customBy, photoBy, fontIdx, ink, bg, moves, situationIdx, strips, withReview, logoOn, logoImg, priceOn, deal, sceneImgs, shotImgs, shots]);
 
   // Every design at once, small, so the owner picks one by eye (rules 9b).
   // A moment after typing stops: each preview is a full drawing.
@@ -3893,7 +4056,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     return () => { cancelled = true; clearTimeout(timer); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [words, format, imgs, itemImgs, cutItems, pickBy, rtl, eyebrow, cta, shortUrl, reviews, reviewIdx, faqs, faqIdx,
-    lookBy, holidayPick, customBy, photoBy, fontIdx, ink, bg, sceneImgs, shotImgs, shots]);
+    lookBy, holidayPick, holidayStyle, decorImgs, customBy, photoBy, fontIdx, ink, bg, sceneImgs, shotImgs, shots]);
 
   // The QR code and the post's link name the design (/p/{slug}/{design}),
   // so the owner can see which design brought visits (borrowed from the ad
@@ -3960,7 +4123,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       const { data } = await axios.post(`${API}/ads/saved`, {
         target_type: targetType, target_id: target.id, id: asNew ? null : (savedId || null), lang, design, kept,
         item: featured?.name || '', words: { ...wordsFor(layout), picked: true }, thumb: c.toDataURL('image/jpeg', 0.7),
-        settings: { format, look, customHex, fontIdx, ink, strips, withReview, logo: logoOn, price: priceOn, deal, moves, adName, bg: bg.src ? { src: bg.src } : { id: bg.id || 'sand' }, photo: photoBy[layout]?.src || null, reviewIdx, faqIdx, situationIdx },
+        settings: { format, look, festive: decorOn ? holidayPick : '', customHex, fontIdx, ink, strips, withReview, logo: logoOn, price: priceOn, deal, moves, adName, bg: bg.src ? { src: bg.src } : { id: bg.id || 'sand' }, photo: photoBy[layout]?.src || null, reviewIdx, faqIdx, situationIdx },
       }, auth);
       setSavedId(data.id);
       loadSaved();
@@ -4297,11 +4460,12 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   };
   // Tzvi, 5 Nov 2026: "it sticks with channuka doesnt let me change it". The
   // holiday is its own named choice, any chag or none, not one more colour.
-  const holidayNow = !customHex ? holidayPick : '';
+  const holidayNow = holidayFull && customHex ? '' : holidayPick;
   const holidays = holiday ? [holiday, ...HOLIDAYS.filter((h) => h !== holiday)] : HOLIDAYS;
   const pickHoliday = (k) => {
     setHolidayPick(k === 'noholiday' ? '' : k);
-    if (k !== 'noholiday') setCustomBy((m) => ({ ...m, [layout]: '' }));
+    // Decorated, the owner's colour stays; the full holiday look brings its own.
+    if (k !== 'noholiday' && (holidayStyle === 'full' || !DECOR[k])) setCustomBy((m) => ({ ...m, [layout]: '' }));
   };
   const swatch = (name) => {
     const L = lookOf(name, brandHex, featured?.cut || featured?.img);
@@ -4540,6 +4704,12 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
               <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.holidayTitle', 'Holiday')}</p>
               {chips(holidayNow || 'noholiday', pickHoliday, [
                 ['noholiday', t('ads.noHoliday', 'No holiday')], ...holidays.map((h) => [h, t(`ads.look.${h}`)])])}
+              {holidayPick && DECOR[holidayPick] && (
+                <div data-testid="ad-holiday-style">
+                  {chips(holidayStyle, (k) => { setHolidayStyle(k); if (k === 'full') setCustomBy((m) => ({ ...m, [layout]: '' })); }, [
+                    ['decor', t('ads.holidayDecor', 'My design, decorated')], ['full', t('ads.holidayFull', 'Holiday colours')]])}
+                </div>
+              )}
             </div>
             {((themed && layout !== 'custom' && layout !== 'fullphoto' && layout !== 'shoot') || COLOUR_FIXED.includes(layout)) && (
               <div className="space-y-1.5">

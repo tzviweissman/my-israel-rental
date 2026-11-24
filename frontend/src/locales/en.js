@@ -4950,6 +4950,8 @@ const en = {
         family: { lead: "Bold looks", screens: "Screens and lists", words: "Words that speak to them", simple: "Simple" },
         ctaSite: "Add your business, free",
         noHoliday: "No holiday",
+        holidayDecor: "My design, decorated",
+        holidayFull: "Holiday colours",
         nudgeItem: "Your ad for {{item}} is ready",
         nudgeVisits: "Visits from your ads this week: {{n}}",
         situationL: "A real moment",
