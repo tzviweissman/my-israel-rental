@@ -14,7 +14,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).resolve().parents[4] / "backend" / ".env.local")
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'starter')); import hf; hf.load_key()  # this checkout's key, or the main one's from a worktree (starter/hf.py)
 import higgsfield_client  # noqa: E402
 
 MODEL = 'minimax/h3/image-to-video'

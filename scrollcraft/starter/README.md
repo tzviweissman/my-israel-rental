@@ -132,6 +132,8 @@ WhatsApp; `w: 0` (no photo) gives a one-column sheet.
 
 - **The builder brief**: every build or rework starts from `docs/build-brief-template.md`, filled in, nothing deleted. Each line is a mistake that already reached Tzvi.
 - **`film.js`**: the opening film that follows the scroll (frames on a canvas, chapters by scroll point, passes so it scrubs at once). Copy it into the build, include it after `site.js`; the markup and CSS are at its top. `american-crust/gen/film.sh` makes the frames from a joined film.
+- **`phone_loop.py`**: the phone opening that plays by itself on repeat, from the build's phone frames: `python ../../starter/phone_loop.py assets/film/m assets/film/phone-loop.mp4`. Run it again whenever the frames change.
+- **`hf.py`, `still.py`, `clip.py`** (23 Nov 2026): paid Higgsfield API pictures and clips. `hf.py` loads the key from this checkout or, in a worktree, the main one, and holds the model names that work on our account (`IMAGE_EDIT`, `VIDEO`): change a name there, never in a build's copy. `python ../../starter/still.py gen/out.png <picture> "<prompt>"` edits a picture (the result is often square: cut through plain background or extend it); `python ../../starter/clip.py <start.png> gen/clip.mp4 6 "<prompt>" [end.png]` makes a clip landing on a chosen frame, `--resume` picks one up.
 - **`node scripts/check-build.mjs scrollcraft/builds/<folder>`**: every check in one command (site, fits, motion and readable on every page; concept, fingerprints and rules for the site), four at a time. Nothing is shown to Tzvi or published until it passes.
 
 ## The kit (rules 3u, 29 Oct 2026)

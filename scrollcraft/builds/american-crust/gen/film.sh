@@ -27,7 +27,5 @@ ffmpeg -v error -y -i ../gen/film/opening-full.mp4 -vf "fps=233/$D,scale=1680:-2
 ffmpeg -v error -y -i ../gen/film/opening-full.mp4 -vf "fps=233/$D,crop=ih*9/16:ih:(iw-ih*9/16)*0.56:0,scale=720:1280:flags=lanczos" -frames:v 233 -c:v libwebp -quality 66 film/m/%04d.webp
 # The phone plays it by itself on repeat (Tzvi, 29 Oct 2026): the phone frames at 15 fps, the pie held a moment, then a
 # soft fade back to the first frame
-ffmpeg -v error -y -framerate 15 -i film/m/%04d.webp -loop 1 -t 1.3 -i film/m/0001.webp -filter_complex "\
-[0:v]tpad=stop_mode=clone:stop_duration=1,format=yuv420p,settb=1/15,fps=15[a];[1:v]format=yuv420p,settb=1/15,fps=15[b];\
-[a][b]xfade=transition=fade:duration=0.6:offset=15.93[v]" -map "[v]" -an -c:v libx264 -crf 28 -preset slow -movflags +faststart film/phone-loop.mp4
+python ../../../starter/phone_loop.py film/m film/phone-loop.mp4
 ls film/d | wc -l; du -sh film/d film/m film/phone-loop.mp4

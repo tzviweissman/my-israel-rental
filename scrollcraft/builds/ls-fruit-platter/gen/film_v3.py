@@ -10,7 +10,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).resolve().parents[4] / "backend" / ".env.local")
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'starter')); import hf; hf.load_key()  # this checkout's key, or the main one's from a worktree (starter/hf.py)
 import higgsfield_client  # noqa: E402
 
 START = "https://d8j0ntlcm91z4.cloudfront.net/user_3HWGlZDXVCAOoMKfZq628Ml9cM5/hf_20261026_174926_ce1d064f-a13a-463e-a8e2-599f1ff39be9.png"  # gen/v3-start-empty-board.jpg
