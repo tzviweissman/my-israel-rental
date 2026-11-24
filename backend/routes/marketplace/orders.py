@@ -2792,7 +2792,8 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
             ids = ln.option_ids or ([ln.option_id] if ln.option_id else [])
             chosen = [o for o in prod["options"] if o["id"] in ids and o.get("in_stock", True)]
             if not chosen or len(chosen) != len(set(ids)) or len(chosen) > prod["picks"]:
-                raise HTTPException(status_code=400, detail=f"Pick up to {prod['picks']} for {prod['name']}")
+                he = (payload.lang or "").startswith("he")
+                raise HTTPException(status_code=400, detail=f"בחרו עד {prod['picks']} עבור {prod['name']}" if he else f"Pick up to {prod['picks']} for {prod['name']}")
             name = f"{prod['name']} ({', '.join(o['name'] for o in chosen)})"
             lines.append({"product_id": prod["id"], "name": name, "price": price, "qty": ln.qty,
                           "option_ids": [o["id"] for o in chosen], "option": ", ".join(o["name"] for o in chosen)})
@@ -2802,7 +2803,8 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         if prod.get("options"):
             opt = next((o for o in prod["options"] if o["id"] == ln.option_id), None)
             if not opt or not opt.get("in_stock", True):
-                raise HTTPException(status_code=400, detail=f"Pick a choice for {prod['name']}")
+                he = (payload.lang or "").startswith("he")
+                raise HTTPException(status_code=400, detail=f"בחרו אפשרות עבור {prod['name']}" if he else f"Pick a choice for {prod['name']}")
             if opt.get("price") is not None:
                 price = float(opt["price"])
             name = f"{prod['name']} ({opt['name']})"
