@@ -52,7 +52,14 @@ for (const [side, s] of Object.entries(seen)) {
   if (s === 'SKIPPED' && !touches(side)) console.log(`${side}: skipped, as it should be (this commit does not change ${side}/).`);
   else if (s === 'SKIPPED') console.log(`${side} was SKIPPED: the commit's own files do not touch ${side}/, so nothing of it shipped.`);
   else if (s === 'REMOVED') console.log(`${side}: replaced by a newer deploy, which includes this commit; check that one if in doubt.`);
-  else if (s !== 'SUCCESS') console.log(`${side} ended ${s} after ${since()}: look at its build log.`);
+  else if (s !== 'SUCCESS') {
+    console.log(`${side} ended ${s} after ${since()}: look at its build log.`);
+    // 24 Nov 2026: a build failed on a Railway tool change another session had already fixed on main. Say so at once.
+    run('git', ['fetch', '-q', 'origin']);
+    const newer = run('git', ['log', '--oneline', `${sha}..origin/main`, '--', `${side}/`]).stdout.trim();
+    if (newer) console.log(`Newer commits on main change ${side}/ (one may already fix it; wait for the newest):
+${newer}`);
+  }
 }
 console.log(ok ? `Deployed as expected after ${since()}.` : 'Not deployed as expected.');
 process.exit(ok ? 0 : 1);
