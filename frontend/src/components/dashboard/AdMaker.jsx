@@ -17,7 +17,7 @@
  * as the owner's QR code, so visits from an ad show up in its scan count.
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { createPortal, flushSync } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { QRCodeCanvas } from 'qrcode.react';
 import { sharpCanvas, bestPhoto } from '../../utils/sharpCanvas';
@@ -25,7 +25,7 @@ import { adVideo } from '../../utils/adVideo';
 import BackgroundGallery from './BackgroundGallery';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Copy, Download, ExternalLink, Film, Layers, Loader2, Printer, RefreshCw, Save, Share2, X } from 'lucide-react';
+import { ChevronDown, Copy, Download, ExternalLink, Film, Layers, Loader2, Minus, Plus, Printer, RefreshCw, Save, Share2, Undo2, X } from 'lucide-react';
 import { regularShown, holidayShown, formatShownPrice, priceSymbol } from '../../utils/listingPrice';
 import { areaLabel } from '../../utils/areaNames';
 // the logo reads on the ad (A4.6): its letters 30px tall, or the owner is told (utils/logoWordmark.js)
@@ -2905,6 +2905,10 @@ export function adIssues(words, item) {
 // A gallery design is "layout:look" (THEMED below); the rest are one look.
 // The words each 9f layout reads, and edits in the panel.
 const NEW_FIELDS = ['lead', 'situations', 'mirror', 'chat', 'post', 'versus', 'reasons', 'honest', 'moment', 'people'];
+const AD_TABS = ['words', 'look', 'extras', 'share'];
+// Where a tap on each piece of the ad leads in the options, and the control there to ring.
+const TAB_OF_PIECE = { words: ['words'], word: ['words'], extra: ['words'], product: ['words', 'products'], name: ['words', 'products'],
+  price: ['extras', 'price'], logo: ['extras', 'logo'], review: ['extras', 'review'], deal: ['extras', 'deal'], qr: ['share'], link: ['share'] };
 const FIELD_OF = { situation: 'situations', mirror: 'mirror', chat: 'chat', post: 'post', versus: 'versus',
   reasons: 'reasons', honest: 'honest', moment: 'moment' };
 // "Labels" (the bag and foot diagrams, docs/inspo/ad-videos-2026-11-07): the product in the middle, its listing's
@@ -3350,8 +3354,23 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const [moves, setMoves] = useState({});
   const [boxes, setBoxes] = useState({});
   const [sel, setSel] = useState('');
+  // The piece whose words are being typed over on the ad itself (Tzvi, 23 Nov 2026: "when he clicks on it he should be able to edit the text").
+  const [editing, setEditing] = useState('');
+  const editRef = useRef(null);
+  // The options in four tabs, like Canva's side bar (Tzvi, 23 Nov 2026: "clean up this area on the side to make it
+  // easier to navigate"). The words come first: they are what an owner changes most. The last tab used is remembered.
+  const [tab, setTabNow] = useState(() => { try { return AD_TABS.includes(localStorage.getItem('mir-ad-tab')) ? localStorage.getItem('mir-ad-tab') : 'words'; } catch { return 'words'; } });
+  const setTab = (k) => { setTabNow(k); try { localStorage.setItem('mir-ad-tab', k); } catch { /* private window: just not remembered */ } };
+  const [flash, setFlash] = useState(''); // the control a tap on the ad led to, ringed for a moment
+  const [menu, setMenu] = useState(''); // the open drop-down: 'download', 'print' or 'save'
+  const [bgOpen, setBgOpen] = useState(false); // the photo search, closed until asked for: most owners never use it
+  const [addLine, setAddLine] = useState(false);
+  const [canUndo, setCanUndo] = useState(false);
   // Typing on a phone: the pinned preview shrinks to a thumbnail, so the keyboard leaves room to see what you type.
   const [typing, setTyping] = useState(false);
+  // The preview grows back a moment after the keyboard closes, not at once: growing at once pushed the options
+  // down mid-tap, so a tap on a tab with the keyboard open landed on whatever slid under the finger (23 Nov 2026).
+  const typingTimer = useRef(null);
   const [guides, setGuides] = useState({});
   // "Make your own": its background, and the photo search.
   const [bg, setBg] = useState({ id: 'sand' });
@@ -4164,12 +4183,16 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     const rect = canvasRef.current.getBoundingClientRect();
     const b = boxes[name] || [];
     const cur = { x: b[4] || 0, y: b[5] || 0, s: b[6] || 1 };
+    setEditing('');
     drag.current = { name, mode, sx: e.clientX, sy: e.clientY, k: canvasRef.current.width / rect.width, cur, box: boxes[name] };
     e.currentTarget.setPointerCapture?.(e.pointerId);
   };
   const onMove = (e) => {
     const d = drag.current;
     if (!d) return;
+    // A tap is not a drag: a finger wobbles a few pixels, and that wobble must not count as a move.
+    if (!d.moved && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 6) return;
+    d.moved = true;
     let dx = (e.clientX - d.sx) * d.k;
     let dy = (e.clientY - d.sy) * d.k;
     if (d.mode === 'move') {
@@ -4195,7 +4218,71 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       : { ...d.cur, x: d.cur.x + dx, y: d.cur.y + dy };
     setMoves((m) => ({ ...m, [moveKey]: { ...(m[moveKey] || {}), [d.name]: next } }));
   };
-  const onUp = () => { drag.current = null; setGuides({}); };
+  // Which of the owner's words each piece shows, so a tap on it opens those words to type over.
+  const fieldOf = (name) => (name === 'extra' ? 'extra' : name === 'word' ? 'big_word'
+    : name === 'words' && layout !== 'question' ? FIELD_OF[layout] || { calling: 'caller', checklist: 'checklist' }[layout] || 'headline' : '');
+  const onUp = () => {
+    const d = drag.current;
+    drag.current = null;
+    setGuides({});
+    if (!d || d.moved || d.mode !== 'move') return;
+    // A tap opens that piece's options, as in Canva, and rings the control it leads to.
+    const [toTab, ring] = TAB_OF_PIECE[d.name] || [];
+    if (toTab) setTab(toTab);
+    if (ring) { setFlash(ring); setTimeout(() => setFlash(''), 1600); }
+    if (fieldOf(d.name)) {
+      // Rendered now and focused inside the tap, or a phone does not open its keyboard.
+      flushSync(() => setEditing(d.name));
+      editRef.current?.focus();
+      editRef.current?.select();
+    }
+  };
+  const ringed = (k) => (flash === k ? 'ring-2 ring-offset-2 ring-[#167AB8] rounded-lg' : '');
+  // Bigger or smaller, from the bar over the words being typed: the same scale the blue dot pulls.
+  const resize = (name, f) => setMoves((m) => {
+    const cur = (m[moveKey] || {})[name] || { x: boxes[name]?.[4] || 0, y: boxes[name]?.[5] || 0, s: boxes[name]?.[6] || 1 };
+    return { ...m, [moveKey]: { ...(m[moveKey] || {}), [name]: { ...cur, s: Math.max(0.3, Math.min(3, cur.s * f)) } } };
+  });
+  // A tap anywhere outside the text box and its bar, or outside an open drop-down, closes it.
+  useEffect(() => {
+    if (!editing && !menu) return undefined;
+    const away = (e) => {
+      if (editing && !e.target.closest('[data-ad-editor]')) setEditing('');
+      if (menu && !e.target.closest('[data-ad-menu]')) setMenu('');
+    };
+    document.addEventListener('pointerdown', away);
+    return () => document.removeEventListener('pointerdown', away);
+  }, [editing, menu]);
+  // Undo: the words and the moves as they were before each change. Typing or a drag in one go is one step.
+  const hist = useRef({ stack: [], last: null, at: 0, skip: false });
+  useEffect(() => {
+    const h = hist.current;
+    const now = { words, moves };
+    if (h.skip) { h.skip = false; h.last = now; return; }
+    if (h.last?.words && words && Date.now() - h.at > 800) {
+      h.stack.push(h.last);
+      if (h.stack.length > 30) h.stack.shift();
+    }
+    h.at = Date.now();
+    h.last = now;
+    setCanUndo(h.stack.length > 0);
+  }, [words, moves]);
+  const undo = () => {
+    const h = hist.current;
+    const back = h.stack.pop();
+    if (!back) return;
+    h.skip = true;
+    setEditing('');
+    setWords(back.words);
+    setMoves(back.moves);
+    setCanUndo(h.stack.length > 0);
+  };
+  const editValue = editing ? (fieldOf(editing) === 'headline' ? wordsFor(layout)?.headline : words?.[fieldOf(editing)]) || '' : '';
+  const setEditValue = (v) => {
+    const f = fieldOf(editing);
+    if (f === 'headline') setWords({ ...wordsFor(layout), headline: v, picked: true });
+    else setWords({ ...words, [f]: v });
+  };
   const resetMoves = () => { setMoves((m) => ({ ...m, [moveKey]: {} })); setSel(''); };
   const W0 = canvasRef.current?.width || 1080;
   const H0 = canvasRef.current?.height || 1350;
@@ -4281,11 +4368,6 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
             </p>
           ) : null;
         })()}
-        <div className="space-y-1.5 mb-4" data-testid="ad-holidays">
-          <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.holidayTitle', 'Holiday')}</p>
-          {chips(holidayNow || 'noholiday', pickHoliday, [
-            ['noholiday', t('ads.noHoliday', 'No holiday')], ...holidays.map((h) => [h, t(`ads.look.${h}`)])])}
-        </div>
         {targetType === 'business' && itemFor('shoot') && (() => {
           const it = itemFor('shoot');
           const have = !!shotOf(it);
@@ -4376,16 +4458,61 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                     )}
                   </div>
                 ))}
+                {editing && boxes[editing] && (() => {
+                  const [, y, , h] = boxes[editing];
+                  const below = (y + h) / H0 < 0.6;
+                  const f = fieldOf(editing);
+                  const oneLine = ['headline', 'extra', 'big_word', 'caller'].includes(f);
+                  // A small bar over the box, like Canva's text bar: the font, the word colour and the size, right
+                  // where the owner is looking, so changing the words never sends them to the side panel.
+                  const barBtn = 'inline-flex items-center justify-center w-8 h-8 rounded-md border bg-white';
+                  return (
+                    <div data-ad-editor="" onPointerDown={(e) => e.stopPropagation()} data-testid="ad-edit-box"
+                      className={`absolute z-30 left-1/2 -translate-x-1/2 w-[min(340px,calc(100vw-56px))] flex ${below ? 'flex-col' : 'flex-col-reverse'} gap-1.5`}
+                      style={{ [below ? 'top' : 'bottom']: `${below ? ((y + h) / H0) * 100 : 100 - (y / H0) * 100}%`, marginTop: below ? 6 : 0, marginBottom: below ? 0 : 6 }}>
+                      <textarea ref={editRef} dir="auto" value={editValue} rows={oneLine ? 2 : 4}
+                        maxLength={{ headline: 60, extra: 70, big_word: 12, caller: 24 }[f]}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Escape' || (oneLine && e.key === 'Enter')) { e.preventDefault(); setEditing(''); } }}
+                        aria-label={t('ads.editWords', 'Edit the words')} data-testid="ad-edit-words"
+                        className="w-full rounded-lg border-2 bg-white px-2 py-1.5 shadow-lg resize-none" style={{ borderColor: '#167AB8', color: 'var(--ink)', fontSize: 16 }} />
+                      <div className="flex flex-wrap items-center gap-1.5 rounded-lg bg-white p-1.5 shadow-lg text-xs" style={{ color: 'var(--ink)' }} data-testid="ad-text-bar">
+                        {themed && (
+                          <select value={fontIdx} onChange={(e) => setFontIdx(Number(e.target.value))} aria-label={t('ads.fontTitle', 'Font')}
+                            className="h-8 w-20 shrink-0 rounded-md border px-1" style={{ fontSize: 16 }} data-testid="ad-bar-font">
+                            {FONTS.map(([en, he], i) => <option key={en} value={i}>{rtl ? he : en}</option>)}
+                          </select>
+                        )}
+                        {themed && (
+                          <input type="color" value={ink || '#FFFFFF'} onChange={(e) => setInk(e.target.value.toUpperCase())} aria-label={t('ads.inkTitle', 'Word colour')}
+                            className="w-8 h-8 shrink-0 rounded-md border p-0.5 bg-white cursor-pointer" data-testid="ad-bar-ink" />
+                        )}
+                        <button type="button" onClick={() => resize(editing, 1 / 1.1)} aria-label={t('ads.smaller', 'Smaller')} className={`${barBtn} shrink-0`} data-testid="ad-bar-smaller"><Minus size={14} /></button>
+                        <button type="button" onClick={() => resize(editing, 1.1)} aria-label={t('ads.bigger', 'Bigger')} className={`${barBtn} shrink-0`} data-testid="ad-bar-bigger"><Plus size={14} /></button>
+                        <button type="button" onClick={() => setEditing('')} className="ms-auto shrink-0 h-8 px-2.5 rounded-md font-semibold text-white" style={{ background: '#000' }} data-testid="ad-bar-done">
+                          {t('ads.done', 'Done')}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
             {(
               <div className="flex items-center justify-between gap-2 text-xs" style={{ color: 'var(--brand-muted)' }}>
-                <span className="hidden sm:inline">{t('ads.dragHint', 'Drag the product, the words, the price, the QR code or the link to move them. Pull the blue dot to resize.')}</span>
-                {Object.keys(moves[moveKey] || {}).length > 0 && (
-                  <button type="button" onClick={resetMoves} className="font-semibold shrink-0" style={{ color: 'var(--brand-primary)' }} data-testid="ad-reset-moves">
-                    {t('ads.resetMoves', 'Put back')}
-                  </button>
-                )}
+                <span className="hidden sm:inline">{t('ads.dragHint', 'Drag the product, the words, the price, the QR code or the link to move them. Tap the words to change them. Pull the blue dot to resize.')}</span>
+                <span className="flex items-center gap-3 ms-auto shrink-0">
+                  {canUndo && (
+                    <button type="button" onClick={undo} className="inline-flex items-center gap-1 font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-undo">
+                      <Undo2 size={13} /> {t('ads.undo', 'Undo')}
+                    </button>
+                  )}
+                  {Object.keys(moves[moveKey] || {}).length > 0 && (
+                    <button type="button" onClick={resetMoves} className="font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-reset-moves">
+                      {t('ads.resetMoves', 'Put back')}
+                    </button>
+                  )}
+                </span>
               </div>
             )}
           </div>
@@ -4393,7 +4520,27 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
               field tapped or focused would scroll in under it and the tap hit the ad
               (18 Nov 2026). The margin keeps scrolled-to controls below the preview. */}
           <div className={`space-y-4 ${typing ? 'max-sm:[&_:is(input,textarea,select,button)]:scroll-mt-[220px]' : 'max-sm:[&_:is(input,textarea,select,button)]:scroll-mt-[440px]'}`}
-            onFocus={(e) => setTyping(e.target.matches('input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=date]), textarea'))} onBlur={() => setTyping(false)}>
+            onFocus={(e) => { if (e.target.matches('input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=date]), textarea')) { clearTimeout(typingTimer.current); setTyping(true); } }}
+            onBlur={() => { typingTimer.current = setTimeout(() => setTyping(false), 400); }}>
+            {/* The four tabs. A dot marks a tab with something to fix in it, so a warning is never hidden behind one. */}
+            <div role="tablist" aria-label={t('ads.tabsLabel', 'Ad options')} className="grid grid-cols-4 gap-1 rounded-xl p-1" style={{ background: '#F9FAFB' }} data-testid="ad-tabs">
+              {[['words', t('ads.tabWords', 'Words'), issues.length > 0 || headlineWords > 9],
+                ['look', t('ads.tabLook', 'Look'), !!lost],
+                ['extras', t('ads.tabExtras', 'Extras'), (logoImg && logoOn && !logoReads(logoImg)) || (deal.text.trim() && !deal.until)],
+                ['share', t('ads.tabShare', 'Share'), false]].map(([k, label, warn]) => (
+                <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)} data-testid={`ad-tab-${k}`}
+                  className="relative py-2 rounded-lg text-sm font-semibold" style={tab === k ? { background: '#fff', color: 'var(--ink)', boxShadow: '0 1px 3px rgba(17,24,39,.12)' } : { color: 'var(--brand-muted)' }}>
+                  {label}
+                  {warn && <span className="absolute top-1.5 end-2 w-2 h-2 rounded-full" style={{ background: '#D97706' }} aria-label={t('ads.tabNeedsLook', 'Something to fix here')} data-testid={`ad-tab-warn-${k}`} />}
+                </button>
+              ))}
+            </div>
+            <div className={tab === 'look' ? 'space-y-4' : 'hidden'} role="tabpanel" data-testid="ad-panel-look">
+            <div className="space-y-1.5" data-testid="ad-holidays">
+              <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.holidayTitle', 'Holiday')}</p>
+              {chips(holidayNow || 'noholiday', pickHoliday, [
+                ['noholiday', t('ads.noHoliday', 'No holiday')], ...holidays.map((h) => [h, t(`ads.look.${h}`)])])}
+            </div>
             {((themed && layout !== 'custom' && layout !== 'fullphoto' && layout !== 'shoot') || COLOUR_FIXED.includes(layout)) && (
               <div className="space-y-1.5">
                 <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.colourTitle', 'Background colour')}</p>
@@ -4434,7 +4581,12 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                     {t('ads.bgNone', 'No photo')}
                   </button>
                 )}
-                <BackgroundGallery API={API} token={token} lang={lang} onPick={pickBackground} />
+                <button type="button" onClick={() => setBgOpen((o) => !o)} aria-expanded={bgOpen} data-testid="ad-bg-open"
+                  className="w-full flex items-center justify-between rounded-lg border px-3 py-2 text-sm font-semibold" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
+                  {t('ads.bgSearchOpen', 'Search free photos for the background')}
+                  <ChevronDown size={16} className={`transition-transform ${bgOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+                </button>
+                {bgOpen && <BackgroundGallery API={API} token={token} lang={lang} onPick={pickBackground} />}
               </div>
             )}
             {themed && (
@@ -4460,22 +4612,23 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                 )}
               </div>
             )}
-            <div className="space-y-2" data-testid="ad-extras">
-              <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs font-semibold" style={{ color: 'var(--ink)' }}>
+            </div>
+            <div className={tab === 'extras' ? 'space-y-3' : 'hidden'} role="tabpanel" data-testid="ad-extras">
+              <div className="flex flex-col gap-2.5 text-sm font-semibold" style={{ color: 'var(--ink)' }}>
                 {canStrip && (
-                  <label className="inline-flex items-center gap-1.5">
+                  <label className="inline-flex items-center gap-2">
                     <input type="checkbox" checked={strips} onChange={(e) => setStrips(e.target.checked)} data-testid="ad-strips" />
                     {t('ads.strips', 'Headline on strips')}
                   </label>
                 )}
                 {targetType === 'business' && !PRICE_ON.has(layout) && featured?.price ? (
-                  <label className="inline-flex items-center gap-1.5">
+                  <label className={`inline-flex items-center gap-2 ${ringed('price')}`}>
                     <input type="checkbox" checked={priceOn} onChange={(e) => setPriceOn(e.target.checked)} data-testid="ad-price" />
                     {t('ads.withPrice', 'Show the price')}
                   </label>
                 ) : null}
                 {logoImg && (
-                  <label className="inline-flex items-center gap-1.5">
+                  <label className={`inline-flex items-center gap-2 ${ringed('logo')}`}>
                     <input type="checkbox" checked={logoOn} onChange={(e) => setLogoOn(e.target.checked)} data-testid="ad-logo" />
                     {t('ads.withLogo', 'Show my logo')}
                   </label>
@@ -4486,14 +4639,14 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                   </p>
                 )}
                 {reviews.length > 0 && design !== 'review' && (
-                  <label className="inline-flex items-center gap-1.5">
+                  <label className={`inline-flex items-center gap-2 ${ringed('review')}`}>
                     <input type="checkbox" checked={withReview} onChange={(e) => setWithReview(e.target.checked)} data-testid="ad-with-review" />
                     {t('ads.withReview', 'Add a customer review')}
                   </label>
                 )}
               </div>
               {targetType !== 'site' && (
-                <div className="grid grid-cols-[1fr_auto] gap-2 items-end">
+                <div className={`grid grid-cols-[1fr_auto] gap-2 items-end ${ringed('deal')}`}>
                   <label className="block text-xs font-semibold" style={{ color: 'var(--ink)' }}>
                     {t('ads.deal', 'A real deal you are running (optional)')}
                     <input className={`${field} mt-1`} maxLength={30} value={deal.text} placeholder={t('ads.dealHint', 'Buy 2, get 1 free')}
@@ -4508,11 +4661,131 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                 </div>
               )}
             </div>
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.shape', 'Where will you post it?')}</p>
-              {chips(format, pickFormat, [
-                ['square', t('ads.square', 'Square post')], ['feed', t('ads.feed', 'Facebook / Instagram')], ['story', t('ads.story', 'WhatsApp status / story')]])}
-            </div>
+            <div className={tab === 'words' ? 'space-y-4' : 'hidden'} role="tabpanel" data-testid="ad-panel-words">
+            {words && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.words', 'The words (change anything)')}</p>
+                  <button type="button" onClick={() => write(null, forWhom)} disabled={busy} className="inline-flex items-center gap-1 text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-rewrite">
+                    <RefreshCw size={12} /> {t('ads.rewrite', 'Write again')}
+                  </button>
+                </div>
+                {poolFor(layout).length > 1 && (
+                  <div className={`space-y-1 ${ringed('products')}`}>
+                    <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('ads.whichProduct', 'Which product is in the ad (its own price comes with it)')}</p>
+                    <div className="flex gap-2 overflow-x-auto pb-1" data-testid="ad-products">
+                      {poolFor(layout).map((it, i) => (
+                        <button key={it.name} type="button" onClick={() => setPickBy((m) => ({ ...m, [layout]: it.name }))} aria-pressed={featured?.name === it.name}
+                          className="shrink-0 w-[72px] text-center" data-testid={`ad-product-${i}`}>
+                          <img src={(it.cut || it.img).src} alt="" className="h-12 w-full object-contain rounded border-2"
+                            style={{ borderColor: featured?.name === it.name ? '#000' : 'var(--brand-border)' }} />
+                          <span className="block text-[10px] leading-tight truncate" dir="auto">{it.name}</span>
+                          {it.price > 0 && <span className="block text-[10px] font-semibold">{money(it.price, it.currency)}</span>}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Picking a product with no photo of its own on the Product photo design shows a plain photo
+                        instead: say so where it was picked, with the button to photograph it (18 Nov 2026). */}
+                    {layout === 'shoot' && targetType === 'business' && featured && !shotOf(featured)
+                      && !shots.some((x) => x.status === 'making' && sameShot(x, featured, format)) && (
+                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs" style={{ background: '#F9FAFB', color: 'var(--ink)' }} data-testid="ad-shot-this">
+                        <span dir="auto">{t('ads.shotThis', '{{item}} has no product photo yet, so a plain photo shows.', { item: featured.name })}</span>
+                        <button type="button" onClick={makeShot} disabled={shotsLeft === 0} className="px-3 py-1.5 rounded-lg font-semibold text-white disabled:opacity-50"
+                          style={{ background: '#000' }} data-testid="ad-shot-this-make">{t('ads.shotThisMake', 'Photograph this one')}</button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {(words.ideas || []).length > 0 && (
+                  <div className="space-y-1" data-testid="ad-ideas">
+                    <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('ads.ideasTitle', 'Pick a headline, or write your own')}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[...words.ideas, ...(words.plain ? [{ text: words.plain, key: words.plainKey || '', item: words.plainItem || '' }] : [])].map((o, i) => (
+                        <button key={o.text} type="button" dir="auto" onClick={() => { setWords({ ...words, headline: o.text, key: o.key, item: o.item || '', picked: true }); if (o.item) setPickBy({}); }} aria-pressed={wordsFor(layout).headline === o.text}
+                          className={`${chip(wordsFor(layout).headline === o.text)} text-start`} style={chipStyle(wordsFor(layout).headline === o.text)} data-testid={`ad-idea-${i}`}>
+                          {o.text}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <label className="block text-xs font-semibold" style={{ color: 'var(--ink)' }}>
+                  {t('ads.headline', 'Headline')}
+                  <input dir="auto" className={`${field} mt-1 font-normal`} value={wordsFor(layout).headline} maxLength={60} onChange={(e) => setWords({ ...wordsFor(layout), headline: e.target.value, picked: true })} data-testid="ad-headline" />
+                </label>
+                {headlineWords > 9 && (
+                  <p className="text-xs font-semibold rounded-lg px-2.5 py-2" style={{ background: '#FFF4E5', color: '#7A4100' }} data-testid="ad-one-message">
+                    {t('ads.oneMessage', 'One idea per ad works best: try 9 words or fewer in the headline.')}
+                  </p>
+                )}
+                {FIELD_OF[layout] && (
+                  <textarea dir="auto" className={field} rows={FIELD_OF[layout] === 'post' || FIELD_OF[layout] === 'moment' ? 2 : 4} value={words[FIELD_OF[layout]] || ''}
+                    onChange={(e) => setWords({ ...words, [FIELD_OF[layout]]: e.target.value })}
+                    aria-label={t(`ads.${FIELD_OF[layout]}Field`)} placeholder={t(`ads.${FIELD_OF[layout]}Field`)} data-testid={`ad-field-${FIELD_OF[layout]}`} />
+                )}
+                {layout === 'situation' && lineList(words.situations).length > 1 && (
+                  <button type="button" onClick={() => setSituationIdx((i) => i + 1)} className="text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-next-situation">
+                    {t('ads.anotherMoment', 'Another moment')}
+                  </button>
+                )}
+                {layout === 'behind' && (
+                  <input dir="auto" className={field} value={words.big_word} maxLength={12} onChange={(e) => setWords({ ...words, big_word: e.target.value })}
+                    aria-label={t('ads.bigWordField', 'The big word')} placeholder={t('ads.bigWordField', 'The big word')} />
+                )}
+                {layout === 'search' && (
+                  <input dir="auto" className={field} value={words.search} maxLength={60} onChange={(e) => setWords({ ...words, search: e.target.value })}
+                    aria-label={t('ads.searchField', 'What they search for')} placeholder={t('ads.searchField', 'What they search for')} data-testid="ad-search-words" />
+                )}
+                {layout === 'toggle' && (
+                  <textarea dir="auto" className={field} rows={3} value={words.switches} onChange={(e) => setWords({ ...words, switches: e.target.value })}
+                    aria-label={t('ads.switchesField', 'Switches')} placeholder={t('ads.switchesField', 'Switches')} />
+                )}
+                {layout === 'checklist' && (
+                  <textarea dir="auto" className={field} rows={4} value={words.checklist} onChange={(e) => setWords({ ...words, checklist: e.target.value })}
+                    aria-label={t('ads.checklistField', 'The list')} placeholder={t('ads.checklistField', 'The list')} />
+                )}
+                {layout === 'calling' && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <input dir="auto" className={field} value={words.caller} maxLength={24} onChange={(e) => setWords({ ...words, caller: e.target.value })}
+                      aria-label={t('ads.callerField', 'Who is calling')} placeholder={t('ads.callerField', 'Who is calling')} />
+                    <input dir="auto" className={field} value={words.decline} maxLength={16} onChange={(e) => setWords({ ...words, decline: e.target.value })}
+                      aria-label={t('ads.declineField', 'Under the red button')} placeholder={t('ads.declineField', 'Under the red button')} />
+                  </div>
+                )}
+                {issues.length > 0 && (
+                  <p className="text-xs font-semibold" style={{ color: '#B42318' }} role="alert" data-testid="ad-issue">
+                    {t('ads.issuePrice', 'Take the price out of the words: the ad already shows the price of the product you picked, and two prices confuse people.')}
+                  </p>
+                )}
+                {/* The selling points as one labelled, numbered group, and the owner's own line after them as a
+                    button of its own: in one pile of look-alike boxes it was missed (Tzvi, 23 Nov 2026). */}
+                {words.points.length > 0 && (
+                  <div className="space-y-1.5" data-testid="ad-points">
+                    <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.pointsTitle', 'Selling points')}</p>
+                    {words.points.map((p, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span className="shrink-0 w-6 h-6 rounded-full text-xs font-semibold inline-flex items-center justify-center" style={{ background: '#F9FAFB', color: 'var(--brand-muted)' }} aria-hidden="true">{i + 1}</span>
+                        <input dir="auto" className={field} value={p} maxLength={40} aria-label={`${t('ads.point', 'Selling point')} ${i + 1}`}
+                          onChange={(e) => setWords({ ...words, points: words.points.map((q, j) => (j === i ? e.target.value : q)) })} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {addLine || words.extra ? (
+                  <label className="block text-xs font-semibold" style={{ color: 'var(--ink)' }}>
+                    {t('ads.extraTitle', 'Your own line')}
+                    <input dir="auto" className={`${field} mt-1 font-normal`} value={words.extra || ''} maxLength={70} autoFocus={addLine && !words.extra}
+                      onChange={(e) => setWords({ ...words, extra: e.target.value })} placeholder={t('ads.extraHint', 'Anything you want to add, like "Open on Fridays"')} data-testid="ad-extra" />
+                  </label>
+                ) : (
+                  <button type="button" onClick={() => setAddLine(true)} data-testid="ad-add-line"
+                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border-2 border-dashed px-3 py-2.5 text-sm font-semibold"
+                    style={{ borderColor: '#167AB8', color: '#167AB8' }}>
+                    <Plus size={15} aria-hidden="true" /> {t('ads.addLine', 'Add your own line')}
+                  </button>
+                )}
+              </div>
+            )}
             <div className="space-y-1.5">
               {design === 'question' && faqs.length > 0 && (
                 <div className="flex items-center justify-between gap-2 text-xs" style={{ color: 'var(--brand-muted)' }}>
@@ -4553,157 +4826,77 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                 </div>
               </div>
             )}
-            {words && (
-              <div className="space-y-2" dir={rtl ? 'rtl' : 'ltr'}>
-                <div className="flex items-center justify-between" dir="auto">
-                  <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.words', 'The words (change anything)')}</p>
-                  <button type="button" onClick={() => write(null, forWhom)} disabled={busy} className="inline-flex items-center gap-1 text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-rewrite">
-                    <RefreshCw size={12} /> {t('ads.rewrite', 'Write again')}
-                  </button>
-                </div>
-                {poolFor(layout).length > 1 && (
-                  <div className="space-y-1">
-                    <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('ads.whichProduct', 'Which product is in the ad (its own price comes with it)')}</p>
-                    <div className="flex gap-2 overflow-x-auto pb-1" data-testid="ad-products">
-                      {poolFor(layout).map((it, i) => (
-                        <button key={it.name} type="button" onClick={() => setPickBy((m) => ({ ...m, [layout]: it.name }))} aria-pressed={featured?.name === it.name}
-                          className="shrink-0 w-[72px] text-center" data-testid={`ad-product-${i}`}>
-                          <img src={(it.cut || it.img).src} alt="" className="h-12 w-full object-contain rounded border-2"
-                            style={{ borderColor: featured?.name === it.name ? '#000' : 'var(--brand-border)' }} />
-                          <span className="block text-[10px] leading-tight truncate" dir="auto">{it.name}</span>
-                          {it.price > 0 && <span className="block text-[10px] font-semibold">{money(it.price, it.currency)}</span>}
-                        </button>
-                      ))}
-                    </div>
-                    {/* Picking a product with no photo of its own on the Product photo design shows a plain photo
-                        instead: say so where it was picked, with the button to photograph it (18 Nov 2026). */}
-                    {layout === 'shoot' && targetType === 'business' && featured && !shotOf(featured)
-                      && !shots.some((x) => x.status === 'making' && sameShot(x, featured, format)) && (
-                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs" style={{ background: '#F9FAFB', color: 'var(--ink)' }} data-testid="ad-shot-this">
-                        <span dir="auto">{t('ads.shotThis', '{{item}} has no product photo yet, so a plain photo shows.', { item: featured.name })}</span>
-                        <button type="button" onClick={makeShot} disabled={shotsLeft === 0} className="px-3 py-1.5 rounded-lg font-semibold text-white disabled:opacity-50"
-                          style={{ background: '#000' }} data-testid="ad-shot-this-make">{t('ads.shotThisMake', 'Photograph this one')}</button>
-                      </div>
-                    )}
-                  </div>
-                )}
-                {(words.ideas || []).length > 0 && (
-                  <div className="space-y-1" data-testid="ad-ideas">
-                    <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('ads.ideasTitle', 'Pick a headline, or write your own')}</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {[...words.ideas, ...(words.plain ? [{ text: words.plain, key: words.plainKey || '', item: words.plainItem || '' }] : [])].map((o, i) => (
-                        <button key={o.text} type="button" dir="auto" onClick={() => { setWords({ ...words, headline: o.text, key: o.key, item: o.item || '', picked: true }); if (o.item) setPickBy({}); }} aria-pressed={wordsFor(layout).headline === o.text}
-                          className={`${chip(wordsFor(layout).headline === o.text)} text-start`} style={chipStyle(wordsFor(layout).headline === o.text)} data-testid={`ad-idea-${i}`}>
-                          {o.text}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <input className={field} value={wordsFor(layout).headline} maxLength={60} onChange={(e) => setWords({ ...wordsFor(layout), headline: e.target.value, picked: true })} aria-label={t('ads.headline', 'Headline')} data-testid="ad-headline" />
-                <input className={field} value={words.extra || ''} maxLength={70} onChange={(e) => setWords({ ...words, extra: e.target.value })}
-                  aria-label={t('ads.extraLine', 'Add a line of your own (optional)')} placeholder={t('ads.extraLine', 'Add a line of your own (optional)')} data-testid="ad-extra" />
-                {headlineWords > 9 && (
-                  <p className="text-xs font-semibold rounded-lg px-2.5 py-2" style={{ background: '#FFF4E5', color: '#7A4100' }} data-testid="ad-one-message">
-                    {t('ads.oneMessage', 'One idea per ad works best: try 9 words or fewer in the headline.')}
-                  </p>
-                )}
-                {FIELD_OF[layout] && (
-                  <textarea className={field} rows={FIELD_OF[layout] === 'post' || FIELD_OF[layout] === 'moment' ? 2 : 4} value={words[FIELD_OF[layout]] || ''}
-                    onChange={(e) => setWords({ ...words, [FIELD_OF[layout]]: e.target.value })}
-                    aria-label={t(`ads.${FIELD_OF[layout]}Field`)} placeholder={t(`ads.${FIELD_OF[layout]}Field`)} data-testid={`ad-field-${FIELD_OF[layout]}`} />
-                )}
-                {layout === 'situation' && lineList(words.situations).length > 1 && (
-                  <button type="button" onClick={() => setSituationIdx((i) => i + 1)} className="text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-next-situation">
-                    {t('ads.anotherMoment', 'Another moment')}
-                  </button>
-                )}
-                {layout === 'behind' && (
-                  <input className={field} value={words.big_word} maxLength={12} onChange={(e) => setWords({ ...words, big_word: e.target.value })}
-                    aria-label={t('ads.bigWordField', 'The big word')} placeholder={t('ads.bigWordField', 'The big word')} />
-                )}
-                {layout === 'search' && (
-                  <input className={field} value={words.search} maxLength={60} onChange={(e) => setWords({ ...words, search: e.target.value })}
-                    aria-label={t('ads.searchField', 'What they search for')} placeholder={t('ads.searchField', 'What they search for')} data-testid="ad-search-words" />
-                )}
-                {layout === 'toggle' && (
-                  <textarea className={field} rows={3} value={words.switches} onChange={(e) => setWords({ ...words, switches: e.target.value })}
-                    aria-label={t('ads.switchesField', 'Switches')} placeholder={t('ads.switchesField', 'Switches')} />
-                )}
-                {layout === 'checklist' && (
-                  <textarea className={field} rows={4} value={words.checklist} onChange={(e) => setWords({ ...words, checklist: e.target.value })}
-                    aria-label={t('ads.checklistField', 'The list')} placeholder={t('ads.checklistField', 'The list')} />
-                )}
-                {layout === 'calling' && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <input className={field} value={words.caller} maxLength={24} onChange={(e) => setWords({ ...words, caller: e.target.value })}
-                      aria-label={t('ads.callerField', 'Who is calling')} placeholder={t('ads.callerField', 'Who is calling')} />
-                    <input className={field} value={words.decline} maxLength={16} onChange={(e) => setWords({ ...words, decline: e.target.value })}
-                      aria-label={t('ads.declineField', 'Under the red button')} placeholder={t('ads.declineField', 'Under the red button')} />
-                  </div>
-                )}
-                {issues.length > 0 && (
-                  <p className="text-xs font-semibold" style={{ color: '#B42318' }} role="alert" data-testid="ad-issue">
-                    {t('ads.issuePrice', 'Take the price out of the words: the ad already shows the price of the product you picked, and two prices confuse people.')}
-                  </p>
-                )}
-                {words.points.map((p, i) => (
-                  <input key={i} className={field} value={p} maxLength={40} aria-label={t('ads.point', 'Selling point')}
-                    onChange={(e) => setWords({ ...words, points: words.points.map((q, j) => (j === i ? e.target.value : q)) })} />
-                ))}
-                <label className="block text-xs font-semibold" style={{ color: 'var(--ink)' }}>
-                  {t('ads.captionLabel', 'Post text, for under the picture when you post')}
-                  <textarea className={`${field} mt-1 font-normal`} rows={4} value={words.caption} onChange={(e) => setWords({ ...words, caption: e.target.value })} data-testid="ad-caption" />
-                </label>
-              </div>
-            )}
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={shareStatus} disabled={!preview || busy || issues.length > 0}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white disabled:opacity-60" style={{ background: '#000' }} data-testid="ad-status">
-                <Share2 size={15} /> {t('ads.status', 'Share to WhatsApp Status')}
-              </button>
-              <button type="button" onClick={video ? sendVideo : makeVideo} disabled={!preview || busy || issues.length > 0 || videoPct !== null}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-video">
-                {videoPct !== null ? <Loader2 className="animate-spin" size={15} /> : <Film size={15} />}
-                {videoPct !== null ? `${t('ads.videoBusy', 'Making your video')} ${videoPct}%`
-                  : video ? (navigator.canShare ? t('ads.videoSend', 'Send the video') : t('ads.videoSave', 'Download the video')) : t('ads.videoMake', 'Make it move')}
-              </button>
-              <button type="button" onClick={() => saveAd()} disabled={!preview || busy}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-save">
-                <Save size={15} /> {t('ads.save', 'Save')}
-              </button>
-              <button type="button" onClick={sharePicture} disabled={!preview || busy || issues.length > 0}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-share">
-                {navigator.canShare ? <Share2 size={15} /> : <Download size={15} />} {t('ads.share', 'Post the picture')}
-              </button>
-              <button type="button" onClick={copyText} disabled={!words}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-copy">
-                <Copy size={15} /> {t('ads.copy', 'Copy the post text')}
-              </button>
-              <button type="button" onClick={allShapes} disabled={!preview || busy || issues.length > 0}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-all-shapes">
-                <Layers size={15} /> {t('ads.allShapes', 'All three shapes')}
-              </button>
             </div>
-            {savedId && (
-              <button type="button" onClick={() => saveAd(false, true)} className="text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-save-new">
-                {t('ads.saveNew', 'Save as a new ad')}
+            {tab !== 'share' && (
+              <button type="button" onClick={() => setTab('share')} className="w-full py-2.5 rounded-lg text-sm font-semibold" style={{ background: 'rgba(36,175,235,.33)', color: 'var(--ink)' }} data-testid="ad-to-share">
+                {t('ads.toShare', 'Ready? Share or download it')}
               </button>
             )}
-            {design !== 'native' && (
-              <div className="flex flex-wrap items-center gap-1.5" data-testid="ad-print">
-                <span className="inline-flex items-center gap-1 text-xs font-semibold me-1" style={{ color: 'var(--ink)' }}>
-                  <Printer size={14} aria-hidden="true" /> {t('ads.printTitle', 'Print')}
-                </span>
-                {[['flyer', t('ads.printFlyer', 'A4 flyer')], ['table', t('ads.printTable', 'Table card')],
-                  ['cards', t('ads.printCards', 'Business cards')], ['sticker', t('ads.printSticker', 'Window sticker')]].map(([k, label]) => (
-                  <button key={k} type="button" onClick={() => printIt(k)} disabled={!preview || busy || issues.length > 0}
-                    className={`${chip(false)} disabled:opacity-40`} style={chipStyle(false)} data-testid={`ad-print-${k}`}>
-                    {label}
-                  </button>
-                ))}
-              </div>
+            <div className={tab === 'share' ? 'space-y-4' : 'hidden'} role="tabpanel" data-testid="ad-panel-share">
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.shape', 'Where will you post it?')}</p>
+              {chips(format, pickFormat, [
+                ['square', t('ads.square', 'Square post')], ['feed', t('ads.feed', 'Facebook / Instagram')], ['story', t('ads.story', 'WhatsApp status / story')]])}
+            </div>
+            {words && (
+              <label className="block text-xs font-semibold" style={{ color: 'var(--ink)' }}>
+                {t('ads.captionLabel', 'Post text, for under the picture when you post')}
+                <textarea dir="auto" className={`${field} mt-1 font-normal`} rows={4} value={words.caption} onChange={(e) => setWords({ ...words, caption: e.target.value })} data-testid="ad-caption" />
+              </label>
             )}
+            {/* One main action; the rest in three drop-downs, as Canva keeps sharing behind one button. */}
+            <button type="button" onClick={shareStatus} disabled={!preview || busy || issues.length > 0}
+              className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-lg text-sm font-semibold text-white disabled:opacity-60" style={{ background: '#000' }} data-testid="ad-status">
+              <Share2 size={15} /> {t('ads.status', 'Share to WhatsApp Status')}
+            </button>
+            {(() => {
+              const off = !preview || busy || issues.length > 0;
+              const btn = 'inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60';
+              const btnStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
+              const item = 'w-full flex items-center gap-2 px-3 py-2.5 text-sm text-start hover:bg-[#F9FAFB] disabled:opacity-40';
+              const dropdown = (k, label, icon, items) => (
+                <div className="relative" data-ad-menu="">
+                  <button type="button" onClick={() => setMenu((m) => (m === k ? '' : k))} aria-expanded={menu === k} className={`${btn} w-full`} style={btnStyle} data-testid={`ad-menu-${k}`}>
+                    {icon} {label} <ChevronDown size={14} aria-hidden="true" />
+                  </button>
+                  {menu === k && (
+                    <div role="menu" className="absolute z-30 mt-1 min-w-[200px] end-0 rounded-lg border bg-white shadow-lg py-1" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
+                      {items.filter(Boolean).map(([id, text, ic, run, disabled]) => (
+                        <button key={id} type="button" role="menuitem" disabled={disabled} onClick={() => { setMenu(''); run(); }} className={item} data-testid={id}>
+                          {ic} {text}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+              return (
+                <div className="grid grid-cols-2 gap-2">
+                  <button type="button" onClick={video ? sendVideo : makeVideo} disabled={off || videoPct !== null} className={btn} style={btnStyle} data-testid="ad-video">
+                    {videoPct !== null ? <Loader2 className="animate-spin" size={15} /> : <Film size={15} />}
+                    {videoPct !== null ? `${t('ads.videoBusy', 'Making your video')} ${videoPct}%`
+                      : video ? (navigator.canShare ? t('ads.videoSend', 'Send the video') : t('ads.videoSave', 'Download the video')) : t('ads.videoMake', 'Make it move')}
+                  </button>
+                  {savedId ? dropdown('save', t('ads.save', 'Save'), <Save size={15} />, [
+                    ['ad-save', t('ads.saveChanges', 'Save the changes'), <Save size={15} />, () => saveAd(), !preview || busy],
+                    ['ad-save-new', t('ads.saveNew', 'Save as a new ad'), <Plus size={15} />, () => saveAd(false, true), !preview || busy],
+                  ]) : (
+                    <button type="button" onClick={() => saveAd()} disabled={!preview || busy} className={btn} style={btnStyle} data-testid="ad-save">
+                      <Save size={15} /> {t('ads.save', 'Save')}
+                    </button>
+                  )}
+                  {dropdown('download', t('ads.downloadMenu', 'Download'), <Download size={15} />, [
+                    ['ad-share', t('ads.share', 'Post the picture'), navigator.canShare ? <Share2 size={15} /> : <Download size={15} />, sharePicture, off],
+                    ['ad-all-shapes', t('ads.allShapes', 'All three shapes'), <Layers size={15} />, allShapes, off],
+                    ['ad-copy', t('ads.copy', 'Copy the post text'), <Copy size={15} />, copyText, !words],
+                  ])}
+                  {design !== 'native' && dropdown('print', t('ads.printTitle', 'Print'), <Printer size={15} />,
+                    [['flyer', t('ads.printFlyer', 'A4 flyer')], ['table', t('ads.printTable', 'Table card')],
+                      ['cards', t('ads.printCards', 'Business cards')], ['sticker', t('ads.printSticker', 'Window sticker')]]
+                      .map(([k, label]) => [`ad-print-${k}`, label, null, () => printIt(k), off]))}
+                </div>
+              );
+            })()}
             {targetType === 'business' && (
               <a href={adLibraryUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold"
                 style={{ color: 'var(--brand-primary)' }} data-testid="ad-library-link">
@@ -4722,6 +4915,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
               </div>
             )}
             <p className="text-[11px] text-gray-600">{t('ads.hint', 'The link on the ad is your own short link, so you can see how many people opened it under "Share & QR code".')}</p>
+            </div>
           </div>
         </div>
         <div className="hidden"><QRCodeCanvas ref={qrRef} value={qrUrl} size={380} marginSize={2} level="M" fgColor={INK} /></div>

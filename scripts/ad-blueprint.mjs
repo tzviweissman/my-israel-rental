@@ -165,7 +165,9 @@ function write(name) {
 function designKeys() {
   const maker = fs.readFileSync(path.join(ROOT, 'frontend/src/components/dashboard/AdMaker.jsx'), 'utf8');
   const studio = fs.readFileSync(path.join(ROOT, 'frontend/src/components/admin/AdStudio.jsx'), 'utf8');
-  const keys = new Set([...maker.matchAll(/^\s*\['([a-z]+)', t\('ads\.[A-Za-z]+', '[^']*'\), /gm)].map((m) => m[1]));
+  // The gallery rows sit four spaces in. Any indent used to count, so the options tabs (['look', t('ads.tabLook', ...)],
+  // 23 Nov 2026) read as three new designs; the same 36 designs match either way.
+  const keys = new Set([...maker.matchAll(/^ {4}\['([a-z]+)', t\('ads\.[A-Za-z]+', '[^']*'\), /gm)].map((m) => m[1]));
   const d = /export const DESIGNS = \[([^\]]*)\]/.exec(studio);
   for (const m of (d ? d[1] : '').matchAll(/'([a-z]+)'/g)) keys.add(m[1]);
   return [...keys];

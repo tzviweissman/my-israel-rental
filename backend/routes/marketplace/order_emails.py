@@ -59,6 +59,39 @@ def email_line(biz: dict[str, Any], key: str, lang: str, vals: dict[str, Any]) -
     return re.sub(r"[ \t]{2,}", " ", t).strip()
 
 
+# "Your email look" (Tzvi, 23 Nov 2026, from Shopify's "Customize email templates": logo, logo size, accent colour).
+# Off unless the business turns it on, so the emails of businesses already approved stay as they are; on, its own
+# logo and colour head the emails its customers get, and its button takes the colour.
+LOGO_PX = {"small": 40, "medium": 64, "large": 96}
+DEFAULT_ACCENT = "#167AB8"
+
+
+def _luminance(hex6: str) -> float:
+    rgb = [int(hex6[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+    lin = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in rgb]
+    return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2]
+
+
+def clean_look(raw: Optional[dict[str, Any]]) -> dict[str, Any]:
+    raw = raw or {}
+    accent = str(raw.get("accent") or "").strip().upper()
+    return {"on": bool(raw.get("on")), "logo": raw.get("logo") if raw.get("logo") in (*LOGO_PX, "none") else "medium",
+            "accent": accent if re.fullmatch(r"#[0-9A-F]{6}", accent) else DEFAULT_ACCENT}
+
+
+def email_brand(biz: dict[str, Any]) -> Optional[dict[str, Any]]:
+    """The business's own email look, or None for ours. Words on the colour are white, or ink when white would
+    not read (4.5:1, the same bar as the site's text)."""
+    look = (biz.get("order_settings") or {}).get("email_look") or {}
+    if not look.get("on"):
+        return None
+    look = clean_look(look)
+    white = 1.05 / (_luminance(look["accent"]) + 0.05)
+    return {"name": biz.get("name") or "", "name_he": biz.get("name_he") or "", "accent": look["accent"],
+            "ink": "#FFFFFF" if white >= 4.5 else "#111827",
+            "logo": biz.get("logo_url") if look["logo"] != "none" else None, "logo_px": LOGO_PX.get(look["logo"], 64)}
+
+
 def note_html(biz: dict[str, Any]) -> str:
     """The business's own line (texts panel), as it appears on confirmations."""
     from .orders import _esc
@@ -129,7 +162,7 @@ async def email_customer_received(o: dict[str, Any], biz: dict[str, Any]) -> Non
     subject = f"ההזמנה שלך {order_no(o)} מ{name}" if he else f"Your order {order_no(o)} from {name}"
     await _email(o["customer_email"], subject, html, tag="order-confirmation",
                  button=("מעקב אחר ההזמנה" if he else "Follow your order", track_link(o)), lang=lang, log=_log(o, "customer", "order_received"),
-                 after_button=extra)
+                 after_button=extra, brand=email_brand(biz))
 
 
 async def email_customer_decision(o: dict[str, Any], biz: dict[str, Any], confirm: bool) -> None:
@@ -150,7 +183,8 @@ async def email_customer_decision(o: dict[str, Any], biz: dict[str, Any], confir
         subject = f"ההזמנה שלך {no} מ{name}" if he else f"Your order {no} from {name}"
         html, button, extra = f"<p>{_esc(line)}</p>", None, ""
     await _email(o["customer_email"], subject, html, tag="order-confirmed" if confirm else "order-declined", button=button,
-                 lang=lang, log=_log(o, "customer", "order_confirmed" if confirm else "order_declined"), after_button=extra)
+                 lang=lang, log=_log(o, "customer", "order_confirmed" if confirm else "order_declined"), after_button=extra,
+                 brand=email_brand(biz))
 
 
 async def email_owner_new_booking(gig: dict[str, Any], booking: dict[str, Any], customer_name: str, summary: str) -> None:

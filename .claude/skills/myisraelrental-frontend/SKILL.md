@@ -72,6 +72,7 @@ Placeholder figures from the preview files ("1,200+ active rentals", "19 cities"
 - Icons are `lucide-react`. The previews' `<use href="#i-…">` are placeholders — see the mapping table in `docs/hero-cinematic-spec.md`.
 - Scroll reveal uses the fail-safe `.js-reveal` pattern: content is visible if JS never runs. Never ship `.reveal{opacity:0}` unconditionally.
 - Respect `prefers-reduced-motion` — posters instead of video.
+- **When a dashboard lists or edits automatic messages (universal, all business dashboards):** every automatic message a business or its customers get (texts, emails, WhatsApp, reminders, review asks, auto-answers) is listed with a plain line saying WHEN it goes out and WHO gets it, e.g. "Sent when you confirm an order · to your customer" (from Shopify's Customer notifications page, studied 23 Nov 2026).
 
 ## 8. Known traps
 

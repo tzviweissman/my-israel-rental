@@ -282,6 +282,17 @@ def test_customer_told_order_arrived(world):
     assert sent.await_count == 0
 
 
+def test_a_message_switched_off_is_not_sent(world):
+    """Tzvi, 23 Nov 2026: a business can switch off an optional message; a confirmation can never be switched off."""
+    order, sent = world
+    biz = {"name": "Blazin Boards", "order_settings": {"text_on": True, "text_off": ["order_received"]}}
+    run(ot.text_customer_received(order, biz))
+    assert sent.await_count == 0
+    assert ot.message_off(biz, "order_received")
+    assert not ot.message_off({"order_settings": {"text_off": ["order_confirmed"]}}, "order_confirmed")
+    assert ot.clean_off(["review", "order_confirmed", "nope", "review"]) == ["review"]
+
+
 def test_app_link_opens_the_app():
     from utils.whatsapp_link import build_whatsapp_app_link
     assert build_whatsapp_app_link("052-111-2222", "a b") == "whatsapp://send?phone=972521112222&text=a%20b"

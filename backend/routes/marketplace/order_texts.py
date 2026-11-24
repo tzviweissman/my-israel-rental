@@ -98,6 +98,70 @@ def texts_on(biz: dict[str, Any]) -> bool:
     return bool(st.get("text_on") or st.get("text_number"))
 
 
+# The customer messages a business may switch off (Tzvi, 23 Nov 2026: "switch any message off"). A confirmation or a
+# decline always goes: the customer needs the answer. The reminder has its own switch (appointment_reminders.py).
+OPTIONAL = ("order_received", "request_received", "review", "auto_reply")
+
+
+def message_off(biz: dict[str, Any], key: str) -> bool:
+    return key in OPTIONAL and key in ((biz.get("order_settings") or {}).get("text_off") or [])
+
+
+def clean_off(raw: Optional[list[str]]) -> list[str]:
+    return sorted({k for k in (raw or []) if k in OPTIONAL})
+
+
+# Which logged sends are which message (sms_log and email_log "kind"), for the counts on each message.
+KINDS = {"order_received": ["order_received"], "order_confirmed": ["order_confirmed"], "order_declined": ["order_declined"],
+         "booking_confirmed": ["booking_accepted"], "booking_declined": ["booking_declined"],
+         "request_received": ["request_received"], "reminder": ["booking_reminder"],
+         "review": ["order_review", "booking_review"], "auto_reply": ["auto_reply"]}
+
+
+async def message_counts(business_id: str, days: int = 30) -> dict[str, dict[str, int]]:
+    """How many of each customer message went in the last `days` days, by text and email, and how many did not arrive."""
+    from datetime import timedelta
+    since = (datetime.now(UTC) - timedelta(days=days)).isoformat()
+    by_kind = {k: key for key, kinds in KINDS.items() for k in kinds}
+    out: dict[str, dict[str, int]] = {}
+    for coll, bad in (("sms_log", ["failed"]), ("email_log", ["bounced", "spam"])):
+        rows = await db[coll].aggregate([
+            {"$match": {"business_id": business_id, "who": "customer", "at": {"$gte": since}, "kind": {"$in": list(by_kind)}}},
+            {"$group": {"_id": "$kind", "n": {"$sum": 1}, "bad": {"$sum": {"$cond": [{"$in": ["$status", bad]}, 1, 0]}}}},
+        ]).to_list(50)
+        for r in rows:
+            c = out.setdefault(by_kind[r["_id"]], {"sent": 0, "failed": 0})
+            c["sent"] += r["n"]
+            c["failed"] += r["bad"]
+    return out
+
+
+SAMPLE = {"en": {"customer": "Dana", "order": "#1042", "service": "Haircut", "when": "tomorrow", "time": "14:00"},
+          "he": {"customer": "דנה", "order": "#1042", "service": "תספורת", "when": "מחר", "time": "14:00"}}
+
+
+async def send_test(biz: dict[str, Any], key: str, lang: str, how: str, words: Optional[str], to: str) -> bool:
+    """One sample of a customer message, sent to the business itself so it sees it on its own phone or inbox: the
+    words as they are in the editor (saved or not), filled with a sample customer, with our sample link."""
+    lang = "he" if lang == "he" else "en"
+    vals = {**SAMPLE[lang], "business": _biz_name(biz, lang)}
+    t = " ".join((words if words is not None else "").split())[:300] or (
+        (((biz.get("order_settings") or {}).get("text_templates") or {}).get(key) or {}).get(lang) or TEMPLATES[key][lang])
+    for k in PLACEHOLDERS:
+        t = t.replace("{" + k + "}", str(vals.get(k) or ""))
+    t = re.sub(r"[ \t]{2,}", " ", t).strip()
+    if not t:
+        return False
+    test = "בדיקה: " if lang == "he" else "Test: "
+    link = "" if key in ("order_declined", "auto_reply") else f" {_frontend()}/orders/track/sample"
+    if how == "email":
+        from .order_emails import email_brand, note_html
+        from .orders import _email, _esc
+        return await _email(to, f"{test}{_biz_name(biz, lang)}", f"<p>{_esc(t)}</p>{note_html(biz)}", tag="message-test", lang=lang,
+                            brand=email_brand(biz), log={"business_id": biz.get("_id"), "who": "business", "kind": "test", "label": key})
+    return await _text(to, f"{test}{t}{link}{_note(biz)}", biz_id=biz.get("_id"), who="business", kind="test", label=key)
+
+
 def hears_without_whatsapp(biz: dict[str, Any]) -> bool:
     """The business hears about a new order from us, by text or by email, so the
     customer is not also sent on to WhatsApp (Tzvi, 12 Nov 2026: "it shows a
@@ -308,7 +372,7 @@ async def text_customer_received(o: dict[str, Any], biz: dict[str, Any]) -> None
     say yes, and here is the link (Tzvi, 6 Nov 2026). Never raises."""
     try:
         phone = o.get("customer_phone_e164") or o.get("customer_phone")
-        if not phone or o.get("table") or not texts_on(biz):
+        if not phone or o.get("table") or not texts_on(biz) or message_off(biz, "order_received"):
             return
         lang = "he" if o.get("lang") == "he" else "en"
         no = order_no(o)
@@ -323,7 +387,7 @@ async def text_customer_request(gig: dict[str, Any], phone: Optional[str], path:
     (its customers then do not open WhatsApp). Never raises."""
     try:
         biz = await db.businesses.find_one({"_id": gig.get("business_id")}) or {}
-        if not phone or not texts_on(biz):
+        if not phone or not texts_on(biz) or message_off(biz, "request_received"):
             return
         lang = "he" if he else "en"
         body = compose(biz, "request_received", lang, {"business": _biz_name(biz, lang), "service": gig.get("title") or ""}, f"{_frontend()}{path}")
@@ -531,7 +595,7 @@ async def _review_text(coll: str, doc: dict[str, Any], biz: dict[str, Any], phon
     link is the customer's own status page, which asks for the review with
     no sign-in."""
     from utils.reviews import native_enabled
-    if not phone or not texts_on(biz) or not native_enabled():
+    if not phone or not texts_on(biz) or not native_enabled() or message_off(biz, "review"):
         return
     claimed = await db[coll].update_one({"_id": doc["_id"], "review_text_at": {"$exists": False}},
                                         {"$set": {"review_text_at": datetime.now(UTC).isoformat()}})
@@ -700,7 +764,7 @@ async def _auto_reply(biz: dict[str, Any], sender: str, last: dict[str, Any]) ->
     """The business's own answer to a customer who replied, like WhatsApp's
     away message: only if it wrote one, with texts on, once a day per customer."""
     own = ((biz.get("order_settings") or {}).get("text_templates") or {}).get("auto_reply") or {}
-    if not own or not texts_on(biz):
+    if not own or not texts_on(biz) or message_off(biz, "auto_reply"):
         return
     lang = "he" if own.get("he") and (sender.startswith("972") or not own.get("en")) else "en"
     try:

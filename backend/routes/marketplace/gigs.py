@@ -1241,7 +1241,7 @@ async def _email_guest_status(booking: dict, event: str, gig_title: str | None =
         return
     try:
         from utils import email as em
-        from .order_emails import email_line, note_html
+        from .order_emails import email_brand, email_line, note_html
         from .orders import _email
         gig = await db.marketplace_gigs.find_one({"_id": booking.get("gig_id")}, {"business_id": 1}) or {}
         biz = await db.businesses.find_one({"_id": gig.get("business_id")}) or {}
@@ -1267,15 +1267,16 @@ async def _email_guest_status(booking: dict, event: str, gig_title: str | None =
             f'<h2 style="color:#222;font-size:22px;margin:0 0 8px;">{head}</h2>'
             f'<p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 18px;">{line}</p>'
             + (note_html(biz) if event == "accepted" else "")
-            + em._button("לפרטי התור" if he else "See your booking", link)
         )
+        brand = email_brand(biz)
+        inner += em._button("לפרטי התור" if he else "See your booking", link, **({"color": brand["accent"], "text": brand["ink"]} if brand else {}))
         if event == "accepted" and booking.get("preferred_date") and booking.get("time_slot"):
             from utils.calendar_link import google_calendar_url
             cal = google_calendar_url(gig_title or "Appointment", booking["preferred_date"], booking["time_slot"],
                                       booking.get("duration_minutes") or 60, details=link)
             if cal:
                 inner += f'<p style="margin:14px 0 0;font-size:14px;"><a href="{em._esc(cal)}" style="color:#167AB8;">{"הוספה ליומן Google" if he else "Add to Google Calendar"}</a></p>'
-        await _email(to, head, inner, tag=f"guest_booking_{event}", lang=lang,
+        await _email(to, head, inner, tag=f"guest_booking_{event}", lang=lang, brand=brand,
                      log={"business_id": gig.get("business_id"), "who": "customer", "kind": f"booking_{event}",
                           "ref_id": booking.get("_id"), "label": gig_title or ""})
     except Exception:  # noqa: BLE001

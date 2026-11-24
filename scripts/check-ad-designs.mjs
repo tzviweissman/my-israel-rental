@@ -8,7 +8,9 @@
  * so other sessions' edits cannot break the run; --port 3210 uses a server already running. The words come from
  * scripts/fixtures, so this spends no API credit. Local dev business: any the owner has.
  *
- *   node scripts/check-ad-designs.mjs [--only behind,chat] [--pictures <folder>] [--port 3210]
+ *   node scripts/check-ad-designs.mjs [--only behind,chat] [--pictures <folder>] [--port 3210] [--panel]
+ *   --panel skips the moving-ad videos (minutes, not 40+); use it only when the change touches the options panel, not the
+ *   drawing of any design or the moving ads. A --panel run never counts as a full pass for the commit check.
  */
 import { chromium } from 'playwright';
 import fs from 'node:fs';
@@ -20,6 +22,11 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace
 const arg = (n) => { const i = process.argv.indexOf(n); return i > 0 ? process.argv[i + 1] : null; };
 const only = arg('--only') ? new Set(arg('--only').split(',')) : null;
 const pictures = arg('--pictures');
+const panel = process.argv.includes('--panel');
+// A line as it goes, with the seconds since the start (23 Nov 2026): a run that sticks used to print nothing until
+// it failed, and finding where took three runs. --quiet leaves only the section lines.
+const t0 = Date.now();
+const progress = (msg) => { if (!process.argv.includes('--quiet')) console.log(`  [${Math.round((Date.now() - t0) / 1000)}s] ${msg}`); };
 const SITE = `http://localhost:${arg('--port') || await ownServer()}`;
 // A private dev server (19 Nov 2026: edits by other sessions reloaded the shared :3210 mid-run and failed it twice).
 async function ownServer() {
@@ -163,7 +170,27 @@ const drawOf = async (fn) => {
 
 // A click on a gallery, shape or language button that does not land is tried again before the run fails (18 Nov 2026:
 // one stuck click on "calling" waited two minutes and failed a 44-minute run; the next run passed untouched).
+// The maker's options sit in four tabs, and the picture's downloads in a drop-down, since 23 Nov 2026: open the
+// tab (and the menu) a control lives in before using it, as an owner would.
+const MENU_ITEMS = { 'ad-share': 'download', 'ad-all-shapes': 'download', 'ad-copy': 'download', 'ad-save-new': 'save' };
+async function open(sel) {
+  const id = (sel.match(/data-testid="?([\w-]+)/) || [])[1];
+  if (MENU_ITEMS[id] && !(await p.locator(sel).count())) {
+    await p.locator('[data-testid="ad-tab-share"]').click();
+    await p.locator(`[data-testid="ad-menu-${MENU_ITEMS[id]}"]`).click();
+    return;
+  }
+  await p.evaluate((q) => {
+    const panel = document.querySelector(q)?.closest('[role=tabpanel]');
+    if (!panel || !panel.classList.contains('hidden')) return;
+    const k = panel.dataset.testid === 'ad-extras' ? 'extras' : panel.dataset.testid.replace('ad-panel-', '');
+    document.querySelector(`[data-testid=ad-tab-${k}]`).click();
+  }, sel);
+  await p.waitForTimeout(150);
+}
+
 async function tap(sel) {
+  await open(sel);
   for (let i = 1; ; i += 1) {
     try { await p.locator(sel).click({ timeout: 40000 }); return; } catch (e) {
       if (i === 3) throw e;
@@ -187,6 +214,7 @@ for (const l of ['en', 'he']) {
   if (l === 'en') console.log(`ad maker: ${keys.length} designs`);
   for (const k of keys) {
     if (only && !only.has(k)) continue;
+    progress(`ad maker ${l} ${k}`);
     for (const f of (k === 'native' ? ['story'] : ['square', 'feed', 'story'])) {
       const drawn = await drawOf(async () => {
         await tap(`[data-testid="ad-${f}"]`);
@@ -209,6 +237,7 @@ if (!(await p.locator('[data-testid="ad-logo-unclear"]').count())) fails.push('l
 // A headline about one product brings that product's picture with it.
 {
   await p.click('[data-testid="ad-g-clean"]');
+  await open('[data-testid="ad-idea-1"]');
   await p.click('[data-testid="ad-idea-1"]');
   await p.waitForTimeout(600);
   const shown = await p.locator('[data-testid^="ad-product-"][aria-pressed="true"]').first().innerText();
@@ -219,6 +248,7 @@ if (!(await p.locator('[data-testid="ad-logo-unclear"]').count())) fails.push('l
 // The pros' touches (docs/inspo/ad-videos-2026-11-07): a deal shows only with its end date, the headline can sit on strips.
 {
   await p.click('[data-testid="ad-g-clean"]');
+  await open('[data-testid="ad-deal"]');
   await p.fill('[data-testid="ad-deal"]', 'Buy 2, get 1 free');
   await p.waitForTimeout(800);
   let seen = await p.evaluate(() => window.__drawn.some((d) => /Buy 2, get 1 free/.test(d.t || '')));
@@ -241,7 +271,7 @@ if (!(await p.locator('[data-testid="ad-logo-unclear"]').count())) fails.push('l
 
 // A dragged piece snaps to the middle of the ad, with a line to show it.
 {
-  await p.locator('[data-testid="ad-feed"]').click();
+  await tap('[data-testid="ad-feed"]');
   await p.locator('[data-testid="ad-g-behind"]').click();
   await p.waitForTimeout(700);
   const piece = p.locator('[data-testid="ad-piece-qr"]');
@@ -267,9 +297,12 @@ if (!(await p.locator('[data-testid="ad-logo-unclear"]').count())) fails.push('l
   await tap('[data-testid="ad-story"]');
   const pickable = await p.locator('[data-testid="ad-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-g-', '')));
   for (const k of pickable) {
+    if (only && !only.has(k)) continue;
+    progress(`colour ${k}`);
     await tap(`[data-testid="ad-g-${k}"]`);
     await p.waitForTimeout(350);
     if (!(await p.locator('[data-testid="ad-colour-custom-hex"]').count())) continue;
+    await open('[data-testid="ad-colour-custom-hex"]');
     for (const [hex, rgb] of [['#FFE9A8', [255, 233, 168]], ['#7A1FA2', [122, 31, 162]]]) {
       const drawn = await drawOf(async () => { await p.locator('[data-testid="ad-colour-custom-hex"]').fill(hex); });
       const seen = await p.locator('[data-testid="ad-preview"]').evaluate((c) => {
@@ -310,6 +343,7 @@ const pullTo = async (name, tx, ty) => {
 const dragKeys = await p.locator('[data-testid="ad-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-g-', '')));
 for (const k of dragKeys) {
   if (only && !only.has(k)) continue;
+  progress(`drag ${k}`);
   await tap('[data-testid="ad-story"]');
   await tap(`[data-testid="ad-g-${k}"]`);
   await p.waitForTimeout(700);
@@ -342,6 +376,7 @@ for (const k of dragKeys) {
 // The picture that leaves is drawn at double size (A8.9): read the width from the file a person gets.
 await p.evaluate(() => { navigator.canShare = () => false; });
 await p.locator('[data-testid="ad-g-behind"]').click();
+await open('[data-testid="ad-share"]');
 const [dl] = await Promise.all([p.waitForEvent('download'), p.locator('[data-testid="ad-share"]').click()]);
 const jpg = fs.readFileSync(await dl.path());
 let at = 2;
@@ -390,8 +425,8 @@ const MOVING = async (qrBox) => {
   }
   return { pics, dur, w: v.videoWidth, h: v.videoHeight, end, busy: busy / 4096, moved: diff(middle, last), hold: diff(settled, last), qr: region(qrEarly, last), canvasW: still.width, canvasH: still.height };
 };
-// In real Chrome, its own window: the moving ads need H.264, which the test browser does not have.
-{
+// In real Chrome, its own window: the moving ads need H.264, which the test browser does not have. Skipped with --panel.
+if (!panel) {
   const chrome = await chromium.launch({ channel: 'chrome' });
   const main = p;
   const movingPage = await (await chrome.newContext({ viewport: { width: 1440, height: 1000 } })).newPage();
@@ -406,7 +441,7 @@ const MOVING = async (qrBox) => {
   // The maker lives on the Advertising page since 6 Nov 2026.
   await p.goto(`${SITE}/dashboard?tab=advertising&as=owner`, { timeout: 180000 });
   await p.locator('[data-testid="ad-gallery"]').waitFor();
-  await p.locator('[data-testid="ad-en"]').click();
+  await tap('[data-testid="ad-en"]');
   await p.waitForFunction(() => document.querySelector('[data-testid="ad-g-behind"] img'));
   await p.waitForTimeout(2500);
   await p.evaluate(() => { navigator.canShare = () => false; });
@@ -415,11 +450,12 @@ const MOVING = async (qrBox) => {
   // Every shape on the first design; the rest in one shape, because each clip takes seconds.
   clips.push(['behind', 'feed'], ['behind', 'story']);
   for (const [k, f] of clips) {
+    progress(`moving ${k} ${f}`);
     if (f !== 'story' || k === 'native') await tap(`[data-testid="ad-${f}"]`);
     else await tap('[data-testid="ad-story"]');
     await tap(`[data-testid="ad-g-${k}"]`);
     await p.waitForTimeout(900);
-    await p.locator('[data-testid="ad-video"]').click();
+    await tap('[data-testid="ad-video"]');
     // Each frame is drawn in full: about half a minute a video on this machine.
     await p.locator('[data-testid="ad-video-preview"]').waitFor({ timeout: 300000 }).catch(() => { throw new Error(`moving ${k} ${f}: no video after 5 minutes`); });
     await p.waitForFunction(() => document.querySelector('[data-testid="ad-video-preview"]').readyState >= 2);
@@ -443,6 +479,7 @@ const MOVING = async (qrBox) => {
     if (m.qr > 6) fails.push(`${where}: the QR code is not still from 3.1 seconds (${m.qr.toFixed(1)})`);
     if (process.env.AD_VIDEO_LOG) console.log(where, JSON.stringify(m));
     if (pictures) {
+      await open('[data-testid="ad-video"]');
       const [got] = await Promise.all([p.waitForEvent('download'), p.locator('[data-testid="ad-video"]').click()]);
       fs.copyFileSync(await got.path(), path.join(pictures, `${k}-${f}.mp4`));
     }
@@ -499,6 +536,7 @@ for (const l of ['en', 'he']) {
   if (l === 'en') console.log(`site maker: ${keys.length} designs`);
   for (const k of keys) {
     if (only && !only.has(k)) continue;
+    progress(`site maker ${l} ${k}`);
     for (const f of (k === 'native' ? ['story'] : ['square', 'feed', 'story'])) {
       const drawn = await drawOf(async () => {
         await tap(`[data-testid="ad-${f}"]`);
@@ -526,6 +564,8 @@ for (const k of studio) {
     count += 1;
   }
 }
+// A request still being answered when the browser closes threw "Request context disposed" and failed a passing run.
+await p.unrouteAll({ behavior: 'ignoreErrors' });
 await b.close();
 if (errors.length) fails.push(`page errors: ${[...new Set(errors)].join(' | ')}`);
 console.log(`drew ${count} ads`);
@@ -534,4 +574,4 @@ if (fails.length) {
   process.exit(1);
 }
 console.log('every design passes the measured rules');
-if (!only) writeMeasured(ROOT); // the commit check reads this: changed drawing code must be measured again
+if (!only && !panel) writeMeasured(ROOT); // the commit check reads this: changed drawing code must be measured again

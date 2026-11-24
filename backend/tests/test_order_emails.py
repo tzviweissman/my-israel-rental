@@ -133,3 +133,17 @@ def test_recent_emails_read_postmark_reports_and_a_bounce_wins(monkeypatch):
                                  {"record_type": "Delivery", "raw": {"Metadata": {"log_id": "L2"}}}]
     rows = asyncio.run(oe.recent_emails("b1"))
     assert [r["status"] for r in rows] == ["delivered", "bounced", "sent"]
+
+
+def test_email_look_is_the_businesss_own_only_when_turned_on():
+    """Tzvi, 23 Nov 2026: "Your email look". Off by default, so approved businesses' emails stay as they were."""
+    biz = {"name": "Blazin Boards", "logo_url": "https://res.cloudinary.com/x/logo.png", "order_settings": {}}
+    assert oe.email_brand(biz) is None
+    assert "My Israel Rental" in email_mod._wrap("<p>x</p>")
+    dark = oe.email_brand({**biz, "order_settings": {"email_look": {"on": True, "logo": "small", "accent": "#0f5e8f"}}})
+    assert dark["accent"] == "#0F5E8F" and dark["ink"] == "#FFFFFF" and dark["logo_px"] == 40
+    light = oe.email_brand({**biz, "order_settings": {"email_look": {"on": True, "logo": "none", "accent": "#FFE9A8"}}})
+    assert light["ink"] == "#111827" and light["logo"] is None
+    html = email_mod._wrap("<p>x</p>", brand=dark)
+    assert "Blazin Boards" in html and "via myisraelrental" in html and "logo.png" in html
+    assert oe.clean_look({"accent": "javascript:1", "logo": "huge"})["accent"] == oe.DEFAULT_ACCENT

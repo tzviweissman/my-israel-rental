@@ -231,14 +231,28 @@ def _strip_html(html: str) -> str:
 
 
 # --- Shared branded wrapper -------------------------------------------------
-def _wrap(inner_html: str, *, preheader: str = "", lang: str = "en") -> str:
+def _wrap(inner_html: str, *, preheader: str = "", lang: str = "en", brand: dict | None = None) -> str:
     """Wrap inner content with branded header/footer. `preheader` is the
     preview text shown by mail clients next to the subject. `lang="he"`
-    sets the whole email right to left, footer included."""
+    sets the whole email right to left, footer included. `brand` (a
+    business's own email look, order_emails.email_brand): its logo, name and
+    colour head the email instead of ours, "via myisraelrental" under them."""
     he = lang == "he"
     side = "right" if he else "left"
     questions = "שאלות? כתבו לנו ל-" if he else "Questions? Reach us at"
     or_ = "או" if he else "or"
+    if brand:
+        name = _esc((brand.get("name_he") if he and brand.get("name_he") else brand.get("name")) or "")
+        logo = (f'<img src="{_esc(brand["logo"])}" alt="" height="{brand["logo_px"]}" style="height:{brand["logo_px"]}px;width:auto;'
+                f'border-radius:8px;display:block;margin:0 0 10px 0;{"margin-right:0;margin-left:auto;" if he else ""}" />') if brand.get("logo") else ""
+        header = (f'<td style="background:{brand["accent"]};padding:24px 32px;text-align:{side};">{logo}'
+                  f'<div style="color:{brand["ink"]};font-size:22px;font-weight:700;">{name}</div>'
+                  f'<div style="color:{brand["ink"]};opacity:.75;font-size:11px;margin-top:4px;">{"דרך myisraelrental" if he else "via myisraelrental"}</div></td>')
+    else:
+        header = (f'<td style="background:{BRAND_TEAL};padding:28px 32px;text-align:{side};">'
+                  f'<div style="color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.3px;">My Israel Rental</div>'
+                  f'<div style="color:{BRAND_GOLD};font-size:11px;letter-spacing:{"1px" if he else "3px"};margin-top:4px;text-transform:uppercase;">'
+                  f'{"הבית שלכם בישראל" if he else "Your home in Israel"}</div></td>')
     return f"""<!DOCTYPE html>
 <html lang="{'he' if he else 'en'}" dir="{'rtl' if he else 'ltr'}">
 <head>
@@ -253,10 +267,7 @@ def _wrap(inner_html: str, *, preheader: str = "", lang: str = "en") -> str:
       <td align="center">
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
           <tr>
-            <td style="background:{BRAND_TEAL};padding:28px 32px;text-align:{side};">
-              <div style="color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.3px;">My Israel Rental</div>
-              <div style="color:{BRAND_GOLD};font-size:11px;letter-spacing:{'1px' if he else '3px'};margin-top:4px;text-transform:uppercase;">{'הבית שלכם בישראל' if he else 'Your home in Israel'}</div>
-            </td>
+            {header}
           </tr>
           <tr>
             <td style="padding:36px 36px 28px 36px;">
@@ -280,10 +291,10 @@ def _wrap(inner_html: str, *, preheader: str = "", lang: str = "en") -> str:
 </html>"""
 
 
-def _button(label: str, href: str, *, color: str = BRAND_TEAL) -> str:
+def _button(label: str, href: str, *, color: str = BRAND_TEAL, text: str = "#ffffff") -> str:
     return (
         f'<div style="text-align:center;margin:28px 0;">'
-        f'<a href="{href}" style="background:{color};color:#ffffff;padding:14px 34px;'
+        f'<a href="{href}" style="background:{color};color:{text};padding:14px 34px;'
         f'text-decoration:none;border-radius:10px;font-size:14px;font-weight:600;'
         f'display:inline-block;letter-spacing:0.3px;">{label}</a>'
         f"</div>"

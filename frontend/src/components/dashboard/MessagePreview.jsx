@@ -12,19 +12,37 @@ const WA_GREEN = '#075E54';
 // send, and texts and emails carry the alerts (Tzvi, 19 Nov 2026: "remove whatsapp from business dashboards").
 const WHATSAPP_LIVE = false;
 
-export default function MessagePreview({ loaded, templates, note }) {
+// Which customer messages also go by email, which carry no link, and which carry the business's own line
+// (order_emails.py, order_texts.py: NO_LINK, _note). The preview shows the message being edited (Tzvi, 23 Nov 2026).
+const EMAIL_TOO = new Set(['order_received', 'order_confirmed', 'order_declined', 'booking_confirmed', 'booking_declined']);
+const NO_LINK = new Set(['order_declined', 'auto_reply']);
+const WITH_LINE = new Set(['order_confirmed', 'booking_confirmed', 'reminder']);
+
+// White words on the colour, or ink when white would not read (4.5:1): the same choice as order_emails.email_brand.
+export function inkOn(hex) {
+  const lin = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  const lum = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+  return 1.05 / (lum + 0.05) >= 4.5 ? '#FFFFFF' : '#111827';
+}
+
+export default function MessagePreview({ loaded, templates, note, msgKey = 'order_confirmed', lang: langIn, fixedWho, look, initialHow = 'text' }) {
   const { t, i18n } = useTranslation();
-  const he = i18n.language?.startsWith('he');
-  const [who, setWho] = useState('customer');
-  const [how, setHow] = useState('text');
+  const he = langIn ? langIn === 'he' : i18n.language?.startsWith('he');
+  const [whoPicked, setWho] = useState('customer');
+  const who = fixedWho || whoPicked;
+  const [howPicked, setHow] = useState(initialHow);
+  const emailToo = who === 'owner' || EMAIL_TOO.has(msgKey);
+  const how = howPicked === 'email' && !emailToo ? 'text' : howPicked;
   const biz = (he && loaded.business_name_he) || loaded.business_name || t('orderTexts.pv.yourBusiness', 'Your business');
   const product = loaded.sample_product;
   const item = product?.name || t('orderTexts.pv.item', 'Family box');
   const lang = he ? 'he' : 'en';
-  const words = ((templates.order_confirmed || {})[lang] ?? loaded.text_defaults?.order_confirmed?.[lang] ?? '')
-    .split('{order}').join('#1042').split('{business}').join(biz).split('{customer}').join(he ? 'דנה' : 'Dana').trim();
-  const line = (note || '').trim();
-  const customerText = `${words} myisraelrental.com/orders/track/a1B2c3`;
+  const sample = { order: '#1042', business: biz, customer: he ? 'דנה' : 'Dana', service: he ? 'תספורת' : 'Haircut', when: he ? 'מחר' : 'tomorrow', time: '14:00' };
+  let words = (templates[msgKey] || {})[lang] ?? loaded.text_defaults?.[msgKey]?.[lang] ?? '';
+  Object.entries(sample).forEach(([p, v]) => { words = words.split(`{${p}}`).join(v); });
+  words = words.replace(/[ \t]{2,}/g, ' ').trim();
+  const line = WITH_LINE.has(msgKey) ? (note || '').trim() : '';
+  const customerText = NO_LINK.has(msgKey) ? words : `${words} myisraelrental.com/orders/track/a1B2c3`;
   const ownerText = he
     ? `הזמנה חדשה #1042 מדנה, 050-123-4567\n1x ${item}\nמשלוח לרחוב הרצל 5 · מחר 12:00\nאישור או דחייה: myisraelrental.com/orders/owner/…`
     : `New order #1042 from Dana, 050-123-4567\n1x ${item}\nDelivery to 5 Herzl St, tomorrow 12:00\nConfirm or decline: myisraelrental.com/orders/owner/…`;
@@ -69,19 +87,48 @@ export default function MessagePreview({ loaded, templates, note }) {
     );
   } else {
     const subject = who === 'customer'
-      ? (he ? `ההזמנה שלך #1042 מ${biz} אושרה` : `Your order #1042 from ${biz} is confirmed`)
+      ? ({
+        order_confirmed: he ? `ההזמנה שלך #1042 מ${biz} אושרה` : `Your order #1042 from ${biz} is confirmed`,
+        booking_confirmed: he ? `התור שלך אצל ${biz} אושר` : `Your booking with ${biz} is confirmed`,
+        booking_declined: he ? `התור שלך אצל ${biz}` : `Your booking with ${biz}`,
+      }[msgKey] || (he ? `ההזמנה שלך #1042 מ${biz}` : `Your order #1042 from ${biz}`))
       : (he ? 'הזמנה חדשה #1042 מדנה' : 'New order #1042 from Dana');
+    // The email's real head (utils/email.py _wrap): ours, or on a customer's email the business's own look when
+    // turned on (order_emails.email_brand). Sizes are the email's, at the preview's scale (about half).
+    const own = who === 'customer' && look?.on ? look : null;
+    const ink = own ? inkOn(own.accent) : '#fff';
     body = (
-      <div className="p-3 min-h-[220px] text-[13px]" style={{ background: '#fff', color: '#111' }} dir={he ? 'rtl' : 'ltr'}>
-        <p className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>{who === 'customer' ? `${biz} · myisraelrental` : 'myisraelrental'}</p>
-        <p className="font-bold mb-2">{subject}</p>
-        <div className="rounded-lg border p-3" style={{ borderColor: 'var(--brand-border)' }}>
-          {loaded.logo_url && <img src={loaded.logo_url} alt="" className="h-10 w-10 rounded-full object-cover mb-2" />}
-          <p className="whitespace-pre-line">{who === 'customer' ? words : ownerText.split('\n').slice(0, 3).join('\n')}</p>
-          {who === 'customer' && line && <p className="mt-2 font-semibold">{line}</p>}
-          <span className="inline-block mt-3 rounded-full px-4 py-2 text-[12px] font-semibold text-white" style={{ background: '#000' }}>
-            {who === 'customer' ? t('orderTexts.pv.track', 'Track your order') : t('orderTexts.pv.decide', 'Confirm or decline')}
-          </span>
+      <div className="min-h-[220px] text-[13px]" style={{ background: '#fff', color: '#111' }} dir={he ? 'rtl' : 'ltr'}>
+        <div className="px-3 pt-2 pb-1">
+          <p className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>{who === 'customer' ? `${biz} · myisraelrental` : 'myisraelrental'}</p>
+          <p className="font-bold">{subject}</p>
+        </div>
+        <div className="mx-2 mb-2 rounded-lg border overflow-hidden" style={{ borderColor: 'var(--brand-border)' }} data-testid="pv-email">
+          <div className="px-3 py-2.5" style={{ background: own ? own.accent : '#1E6A6A' }} data-testid="pv-email-head">
+            {own ? (
+              <>
+                {loaded.logo_url && own.logo !== 'none' && (
+                  <img src={loaded.logo_url} alt="" className="rounded mb-1 w-auto" style={{ height: { small: 20, medium: 32, large: 48 }[own.logo] || 32 }} />
+                )}
+                <p className="font-bold text-[13px]" style={{ color: ink }}>{biz}</p>
+                <p className="text-[9px]" style={{ color: ink, opacity: 0.75 }}>{he ? 'דרך myisraelrental' : 'via myisraelrental'}</p>
+              </>
+            ) : (
+              <>
+                <p className="font-bold text-[13px] text-white">My Israel Rental</p>
+                <p className="text-[8px] uppercase tracking-widest" style={{ color: '#D4AF37' }}>{he ? 'הבית שלכם בישראל' : 'Your home in Israel'}</p>
+              </>
+            )}
+          </div>
+          <div className="p-3">
+            <p className="whitespace-pre-line">{who === 'customer' ? words : ownerText.split('\n').slice(0, 3).join('\n')}</p>
+            {who === 'customer' && line && <p className="mt-2 font-semibold">{line}</p>}
+            {!(who === 'customer' && NO_LINK.has(msgKey)) && (
+              <span className="inline-block mt-3 rounded-lg px-4 py-2 text-[12px] font-semibold" style={{ background: own ? own.accent : '#1E6A6A', color: ink }}>
+                {who === 'customer' ? t('orderTexts.pv.track', 'Track your order') : t('orderTexts.pv.decide', 'Confirm or decline')}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -92,17 +139,20 @@ export default function MessagePreview({ loaded, templates, note }) {
       <h4 className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('orderTexts.pv.title', 'See what gets sent')}</h4>
       <p className="text-[12px] mt-0.5 mb-2" style={{ color: 'var(--brand-muted)' }}>{t('orderTexts.pv.hint', 'A sample order, with your words and your own line. It changes as you type.')}</p>
       <div className="flex flex-wrap gap-2 mb-3">
-        <div className="inline-flex rounded-full border p-0.5" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('orderTexts.pv.who', 'Who gets it')}>
-          <Tab value="customer" current={who} set={setWho} id="pv-who-customer">{t('orderTexts.pv.customer', 'Your customer')}</Tab>
-          <Tab value="owner" current={who} set={setWho} id="pv-who-owner">{t('orderTexts.pv.you', 'You')}</Tab>
-        </div>
+        {!fixedWho && (
+          <div className="inline-flex rounded-full border p-0.5" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('orderTexts.pv.who', 'Who gets it')}>
+            <Tab value="customer" current={who} set={setWho} id="pv-who-customer">{t('orderTexts.pv.customer', 'Your customer')}</Tab>
+            <Tab value="owner" current={who} set={setWho} id="pv-who-owner">{t('orderTexts.pv.you', 'You')}</Tab>
+          </div>
+        )}
         <div className="inline-flex rounded-full border p-0.5" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('orderTexts.pv.how', 'How it arrives')}>
           <Tab value="text" current={how} set={setHow} id="pv-how-text">{t('orderTexts.pv.text', 'Text')}</Tab>
           {WHATSAPP_LIVE && <Tab value="whatsapp" current={how} set={setHow} id="pv-how-whatsapp">WhatsApp</Tab>}
-          <Tab value="email" current={how} set={setHow} id="pv-how-email">{t('orderTexts.pv.email', 'Email')}</Tab>
+          {emailToo && <Tab value="email" current={how} set={setHow} id="pv-how-email">{t('orderTexts.pv.email', 'Email')}</Tab>}
         </div>
       </div>
-      <div className="mx-auto w-full max-w-[300px] rounded-[28px] border-[6px] overflow-hidden shadow-md" style={{ borderColor: '#111' }} data-testid="pv-phone">
+      {who === 'customer' && <p className="text-[12px] font-semibold mb-2" style={{ color: 'var(--ink)' }} data-testid="pv-which">{t(`orderTexts.tpl.${msgKey}`, msgKey)}</p>}
+      <div className="mx-auto w-full max-w-[300px] max-h-[32vh] lg:max-h-none overflow-y-auto rounded-[28px] border-[6px] shadow-md" style={{ borderColor: '#111' }} data-testid="pv-phone">
         {body}
       </div>
     </div>

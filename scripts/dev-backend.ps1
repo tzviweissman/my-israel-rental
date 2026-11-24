@@ -123,6 +123,18 @@ else {
 
 # --- Start the API server --------------------------------------------
 
+# No rate limits on the local API (23 Nov 2026): the long browser checks (check-ad-designs, the test suite) make
+# hundreds of calls in minutes, the limiter rightly reads that as abuse, and its 429s broke runs in ways that looked
+# like real failures. utils/rate_limit.py ignores the flag on Railway. To test the limiter itself (the four
+# TestP3RateLimits tests in tests/test_security_audit.py), start this with $env:DEV_RATE_LIMIT = '1'.
+if ($env:DEV_RATE_LIMIT -eq '1') {
+    Remove-Item Env:DISABLE_RATE_LIMIT -ErrorAction SilentlyContinue
+    Write-Host '[dev] Rate limits ON (DEV_RATE_LIMIT=1).'
+} else {
+    $env:DISABLE_RATE_LIMIT = '1'
+    Write-Host '[dev] Rate limits off for local checks. $env:DEV_RATE_LIMIT = ''1'' keeps them on.'
+}
+
 Write-Host '[dev] Starting the API server on 8001...'
 # --reload-dir: without it the reloader watches the WHOLE repo (the working
 # directory), so saving a page build under scrollcraft/ or any frontend
