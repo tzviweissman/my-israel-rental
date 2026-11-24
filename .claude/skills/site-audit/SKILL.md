@@ -112,11 +112,13 @@ Check for recurrences of each:
 - Looping push-in video clips that visibly rewind on scroll-back.
 - Prices computed in the frontend that the backend would compute differently (Smart Pricing overrides).
 - Redirect destinations containing a port — crashes `serve-handler`.
+- **Hidden count limits in forms.** Run `grep -rnE "(products|tiers|photos|images|team|faqs|items|options)[A-Za-z.]*\.length (>=|<|>) ?[0-9]{2}|(products|tiers|photos|images|team|faqs|options)\)?\.slice\(0, ?[0-9]{2}" frontend/src/pages frontend/src/components` and read each hit that caps rows a business adds (products, services, photos, team, FAQs). A finding when: the number is a literal instead of a shared named limit, two kinds of listing get different limits for the same thing, or the cap drops rows or hides a button without telling the owner. *(Precedent, 23 Nov 2026: Bawk Bawk Chicken's menu was cut at 20 services by the reader and the add button vanished at 15, while shops allowed 30.)*
 
 ## 8. Build, tests and dependencies
 
 - Production build passes; list new warnings separately from pre-existing ones.
 - Test suite passes; note skipped tests and untested critical paths (auth, booking, payments, permissions).
+- Sign-up form: `APP_ORIGIN=<frontend> API_ORIGIN=<api> node scripts/test-tier-limit.mjs` (rows up to the limit with a message, and "Make it a shop" keeping a read menu), beside `scripts/shot-business-form.mjs`.
 - Dependency audit for known vulnerabilities. Note that `--legacy-peer-deps` is required here (react-day-picker vs date-fns v4).
 - Dead code: components not imported, routes not reachable, feature flags permanently off.
 

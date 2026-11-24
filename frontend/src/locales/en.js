@@ -1517,6 +1517,8 @@ const en = {
         extractDonePhotos_other: '{{count}} products read, {{photos}} with their picture. Check them, then add any photo that is missing.',
         extractDoneServices_one: '{{count}} service read, {{photos}} with its picture. Check it.',
         extractDoneServices_other: '{{count}} services read, {{photos}} with their picture. Check them.',
+        menuLooksLikeShop: 'This looks like a menu. A shop lets customers order several items at once.',
+        makeItShop: 'Make it a shop',
         socialsTitle: 'Your Instagram, Facebook or website',
         socialsBody: 'Add any you have. We can read them to fill this in for you, and we keep them for your page.',
         socialsWebsite: 'Website',

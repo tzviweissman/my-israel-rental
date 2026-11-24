@@ -1515,6 +1515,8 @@ const he = {
         extractDonePhotos_other: 'נקראו {{count}} מוצרים, {{photos}} עם תמונה. בדקו, והוסיפו כל תמונה שחסרה.',
         extractDoneServices_one: 'נקרא שירות אחד, {{photos}} עם תמונה. בדקו אותו.',
         extractDoneServices_other: 'נקראו {{count}} שירותים, {{photos}} עם תמונה. בדקו אותם.',
+        menuLooksLikeShop: 'זה נראה כמו תפריט. בחנות לקוחות יכולים להזמין כמה פריטים בבת אחת.',
+        makeItShop: 'להפוך לחנות',
         socialsTitle: 'האינסטגרם, הפייסבוק או האתר שלכם',
         socialsBody: 'הוסיפו מה שיש לכם. נוכל לקרוא אותם כדי למלא את זה בשבילכם, ונשמור אותם לדף שלכם.',
         socialsWebsite: 'אתר',

@@ -361,8 +361,15 @@ const CreateGig = () => {
   };
 
   // ---- Tier helpers (deliverable + appointment) -----------------------------
+  // One limit for products and services (tiers). Services were capped at 15 by hand and 20 from the
+  // menu reader while products allowed 30, and the add button stopped silently: Bawk Bawk Chicken
+  // (a "deliverable" listing) got 20 of its menu and could add no more (23 Nov 2026).
+  const MAX_PRODUCTS = 30;
   const addTier = () => {
-    if (form.tiers.length >= 15) return;
+    if (form.tiers.length >= MAX_PRODUCTS) {
+      toast.error(t('wizard.productLimit', { defaultValue: 'Up to {{n}} products', n: MAX_PRODUCTS }));
+      return;
+    }
     const prev = form.tiers[form.tiers.length - 1]?.currency || 'ILS';
     set({ tiers: [...form.tiers, emptyTierFor(form.gig_type, prev)] });
   };
@@ -413,7 +420,10 @@ const CreateGig = () => {
 
   // ---- Product helpers (store) ---------------------------------------------
   const addProduct = () => {
-    if (form.products.length >= 30) return;
+    if (form.products.length >= MAX_PRODUCTS) {
+      toast.error(t('wizard.productLimit', { defaultValue: 'Up to {{n}} products', n: MAX_PRODUCTS }));
+      return;
+    }
     const prev = form.products[form.products.length - 1]?.currency || 'ILS';
     set({ products: [...form.products, emptyProduct(prev)] });
   };
@@ -461,7 +471,6 @@ const CreateGig = () => {
     updateProduct(i, { images: productPhotos(form.products[i]).filter((u) => u !== url), image: '' });
   };
 
-  const MAX_PRODUCTS = 30;
   // A row nobody has touched yet. The wizard opens with one, and dropping
   // in photos should fill it rather than leave a blank above the pictures.
   const productIsBlank = (p) => !p.name.trim() && !String(p.price).trim() && productPhotos(p).length === 0;
@@ -534,7 +543,9 @@ const CreateGig = () => {
       // A service's price list becomes its services (tiers), with the same cut-out pictures.
       if (form.gig_type !== 'store') {
         const kept = form.tiers.filter((x) => x.name.trim() || String(x.price).trim() || (x.images || []).length);
-        const rowsT = (data.products || []).slice(0, Math.max(0, 20 - kept.length));
+        const rowsT = (data.products || []).slice(0, Math.max(0, MAX_PRODUCTS - kept.length));
+        const leftOut = (data.products || []).length - rowsT.length;
+        if (leftOut > 0) toast.error(t('wizard.productLimit', { defaultValue: 'Up to {{n}} products', n: MAX_PRODUCTS }));
         if (!rowsT.length) {
           toast.error(t('wizard.extractNone', 'Nothing came back. Try a clearer picture, or type the list.'));
           return false;
@@ -548,6 +559,25 @@ const CreateGig = () => {
         set({ tiers: [...kept, ...madeT] });
         const withPhotoT = madeT.filter((m) => m.images.length).length;
         toast.success(t('wizard.extractDoneServices', { count: madeT.length, photos: withPhotoT, defaultValue: '{{count}} services read, {{photos}} with their picture. Check them.' }));
+        // A long priced menu on a "service you deliver" listing is almost always a shop (Bawk Bawk
+        // Chicken, 23 Nov 2026: a takeout menu filled the services list). Offer the move, rows kept.
+        if (form.gig_type === 'deliverable' && madeT.filter((m) => m.name && m.price).length >= 8) {
+          toast(t('wizard.menuLooksLikeShop', 'This looks like a menu. A shop lets customers order several items at once.'), {
+            duration: 15000,
+            action: {
+              label: t('wizard.makeItShop', 'Make it a shop'),
+              onClick: () => setForm((f) => ({
+                ...f,
+                gig_type: 'store',
+                products: f.tiers.map((x) => ({
+                  ...emptyProduct(x.currency || 'ILS'),
+                  name: x.name || '', price: x.price || '', description: x.description || '', images: x.images || [],
+                })),
+                tiers: [],
+              })),
+            },
+          });
+        }
         return true;
       }
       const rows = (data.products || []).slice(0, MAX_PRODUCTS - form.products.filter((p) => !productIsBlank(p)).length);
@@ -2183,11 +2213,9 @@ const TiersStep = ({ gigType, category, tiers, onUpdate, onAdd, onRemove, onUplo
           )}
         </div>
       );})}
-      {tiers.length < 15 && (
-        <button type="button" onClick={onAdd} className="text-sm font-semibold text-[var(--brand-primary)] flex items-center gap-1" data-testid="wizard-tier-add">
-          <Plus size={14} /> {t('wizard.addTier', 'Add another service')}
-        </button>
-      )}
+      <button type="button" onClick={onAdd} className="text-sm font-semibold text-[var(--brand-primary)] flex items-center gap-1" data-testid="wizard-tier-add">
+        <Plus size={14} /> {t('wizard.addTier', 'Add another service')}
+      </button>
       {gigType === 'deliverable' && (
         <label className="flex items-start gap-3 p-3 rounded-xl border border-gray-200 bg-white cursor-pointer" data-testid="wizard-date-booking-toggle">
           <input type="checkbox" checked={!!enableDateBooking} onChange={onToggleDateBooking} className="mt-1" />
