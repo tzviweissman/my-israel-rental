@@ -439,6 +439,19 @@ export default function OrderPage() {
         <section className="rounded-2xl border bg-white p-3" style={{ borderColor: 'var(--brand-border)' }}>
           <h2 className="text-sm font-bold mb-2" style={{ color: 'var(--ink)' }}>{t('order.what', 'What would you like?')}</h2>
           {products.length === 0 && <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('order.noProducts', 'This store has not listed products yet - write what you want below.')}</p>}
+          {sections.length > 2 && (
+            // Tabs that jump to each section, like a delivery app's menu (Bawk Bawk's 34 items, 24 Nov 2026).
+            <nav className="sticky top-0 z-10 -mx-3 px-3 py-2 bg-white flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }} data-testid="order-tabs">
+              {sections.map((g, k) => (
+                <button key={g || '-'} type="button" dir="auto"
+                  onClick={() => document.getElementById(`order-sec-${k}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                  className="shrink-0 rounded-full border px-3 h-9 text-xs font-semibold whitespace-nowrap"
+                  style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
+                  {g || t('order.moreItems', 'More')}
+                </button>
+              ))}
+            </nav>
+          )}
           <ul className="divide-y" style={{ borderColor: 'var(--brand-border)' }}>
             {shownProducts.map((p, i) => {
               const rows = rowsOf(p);
@@ -457,7 +470,7 @@ export default function OrderPage() {
               return (
                 <React.Fragment key={p.id}>
                 {heading && (
-                  <li className="pt-4 pb-1 text-xs font-bold uppercase tracking-wide" dir="auto" style={{ color: 'var(--brand-muted)' }} data-testid="order-section">
+                  <li id={`order-sec-${sections.indexOf(p.group || '')}`} className="pt-4 pb-1 text-xs font-bold uppercase tracking-wide scroll-mt-14" dir="auto" style={{ color: 'var(--brand-muted)' }} data-testid="order-section">
                     {p.group || t('order.moreItems', 'More')}
                   </li>
                 )}

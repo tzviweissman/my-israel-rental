@@ -183,6 +183,15 @@ input[type="date"]:valid:before {
   pointer-events: none;
 }
 .glass-nav > * { pointer-events: auto; }
+/* A phone scrolled into a light page (a listing's products): the light scrim
+   let item names and prices show through the white logo, pills and icons
+   (Bawk Bawk's listing, 23 Nov 2026). Darker where the chrome sits, still a
+   soft fade at the foot, so nothing gets a hard edge. Never on the home page. */
+@media (max-width: 767px) {
+  .glass-nav.glass-nav-deep {
+    background: linear-gradient(180deg, rgba(4, 12, 17, .94) 0%, rgba(4, 12, 17, .9) 90%, rgba(4, 12, 17, 0) 100%);
+  }
+}
 
 .glass-pill {
   background: rgba(255, 255, 255, .12);

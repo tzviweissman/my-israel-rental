@@ -212,7 +212,31 @@ async def keep(pages: list[bytes], item: dict[str, Any], rows: list | None = Non
         return None
 
 
-if __name__ == "__main__":
+def tile_sheet(paths: list[str], out: str) -> list[int]:
+    """Free check before a paid read: each screenshot with its found photo squares in red, side by side. A square
+    that is off its photo, or a photo with no square, is wrong before any money is spent (Bawk Bawk, 23 Nov 2026)."""
+    from PIL import Image, ImageDraw
+    w, h = 234, 506
+    sheet = Image.new("RGB", (len(paths) * (w + 6), h), "white")
+    counts = []
+    for i, p in enumerate(paths):
+        raw = open(p, "rb").read()
+        tiles = list_tiles(raw)
+        im = Image.open(io.BytesIO(raw)).convert("RGB")
+        d = ImageDraw.Draw(im)
+        for bx in tiles:
+            d.rectangle(bx, outline="red", width=max(4, im.width // 120))
+        sheet.paste(im.resize((w, h)), (i * (w + 6), 0))
+        counts.append(len(tiles))
+    sheet.save(out)
+    return counts
+
+
+if __name__ == "__main__" and len(__import__("sys").argv) > 2:
+    # python utils/catalog_crops.py shot1.png shot2.png ... sheet.jpg
+    import sys
+    print("photos found per screenshot:", tile_sheet(sys.argv[1:-1], sys.argv[-1]), "->", sys.argv[-1])
+elif __name__ == "__main__":
     from PIL import Image
     page = Image.new("RGB", (1000, 1400), "white")
     buf = io.BytesIO()

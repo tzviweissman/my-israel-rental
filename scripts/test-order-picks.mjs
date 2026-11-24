@@ -23,6 +23,19 @@ try {
   const sections = await page.locator('[data-testid="order-section"]').allInnerTexts();
   console.log('sections:', sections.join(' | '));
   if (sections.length < 2) fail('expected section headings');
+  // Three or more sections get tabs; the last tab scrolls its heading to the top, under the tabs.
+  const tabs = page.locator('[data-testid="order-tabs"] button');
+  if (sections.length > 2) {
+    if ((await tabs.count()) !== sections.length) fail(`expected ${sections.length} tabs, got ${await tabs.count()}`);
+    await tabs.last().click();
+    await page.waitForTimeout(900);
+    const top = await page.locator('[data-testid="order-section"]').last().evaluate((el) => el.getBoundingClientRect().top);
+    const bar = await page.locator('[data-testid="order-tabs"]').evaluate((el) => el.getBoundingClientRect());
+    console.log('last section top:', Math.round(top), 'tabs bar:', Math.round(bar.top), '-', Math.round(bar.bottom));
+    if (top < bar.bottom - 2 || top > 160) fail('the last tab did not bring its section to the top, below the tabs');
+    await page.screenshot({ path: 'screenshots/test-order-tabs.png' });
+    await page.evaluate(() => window.scrollTo(0, 0));
+  }
 
   const picks = page.locator('[data-testid^="order-picks-"]').first();
   const chips = picks.locator('button');

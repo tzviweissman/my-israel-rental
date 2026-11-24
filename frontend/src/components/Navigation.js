@@ -366,7 +366,7 @@ const Navigation = () => {
     <nav
       ref={navRef}
       data-testid="global-nav"
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass-nav"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass-nav${!isHome && mobileScrolled ? ' glass-nav-deep' : ''}`}
       style={{
         // The bar NEVER takes a fill. `.glass-nav` supplies the preview's
         // gradient scrim and the glass bubbles are the chrome — that is the
