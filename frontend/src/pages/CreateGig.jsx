@@ -67,6 +67,7 @@ import { FILL_HANDOFF } from '../components/onboarding/FillForMe';
 import { useTranslation } from 'react-i18next';
 import { PriceKindPicker } from '../components/forms/PriceKind';
 import { countStep } from '../utils/tapKind';
+import { isFoodBusiness } from '../utils/businessProof';
 
 // "What can customers do with you?" (Tzvi, 24 Nov 2026: one kind of business, the features it needs;
 // docs/plans/one-business-type-signup.md, phase 1). Several can be ticked. Each maps onto today's listing type;
@@ -276,6 +277,13 @@ const CreateGig = () => {
   });
 
   useFormDraft('create-gig', { form, step, layout: DRAFT_LAYOUT, bizName, bizLogo }, !submitted);
+
+  // "Find your business" first (plan phase 1): a new sign-up sees only the finders (Google, their accounts,
+  // an ad) until one fills the form in or they skip. Not when the form already has a start: a restored draft,
+  // a business they are adding to, an answer picked after publishing, the dashboard's fill, or a dev ?step.
+  const [findFirst, setFindFirst] = useState(() => !form.title.trim() && !targetBusinessId
+    && !['step', 'fill', 'offer', 'draft'].some((k) => searchParams.get(k)));
+  useEffect(() => { if (findFirst && form.title.trim()) setFindFirst(false); }, [findFirst, form.title]);
 
   const [email, setEmail] = useState(() => readDraft('create-gig-email') || '');
   useFormDraft('create-gig-email', email, !submitted);
@@ -1117,6 +1125,7 @@ const CreateGig = () => {
         next: firstBusiness ? '/dashboard?tour=first' : `/businesses/${data.id}`,
         // The other ticked answers, each its own listing under the same business (plan phase 1).
         more: OFFERS.filter((o) => (form.offers || []).includes(o.id) && o.type !== form.gig_type).map((o) => o.id),
+        offers: form.offers || [],
       });
     } catch (err) {
       // apiErrorMessage: a refused field comes back as a list, which a toast cannot show (salon, 25 Oct 2026).
@@ -1203,6 +1212,26 @@ const CreateGig = () => {
 
   if (published) {
     const pageUrl = `${window.location.origin}/businesses/${published.id}`;
+    // What makes the page stronger now it is live, for this kind of business (plan phase 1: the ready bar becomes
+    // a checklist driven by the category and the answers). Each line opens the business details to fill it in.
+    const b = liveBiz || {};
+    const food = isFoodBusiness([form.category]) || (published.offers || []).includes('order');
+    const todo = [
+      { k: 'logo', ok: !!b.logo_url, label: t('wizard.next_logo', 'Your logo') },
+      { k: 'hours', ok: !!b.hours, label: t('wizard.next_hours', 'Opening hours') },
+      ...(food ? [
+        { k: 'kosher', ok: !!b.kosher_certification?.body, label: t('wizard.next_kosher', 'Kashrut supervision') },
+        { k: 'delivery', ok: !!b.delivery_note, label: t('wizard.next_delivery', 'Delivery days, minimum and fee') },
+        { k: 'lead', ok: !!b.lead_time, label: t('wizard.next_lead', 'How early to order') },
+      ] : []),
+      ...((published.offers || []).includes('quote') ? [
+        { k: 'areas', ok: !!(b.areas || []).length, label: t('wizard.next_areas', 'The areas you work in') },
+        { k: 'licence', ok: !!b.license_number, label: t('wizard.next_licence', 'Your licence number, if your trade has one') },
+      ] : []),
+      { k: 'languages', ok: !!(b.languages || []).length, label: t('wizard.next_languages', 'Languages you speak') },
+      { k: 'founded', ok: !!b.founded_year, label: t('wizard.next_founded', 'The year you started') },
+    ];
+    const detailsUrl = `/dashboard?tab=my-businesses&details=${encodeURIComponent(published.bizId)}`;
     return (
       <div className="min-h-screen bg-white relative overflow-hidden" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="wizard-published">
         <style>{`
@@ -1278,6 +1307,31 @@ const CreateGig = () => {
           >
             <Copy size={18} aria-hidden="true" /> {t('wizard.liveCopy', 'Copy your page link')}
           </button>
+          {liveBiz && todo.some((x) => !x.ok) && (
+            <div className="text-start mb-6 rounded-2xl border p-4" style={{ borderColor: 'var(--brand-border)' }} data-testid="wizard-live-todo">
+              <div className="flex items-baseline justify-between gap-2 mb-2">
+                <h2 className="text-sm font-bold" style={{ color: 'var(--ink)' }}>{t('wizard.nextTitle', 'Make your page stronger')}</h2>
+                <span className="text-xs tabular-nums" style={{ color: 'var(--brand-muted)' }}>
+                  {t('wizard.nextCount', { done: todo.filter((x) => x.ok).length, all: todo.length, defaultValue: '{{done}} of {{all}} done' })}
+                </span>
+              </div>
+              <ul>
+                {todo.map((x) => (
+                  <li key={x.k}>
+                    <button type="button" disabled={x.ok} onClick={() => navigate(detailsUrl)}
+                      className="w-full min-h-[44px] flex items-center gap-3 text-sm text-start disabled:cursor-default"
+                      style={{ color: x.ok ? 'var(--brand-muted)' : 'var(--ink)' }} data-testid={`wizard-live-todo-${x.k}`}>
+                      <span className={`w-5 h-5 rounded-full grid place-content-center shrink-0 ${x.ok ? 'bg-[var(--brand-primary)] text-white' : 'border-2 border-gray-300'}`} aria-hidden="true">
+                        {x.ok && <Check size={12} />}
+                      </span>
+                      <span className={`flex-1 ${x.ok ? 'line-through' : ''}`}>{x.label}</span>
+                      {!x.ok && <ArrowRight size={16} className="rtl:rotate-180" aria-hidden="true" />}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="text-start mb-6">
             <QrShareCard url={pageUrl} filename="my-page-qr" testidPrefix="wizard-live-qr" />
           </div>
@@ -1350,11 +1404,13 @@ const CreateGig = () => {
           </div>
         </div>
         <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-head)' }}>
-          {stepLabels[step]}
+          {step === 1 && findFirst ? t('wizard.findFirstTitle', 'Find your business') : stepLabels[step]}
         </h1>
 
         <p className="text-sm text-gray-600 -mt-4 mb-5" data-testid="wizard-reassure">
-          {step === 1
+          {step === 1 && findFirst
+            ? t('wizard.findReassure', 'We fill in what we can find, so there is less to type. Free to list, no commission.')
+            : step === 1
             ? t('wizard.reassure1', 'Free to list, no commission, no card needed. You can stop anytime, we save it as you go.')
             : step === contactStep
               ? t('wizard.reassureLast', 'Last screen. Then your page goes live.')
@@ -1618,7 +1674,7 @@ const CreateGig = () => {
         )}
 
         {/* --- Step 1: what customers can do (several answers; replaces the three type cards) --- */}
-        {step === 1 && (
+        {step === 1 && !findFirst && (
           <fieldset className="mb-6" data-testid="wizard-offers">
             <legend className="text-sm font-semibold text-gray-800 mb-1">{t('wizard.offersQ', 'What can customers do with you?')}</legend>
             <p className="text-xs text-gray-500 mb-3">{t('wizard.offersHelp', 'Tick all that fit. We only ask what you need.')}</p>
@@ -1657,7 +1713,7 @@ const CreateGig = () => {
         )}
 
         {/* --- Screen 1, continued: overview (title + category) --- */}
-        {step === 1 && (
+        {step === 1 && !findFirst && (
           <div className="space-y-4">
             {askLogo && (firstBusiness || bizLogo) && (
               <div className="rounded-xl border bg-white p-4 flex items-start gap-4" style={{ borderColor: 'var(--brand-border)' }} data-testid="wizard-business">
@@ -1889,6 +1945,15 @@ const CreateGig = () => {
             than hidden: a disabled step still has to be walked past, and
             the whole point is that a provider never sees a price. */}
 
+        {step === 1 && findFirst ? (
+          <div className="mt-8 flex justify-end">
+            <button type="button" onClick={() => setFindFirst(false)}
+              className="px-6 py-2.5 min-h-[44px] rounded-full text-sm font-semibold flex items-center gap-1 border-2"
+              style={{ borderColor: 'var(--ink)', color: 'var(--ink)' }} data-testid="wizard-find-skip">
+              {t('wizard.findSkip', 'Skip, I will fill it in myself')} <ArrowRight size={14} className="rtl:rotate-180" />
+            </button>
+          </div>
+        ) : (
         <div className="flex flex-col items-end mt-8 gap-2 sm:flex-row sm:items-center sm:justify-between">
           <button type="button" disabled={step === 1} onClick={() => setStep((s) => s - 1)}
             className="px-4 py-2 min-h-[44px] rounded-lg text-sm font-semibold text-gray-600 disabled:opacity-30 flex items-center gap-1 self-start sm:self-auto" data-testid="wizard-back">
@@ -1920,6 +1985,7 @@ const CreateGig = () => {
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   );
