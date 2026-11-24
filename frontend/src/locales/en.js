@@ -8266,6 +8266,7 @@ const en = {
         tplLang: "Language of the text",
         tplEdited: "Your words",
         tplOff: "Off",
+        typeInPhone: "Tap the message in the phone to change its words",
         lookTitle: "Your email look",
         lookOnHint: "On: your logo and colour head every email your customers get, and the button takes your colour.",
         lookOffHint: "Off: customer emails carry the MyIsraelRental header. Turn on to put your own logo and colour on them.",
@@ -8274,7 +8275,7 @@ const en = {
         lookNoLogo: "Add a logo in your business details to show it on your emails.",
         lookColour: "Your colour",
         tab: {
-          alerts: "Your alerts",
+          alerts: "Notification settings",
           messages: "Customer messages",
           history: "History",
         },

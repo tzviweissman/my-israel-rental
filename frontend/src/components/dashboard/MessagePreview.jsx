@@ -25,7 +25,7 @@ export function inkOn(hex) {
   return 1.05 / (lum + 0.05) >= 4.5 ? '#FFFFFF' : '#111827';
 }
 
-export default function MessagePreview({ loaded, templates, note, msgKey = 'order_confirmed', lang: langIn, fixedWho, look, initialHow = 'text' }) {
+export default function MessagePreview({ loaded, templates, note, msgKey = 'order_confirmed', lang: langIn, fixedWho, look, initialHow = 'text', editor }) {
   const { t, i18n } = useTranslation();
   const he = langIn ? langIn === 'he' : i18n.language?.startsWith('he');
   const [whoPicked, setWho] = useState('customer');
@@ -61,8 +61,12 @@ export default function MessagePreview({ loaded, templates, note, msgKey = 'orde
     body = (
       <div className="p-3 min-h-[220px]" style={{ background: '#fff' }}>
         <p className="text-center text-[11px] font-semibold mb-2" style={{ color: 'var(--brand-muted)' }}>myisraelrental</p>
-        <div className="max-w-[85%] rounded-2xl rounded-bl-sm px-3 py-2 text-[13px] whitespace-pre-line break-words" style={{ background: '#E9E9EB', color: '#111' }} dir="auto">
-          {who === 'customer' ? <>{customerText}{line && <><br /><b>{line}</b></>}</> : ownerText}
+        <div className={`${editor ? 'max-w-[92%] ring-2 ring-[#167AB8]' : 'max-w-[85%]'} rounded-2xl rounded-bl-sm px-3 py-2 text-[13px] whitespace-pre-line break-words`} style={{ background: '#E9E9EB', color: '#111' }} dir="auto">
+          {who === 'customer' && editor ? (
+            // The words are typed right here, in the text as it arrives (Tzvi, 24 Nov 2026); the link and own line
+            // after them are added by the server, so they show but cannot be typed over.
+            <>{editor}{!NO_LINK.has(msgKey) && <span className="block" style={{ color: '#1E5AA8' }}>myisraelrental.com/orders/track/a1B2c3</span>}{line && <b className="block mt-1">{line}</b>}</>
+          ) : who === 'customer' ? <>{customerText}{line && <><br /><b>{line}</b></>}</> : ownerText}
         </div>
       </div>
     );
@@ -121,7 +125,8 @@ export default function MessagePreview({ loaded, templates, note, msgKey = 'orde
             )}
           </div>
           <div className="p-3">
-            <p className="whitespace-pre-line">{who === 'customer' ? words : ownerText.split('\n').slice(0, 3).join('\n')}</p>
+            {who === 'customer' && editor ? <div className="rounded ring-2 ring-[#167AB8] px-1">{editor}</div>
+              : <p className="whitespace-pre-line">{who === 'customer' ? words : ownerText.split('\n').slice(0, 3).join('\n')}</p>}
             {who === 'customer' && line && <p className="mt-2 font-semibold">{line}</p>}
             {!(who === 'customer' && NO_LINK.has(msgKey)) && (
               <span className="inline-block mt-3 rounded-lg px-4 py-2 text-[12px] font-semibold" style={{ background: own ? own.accent : '#1E6A6A', color: ink }}>
@@ -135,9 +140,10 @@ export default function MessagePreview({ loaded, templates, note, msgKey = 'orde
   }
 
   return (
-    <div className="mt-4 pt-3 border-t" style={{ borderColor: 'var(--brand-border)' }} data-testid="message-preview">
-      <h4 className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('orderTexts.pv.title', 'See what gets sent')}</h4>
-      <p className="text-[12px] mt-0.5 mb-2" style={{ color: 'var(--brand-muted)' }}>{t('orderTexts.pv.hint', 'A sample order, with your words and your own line. It changes as you type.')}</p>
+    <div className={editor ? '' : 'mt-4 pt-3 border-t'} style={{ borderColor: 'var(--brand-border)' }} data-testid="message-preview">
+      {/* As the editor, the phone needs no title of its own: the line above it says to tap the message. */}
+      {!editor && <h4 className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('orderTexts.pv.title', 'See what gets sent')}</h4>}
+      {!editor && <p className="text-[12px] mt-0.5 mb-2" style={{ color: 'var(--brand-muted)' }}>{t('orderTexts.pv.hint', 'A sample order, with your words and your own line. It changes as you type.')}</p>}
       <div className="flex flex-wrap gap-2 mb-3">
         {!fixedWho && (
           <div className="inline-flex rounded-full border p-0.5" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('orderTexts.pv.who', 'Who gets it')}>
@@ -145,13 +151,16 @@ export default function MessagePreview({ loaded, templates, note, msgKey = 'orde
             <Tab value="owner" current={who} set={setWho} id="pv-who-owner">{t('orderTexts.pv.you', 'You')}</Tab>
           </div>
         )}
-        <div className="inline-flex rounded-full border p-0.5" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('orderTexts.pv.how', 'How it arrives')}>
-          <Tab value="text" current={how} set={setHow} id="pv-how-text">{t('orderTexts.pv.text', 'Text')}</Tab>
-          {WHATSAPP_LIVE && <Tab value="whatsapp" current={how} set={setHow} id="pv-how-whatsapp">WhatsApp</Tab>}
-          {emailToo && <Tab value="email" current={how} set={setHow} id="pv-how-email">{t('orderTexts.pv.email', 'Email')}</Tab>}
-        </div>
+        {/* Only when there is a choice: a text-only message showed one "Text" button that did nothing. */}
+        {(emailToo || WHATSAPP_LIVE) && (
+          <div className="inline-flex rounded-full border p-0.5" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('orderTexts.pv.how', 'How it arrives')}>
+            <Tab value="text" current={how} set={setHow} id="pv-how-text">{t('orderTexts.pv.text', 'Text')}</Tab>
+            {WHATSAPP_LIVE && <Tab value="whatsapp" current={how} set={setHow} id="pv-how-whatsapp">WhatsApp</Tab>}
+            {emailToo && <Tab value="email" current={how} set={setHow} id="pv-how-email">{t('orderTexts.pv.email', 'Email')}</Tab>}
+          </div>
+        )}
       </div>
-      {who === 'customer' && <p className="text-[12px] font-semibold mb-2" style={{ color: 'var(--ink)' }} data-testid="pv-which">{t(`orderTexts.tpl.${msgKey}`, msgKey)}</p>}
+      {who === 'customer' && !editor && <p className="text-[12px] font-semibold mb-2" style={{ color: 'var(--ink)' }} data-testid="pv-which">{t(`orderTexts.tpl.${msgKey}`, msgKey)}</p>}
       <div className="mx-auto w-full max-w-[300px] max-h-[32vh] lg:max-h-none overflow-y-auto rounded-[28px] border-[6px] shadow-md" style={{ borderColor: '#111' }} data-testid="pv-phone">
         {body}
       </div>

@@ -37,6 +37,7 @@ const PIECES = {
   review: ['customer', 'business', 'order'],
   auto_reply: ['business'],
 };
+const PIECE_KEYS = { customer: 1, business: 1, order: 1, service: 1, when: 1, time: 1 };
 const NO_LINK = new Set(['order_declined', 'auto_reply']);
 const SAMPLE_LINK = 'https://myisraelrental.com/orders/track/a1B2c3D4e5F6g7H8i9J0kL';
 // The plain SMS alphabet: a text in it is 160 letters a part, anything else (Hebrew, ₪, emoji) 70.
@@ -91,13 +92,26 @@ export default function CustomerMessages({
     setTemplates((all) => { const next = { ...(all[k] || {}) }; delete next[lang]; return { ...all, [k]: next }; });
     bump((n) => n + 1);
   };
+  // In the phone the pieces read by their names, {Order number} not {order}, and go back to the server's names
+  // as they are typed. A name the owner breaks is just words, as a broken {order} was before.
+  const pieceNames = () => Object.keys(PIECE_KEYS).map((p) => [p, t(`orderTexts.piece.${p}`, p)]);
+  const toShown = (v) => pieceNames().reduce((s, [p, n]) => s.split(`{${p}}`).join(`{${n}}`), v || '');
+  const fromShown = (v) => pieceNames().reduce((s, [p, n]) => s.split(`{${n}}`).join(`{${p}}`), v || '');
   const insert = (k, piece) => {
     const el = document.getElementById(`tpl-${k}`);
-    const v = value(k);
-    const at = el ? el.selectionStart : v.length;
-    set(k, `${v.slice(0, at)}{${piece}}${v.slice(at)}`, { step: true });
-    setTimeout(() => { if (el) { el.focus(); el.selectionStart = el.selectionEnd = at + piece.length + 2; } }, 0);
+    const shown = toShown(value(k));
+    const name = t(`orderTexts.piece.${piece}`, piece);
+    const at = el ? el.selectionStart : shown.length;
+    set(k, fromShown(`${shown.slice(0, at)}{${name}}${shown.slice(at)}`), { step: true });
+    setTimeout(() => { if (el) { el.focus(); el.selectionStart = el.selectionEnd = at + name.length + 2; } }, 0);
   };
+  const editorFor = (k) => (
+    <textarea id={`tpl-${k}`} rows={Math.max(2, Math.ceil(toShown(value(k)).length / 26))} maxLength={300} value={toShown(value(k))}
+              onChange={(e) => set(k, fromShown(e.target.value))} dir={lang === 'he' ? 'rtl' : 'ltr'}
+              className="block w-full bg-transparent resize-none outline-none p-0 m-0 border-0" style={{ color: '#111', fontSize: 16, lineHeight: 1.35 }}
+              placeholder={k === 'auto_reply' ? t('orderTexts.tplAutoPlaceholder', 'For example: Thanks, we will get back to you within the hour.') : ''}
+              aria-label={label(k)} data-testid={`tpl-${k}-input`} />
+  );
   const isOff = (k) => (k === 'reminder' ? reminders && !reminders.on : off.includes(k) || (k === 'auto_reply' && !value(k)));
   const toggle = (k) => {
     if (k === 'reminder') setReminders((r) => ({ ...r, on: !r.on }));
@@ -226,11 +240,9 @@ export default function CustomerMessages({
                             <span className="text-[12px]" style={muted}>{t('orderTexts.reminderAlso', 'plus one 2 hours before. An email reminder goes at the same time.')}</span>
                           </label>
                         )}
-                        <textarea id={`tpl-${k}`} rows={3} maxLength={300} value={value(k)} onChange={(e) => set(k, e.target.value)} dir={lang === 'he' ? 'rtl' : 'ltr'}
-                                  className="w-full px-2 py-2 rounded-lg border bg-white" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)', fontSize: 16 }}
-                                  placeholder={k === 'auto_reply' ? t('orderTexts.tplAutoPlaceholder', 'For example: Thanks, we will get back to you within the hour.') : ''}
-                                  aria-label={label(k)} data-testid={`tpl-${k}-input`} />
-                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                        <p className="text-[12px] font-semibold mb-1" style={{ color: 'var(--ink)' }}>{t('orderTexts.typeInPhone', 'Tap the message in the phone to change its words')}</p>
+                        <div data-testid={`tpl-${k}-preview`}>{renderPreview(k, editorFor(k))}</div>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-2">
                           <button type="button" onClick={() => undo(k)} disabled={!s.past.length} className={iconBtn} style={iconStyle} data-testid={`tpl-${k}-undo`}>
                             <Undo2 size={13} /> {t('orderTexts.undo', 'Undo')}
                           </button>
@@ -244,7 +256,6 @@ export default function CustomerMessages({
                             </button>
                           ))}
                         </div>
-                        {text && <div className="mt-1" data-testid={`tpl-${k}-preview`}>{renderPreview(k)}</div>}
                         <div className="flex flex-wrap items-center justify-between gap-2 mt-1.5">
                           <span className="text-[11px]" style={{ color: text && parts(text) > 1 ? '#B42318' : 'var(--brand-muted)' }}>
                             {text ? t('orderTexts.tplParts', '{{n}} characters, counts as {{p}} text(s)', { n: text.length, p: parts(text) }) : ''}

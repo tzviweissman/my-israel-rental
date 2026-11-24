@@ -2187,12 +2187,12 @@ async def send_message_test(business_id: str, payload: MessageTestIn, user=Depen
             gig = await db.marketplace_gigs.find_one({"business_id": biz["_id"], "status": "published"})
             to = (await gig_whatsapp_number(gig)) if gig else None
         if not to:
-            raise HTTPException(status_code=400, detail="Add a number for texts first, under Your alerts")
+            raise HTTPException(status_code=400, detail="Add a number for texts first, under Notification settings")
     else:
         from .order_emails import business_email
         to = await business_email(biz)
         if not to:
-            raise HTTPException(status_code=400, detail="Add an email address first, under Your alerts")
+            raise HTTPException(status_code=400, detail="Add an email address first, under Notification settings")
     day = datetime.now(timezone.utc).date().isoformat()
     count = await db.message_tests.find_one_and_update({"_id": f"{business_id}:{day}"}, {"$inc": {"n": 1}}, upsert=True,
                                                        return_document=ReturnDocument.AFTER)

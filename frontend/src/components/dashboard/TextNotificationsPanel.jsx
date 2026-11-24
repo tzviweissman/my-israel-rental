@@ -1,7 +1,7 @@
 /**
  * Texts and emails for one business (Tzvi, 6 Nov 2026; emails 11 Nov). Three tabs since 23 Nov 2026 (Tzvi: "people
  * are having a hard time navigating and knowing what each does"):
- *   - Your alerts: accept orders automatically, and how the business hears of a new order (text, email, where to).
+ *   - Notification settings: accept orders automatically, and how the business hears of a new order (text, email, where to).
  *   - Customer messages: the business's own line, and every message its customers get, grouped by when it goes out
  *     (CustomerMessages.jsx), beside a phone preview of the one being edited (MessagePreview.jsx).
  *   - History: the last texts and emails, whether each arrived, and customers' replies.
@@ -290,7 +290,7 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
                             off={off} setOff={setOff} reminders={reminders} setReminders={setReminders} counts={counts} textsOn={on}
                             businessName={loaded.business_name} businessNameHe={loaded.business_name_he} lang={msgLang} setLang={setMsgLang}
                             openKey={openKey} setOpenKey={setOpenKey} onTurnTextsOn={() => setOn(true)}
-                            renderPreview={(k) => <MessagePreview loaded={loaded} templates={templates} note={note} msgKey={k} lang={msgLang} fixedWho="customer" look={look} />} />
+                            renderPreview={(k, editor) => <MessagePreview loaded={loaded} templates={templates} note={note} msgKey={k} lang={msgLang} fixedWho="customer" look={look} editor={editor} />} />
         </div>
       )}
 
