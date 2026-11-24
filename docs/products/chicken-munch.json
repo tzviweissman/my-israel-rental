@@ -1,0 +1,11 @@
+{
+  "business": "Chicken Munch",
+  "items": {
+    "hot-poppers": {
+      "name": "Hot Poppers in their kraft paper bowl",
+      "photo": "frontend/public/pages/chicken-munch/assets/poppers.webp",
+      "traits": "a kraft paper bowl of popcorn chicken; each piece a round, puffy, irregular lump of boneless chicken about the size of a walnut, never square, boxy or flat-sided, no spiky flakes; deep amber-red; completely coated in a thick, wet, glossy sticky glaze; no crumbs, flakes or drops round them; lit from the front, no glowing or see-through edges.",
+      "source": "his own photo; traits from the 9 Nov 2026 status ad, where the leaping pieces first came out square and glowing (docs/ads/gen/chicken-munch-status/gen.py)"
+    }
+  }
+}
