@@ -18,7 +18,8 @@ From a gen script (run with backend/.venv/Scripts/python; HF_KEY from backend/.e
 
 From the command line:
     python scripts/hf.py price <model> '<json arguments>'      the API's price, nothing spent
-    python scripts/hf.py spent [days]                          spend by month, model and business; every redo and why
+    python scripts/hf.py models                                every model our scripts name: priced, rate or gone
+    python scripts/hf.py spent [days]                         spend by month, model and business; every redo and why
     python scripts/hf.py verdict <out file> kept|redo "<why>"  record what happened to a result (redo needs a why)
     python scripts/hf.py product <business>/<item>             show a saved product
 """
@@ -77,9 +78,69 @@ def price(model: str, args: dict) -> dict | None:
         r = h.sync_client._transport.request("POST", f"/estimate/{model}", json=args).json()
     except Exception as e:  # noqa: BLE001
         sys.exit(f"price check refused for {model}: {e} (a wrong model name is refused here, before any spend)")
-    if r.get("type") != "estimate":
+    if r.get("type") == "estimate":
+        return {"credits": float(r.get("credits") or 0), "usd": float(r.get("usd") or 0)}
+    return _from_rate(r.get("pricing_description") or "", args)
+
+
+CREDITS_PER_USD = 16.0  # from the API's own estimates on 24 Nov 2026: 12.48 credits = $0.78, 1.5 = $0.094
+
+
+def _from_rate(desc: str, args: dict) -> dict | None:
+    """Video models priced per second ("1080p: $0.0962" or "$0.13 per generated second") times the duration asked.
+    Anything else (Marketing Studio's per-token rate) has no price before it runs: None, and make() wants credits=."""
+    import re
+    secs = args.get("duration")
+    if not secs or "second" not in desc:
         return None
-    return {"credits": float(r.get("credits") or 0), "usd": float(r.get("usd") or 0)}
+    rates = dict(re.findall(r"(\d+p|\dK):\s*\$(\d+(?:\.\d+)?)", desc))
+    res = str(args.get("resolution", "")).lower()
+    rate = next((float(v) for k, v in rates.items() if k.lower() == res), None)
+    if rate is None and not rates:
+        one = re.search(r"\$(\d+(?:\.\d+)?) per (?:generated |video )?second", desc)
+        rate = float(one.group(1)) if one else None
+    if rate is None:
+        return None
+    usd = rate * float(secs)
+    return {"credits": round(usd * CREDITS_PER_USD, 2), "usd": round(usd, 3), "from_rate": True}
+
+
+def models() -> None:
+    """Every model id our gen scripts name, and what the API says about its price (nothing is spent)."""
+    import re
+    import subprocess
+    files = subprocess.run(["git", "ls-files", "*.py", "*.mjs"], cwd=ROOT, capture_output=True, text=True).stdout.split()
+    ids = set()
+    for f in files:
+        if "gen" in f or f.endswith(("ad_shots.py", "hf.py")):
+            text = (ROOT / f).read_text(encoding="utf-8", errors="ignore")
+            ids |= set(re.findall(r"""['"]((?:[a-z0-9.-]+/){2,3}[a-z0-9.-]+)['"]""", text))
+    def is_path(i: str) -> bool:  # file and folder names caught by the same pattern
+        first = i.split("/")[0]
+        return (bool(re.search(r"\.[a-z]{2,4}$", i)) or first in ("gen", "src", "assets", "docs", "scripts", "frontend",
+                "backend") or (ROOT / "scrollcraft" / "builds" / first).exists())
+
+    h = _client()
+    img, vid = "https://example.com/a.jpg", "https://example.com/a.mp4"
+    tries = ({"prompt": "x", "duration": 5, "image_url": img}, {"prompt": "x", "duration": 5, "image_urls": [img]},
+             {"prompt": "x", "duration": 5, "video_urls": [vid], "image_urls": [img]},
+             {"prompt": "x", "video_url": vid, "image_urls": [img]}, {"prompt": "x"})
+    for m in sorted(i for i in ids if not is_path(i)):
+        kind = None
+        for args in tries:
+            try:
+                r = h.sync_client._transport.request("POST", f"/estimate/{m}", json=args).json()
+            except Exception as e:  # noqa: BLE001
+                if "model_not_found" in str(e):
+                    kind = "GONE (model_not_found): a script naming it gets nothing; switch it to a listed model"
+                    break
+                continue
+            d = r.get("pricing_description", "")
+            kind = ("price from the API" if r.get("type") == "estimate" else
+                    "rate per second: hf works it out from duration and resolution" if "second" in d else
+                    "rate only (per token or similar): pass credits= from get_cost")
+            break
+        print(f"{m:46} {kind or 'exists, but none of the test arguments fitted: read its page on docs.higgsfield.ai'}")
 
 
 def product(ref: str) -> dict:
@@ -136,8 +197,8 @@ def make(model: str, args: dict, out, *, why: str, product: str | None = None, m
          credits: float | None = None, poll_seconds: int = 10, timeout_minutes: int = 40) -> Path:
     """One paid request, priced first, logged, resumable. Returns the saved file; exits on failure.
 
-    Some models (Marketing Studio image, Kling) get only a rate from the API, not a price. For those pass
-    credits= from get_cost; without it nothing is sent, so a limit can never be skipped (24 Nov 2026: a
+    Video models priced per second are worked out from duration and resolution. A per-token rate (Marketing
+    Studio image) has no price before it runs: pass credits= from get_cost; without it nothing is sent, so a limit can never be skipped (24 Nov 2026: a
     max_credits test went through on Marketing Studio because its price was unknown)."""
     out = Path(out).resolve()
     if not why.strip():
@@ -265,6 +326,8 @@ if __name__ == "__main__":
         sys.exit(__doc__)
     if a[0] == "price" and len(a) == 3:
         print(price(a[1], json.loads(a[2])) or "the API gives only a rate for this model")
+    elif a[0] == "models":
+        models()
     elif a[0] == "spent":
         spent(int(a[1]) if len(a) > 1 else None)
     elif a[0] == "verdict" and len(a) >= 3:

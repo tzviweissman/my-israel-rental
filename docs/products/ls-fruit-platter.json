@@ -1,0 +1,29 @@
+{
+  "business": "LS Fruit Platter",
+  "items": {
+    "small": {
+      "name": "Small fruit platter on its round tray",
+      "photo": "scrollcraft/builds/ls-fruit-platter/src/owner/p04.jpg",
+      "traits": "pineapple crown at the top, red grapes on the left, the tall watermelon wedge in the middle, dates and walnuts, pomegranate, the round tray under yellow melon slices; every fruit in its place, nothing added.",
+      "source": "her own photo (scrollcraft/builds/ls-fruit-platter/gen/platters-brief.md:6,13). Never use src/owner/h-*.jpg: those are generated."
+    },
+    "medium": {
+      "name": "Medium fruit platter on a wooden board with a handle",
+      "photo": "scrollcraft/builds/ls-fruit-platter/src/owner/p05.jpg",
+      "traits": "dark grapes on the left, pineapple chunks and crown, lychees, watermelon slices fanned on the right, sliced green melon at the front, a wooden board with a handle. The books, vase and bowl in her photo are props, not the platter.",
+      "source": "her own photo (platters-brief.md:6,13)"
+    },
+    "large": {
+      "name": "Large fruit platter on a long board",
+      "photo": "scrollcraft/builds/ls-fruit-platter/src/owner/p06.jpg",
+      "traits": "green grapes, dates, pineapple, kiwi, lychees, red grapes, pomegranate and a long fan of melon slices on a long wooden board; every fruit in its place.",
+      "source": "her own photo (platters-brief.md:6,13)"
+    },
+    "xl": {
+      "name": "XL fruit platter on a narrow long board",
+      "photo": "scrollcraft/builds/ls-fruit-platter/src/owner/p07.jpg",
+      "traits": "green grapes, kiwi and melon, dates and pomegranate, dark grapes and a watermelon strip in rows along the narrow long board.",
+      "source": "her own photo (platters-brief.md:6,13); the model redraws the cut of some pieces, so the exact slice count is not guaranteed (platters-brief.md:15)"
+    }
+  }
+}

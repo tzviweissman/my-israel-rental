@@ -1,0 +1,23 @@
+{
+  "business": "The Whipped Cup",
+  "items": {
+    "classic": {
+      "name": "Classic Cloud jar",
+      "photo": "scrollcraft/builds/whipped-cup/gen/jar-classic-ref.jpg",
+      "traits": "a tall square clear plastic bottle with a silver screw lid, a cream satin ribbon tied in a bow and twine wound round the neck, full of whipped coffee with lighter streaks and pockets; the dark label: 'THE WHIPPED CUP', pink cup icon, 'TWC', 'Classic Cloud', 'add ice, milk & coffee as desired', 'makes 3 coffees · your cup, your cloud', three dots. Make it at 2k so the small print stays sharp; name exactly one of each prop.",
+      "source": "her own photo as used on the site (scrollcraft/builds/whipped-cup/gen/jars-brief.md:6-12,22)"
+    },
+    "caramel": {
+      "name": "Caramel Cloud jar",
+      "photo": "scrollcraft/builds/whipped-cup/gen/jar-caramel-ref.jpg",
+      "traits": "the same tall square bottle, silver lid, cream ribbon bow and twine, full of caramel whipped coffee; the tan label with 'THE WHIPPED CUP', pink cup icon, 'TWC', 'Caramel Cloud' and the same small print. One of each prop: a test once had two caramel dishes.",
+      "source": "her own photo (jars-brief.md:6-12,22)"
+    },
+    "vanilla": {
+      "name": "Vanilla Cloud jar",
+      "photo": "scrollcraft/builds/whipped-cup/gen/jar-vanilla-ref.jpg",
+      "traits": "the same tall square bottle, silver lid, cream ribbon bow and twine, full of vanilla whipped coffee; the white label with pink lettering: 'THE WHIPPED CUP', 'TWC', 'Vanilla Cloud'. Its small print is hidden by beans in her photo and the model garbles it ('your cour cloud'): keep the beans off the label or lay the label on in code.",
+      "source": "her own photo (jars-brief.md:6-12,22)"
+    }
+  }
+}

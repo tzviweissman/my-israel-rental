@@ -1,0 +1,11 @@
+{
+  "business": "RS Modest Activewear",
+  "items": {
+    "black-sports-skirt": {
+      "name": "black sports skirt",
+      "photo": "scrollcraft/builds/rs-modest-activewear/gen/skirt-ref.jpg",
+      "traits": "the black sports skirt on the left of her photo: built-in leggings showing under the hem, a wide smooth waistband, a long soft A-line drape, a small 'RS' mark near the hem. Only the black skirt: no white skirt, no bag unless asked.",
+      "source": "her flyer photo (scrollcraft/builds/rs-modest-activewear/gen/skirt-brief.md:6,9,15)"
+    }
+  }
+}

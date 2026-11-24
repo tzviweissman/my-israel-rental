@@ -1,0 +1,17 @@
+{
+  "business": "American Crust",
+  "items": {
+    "everything-bagels": {
+      "name": "everything bagels, baked",
+      "photo": "scrollcraft/builds/american-crust/src/owner/p03.jpg",
+      "traits": "their pale speckled bagel dough, baked golden, irregular hand-made rounds (never rounder or more evenly seeded than in the photo), thickly covered in their everything topping of sesame, poppy, dried onion and garlic.",
+      "source": "their own photo (blueprint american-crust-moving.md:54); traits and the 'too round, too even' mistake from scrollcraft/builds/american-crust/gen/film-brief.md:14-15"
+    },
+    "pizza-dough-tub": {
+      "name": "Pizza Dough tub",
+      "photo": "scrollcraft/builds/american-crust/src/owner/p05.jpg",
+      "traits": "a round white plastic tub of pale pizza dough with the black PIZZA DOUGH label and their logo on the lid. The label's small print is never redrawn by the model: cut their real label from the photo and lay it on in code.",
+      "source": "their flyer photo (film-brief.md:6-7); the label was misread three times (50GRAM, 60GRAM, a wrong phone number), film-brief.md:9"
+    }
+  }
+}

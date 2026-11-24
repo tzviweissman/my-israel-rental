@@ -1,0 +1,11 @@
+{
+  "business": "Krysp",
+  "items": {
+    "peanut-chew": {
+      "name": "half-dipped peanut chew",
+      "photo": "scrollcraft/builds/krysp/src/owner/p02.jpg",
+      "traits": "one of the dark-chocolate half-dipped pieces in the second column of her board: crisp rice bound in peanut butter, the same all the way through at a cut end, one half dipped in dark chocolate with a thin white drizzle; never changes shape, size or colour; only her own ingredients (no peanuts, no caramel, nothing not seen in her photo). A chew bends and tears slowly; only the chocolate shell cracks sharp.",
+      "source": "her own board photo (scrollcraft/builds/krysp/gen/advert-brief.md:11-12, snap-brief.md:8-14, web-brief.md:10-16); the bend and snap were remade, 'dont look natural' (snap-brief.md:29)"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "business": "Finest Cuts",
+  "items": {
+    "chicken-board": {
+      "name": "golden chicken board with three sauce cups",
+      "photo": "scrollcraft/builds/finest-cut/src/owner/p02.jpg",
+      "traits": "golden crumbed chicken pieces and pale strips on a wooden board on their black stone ground; the same pieces throughout, never changing shape, count or colour; the crust texture and colour as in the photo; the three round sauce cups with their logo where they are in the photo.",
+      "source": "their own photo (scrollcraft/builds/finest-cut/gen/mountains-brief.md:14-17,29)"
+    }
+  }
+}

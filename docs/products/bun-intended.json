@@ -1,0 +1,11 @@
+{
+  "business": "Bun Intended",
+  "items": {
+    "bun-box": {
+      "name": "Bun Intended buns in their kraft trays",
+      "photo": "scrollcraft/builds/bun-intended/src/box4.jpg",
+      "traits": "soft, tall, hand-rolled cinnamon buns with uneven swirls, packed in long kraft paper trays: Classic with a loose white drizzle, caramel with a glossy caramel-coffee glaze pooled in the swirl, Lotus heaped with white cream and coarse Lotus biscuit crumbs. Not perfectly round or centred, not paler or flatter than in the photo; no 'Lotus' lettering on any crumb.",
+      "source": "their only photo of the buns (scrollcraft/builds/bun-intended/message-to-owner.md:5-7). The bun cut-outs in assets/ are not safe masters: the chocolate one is generated and the espresso one is in doubt. A bun once came out paler, flatter and too perfect (memory: generate-right-first-time); the model drew 'Lotus' on a biscuit (gen/bun-brief.md:19)."
+    }
+  }
+}

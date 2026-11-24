@@ -1,0 +1,11 @@
+{
+  "business": "Blazin' Boards",
+  "items": {
+    "board": {
+      "name": "Blazin' Boards meat board",
+      "photo": "scrollcraft/builds/blazin-boards/assets/board-top.jpg",
+      "traits": "the wooden board with its metal ring and the burned-in 'BLAZIN' BOARDS' label, as large and sharp as in the photo; the bone-in steak in the middle; the sliced meats, red cured pieces, dark jerky and pink ham in their exact places.",
+      "source": "a crop of their own photo (scrollcraft/builds/blazin-boards/RULES.md:43, gen/board-brief.md:6,9); the generated label came out small and soft (board-brief.md:19). assets/board-hero.webp is generated."
+    }
+  }
+}

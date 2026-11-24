@@ -1,0 +1,11 @@
+{
+  "business": "Bake Away",
+  "items": {
+    "white-glazed-doughnut": {
+      "name": "white-glazed doughnut",
+      "photo": "scrollcraft/builds/bake-away/src/owner/p05.jpg",
+      "traits": "one ring doughnut, thick ivory-white glaze (never beige or warm) covering the top and running down the sides in soft drips, golden-brown fried dough showing at the bottom edge and inside the hole, thin milk-chocolate lines drizzled diagonally from upper left to lower right, about ten lines, some doubled; the same size as in her photo.",
+      "source": "her own photo (scrollcraft/builds/bake-away/gen/film-brief.md:13-18); the first take came out beige and too big (film-brief.md:91)"
+    }
+  }
+}

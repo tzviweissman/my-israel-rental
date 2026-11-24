@@ -6,6 +6,36 @@
       "photo": "frontend/public/pages/chicken-munch/assets/poppers.webp",
       "traits": "a kraft paper bowl of popcorn chicken; each piece a round, puffy, irregular lump of boneless chicken about the size of a walnut, never square, boxy or flat-sided, no spiky flakes; deep amber-red; completely coated in a thick, wet, glossy sticky glaze; no crumbs, flakes or drops round them; lit from the front, no glowing or see-through edges.",
       "source": "his own photo; traits from the 9 Nov 2026 status ad, where the leaping pieces first came out square and glowing (docs/ads/gen/chicken-munch-status/gen.py)"
+    },
+    "munch-box": {
+      "name": "Munch box, their kraft takeaway box",
+      "photo": "frontend/public/pages/chicken-munch/assets/box-yellow.webp",
+      "traits": "a brown kraft cardboard box with a lifted kraft lid that has a clear window, full of golden cornflake-crusted chicken tenders and crunchy dark crispy chicken bites, with round black sauce cups carrying the red and yellow CHICKEN MUNCH sticker and 055-331-6975. The pretzel coating is dark and ricey, never like alphabet pasta; no glossy orange glazed pieces or plain breaded nuggets that are not in the photo.",
+      "source": "his listing photo cut out with nothing changed (scrollcraft/builds/chicken-munch/gen/hero-brief.md:17, from src/owner/shot-box.png); traits from docs/ads/gen/chicken-munch-chanukah-moving/gen3d.py:28-30; the generated box of hero-brief.md:15 got the sauce labels, pretzel and extra pieces wrong"
+    },
+    "cornflake": {
+      "name": "Cornflake chicken, the front bowl",
+      "photo": "scrollcraft/builds/chicken-munch/src/owner/oct19/cornflake.jpg",
+      "traits": "the front kraft bowl heaped high with cornflake-crusted chicken, the flakes golden and craggy; the sauce pot with his round CHICKEN MUNCH label and 055-331-6975 on the rim; the heap as big as in his photo, never a smaller pile; navy cloth under it.",
+      "source": "his own photo (hero-brief.md:6); the generated version made the heap smaller (hero-brief.md:10)"
+    },
+    "fruity": {
+      "name": "Fruity chicken, the front bowl",
+      "photo": "scrollcraft/builds/chicken-munch/src/owner/oct19/fruity.jpg",
+      "traits": "the front kraft bowl of chicken in a rainbow fruity-cereal coating (red, green, yellow, blue, purple bits); the sauce pot with his round CHICKEN MUNCH label, its lid at the same angle as in his photo.",
+      "source": "his own photo (hero-brief.md:6); the generated version leaned the sauce lid differently (hero-brief.md:10)"
+    },
+    "rice-krispie": {
+      "name": "Rice Krispie chicken fingers, the front bowl",
+      "photo": "scrollcraft/builds/chicken-munch/src/owner/oct19/rice-krispie.jpg",
+      "traits": "the front kraft bowl of chicken fingers in a pale golden puffed-rice coating; the same number of pieces as in his photo; the sauce pot with his round CHICKEN MUNCH label.",
+      "source": "his own photo (hero-brief.md:6); the generated version changed the piece count (hero-brief.md:10)"
+    },
+    "classic": {
+      "name": "Classic American Crunch tenders, the front bowl",
+      "photo": "scrollcraft/builds/chicken-munch/src/owner/oct19/tenders-1.jpg",
+      "traits": "the front kraft bowl of long golden breaded chicken tenders with a craggy crunchy coating; the sauce pot with his round CHICKEN MUNCH label beside it.",
+      "source": "his own photo (src/owner/oct19, hero-brief.md:6); which photo the site's classic.webp came from is not recorded"
     }
   }
 }

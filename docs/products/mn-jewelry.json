@@ -1,0 +1,23 @@
+{
+  "business": "M and N Jewelry",
+  "items": {
+    "solitaire": {
+      "name": "round solitaire ring with a pave band",
+      "photo": "docs/ads/gen/mn-jewelry-status/ring-src.jpg",
+      "traits": "one ring only: a round brilliant solitaire diamond in a raised four-prong setting on a thin white-gold band; very small pave diamonds run only along the upper half of the band, from the centre stone down each shoulder, the lower half plain polished white gold; the pave as small as in the photo. The metal is cool bright silver-white white gold, never yellow or rose; the diamond colourless and icy white, never champagne or tinted.",
+      "source": "their own photo (docs/ads/gen/mn-jewelry-status/gen.py:2,23-26; same as scrollcraft/builds/mn-jewelry/src/owner/p02.jpg); first takes came out yellow gold with a tinted stone, then with stones round the whole band (blueprints mn-jewelry-status.md:138, mn-jewelry-infinity-status.md:142)"
+    },
+    "five-stone-band": {
+      "name": "five-stone diamond band",
+      "photo": "docs/ads/gen/mn-jewelry-infinity-status/band-src.jpg",
+      "traits": "a white-gold band with exactly FIVE larger round diamonds in a single row across the top only; the rest of the band plain polished white gold with no stones; cool silver-white metal, colourless stones.",
+      "source": "their own photo (docs/ads/gen/mn-jewelry-infinity-status/gen.py:2-3,29-30; same as src/owner/p08.jpg); five stones counted on the photo 24 Nov 2026"
+    },
+    "twist-solitaire": {
+      "name": "twist solitaire ring",
+      "photo": "scrollcraft/builds/mn-jewelry/src/owner/p10.jpg",
+      "traits": "a large round brilliant diamond in four prongs on a plain polished white-gold band that twists into the setting; no stones on the band; keep the number, cut and layout of the stones, the prongs, the band's shape and width and the metal colour; no added stones, no extra sparkle.",
+      "source": "their photo chosen as the film's ring (scrollcraft/builds/mn-jewelry/CONCEPT.md:48); general traits from gen/studio-brief.md:6-7,16"
+    }
+  }
+}

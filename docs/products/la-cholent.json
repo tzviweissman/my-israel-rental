@@ -1,0 +1,11 @@
+{
+  "business": "L.A. Cholent",
+  "items": {
+    "tubs": {
+      "name": "L.A. Cholent kit tubs",
+      "photo": "scrollcraft/builds/la-cholent/src/medium.jpg",
+      "traits": "four square clear plastic tubs sealed with cling film, the same count of four, full of thick dark red-brown raw cholent kit (grains and beans, as seen through the tub, never smoother or more orange); on each lid the black label 'L.A. CHOLENT By Rabbi Samuels' with the recipe steps and 'Yields approx. 3-4 pounds', sharp and readable. No added tubs or copies.",
+      "source": "their own photo (docs/ads/gen/la-cholent-status/gen.py:5, scrollcraft/builds/la-cholent/gen/tubs-brief.md:6-7); mistakes: a label came out reading 'Stir wall' and the fill too smooth and orange (tubs-brief.md:9-10). The slow cooker in assets/pot.webp is generated, not theirs."
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "business": "Burnt Meatboards",
+  "items": {
+    "meat-board": {
+      "name": "BÜRNT meat board",
+      "photo": "scrollcraft/builds/burnt-meatboards/src/owner/p46.jpg",
+      "traits": "a pale wood board with visible grain and rounded corners, the dark burned BÜRNT flame mark at its lower left; the smoked bone-in rib eye with its long bone across the middle, fans of pink slices with a dark crust, dark jerky, salami rounds. The meat is never changed: Tzvi allowed generated meat on the film's board only.",
+      "source": "his own photo (scrollcraft/builds/burnt-meatboards/gen/fire-film-brief.md:67,141-143; film-brief.md:6,16). Exact placement (the iron, the mark) is done in code: clip B put the mark in the wrong place twice (fire-film-brief.md:335-337)."
+    }
+  }
+}
