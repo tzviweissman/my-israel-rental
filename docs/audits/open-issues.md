@@ -578,3 +578,8 @@ Main moved on after PR #24 was opened (the sign-up work stream was rewritten), s
 - Dropped: nothing.
 - Checked: test-i18n-parity all passed, check-pages-scripts 96 checked 0 broken, both locale files import (214 keys each), every changed Python file compiles, pytest test_order_emails, test_page_price_sync, test_site_reader, test_item_size 25 passed 2 skipped. Frontend not built (no node_modules in this sandbox).
 - Needs a decision: the 23 Nov finding (a code stays applied after the basket drops under its minimum, then the send is refused) and the two 22 Nov discount findings (free-delivery code shown as applied on bookings and quotes; a free-delivery code used up on a delivery that was already free) touch how codes are charged, so they were reported, not fixed.
+
+## Code review of 24 Nov 2026 (claude/exciting-bell-k2txx0)
+- [Low] Texts and emails: staff with the Orders area can send paid test texts to the business's number (10 a day) and use its daily translation allowance, while the message settings themselves are owner only (`orders.py:2178`, `:2214` call `_owned_business` without `None`). First seen 24 Nov (2026-11-24-site-audit.md). Permissions: reported, not fixed.
+- Fixed 24 Nov: "Pick up to N" and "Pick a choice" order refusals now in Hebrew on a Hebrew order page (c12ecde9).
+- Still open: the 23 Nov audit merge (claude/audit-merge-8kdnag) is not on main, so test-i18n-parity still fails its 3 checks (browse.*, wizard.pickCategory); audit sandbox still has no MongoDB or Playwright download.
