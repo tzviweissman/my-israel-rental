@@ -64,6 +64,28 @@ try {
   const items = await page.locator('[data-testid^="wizard-live-todo-"]').allInnerTexts();
   console.log('checklist:', items.join(' | '));
   if (!items.some((x) => /kashrut|כשרות/i.test(x))) fail('a food shop is not asked about kashrut');
+  // Filled in on the spot: the hours and the year save to the business and tick their lines.
+  const done = () => page.locator('[data-testid^="wizard-live-todo-"]:disabled').count();
+  const before = await done();
+  // The dev account keeps one business, so a second run finds these done: clear them first.
+  if (await page.locator('[data-testid="wizard-live-todo-hours"]:disabled').count()) {
+    console.log('hours and year already set from an earlier run: clear them in the dashboard to test filling them in again');
+  } else {
+  await page.locator('[data-testid="wizard-live-todo-hours"]').click();
+  await page.locator('[data-testid="wizard-live-todo-input-hours"]').fill('Sun to Thu 8:00 to 14:00');
+  await page.locator('[data-testid="wizard-live-todo-save-hours"]').click();
+  await page.locator('[data-testid="wizard-live-todo-hours"]:disabled').waitFor({ timeout: 20000 }).catch(() => fail('opening hours did not save on the spot'));
+  await page.locator('[data-testid="wizard-live-todo-founded"]').click();
+  await page.locator('[data-testid="wizard-live-todo-input-founded"]').fill('1850x');
+  if (await page.locator('[data-testid="wizard-live-todo-save-founded"]').isEnabled()) {
+    await page.locator('[data-testid="wizard-live-todo-save-founded"]').click();
+    if (!(await page.locator('[data-testid="wizard-live-todo-input-founded"]').count())) fail('a year that is not a year was accepted');
+  }
+  await page.locator('[data-testid="wizard-live-todo-input-founded"]').fill('2015');
+  await page.locator('[data-testid="wizard-live-todo-save-founded"]').click();
+  await page.locator('[data-testid="wizard-live-todo-founded"]:disabled').waitFor({ timeout: 20000 }).catch(() => fail('the year did not save on the spot'));
+  console.log('ticked on the spot:', before, '->', await done());
+  }
   await page.locator('[data-testid="wizard-live-todo"]').scrollIntoViewIfNeeded();
   await page.screenshot({ path: path.join(shots, `published-${lng}.png`) });
   if (add) {

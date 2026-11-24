@@ -147,6 +147,10 @@ const CreateGig = () => {
   // Set on publish: the "your page is live" screen shows before the dashboard.
   const [published, setPublished] = useState(null);
   const [liveBiz, setLiveBiz] = useState(null);
+  // The checklist line being filled in on the published screen, and what is typed.
+  const [todoOpen, setTodoOpen] = useState(null);
+  const [todoVal, setTodoVal] = useState('');
+  const [todoSaving, setTodoSaving] = useState(false);
   // The first ad's AI product photo: null (not asked), 'making', 'ready' or 'none'.
   const [shot, setShot] = useState(null);
   const [showPaste, setShowPaste] = useState(false);
@@ -1218,20 +1222,34 @@ const CreateGig = () => {
     const food = isFoodBusiness([form.category]) || (published.offers || []).includes('order');
     const todo = [
       { k: 'logo', ok: !!b.logo_url, label: t('wizard.next_logo', 'Your logo') },
-      { k: 'hours', ok: !!b.hours, label: t('wizard.next_hours', 'Opening hours') },
+      { k: 'hours', ok: !!b.hours, label: t('wizard.next_hours', 'Opening hours'), ph: 'Sun to Thu 9:00 to 18:00, Fri 9:00 to 13:00', save: (v) => ({ hours: v }) },
       ...(food ? [
-        { k: 'kosher', ok: !!b.kosher_certification?.body, label: t('wizard.next_kosher', 'Kashrut supervision') },
-        { k: 'delivery', ok: !!b.delivery_note, label: t('wizard.next_delivery', 'Delivery days, minimum and fee') },
-        { k: 'lead', ok: !!b.lead_time, label: t('wizard.next_lead', 'How early to order') },
+        { k: 'kosher', ok: !!b.kosher_certification?.body, label: t('wizard.next_kosher', 'Kashrut supervision'), ph: t('wizard.kosherHint', 'Who certifies it, for example Badatz'), save: (v) => ({ kosher_certification: { body: v.slice(0, 120) } }) },
+        { k: 'delivery', ok: !!b.delivery_note, label: t('wizard.next_delivery', 'Delivery days, minimum and fee'), ph: t('wizard.deliveryNoteHint', 'Which days, by when to order, where to and the fee'), save: (v) => ({ delivery_note: v.slice(0, 300) }) },
+        { k: 'lead', ok: !!b.lead_time, label: t('wizard.next_lead', 'How early to order'), ph: t('wizard.next_lead_ph', 'e.g. 2 days before'), save: (v) => ({ lead_time: v.slice(0, 120) }) },
       ] : []),
       ...((published.offers || []).includes('quote') ? [
         { k: 'areas', ok: !!(b.areas || []).length, label: t('wizard.next_areas', 'The areas you work in') },
-        { k: 'licence', ok: !!b.license_number, label: t('wizard.next_licence', 'Your licence number, if your trade has one') },
+        { k: 'licence', ok: !!b.license_number, label: t('wizard.next_licence', 'Your licence number, if your trade has one'), save: (v) => ({ license_number: v.slice(0, 60) }) },
       ] : []),
-      { k: 'languages', ok: !!(b.languages || []).length, label: t('wizard.next_languages', 'Languages you speak') },
-      { k: 'founded', ok: !!b.founded_year, label: t('wizard.next_founded', 'The year you started') },
+      { k: 'languages', ok: !!(b.languages || []).length, label: t('wizard.next_languages', 'Languages you speak'), ph: t('wizard.next_languages_ph', 'English, Hebrew'), save: (v) => ({ languages: v.split(',').map((x) => x.trim()).filter(Boolean) }) },
+      { k: 'founded', ok: !!b.founded_year, label: t('wizard.next_founded', 'The year you started'), ph: '2015', numeric: true,
+        save: (v) => (/^\d{4}$/.test(v) && +v >= 1800 && +v <= new Date().getFullYear() ? { founded_year: +v } : null) },
     ];
     const detailsUrl = `/dashboard?tab=my-businesses&details=${encodeURIComponent(published.bizId)}`;
+    // Filled in right here (Shopify's setup guide does this): saved to the business, ticked at once.
+    const saveTodo = async (x) => {
+      const body = x.save(todoVal.trim());
+      if (!todoVal.trim() || !body) return;
+      setTodoSaving(true);
+      try {
+        const { data } = await axios.patch(`${API}/marketplace/businesses/${published.bizId}`, body, { headers: { Authorization: `Bearer ${token}` } });
+        setLiveBiz((cur) => ({ ...cur, ...body, ...(data && typeof data === 'object' ? data : {}) }));
+        setTodoOpen(null); setTodoVal('');
+      } catch (err) {
+        toast.error(apiErrorMessage(err, t('wizard.nextSaveFailed', 'Could not save that. Try again.'), t));
+      } finally { setTodoSaving(false); }
+    };
     return (
       <div className="min-h-screen bg-white relative overflow-hidden" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="wizard-published">
         <style>{`
@@ -1318,7 +1336,20 @@ const CreateGig = () => {
               <ul>
                 {todo.map((x) => (
                   <li key={x.k}>
-                    <button type="button" disabled={x.ok} onClick={() => navigate(detailsUrl)}
+                    {todoOpen === x.k ? (
+                      <form className="flex gap-2 py-1" onSubmit={(e) => { e.preventDefault(); saveTodo(x); }} data-testid={`wizard-live-todo-form-${x.k}`}>
+                        <input autoFocus value={todoVal} onChange={(e) => setTodoVal(e.target.value)} dir="auto"
+                          inputMode={x.numeric ? 'numeric' : undefined} placeholder={x.ph || ''} aria-label={x.label}
+                          className="flex-1 min-w-0 h-11 px-3 rounded-lg border text-base" style={{ borderColor: 'var(--brand-border)' }}
+                          data-testid={`wizard-live-todo-input-${x.k}`} />
+                        <button type="submit" disabled={todoSaving || !todoVal.trim()}
+                          className="h-11 px-4 rounded-lg text-sm font-semibold disabled:opacity-40" style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }}
+                          data-testid={`wizard-live-todo-save-${x.k}`}>
+                          {todoSaving ? <Loader2 size={14} className="animate-spin" /> : t('wizard.nextSave', 'Save')}
+                        </button>
+                      </form>
+                    ) : (
+                    <button type="button" disabled={x.ok} onClick={() => (x.save ? (setTodoOpen(x.k), setTodoVal('')) : navigate(detailsUrl))}
                       className="w-full min-h-[44px] flex items-center gap-3 text-sm text-start disabled:cursor-default"
                       style={{ color: x.ok ? 'var(--brand-muted)' : 'var(--ink)' }} data-testid={`wizard-live-todo-${x.k}`}>
                       <span className={`w-5 h-5 rounded-full grid place-content-center shrink-0 ${x.ok ? 'bg-[var(--brand-primary)] text-white' : 'border-2 border-gray-300'}`} aria-hidden="true">
@@ -1327,6 +1358,7 @@ const CreateGig = () => {
                       <span className={`flex-1 ${x.ok ? 'line-through' : ''}`}>{x.label}</span>
                       {!x.ok && <ArrowRight size={16} className="rtl:rotate-180" aria-hidden="true" />}
                     </button>
+                    )}
                   </li>
                 ))}
               </ul>

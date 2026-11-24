@@ -88,6 +88,11 @@ if (staged.some((f) => /^(docs\/(page-generation-rules|rules-checklist|static-ad
 }
 // a change to the moving-ad check (or its self-test) must still pass a good ad and refuse the broken ones (17 Nov 2026);
 // it records five short ads, so it runs only then, never on other commits
+// a copy name written twice in en.js or he.js silently replaces the first (24 Nov 2026, the sign-up's title)
+if (staged.some((f) => /^frontend\/src\/locales\/(en|he)\.js$/.test(f))) {
+  const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-locale-dupes.mjs')], { cwd: ROOT, encoding: 'utf8' });
+  if (c.status !== 0) { console.error(`Commit refused: ${c.stderr || c.stdout}`); process.exit(1); }
+}
 // the logo measure (A4.6) must still fail L.A. Cholent's badge and read the wordmarks: seconds, no recording (18 Nov 2026)
 if (staged.some((f) => /^scripts\/(logo_check\.py|check-moving-ad\.py)$/.test(f))) {
   const c = spawnSync(path.join(ROOT, 'backend', '.venv', 'Scripts', 'python'), [path.join(ROOT, 'scripts', 'logo_check.py'), '--selftest'], { cwd: ROOT, encoding: 'utf8' });
