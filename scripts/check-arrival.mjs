@@ -26,13 +26,20 @@ for (const url of urls) {
     const p = await browser.newPage({ viewport: { width: w, height: h } });
     await p.goto(url, { waitUntil: 'domcontentloaded' });
     if (await p.evaluate(() => !![...document.querySelectorAll('canvas, .film, [data-film], [data-sc-act="pin"]')].some((e) => e.getBoundingClientRect().top < innerHeight) || [...document.querySelectorAll('video:not([loop])')].some((v) => v.getBoundingClientRect().top < innerHeight))) { console.log(`${url}: opens on a film, not checked`); await p.close(); break; }
-    await p.waitForTimeout(100);
-    const first = (await p.screenshot({ type: 'jpeg', quality: 70 })).toString('base64');
-    await p.waitForTimeout(1900);
-    const later = (await p.screenshot({ type: 'jpeg', quality: 70 })).toString('base64');
-    await p.waitForTimeout(500);
-    const head = await p.evaluate(() => { const e = document.querySelector('h1'); if (!e) return 1; let o = 1; for (let n = e; n && n.nodeType === 1; n = n.parentElement) o *= Number(getComputedStyle(n).opacity); return o; });
-    const d = await diff(first, later);
+    // one look: the first screen at 0.1 s and 2 s, and the headline at 2.5 s
+    const look = async () => {
+      await p.waitForTimeout(100);
+      const first = (await p.screenshot({ type: 'jpeg', quality: 70 })).toString('base64');
+      await p.waitForTimeout(1900);
+      const later = (await p.screenshot({ type: 'jpeg', quality: 70 })).toString('base64');
+      await p.waitForTimeout(500);
+      const head = await p.evaluate(() => { const e = document.querySelector('h1'); if (!e) return 1; let o = 1; for (let n = e; n && n.nodeType === 1; n = n.parentElement) o *= Number(getComputedStyle(n).opacity); return o; });
+      return [await diff(first, later), head];
+    };
+    let [d, head] = await look();
+    // a busy machine (every check at once) can take the 0.1 s picture after the arrival has finished: look once more
+    // on a fresh load before failing (24 Nov 2026, Clean Plus failed in check-build and passed alone)
+    if (d < 1.5) { await p.goto(url, { waitUntil: 'domcontentloaded' }); [d, head] = await look(); }
     if (d < 1.5) { bad++; console.log(`STILL  ${url} ${w}x${h}: the first screen does not arrive, it is the same at 0.1 s and 2 s (rules 3u.5)`); }
     if (head < 0.99) { bad++; console.log(`LATE   ${url} ${w}x${h}: the headline is still not fully there at 2.5 s (rules 3u.5)`); }
     await p.close();
