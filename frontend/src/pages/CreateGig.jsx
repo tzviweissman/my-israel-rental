@@ -79,6 +79,8 @@ const OFFERS = [
 const offerOf = (type) => OFFERS.find((o) => o.type === type)?.id;
 // Ticked for them from the category, never silently: a shop orders, personal care and lessons book.
 const OFFER_BY_CATEGORY = { 'shops-products': 'order', 'personal-care': 'book', 'health-fitness': 'book', 'education-tutoring': 'book' };
+// Where the category is mixed, the subcategory knows: caterers and cake makers take orders (events-catering also holds DJs).
+const OFFER_BY_SUBCATEGORY = { catering: 'order', 'cakes-desserts': 'order' };
 
 const emptyWeekly = () => DAYS.reduce((acc, d) => ({ ...acc, [d.k]: [] }), {});
 
@@ -1708,7 +1710,10 @@ const CreateGig = () => {
                 }}
                 sub={form.subcategory}
                 subs={(SUBCATEGORIES[form.category] || []).map((s) => ({ slug: s.slug, label: subcategoryLabel(s, t) }))}
-                onSubChange={(slug) => set({ subcategory: slug })}
+                onSubChange={(slug) => {
+                  set({ subcategory: slug });
+                  if (!(form.offers || []).length && OFFER_BY_SUBCATEGORY[slug]) toggleOffer(OFFER_BY_SUBCATEGORY[slug]);
+                }}
                 subLabel={t('services.specificType', 'Specific type')}
                 testidPrefix="wizard-cat"
               />
