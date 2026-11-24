@@ -1,5 +1,5 @@
 /**
- * A services ("deliverable") listing can hold 30 rows, the same as a shop's products, and the add
+ * A services ("deliverable") listing can hold 60 rows, the same as a shop's products, and the add
  * button says so at the limit instead of vanishing. Bawk Bawk Chicken got 20 of its menu and no way
  * to add more (23 Nov 2026): the reader cut at 20 and the add button disappeared at 15.
  *
@@ -20,15 +20,22 @@ try {
   await page.goto(`${APP}/businesses/add?step=2`, { waitUntil: 'domcontentloaded' });
   const add = page.locator('[data-testid="wizard-tier-add"]');
   await add.waitFor({ timeout: 30000 });
+  // "Small Platter 80" typed as a name becomes a name and a price when the box is left.
+  await page.locator('[data-testid="wizard-tier-name-0"]').fill('Small Platter 80');
+  await page.locator('[data-testid="wizard-tier-price-0"]').focus();
+  const split = [await page.locator('[data-testid="wizard-tier-name-0"]').inputValue(),
+    await page.locator('[data-testid="wizard-tier-price-0"]').inputValue()];
+  console.log('typed "Small Platter 80" ->', JSON.stringify(split));
+  if (split[0] !== 'Small Platter' || split[1] !== '80') { console.error('FAIL: name and price not split'); failed = true; }
   const rows = () => page.locator('[data-testid="wizard-tier-add"]').evaluate(
     (b) => b.parentElement.querySelectorAll('input[type="number"], input[inputmode="decimal"]').length);
   const perRow = await rows(); // the form opens with one row; a row can have several number boxes
-  for (let i = 0; i < 35; i++) await add.click();
+  for (let i = 0; i < 65; i++) await add.click();
   const end = (await rows()) / perRow;
-  console.log(`rows after 35 clicks: ${end}`);
-  const toast = await page.getByText(/Up to 30/).count();
-  if (end !== 30) { console.error(`FAIL: expected 30 rows, got ${end}`); failed = true; }
-  if (!toast) { console.error('FAIL: no "Up to 30" message at the limit'); failed = true; }
+  console.log(`rows after 65 clicks: ${end}`);
+  const toast = await page.getByText(/Up to 60/).count();
+  if (end !== 60) { console.error(`FAIL: expected 60 rows, got ${end}`); failed = true; }
+  if (!toast) { console.error('FAIL: no "Up to 60" message at the limit'); failed = true; }
   if (errors.length) { console.error('FAIL:', errors[0]); failed = true; }
 
   // A long priced menu read into a services listing offers "Make it a shop", which keeps every row.
@@ -61,4 +68,4 @@ try {
   if (kept !== 10) { console.error(`FAIL: expected 10 menu rows as products, got ${kept}`); failed = true; }
 } finally { await browser.close(); }
 if (failed) process.exit(1);
-console.log('ok: 30 rows, message at the limit');
+console.log('ok: name and price split, 60 rows with a message at the limit, menu to shop keeps every row');

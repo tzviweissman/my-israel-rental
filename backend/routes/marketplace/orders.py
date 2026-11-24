@@ -2401,6 +2401,8 @@ class OrderLineIn(BaseModel):
     qty: int = Field(..., ge=1, le=99)
     # Which size, flavour or colour, when the product has options.
     option_id: Optional[str] = Field(None, max_length=40)
+    # Several of them, for a product with `picks` ("choose up to 3 flavours").
+    option_ids: list[str] = Field(default_factory=list, max_length=10)
 
 
 class WebsiteOrderIn(BaseModel):
@@ -2483,6 +2485,7 @@ def _products_for_order(gig: dict[str, Any]) -> list[dict[str, Any]]:
             "pickup_only": bool(p.get("pickup_only")),
             "options": [{"id": o.get("id"), "name": o.get("name"), "price": o.get("price"), "in_stock": o.get("in_stock", True)}
                         for o in p.get("options") or []],
+            "picks": p.get("picks") if p.get("options") else None,
         })
     return out
 
@@ -2680,6 +2683,18 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         if prod.get("price_kind") == "from":
             to_confirm = True
         price, name, opt = float(prod.get("price") or 0), prod["name"], None
+        if prod.get("options") and prod.get("picks"):
+            # Choose up to N at the product's price: the line names the choices.
+            ids = ln.option_ids or ([ln.option_id] if ln.option_id else [])
+            chosen = [o for o in prod["options"] if o["id"] in ids and o.get("in_stock", True)]
+            if not chosen or len(chosen) != len(set(ids)) or len(chosen) > prod["picks"]:
+                raise HTTPException(status_code=400, detail=f"Pick up to {prod['picks']} for {prod['name']}")
+            name = f"{prod['name']} ({', '.join(o['name'] for o in chosen)})"
+            lines.append({"product_id": prod["id"], "name": name, "price": price, "qty": ln.qty,
+                          "option_ids": [o["id"] for o in chosen], "option": ", ".join(o["name"] for o in chosen)})
+            subtotal += price * ln.qty
+            currencies.add((prod.get("currency") or "ILS").upper())
+            continue
         if prod.get("options"):
             opt = next((o for o in prod["options"] if o["id"] == ln.option_id), None)
             if not opt or not opt.get("in_stock", True):

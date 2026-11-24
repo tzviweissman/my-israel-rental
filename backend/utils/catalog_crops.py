@@ -10,7 +10,9 @@ import asyncio
 import io
 from typing import Any
 
-MIN_SIDE = 320  # px, the short side of a kept picture
+# px, the short side of a kept picture. 320 until 23 Nov 2026, when it dropped every photo of a WhatsApp catalog
+# (its thumbnails are ~238px on an iPhone screenshot); 200 still shows sharp in a product row.
+MIN_SIDE = 200
 BOX_RULE = (
     "photo_box    the box around THIS item's own photo on the page, as [left, top, right, bottom] fractions of the "
     "page's width and height (0 to 1), tight to the photo, without its caption or price. null when the item has "
@@ -84,7 +86,110 @@ def _trim(part, ground):
     return part.crop(box)
 
 
-async def keep(pages: list[bytes], item: dict[str, Any]) -> str | None:
+def list_tiles(page: bytes) -> list[tuple[int, int, int, int]]:
+    """The photo squares of a list-layout screenshot (one photo per row, in a column at the left or right edge, as in
+    a WhatsApp or Instagram catalog), top to bottom, as pixel boxes. Only photos fully on the page.
+
+    The reader's own boxes ran about one row low on every WhatsApp screenshot (23 Nov 2026: Soda Can got The
+    Couples Box's photo), so on such a page the photo is found here and matched by row instead."""
+    import numpy as np
+    from PIL import Image
+    im = Image.open(io.BytesIO(page)).convert("RGB")
+    W, H = im.size
+    s = 300 / W
+    small = np.asarray(im.resize((300, max(1, round(H * s))))).astype(int)
+    h = small.shape[0]
+    busy = np.abs(small - _page_colour(im)).sum(axis=2) > 48
+    best_boxes: list[tuple[int, int, int, int]] = []
+    for lo, hi in ((0.02, 0.30), (0.70, 0.98)):  # the photo column at the left, or at the right (Hebrew)
+        rows = busy[:, int(lo * 300):int(hi * 300)].mean(axis=1) > 0.4  # 0.4: dark food on a dark page
+        boxes, start = [], None
+        for y, v in enumerate(list(rows) + [False]):
+            if v and start is None:
+                start = y
+            elif not v and start is not None:
+                # A photo is tall (text lines are not) and not cut by the page's edge.
+                if y - start >= 0.06 * h and start > 0 and y < h - 1:
+                    left, right = _longest_run(busy[start:y].mean(axis=0) > 0.4)
+                    if 0.6 < (right - left) / (y - start) < 1.6:
+                        boxes.append((round(left / s), round(start / s), round(right / s), round(y / s)))
+                start = None
+        if len(boxes) > len(best_boxes):
+            best_boxes = boxes
+    return best_boxes
+
+
+def tile_crop(page: bytes, box: tuple[int, int, int, int]) -> bytes | None:
+    from PIL import Image
+    part = Image.open(io.BytesIO(page)).convert("RGB").crop(box)
+    if min(part.size) < MIN_SIDE:
+        return None
+    buf = io.BytesIO()
+    part.save(buf, "JPEG", quality=90)
+    return buf.getvalue()
+
+
+def look(jpg: bytes) -> str:
+    """A rough fingerprint of a picture (8x8 average hash): the same logo cut from several rows gives the same one."""
+    from PIL import Image
+    g = Image.open(io.BytesIO(jpg)).convert("L").resize((8, 8))
+    px = list(g.getdata())
+    avg = sum(px) / len(px)
+    return "".join("1" if v > avg else "0" for v in px)
+
+
+def norm(name: str) -> str:
+    """A name compared across readings: letters and digits only ("Fire🔥 Poppers" is "fire poppers")."""
+    import re
+    return " ".join(re.findall(r"\w+", (name or "").lower()))
+
+
+async def names_on(page: tuple[str, bytes], n: int, api_key: str) -> list[str] | None:
+    """The product names beside the page's n photos, top to bottom, read on their own: one screenshot and one
+    question is reliable where the whole read's page and row numbers were not (23 Nov 2026: across 13
+    screenshots they pointed at the wrong screen). None unless exactly n come back."""
+    import json
+    import re
+    import uuid
+    from utils.llm import LlmChat, UserMessage
+    chat = LlmChat(api_key=api_key, session_id=str(uuid.uuid4()), system_message=(
+        "You read one screenshot of a shop's catalog, a list with one product photo per row. Reply with JSON only: "
+        '{"names": [...]}, the product name written beside each row whose photo is fully visible, top to bottom, '
+        "exactly as written. Skip a row whose photo is cut off by the top or bottom edge, and section headings."))
+    chat.with_model("anthropic", "claude-haiku-5-5")
+    try:
+        raw = await chat.send_message(UserMessage(text=f"This screenshot has {n} such rows. The names, top to bottom.",
+                                                  images=[page]))
+        m = re.search(r"\{.*\}", raw, re.S)
+        names = json.loads(m.group(0)).get("names") if m else None
+    except Exception:  # noqa: BLE001 - the page then gives no photos, never wrong ones
+        return None
+    return [str(x) for x in names] if isinstance(names, list) and len(names) == n else None
+
+
+async def photos_by_name(images: list, page_tiles: list, api_key: str) -> dict:
+    """Name -> (page, photo box) for every list page whose names were read back in full; the first sighting wins."""
+    pages = [i for i, t in enumerate(page_tiles) if len(t) >= 2]
+    found = await asyncio.gather(*(names_on(images[i], len(page_tiles[i]), api_key) for i in pages))
+    out: dict = {}
+    for i, names in zip(pages, found):
+        for name, box in zip(names or [], page_tiles[i]):
+            out.setdefault(norm(name), (i, box))
+    return out
+
+
+async def upload(jpg: bytes | None) -> str | None:
+    from utils.cloud_storage import upload_bytes_to_cloudinary
+    if not jpg:
+        return None
+    try:
+        return (await upload_bytes_to_cloudinary(jpg, is_video=False, folder="myisraelrental/catalog-crops"))["url"]
+    except Exception:  # noqa: BLE001 - the row works without its picture
+        return None
+
+
+async def keep(pages: list[bytes], item: dict[str, Any], rows: list | None = None,
+               page_tiles: list | None = None) -> str | None:
     """The item's picture, uploaded, from its `photo_box` and `page`; None when there is none worth showing."""
     from utils.cloud_storage import upload_bytes_to_cloudinary
     try:
@@ -93,10 +198,14 @@ async def keep(pages: list[bytes], item: dict[str, Any]) -> str | None:
         n = 0
     if not (0 <= n < len(pages)):
         return None
-    # In a thread: a crop of a phone-sized page takes ~0.4 s, and up to 30 rows would hold every request.
+    # In a thread: a crop of a phone-sized page takes ~0.4 s, and up to 60 rows would hold every request.
+    tiles = page_tiles[n] if page_tiles is not None else await asyncio.to_thread(list_tiles, pages[n])
+    if len(tiles) >= 2:
+        return None  # a list page: its photos come by name (photos_by_name), never from the reader's box
     jpg = await asyncio.to_thread(crop, pages[n], item.get("photo_box"))
     if not jpg:
         return None
+    item["look"] = look(jpg)
     try:
         return (await upload_bytes_to_cloudinary(jpg, is_video=False, folder="myisraelrental/catalog-crops"))["url"]
     except Exception:  # noqa: BLE001 - the row works without its picture
@@ -111,6 +220,7 @@ if __name__ == "__main__":
     raw = buf.getvalue()
     assert crop(raw, [0.1, 0.1, 0.6, 0.5]) is not None  # 500 x 560
     assert crop(raw, [0.1, 0.1, 0.2, 0.2]) is None  # 100 x 140: a thumbnail
+    assert crop(raw, [0.1, 0.1, 0.34, 0.27]) is not None  # 240 x 238: a WhatsApp catalog photo
     assert crop(raw, None) is None and crop(raw, [0, 0, "x", 1]) is None
     # a dark 400x400 photo at (100,100) with a line of "text" under it: a loose box comes back as the photo
     from PIL import ImageDraw
@@ -121,4 +231,15 @@ if __name__ == "__main__":
     page.save(buf, "JPEG", quality=95)
     got = Image.open(io.BytesIO(crop(buf.getvalue(), [0.05, 0.05, 0.55, 0.43])))
     assert abs(got.width - 400) < 30 and abs(got.height - 400) < 30, got.size
+    # a dark catalog list: three photos down the left, a line of text beside each, one photo cut off at the bottom
+    page = Image.new("RGB", (1170, 2532), (10, 10, 10))
+    d = ImageDraw.Draw(page)
+    for k in range(3):
+        d.rectangle((50, 300 + k * 380, 290, 540 + k * 380), fill=(200, 120, 40))
+        d.rectangle((340, 380 + k * 380, 900, 410 + k * 380), fill="white")
+    d.rectangle((50, 2400, 290, 2531), fill=(200, 120, 40))
+    buf = io.BytesIO()
+    page.save(buf, "PNG")
+    tiles = list_tiles(buf.getvalue())
+    assert len(tiles) == 3 and abs(tiles[1][1] - 680) < 10, tiles
     print("ok")

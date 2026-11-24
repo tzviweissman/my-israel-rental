@@ -31,6 +31,7 @@ checked to be a public host first.
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 import uuid
@@ -45,10 +46,12 @@ from utils.rate_limit import check_rate
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
-MAX_PRODUCTS = 30
+# 60: a takeout's WhatsApp catalog runs past 30 (Bawk Bawk Chicken, 45 items, 23 Nov 2026).
+MAX_PRODUCTS = 60
 # Room for a website's home page and a few of its own pages (12 Nov 2026).
 MAX_TEXT = 16000
-MAX_PAGES = 6
+# 15: screenshots of a WhatsApp catalog, one screen each (13 for Bawk Bawk Chicken).
+MAX_PAGES = 15
 PHOTOS_PER_ITEM = 8
 # A shop's own list is exact, so more of it is kept than a reader's guess (Burnt Meatboards has 38).
 SHOP_PRODUCTS = 100
@@ -73,7 +76,11 @@ appear in the source. Each entry has EXACTLY these fields:
                are all ILS. Use USD only for $ or an explicit dollar price.
   description  string, and EMPTY unless the source itself describes the item.
                Never invent one. "Serves 6-8" or a list of what is on the
-               board is a description; your own marketing is not.
+               board is a description; your own marketing is not. Text the
+               source cuts off is copied exactly as shown, its dots included
+               ("Choose up to 3 of our Signat...").
+  group        the section heading the item sits under in the source
+               ("Platters", "Sauces"), as written, or "" when there is none.
   {boxes}
 
 Rules that matter more than completeness:
@@ -82,11 +89,23 @@ Rules that matter more than completeness:
     the source. The owner is going to check this against their own list.
   * A price you cannot read clearly is null. A guessed price is worse than a
     blank one, because a blank one is obvious and a wrong one is not.
-  * Skip headings, section titles, opening hours, phone numbers, addresses
-    and delivery terms. They are not products.
-  * At most 30 products. If the source has more, return the first 30.
+  * Headings and section titles are not products (use them as "group").
+    Skip opening hours, phone numbers, addresses and delivery terms.
+  * The pictures may be several screenshots of one app catalog (WhatsApp,
+    Instagram). They overlap and repeat items: an "All items" list and the
+    sections show the same product again. Return each product ONCE (same
+    name and price), under its section rather than "All items".
+  * At most 60 products. If the source has more, return the first 60.
 
 Reply with the JSON object and nothing else."""
+
+
+def _uncut(text: str) -> str:
+    """A description an app cut off ("Choose up to 3 of our Signat...") ends at its last whole word, without the dots."""
+    if not re.search(r"(\.\.\.|…)$", text):
+        return text
+    text = re.sub(r"\s*(\.\.\.|…)$", "", text)
+    return re.sub(r"[\s(,;:–-]+$", "", re.sub(r"\s*\S*$", "", text)) if " " in text else text
 
 
 def _rows(raw: str, limit: int = MAX_PRODUCTS) -> list[dict[str, Any]]:
@@ -126,7 +145,10 @@ def _rows(raw: str, limit: int = MAX_PRODUCTS) -> list[dict[str, Any]]:
             "name": name,
             "price": price,
             "currency": currency,
-            "description": str(item.get("description") or "").strip()[:300],
+            "description": _uncut(str(item.get("description") or "").strip()[:300]),
+            # An app's "All items" list is not a section of the menu.
+            "group": None if re.fullmatch(r"all( items| products)?|הכל|כל המוצרים", str(item.get("group") or "").strip(), re.I)
+                     else (str(item.get("group") or "").strip()[:60] or None),
             "photo_box": item.get("photo_box"),
             "page": item.get("page"),
         })
@@ -186,10 +208,32 @@ async def extract_products(
     products = _rows(raw)
     if not products:
         raise HTTPException(status_code=422, detail="No products found in that. Try a clearer picture, or type the list.")
-    from utils.catalog_crops import keep
+    from utils.catalog_crops import keep, list_tiles, look, norm, photos_by_name, tile_crop, upload
+    pages = [c for _, c in images]
+    # Catalog screenshots (one photo per row): each photo found on the page and matched by the name beside it.
+    page_tiles = [await asyncio.to_thread(list_tiles, c) for c in pages]
+    by_name = await photos_by_name(images, page_tiles, ANTHROPIC_API_KEY) if any(len(t) >= 2 for t in page_tiles) else {}
+    looks = {}
     for row in products:
         box, page = row.pop("photo_box", None), row.pop("page", None)
-        row["image"] = await keep([c for _, c in images], {"photo_box": box, "page": page}) if images else None
+        hit = by_name.get(norm(row["name"]))
+        if hit:
+            jpg = await asyncio.to_thread(tile_crop, pages[hit[0]], hit[1])
+            looks[id(row)] = look(jpg) if jpg else None
+            row["image"] = await upload(jpg)
+        else:
+            item = {"photo_box": box, "page": page}
+            row["image"] = await keep(pages, item, page_tiles=page_tiles) if images else None
+            looks[id(row)] = item.get("look")
+    # Nearly the same picture on 5 or more items is the shop's logo standing in for a photo: no photo is better.
+    # 5, not fewer: Bawk Bawk Chicken's one grilled-chicken photo is on 4 items, its logo on about 25 (23 Nov 2026).
+    # ponytail: 4 bits of 64 apart is "nearly the same"; a shop showing one real photo on 5+ items loses it.
+    near = lambda a, b: sum(x != y for x, y in zip(a, b)) <= 4  # noqa: E731
+    all_looks = [v for v in looks.values() if v]
+    for row in products:
+        mine = looks.get(id(row))
+        if mine and sum(1 for v in all_looks if near(mine, v)) >= 5:
+            row["image"] = None
     logger.info("[product-extract] user=%s rows=%d pages=%d photos=%d", user["user_id"], len(products), len(images),
                 sum(1 for r in products if r["image"]))
     return {"products": products}

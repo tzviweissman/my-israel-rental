@@ -113,6 +113,17 @@ const emptyProduct = (prevCurrency = 'ILS') => ({
 });
 // A product priced on request has no price to check (components/forms/PriceKind.jsx).
 const hasPrice = (p) => p.price_kind === 'quote' || parseFloat(p.price) > 0;
+// "Small Platter 80" or "Fries ₪15" typed in the name box, with no price yet, is a name and a price,
+// as it is written in a WhatsApp message (23 Nov 2026). Only a number at the very end is taken.
+// ponytail: a number that belongs to the name ("iPhone 15") is still read as a price; the owner sees it move
+// into the price box and can put it back. Names ending "of 6", "x 4", "size 10", "pack 12" are left alone.
+const splitNamePrice = (row) => {
+  if (String(row.price ?? '').trim()) return null;
+  const m = String(row.name || '').trim().match(/^(.*?\S)\s*[-:–]?\s*[₪$]?\s?(\d{1,6}(?:[.,]\d{1,2})?)\s*(₪|\$|nis|ils|shekel|שח|ש"ח)?$/i);
+  if (!m || !/\D/.test(m[1]) || /\d\s*$/.test(m[1])) return null;
+  if (/(^|\s)(of|x|×|for|size|pack|set|no\.?|#|של|גודל|מס'?)$/i.test(m[1].trim())) return null;
+  return { name: m[1].trim(), price: m[2].replace(',', '.') };
+};
 
 // The screen layout a saved draft's step number refers to (see `step` below).
 const DRAFT_LAYOUT = 2;
@@ -364,7 +375,7 @@ const CreateGig = () => {
   // One limit for products and services (tiers). Services were capped at 15 by hand and 20 from the
   // menu reader while products allowed 30, and the add button stopped silently: Bawk Bawk Chicken
   // (a "deliverable" listing) got 20 of its menu and could add no more (23 Nov 2026).
-  const MAX_PRODUCTS = 30;
+  const MAX_PRODUCTS = 60;
   const addTier = () => {
     if (form.tiers.length >= MAX_PRODUCTS) {
       toast.error(t('wizard.productLimit', { defaultValue: 'Up to {{n}} products', n: MAX_PRODUCTS }));
@@ -572,6 +583,8 @@ const CreateGig = () => {
                 products: f.tiers.map((x) => ({
                   ...emptyProduct(x.currency || 'ILS'),
                   name: x.name || '', price: x.price || '', description: x.description || '', images: x.images || [],
+                  // The menu's own sections ("Platters", "Sauces"), from what was just read.
+                  group: (data.products || []).find((r) => r.name === x.name)?.group || null,
                 })),
                 tiers: [],
               })),
@@ -592,6 +605,7 @@ const CreateGig = () => {
         price: r.price == null ? '' : String(r.price),
         description: r.description || '',
         images: r.image ? [r.image] : [],
+        group: r.group || null,
       }));
       // Replaces the untouched rows, keeps everything already filled in.
       set({ products: [...form.products.filter((p) => !productIsBlank(p)), ...made] });
@@ -1951,6 +1965,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, onDuplicate, o
           </div>
           <div className="flex-1 min-w-0 space-y-2">
             <input value={p.name} onChange={(e) => onUpdate(i, { name: e.target.value })}
+              onBlur={() => { const sp = splitNamePrice(p); if (sp) onUpdate(i, sp); }}
               placeholder={t('wizard.productNamePh', 'Name, e.g. Oak table')}
               className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 text-sm font-semibold focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 placeholder:text-gray-400 placeholder:font-normal"
               data-testid={`wizard-product-name-${i}`} />
@@ -2052,6 +2067,7 @@ const TiersStep = ({ gigType, category, tiers, onUpdate, onAdd, onRemove, onUplo
                 {isAppt ? t('wizard.serviceName', 'Service name') : t('wizard.tierName', 'Service or package name')} <span className="text-red-500">*</span>
               </label>
               <input value={tt.name} onChange={(e) => onUpdate(i, { name: e.target.value })}
+                onBlur={() => { const sp = splitNamePrice(tt); if (sp) onUpdate(i, sp); }}
                 placeholder={i === 0
                   ? (isAppt
                     ? t('wizard.serviceNamePhAppt', 'e.g. Haircut')

@@ -75,6 +75,7 @@ export default function OrderPage() {
 
   const [data, setData] = useState(null);       // null loading, false not available
   const [qty, setQty] = useState({});           // product id -> qty
+  const [picked, setPicked] = useState({});     // product id -> option ids, for "choose up to N" (backend picks)
   const [extra, setExtra] = useState('');
   const [notes, setNotes] = useState('');
   // The store's own questions (backend custom_fields.py).
@@ -204,13 +205,24 @@ export default function OrderPage() {
   const currency = (products[0] || data.products[0] || {}).currency || 'ILS';
   // One row per thing a customer can pick: the product, or each of its
   // sizes/flavours (backend ProductOption), keyed "product::option".
-  const rowsOf = (p) => ((p.options || []).length
+  const rowsOf = (p) => ((p.options || []).length && !p.picks
     ? p.options.filter((o) => o.in_stock !== false).map((o) => ({
       key: `${p.id}::${o.id}`, product: p, option: o, name: `${p.name} (${o.name})`,
       price: o.price === null || o.price === undefined ? p.price : o.price,
     }))
     : [{ key: p.id, product: p, option: null, name: p.name, price: p.price }]);
-  const lines = products.flatMap(rowsOf).filter((r) => (qty[r.key] || 0) > 0).map((r) => ({ ...r, qty: qty[r.key] }));
+  const pickNames = (p) => p.options.filter((o) => (picked[p.id] || []).includes(o.id)).map((o) => o.name).join(', ');
+  const lines = products.flatMap(rowsOf).filter((r) => (qty[r.key] || 0) > 0).map((r) => ({
+    ...r, qty: qty[r.key], ...(r.product.picks && (picked[r.product.id] || []).length ? { name: `${r.product.name} (${pickNames(r.product)})` } : {}),
+  }));
+  const togglePick = (p, id) => setPicked((m) => {
+    const cur = m[p.id] || [];
+    if (cur.includes(id)) return { ...m, [p.id]: cur.filter((x) => x !== id) };
+    return cur.length >= p.picks ? m : { ...m, [p.id]: [...cur, id] };
+  });
+  // The menu's own sections ("Platters", "Sauces"), in the order they first appear (backend product group).
+  const sections = [...new Set(products.map((p) => p.group || ''))];
+  const shownProducts = sections.length > 1 ? sections.flatMap((g) => products.filter((p) => (p.group || '') === g)) : products;
   // A product the business sells for pickup only (a pickup bundle) makes the order a pickup; the server refuses a delivery.
   const pickupOnlyBasket = lines.some((l) => l.product.pickup_only);
   if (pickupOnlyBasket && fulfilment !== 'pickup') setFulfilment('pickup');
@@ -275,6 +287,7 @@ export default function OrderPage() {
     : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()) ? t('loadState.needEmail', 'Add your email to send your order.')
     : '';
   const canSubmit = !closedNow && !chosenFull && (lines.length > 0 || extra.trim())
+    && lines.every((l) => !l.product.picks || (picked[l.product.id] || []).length > 0)
     && (table || (date && !pastCutoff(date, data.settings.cutoffs) && (windowsForDay.length === 0 || windowKey) && name.trim() && phone.trim()))
     && !(phone.trim() && phoneErr)
     && (table || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()))
@@ -293,7 +306,8 @@ export default function OrderPage() {
     try {
       const w = windowsForDay.find((x) => `${x.start}-${x.end}` === windowKey);
       const body = {
-        lines: lines.map((l) => ({ product_id: l.product.id, qty: l.qty, option_id: l.option ? l.option.id : null })),
+        lines: lines.map((l) => ({ product_id: l.product.id, qty: l.qty, option_id: l.option ? l.option.id : null,
+          ...(l.product.picks ? { option_ids: picked[l.product.id] || [] } : {}) })),
         extra_items: extra.trim(), notes: notes.trim(), fulfilment: table ? 'pickup' : fulfilment, date: table ? data.today : date,
         window: !table && w ? { weekday: w.weekday, start: w.start, end: w.end } : null,
         table,
@@ -426,8 +440,9 @@ export default function OrderPage() {
           <h2 className="text-sm font-bold mb-2" style={{ color: 'var(--ink)' }}>{t('order.what', 'What would you like?')}</h2>
           {products.length === 0 && <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('order.noProducts', 'This store has not listed products yet - write what you want below.')}</p>}
           <ul className="divide-y" style={{ borderColor: 'var(--brand-border)' }}>
-            {products.map((p) => {
+            {shownProducts.map((p, i) => {
               const rows = rowsOf(p);
+              const heading = sections.length > 1 && (i === 0 || (shownProducts[i - 1].group || '') !== (p.group || ''));
               const stepper = (r) => {
                 const max = maxFor(p, r.key);
                 return (
@@ -440,7 +455,13 @@ export default function OrderPage() {
               };
               const few = p.stock !== null && p.stock !== undefined && p.stock <= 5;
               return (
-                <li key={p.id} className="py-2" data-testid={`order-product-${p.id}`}>
+                <React.Fragment key={p.id}>
+                {heading && (
+                  <li className="pt-4 pb-1 text-xs font-bold uppercase tracking-wide" dir="auto" style={{ color: 'var(--brand-muted)' }} data-testid="order-section">
+                    {p.group || t('order.moreItems', 'More')}
+                  </li>
+                )}
+                <li className="py-2" data-testid={`order-product-${p.id}`}>
                   <div className="flex items-center gap-3">
                     {p.image && <img src={p.image} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />}
                     <div className="min-w-0 flex-1">
@@ -466,7 +487,28 @@ export default function OrderPage() {
                       ))}
                     </ul>
                   )}
+                  {p.picks && (p.options || []).length > 0 && kindOf(p) !== 'quote' && (
+                    <fieldset className="mt-1 ps-3" data-testid={`order-picks-${p.id}`}>
+                      <legend className="text-xs" style={{ color: 'var(--brand-muted)' }}>
+                        {t('order.pickUpTo', 'Choose up to {{n}}', { n: p.picks })} · {(picked[p.id] || []).length}/{p.picks}
+                      </legend>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {p.options.filter((o) => o.in_stock !== false).map((o) => {
+                          const on = (picked[p.id] || []).includes(o.id);
+                          return (
+                            <button key={o.id} type="button" aria-pressed={on} onClick={() => togglePick(p, o.id)}
+                              className="px-3 min-h-[40px] rounded-full border text-sm" dir="auto"
+                              style={on ? { background: 'var(--ink)', color: '#fff', borderColor: 'var(--ink)' } : { borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
+                              data-testid={`order-pick-${p.id}-${o.id}`}>
+                              {o.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </fieldset>
+                  )}
                 </li>
+                </React.Fragment>
               );
             })}
           </ul>

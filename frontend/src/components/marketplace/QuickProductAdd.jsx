@@ -8,7 +8,7 @@
  * Gift Boutique, 22 Oct 2026). The parent owns the products: this only
  * hands back the chosen photo files (`onPhotos`) and asks the parent to
  * read a list (`onExtract({ text } | { files })`, resolving true when rows
- * came back). Up to 6 pages of a catalog at once; each item's picture is cut
+ * came back). Up to 15 pages of a catalog at once (WhatsApp catalog screenshots, 23 Nov 2026); each item's picture is cut
  * out of the page when it is big enough (10 Nov 2026). `onPhotos` is
  * optional: a service's list has no "one photo each" button.
  *
@@ -98,10 +98,10 @@ export default function QuickProductAdd({ onPhotos, onExtract, bulkPhotos, extra
         <button type="button" disabled={busy} onClick={() => listShotRef.current?.click()}
           className={btn} data-testid={`${testid}-from-shot`}>
           {extracting ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
-          {t('wizard.shotOfCatalog', 'Photos of your catalog, menu or price list')}
+          {t('wizard.shotOfCatalog', 'Screenshots of your WhatsApp catalog, or photos of your menu')}
         </button>
         <input ref={listShotRef} type="file" accept="image/*" multiple className="hidden"
-          onChange={(e) => { const f = Array.from(e.target.files || []).slice(0, 6); e.target.value = ''; if (f.length) onExtract({ files: f }, seasonOf()); }}
+          onChange={(e) => { const f = Array.from(e.target.files || []).slice(0, 15); e.target.value = ''; if (f.length) onExtract({ files: f }, seasonOf()); }}
           data-testid={`${testid}-shot-input`} />
       </div>
 
@@ -122,7 +122,7 @@ export default function QuickProductAdd({ onPhotos, onExtract, bulkPhotos, extra
       )}
 
       <p className="text-[11px] text-gray-500">
-        {t('wizard.quickNoteCatalog', 'Up to 6 pages at once. We read the names and prices, and cut out each picture that is big and sharp enough. Check them, then add any photo that is missing.')}
+        {t('wizard.quickNoteCatalog', 'Up to 15 pictures at once: scroll your WhatsApp catalog and screenshot each screen. We read the names, prices and sections, and cut out each photo. Check them, then add any photo that is missing.')}
       </p>
     </div>
   );

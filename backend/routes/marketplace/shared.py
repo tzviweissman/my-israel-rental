@@ -660,6 +660,9 @@ class ProductItem(BaseModel):
     low_stock_at: Optional[int] = Field(None, ge=1, le=100_000)
     # Sizes, flavours or colours the customer picks one of.
     options: list[ProductOption] = Field(default_factory=list, max_length=20)
+    # Set: the customer picks UP TO this many of `options` instead of one, at the product's own price
+    # ("Medium platter, choose up to 3 flavours"; Bawk Bawk Chicken, 23 Nov 2026). Option prices are not added.
+    picks: Optional[int] = Field(None, ge=2, le=10)
     # Other products of this listing that go with it, by id, for "Add to
     # your order" on the order form (pairings.py).
     goes_with: list[str] = Field(default_factory=list, max_length=4)

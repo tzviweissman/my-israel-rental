@@ -23,7 +23,10 @@ export function cleanExtras(o) {
     .filter((x) => x.name);
   const goesWith = (o.goes_with || []).filter(Boolean).slice(0, 4);
   const date = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : null);
-  return { stock, low_stock_at: stock === null ? null : low, options, goes_with: goesWith,
+  // "Choose up to N" (backend ProductItem.picks): only with 2+ choices; 1 or empty is the usual pick-one.
+  const n = parseInt(o.picks, 10);
+  const picks = options.length >= 2 && n >= 2 ? Math.min(n, 10, options.length) : null;
+  return { stock, low_stock_at: stock === null ? null : low, options, picks, goes_with: goesWith,
     available_from: date(o.available_from), available_until: date(o.available_until),
     // only sent once set, so an untouched product still compares equal to its original
     pickup_only: o.pickup_only ? true : ('pickup_only' in o ? false : null) };
@@ -31,7 +34,7 @@ export function cleanExtras(o) {
 
 export default function ProductExtras({ option: o, onChange, i, others = [] }) {
   const { t } = useTranslation();
-  const has = (o.stock !== null && o.stock !== undefined && o.stock !== '') || (o.options || []).length > 0 || (o.goes_with || []).length > 0 || !!o.available_from || !!o.available_until || !!o.pickup_only;
+  const has = (o.stock !== null && o.stock !== undefined && o.stock !== '') || (o.options || []).length > 0 || !!o.picks || (o.goes_with || []).length > 0 || !!o.available_from || !!o.available_until || !!o.pickup_only;
   const [open, setOpen] = useState(has);
   const opts = o.options || [];
   const setOpt = (k, patch) => onChange({ options: opts.map((x, j) => (j === k ? { ...x, ...patch } : x)) });
@@ -86,6 +89,18 @@ export default function ProductExtras({ option: o, onChange, i, others = [] }) {
           <div>
             <p className="font-semibold text-gray-700">{t('editListing.choices', 'Sizes, flavours or colours')}</p>
             <p className="text-xs text-gray-600 mb-2">{t('editListing.choicesHelp', 'The customer picks one. Leave the price empty to use the product price.')}</p>
+            {opts.length >= 2 && (
+              <label className="inline-flex items-center gap-2 mb-2">
+                {t('editListing.picksLabel', 'The customer chooses')}
+                <select value={o.picks || 1} onChange={(e) => onChange({ picks: Number(e.target.value) > 1 ? Number(e.target.value) : null })}
+                        className={box} style={boxStyle} data-testid={`product-picks-${i}`}>
+                  {Array.from({ length: Math.min(10, opts.length) }, (_, k) => k + 1).map((n) => (
+                    <option key={n} value={n}>{n === 1 ? t('editListing.picksOne', 'one') : t('editListing.picksUpTo', 'up to {{n}}', { n })}</option>
+                  ))}
+                </select>
+                {o.picks > 1 && <span className="text-xs text-gray-600">{t('editListing.picksHelp', 'at the product price, e.g. a platter of 3 flavours')}</span>}
+              </label>
+            )}
             <ul className="space-y-2">
               {opts.map((x, k) => (
                 <li key={x.id || k} className="flex flex-wrap items-center gap-2">
