@@ -145,6 +145,9 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
 - [x] A8.9 The picture that leaves the site is drawn at double size (2160 wide) from the best copy of the photo, never the preview.
   plan: measured by check-ad-designs (sharp)
 
+- [x] A8.10 Whole in a WhatsApp chat: a chat shows a tall picture only as its middle until someone taps it, and most never tap. On a 1080x1920 ad every word, the business's name, the link, the logo and the QR sit between y 250 and 1670 (the 1080x1420 a chat shows, measured on Tzvi's phone); only the picture may run past. Checked on the sheet from python scripts/ad-chat-view.py <ad.jpg> <sheet.jpg>, which the answer names. Applies to every hand-made story ad and new story design from 25 Nov 2026; designs the ad maker already draws keep A8.4.
+  plan: docs/ads/myisraelrental-restaurants-chat-view.jpg: in the chat window (rows 250 to 1670) are the note, the number, 'Restaurants, each with a hechsher', the headline, the logo, the name, 'Free to search. No sign-up.', the link and the 164px QR; only the fork's handle and the pasta's tail run past. Tzvi's screenshot of the first send had the note and the foot cut; both moved in (note at 282, foot at 1474 to 1638).
+
 ## 7. Before it goes out
 
 - [x] A9.1 Drawn and looked at on the real business, at phone size, beside the reference it came from.
