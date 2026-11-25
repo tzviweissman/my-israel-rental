@@ -149,3 +149,4 @@ regardless, per the brief.
 should read and extend this file rather than re-reading every report.
 treat it as used and do not repeat it.
 which is a different report type). Flagged as documentation drift, same as the
+2026-11-25 - Zeigarnik effect (unfinished checklist shown again) - business dashboard, the sign-up's 'Make your page stronger' list (CreateGig.jsx wizard-live-todo)
