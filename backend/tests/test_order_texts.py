@@ -297,7 +297,8 @@ def test_confirmed_text_carries_the_first_pay_link_until_paid():
     """Tzvi, 25 Nov 2026: the order-confirmed text has the business's payment link, unless already paid."""
     biz = {"payment_links": [{"label": "Bit", "url": "https://www.bitpay.co.il/app/me/X"}, {"label": "PayBox", "url": "https://paybox.co.il/p/y"}]}
     assert ot._pay_line({}, biz, "en") == "\nPay with Bit: https://www.bitpay.co.il/app/me/X"
-    assert ot._pay_line({}, biz, "he").startswith("\nלתשלום בBit: ")
+    assert ot._pay_line({}, biz, "he").startswith("\nלתשלום ב-Bit: ")
+    assert ot._pay_line({}, {"payment_links": [{"label": "ביט", "url": "https://www.bitpay.co.il/app/me/X"}]}, "he").startswith("\nלתשלום בביט: ")
     assert ot._pay_line({"payment": {"method": "card"}}, biz, "en") == ""
     assert ot._pay_line({}, {"payment_links": [{"label": "x", "url": "https://evil.example.com/"}]}, "en") == ""
     assert ot._pay_line({}, {}, "en") == ""
