@@ -5,20 +5,21 @@
      listed on the live site that day, each with a hechsher named on its own website.
      Take 2 (Tzvi, beside Pinterest "PASTA"/"TWIST" posters: "what makes ours bland and boring"): one tall twist of
      spaghetti (gen.py take 2, cut out as twist.png) hangs down the middle through a huge condensed "5,000+" that fills
-     the width; the twist hangs behind the digits and strands.py brings the two loose strands out in front. The headline is small print now: the number and the food are the ad.
+     the width; the twist hangs behind the digits, and four loose strands (gen.py take 3) weave over and under each character in turn (strands.py). The headline is small print now: the number and the food are the ad.
      Every word, the logo and the QR are drawn here (A3.7, A9.8).
      Still: node scripts/record-moving-ad.mjs docs/ads/gen/myisraelrental-restaurants-status myisraelrental-restaurants-status '' 7.9 -->
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Playfair+Display:ital,wght@0,700;1,600&family=Manrope:wght@500;700;800&display=block" rel="stylesheet">
 <style>
 html,body{margin:0;background:#111}
 #ad{position:relative;width:1080px;height:1920px;overflow:hidden;background:#167AB8;font-family:Manrope,sans-serif;color:#fff}
-#pasta,#strands{position:absolute;left:0;top:-120px;width:1080px;height:1920px;pointer-events:none}
+#glow{position:absolute;left:0;top:0;width:1080px;height:1920px;background:radial-gradient(ellipse 560px 760px at 520px 760px,rgba(120,200,245,.55),rgba(22,122,184,0) 70%)}
+#pasta,#loose,#strands{position:absolute;left:0;top:0;width:1080px;height:1920px;pointer-events:none}
 #pasta{filter:drop-shadow(0 30px 30px rgba(5,30,55,.45))}
 #num{position:absolute;left:-18px;right:-18px;top:520px;text-align:center;font:400 452px/1 Anton,sans-serif;letter-spacing:-6px;white-space:nowrap}
-#kind{position:absolute;right:52px;top:1000px;width:330px;text-align:right}
-#kind .r{font:400 60px/1 Anton,sans-serif;letter-spacing:1px;color:#FBE3A1}
-#kind .h{font:italic 600 42px/1.15 'Playfair Display',serif;margin-top:14px}
-#h1{position:absolute;left:52px;top:996px;width:330px;font:700 54px/1.06 'Playfair Display',serif}
+#kind{position:absolute;right:40px;top:1010px;width:290px;text-align:right}
+#kind .r{font:400 52px/1 Anton,sans-serif;letter-spacing:1px;color:#FBE3A1}
+#kind .h{font:italic 600 38px/1.15 'Playfair Display',serif;margin-top:12px}
+#h1{position:absolute;left:40px;top:1006px;width:270px;font:700 46px/1.08 'Playfair Display',serif}
 #h1 b{color:#FBE3A1;font-weight:700}
 #logo{position:absolute;left:48px;top:1506px;width:104px;height:104px;border-radius:24px;background:#0F2A4A;object-fit:contain;padding:14px;box-sizing:border-box}
 #foot{position:absolute;left:176px;top:1504px;width:670px;color:#fff}
@@ -29,7 +30,9 @@ html,body{margin:0;background:#111}
 #qr img{width:100%;height:100%}
 </style></head><body>
 <div id="ad">
-  <img id="pasta" src="twist.png" alt="">
+  <div id="glow"></div>
+  <img id="pasta" src="pasta.png" alt="">
+  <img id="loose" src="loose.png" alt="">
   <div id="num">5,000+</div>
   <img id="strands" src="strands.png" alt="">
   <div id="kind"><div class="r">RESTAURANTS,</div><div class="h">each with a hechsher.</div></div>
@@ -39,6 +42,8 @@ html,body{margin:0;background:#111}
 <script>
 window.AD = {"name":"MyIsraelRental","lines":["By city, meat or dairy, and hechsher. Free."],"link":"myisraelrental.com/restaurants","logo":"logo-mark.png"};
 K.foot();
+// ?bare: the number alone, for strands.py to measure each character's columns
+if (location.search.includes('bare')) for (const id of ['pasta', 'loose', 'strands', 'kind', 'h1']) document.getElementById(id).style.display = 'none';
 window.render = async () => {};
 </script>
 </body></html>

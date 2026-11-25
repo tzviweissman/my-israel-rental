@@ -42,11 +42,28 @@ TWIST = (
     "soft shadow on the right side of the twist. The bottom fifth is empty blue. No people, no hands, no words."
 )
 
+# Take 3 (Tzvi, 25 Nov 2026: "it only goes through the number once it should be wrapping in and out"): the twist is
+# too wide to pass in front of a whole zero without hiding it, so thin loose strands of the same pasta are shot alone,
+# swooping across the full width, and woven in front of and behind each character in code (strands.py).
+LOOSE = (
+    "A real food photograph, shot on a full-frame camera with a 100mm lens, crisp, high contrast. Image 1 is a rough "
+    "layout: follow its arrangement exactly. Image 2 shows the pasta: the very same spaghetti with the same glossy "
+    "plain tomato sauce, same colour, same thickness. The whole background is one flat, seamless, saturated medium "
+    "blue (#167AB8), completely empty. Where the four thin lines are, four long single strands of that spaghetti "
+    "float in mid-air, each running the full width of the picture from the left edge to the right edge in a long, "
+    "loose, gentle wave, coated in sauce with small flecks of tomato, clearly separate from each other, never "
+    "touching or crossing. Hard light from the upper left, bright highlights along each strand. The top quarter and "
+    "the bottom two fifths are empty blue. No fork, no plate, no basil, no people, no hands, no words."
+)
+
 take = sys.argv[1] if len(sys.argv) > 1 else "1"
-two = int(take) >= 2
+n = int(take)
 h = hf._client()
+prompt, layout, what = ((LOOSE, "layout3.png", "loose strands") if n >= 3 else
+                        (TWIST, "layout2.png", "twist") if n == 2 else (PROMPT, "layout.png", "nest"))
+images = [h.upload_file(str(HERE / layout))] + ([h.upload_file(str(HERE / "out" / "photo-2.jpg"))] if n >= 3 else [])
 hf.make("marketing-studio/image/sunburst",
-        {"prompt": TWIST if two else PROMPT, "image_urls": [h.upload_file(str(HERE / ("layout2.png" if two else "layout.png")))],
+        {"prompt": prompt, "image_urls": images,
          "aspect_ratio": "9:16", "resolution": "2k", "quality": "medium", "enhance_prompt": False},
-        HERE / "out" / f"photo-{take}.jpg", why=f"myisraelrental restaurants ad, pasta {'twist' if two else 'nest'} photo, take {take}",
+        HERE / "out" / f"photo-{take}.jpg", why=f"myisraelrental restaurants ad, pasta {what} photo, take {take}",
         credits=2, max_credits=3)

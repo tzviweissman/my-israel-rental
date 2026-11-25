@@ -1,0 +1,14 @@
+{
+ "shape": "story",
+ "ground": "#167AB8",
+ "boxes": [
+  {"what": "long loose spaghetti strand, wavy", "x": -0.05, "y": 0.30, "w": 1.1, "h": 0.012, "colour": "#e8b56a", "angle": -6},
+  {"what": "long loose spaghetti strand, wavy", "x": -0.05, "y": 0.36, "w": 1.1, "h": 0.012, "colour": "#e8b56a", "angle": 5},
+  {"what": "long loose spaghetti strand, wavy", "x": -0.05, "y": 0.42, "w": 1.1, "h": 0.012, "colour": "#e8b56a", "angle": -4},
+  {"what": "long loose spaghetti strand, wavy", "x": -0.05, "y": 0.47, "w": 1.1, "h": 0.012, "colour": "#e8b56a", "angle": 7}
+ ],
+ "keep_empty": [
+  {"what": "top", "x": 0.0, "y": 0.0, "w": 1.0, "h": 0.25},
+  {"what": "bottom", "x": 0.0, "y": 0.56, "w": 1.0, "h": 0.4}
+ ]
+}
