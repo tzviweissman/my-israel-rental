@@ -258,7 +258,7 @@ export default function CustomerMessages({
                         </div>
                         <div className="flex flex-wrap items-center justify-between gap-2 mt-1.5">
                           <span className="text-[11px]" style={{ color: text && parts(text) > 1 ? '#B42318' : 'var(--brand-muted)' }}>
-                            {text ? t('orderTexts.tplParts', '{{n}} characters, counts as {{p}} text(s)', { n: text.length, p: parts(text) }) : ''}
+                            {text ? t('orderTexts.tplParts', { n: text.length, count: parts(text) }) : ''}
                           </span>
                           {own(k) !== undefined && (
                             <button type="button" onClick={() => reset(k)} className="inline-flex items-center gap-1 min-h-[36px] text-[12px] font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid={`tpl-${k}-reset`}>
