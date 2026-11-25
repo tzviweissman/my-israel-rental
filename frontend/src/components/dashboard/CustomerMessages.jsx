@@ -149,7 +149,7 @@ export default function CustomerMessages({
 
   const muted = { color: 'var(--brand-muted)' };
   const chip = (text, style) => <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap" style={style}>{text}</span>;
-  const iconBtn = 'inline-flex items-center gap-1 min-h-[36px] px-2.5 rounded-full border text-[12px] font-semibold disabled:opacity-40';
+  const iconBtn = 'inline-flex items-center gap-1 min-h-[44px] px-2.5 rounded-full border text-[12px] font-semibold disabled:opacity-40';
   const iconStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 
   return (
@@ -157,7 +157,7 @@ export default function CustomerMessages({
       {!textsOn && (
         <div className="rounded-xl px-3 py-2.5 mb-3 text-[13px] flex flex-wrap items-center justify-between gap-2" style={{ background: '#FFF4E5', color: '#7A4100' }} role="status" data-testid="msgs-texts-off">
           <span>{t('orderTexts.textsOffNote', 'Texts to customers are off, because "Text me new orders and bookings" is off. Emails still go.')}</span>
-          <button type="button" onClick={onTurnTextsOn} className="font-semibold underline min-h-[36px]">{t('orderTexts.turnTextsOn', 'Turn texts on')}</button>
+          <button type="button" onClick={onTurnTextsOn} className="font-semibold underline min-h-[44px]">{t('orderTexts.turnTextsOn', 'Turn texts on')}</button>
         </div>
       )}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -165,7 +165,7 @@ export default function CustomerMessages({
         <div className="inline-flex rounded-full border p-0.5" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('orderTexts.tplLang', 'Language of the text')}>
           {['en', 'he'].map((l) => (
             <button key={l} type="button" onClick={() => setLang(l)} aria-pressed={lang === l} data-testid={`tpl-lang-${l}`}
-                    className="px-3 min-h-[36px] rounded-full text-[13px] font-semibold"
+                    className="px-3 min-h-[44px] rounded-full text-[13px] font-semibold"
                     style={lang === l ? { background: 'var(--ink)', color: '#fff' } : { color: 'var(--ink)' }}>
               {l === 'en' ? 'English' : 'עברית'}
             </button>
@@ -254,7 +254,7 @@ export default function CustomerMessages({
                           </button>
                           <span className="mx-1 h-5 w-px" style={{ background: 'var(--brand-border)' }} aria-hidden="true" />
                           {PIECES[k].map((p) => (
-                            <button key={p} type="button" onClick={() => insert(k, p)} className="px-2.5 min-h-[36px] rounded-full border text-[12px]" style={iconStyle}>
+                            <button key={p} type="button" onClick={() => insert(k, p)} className="px-2.5 min-h-[44px] rounded-full border text-[12px]" style={iconStyle}>
                               + {t(`orderTexts.piece.${p}`, p)}
                             </button>
                           ))}
@@ -264,7 +264,7 @@ export default function CustomerMessages({
                             {text ? t('orderTexts.tplParts', { n: text.length, count: parts(text) }) : ''}
                           </span>
                           {own(k) !== undefined && (
-                            <button type="button" onClick={() => reset(k)} className="inline-flex items-center gap-1 min-h-[36px] text-[12px] font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid={`tpl-${k}-reset`}>
+                            <button type="button" onClick={() => reset(k)} className="inline-flex items-center gap-1 min-h-[44px] text-[12px] font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid={`tpl-${k}-reset`}>
                               <RotateCcw size={12} /> {t('orderTexts.tplReset', 'Use our wording')}
                             </button>
                           )}
