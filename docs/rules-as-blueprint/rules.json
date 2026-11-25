@@ -3741,6 +3741,49 @@
    "status": "planned"
   },
   {
+   "id": "R3am.1",
+   "rule": "A clip whose camera travels gets a grey-shape camera rough before it is paid for; its prompt is written second by second from the rough",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "Blender or a three.js grey-box page recorded with Playwright (section 8, job 4) writes gen/board/rough-<step>.mp4; the brief writes the prompt from it",
+   "confirmed_by": "LOOK: the rough beside the clip, on part D of the board",
+   "status": "planned"
+  },
+  {
+   "id": "R3am.2",
+   "rule": "A film behind feature words leaves one half clear for the words, the subject crossing for the next feature",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "The film brief: each end still names the half left clear",
+   "confirmed_by": "LOOK: the opening at each feature, laptop and phone",
+   "status": "planned"
+  },
+  {
+   "id": "R3am.3",
+   "rule": "The picked first screen and the part C home page carry the tweaks panel for Tzvi",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "scrollcraft/starter/tweaks.js copied into gen/board/",
+   "confirmed_by": "LOOK: the panel on the picked first screen",
+   "status": "built"
+  },
+  {
+   "id": "R3am.4",
+   "rule": "Exploded view, growing card, paper-cut scene or two-axis chooser only when picked, labels from the owner, never near prices or on shop pages",
+   "how": [
+    "EYE"
+   ],
+   "built_by": "Picked on CONCEPT.md treatments or signature lines",
+   "confirmed_by": "LOOK + check-compared TREATMENTS",
+   "status": "planned"
+  },
+  {
    "id": "R3e.26",
    "rule": "Controls answer in 300 ms or less, ease out, never from scale(0), no bounce, pressed buttons shrink to 0.97",
    "how": [

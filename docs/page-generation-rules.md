@@ -2,60 +2,61 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 143: 1. The job, in one line
-- 148: 2. What the AI gets, and the only facts it may use
-- 181: 3. Hard rules (checked: a page breaking one is thrown away and remade)
-- 218: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
-- 260: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
-- 328: 3b. The category checklist (from the Inspo study)
-- 371: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 504: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 621: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
-- 768: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 833: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 1008: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
-- 1308: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 1347: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 1462: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 1541: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 1573: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 1600: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 1649: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 1686: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1760: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1785: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1822: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1939: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
-- 1960: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 2031: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
-- 2115: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 2232: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 2326: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 2351: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 2391: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2668: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2695: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2763: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2780: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2826: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2849: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2882: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2931: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
-- 3015: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
-- 3059: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3198: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3238: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3333: 4. What is reported to the owner instead (content gaps)
-- 3342: 5. How to write
-- 3391: 5a. Lessons from the practice pages
-- 3422: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3471: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3488: 6. Playbooks for the most common businesses
-- 3608: 7. Choosing the three options (automatic page builder only)
-- 3632: 8. Photos, video and the tools
-- 3857: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3927: 9. The scroll sections: what the practice pages become
-- 3963: 10. Open decisions (need Tzvi)
+- 144: 1. The job, in one line
+- 149: 2. What the AI gets, and the only facts it may use
+- 182: 3. Hard rules (checked: a page breaking one is thrown away and remade)
+- 219: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
+- 261: 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
+- 329: 3b. The category checklist (from the Inspo study)
+- 372: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 505: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 622: 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
+- 769: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 834: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 1009: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
+- 1309: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 1348: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 1463: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 1542: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 1574: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 1601: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 1650: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 1687: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1761: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1786: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1823: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1940: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026; replaces "sections change worlds" of 21 Oct)
+- 1961: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 2032: 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+- 2116: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 2233: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 2327: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 2352: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 2392: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 2669: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2696: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2764: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2781: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2827: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2850: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2883: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2932: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
+- 3016: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
+- 3062: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
+- 3208: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3248: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3343: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
+- 3401: 4. What is reported to the owner instead (content gaps)
+- 3410: 5. How to write
+- 3459: 5a. Lessons from the practice pages
+- 3490: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3539: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3556: 6. Playbooks for the most common businesses
+- 3676: 7. Choosing the three options (automatic page builder only)
+- 3700: 8. Photos, video and the tools
+- 3929: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 3999: 9. The scroll sections: what the practice pages become
+- 4035: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -3038,6 +3039,8 @@ together they made the page busy.
    - the split opening, the branching hero, layered parallax from one photo, the video-to-layers handoff, the panel
      wipe, the light switch or cursor flashlight, a custom cursor and the photo sphere (3al.7), each by the category
      fit of 3t;
+   - the labelled exploded view, the card that grows into the next film and the paper-cut scene drawn in code
+     (3am.4), each by the category fit of 3t;
    - any small touch of 3bb that is there for looks;
    - any other effect added for looks counts the same way (3u.6 to 3u.8, 3v.8, 3x.5, 3x.6, 3x.12, 3g.7).
    The one small touch of 3p.5 is the first of the three (decided 22 Nov 2026): when it is something the visitor sees
@@ -3070,7 +3073,10 @@ is asked of a site published before 22 Nov 2026.
 
 2. **Three first screens, one per reference, and Tzvi picks.**
    - Before the rest of the site and before any paid picture for the first screen, the first screen is
-     built three times as plain HTML in the build. One reference leads each version.
+     built three times as plain HTML in the build. One reference leads each version. **One of the three may be a
+     wildcard** (25 Nov 2026, from RoboNuggets' "/wildcard"): the builder's own idea from no reference, still built
+     from the business's own things, and labelled "wildcard" on the board, so Tzvi also sees something no reference
+     suggested. Its line in REFERENCES.md says `wildcard: <the idea in one line>` in place of a picture.
    - The three share the same fonts, words and the owner's real photos, with grey boxes where a picture will
      be generated. Each is a different opening type that fits the business (3ah.8: a staged side-lit product, a
      light reveal, a split opening, a film, layered parallax and so on), so Tzvi picks between real alternatives.
@@ -3119,6 +3125,10 @@ is asked of a site published before 22 Nov 2026.
    - A build with an open item, or a done item whose proof is missing, is not shown or published. A build with no
      corrections yet says `- none yet`.
    - Checked by `scripts/judges.mjs` in check-build and publish-page.
+   - **At the end of every build**, `node scripts/feedback-repeats.mjs` lists the corrections Tzvi gave on two or more
+     sites (from every build's FEEDBACK.md). Each repeat is put to him as a proposed rule, through the add-a-rule steps
+     at the top of this document (25 Nov 2026, from Ben AI's /dream: a correction repeated across projects belongs in
+     the rules, not only in one build's notes).
 
 7. **A keyboard user sees where they are, toggles are real, prices line up.** `scripts/check-keyboard.mjs`, from
    Vercel's Web Interface Guidelines:
@@ -3329,6 +3339,64 @@ as his credit prices or model verdicts. Frames below are in that folder. None is
    from its own reference picture, the still version first and its motion second, never a whole page in one go
    (about 14 videos; video 13 for one section per prompt; 19, 22 and 23 for asking the model to explain).
    Checked by LOOK: the build's notes.
+
+## 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
+
+Notes and frames: `docs/inspo/videos-2026-11-25/`. Two more came from the same batch and live with the rules they
+change: a wildcard first screen (3aj.2) and repeated corrections proposed as rules (3aj.6). None of these is asked of
+a site published before 25 Nov 2026 (rule-dates.mjs).
+
+1. **A camera rough before a paid clip whose camera travels** (Kyle Skelly; Matt Penny's Blender MCP). When a clip's
+   camera moves through or round something (a fly-through, an orbit, a push through a window or door), and so not
+   for a locked-off camera (3al.1) or a plain slow push:
+   - Before the clip is paid for, the move is made as grey shapes with a keyframed camera and rendered as a short,
+     low-quality video at the clip's length and shape: `gen/board/rough-<step>.mp4`. Blender or three.js (section 8,
+     job 4). Free.
+   - The clip's prompt is written from the rough, second by second, with numbers (3al.4): "0 to 3 s: the camera
+     pulls back through the window frame; 3 to 8 s: it tilts down 30 degrees onto the street".
+   - The rough sits on part D of the design board (3aj.8) beside the film's stills, and Tzvi's yes to the film as
+     stills covers it.
+   - Why: "you never really know what you're going to get"; the same move written only in words came back without
+     "the pacing or the dynamic camera moves that we want". Our stills (3h.6, 3al.1, 3al.5) show where a camera stands,
+     never how it travels, which is what a paid clip most often gets wrong.
+   - Checked by LOOK: the rough beside the clip, and each travelling step in `gen/chain.json` naming its rough. A film
+     whose camera never travels has none.
+
+2. **The subject makes room for the words** (Kyle Skelly's samurai site, `mvfo3pUiCCA-character-film-hero.png`). When
+   a film plays behind feature words, the film is planned so the subject stands on one half while a feature's words
+   sit on the other, and crosses to the other half for the next feature, so film and words read as one picture, never
+   words laid over a busy frame. Each step's end still (3al.1) names which half is left clear. Checked by LOOK: the
+   opening scrolled to each feature, laptop and phone (on a phone the words may sit under the subject instead).
+
+3. **A tweaks panel on the design board** (Chase AI's tweaks bar, `7FU98O0JLHs-tweaks-panel.png`; the same idea as Tae
+   Online HD's hand edits on the canvas). Once Tzvi has picked a first screen (3aj.2), that screen and the part C home
+   page load `scrollcraft/starter/tweaks.js`, copied into `gen/board/`. Every custom property of the site's `:root`
+   becomes a control (colours a picker, sizes a slider, fonts a text box that loads the named Google font), and "Copy
+   values" gives the changed lines as a `:root` block. Tzvi moves the sliders himself and sends the block back instead
+   of describing the change in words; the builder pastes it into site.css. `gen/` is never published, so the panel
+   never reaches a visitor. Why: corrections like "too zoomed" or "the heading should be heavier" took a round each,
+   and a slider settles them in one. Checked by LOOK: the panel on the picked first screen.
+
+4. **More choices for the menu** (3ai.2; each counts as one of the three decorations and is never required):
+   - **The labelled exploded view** (Kyle Skelly's VR headset, `mvfo3pUiCCA-exploded-product-on-scroll.png`; Matt
+     Penny's headphones, `aD9X6Lc3dVk-exploded-headphones-blender.png`): the product comes apart as the page scrolls
+     and each part is named with a real fact from the owner. Only for a product with real layers or parts (a layer
+     cake, a sandwich, a ring's stones, the parts a repair shop replaces). The parts and labels come from the owner's
+     own photos and words, never guessed. Never on prices or order controls (3ak.4), and not on the shop or menu pages
+     (3al.8).
+   - **The card that grows into the next film** (`mvfo3pUiCCA-card-grows-into-next-film.png`): a small clip in a
+     section grows to fill the screen and becomes the next scene. Only on a site with two or more films; the handoff
+     of 3ae.
+   - **The paper-cut scene drawn in code** (Matt Penny's Lemo Opuscar style, `aD9X6Lc3dVk-paper-cut-style.png`):
+     layered cut-paper shapes with one soft light, in the site's own colours, for a business with a story to tell (a
+     guide, a family bakery). Free; the same care as 3ak.1 (aria-hidden, still under reduced motion, never behind
+     prices).
+   A signature section may also take the form of **a chooser on two axes** (Nate Herk's "Find your drink",
+   `DByAR5Su1Yw-find-your-drink-map.png`), on a `- signature:` line of 3ad.1 like any other: the visitor drags a marker
+   onto a map whose axes are the business's own (strong to gentle, sweet to savoury) and the nearest real item shows
+   with its real prices and Add button. Only for a menu of eight or more items, each placed on the map from what the
+   owner says about it, never guessed.
+   Checked by LOOK, and the count by check-compared TREATMENTS as for every decoration.
 
 ## 4. What is reported to the owner instead (content gaps)
 
@@ -3840,6 +3908,10 @@ added to a page later, every one of these buttons is changed in the same edit.
 2. **Polishing generated video:** stabilising, timing to the scroll, clean edges.
 3. **Reusable 3D scenes** for the scroll sections in section 9, each made once to
    our standard.
+4. **The camera rough** before a paid clip whose camera travels (3am.1, 25 Nov 2026): grey shapes and a keyframed
+   camera, rendered as a short low-quality video. Blender is not installed on this computer (25 Nov 2026); until it
+   is, the rough is a three.js page of grey boxes recorded with Playwright. Never through Higgsfield's Blender plugin
+   or bridge: paid generation goes only through `scripts/hf.py`.
 
 No page reuses another business's scene as it is. Blender hasn't been used in the
 project yet, so the first jobs write their lessons here.

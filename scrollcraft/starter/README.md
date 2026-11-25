@@ -143,3 +143,10 @@ arriving in order (`data-arrive`), laptop-only depth (`data-depth`), one rotatin
 (`.rot`), a tilted label (`.tilt`) and question cards (`details.faq-q`). Copy the parts a site uses
 into its own site.css and site.js. `kit/test.html` has buttons that replay each piece; a new moving
 piece is tried there first (3u.12), then added to the kit.
+
+## The tweaks panel (rules 3am.3, 25 Nov 2026)
+
+`tweaks.js` is for the design board only, never a published page. Copy it into `gen/board/` and add
+`<script src="tweaks.js"></script>` to the picked first screen and the part C page. A "Tweaks" button opens a
+control for every `:root` value (colours, sizes, fonts; a Google font typed in is loaded). Tzvi presses
+"Copy values" and sends the `:root` block back; paste it into site.css.

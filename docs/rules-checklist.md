@@ -6,15 +6,15 @@ Sections (line each starts on; read with that offset):
 - 76: 1. Facts and words
 - 107: 2. Opening
 - 190: 3. Sections and worlds
-- 293: 4. Photos and media
-- 324: 5. Prices and savings
-- 347: 6. Order and booking flow
-- 373: 7. Motion
-- 405: 8. Phone
-- 420: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
-- 427: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 438: 9. Finish
-- 443: Retired
+- 297: 4. Photos and media
+- 328: 5. Prices and savings
+- 351: 6. Order and booking flow
+- 377: 7. Motion
+- 409: 8. Phone
+- 424: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
+- 431: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 442: 9. Finish
+- 447: Retired
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -286,6 +286,10 @@ R3al.6 | BRAND.md has an ## Image style paragraph (light, colour, mood, three co
 R3al.7 | A split opening, branching hero, layered parallax, video-to-layers handoff, panel wipe, light switch or cursor flashlight, custom cursor, photo sphere or made by hand is used only when picked on the - treatments: line, counted in 3ai's three and fitting the category (3t); the light switch and flashlight only for a business whose story is light or mood; n/a when none is used | 3al.7, 3ai, 3t | LOOK: CONCEPT.md treatments line against the site + script: `node scripts/check-compared.mjs <build>` (TREATMENTS)
 R3al.8 | An intro (a screen shown before the page; not the opening's arrival, a film's first event or a phone opening's clock, which play on every visit) plays on the first visit only and lasts a few seconds; no intro or reveal on an information page (menu, prices, shop) (parallax on phones: R3a.5) | 3al.8, 3ac, 3ai | LOOK: a second visit, the shop and menu pages, and a phone
 R3al.9 | Before each risky change the builder wrote back what it understood; each section was built from its own reference picture, still first, motion second | 3al.9 | LOOK: the build's notes
+R3am.1 | Each clip whose camera travels (a fly-through, an orbit, a push through an opening) had a grey-shape camera rough (gen/board/rough-<step>.mp4) made before it was paid for, its prompt written second by second from the rough and the rough shown on part D of the board | 3am.1, 3aj.8, 3al.4 | LOOK: the rough beside the clip and its step in gen/chain.json; n/a when no clip's camera travels when:film
+R3am.2 | When a film plays behind feature words, the subject stands on one half and the words on the other, crossing for the next feature; each step's end still names the half left clear | 3am.2, 3al.1 | LOOK: the opening scrolled to each feature, laptop and phone; n/a with no feature words over a film when:film
+R3am.3 | The picked first screen and the part C home page loaded the tweaks panel (gen/board/tweaks.js) for Tzvi, and any values he sent back are in site.css | 3am.3, 3aj.8 | LOOK: the panel on the picked first screen
+R3am.4 | A labelled exploded view, a card that grows into the next film, a paper-cut scene in code or a two-axis chooser is used only when picked (treatments line, or a signature line for the chooser), with every label and map place from the owner's own words, never on prices, order controls or the shop and menu pages; n/a when none is used | 3am.4, 3ai, 3ak.4, 3al.8 | LOOK: CONCEPT.md treatments and signature lines against the site + script: `node scripts/check-compared.mjs <build>` (TREATMENTS)
 R3u.8 | A tilted label over headings, if used, is this site's own shape from its world and in fingerprints.json, never another site's | 3u.8 | LOOK: its "label" in fingerprints.json differs from every other site's; n/a if none
 R3u.9 | Questions are rounded cards on `<details>`, "+" in an accent circle turning into "x", the answer opening smoothly inside the card | 3u.9 | LOOK: open two on a phone; n/a if no questions section
 R3u.10 | A business with two or more places has its list beside a map in the site's colours with numbered pins, the map held on a laptop and above the list on a phone | 3u.10 | LOOK; n/a with one place or none

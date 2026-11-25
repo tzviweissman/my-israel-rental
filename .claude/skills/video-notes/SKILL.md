@@ -11,6 +11,14 @@ watch continuously or hear audio. So the job is: **get the words, sample
 the pictures where they carry the meaning, then judge both.** Never
 summarise from a title, a thumbnail, or a description.
 
+## First: was this video already studied?
+
+Search the project's notes for each video's ID before opening anything
+(in MyIsraelRental: `grep -rl "<id1>\|<id2>" docs/inspo --include=*.md`).
+On 25 Nov 2026 two of eight videos had been studied three days earlier,
+and watching them again cost about 10 minutes. For one already studied,
+read the old notes and only look for what they missed.
+
 ## Before anything else: check tab visibility
 
 This is the cheapest diagnosis and it masquerades as every other failure.
@@ -40,7 +48,9 @@ then YouTube throttled it (the page below the player stayed a grey skeleton,
 no "Show transcript" button, playback buffering at 2s per 5s). The user's
 Chrome (claude-in-chrome) read the other two at once. So:
 
-- **One video:** the in-app pane is fine.
+- **One video: try yt-dlp first** (`yt-dlp --skip-download --write-auto-subs --sub-langs en --sub-format vtt -o v <url>`,
+  then strip the timing lines and repeated lines). It worked first time on 24 Nov 2026, in seconds. On a 429, do not
+  retry; use the in-app pane.
 - **Two or more, or the first try shows a skeleton page:** go straight to
   claude-in-chrome. One tab, one video at a time.
 - In Chrome, never `await` long inside `javascript_tool` (it froze at 45s):
@@ -73,6 +83,24 @@ Mid-roll ads reset `currentTime` to 0 and silently swallow seeks. If a
 seek lands at 0, check for an ad before assuming the seek failed.
 
 ### 3. Open the transcript panel — click ONE button, once
+
+**The button now lives inside the description** (verified 25 Nov 2026, 8
+videos in a row): expand the description first, then click Show
+transcript. One script does both and needs no screenshot; run it, then
+`computer wait` 8 s and `get_page_text`:
+
+```js
+const e = document.querySelector('#description-inline-expander #expand'); if (e) e.click();
+setTimeout(() => { const b = [...document.querySelectorAll('button, tp-yt-paper-button')]
+  .find(x => /^show transcript/i.test(((x.innerText||'') + ' ' + (x.getAttribute('aria-label')||'')).trim()));
+  if (b) b.click(); }, 2000);
+```
+
+If no button is found (the page below the player still loading), scroll
+down, `find` "more" in the description and "Show transcript", and click
+each by its ref. That worked when scripted clicks found nothing.
+
+The older one-step version:
 
 ```js
 const btn = [...document.querySelectorAll('button, tp-yt-paper-button')]
