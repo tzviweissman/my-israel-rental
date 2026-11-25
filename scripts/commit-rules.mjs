@@ -62,7 +62,8 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'rules-merge-'));
 // the base of the merge: --base <commit>, or the last commit this script pushed from here (kept in .git), when main
 // still holds it; else HEAD. A checkout behind main that pushed its own rule change is merged against what it pushed,
 // so its own earlier change is never read as a clash with main (19 Nov 2026)
-const RECORD = path.join(ROOT, '.git', 'rules-last-push');
+// in a worktree .git is a file, so ask git where its folder is (25 Nov 2026: the write after a push crashed there)
+const RECORD = path.resolve(ROOT, git(['rev-parse', '--git-dir']).stdout.trim(), 'rules-last-push');
 let since = baseRev || (fs.existsSync(RECORD) ? fs.readFileSync(RECORD, 'utf8').trim() : null);
 if (since && git(['merge-base', '--is-ancestor', since, 'origin/main']).status !== 0) since = null;
 if (since) console.log(`merging against ${since.slice(0, 8)}, the rules last pushed from here`);
