@@ -1054,6 +1054,15 @@
    "status": "planned"
   },
   {
+   "id": "A28.4",
+   "rule": "A thing the model may not know by name (a dreidel, a menorah, a sufganiya) is described by its shape, parts and colours in the prompt, and the first picture looked at before more are made",
+   "how": ["ASK"],
+   "built_by": "docs/static-ad-rules.md section 28; the gen script's prompt",
+   "confirmed_by": "LOOK at the first picture: the thing is what was asked for",
+   "retried": false,
+   "status": "planned"
+  },
+  {
    "id": "A10.17",
    "rule": "A moving ad's story flows: one place, one hero, each cut caused, the payoff set up first, a choice asked in words for 2.5s+, and the whole film watched as a contact sheet before it is shown",
    "how": ["ASK"],

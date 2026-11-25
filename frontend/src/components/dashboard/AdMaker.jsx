@@ -1383,7 +1383,7 @@ function festiveGround(ctx, W, H, holiday) {
 }
 // Where the props go: along the edges, half off the ad like props on a styled shoot, never on a word, the link, the
 // code or the logo, and over at most a corner of the product. Worked out on the still, so in a moving ad they stay put.
-function placeDecor(W, H, boxes, texts, pics, format, key, names) {
+function placeDecor(W, H, boxes, texts, pics, format, key, names, own = []) {
   const pad = 16;
   // The full photo design is often the owner's own flyer, with its own writing we cannot see: nothing goes on it.
   if (key.startsWith('fullphoto')) return { props: [], sparks: [] };
@@ -1405,6 +1405,9 @@ function placeDecor(W, H, boxes, texts, pics, format, key, names) {
   const rnd = seeded(key);
   const order = names.slice();
   for (let i = order.length - 1; i > 0; i -= 1) { const j = Math.floor(rnd() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  // The business's own other products among the holiday's (the real product in the hero's hands, docs/inspo): a
+  // bakery's pastries beside the dreidel, so the ad is theirs and the holiday's at once.
+  own.forEach((n, i) => order.splice(1 + i * 2, 0, n));
   const spots = [];
   for (const s of [0.26, 0.21, 0.16, 0.13]) {
     const sz = W * s;
@@ -1421,10 +1424,13 @@ function placeDecor(W, H, boxes, texts, pics, format, key, names) {
   spots.sort((p, q) => q[2] - p[2] || corner(p) - corner(q));
   const out = [];
   for (const p of spots) {
-    if (out.length >= Math.min(4, order.length)) break;
+    if (out.length >= Math.min(own.length ? 5 : 4, order.length)) break;
     const r = [p[0], p[1], p[2], p[2]];
     if (!fits(r) || out.some((o) => inter(r, [o.x, o.y, o.s, o.s]) > 0)) continue;
-    out.push({ name: order[out.length], x: p[0], y: p[1], s: p[2], rot: (rnd() - 0.5) * 0.4, flip: p[0] + p[2] / 2 > W / 2 });
+    const name = order[out.length];
+    // Their own product is never mirrored (its label would read backwards) and barely tilted.
+    const mine = name.startsWith('own:');
+    out.push({ name, x: p[0], y: p[1], s: p[2], rot: (rnd() - 0.5) * (mine ? 0.12 : 0.4), flip: !mine && p[0] + p[2] / 2 > W / 2 });
   }
   // Sparkles in the empty spaces, anywhere on the ad.
   const sparks = [];
@@ -3400,7 +3406,10 @@ function render(target, design, a0) {
     const pics = [];
     render(target, design, { ...a, decorMeasure: true, boxes, textsOut: texts, picsOut: pics, anim: null, stats: null });
     const c = sharpCanvas(target, a.scale || 1);
-    a = { ...a, decorAt: placeDecor(c.width, c.height, boxes, texts, pics, a.format, `${design}|${a.format}|${a.rtl}`, DECOR[a.festive] || []) };
+    const own = (a.items || []).filter((it) => it.cut && it.name !== a.item?.name).slice(0, 2);
+    const decor = { ...a.decor, ...Object.fromEntries(own.map((it) => [`own:${it.name}`, it.cut])) };
+    a = { ...a, decor, decorAt: placeDecor(c.width, c.height, boxes, texts, pics, a.format, `${design}|${a.format}|${a.rtl}`,
+      DECOR[a.festive] || [], own.map((it) => `own:${it.name}`)) };
   }
   const canvas = sharpCanvas(target, a.scale || 1);
   const [layout, lookKey] = design.split(':');

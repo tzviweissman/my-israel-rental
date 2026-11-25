@@ -915,3 +915,10 @@ real product photo as a reference image, and the prompt asks for a plain panel i
 label goes, with no writing. The model then draws no fake words to hide, the panel already turns and takes the light
 as he moves, and label-fit finds it every frame. This is also how the best 3D product films in our inspo look: the
 real pack in the hero's hands, not a lookalike.
+
+A thing the model may not know is described by its shape, not only its name (A28.4). The ad maker's Chanukah props
+(docs/ads/gen/scenes/decor.py, 24 Nov 2026) asked for "a dreidel" and got a spinning cone, then "a silver dreidel" and
+got a flat lid: two paid pictures thrown away. Spelled out as "a small spinning top shaped like a cube, four flat
+square sides, a short pyramid point under it and a round stem on top", it came right first time. The same goes for a
+menorah (nine branches, eight in a row and one raised in the middle; generated ones still come wrong, so its lights
+are drawn in code), a sufganiya, a challah or anything local. Look at the first picture before making more.
