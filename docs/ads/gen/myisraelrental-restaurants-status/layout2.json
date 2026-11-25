@@ -1,0 +1,14 @@
+{
+ "shape": "story",
+ "ground": "#167AB8",
+ "boxes": [
+  {"what": "steel fork lifting the pasta, tines down", "x": 0.43, "y": 0.04, "w": 0.06, "h": 0.2, "colour": "#c9cdd2", "angle": 8},
+  {"what": "tall twisting ribbon of spaghetti hanging from the fork", "x": 0.36, "y": 0.2, "w": 0.24, "h": 0.52, "colour": "#e0a252"},
+  {"what": "loose strand looping left", "x": 0.04, "y": 0.43, "w": 0.4, "h": 0.016, "colour": "#e8b56a", "angle": 12},
+  {"what": "loose strand looping right", "x": 0.55, "y": 0.5, "w": 0.42, "h": 0.016, "colour": "#e8b56a", "angle": -14},
+  {"what": "sauce drip", "x": 0.47, "y": 0.74, "w": 0.03, "h": 0.03, "colour": "#b8321f"}
+ ],
+ "keep_empty": [
+  {"what": "foot", "x": 0.04, "y": 0.8, "w": 0.92, "h": 0.1}
+ ]
+}

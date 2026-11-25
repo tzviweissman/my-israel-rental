@@ -2,24 +2,24 @@
 <html><head><meta charset="utf-8">
 <!-- MyIsraelRental restaurants ad, "fork through 5,000+" (docs/ads/blueprints/myisraelrental-restaurants-status.md;
      Tzvi, 25 Nov 2026: idea "Fork through 5,000+", headline "kosher acoss israel in 1 place"). 5,325 restaurants were
-     listed on the live site that day, each with a hechsher named on its own website. The photo is gen.py's photo-1.jpg
-     cut out by ad-fit-picture.py --cut (front.png) and laid on our accent blue, 60px lower than shot, so the loose strands
-     cross the middle of the digits; strands.py cuts the parts that lie in front of them (strands.png). The cream
-     ground it was shot on (ground.jpg) scored a 4 beside the library 5s: too quiet, the weave too timid.
+     listed on the live site that day, each with a hechsher named on its own website.
+     Take 2 (Tzvi, beside Pinterest "PASTA"/"TWIST" posters: "what makes ours bland and boring"): one tall twist of
+     spaghetti (gen.py take 2, cut out as twist.png) hangs down the middle through a huge condensed "5,000+" that fills
+     the width; the twist hangs behind the digits and strands.py brings the two loose strands out in front. The headline is small print now: the number and the food are the ad.
      Every word, the logo and the QR are drawn here (A3.7, A9.8).
      Still: node scripts/record-moving-ad.mjs docs/ads/gen/myisraelrental-restaurants-status myisraelrental-restaurants-status '' 7.9 -->
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,600&family=Manrope:wght@500;700;800&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Playfair+Display:ital,wght@0,700;1,600&family=Manrope:wght@500;700;800&display=block" rel="stylesheet">
 <style>
 html,body{margin:0;background:#111}
 #ad{position:relative;width:1080px;height:1920px;overflow:hidden;background:#167AB8;font-family:Manrope,sans-serif;color:#fff}
-#h1{position:absolute;left:70px;right:60px;top:176px;font:700 104px/1.02 'Playfair Display',serif;letter-spacing:-2px}
+#pasta,#strands{position:absolute;left:0;top:-120px;width:1080px;height:1920px;pointer-events:none}
+#pasta{filter:drop-shadow(0 30px 30px rgba(5,30,55,.45))}
+#num{position:absolute;left:-18px;right:-18px;top:520px;text-align:center;font:400 452px/1 Anton,sans-serif;letter-spacing:-6px;white-space:nowrap}
+#kind{position:absolute;right:52px;top:1000px;width:330px;text-align:right}
+#kind .r{font:400 60px/1 Anton,sans-serif;letter-spacing:1px;color:#FBE3A1}
+#kind .h{font:italic 600 42px/1.15 'Playfair Display',serif;margin-top:14px}
+#h1{position:absolute;left:52px;top:996px;width:330px;font:700 54px/1.06 'Playfair Display',serif}
 #h1 b{color:#FBE3A1;font-weight:700}
-#num{position:absolute;left:58px;top:500px;font:800 296px/1 'Playfair Display',serif;color:#fff;letter-spacing:-10px;font-variant-numeric:lining-nums;white-space:nowrap}
-#pasta,#strands{position:absolute;left:0;top:60px;width:1080px;height:1920px;pointer-events:none}
-#pasta{filter:drop-shadow(0 26px 28px rgba(5,30,55,.45))}
-#sub{position:absolute;left:70px;top:990px;width:460px}
-#sub .r{font:800 68px/1 Manrope,sans-serif;letter-spacing:-1px}
-#sub .h{font:italic 600 46px/1.15 'Playfair Display',serif;color:#FBE3A1;margin-top:12px}
 #logo{position:absolute;left:48px;top:1506px;width:104px;height:104px;border-radius:24px;background:#0F2A4A;object-fit:contain;padding:14px;box-sizing:border-box}
 #foot{position:absolute;left:176px;top:1504px;width:670px;color:#fff}
 #foot .n{font-weight:800;font-size:48px}
@@ -29,11 +29,11 @@ html,body{margin:0;background:#111}
 #qr img{width:100%;height:100%}
 </style></head><body>
 <div id="ad">
-  <div id="h1">Kosher across Israel, in <b>one place.</b></div>
-  <img id="pasta" src="front.png" alt="">
+  <img id="pasta" src="twist.png" alt="">
   <div id="num">5,000+</div>
   <img id="strands" src="strands.png" alt="">
-  <div id="sub"><div class="r">restaurants,</div><div class="h">each with a hechsher.</div></div>
+  <div id="kind"><div class="r">RESTAURANTS,</div><div class="h">each with a hechsher.</div></div>
+  <div id="h1">Kosher across Israel, in <b>one place.</b></div>
 </div>
 <script src="../_kit/kit.js"></script>
 <script>

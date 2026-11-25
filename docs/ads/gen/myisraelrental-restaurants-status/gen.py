@@ -27,10 +27,26 @@ PROMPT = (
     "Nothing else in the picture: the top third and bottom third are empty cream. No people, no hands, no words."
 )
 
+# Take 2 (Tzvi, 25 Nov 2026, beside Pinterest "PASTA"/"TWIST" posters: "what makes ours bland and boring"): take 1's
+# nest sat still in a corner. Now the fork lifts one tall twisting ribbon of pasta down the middle of the frame, on
+# our blue, so the digits can be woven through it in front and behind (strands.py).
+TWIST = (
+    "A real food photograph, shot on a full-frame camera with a 100mm lens, crisp, mouth-watering, high contrast. "
+    "Image 1 is a rough layout: follow its arrangement exactly. The whole background is one flat, seamless, saturated "
+    "medium blue (#167AB8), completely empty, no table, no plate, no props, no text. Near the top centre, a stainless "
+    "steel fork held by no hand, tines pointing down, lifts a tall, dramatic twisting ribbon of spaghetti that hangs "
+    "and spirals down the middle of the picture to about three quarters of its height, glossy with a rich plain "
+    "tomato sauce, a few small fresh basil leaves caught in it. Where the two thin strokes are, two long single "
+    "strands swing out wide, one looping to the left edge and one to the right edge, in motion. A thick drop of sauce "
+    "falls from the bottom of the twist. Hard light from the upper left, bright highlights on the pasta, a deep "
+    "soft shadow on the right side of the twist. The bottom fifth is empty blue. No people, no hands, no words."
+)
+
 take = sys.argv[1] if len(sys.argv) > 1 else "1"
+two = int(take) >= 2
 h = hf._client()
 hf.make("marketing-studio/image/sunburst",
-        {"prompt": PROMPT, "image_urls": [h.upload_file(str(HERE / "layout.png"))],
+        {"prompt": TWIST if two else PROMPT, "image_urls": [h.upload_file(str(HERE / ("layout2.png" if two else "layout.png")))],
          "aspect_ratio": "9:16", "resolution": "2k", "quality": "medium", "enhance_prompt": False},
-        HERE / "out" / f"photo-{take}.jpg", why=f"myisraelrental restaurants ad, fork and pasta photo, take {take}",
+        HERE / "out" / f"photo-{take}.jpg", why=f"myisraelrental restaurants ad, pasta {'twist' if two else 'nest'} photo, take {take}",
         credits=2, max_credits=3)
