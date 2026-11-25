@@ -23,22 +23,22 @@ Sections (line each starts on; read with that offset):
 - 637: Sources
 - 672: 11. Moving ads (Tzvi, 6 Nov 2026)
 - 686: 12. Never bland (Tzvi, 8 Nov 2026)
-- 694: 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
-- 707: 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
-- 723: 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
-- 735: 16. The headline says the offer (Tzvi, 10 Nov 2026)
-- 745: 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
-- 761: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
-- 773: 19. A 5 every time (Tzvi, 10 Nov 2026)
-- 784: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
-- 808: 21. The drawing is kept (Tzvi, 16 Nov 2026)
-- 815: 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
-- 823: 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
-- 840: 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
-- 850: 25. Every listing photo in an ad is clean (Tzvi, 17 Nov 2026)
-- 859: 26. Memorable, not one template (Tzvi, 18 Nov 2026: "All ten")
-- 880: 27. The site's brand in its ads (Tzvi, 22 Nov 2026)
-- 891: 28. The look is chosen first, and a rebuilt product keeps its own label (Tzvi, 22 Nov 2026)
+- 696: 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
+- 709: 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
+- 725: 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
+- 737: 16. The headline says the offer (Tzvi, 10 Nov 2026)
+- 747: 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
+- 763: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
+- 775: 19. A 5 every time (Tzvi, 10 Nov 2026)
+- 786: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
+- 810: 21. The drawing is kept (Tzvi, 16 Nov 2026)
+- 817: 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
+- 825: 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
+- 842: 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
+- 852: 25. Every listing photo in an ad is clean (Tzvi, 17 Nov 2026)
+- 861: 26. Memorable, not one template (Tzvi, 18 Nov 2026: "All ten")
+- 882: 27. The site's brand in its ads (Tzvi, 22 Nov 2026)
+- 893: 28. The look is chosen first, and a rebuilt product keeps its own label (Tzvi, 22 Nov 2026)
 <!-- /contents -->
 
 The rules for every still advert MyIsraelRental makes: the ad maker on the
@@ -690,6 +690,8 @@ small bagels under an empty wall, flat daylight, nothing happening and a small h
 beside the pro ads. So every ad is put beside the pro references before it is shown (scripts/ad_vs_pros.py) and
 must pass five checks: product as hero, strong light or colour, something happening, the headline as design, holds
 its own beside the pros. Step A9.5 in docs/ad-rules-checklist.md.
+
+Exciting beside its own kind (Tzvi, 25 Nov 2026: "Do you see what makes ours bland and boring and there's exciting?"). The restaurants ad passed A9.5 and scored a 5 beside the library, then Tzvi set it beside a Pinterest search for pasta posters and it was the dullest there: the pasta sat in a corner beside a thin serif "5,000+", the strands only tucked under the comma, nothing moved, and four lines of words competed. The posters had pasta running through every letter of a heavy word that filled the frame, caught mid-lift and dripping, with everything else in small print. Remade with one new photo (a tall twist hanging through a huge condensed number, its strands woven in front) it held its own. Pro ads of other kinds (A9.5) and the library (A9.7) had not shown it, because the bar is set by the best ads of the same subject. So every ad is also put beside three or more top posters of its own subject from a saved Pinterest search, and answers five questions: does the hero touch the words, is the big word heavy and filling the width, is the hero caught mid-action, does one thing lead, and is it not the calmest on the sheet. Step A9.9 in docs/ad-rules-checklist.md; the sheet comes from scripts/ad_vs_pros.py --refs.
 
 ## 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
 

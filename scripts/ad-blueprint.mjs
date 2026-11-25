@@ -53,6 +53,7 @@ const SCORE_RULES = new Set(['A9.7', 'A10.7', 'A10.8']);
 const LAYOUT_RULES = new Set(['A3.11']);
 const KEEP_RULES = new Set(['A9.8']);
 const INSPO_RULES = new Set(['A9g.11']);   // references opened, and a Pinterest search saved for this ad (Tzvi, 24 Nov 2026)
+const KIND_RULES = new Set(['A9.9']);      // beside top posters of its own subject, five numbered yes/no (Tzvi, 25 Nov 2026)
 const LIB = path.join(ROOT, 'docs', 'inspo', 'pinterest-ads-2026-11-02');
 let libCodes = null;
 function libraryCodes() {
@@ -114,6 +115,14 @@ function problems(name, upTo, finished) {
         if (!dirs.some((d) => fs.existsSync(path.join(ROOT, d, 'README.md')))) out.push(`stage ${s.n}, ${it.id}: name the Pinterest search saved for this ad, a docs/inspo/<folder> with a README.md`);
         const codes = new Set([...g.plan.matchAll(/\b([0-9a-f]{6})\b/gi)].map((x) => x[1].toLowerCase()).filter((c) => libraryCodes().has(c)));
         if (codes.size < 5) out.push(`stage ${s.n}, ${it.id}: name five library ads opened at full size by their codes (found ${codes.size} in docs/inspo/pinterest-ads-2026-11-02)`);
+      }
+      // A9.9: a sheet beside same-subject posters that exists, five numbered answers, and any "no" says it was remade.
+      if (KIND_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
+        const sheet = [...g.plan.matchAll(/([\w./-]+\.(?:jpg|jpeg|png))/gi)].map((x) => x[1]).some((f) => fs.existsSync(path.resolve(ROOT, f)));
+        if (!sheet) out.push(`stage ${s.n}, ${it.id}: name the sheet from python scripts/ad_vs_pros.py <sheet.jpg> <ad.jpg> --refs <pin>,<pin>,<pin>`);
+        const n = new Set([...g.plan.matchAll(/(?:^|\s)([1-5])\)/g)].map((x) => x[1])).size;
+        if (n < 5) out.push(`stage ${s.n}, ${it.id}: answer the five questions as 1) to 5) (found ${n})`);
+        if (/(?:^|\s)[1-5]\)\s*no\b/i.test(g.plan) && !/remade/i.test(g.plan) && !SENT_ANYWAY.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: a "no" goes back to be remade; say what changed ("remade: ...")`);
       }
       if (FIT_RULES.has(it.id) && !/^n\/a:/i.test(g.plan) && !/ad-fit-picture/.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: name scripts/ad-fit-picture.py, the way the picture was laid on the ad, or n/a`);
       // A design's blueprint says how the maker places every business's logo ("built by ..."), not one file.
