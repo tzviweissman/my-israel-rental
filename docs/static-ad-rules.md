@@ -19,26 +19,26 @@ Sections (line each starts on; read with that offset):
 - 499: 9f. Three more videos (4 Nov 2026)
 - 560: 9h. What makes it look designed (Tzvi, 6 Nov 2026: "can we make the ads better")
 - 566: 9g. Three more videos: why an ad catches the eye (4 Nov 2026)
-- 611: 10. What to discount from the videos
-- 630: Sources
-- 665: 11. Moving ads (Tzvi, 6 Nov 2026)
-- 679: 12. Never bland (Tzvi, 8 Nov 2026)
-- 687: 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
-- 695: 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
-- 711: 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
-- 723: 16. The headline says the offer (Tzvi, 10 Nov 2026)
-- 733: 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
-- 749: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
-- 761: 19. A 5 every time (Tzvi, 10 Nov 2026)
-- 772: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
-- 796: 21. The drawing is kept (Tzvi, 16 Nov 2026)
-- 803: 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
-- 811: 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
-- 828: 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
-- 838: 25. Every listing photo in an ad is clean (Tzvi, 17 Nov 2026)
-- 847: 26. Memorable, not one template (Tzvi, 18 Nov 2026: "All ten")
-- 868: 27. The site's brand in its ads (Tzvi, 22 Nov 2026)
-- 879: 28. The look is chosen first, and a rebuilt product keeps its own label (Tzvi, 22 Nov 2026)
+- 618: 10. What to discount from the videos
+- 637: Sources
+- 672: 11. Moving ads (Tzvi, 6 Nov 2026)
+- 686: 12. Never bland (Tzvi, 8 Nov 2026)
+- 694: 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
+- 707: 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
+- 723: 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
+- 735: 16. The headline says the offer (Tzvi, 10 Nov 2026)
+- 745: 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
+- 761: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
+- 773: 19. A 5 every time (Tzvi, 10 Nov 2026)
+- 784: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
+- 808: 21. The drawing is kept (Tzvi, 16 Nov 2026)
+- 815: 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
+- 823: 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
+- 840: 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
+- 850: 25. Every listing photo in an ad is clean (Tzvi, 17 Nov 2026)
+- 859: 26. Memorable, not one template (Tzvi, 18 Nov 2026: "All ten")
+- 880: 27. The site's brand in its ads (Tzvi, 22 Nov 2026)
+- 891: 28. The look is chosen first, and a rebuilt product keeps its own label (Tzvi, 22 Nov 2026)
 <!-- /contents -->
 
 The rules for every still advert MyIsraelRental makes: the ad maker on the
@@ -603,6 +603,13 @@ not every sheet (4 of 8, 3 of 14, 2 of 11), chosen where ads are on screen.
    editable on top.
 9. **One message, many different-looking ads** (Fraser, with 9f.6): not the
    same design with another headline.
+10. **Open the references, never only the sheets** (Tzvi, 24 Nov 2026: "i dont like these look at our inspo or
+   pinterest for better ideas"). Six ideas for the MyIsraelRental businesses ad were written from the library's
+   contact sheets alone and all were turned down; the one he chose came from a Pinterest search made for that ad
+   (docs/inspo/pinterest-business-ad-2026-11-24, the magnifier). So, for every hand-made ad and new design from
+   25 Nov 2026: at least five library ads are opened at full size, and one Pinterest search is made for this ad or
+   its series and saved under docs/inspo/ with a README, before any idea is written. Step A9g.11; the blueprint
+   refuses an answer without that folder and five codes.
 
 Discount: Janson sells a coaching community and pushes an account-sharing
 service for paid tools, which we will not use. Fraser sells a course and an
@@ -691,6 +698,11 @@ its own beside the pros. Step A9.5 in docs/ad-rules-checklist.md.
 get in a second; words and picture interlocked; one colour world; a frozen moment; light that shapes; three things
 carry the ad; a short headline in two voices; the product as the hero, standing on its set. Planned in the
 blueprint before building, checked on the ad-vs-pros sheet (A9.5) before anyone sees it.
+
+When a generated subject crosses the headline (A11.2; Tzvi, 24 Nov 2026), the overlap is planned in code from the
+start. The magnifier ad asked the model to put the glass's rim over the words; it placed the glass lower, so a
+second paid take was spent before the rim was cut out of the picture in code (rim.py) and laid over the headline.
+Now the layout sketch keeps the subject clear of the words, and the part in front is cut and laid in code.
 
 ## 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
 

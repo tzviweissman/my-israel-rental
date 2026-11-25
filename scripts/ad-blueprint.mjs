@@ -52,6 +52,16 @@ const HEADLINE_RULES = new Set(['A2.11']);
 const SCORE_RULES = new Set(['A9.7', 'A10.7', 'A10.8']);
 const LAYOUT_RULES = new Set(['A3.11']);
 const KEEP_RULES = new Set(['A9.8']);
+const INSPO_RULES = new Set(['A9g.11']);   // references opened, and a Pinterest search saved for this ad (Tzvi, 24 Nov 2026)
+const LIB = path.join(ROOT, 'docs', 'inspo', 'pinterest-ads-2026-11-02');
+let libCodes = null;
+function libraryCodes() {
+  if (libCodes) return libCodes;
+  libCodes = new Set();
+  const walk = (d) => { for (const e of fs.readdirSync(d, { withFileTypes: true })) { if (e.isDirectory()) walk(path.join(d, e.name)); else { const m = /^([0-9a-f]{6})[0-9a-f]*\.(?:jpg|jpeg|png|webp)$/i.exec(e.name); if (m) libCodes.add(m[1].toLowerCase()); } } };
+  try { walk(LIB); } catch { /* no library */ }
+  return libCodes;
+}
 const SENT_ANYWAY = /sent as it is:\s*tzvi,\s*\d/i;
 const blank = (plan) => !plan || /^(\.\.\.|todo|tbd)$/i.test(plan);
 
@@ -97,6 +107,13 @@ function problems(name, upTo, finished) {
       if (KEEP_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
         const kept = [...g.plan.matchAll(/(docs\/ads\/gen\/[\w./-]+\.(?:html|py|mjs|js))/gi)].map((x) => x[1]);
         if (!kept.some((p) => fs.existsSync(path.resolve(ROOT, p)))) out.push(`stage ${s.n}, ${it.id}: name the page or script that draws it, kept in docs/ads/gen/${name}/`);
+      }
+      // A9g.11: a saved search folder under docs/inspo/ with its README, and five library ads named by their codes.
+      if (INSPO_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
+        const dirs = [...g.plan.matchAll(/(docs\/inspo\/[\w.-]+)/g)].map((x) => x[1]).filter((d) => !d.endsWith('pinterest-ads-2026-11-02'));
+        if (!dirs.some((d) => fs.existsSync(path.join(ROOT, d, 'README.md')))) out.push(`stage ${s.n}, ${it.id}: name the Pinterest search saved for this ad, a docs/inspo/<folder> with a README.md`);
+        const codes = new Set([...g.plan.matchAll(/\b([0-9a-f]{6})\b/gi)].map((x) => x[1].toLowerCase()).filter((c) => libraryCodes().has(c)));
+        if (codes.size < 5) out.push(`stage ${s.n}, ${it.id}: name five library ads opened at full size by their codes (found ${codes.size} in docs/inspo/pinterest-ads-2026-11-02)`);
       }
       if (FIT_RULES.has(it.id) && !/^n\/a:/i.test(g.plan) && !/ad-fit-picture/.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: name scripts/ad-fit-picture.py, the way the picture was laid on the ad, or n/a`);
       // A design's blueprint says how the maker places every business's logo ("built by ..."), not one file.

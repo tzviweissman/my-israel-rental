@@ -36,6 +36,17 @@
    "status": "planned"
   },
   {
+   "id": "A9g.11",
+   "rule": "Ideas come from five library ads opened at full size and a Pinterest search saved for this ad",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "scripts/ad-blueprint.mjs --check refuses the answer without a docs/inspo/<folder>/README.md and five library codes",
+   "confirmed_by": "ad-blueprint.mjs --check",
+   "retried": false,
+   "status": "planned"
+  },
+  {
    "id": "A9e.2",
    "rule": "One sentence: what the picture says, the words finish",
    "how": [

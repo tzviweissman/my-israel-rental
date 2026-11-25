@@ -30,10 +30,11 @@ blueprint written before that date has no such line and is not held to it (new-r
 
 A0.1 | One job: what you get, or a question, or a real offer. Never two. | static-ad-rules 0 | decide
 A0.2 | One-second test: a stranger knows what is offered and where. Clarity beats cleverness. | 0 | decide
-A9g.1 | Starts from an ad that already works: name the ad in docs/inspo/pinterest-ads-2026-11-02 (or Meta's Ad Library, by reach and days running) it takes its idea from. | 9d, 9g.1 | decide
+A9g.1 | Starts from an ad that already works: name the ad in docs/inspo/pinterest-ads-2026-11-02 (or Meta's Ad Library, by reach and days running) it takes its idea from. Applies to every hand-made ad and new design; A9g.11 says what must have been looked at first. | 9d, 9g.1 | decide
 A9e.2 | In one sentence: what the picture says that the words finish. Cover the words: the picture raises a question. Cover the picture: the words are not complete. | 9d, 9e.2 | decide
 A9e.3 | The idea, by name: the product stands in for a familiar object, or sits in a familiar screen, or type and subject interlock, or surreal scale, or a pun. Not a good photo with a headline (scored 1.9 to 2.8). | 9d, 9e.3 | decide
 A9f.1 | The angle, by name: a real moment and why ours wins there, or the exact reader, or an honest trade-off, or the want behind the feature, or a moment in the day, or a real review. | 9f | decide
+A9g.11 | Ideas come from references opened, not summaries: before any idea is written, at least five library ads (docs/inspo/pinterest-ads-2026-11-02, by their six-character codes) are opened at full size, and one Pinterest search is made for this ad (or its series) and saved under docs/inspo/pinterest-<subject>-<date>/ with its README. The answer names the folder and the five codes. Applies to every hand-made ad and new design from 25 Nov 2026; with A9g.1, the reference it names is one of these. | 9g.10, Tzvi 24 Nov | decide since:2026-11-25
 A9g.9 | Is this a different-looking ad from the last ones for this business, and not the same design with another headline? | 7, 9b, 9f.6, 9g.9 | decide
 A9g.10 | The gallery of one business looks varied at a glance: its designs do not share one colour or one layout, and each starts on its own product where there are several. | 9g, Tzvi 5 Nov | auto:variety
 A27.1 | The site's brand: for a business with a custom site, name its scrollcraft/builds/<folder>/BRAND.md and say which of its colours and fonts this ad uses and which of its bans it keeps; or "n/a: no custom site". | 27, page rules 3ak.3 | decide since:2026-11-22
@@ -119,7 +120,7 @@ From docs/inspo/pro-references/README.md, what every pro ad had and ours lacked.
 the ad-vs-pros sheet (A9.5) after.
 
 A11.1 | One idea you get in a second: name the surprise, pun or visual question the picture asks; the words answer it. "A good photo with a headline" is not an idea. | 13, pro-references 1 | decide
-A11.2 | Words and picture interlock: the headline or one huge word sits behind the subject with parts of the subject in front, or the subject sits inside the letters. Name how. | 13, pro-references 2 | decide
+A11.2 | Words and picture interlock: the headline or one huge word sits behind the subject with parts of the subject in front, or the subject sits inside the letters. Name how. When the subject is generated and crosses the words, the overlap is planned in code from the start: the layout sketch keeps the subject clear of the headline, and the part in front is cut from the picture and laid over the words (docs/ads/gen/myisraelrental-magnifier-status/rim.py), never paid for again to move the subject. | 13, pro-references 2, Tzvi 24 Nov | decide
 A11.3 | One colour world: the ground takes the product's own colour or its set's, with one accent; no stock yellow sticker or white button that belongs to no picture. | 13, pro-references 4 | decide
 A11.4 | A frozen moment: something is happening (falling seeds, steam, a pour, a splash, motion). Name it, and keep it true to the product. | 13, pro-references 5 | decide
 A11.5 | Light that shapes: one strong side or back light, a fall to dark, real depth. Never flat even daylight on the hero. | 13, pro-references 6 | decide
