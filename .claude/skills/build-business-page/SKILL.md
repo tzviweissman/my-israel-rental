@@ -125,7 +125,12 @@ Prices are read with `get_cost` at the time, never from memory.
    NOFIVE line (its other lines wait for the judging).
 3. **Ideas in words, and the brand sheet (free).** One Fable subagent (see Models) writes the opening ideas,
    the "Own:" idea, the film stories and the headlines into IDEAS.md. Run the one-sentence test on the words:
-   "you land and ___ happens" must be about the business (§3n). Write BRAND.md: colours with their uses, two
+   "you land and ___ happens" must be about the business (§3n). Write BRAND.md (new builds from 25 Nov 2026), opening
+   on a `- look:` line: one family from `docs/inspo/by-look.md` and the 3 to 5 look words most repeated among
+   REFERENCES.md's kept pictures of it ("warm paper ground, thin serif, round plate photos"). The colours, fonts
+   and image style below follow from those words. When another build of the same category already took that
+   family (`grep -H "^- look:" scrollcraft/builds/*/BRAND.md`), pick another family that suits the category, so
+   two bakeries do not come out alike. Then: colours with their uses, two
    fonts, one radius, motion limits, the design bans taken from `docs/category-mistakes.md` (§3x.7), its
    `## For ads` part, which every ad for the business will read (§3ak), and its `## Image style` paragraph
    (light, colour, mood, three colours given to three named objects), pasted at the end of every image prompt

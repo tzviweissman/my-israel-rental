@@ -93,6 +93,11 @@ if (staged.some((f) => /^frontend\/src\/locales\/(en|he)\.js$/.test(f))) {
   const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-locale-dupes.mjs')], { cwd: ROOT, encoding: 'utf8' });
   if (c.status !== 0) { console.error(`Commit refused: ${c.stderr || c.stdout}`); process.exit(1); }
 }
+// a website picture saved under docs/inspo is tagged in docs/inspo/by-look.tsv, so the index by look stays whole (25 Nov 2026)
+if (staged.some((f) => /^docs\/inspo\/(.+\.(png|jpe?g|webp)|by-look\.tsv)$/i.test(f))) {
+  const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'build-inspo-by-look.mjs'), '--check'], { cwd: ROOT, encoding: 'utf8' });
+  if (c.status !== 0) { console.error(`Commit refused: tag these in docs/inspo/by-look.tsv (or EXCLUDE them with a reason), then run node scripts/build-inspo-by-look.mjs:\n${c.stdout}`); process.exit(1); }
+}
 // the logo measure (A4.6) must still fail L.A. Cholent's badge and read the wordmarks: seconds, no recording (18 Nov 2026)
 if (staged.some((f) => /^scripts\/(logo_check\.py|check-moving-ad\.py)$/.test(f))) {
   const c = spawnSync(path.join(ROOT, 'backend', '.venv', 'Scripts', 'python'), [path.join(ROOT, 'scripts', 'logo_check.py'), '--selftest'], { cwd: ROOT, encoding: 'utf8' });

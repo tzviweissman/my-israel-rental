@@ -19,8 +19,8 @@ not here.
 | [Quiet minimal](#quiet-minimal) | 88 | White or pale ground, lots of empty space, small calm type, few colours. | service, fashion-shop, events |
 | [Bold colour](#bold-colour) | 69 | Whole screens of saturated flat colour, loud and poster-like, colour per product or section. | food-shop, events, service |
 | [Playful hand-drawn](#playful-hand-drawn) | 30 | Illustration, doodles, stickers, hand lettering, paper-cut; friendly and fun. | events, food-shop, place |
-| [Giant type](#giant-type) | 52 | The type is the picture: huge or cropped wordmarks, letters filling the screen, raw type-first grids. | events, service, fashion-shop |
-| [Full-bleed film](#full-bleed-film) | 75 | A full-screen photo, video or 3D scene carries the page, type on top; immersive. | rental, place, events |
+| [Giant type](#giant-type) | 53 | The type is the picture: huge or cropped wordmarks, letters filling the screen, raw type-first grids. | events, service, fashion-shop |
+| [Full-bleed film](#full-bleed-film) | 76 | A full-screen photo, video or 3D scene carries the page, type on top; immersive. | rental, place, events |
 | [Tech and data](#tech-data) | 18 | Readouts, wireframes, number grids, tiny mono labels, maps; engineering or futuristic. | service, rental, food-shop |
 | [Soft gradient](#soft-gradient) | 29 | Pastel or glowing gradients, frosted glass, soft 3D shapes; the modern AI or SaaS look. | service, fashion-shop, events |
 | [App interface](#app-interface) | 19 | Product screens, card grids, directories, forms and dashboards from software. | service, fashion-shop, trainer |
@@ -446,7 +446,7 @@ Illustration, doodles, stickers, hand lettering, paper-cut; friendly and fun.
 | [videos-ruben-stom-2026-11-22/wbVWftxYNzY-scroll-line-starts-drawing.png](videos-ruben-stom-2026-11-22/wbVWftxYNzY-scroll-line-starts-drawing.png) | Journey site | cream ground, doodles, headline scrolling away, pinned card and drawn line | service, events, trainer |
 
 <a id="giant-type"></a>
-## Giant type (52)
+## Giant type (53)
 
 The type is the picture: huge or cropped wordmarks, letters filling the screen, raw type-first grids.
 
@@ -472,6 +472,7 @@ The type is the picture: huge or cropped wordmarks, letters filling the screen, 
 | [awwwards-categories-2026-10-18/bulletproof-2-name-list.webp](awwwards-categories-2026-10-18/bulletproof-2-name-list.webp) | Bulletproof | light grey ground, huge grey brand names stacked, one bright photo card in the middle | events, food-shop |
 | [awwwards-categories-2026-10-18/colonia-zacamil-1-image-inside-headline.webp](awwwards-categories-2026-10-18/colonia-zacamil-1-image-inside-headline.webp) | Colonia Zacamil | sand ground, tall condensed black caps, aerial photo sitting inside the headline, mono button | events, place |
 | [awwwards-categories-2026-10-18/creative-reference-library-1-cutup-giant-type.webp](awwwards-categories-2026-10-18/creative-reference-library-1-cutup-giant-type.webp) | Creative Reference Library | warm grey ground, huge white cut-up letters, black blocks, tiny dense text | service, events |
+| [awwwards-categories-2026-10-18/dawn-saunders-1-giant-name-portrait.webp](awwwards-categories-2026-10-18/dawn-saunders-1-giant-name-portrait.webp) | Dawn Saunders | giant white name behind portrait, flat warm yellow ground, cut-out person, black half circle | service, beauty, trainer |
 | [awwwards-categories-2026-10-18/glowing-cheetah-1-torn-edge-hero.webp](awwwards-categories-2026-10-18/glowing-cheetah-1-torn-edge-hero.webp) | Glowing Cheetah | dark cheetah photo, huge butter yellow ragged letters, torn paper edge, quirky caps | events |
 | [awwwards-categories-2026-10-18/grande-charte-2-giant-email.webp](awwwards-categories-2026-10-18/grande-charte-2-giant-email.webp) | Grande Charte | stone ground, giant tall black condensed email, sage serif line, holographic badge | service, events |
 | [awwwards-categories-2026-10-18/kyoosang-choi-1-sticker-book-opens.webp](awwwards-categories-2026-10-18/kyoosang-choi-1-sticker-book-opens.webp) | Kyoosang Choi | black ground, rotated bold words, outlined giant letter, mixed type sizes | fashion-shop, events |
@@ -506,7 +507,7 @@ The type is the picture: huge or cropped wordmarks, letters filling the screen, 
 | [videos-2026-11-22/tae-moodboard-take-and-skip-notes.png](videos-2026-11-22/tae-moodboard-take-and-skip-notes.png) | Fiasco, Instrument | full width heavy caps headline, photos floating around edges, flat yellow ground, sticky notes | fashion-shop, events |
 
 <a id="full-bleed-film"></a>
-## Full-bleed film (75)
+## Full-bleed film (76)
 
 A full-screen photo, video or 3D scene carries the page, type on top; immersive.
 
@@ -540,6 +541,7 @@ A full-screen photo, video or 3D scene carries the page, type on top; immersive.
 | [awwwards-categories-2026-10-18/junkbranding-2-ring-over-jellyfish.webp](awwwards-categories-2026-10-18/junkbranding-2-ring-over-jellyfish.webp) | Junkbranding | full-screen dotted underwater scene, glowing pastel ring, big light serif line | events, place |
 | [awwwards-categories-2026-10-18/lenval-properties-1-full-bleed-projects.webp](awwwards-categories-2026-10-18/lenval-properties-1-full-bleed-projects.webp) | Lenval Properties | full-bleed dusk building photo, tiny circle cursor label, dark cookie bar | rental, place |
 | [awwwards-categories-2026-10-18/montarville-2-project-slider-card.webp](awwwards-categories-2026-10-18/montarville-2-project-slider-card.webp) | Montarville | full-screen interior photo, big white heading, white caption card, numbered tabs | service, rental |
+| [awwwards-categories-2026-10-18/odyssee-2-close-up-opening.webp](awwwards-categories-2026-10-18/odyssee-2-close-up-opening.webp) | Odyssee Clinic | full-screen face close-up, pale grey studio ground, thin serif wordmark, small caps menu | beauty, service |
 | [awwwards-categories-2026-10-18/offforum-1-photo-cycle-hero.webp](awwwards-categories-2026-10-18/offforum-1-photo-cycle-hero.webp) | OFFF Forum | dark full-screen event photo, white serif caps centred, outlined info box | events |
 | [awwwards-categories-2026-10-18/schlosshotel-kitzbuhel-1-sauna-crossfade.webp](awwwards-categories-2026-10-18/schlosshotel-kitzbuhel-1-sauna-crossfade.webp) | Schlosshotel Kitzbuhel | full-screen warm sauna photo, centred serif logo, round maroon badge | rental, place, beauty |
 | [awwwards-categories-2026-10-18/second-ride-1-split-hero.webp](awwwards-categories-2026-10-18/second-ride-1-split-hero.webp) | Second Ride | two full-height photos side by side, white wordmark centre, dark fade captions | fashion-shop, rental |
@@ -605,7 +607,7 @@ Readouts, wireframes, number grids, tiny mono labels, maps; engineering or futur
 | [awwwards-anatomy-2026-10-22/services/d2c-d-sheet.webp](awwwards-anatomy-2026-10-22/services/d2c-d-sheet.webp) | D2C Life Science | sage green loader, 3D cream tiles with glyphs, mono labels, bold caps statement | service |
 | [awwwards-anatomy-2026-10-22/services/d2c-m-sheet.webp](awwwards-anatomy-2026-10-22/services/d2c-m-sheet.webp) | D2C Life Science | muted sage ground, 3D cream cubes with symbols, mono body text, bold caps headings | service |
 | [awwwards-anatomy-2026-10-22/services/usavionix-d-sheet.webp](awwwards-anatomy-2026-10-22/services/usavionix-d-sheet.webp) | USAvionix | pure black ground, aerial aircraft render with thin spec callout lines, tiny nav dots | service |
-| [awwwards-anatomy-2026-10-22/services/usavionix-m-sheet.webp](awwwards-anatomy-2026-10-22/services/usavionix-m-sheet.webp) | USAvionix | black loader screen, tiny mono initializing label, faint outline | service |
+| [awwwards-anatomy-2026-10-22/services/usavionix-m-sheet.webp](awwwards-anatomy-2026-10-22/services/usavionix-m-sheet.webp) | USAvionix | dark terrain film, tiny mono readouts, outlined map zones, glowing status dots | service |
 | [awwwards-categories-2026-10-18/3d-discovery-1-numbered-3d-objects.webp](awwwards-categories-2026-10-18/3d-discovery-1-numbered-3d-objects.webp) | 3D Discovery | light grey ground, corner brackets, giant step number, grey 3D object, thin ruled grid | service |
 | [awwwards-categories-2026-10-18/itsua-2-stats-row.webp](awwwards-categories-2026-10-18/itsua-2-stats-row.webp) | ITSUA | white ground, dashed column guides, huge grotesk headline, five coloured stat numbers, mono labels | service |
 | [awwwards-categories-2026-10-18/orizon-2-orb-coverage-card.webp](awwwards-categories-2026-10-18/orizon-2-orb-coverage-card.webp) | Orizon | white ground, glowing green orb, concentric rings, mono labels, outlined cards | service |
@@ -678,13 +680,11 @@ Product screens, card grids, directories, forms and dashboards from software.
 | [videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-a.png](videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-a.png) | Lumiere Studio | dark ground, wall of small page thumbnails, draggable tile grid | service, fashion-shop |
 | [videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-b-after-inertia.png](videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-b-after-inertia.png) | Lumiere Studio | dark ground, wall of small page thumbnails, draggable tile grid | service, fashion-shop |
 
-## Looked at and left out (34)
+## Looked at and left out (32)
 
 Pictures in site folders that are not someone else's website. Whole folders of ads and film stills
 are left out too: `ad-videos-2026-11-04`, `ad-videos-2026-11-07`, `pinterest-ads-2026-11-02`, `pinterest-business-ad-2026-11-24`, `pro-references`, `bar-breaking-2026-11-02`, `pinterest-burnt-2026-11-18`, `pinterest-burnt-reveal-2026-11-23`, `product-films-2026-10-21`, `product-shots-2026-10-22`, `videos-2026-11-01`, `sameness-2026-11-17`.
 
-- `awwwards-categories-2026-10-18/dawn-saunders-1-giant-name-portrait.webp`: blank black capture, no content visible
-- `awwwards-categories-2026-10-18/odyssee-2-close-up-opening.webp`: blank grey frame, no page content
 - `awwwards-categories-2026-10-18/rialto-1-blue-logo-loader.webp`: loader screen only
 - `directory-2026-11-20/ours-before.jpg`: our own MyIsraelRental page
 - `directory-2026-11-20/preview-l-all2.jpg`: our own preview build
