@@ -53,7 +53,8 @@ const SCORE_RULES = new Set(['A9.7', 'A10.7', 'A10.8']);
 const LAYOUT_RULES = new Set(['A3.11']);
 const KEEP_RULES = new Set(['A9.8']);
 const INSPO_RULES = new Set(['A9g.11']);   // references opened, and a Pinterest search saved for this ad (Tzvi, 24 Nov 2026)
-const KIND_RULES = new Set(['A9.9']);      // beside top posters of its own subject, five numbered yes/no (Tzvi, 25 Nov 2026)
+const KIND_RULES = new Set(['A9.9']);      // beside top posters of its own subject, seven numbered yes/no (Tzvi, 25 Nov 2026)
+const PLATE_RULES = new Set(['A3.13']);    // the picture made around our own typed word: the plate picture exists (Tzvi, 25 Nov 2026)
 const LIB = path.join(ROOT, 'docs', 'inspo', 'pinterest-ads-2026-11-02');
 let libCodes = null;
 function libraryCodes() {
@@ -120,9 +121,14 @@ function problems(name, upTo, finished) {
       if (KIND_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
         const sheet = [...g.plan.matchAll(/([\w./-]+\.(?:jpg|jpeg|png))/gi)].map((x) => x[1]).some((f) => fs.existsSync(path.resolve(ROOT, f)));
         if (!sheet) out.push(`stage ${s.n}, ${it.id}: name the sheet from python scripts/ad_vs_pros.py <sheet.jpg> <ad.jpg> --refs <pin>,<pin>,<pin>`);
-        const n = new Set([...g.plan.matchAll(/(?:^|\s)([1-5])\)/g)].map((x) => x[1])).size;
-        if (n < 5) out.push(`stage ${s.n}, ${it.id}: answer the five questions as 1) to 5) (found ${n})`);
-        if (/(?:^|\s)[1-5]\)\s*no\b/i.test(g.plan) && !/remade/i.test(g.plan) && !SENT_ANYWAY.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: a "no" goes back to be remade; say what changed ("remade: ...")`);
+        const n = new Set([...g.plan.matchAll(/(?:^|\s)([1-7])\)/g)].map((x) => x[1])).size;
+        if (n < 7) out.push(`stage ${s.n}, ${it.id}: answer the seven questions as 1) to 7) (found ${n})`);
+        if (/(?:^|\s)[1-7]\)\s*no\b/i.test(g.plan) && !/remade/i.test(g.plan) && !SENT_ANYWAY.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: a "no" goes back to be remade; say what changed ("remade: ...")`);
+      }
+      // A3.13: the picture was made around our own typed word, so the plate picture given to the model exists.
+      if (PLATE_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
+        const pics = [...g.plan.matchAll(/([\w./-]+\.png)/gi)].map((x) => x[1]);
+        if (!pics.some((f) => fs.existsSync(path.resolve(ROOT, f)))) out.push(`stage ${s.n}, ${it.id}: name the plate picture given to the model (ad.html?plate=1, saved as docs/ads/gen/${name}/plate.png), or n/a: nothing crosses the words`);
       }
       if (FIT_RULES.has(it.id) && !/^n\/a:/i.test(g.plan) && !/ad-fit-picture/.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: name scripts/ad-fit-picture.py, the way the picture was laid on the ad, or n/a`);
       // A design's blueprint says how the maker places every business's logo ("built by ..."), not one file.

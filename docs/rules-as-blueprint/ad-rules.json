@@ -349,6 +349,39 @@
    "status": "planned"
   },
   {
+   "id": "A3.13",
+   "rule": "Words the picture is made around: the model gets our typed word (ad.html?plate=1), our crisp word typed back on top, the parts in front cut in code",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "scripts/ad-blueprint.mjs --check refuses the answer unless it names an existing plate picture, or n/a",
+   "confirmed_by": "ad-blueprint.mjs --check",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A3.14",
+   "rule": "Food on a warm ground, never a cold flat blue, grey or green; the brand colour on the type",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "asked in the blueprint",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
+   "id": "A3.15",
+   "rule": "Food shows its texture and life: its own garnish and seasoning, pieces in the air, raking light",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "asked in the blueprint",
+   "confirmed_by": "LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
    "id": "A3.11",
    "rule": "Layout drawn first and given to the reference-image model",
    "how": [
@@ -683,12 +716,12 @@
   },
   {
    "id": "A9.9",
-   "rule": "Exciting beside its own kind: beside top posters of its own subject, five yes or no",
+   "rule": "Exciting beside its own kind: beside top posters of its own subject, seven yes or no",
    "how": [
     "GEN",
     "EYE"
    ],
-   "built_by": "scripts/ad_vs_pros.py --refs makes the sheet; scripts/ad-blueprint.mjs --check refuses the answer without an existing sheet, five numbered answers, and 'remade' after any no",
+   "built_by": "scripts/ad_vs_pros.py --refs makes the sheet; scripts/ad-blueprint.mjs --check refuses the answer without an existing sheet, seven numbered answers, and 'remade' after any no",
    "confirmed_by": "ad-blueprint.mjs --check, LOOK",
    "retried": false,
    "status": "planned"
