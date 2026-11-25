@@ -102,12 +102,14 @@ presenters' own runs. "10x" titles are not measured.
 - The video-notes skill: search for the video's ID in `docs/inspo/` first; open the description before Show
   transcript.
 
-Not added, because they do not make a build better, quicker or less error-prone:
-- C1 (reviews show what they ordered) and C2 (a QR that sends the order to the phone) are features for customers.
-  C1 needs the review endpoint to return the ordered item; C2 needs a QR maker in the starter (none is installed
-  outside the React app), and a long order makes a dense code. Offered as their own task.
-- D3 (a no-rules test) is a single test, not a rule.
-- D4 (inspo sorted by look) means re-reading every reference folder; offered as its own task.
+Added later the same day (Tzvi: "do all 3"):
+- C1: page rules 3am.5, `scrollcraft/starter/reviews.js`, and the reviews API now adds `ordered` (item names only) and
+  `order_again` for a review written after a real site order (`backend/routes/reviews.py`, tested in
+  `backend/tests/test_reviews_business.py`).
+- C2: page rules 3am.6 and `scrollcraft/starter/qr.js` (Project Nayuki's MIT encoder, copied from the installed
+  qrcode.react); tested: the code decodes back to the exact WhatsApp link.
+- D3: the no-rules test, `norules-test/README.md` and `compare.png`.
+- D4: `docs/inspo/by-look.md`, done in its own session.
 
 No live site changes: rule-dates.mjs holds every site published before today to the rules of its own day
 (check-rules on Bake Away lists R3am.1 to R3am.4 as "not required").

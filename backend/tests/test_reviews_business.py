@@ -79,6 +79,28 @@ def test_done_order_counts_and_is_verified():
     run(t)
 
 
+def test_order_review_says_what_was_ordered(monkeypatch):
+    """rules 3am.5: names only, the same items again; another review gets nothing."""
+    import routes.reviews as route
+
+    async def t(db):
+        await seed(db)
+        lines = [{"product_id": "p1", "name": "Challah", "price": 20, "qty": 2},
+                 {"product_id": "p2", "option_id": "big", "name": "Babka", "price": 45, "qty": 1}]
+        await db.store_orders.insert_one({"_id": "o3", "business_id": "biz1", "owner_user_id": "owner", "gig_id": "gig1",
+                                          "customer_user_id": "cust", "status": "done", "status_changed_at": now(),
+                                          "lines": lines, "customer_phone": "050-0000000"})
+        await rv.create_native(db, booking_id="o3", user_id="cust", rating=5, text=TEXT)
+        monkeypatch.setattr(route, "db", db)
+        out = await rv.list_reviews(db, {"business_id": "biz1"}, source=None, sort="newest", page=1)
+        await route._attach_ordered(out["reviews"])
+        x = out["reviews"][0]
+        assert x["ordered"] == ["Challah", "Babka"]
+        assert x["order_again"] == "/order/gig1?items=p1~2,p2%3A%3Abig~1"
+        assert "050" not in str(x)
+    run(t)
+
+
 def test_anonymous_order_does_not_count():
     async def t(db):
         await seed(db)

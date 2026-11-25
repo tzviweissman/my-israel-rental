@@ -6,15 +6,15 @@ Sections (line each starts on; read with that offset):
 - 76: 1. Facts and words
 - 107: 2. Opening
 - 191: 3. Sections and worlds
-- 298: 4. Photos and media
-- 329: 5. Prices and savings
-- 352: 6. Order and booking flow
-- 378: 7. Motion
-- 410: 8. Phone
-- 425: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
-- 432: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 443: 9. Finish
-- 448: Retired
+- 300: 4. Photos and media
+- 331: 5. Prices and savings
+- 354: 6. Order and booking flow
+- 380: 7. Motion
+- 412: 8. Phone
+- 427: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
+- 434: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 445: 9. Finish
+- 450: Retired
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -291,6 +291,8 @@ R3am.1 | Each clip whose camera travels (a fly-through, an orbit, a push through
 R3am.2 | When a film plays behind feature words, the subject stands on one half and the words on the other, crossing for the next feature; each step's end still names the half left clear | 3am.2, 3al.1 | LOOK: the opening scrolled to each feature, laptop and phone; n/a with no feature words over a film when:film
 R3am.3 | The picked first screen and the part C home page loaded the tweaks panel (gen/board/tweaks.js) for Tzvi, and any values he sent back are in site.css | 3am.3, 3aj.8 | LOOK: the panel on the picked first screen
 R3am.4 | A labelled exploded view, a card that grows into the next film, a paper-cut scene in code or a two-axis chooser is used only when picked (treatments line, or a signature line for the chooser), with every label and map place from the owner's own words, never on prices, order controls or the shop and menu pages; n/a when none is used | 3am.4, 3ai, 3ak.4, 3al.8 | LOOK: CONCEPT.md treatments and signature lines against the site + script: `node scripts/check-compared.mjs <build>` (TREATMENTS)
+R3am.5 | When the site shows our own reviews (an option), reviews.js fills #our-reviews from the API; a review after a real site order shows "Ordered:" with item names only and "Order this" fills the basket; nothing guessed for other reviews; the section stays hidden with no review | 3am.5, 3 (cont.) 5 | LOOK: the section with the API on and off, laptop and phone; n/a when the site shows no reviews of ours
+R3am.6 | A shop or order page that ends in WhatsApp loads qr.js before shop.js; after Send, a laptop sees a scannable QR of the same message, a phone never does, none over 1,500 characters | 3am.6 | LOOK: a test order sent on a laptop, the code scanned with a phone; n/a with no WhatsApp order page
 R3u.8 | A tilted label over headings, if used, is this site's own shape from its world and in fingerprints.json, never another site's | 3u.8 | LOOK: its "label" in fingerprints.json differs from every other site's; n/a if none
 R3u.9 | Questions are rounded cards on `<details>`, "+" in an accent circle turning into "x", the answer opening smoothly inside the card | 3u.9 | LOOK: open two on a phone; n/a if no questions section
 R3u.10 | A business with two or more places has its list beside a map in the site's colours with numbered pins, the map held on a laptop and above the list on a phone | 3u.10 | LOOK; n/a with one place or none

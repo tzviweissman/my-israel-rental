@@ -3795,6 +3795,28 @@
    "status": "planned"
   },
   {
+   "id": "R3am.5",
+   "rule": "Our own reviews on the site say what a real site order was (item names only) with Order this; nothing for other reviews; hidden with none",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "scrollcraft/starter/reviews.js; the API adds ordered and order_again (routes/reviews.py _attach_ordered)",
+   "confirmed_by": "LOOK + tests/test_reviews_business.py",
+   "status": "built"
+  },
+  {
+   "id": "R3am.6",
+   "rule": "After Send on a laptop, a QR code of the same WhatsApp message for the phone",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "scrollcraft/starter/qr.js loaded before shop.js",
+   "confirmed_by": "LOOK: a test order on a laptop, scanned with a phone",
+   "status": "built"
+  },
+  {
    "id": "R3e.26",
    "rule": "Controls answer in 300 ms or less, ease out, never from scale(0), no bounce, pressed buttons shrink to 0.97",
    "how": [

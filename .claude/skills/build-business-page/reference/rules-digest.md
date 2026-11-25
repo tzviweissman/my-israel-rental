@@ -44,11 +44,11 @@ Sections (line each starts on; read with that offset):
 - 1365: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
 - 1378: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
 - 1400: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026)
-- 1418: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1426: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1459: 5a. Design and story (from rules 5a, 5b and 8)
-- 1489: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
-- 1512: 3a. (cont.) Look through it, fix it, then show it
+- 1422: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1430: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1463: 5a. Design and story (from rules 5a, 5b and 8)
+- 1493: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
+- 1516: 3a. (cont.) Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section and item numbers match the full rulebook (since 22 Nov 2026), so "3g.13", "3h.11", "3b.2" and the like
@@ -1414,6 +1414,10 @@ proposed rule (3aj.6).
    or on shop and menu pages), a card that grows into the next film (two or more films), a paper-cut scene drawn in
    code (a business with a story). A signature section may be a two-axis chooser (8 or more items, each placed from
    the owner's words, the nearest real item shown with its price and Add).
+5. Option: our own reviews via `scrollcraft/starter/reviews.js` (`#our-reviews data-business`); a review after a real
+   site order shows "Ordered:" (names only, from the API) and "Order this" fills the basket; hidden with no review.
+6. Every new WhatsApp order page loads `scrollcraft/starter/qr.js` before `shop.js`: after Send, laptops only, a QR of
+   the same message for the phone (none over 1,500 characters).
 
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
 

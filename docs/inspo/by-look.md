@@ -680,7 +680,7 @@ Product screens, card grids, directories, forms and dashboards from software.
 | [videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-a.png](videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-a.png) | Lumiere Studio | dark ground, wall of small page thumbnails, draggable tile grid | service, fashion-shop |
 | [videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-b-after-inertia.png](videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-b-after-inertia.png) | Lumiere Studio | dark ground, wall of small page thumbnails, draggable tile grid | service, fashion-shop |
 
-## Looked at and left out (32)
+## Looked at and left out (37)
 
 Pictures in site folders that are not someone else's website. Whole folders of ads and film stills
 are left out too: `ad-videos-2026-11-04`, `ad-videos-2026-11-07`, `pinterest-ads-2026-11-02`, `pinterest-business-ad-2026-11-24`, `pro-references`, `bar-breaking-2026-11-02`, `pinterest-burnt-2026-11-18`, `pinterest-burnt-reveal-2026-11-23`, `product-films-2026-10-21`, `product-shots-2026-10-22`, `videos-2026-11-01`, `sameness-2026-11-17`.
@@ -714,6 +714,11 @@ are left out too: `ad-videos-2026-11-04`, `ad-videos-2026-11-07`, `pinterest-ads
 - `videos-2026-11-25/aD9X6Lc3dVk-paper-cut-style.png`: motion graphic demo slide, not a web page
 - `videos-2026-11-25/aD9X6Lc3dVk-physics-dominoes-word.png`: motion graphic demo slide, not a web page
 - `videos-2026-11-25/mvfo3pUiCCA-blocking-to-seconds-prompt.png`: prompt and tool screenshot
+- `videos-2026-11-25/norules-test/compare.png`: our own no-rules test (Gremier), not a reference
+- `videos-2026-11-25/norules-test/norules-laptop.png`: our own no-rules test (Gremier), not a reference
+- `videos-2026-11-25/norules-test/norules-phone.png`: our own no-rules test (Gremier), not a reference
+- `videos-2026-11-25/norules-test/rules-laptop.png`: our own no-rules test (Gremier), not a reference
+- `videos-2026-11-25/norules-test/rules-phone.png`: our own no-rules test (Gremier), not a reference
 - `videos-ruben-stom-2026-11-22/HrD3y4bwHcg-instant-ai-prompt-ticker-on-slider.png`: AI builder chat panel beside a furniture page, tool screenshot
 - `videos-ruben-stom-2026-11-22/I0Eb0Vi5OEg-scrubbed-scale-prompt-on-screen.png`: prompt text beside a clip, tool screenshot
 - `videos-ruben-stom-2026-11-22/ot93rO2flS8-split-section-image-wipes-in-beside-animation-prompt.png`: prompt chat panel beside the page, tool screenshot

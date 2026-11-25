@@ -324,6 +324,7 @@ textarea.fld { min-height: 88px; resize: vertical; }
 .back { margin-top: var(--s2); width: 100%; min-height: 44px; border: 1.5px solid var(--line); background: var(--ground); border-radius: var(--r); font: 600 var(--t0)/1 var(--font-body); cursor: pointer; color: var(--ink); }
 .note, .sent { color: var(--soft); font-size: var(--t-1); margin: var(--s3) 0 0; }
 .sent { color: var(--ink); font-weight: 600; }
+.sent-qr { display: block; margin-top: var(--s4); } .sent-qr span { display: block; font-weight: 400; margin-bottom: var(--s2); }   /* rules 3am.6: laptop only, from shop.js */
 .keep { margin-top: var(--s3); }
 .ful { display: flex; gap: var(--s2); }
 .toast { position: fixed; left: 50%; bottom: calc(var(--pad-bar, 0px) + 20px); width: max-content; max-width: 92vw; z-index: 40; display: flex; gap: var(--s2); align-items: center; padding: var(--s3) var(--s5);

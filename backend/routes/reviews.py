@@ -250,6 +250,25 @@ async def report_review(review_id: str, request: Request, payload: dict = Body(.
 
 # ---------------------------------------------------------------- reading
 
+async def _attach_ordered(reviews: list[dict]) -> None:
+    """A review written after a site order says what was ordered (rules 3am.5; Nate Herk's coffee site, 25 Nov 2026):
+    `ordered` is the item names only (no quantities, prices or customer details) and `order_again` the order form with
+    the same items chosen. Only for native reviews of a real store order; nothing is guessed for any other review."""
+    ids = [x["id"] for x in reviews if x.get("source") == "native" and x.get("booking_kind") == "order"]
+    if not ids:
+        return
+    from routes.marketplace.orders import reorder_path
+    booking = {r["_id"]: r.get("booking_id") async for r in db.reviews.find({"_id": {"$in": ids}}, {"booking_id": 1})}
+    orders = {o["_id"]: o async for o in db.store_orders.find({"_id": {"$in": [b for b in booking.values() if b]}},
+                                                              {"lines": 1, "gig_id": 1})}
+    for x in reviews:
+        o = orders.get(booking.get(x["id"]))
+        names = list(dict.fromkeys(str(ln.get("name") or "").strip() for ln in (o or {}).get("lines") or []))
+        names = [n for n in names if n]
+        if names:
+            x["ordered"], x["order_again"] = names[:4], reorder_path(o)
+
+
 async def _page(match: dict, source: str | None, sort: str, page: int, viewer: dict | None) -> dict:
     sources = _sources()
     if not sources:
@@ -257,6 +276,7 @@ async def _page(match: dict, source: str | None, sort: str, page: int, viewer: d
     match = {**match, "source": {"$in": sources}}
     source = source if source in sources else None
     out = await rv.list_reviews(db, match, source=source, sort=sort, page=page)
+    await _attach_ordered(out["reviews"])
     me = (viewer or {}).get("user_id")
     if me:
         rows = {r["_id"]: r async for r in db.reviews.find({"_id": {"$in": [x["id"] for x in out["reviews"]]}},

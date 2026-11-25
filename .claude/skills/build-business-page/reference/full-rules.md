@@ -46,17 +46,17 @@ Sections (line each starts on; read with that offset):
 - 3217: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
 - 3257: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
 - 3352: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
-- 3410: 4. What is reported to the owner instead (content gaps)
-- 3419: 5. How to write
-- 3468: 5a. Lessons from the practice pages
-- 3499: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3548: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3565: 6. Playbooks for the most common businesses
-- 3692: 7. Choosing the three options (automatic page builder only)
-- 3716: 8. Photos, video and the tools
-- 3947: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 4017: 9. The scroll sections: what the practice pages become
-- 4053: 10. Open decisions (need Tzvi)
+- 3427: 4. What is reported to the owner instead (content gaps)
+- 3436: 5. How to write
+- 3485: 5a. Lessons from the practice pages
+- 3516: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3565: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3582: 6. Playbooks for the most common businesses
+- 3709: 7. Choosing the three options (automatic page builder only)
+- 3733: 8. Photos, video and the tools
+- 3964: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 4034: 9. The scroll sections: what the practice pages become
+- 4070: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -3406,6 +3406,23 @@ a site published before 25 Nov 2026 (rule-dates.mjs).
    with its real prices and Add button. Only for a menu of eight or more items, each placed on the map from what the
    owner says about it, never guessed.
    Checked by LOOK, and the count by check-compared TREATMENTS as for every decoration.
+
+5. **Reviews that say what was ordered** (Nate Herk's coffee site, `DByAR5Su1Yw-reviews-with-their-order.png`; Tzvi, 25
+   Nov 2026: "do all 3"). An option for a new site whose business has our own reviews (written after a real order or
+   booking, 3 (cont.) item 5). `scrollcraft/starter/reviews.js` fills `<section id="our-reviews"
+   data-business="<id>">` from `/api/businesses/<id>/reviews`: a review written after a real site order shows
+   "Ordered: <the item names>" and an "Order this" link that puts the same items in the basket. The API sends the
+   item names only (no quantities, prices or customer details, `routes/reviews.py` `_attach_ordered`), and nothing is
+   ever shown or guessed for a Google review or one without an order. The section stays hidden until there is one
+   real review, so a new business never shows an empty box. Its look is written for the site (3ad.2). Checked by
+   LOOK: the section with the API on and off, laptop and phone; `tests/test_reviews_business.py` checks the API.
+
+6. **Send the order to your phone** (Nate Herk's coffee site, `DByAR5Su1Yw-qr-send-order-to-phone.png`). Every new
+   shop or order page that ends by opening WhatsApp loads `scrollcraft/starter/qr.js` before `shop.js`. After "Send",
+   on a laptop (`hover: hover` and `pointer: fine`) only, the thank-you line also shows a QR code of the same
+   WhatsApp message, "No WhatsApp on this computer? Scan this with your phone", for people not signed in to WhatsApp
+   on their laptop. It is skipped for an order whose link is over 1,500 characters, too dense to scan. Phones never
+   see it. Checked by LOOK: send a test order on a laptop and scan the code with a phone.
 
 ## 4. What is reported to the owner instead (content gaps)
 

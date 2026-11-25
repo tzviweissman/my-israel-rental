@@ -150,3 +150,12 @@ piece is tried there first (3u.12), then added to the kit.
 `<script src="tweaks.js"></script>` to the picked first screen and the part C page. A "Tweaks" button opens a
 control for every `:root` value (colours, sizes, fonts; a Google font typed in is loaded). Tzvi presses
 "Copy values" and sends the `:root` block back; paste it into site.css.
+
+## Our reviews and the phone QR (rules 3am.5 and 3am.6, 25 Nov 2026)
+
+- `reviews.js` (an option): add `<section id="our-reviews" data-business="<business id>" data-order="shop.html#order"
+  hidden><h2>…</h2><div class="rv-list"></div></section>` and the script. It shows our own reviews and, for one
+  written after a real site order, "Ordered: …" with an "Order this" link that fills the basket. Style `.rv-card`,
+  `.rv-stars`, `.rv-text`, `.rv-by`, `.rv-ordered` and `.rv-again` for the site.
+- `qr.js` (every new WhatsApp order page): load it before `shop.js`. After Send on a laptop, the thank-you line shows a
+  QR of the same WhatsApp message to scan with the phone.

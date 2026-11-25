@@ -171,6 +171,12 @@
       if (tab) tab.location.href = url; else location.href = url;
       sending = false; send.removeAttribute('aria-busy');
       var sent = document.getElementById('sent'); sent.textContent = 'Thanks, ' + v('me').split(/\s+/)[0] + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false;
+      // On a laptop, a QR code opens the same message on the phone, for people not signed in to WhatsApp here
+      // (rules 3am.6, from Nate Herk's coffee site). Only with qr.js on the page; none for an order too long to scan.
+      var qr = matchMedia('(hover: hover) and (pointer: fine)').matches && url.length <= 1500 && window.siteQR && window.siteQR(url, 220);
+      if (qr) { var w = document.createElement('span'); w.className = 'sent-qr'; qr.setAttribute('aria-label', 'QR code with your order for WhatsApp');
+        var p = document.createElement('span'); p.textContent = 'No WhatsApp on this computer? Scan this with your phone to send the same message.';
+        w.appendChild(p); w.appendChild(qr); sent.appendChild(w); }
     });
   });
   document.getElementById('sum-list').addEventListener('click', function (e) {
