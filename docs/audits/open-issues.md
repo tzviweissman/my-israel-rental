@@ -583,3 +583,11 @@ Main moved on after PR #24 was opened (the sign-up work stream was rewritten), s
 - [Low] Texts and emails: staff with the Orders area can send paid test texts to the business's number (10 a day) and use its daily translation allowance, while the message settings themselves are owner only (`orders.py:2178`, `:2214` call `_owned_business` without `None`). First seen 24 Nov (2026-11-24-site-audit.md). Permissions: reported, not fixed.
 - Fixed 24 Nov: "Pick up to N" and "Pick a choice" order refusals now in Hebrew on a Hebrew order page (c12ecde9).
 - Still open: the 23 Nov audit merge (claude/audit-merge-8kdnag) is not on main, so test-i18n-parity still fails its 3 checks (browse.*, wizard.pickCategory); audit sandbox still has no MongoDB or Playwright download.
+
+## UI audit of 25 Nov 2026 (claude/sweet-knuth-nurkmz)
+- [Low] Ad maker: the new tabs (Words, Look, Extras, Share) 36px, "Ready? Share or download it" 40px, ad language pills 30px at 375 (`AdMaker.jsx:4531`, `:4831`; from 40f3fe3). First seen 25 Nov 2026 (2026-11-25-ui-audit.md). Not fixed: AdMaker commits need check-ad-designs, which times out in the audit sandbox.
+- [Low] Texts and emails length line "counts as 1 text(s)" / Hebrew "כ־1 הודעות". First seen 25 Nov 2026. [Fixed 25 Nov, 934c0fd4, not on main yet]
+- [Low] Order page section tabs 36px tall at 375 (`OrderPage.jsx`, from 310881d). First seen 25 Nov 2026. [Fixed 25 Nov, 452f0b4d, not on main yet]
+- [Low] Texts and emails panel buttons 36px tall (`CustomerMessages.jsx`, from 40f3fe3). First seen 25 Nov 2026. [Fixed 25 Nov, cd747fbc, not on main yet]
+- [Low] Listing page empty cover "No image" hard-coded English (`GigDetail.jsx:893`). First seen 25 Nov 2026. [Fixed 25 Nov, a7c16ddf, not on main yet]
+- Still open, 25 Nov: claude/audit-merge-8kdnag not on main (test-i18n-parity fails the same 3 checks); code-stays-applied-under-minimum (23 Nov, not re-checked); ad maker close button (30 Oct); MongoDB 403 and Playwright chromium 1234 in the sandbox.
