@@ -195,6 +195,9 @@ textarea.fld { min-height: 88px; resize: vertical; }
 .film.slides .track { position: absolute; inset: 0; will-change: transform; }
 .film.slides .slide { position: absolute; left: 0; right: 0; height: 100%; overflow: hidden; background: var(--ground); }
 .film.slides .slide video, .film.slides .slide img.still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* a phone taller than the film shows it whole, sat on the bottom on its ground, so words never lose their ends (rules
+   3aa.36; Burnt's "We Bring the Fire" read "We Brin / the Fire" covering a 390x844 phone, 25 Nov 2026) */
+@media (max-aspect-ratio: 9/16) { .film .stage video, .film .stage canvas, .film.slides .slide video, .film.slides .slide img.still { object-fit: contain !important; object-position: 50% 100% !important; } }
 .film.slides .over { position: absolute; left: var(--gutter); top: 50%; transform: translateY(-40%); transition: opacity 420ms var(--out), transform 420ms var(--out); }
 .film.slides .over h1 { font-size: var(--t5); line-height: 1.02; }
 .film.slides .over .ln { font-size: var(--t1); margin: var(--s4) 0 var(--s5); max-width: 30rem; }

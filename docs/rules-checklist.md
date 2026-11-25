@@ -5,16 +5,16 @@ Sections (line each starts on; read with that offset):
 - 26: How to use it
 - 76: 1. Facts and words
 - 107: 2. Opening
-- 190: 3. Sections and worlds
-- 297: 4. Photos and media
-- 328: 5. Prices and savings
-- 351: 6. Order and booking flow
-- 377: 7. Motion
-- 409: 8. Phone
-- 424: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
-- 431: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 442: 9. Finish
-- 447: Retired
+- 191: 3. Sections and worlds
+- 298: 4. Photos and media
+- 329: 5. Prices and savings
+- 352: 6. Order and booking flow
+- 378: 7. Motion
+- 410: 8. Phone
+- 425: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
+- 432: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 443: 9. Finish
+- 448: Retired
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -154,6 +154,7 @@ R3aa.35 | Every still of one scene from one base picture: the board, walnut and 
 R3aa.36 | Every hero object real and premium up close: clean surfaces, crisp edges, one hard light on the edges, real materials, detail at a maker's scale; a mark matches the tool that made it in design and size, the tool at its mark | 3aa.34 | LOOK: each hero object cropped close beside its inspo at the same size, the shot_seen line answering the six, a mark beside its tool; n/a with no product picture in the opening
 R3aa.37 | The hero object fills a third of its frame, or a product step gets its own close frame beside the wide one, planned as two frames | 3aa.33 | LOOK: the hero's share of each still, the brief's close and wide frames; n/a with no product picture in the opening
 R3aa.38 | Before any clip, Tzvi saw one sheet of the whole film as stills (each clip's start and end, laptop beside phone) and his yes is quoted in beats_seen | 3aa.35 | RUN: clipchain.py make (refuses without it); LOOK: the brief's beats_seen line; n/a with no film when:film
+R3aa.39 | Words over the film are live text in the page, or a step's word inside the middle 80% of the phone film; every word whole at 390x844 | 3aa.36 | LOOK: a 390x844 screenshot of each chapter; n/a with no film when:film
 R3ak.2 | Every scroll film has a scroll timeline: each chain.json step has a scroll line saying where in the scroll it starts and ends, what moves, and when its words come and go; no step's words show outside its scene | 3ak.2, 3aa.20 | LOOK: each step's scroll line against the opening at 20, 50 and 80 percent, laptop and phone; n/a with no film when:film
 R3bb.1 | A choice (3ai.2): any small touch used comes from 3bb's list or the site's own references, is not one the site built before it used, and shows only true facts; a touch that is there for looks is named on the "- treatments:" line and counts as one of the three; no number is asked; n/a when none is used | 3bb, 3ai | LOOK: CONCEPT.md treatments line and each touch on the site
 R3h.1 | The home page opens on a full-screen picture or film (at least 70% picture): the owner's strongest real photo, or the styled shot of it (3ag.1). It is an event from their own thing (a film, or an event built in code), proposed with the first build, never after | 3h.1, 3n | script: site OPENING (home page) plus LOOK to confirm it is an event, not a drift

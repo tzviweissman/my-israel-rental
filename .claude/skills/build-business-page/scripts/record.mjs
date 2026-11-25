@@ -88,6 +88,15 @@ if (EXPECT && !title.toLowerCase().includes(EXPECT.toLowerCase())) {
   console.error(`STOPPED: the page at ${url} is "${title}", not "${EXPECT}". Another site may hold that port; serve this one on a free port.`);
   await b.close(); process.exit(2);
 }
+// A video the page moves by the scroll needs a server that sends part of a file (Range): Python's http.server sends the
+// whole file, the video cannot jump, and Burnt's film stood on its first frame through a whole check (25 Nov 2026).
+for (const src of await p.evaluate(() => [...document.querySelectorAll('video')].map((v) => v.currentSrc || v.src).filter(Boolean))) {
+  const r = await fetch(src, { headers: { Range: 'bytes=0-1' } }).catch(() => null);
+  if (r && r.status !== 206) {
+    console.error(`STOPPED: ${src} came back whole (${r.status}), so the video cannot jump to a moment. Serve the build with node scripts/serve-builds.mjs.`);
+    await b.close(); process.exit(2);
+  }
+}
 
 // One step of the page's own time, then everything that runs on its own is
 // set for that moment, and we wait (in real time) until it is ready to draw.

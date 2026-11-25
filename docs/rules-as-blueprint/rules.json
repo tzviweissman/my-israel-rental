@@ -848,6 +848,17 @@
    "status": "built"
   },
   {
+   "id": "R3aa.39",
+   "rule": "Words over the film are live text in the page, or a step's word inside the middle 80% of the phone film; every word whole at 390x844",
+   "how": [
+    "KIT",
+    "EYE"
+   ],
+   "built_by": "scrollcraft/starter/site.css shows the film whole on a screen taller than 9:16 (3aa.36)",
+   "confirmed_by": "LOOK: a 390x844 screenshot of each chapter",
+   "status": "built"
+  },
+  {
    "id": "R3bb.1",
    "rule": "A choice (3ai.2): any small touch used is from 3bb or the references, counts toward the three when it is there for looks; no number is asked",
    "how": [

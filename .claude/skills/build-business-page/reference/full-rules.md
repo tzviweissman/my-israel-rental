@@ -33,30 +33,30 @@ Sections (line each starts on; read with that offset):
 - 2327: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
 - 2352: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
 - 2392: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 2669: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
-- 2696: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
-- 2764: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
-- 2781: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
-- 2827: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
-- 2850: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
-- 2883: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
-- 2932: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
-- 3016: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
-- 3062: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3208: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3248: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3343: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
-- 3401: 4. What is reported to the owner instead (content gaps)
-- 3410: 5. How to write
-- 3459: 5a. Lessons from the practice pages
-- 3490: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3539: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3556: 6. Playbooks for the most common businesses
-- 3683: 7. Choosing the three options (automatic page builder only)
-- 3707: 8. Photos, video and the tools
-- 3938: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 4008: 9. The scroll sections: what the practice pages become
-- 4044: 10. Open decisions (need Tzvi)
+- 2678: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
+- 2705: 3bb. Small touches (Tzvi, 12 Nov 2026: "all")
+- 2773: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026: "All sites, as a rule")
+- 2790: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026: "All four")
+- 2836: 3ae. One part leads into the next (Tzvi, 18 Nov 2026: "1 and 3")
+- 2859: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026: "All ten")
+- 2892: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
+- 2941: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
+- 3025: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
+- 3071: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
+- 3217: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3257: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3352: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
+- 3410: 4. What is reported to the owner instead (content gaps)
+- 3419: 5. How to write
+- 3468: 5a. Lessons from the practice pages
+- 3499: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3548: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3565: 6. Playbooks for the most common businesses
+- 3692: 7. Choosing the three options (automatic page builder only)
+- 3716: 8. Photos, video and the tools
+- 3947: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 4017: 9. The scroll sections: what the practice pages become
+- 4053: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -2665,6 +2665,15 @@ part where one exists, so it is there without being remembered.
     seen. A changed setup is a new sheet and a new yes. Checked by `clipchain.py make`: it refuses a new clip until
     chain.json's `beats_seen` line names the sheet and quotes his yes; a build that makes its clips with its own script
     puts the same line in its film brief.
+36. **Words over a film stay whole on every screen** (Tzvi, 25 Nov 2026, "do all 3", after Burnt; for films made from
+    that day). A line of words over a film (a phrase, a slogan, a chapter line) is set in the page as live text over the
+    video, never burned into the clips or the joined film. The one exception is a step's word interlocked with the object
+    (3aa.9): it stays in the picture, inside the middle 80 percent of the phone film's width. Why: a phone is taller than
+    9:16 (an iPhone is about 9:19.5), so a film that covers its screen loses its sides; Burnt's "We Bring the Fire",
+    drawn into the phone film, read "We Brin / the Fire" on a 390x844 phone. Wherever the screen is taller than the
+    film, the page shows the phone film whole (`object-fit: contain`, sat on the bottom, on the ground the film fades
+    to). Checked by a 390x844 screenshot of each chapter. Live words like Bramble's chapter labels
+    (`docs/inspo/videos-2026-11-08`).
 
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026: "All four")
 
