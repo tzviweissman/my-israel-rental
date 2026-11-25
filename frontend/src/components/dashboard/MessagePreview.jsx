@@ -42,6 +42,9 @@ export default function MessagePreview({ loaded, templates, note, msgKey = 'orde
   Object.entries(sample).forEach(([p, v]) => { words = words.split(`{${p}}`).join(v); });
   words = words.replace(/[ \t]{2,}/g, ' ').trim();
   const line = WITH_LINE.has(msgKey) ? (note || '').trim() : '';
+  // The first payment link rides on the order-confirmed text (order_texts._pay_line).
+  const pay = msgKey === 'order_confirmed' && loaded.payment_links?.[0];
+  const payLine = pay ? `${he ? 'לתשלום ב' : 'Pay with '}${pay.label}: ${pay.url}` : '';
   const customerText = NO_LINK.has(msgKey) ? words : `${words} myisraelrental.com/orders/track/a1B2c3`;
   const ownerText = he
     ? `הזמנה חדשה #1042 מדנה, 050-123-4567\n1x ${item}\nמשלוח לרחוב הרצל 5 · מחר 12:00\nאישור או דחייה: myisraelrental.com/orders/owner/…`
@@ -65,8 +68,8 @@ export default function MessagePreview({ loaded, templates, note, msgKey = 'orde
           {who === 'customer' && editor ? (
             // The words are typed right here, in the text as it arrives (Tzvi, 24 Nov 2026); the link and own line
             // after them are added by the server, so they show but cannot be typed over.
-            <>{editor}{!NO_LINK.has(msgKey) && <span className="block" style={{ color: '#1E5AA8' }}>myisraelrental.com/orders/track/a1B2c3</span>}{line && <b className="block mt-1">{line}</b>}</>
-          ) : who === 'customer' ? <>{customerText}{line && <><br /><b>{line}</b></>}</> : ownerText}
+            <>{editor}{!NO_LINK.has(msgKey) && <span className="block" style={{ color: '#1E5AA8' }}>myisraelrental.com/orders/track/a1B2c3</span>}{payLine && <span className="block" style={{ color: '#1E5AA8' }} data-testid="pv-pay-line">{payLine}</span>}{line && <b className="block mt-1">{line}</b>}</>
+          ) : who === 'customer' ? <>{customerText}{payLine && <><br />{payLine}</>}{line && <><br /><b>{line}</b></>}</> : ownerText}
         </div>
       </div>
     );

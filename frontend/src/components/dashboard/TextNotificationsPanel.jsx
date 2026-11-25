@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { Check, Loader2, RotateCcw, X } from 'lucide-react';
 import CustomerMessages from './CustomerMessages';
 import MessagePreview from './MessagePreview';
+import PaymentLinksField from './PaymentLinksField';
 
 const TABS = ['alerts', 'messages', 'history'];
 
@@ -34,6 +35,8 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
   const [emailTo, setEmailTo] = useState('');
   const [look, setLook] = useState({ on: false, logo: 'medium', accent: '#167AB8' });
   const [reminders, setReminders] = useState(null);
+  const [payLinks, setPayLinks] = useState([]);
+  const [payNote, setPayNote] = useState('');
   const [recent, setRecent] = useState(null);
   const [recentEmails, setRecentEmails] = useState([]);
   const [counts, setCounts] = useState({});
@@ -44,16 +47,18 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
   // What was last saved, to tell whether anything changed and to put it all back.
   const saved = useRef(null);
 
-  const now = { on, different, number, note, templates, off, autoConfirm, emailOn, emailDifferent, emailTo, reminders, look };
+  const now = { on, different, number, note, templates, off, autoConfirm, emailOn, emailDifferent, emailTo, reminders, look, payLinks, payNote };
   const apply = (s) => {
     setOn(s.on); setDifferent(s.different); setNumber(s.number); setNote(s.note); setTemplates(s.templates); setOff(s.off);
     setAutoConfirm(s.autoConfirm); setEmailOn(s.emailOn); setEmailDifferent(s.emailDifferent); setEmailTo(s.emailTo); setReminders(s.reminders); setLook(s.look);
+    setPayLinks(s.payLinks); setPayNote(s.payNote);
   };
   const fromServer = (data, rem) => ({
     on: !!data.text_on, different: !!data.text_number, number: data.text_number || '', note: data.text_note || '',
     templates: data.text_templates || {}, off: data.text_off || [], autoConfirm: !!data.auto_confirm,
     emailOn: data.email_on !== false, emailDifferent: !!data.email_to, emailTo: data.email_to || '', reminders: rem,
     look: data.email_look || { on: false, logo: 'medium', accent: '#167AB8' },
+    payLinks: (data.payment_links || []).map((l) => ({ url: l.url, label: l.label || '' })), payNote: data.payment_note || '',
   });
 
   useEffect(() => {
@@ -106,11 +111,18 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
       const { data: withEmails } = await axios.put(`${base}/orders/emails`, {
         email_on: emailOn, email_to: emailOn && emailDifferent ? emailTo.trim() : null, email_look: look,
       }, auth);
+      const was = JSON.parse(saved.current);
+      let pay = { payment_links: was.payLinks, payment_note: was.payNote };
+      if (JSON.stringify([payLinks, payNote]) !== JSON.stringify([was.payLinks, was.payNote])) {
+        const links = payLinks.filter((l) => l.url.trim()).map((l) => ({ url: l.url.trim(), label: l.label.trim() }));
+        const { data: b } = await axios.patch(base, { payment_links: links, payment_note: payNote.trim() || null }, auth);
+        pay = { payment_links: b.payment_links || links, payment_note: b.payment_note ?? payNote.trim() };
+      }
       let rem = reminders;
       if (reminders && JSON.stringify(reminders) !== JSON.stringify(JSON.parse(saved.current).reminders)) {
         rem = (await axios.put(`${base}/appointment-reminders`, reminders, auth)).data;
       }
-      const s = fromServer({ ...withEmails, text_templates: data.text_templates, text_off: data.text_off }, rem);
+      const s = fromServer({ ...withEmails, ...pay, text_templates: data.text_templates, text_off: data.text_off }, rem);
       saved.current = JSON.stringify(s);
       apply(s);
       setLoaded(withEmails);
@@ -246,6 +258,7 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
                    placeholder={t('orderTexts.notePlaceholder', 'For example: Pickup at Farn 5, ring the bell')} data-testid="settings-text-note-input" />
             <p className="text-[11px] mt-1 text-end" style={muted}>{note.length}/80</p>
           </div>
+          <PaymentLinksField API={API} links={payLinks} setLinks={setPayLinks} note={payNote} setNote={setPayNote} />
           {/* Your email look (Tzvi, 23 Nov 2026, from Shopify's email templates): off unless turned on, so the emails
               of businesses already approved stay as they are. Shown on every customer email (order_emails.email_brand). */}
           <div className="mb-4 rounded-xl border p-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="email-look">
@@ -289,7 +302,7 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
           <CustomerMessages API={API} auth={auth} businessId={businessId} defaults={loaded.text_defaults} templates={templates} setTemplates={setTemplates}
                             off={off} setOff={setOff} reminders={reminders} setReminders={setReminders} counts={counts} textsOn={on}
                             businessName={loaded.business_name} businessNameHe={loaded.business_name_he} lang={msgLang} setLang={setMsgLang}
-                            openKey={openKey} setOpenKey={setOpenKey} onTurnTextsOn={() => setOn(true)}
+                            openKey={openKey} setOpenKey={setOpenKey} onTurnTextsOn={() => setOn(true)} uses={loaded.uses}
                             renderPreview={(k, editor) => <MessagePreview loaded={loaded} templates={templates} note={note} msgKey={k} lang={msgLang} fixedWho="customer" look={look} editor={editor} />} />
         </div>
       )}

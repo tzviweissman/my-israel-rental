@@ -2003,7 +2003,12 @@ async def _owner_settings_out(biz: dict[str, Any]) -> dict[str, Any]:
     sample = next((p for p in _products_for_order(selling) if p.get("image")), None) if selling else None
     from .order_texts import texts_on
     from .order_emails import clean_look, emails_on
-    return {**_settings_out(biz, await _store_of(biz["_id"])), "pause": pause_of(biz), "text_on": texts_on(biz),
+    # Which customer messages this business can ever send, so the texts page shows only those
+    # (Tzvi, 25 Nov 2026): a shop never sees booking texts, a service with nothing to sell never
+    # sees order texts. A store listing takes orders only (gigs.py refuses it bookings).
+    kinds = await db.marketplace_gigs.distinct("gig_type", {"business_id": biz["_id"], "status": "published"})
+    uses = {"orders": bool(selling), "bookings": any(k != "store" for k in kinds), "reminders": "appointment" in kinds}
+    return {"uses": uses, **_settings_out(biz, await _store_of(biz["_id"])), "pause": pause_of(biz), "text_on": texts_on(biz),
             "text_number": (biz.get("order_settings") or {}).get("text_number"),
             "text_note": (biz.get("order_settings") or {}).get("text_note") or "",
             "text_templates": (biz.get("order_settings") or {}).get("text_templates") or {},
@@ -2011,6 +2016,8 @@ async def _owner_settings_out(biz: dict[str, Any]) -> dict[str, Any]:
             "text_off": (biz.get("order_settings") or {}).get("text_off") or [],
             "business_name": biz.get("name") or "", "business_name_he": biz.get("name_he") or "",
             "logo_url": biz.get("logo_url") or "",
+            # How customers pay (also on the page editor; saved with PATCH /businesses/{id}).
+            "payment_links": allowed_payment_links(biz.get("payment_links")), "payment_note": biz.get("payment_note") or "",
             "sample_product": {k: sample.get(k) for k in ("name", "image", "price", "currency")} if sample else None,
             "text_defaults": TEXT_DEFAULTS,
             # Emails (order_emails.py): on unless switched off; the account's address unless another is chosen.

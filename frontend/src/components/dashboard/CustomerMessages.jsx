@@ -61,7 +61,7 @@ export function fillSample(text, lang, businessName, businessNameHe) {
 
 export default function CustomerMessages({
   API, auth, businessId, defaults, templates, setTemplates, off, setOff, reminders, setReminders, counts, textsOn,
-  businessName, businessNameHe, lang, setLang, openKey, setOpenKey, onTurnTextsOn, renderPreview,
+  businessName, businessNameHe, lang, setLang, openKey, setOpenKey, onTurnTextsOn, renderPreview, uses,
 }) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState('');
@@ -173,7 +173,10 @@ export default function CustomerMessages({
         </div>
       </div>
       {GROUPS.map(([group, keys]) => {
-        const shown = keys.filter((k) => defaults[k]);
+        // Only the messages this business's listings can send (orders.py `uses`); none published yet → all.
+        const any = uses && (uses.orders || uses.bookings);
+        const fits = (k) => !any || (group === 'orders' ? uses.orders : group === 'bookings' ? uses.bookings && (k !== 'reminder' || uses.reminders) : true);
+        const shown = keys.filter((k) => defaults[k] && fits(k));
         if (!shown.length) return null;
         return (
           <section key={group} className="mb-4" data-testid={`msgs-group-${group}`}>

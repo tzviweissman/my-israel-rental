@@ -293,6 +293,16 @@ def test_a_message_switched_off_is_not_sent(world):
     assert ot.clean_off(["review", "order_confirmed", "nope", "review"]) == ["review"]
 
 
+def test_confirmed_text_carries_the_first_pay_link_until_paid():
+    """Tzvi, 25 Nov 2026: the order-confirmed text has the business's payment link, unless already paid."""
+    biz = {"payment_links": [{"label": "Bit", "url": "https://www.bitpay.co.il/app/me/X"}, {"label": "PayBox", "url": "https://paybox.co.il/p/y"}]}
+    assert ot._pay_line({}, biz, "en") == "\nPay with Bit: https://www.bitpay.co.il/app/me/X"
+    assert ot._pay_line({}, biz, "he").startswith("\nלתשלום בBit: ")
+    assert ot._pay_line({"payment": {"method": "card"}}, biz, "en") == ""
+    assert ot._pay_line({}, {"payment_links": [{"label": "x", "url": "https://evil.example.com/"}]}, "en") == ""
+    assert ot._pay_line({}, {}, "en") == ""
+
+
 def test_app_link_opens_the_app():
     from utils.whatsapp_link import build_whatsapp_app_link
     assert build_whatsapp_app_link("052-111-2222", "a b") == "whatsapp://send?phone=972521112222&text=a%20b"

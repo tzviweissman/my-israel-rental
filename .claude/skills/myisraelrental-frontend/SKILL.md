@@ -73,6 +73,7 @@ Placeholder figures from the preview files ("1,200+ active rentals", "19 cities"
 - Scroll reveal uses the fail-safe `.js-reveal` pattern: content is visible if JS never runs. Never ship `.reveal{opacity:0}` unconditionally.
 - Respect `prefers-reduced-motion` — posters instead of video.
 - **When a dashboard lists or edits automatic messages (universal, all business dashboards):** every automatic message a business or its customers get (texts, emails, WhatsApp, reminders, review asks, auto-answers) is listed with a plain line saying WHEN it goes out and WHO gets it, e.g. "Sent when you confirm an order · to your customer" (from Shopify's Customer notifications page, studied 23 Nov 2026).
+- **When grouping or naming a business's settings by what its customers do (universal, all business dashboards):** show only the groups its own listings can use (a shop never sees appointment messages, a service with nothing to sell never sees order messages), and name each group after the service, never "Bookings" alone, which reads as rentals here (Tzvi, 25 Nov 2026). `node scripts/check-msg-groups.mjs` checks the Texts and emails panel against the server's `uses`.
 
 ## 8. Known traps
 

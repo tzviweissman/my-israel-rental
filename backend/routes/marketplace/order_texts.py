@@ -284,6 +284,19 @@ def _note(biz: dict[str, Any]) -> str:
     return f"\n{n}" if n else ""
 
 
+def _pay_line(o: dict[str, Any], biz: dict[str, Any], lang: str) -> str:
+    """The business's first payment link on the order-confirmed text, while the order is unpaid (Tzvi, 25 Nov
+    2026). One link only: every letter can cost another text part. The tracking page shows them all."""
+    from utils.payment_links import allowed_payment_links
+    if (o.get("payment") or {}).get("method"):
+        return ""
+    links = allowed_payment_links(biz.get("payment_links"))
+    if not links:
+        return ""
+    label = links[0].get("label") or ""
+    return "\n" + ("לתשלום ב" if lang == "he" else "Pay with ") + f"{label}: {links[0]['url']}"
+
+
 def _biz_name(biz: dict[str, Any], lang: str) -> str:
     return (biz.get("name_he") if lang == "he" and biz.get("name_he") else biz.get("name")) or ""
 
@@ -490,7 +503,7 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool, te
             lang = "he" if o.get("lang") == "he" else "en"
             body = (compose(biz, "order_confirmed", lang, _order_vals(o, biz, lang), track_link(o)) if confirm
                     else compose(biz, "order_declined", lang, _order_vals(o, biz, lang)))
-            await _text(customer, body + (_note(biz) if confirm else ""), biz_id=o.get("business_id"), who="customer",
+            await _text(customer, body + (_pay_line(o, biz, lang) + _note(biz) if confirm else ""), biz_id=o.get("business_id"), who="customer",
                         kind="order_confirmed" if confirm else "order_declined", ref_id=o.get("_id"), label=no)
         if email:
             from .order_emails import email_customer_decision
