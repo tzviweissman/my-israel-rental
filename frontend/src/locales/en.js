@@ -8391,7 +8391,8 @@ const en = {
         tplAutoHint: "Sent once a day to a customer who answers one of your texts. Works once replies are set up.",
         tplAutoPlaceholder: "For example: Thanks, we will get back to you within the hour.",
         tplInsert: "Add to the text",
-        tplParts: "{{n}} characters, counts as {{p}} text(s)",
+        tplParts_one: "{{n}} characters, sent as one text",
+        tplParts_other: "{{n}} characters, sent as {{count}} texts",
         tplReset: "Use our wording",
         tpl: {
           order_received: "We got your order",
