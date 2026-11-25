@@ -67,13 +67,15 @@ let since = baseRev || (fs.existsSync(RECORD) ? fs.readFileSync(RECORD, 'utf8').
 if (since && git(['merge-base', '--is-ancestor', since, 'origin/main']).status !== 0) since = null;
 if (since) console.log(`merging against ${since.slice(0, 8)}, the rules last pushed from here`);
 const added = {};                                                          // the lines this change added, per file
-for (const f of files) {
+// A clash against the recorded base is tried again against HEAD before stopping: the record can be older than what
+// this checkout holds, so main's later lines read as clashes (25 Nov 2026: ad rule A9g.11, main 30 commits ahead).
+function mergeOne(f, rev) {
   const disk = fs.readFileSync(path.join(ROOT, f), 'utf8'), eol = disk.includes('\r\n') ? '\r\n' : '\n';
-  const mine = lf(disk), base = show(since && show(since, f) !== null ? since : 'HEAD', f), theirs = show('origin/main', f);
+  const mine = lf(disk), base = show(rev, f), theirs = show('origin/main', f);
   const baseLines = new Set(lf(base ?? '').split('\n'));
-  added[f] = mine.split('\n').filter((l) => l.trim() && !baseLines.has(l) && !isContents(l));
-  if (theirs === null || base === null || lf(theirs) === lf(base)) continue;      // main has not changed it
-  if (lf(theirs) === mine) continue;                                              // already the same as main
+  const add = mine.split('\n').filter((l) => l.trim() && !baseLines.has(l) && !isContents(l));
+  if (theirs === null || base === null || lf(theirs) === lf(base)) return { add };   // main has not changed it
+  if (lf(theirs) === mine) return { add };                                           // already the same as main
   // this checkout is often behind main yet already holds main's change (an earlier push made from here): then main's
   // copy is the base, so that change is not mistaken for a clash (19 Nov 2026: the digest line pushed an hour before)
   const mineLines = new Set(mine.split('\n'));
@@ -93,9 +95,18 @@ for (const f of files) {
     if (both.length && both.every(isContents)) return b;                   // a contents list: main's, rebuilt next
     bad.push(a.split('\n')[0]); return m;
   });
-  if (bad.length) { console.error(`${f}: a clash to settle by hand, nothing written:\n  ${bad.join('\n  ')}`); process.exit(1); }
-  fs.writeFileSync(path.join(ROOT, f), out.replace(/\n/g, eol));
-  console.log(`merged ${f} with main`);
+  return { add, bad, out: out.replace(/\n/g, eol) };
+}
+for (const f of files) {
+  const first = since && show(since, f) !== null ? since : 'HEAD';
+  let m = mergeOne(f, first);
+  if (m.bad?.length && first !== 'HEAD' && show('HEAD', f) !== null) {
+    const again = mergeOne(f, 'HEAD');
+    if (!again.bad?.length) { console.log(`${f}: clashed against ${first.slice(0, 8)}, merged against HEAD instead`); m = again; }
+  }
+  added[f] = m.add;
+  if (m.bad?.length) { console.error(`${f}: a clash to settle by hand, nothing written:\n  ${m.bad.join('\n  ')}`); process.exit(1); }
+  if (m.out !== undefined) { fs.writeFileSync(path.join(ROOT, f), m.out); console.log(`merged ${f} with main`); }
 }
 run(process.execPath, [path.join(ROOT, 'scripts', 'check-rule-copies.mjs'), '--sync']);
 run(process.execPath, [path.join(ROOT, 'scripts', 'check-rule-homes.mjs')]);
