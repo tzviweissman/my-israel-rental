@@ -52,11 +52,11 @@ Sections (line each starts on; read with that offset):
 - 3490: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
 - 3539: 5c. Persuasion, and only the honest kind (page-conversion-review)
 - 3556: 6. Playbooks for the most common businesses
-- 3676: 7. Choosing the three options (automatic page builder only)
-- 3700: 8. Photos, video and the tools
-- 3929: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 3999: 9. The scroll sections: what the practice pages become
-- 4035: 10. Open decisions (need Tzvi)
+- 3683: 7. Choosing the three options (automatic page builder only)
+- 3707: 8. Photos, video and the tools
+- 3938: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 4008: 9. The scroll sections: what the practice pages become
+- 4044: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -3586,6 +3586,13 @@ few photos the facts carry the page rather than a padded gallery.
   Study: the products come straight after one photo and one line, three to
   eight of them in the first screen, under a plain heading. The size ladder
   only when three products are measured.
+- **Custom site, a café or bakery with eight or more items:** try the two-axis
+  chooser of 3am.4 ("find your coffee", "find your cake") as one of the two
+  signature sections when its ideas are written (IDEAS.md), with axes from how the owner describes
+  the items. It is the one idea of the 25 Nov videos a visitor plays with
+  rather than only looks at (Nate Herk's "Find your drink",
+  `docs/inspo/videos-2026-11-25/DByAR5Su1Yw-find-your-drink-map.png`). An idea
+  to weigh, not a requirement; skipped when the owner cannot say how the items differ.
 
 ### Personal care (5: hair, beauty, spa, therapy)
 - **Deciding:** results, trust with their body, who does it, how easy it is to book.
@@ -3909,8 +3916,10 @@ added to a page later, every one of these buttons is changed in the same edit.
 3. **Reusable 3D scenes** for the scroll sections in section 9, each made once to
    our standard.
 4. **The camera rough** before a paid clip whose camera travels (3am.1, 25 Nov 2026): grey shapes and a keyframed
-   camera, rendered as a short low-quality video. Blender is not installed on this computer (25 Nov 2026); until it
-   is, the rough is a three.js page of grey boxes recorded with Playwright. Never through Higgsfield's Blender plugin
+   camera, rendered as a short low-quality video. Blender 5.3 was installed on 25 Nov 2026 (winget,
+   `BlenderFoundation.Blender`). `blender -b -P scrollcraft/starter/camera_rough.py -- plan.json` renders the rough
+   from a short plan (grey boxes, camera points with times) without opening Blender; the plan's shape is at the top
+   of that script. Never through Higgsfield's Blender plugin
    or bridge: paid generation goes only through `scripts/hf.py`.
 
 No page reuses another business's scene as it is. Blender hasn't been used in the

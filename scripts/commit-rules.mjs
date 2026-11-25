@@ -8,6 +8,8 @@
  *
  *   node scripts/commit-rules.mjs "<message>" [more paths to commit with it]
  *   node scripts/commit-rules.mjs --onto-main [--push] [--base <commit>] "<message>" [more paths]
+ *   add --only to either: commit just the paths named (plus the skill's copy of the page rules when they are named),
+ *   when another session has rules files changed on disk that are not ready
  *
  * --onto-main (Tzvi, 19 Nov 2026, Burnt: "do all 3 improvemnets"): for a checkout whose main is behind origin and
  * carries other sessions' work. Another session had changed the same rule files on main; a plain three-way merge
@@ -34,9 +36,16 @@ const argv = process.argv.slice(2);
 const onto = argv.includes('--onto-main'), push = argv.includes('--push');
 const baseRev = argv.includes('--base') ? argv[argv.indexOf('--base') + 1] : null;
 const [msg, ...extra] = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--base');
-if (!msg) { console.error('usage: node scripts/commit-rules.mjs [--onto-main [--push]] "<message>" [more paths]'); process.exit(2); }
-const RULE_FILES = [...CONTENTS_FILES, 'docs/rules-as-blueprint/rules.json', 'docs/rules-as-blueprint/ad-rules.json',
-  'docs/ad-rules-checklist.md', '.claude/skills/build-business-page/SKILL.md', '.claude/skills/build-business-page/reference/full-rules.md'];
+if (!msg) { console.error('usage: node scripts/commit-rules.mjs [--onto-main [--push]] [--only] "<message>" [more paths]'); process.exit(2); }
+const FULL_COPY = '.claude/skills/build-business-page/reference/full-rules.md';
+// --only: commit just the paths named (and the skill's copy of the page rules when they are named), never another
+// rules file that changed on disk. 25 Nov 2026: another session's unfinished ad rule A28.2 sat in
+// docs/ad-rules-checklist.md and would have been pushed with rules 3am.
+const only = argv.includes('--only');
+const RULE_FILES = only ? [...extra, ...(extra.includes('docs/page-generation-rules.md') ? [FULL_COPY] : [])]
+  : [...CONTENTS_FILES, 'docs/rules-as-blueprint/rules.json', 'docs/rules-as-blueprint/ad-rules.json',
+    'docs/ad-rules-checklist.md', '.claude/skills/build-business-page/SKILL.md', FULL_COPY];
+if (only && !extra.length) { console.error('--only needs the paths to commit'); process.exit(2); }
 const run = (cmd, args, opt = {}) => { const r = spawnSync(cmd, args, { cwd: ROOT, stdio: 'inherit', ...opt }); if (r.status !== 0) process.exit(r.status || 1); };
 const git = (args, opt = {}) => spawnSync('git', args, { cwd: ROOT, encoding: 'utf8', ...opt });
 const lf = (s) => s.replace(/\r\n/g, '\n');
