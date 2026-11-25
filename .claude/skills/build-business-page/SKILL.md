@@ -115,7 +115,9 @@ Prices are read with `get_cost` at the time, never from memory.
    **Gate:** `message-to-owner.md` is sent, OWNER-QUESTIONS.md holds every ASK FIRST line, and
    `node scripts/blueprint.mjs --check <build> 3` passes.
 2. **Study the kind of business (free).** Name the category (§3t). Read `docs/category-mistakes.md` first, the
-   "every kind" part and the business's own (§3aj.3). Then `reference/playbooks.md`, `docs/inspo/`, Inspo,
+   "every kind" part and the business's own (§3aj.3). Start our own inspo from `docs/inspo/by-look.md` (or
+   `by-look.html`): the look families with their category, and the look words to reuse in REFERENCES.md.
+   Then `reference/playbooks.md`, `docs/inspo/`, Inspo,
    Mobbin, 21st and Pinterest: one study a build (§3g.17, §3aa.7). Write REFERENCES.md: a line for every
    source, `Take:` and `Skip:` on each kept picture (§3aj.1), and `## Why they are a 5` from the two best
    sites of the kind, one of them a live site named by its address (§3ah.7, §3ag). Start the board with part A.

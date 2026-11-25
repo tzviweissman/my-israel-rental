@@ -6,6 +6,11 @@ Inspo, Mobbin and 21st before designing any page (build skill, section 0).
 Borrow how a site works, never its look; every idea still passes the page
 rules (docs/page-generation-rules.md).
 
+**Start from [by-look.md](by-look.md)** (or `by-look.html`, which filters): every website picture here grouped
+by look family (warm editorial, dark studio, giant type...), with 3 to 5 words naming each look and the kinds
+of business it suits (rule 3t). Use its words in REFERENCES.md. New site pictures: add their lines to
+`by-look.tsv` and run `node scripts/build-inspo-by-look.mjs` (`--check` lists any not yet in it).
+
 | Date | Source | Notes |
 |---|---|---|
 | 25 Nov 2026 | Eight YouTube videos: Blender camera blocking, skills vs agents, "make it better" x100, /dream memory, a tweaks panel, motion-graphics repos (two were already studied 22 Nov) | [videos-2026-11-25/](videos-2026-11-25/README.md): 13 ideas by theme, each marked covered or new, option or universal; proposals wait for Tzvi |
