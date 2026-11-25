@@ -3,47 +3,51 @@
 <!-- MyIsraelRental restaurants ad, "fork through 5,000+" (docs/ads/blueprints/myisraelrental-restaurants-status.md;
      Tzvi, 25 Nov 2026: idea "Fork through 5,000+", headline "kosher acoss israel in 1 place"). 5,325 restaurants were
      listed on the live site that day, each with a hechsher named on its own website.
-     Take 2 (Tzvi, beside Pinterest "PASTA"/"TWIST" posters: "what makes ours bland and boring"): one tall twist of
-     spaghetti (gen.py take 2, cut out as twist.png) hangs down the middle through a huge condensed "5,000+" that fills
-     the width; the twist hangs behind the digits, and four loose strands (gen.py take 3) weave over and under each character in turn (strands.py). The headline is small print now: the number and the food are the ad.
+     Take 4 (Tzvi, beside Pinterest "PASTA"/"TWIST": "something about ours just looks bland", "fix it"): the photo was
+     made around our own typed number (?plate=1 below, A3.13): tagliatelle from a fork at the top left wraps the digits
+     on warm cream, shading them. #num types our crisp digits over the photo again; front.png (strands.py) puts the
+     pasta back over the characters it passes in front of, so it goes behind the comma and the second zero.
      Every word, the logo and the QR are drawn here (A3.7, A9.8).
      Still: node scripts/record-moving-ad.mjs docs/ads/gen/myisraelrental-restaurants-status myisraelrental-restaurants-status '' 7.9 -->
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Playfair+Display:ital,wght@0,700;1,600&family=Manrope:wght@500;700;800&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Playfair+Display:ital,wght@0,700;1,500;1,600&family=Manrope:wght@500;700;800&display=block" rel="stylesheet">
 <style>
 html,body{margin:0;background:#111}
-#ad{position:relative;width:1080px;height:1920px;overflow:hidden;background:#167AB8;font-family:Manrope,sans-serif;color:#fff}
-#glow{position:absolute;left:0;top:0;width:1080px;height:1920px;background:radial-gradient(ellipse 560px 760px at 520px 760px,rgba(120,200,245,.55),rgba(22,122,184,0) 70%)}
-#pasta,#loose,#strands{position:absolute;left:0;top:0;width:1080px;height:1920px;pointer-events:none}
-#pasta{filter:drop-shadow(0 30px 30px rgba(5,30,55,.45))}
-#num{position:absolute;left:-18px;right:-18px;top:520px;text-align:center;font:400 452px/1 Anton,sans-serif;letter-spacing:-6px;white-space:nowrap}
-#kind{position:absolute;right:40px;top:1010px;width:290px;text-align:right}
-#kind .r{font:400 52px/1 Anton,sans-serif;letter-spacing:1px;color:#FBE3A1}
-#kind .h{font:italic 600 38px/1.15 'Playfair Display',serif;margin-top:12px}
-#h1{position:absolute;left:40px;top:1006px;width:270px;font:700 46px/1.08 'Playfair Display',serif}
-#h1 b{color:#FBE3A1;font-weight:700}
-#logo{position:absolute;left:48px;top:1506px;width:104px;height:104px;border-radius:24px;background:#0F2A4A;object-fit:contain;padding:14px;box-sizing:border-box}
-#foot{position:absolute;left:176px;top:1504px;width:670px;color:#fff}
-#foot .n{font-weight:800;font-size:48px}
-#foot .s{font-weight:500;font-size:30px;margin-top:10px;color:#E6F1F9}
-#foot .u{font-weight:700;font-size:30px;margin-top:10px;color:#FBE3A1}
-#qr{position:absolute;left:868px;top:1500px;width:172px;height:172px;background:#fff;border-radius:14px;padding:8px;box-sizing:border-box;box-shadow:0 6px 20px #0002}
-#qr img{width:100%;height:100%}
+#ad{position:relative;width:1080px;height:1920px;overflow:hidden;background:#F3EBDD url(ground.jpg) 0 0/1080px 1910px no-repeat;font-family:Manrope,sans-serif;color:#1B2430}
+#num{position:absolute;left:-18px;right:-18px;top:520px;text-align:center;font:400 452px/1 Anton,sans-serif;letter-spacing:-6px;white-space:nowrap;color:#0F5E8F;text-shadow:3px 0px 0 #0F5E8F,-3px 0px 0 #0F5E8F,0px 3px 0 #0F5E8F,0px -3px 0 #0F5E8F,2px 2px 0 #0F5E8F,-2px 2px 0 #0F5E8F,2px -2px 0 #0F5E8F,-2px -2px 0 #0F5E8F}
+/* a 3px shadow ring (not a stroke, which seams inside the letters) covers the photo's own digits, a hair larger than ours */
+#front{position:absolute;left:0;top:0;width:1080px;height:1920px;pointer-events:none}
+.caps{font:700 25px/1.5 Manrope,sans-serif;letter-spacing:6px;text-transform:uppercase}
+#note{position:absolute;right:52px;top:150px;width:460px;text-align:right}
+#note .i{font:italic 500 40px/1.2 'Playfair Display',serif;margin-top:14px}
+#note .rule{width:56px;height:3px;background:#0F5E8F;margin:20px 0 0 auto}
+#kind{position:absolute;left:52px;top:1014px;color:#0F5E8F}
+#h1{position:absolute;left:52px;top:1084px;width:800px;font:700 78px/1.04 'Playfair Display',serif;letter-spacing:-1px}
+#h1 b{color:#0F5E8F;font-weight:700;font-style:italic}
+#logo{position:absolute;left:52px;top:1560px;width:84px;height:84px;border-radius:20px;background:#0F2A4A;object-fit:contain;padding:12px;box-sizing:border-box}
+#foot{position:absolute;left:156px;top:1556px;width:640px;color:#1B2430}
+#foot .n{font-weight:800;font-size:40px}
+#foot .s{font-weight:500;font-size:28px;margin-top:8px;color:#4B5563}
+#foot .u{font-weight:700;font-size:28px;margin-top:8px;color:#0F5E8F}
+#qr{position:absolute;left:888px;top:1548px;width:140px;height:140px;background:transparent;padding:0;box-sizing:border-box}
+#qr img{width:100%;height:100%;mix-blend-mode:multiply}
+#line{position:absolute;left:52px;right:52px;top:1520px;height:2px;background:#1B243022}
 </style></head><body>
 <div id="ad">
-  <div id="glow"></div>
-  <img id="pasta" src="pasta.png" alt="">
-  <img id="loose" src="loose.png" alt="">
   <div id="num">5,000+</div>
-  <img id="strands" src="strands.png" alt="">
-  <div id="kind"><div class="r">RESTAURANTS,</div><div class="h">each with a hechsher.</div></div>
+  <img id="front" src="front.png" alt="">
+  <div id="note"><div class="caps">Meat · Dairy · Pareve</div><div class="i">Search by city<br>and by hechsher.</div><div class="rule"></div></div>
+  <div id="kind" class="caps">Restaurants, each with a hechsher</div>
   <div id="h1">Kosher across Israel, in <b>one place.</b></div>
+  <div id="line"></div>
 </div>
 <script src="../_kit/kit.js"></script>
 <script>
-window.AD = {"name":"MyIsraelRental","lines":["By city, meat or dairy, and hechsher. Free."],"link":"myisraelrental.com/restaurants","logo":"logo-mark.png"};
+window.AD = {"name":"MyIsraelRental","lines":["Free to search. No sign-up."],"link":"myisraelrental.com/restaurants","logo":"logo-mark.png"};
 K.foot();
+// ?plate: the number alone in its ink on cream, the guide the picture is made around (A3.13)
+if (location.search.includes('plate')) { document.getElementById('ad').style.background = '#F3EBDD'; for (const id of ['front', 'note', 'kind', 'h1', 'line', 'foot', 'qr', 'logo']) { const e = document.getElementById(id); if (e) e.style.display = 'none'; } }
 // ?bare: the number alone, for strands.py to measure each character's columns
-if (location.search.includes('bare')) for (const id of ['pasta', 'loose', 'strands', 'kind', 'h1']) document.getElementById(id).style.display = 'none';
+if (location.search.includes('bare')) for (const id of ['front', 'note', 'kind', 'h1', 'line']) document.getElementById(id).style.display = 'none';
 window.render = async () => {};
 </script>
 </body></html>

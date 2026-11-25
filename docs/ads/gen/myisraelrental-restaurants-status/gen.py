@@ -56,12 +56,35 @@ LOOSE = (
     "the bottom two fifths are empty blue. No fork, no plate, no basil, no people, no hands, no words."
 )
 
+# Take 4 (Tzvi, 25 Nov 2026, beside Pinterest "PASTA" and "TWIST" posters: "something about ours just looks bland";
+# "fix it"): the pasta is made around our own typed number (A3.13), so it wraps the strokes and shades them, on a
+# warm cream ground with the digits in our deep blue, wide ribbons with herbs and pepper in the air, on a diagonal
+# from the fork at the top left. Image 2 is ad.html?plate=1 (the number exactly as typed); our crisp digits are laid
+# back over the picture in ad.html and only the pasta in front of them is cut from it (strands.py).
+WRAP = (
+    "A real editorial food photograph for a magazine poster, shot on a full-frame camera with a 100mm lens, crisp, "
+    "mouth-watering, fine texture. Image 2 is a flat sign: big deep blue numbers '5,000+' on a plain warm cream "
+    "background. Keep those numbers EXACTLY as they are in Image 2: the same characters, same shapes, same size, same "
+    "position, same deep blue colour, flat and matte, standing upright like solid painted letters in the scene; do not "
+    "add, remove, move or restyle any character, and add no other text. Image 1 shows where things go: the grey bar "
+    "is a stainless steel fork coming in from the top-left corner, the yellow circle a twirl of pasta on it, and the "
+    "yellow path how the pasta falls from it. From the fork, long wide golden ribbons of fresh tagliatelle in a "
+    "glossy light butter sauce cascade diagonally down and wrap around the numbers: looping around the strokes, "
+    "passing behind some characters and in front of others, knotting once around the first zero, then falling away "
+    "off the lower right. The pasta casts soft real shadows onto the blue numbers where it touches them. Cracked "
+    "black pepper, small flakes of grated cheese and a few fresh parsley leaves are caught in the pasta and float in "
+    "the air around it. Soft warm daylight from the upper left. The bottom third is plain empty warm cream. Dairy "
+    "sauce only: no meat, no fish, no shellfish. No hands, no people, no plate, no other words or letters."
+)
+
 take = sys.argv[1] if len(sys.argv) > 1 else "1"
 n = int(take)
 h = hf._client()
-prompt, layout, what = ((LOOSE, "layout3.png", "loose strands") if n >= 3 else
+prompt, layout, what = ((WRAP, "layout4.png", "wrapped around the digits") if n >= 4 else
+                        (LOOSE, "layout3.png", "loose strands") if n == 3 else
                         (TWIST, "layout2.png", "twist") if n == 2 else (PROMPT, "layout.png", "nest"))
-images = [h.upload_file(str(HERE / layout))] + ([h.upload_file(str(HERE / "out" / "photo-2.jpg"))] if n >= 3 else [])
+extra = HERE / ("plate.png" if n >= 4 else "out/photo-2.jpg")
+images = [h.upload_file(str(HERE / layout))] + ([h.upload_file(str(extra))] if n >= 3 else [])
 hf.make("marketing-studio/image/sunburst",
         {"prompt": prompt, "image_urls": images,
          "aspect_ratio": "9:16", "resolution": "2k", "quality": "medium", "enhance_prompt": False},
