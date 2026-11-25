@@ -18,8 +18,11 @@
 // seconds: the scroll itself (default 40); 2.5 s of the opening and 2.5 s
 // at the end are added. fps defaults to 30. It also writes <out>-sheet.jpg,
 // a contact sheet: look at it before sending the video.
-// Needs ffmpeg on PATH. A phone-size run also writes <out>-whatsapp.mp4, small enough to send.
+// Needs ffmpeg on PATH. Every run also writes <out>-whatsapp.mp4, small enough to send (wide ones at 1080 high).
 // For the owner, add --speed 1: the 1.5x default is for Tzvi's own videos.
+// --expect "<words>": stop at once unless the page's title has those words (any case). Always pass it for a
+// local server: Burnt's owner video ran 10 minutes on American Crust, which already held that port (25 Nov 2026).
+// Every run prints the title it recorded first, either way.
 //
 // Re-record only what changed (Tzvi, 18 Oct 2026: "instead of rerecording
 // everything if you could only rerecord the part we changed"): every run
@@ -38,6 +41,8 @@ import { join } from 'node:path';
 const { chromium } = createRequire(process.cwd() + '/')('playwright');
 const argv = process.argv.slice(2), STOPS = [];
 for (let i = argv.indexOf('--stop'); i >= 0; i = argv.indexOf('--stop')) { STOPS.push(argv[i + 1].split('|')); argv.splice(i, 2); }
+let EXPECT = '';
+{ const i = argv.indexOf('--expect'); if (i >= 0) { EXPECT = argv[i + 1]; argv.splice(i, 2); } }
 const REDO = [];
 for (let i = argv.indexOf('--redo'); i >= 0; i = argv.indexOf('--redo')) { REDO.push(argv[i + 1]); argv.splice(i, 2); }
 // Videos for Tzvi play at 1.5x (Tzvi, 6 Nov 2026: "its always slow"). A script that names its own fps (the
@@ -77,6 +82,12 @@ const cdp = await ctx.newCDPSession(p);
 await p.clock.install({ time: new Date('2026-01-01T09:00:00Z') });
 await p.goto(url, { waitUntil: 'load' });
 await p.evaluate(() => document.fonts.ready);
+const title = await p.title();
+console.log(`recording "${title}" from ${url}`);
+if (EXPECT && !title.toLowerCase().includes(EXPECT.toLowerCase())) {
+  console.error(`STOPPED: the page at ${url} is "${title}", not "${EXPECT}". Another site may hold that port; serve this one on a free port.`);
+  await b.close(); process.exit(2);
+}
 
 // One step of the page's own time, then everything that runs on its own is
 // set for that moment, and we wait (in real time) until it is ready to draw.
@@ -183,11 +194,12 @@ const every = Math.max(1, Math.floor(n / 12));
 execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', out, '-vf', `select=not(mod(n\\,${every})),scale=-2:540,tile=6x2`,
   '-frames:v', '1', out.replace(/\.mp4$/i, '') + '-sheet.jpg']);
 // A copy small enough to send on WhatsApp (Cakes by Tova, 18 Nov 2026: crf 18 gave 19 MB for 57 s; crf 27 gave
-// 3.6 MB with no visible loss). Only for phone-size videos: wide ones stay as they are.
+// 3.6 MB with no visible loss). Wide videos too, at 1080 high (Burnt, 25 Nov 2026: the laptop video was 28 MB,
+// over WhatsApp's 16 MB; 1080p at crf 27 gave 4.5 MB).
 const wa = out.replace(/\.mp4$/i, '') + '-whatsapp.mp4';
-if (phone) execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', out, '-c:v', 'libx264', '-crf', '27', '-preset', 'slow',
-  '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', wa]);
+execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', out, ...(phone ? [] : ['-vf', 'scale=-2:1080']), '-c:v', 'libx264',
+  '-crf', '27', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', wa]);
 // The frames stay in <out>.frames/ for the next --redo.
 const mb = f => (statSync(f).size / 1048576).toFixed(1) + ' MB';
 console.log(`wrote ${out} (${mb(out)}, ${n} frames at ${fps} fps, ${partial ? redrawn + ' drawn again, ' + (n - redrawn) + ' reused' : 'all drawn'}) and its contact sheet` +
-  (phone ? `; ${wa} (${mb(wa)}) is the one to send on WhatsApp` : ''));
+  `; ${wa} (${mb(wa)}) is the one to send on WhatsApp`);

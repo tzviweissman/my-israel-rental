@@ -226,8 +226,8 @@ Prices are read with `get_cost` at the time, never from memory.
    end the film eases its playback rate down onto a sharp resting frame, never a hard stop or a freeze (§3al.2).
    **Gate:** `check-film-video.mjs`, `check-film-clear.mjs`, `check-opening-scroll.mjs`,
    `check-phone-opening.mjs` and `check-iphone.mjs` pass.
-9. **Judged by people who did not build it (free).** Record the preview with the skill's `scripts/record.mjs` and
-   look at its contact sheet. Render at the six sizes of §3p.6, both languages, reduced motion, phones as phones
+9. **Judged by people who did not build it (free).** Record the preview with the skill's `scripts/record.mjs` (with
+   `--expect "<business name>"`, so a wrong site on that port stops it) and look at its contact sheet. Render at the six sizes of §3p.6, both languages, reduced motion, phones as phones
    (§3a). Run `node scripts/compare-sheet.mjs <build> <pic 1> <pic 2>` again, with the same two sites as
    `## Why they are a 5`, only if the page changed since phase 7, and bring REFERENCES.md's `## Compared` up to
    date (§3ag). Two Sonnet judges, each given only the brief `node scripts/judges.mjs --brief` prints
