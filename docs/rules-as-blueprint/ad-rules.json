@@ -646,6 +646,18 @@
    "status": "built"
   },
   {
+   "id": "A8.10",
+   "rule": "Whole in a WhatsApp chat: every word, name, link, logo and QR between y 250 and 1670 of a story",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "scripts/ad-chat-view.py makes the sheet; scripts/ad-blueprint.mjs --check refuses the answer without it",
+   "confirmed_by": "ad-blueprint.mjs --check, LOOK",
+   "retried": false,
+   "status": "planned"
+  },
+  {
    "id": "A8.9",
    "rule": "Picture leaving the site is drawn at 2160 wide from the best photo",
    "how": [

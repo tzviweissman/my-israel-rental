@@ -106,6 +106,7 @@ A8.6 | The QR is at least 150px at 1080 wide, dark on white, with the short link
 A8.7 | Works in Hebrew and English: right-aligned, the QR moves to the left, letters in a font that has them. | 8 | auto:languages
 A8.8 | Words readable on their background: 3:1 for large text; the price circle stays visible. | 8, ad maker 4 Nov | decide
 A8.9 | The picture that leaves the site is drawn at double size (2160 wide) from the best copy of the photo, never the preview. | 8, Tzvi 5 Nov | auto:sharp
+A8.10 | Whole in a WhatsApp chat: a chat shows a tall picture only as its middle until someone taps it, and most never tap. On a 1080x1920 ad every word, the business's name, the link, the logo and the QR sit between y 250 and 1670 (the 1080x1420 a chat shows, measured on Tzvi's phone); only the picture may run past. Checked on the sheet from python scripts/ad-chat-view.py <ad.jpg> <sheet.jpg>, which the answer names. Applies to every hand-made story ad and new story design from 25 Nov 2026; designs the ad maker already draws keep A8.4. | 8, Tzvi 25 Nov | decide since:2026-11-25
 
 ## 7. Before it goes out
 
