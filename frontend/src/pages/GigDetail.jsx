@@ -890,7 +890,7 @@ const GigDetail = () => {
                     }}
                   />
                 )
-                : <div className="w-full h-full flex items-center justify-center text-gray-300">No image</div>}
+                : <div className="w-full h-full flex items-center justify-center text-gray-300">{t('services.noImage', 'No image')}</div>}
               {/* The "Photos of · {tier}" tag is gone. It labelled the hero
                   with the selected option's name, which told a visitor
                   nothing they could not see from the option they had just
