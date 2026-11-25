@@ -445,7 +445,7 @@ export default function OrderPage() {
               {sections.map((g, k) => (
                 <button key={g || '-'} type="button" dir="auto"
                   onClick={() => document.getElementById(`order-sec-${k}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                  className="shrink-0 rounded-full border px-3 h-9 text-xs font-semibold whitespace-nowrap"
+                  className="shrink-0 rounded-full border px-3 h-11 text-xs font-semibold whitespace-nowrap"
                   style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
                   {g || t('order.moreItems', 'More')}
                 </button>
@@ -470,7 +470,7 @@ export default function OrderPage() {
               return (
                 <React.Fragment key={p.id}>
                 {heading && (
-                  <li id={`order-sec-${sections.indexOf(p.group || '')}`} className="pt-4 pb-1 text-xs font-bold uppercase tracking-wide scroll-mt-14" dir="auto" style={{ color: 'var(--brand-muted)' }} data-testid="order-section">
+                  <li id={`order-sec-${sections.indexOf(p.group || '')}`} className="pt-4 pb-1 text-xs font-bold uppercase tracking-wide scroll-mt-16" dir="auto" style={{ color: 'var(--brand-muted)' }} data-testid="order-section">
                     {p.group || t('order.moreItems', 'More')}
                   </li>
                 )}
