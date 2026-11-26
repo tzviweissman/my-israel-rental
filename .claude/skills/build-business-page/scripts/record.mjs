@@ -56,6 +56,9 @@ const fps = Number(argv[5]) >= 10 ? Number(argv[5]) : 30;
 const HOLD = 2.5, dt = 1000 / fps;
 const dir = out.replace(/\.mp4$/i, '') + '.frames';
 
+// the preview server must answer before any browser starts (26 Nov 2026: a stopped server crashed three runs in ways
+// that looked like faults in the tools)
+if (/^https?:/i.test(url)) { try { await fetch(url, { signal: AbortSignal.timeout(8000) }); } catch { console.error(`${url} does not answer: start the preview server first (node scripts/serve-builds.mjs 8991)`); process.exit(2); } }
 const b = await chromium.launch();
 // A phone-sized video is recorded as a phone (touch, no hover), so what the
 // page shows touch screens (a button filled at rest, open captions) is what

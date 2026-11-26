@@ -13,6 +13,9 @@ const { chromium } = createRequire(process.cwd() + '/')('playwright');
 const url = process.argv[2] || 'http://localhost:3000/';
 const sizes = [[1440, 900], [1536, 753], [1280, 650], [1920, 1080], [390, 844], [360, 640]];
 const stops = 18;
+// the preview server must answer before any browser starts (26 Nov 2026: a stopped server crashed three runs in ways
+// that looked like faults in the tools)
+if (/^https?:/i.test(url)) { try { await fetch(url, { signal: AbortSignal.timeout(8000) }); } catch { console.error(`${url} does not answer: start the preview server first (node scripts/serve-builds.mjs 8991)`); process.exit(2); } }
 const b = await chromium.launch();
 const problems = new Map();
 for (const [w, h] of sizes) {

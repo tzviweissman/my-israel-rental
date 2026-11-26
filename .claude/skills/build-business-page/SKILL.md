@@ -105,7 +105,7 @@ Prices are read with `get_cost` at the time, never from memory.
    message, only about their business: missing facts, more photos, guarantee (§3j.1), FAQ with 5 to 8 example
    questions (§3 (cont.) 4), per-item choices for similar products (§3l.1), which number takes WhatsApp (§3o.4),
    prices against their menu (§0b.3), the worry questions (§3c), reviews and the name each may show (3ab.3), servings
-   per size (3u.3), lead time, closed days and the usual choice (3k.8), which size each photo shows (rules 8), the
+   per size (3u.3), every length, size or package a service sells and its price, beyond the one the listing shows (Clean Plus, 26 Nov 2026: the site showed only the listing's 4-hour visit and the owner wrote back that they sell 2-hour visits too), lead time, closed days and the usual choice (3k.8), which size each photo shows (rules 8), the
    originals of any screenshot (§3o.7) and a photo of themselves (3e.22); only what the record does not already
    answer. List every live-site write the build needs (loading products, delivery settings) and ask Tzvi for all of
    them in one go before the first one (§0b.3). Then build what never changes
@@ -248,7 +248,7 @@ Prices are read with `get_cost` at the time, never from memory.
    Pinterest pictures and
    that did not build it score layout, light, colour, type, detail and motion from compare.jpg and the preview's
    contact sheet, one `Judge N:` line each in review.md; the median plus Tzvi's calibration is the `Rating:`, 4 or
-   more with no area under 3.5 (§3aj.4). Then a Sonnet subagent that did not build the site uses it against
+   more with no area under 3.5 (§3aj.4). A third Sonnet judge is given only the contact sheet record.mjs writes beside the video (`<name>-sheet.jpg`; wait for the recording to finish, never make one by hand) and the motion notes, never the stills, and adds its own `Judge 3:` line (26 Nov 2026: two judges on the same stills gave identical scores and notes). Before the next round, list every judge note from every round in review.md and plan one round that answers each note given twice; a returning note changes that section's structure, not its styling (Clean Plus sat at 3.5 for five rounds, 24 to 26 Nov 2026), and a note on something Tzvi chose is asked of him first. After each section change run check-fits.mjs, check-speed.mjs and readable.mjs before judging again. Then a Sonnet subagent that did not build the site uses it against
    `docs/page-review-checklist.md`; fix every FAIL, it looks again (§3r.2). Its brief lists CONCEPT.md's quoted
    yeses, FEEDBACK.md's done items and the every-site parts (three facts, full footer, menu): an item that only
    repeats one of those is "PASS (Tzvi chose: ...)", never FAIL (§3aj.13). Finish the wow-gate answers (§3n). Do not also run

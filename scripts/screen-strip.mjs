@@ -14,6 +14,9 @@ import { chromium } from 'playwright';
 const [url, out, maxArg] = process.argv.slice(2);
 if (!url || !out) { console.error('usage: node scripts/screen-strip.mjs <url> <out.jpg> [max screens]'); process.exit(2); }
 const MAX = Number(maxArg) || 16, W = 1280, H = 800;
+// the preview server must answer before any browser starts (26 Nov 2026: a stopped server crashed three runs in ways
+// that looked like faults in the tools)
+if (/^https?:/i.test(url)) { try { await fetch(url, { signal: AbortSignal.timeout(8000) }); } catch { console.error(`${url} does not answer: start the preview server first (node scripts/serve-builds.mjs 8991)`); process.exit(2); } }
 const browser = await chromium.launch();
 const p = await browser.newPage({ viewport: { width: W, height: H } });
 await p.goto(url, { waitUntil: 'load', timeout: 60000 });
