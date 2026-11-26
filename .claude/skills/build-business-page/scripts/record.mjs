@@ -119,6 +119,18 @@ async function step(ms, extra = 0) {
       // only by our frames (it ran at double speed before, 8 Oct 2026).
       if (v.autoplay && v.__wants === undefined) { v.__wants = true; window.__pause.call(v); }
       if (v.readyState < 1) continue;
+      // A server that does not answer Range requests (python -m http.server) gives a video nothing to seek in, so
+      // every frame stayed on the first picture (American Crust's phone film, 25 Nov 2026). The whole file as a blob
+      // is always seekable: load it once, then go on.
+      const sk = v.seekable, upTo = sk.length ? sk.end(sk.length - 1) : 0;   // no Range: seekable is 0 to 0
+      if (v.__wants && v.duration && upTo < v.duration - 0.1 && !v.__blob && v.currentSrc) {
+        v.__blob = true;
+        waits.push(fetch(v.currentSrc).then((r) => r.blob()).then((bl) => new Promise((r) => {
+          v.addEventListener('loadeddata', r, { once: true }); __wait(r, 5000);
+          v.src = URL.createObjectURL(bl); v.__last = 0;
+        })).catch(() => {}));
+        continue;
+      }
       if (v.__wants && v.__last === v.currentTime) {
         const d = v.duration || 0, next = v.currentTime + ms / 1000;
         v.currentTime = v.loop && d ? next % d : Math.min(next, d || next);

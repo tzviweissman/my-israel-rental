@@ -156,7 +156,7 @@ h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
 .sym { font-size: .55em; }
 
 /* the opening (rule 3h): their dough boiled, baked and bragged about, a full-screen film the scroll drives; each word lights on its chapter */
-.open { position: relative; height: 540vh; background: var(--night); color: var(--cream); }
+.open { position: relative; height: 680vh; background: var(--night); color: var(--cream); }
 .open .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 #cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .open .stage::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, rgba(20, 20, 20, .88) 0%, rgba(20, 20, 20, .72) 34%, rgba(20, 20, 20, .3) 52%, rgba(20, 20, 20, 0) 68%), linear-gradient(0deg, rgba(20, 20, 20, .6), rgba(20, 20, 20, 0) 35%); }
@@ -164,9 +164,10 @@ h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
 .open h1 { font-size: clamp(3rem, min(10vw, 10svh), 6.5rem); line-height: .9; color: var(--cream); }
 .open h1 .w { display: block; transition: color 400ms var(--out), opacity 400ms var(--out), transform 500ms var(--out); }
 .open .w1 { color: var(--mustard); }
-.open .w2, .open .w3 { opacity: .22; transform: translateX(-.15em); }
+.open .w2, .open .w3, .open .w4 { opacity: .22; transform: translateX(-.15em); }
 .open.c2 .w1 { color: var(--cream); } .open.c2 .w2 { opacity: 1; transform: none; color: var(--mustard); }
 .open.c3 .w2 { color: var(--cream); } .open.c3 .w3 { opacity: 1; transform: none; color: var(--mustard); }
+.open.c4 .w3 { color: var(--cream); } .open.c4 .w4 { opacity: 1; transform: none; color: var(--mustard); }
 .open .lede { margin: 0; font-size: 1.2rem; max-width: 24rem; color: var(--cream); }
 .open .end { display: grid; gap: 1.1rem; justify-items: start; }
 .open .btn { background: var(--mustard); color: var(--ink); }
@@ -182,16 +183,16 @@ h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
   .open .wrap { flex: 0 0 auto; height: auto; justify-content: flex-start; gap: 1rem; padding-top: 1.1rem; padding-bottom: 1.4rem; }
   .open h1 { font-size: clamp(2.2rem, 11vw, 3rem); line-height: 1; }
   .open h1 .w { display: inline-block; margin-right: .22em; }
-  .open .w2, .open .w3 { transform: none; }
+  .open .w2, .open .w3, .open .w4 { transform: none; }
   .open .lede { font-size: 1.05rem; }
   }
 /* phone: the film plays on repeat in one screen (index.html adds .loop); the page scrolls on normally and the three words all show (Tzvi, 29 Oct 2026) */
 .open.loop { height: auto; }
 .open.loop .stage { position: relative; top: 0; }
 .open .loopvid { position: relative; flex: 1 1 0; min-height: 36svh; width: 100%; height: auto; object-fit: cover; object-position: 50% 50%; display: block; background: var(--night); }
-.open.loop .w2, .open.loop .w3 { opacity: 1; transform: none; }
-.open.loop .w1, .open.loop .w2, .open.loop .w3 { color: var(--cream); } .open.loop .w1 { color: var(--mustard); }
-@media (prefers-reduced-motion: reduce) { .open { height: 100vh; height: 100svh; } .open .w2, .open .w3 { opacity: 1; transform: none; } }
+.open.loop .w2, .open.loop .w3, .open.loop .w4 { opacity: 1; transform: none; }
+.open.loop .w1, .open.loop .w2, .open.loop .w3, .open.loop .w4 { color: var(--cream); } .open.loop .w1 { color: var(--mustard); }
+@media (prefers-reduced-motion: reduce) { .open { height: 100vh; height: 100svh; } .open .w2, .open .w3, .open .w4 { opacity: 1; transform: none; } }
 
 /* the two products as cards, right under the opening: colour per product (mustard-light, night) */
 .buy { background: var(--mustard); padding: 0 var(--gutter) clamp(1.2rem, 3vh, 2rem); }

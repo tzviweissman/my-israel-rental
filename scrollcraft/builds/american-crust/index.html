@@ -28,7 +28,7 @@
     <div class="stage">
       <canvas id="cv" aria-hidden="true"></canvas>
       <div class="wrap">
-        <h1 id="h-open"><span class="w w1">Boil.</span><span class="w w2">Bake.</span><span class="w w3">Brag.</span></h1>
+        <h1 id="h-open"><span class="w w1">Boil.</span><span class="w w2">Stretch.</span><span class="w w3">Bake.</span><span class="w w4">Brag.</span></h1>
         <div class="end">
           <p class="lede">The American bagel and pizza dough that you've been missing, delivered in Ramat Eshkol, Jerusalem, for ₪25, or pick up in Sanhedria.</p>
           <div class="go"><a class="btn" href="#buy">Order your dough</a><ul class="btn-facts"><li>Dough from <span class="sym">₪</span>27</li><li>Delivery ₪25 in Ramat Eshkol</li><li>Cash or Zelle</li></ul></div>
@@ -155,12 +155,12 @@
     });
   });
   // the opening film (rule 3h), chosen by scroll as on The Brown Box (Tzvi: "once the video ends they cant see it again"):
-  // 233 frames on a canvas (150 to the bagels, then the pie, 23 Nov 2026), loaded in passes (every 8th, then 4th, 2nd, all) so it scrubs early and sharpens; each word
-  // lights on its chapter (Boil from the start, Bake at 0.26, Brag at 0.38: the joins of gen/film.sh; Brag holds through the pie)
+  // 250 frames on a canvas, loaded in passes (every 8th, then 4th, 2nd, all) so it scrubs early and sharpens; each word lights
+  // on its chapter (Boil from the start, Stretch at 0.18, Bake at 0.40, Brag at 0.77: the joins of gen/film.sh, 25 Nov 2026)
   var film = document.getElementById('film'), cv = document.getElementById('cv');
   if (film && cv) {
     var cx = cv.getContext('2d'), still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var kind = innerWidth <= 760 ? 'm' : 'd', N = 233, imgs = new Array(N), p = 0;
+    var kind = innerWidth <= 760 ? 'm' : 'd', N = 250, imgs = new Array(N), p = 0;
     var url = function (i) { return 'assets/film/' + kind + '/' + String(i + 1).padStart(4, '0') + '.webp'; };
     cv.style.background = '#141414 url(' + url(still ? N - 1 : 0) + ') center / cover no-repeat';
     var order = [], seen = {};
@@ -168,7 +168,7 @@
     if (still) order = [N - 1];
     // On a phone the film plays by itself on repeat instead of following the scroll (Tzvi, 29 Oct 2026: "on mobile we
     // should remove the scroll and it should just play on repeat"): one short video made from the same phone frames
-    // (data-loop), the finished bagels held a moment, then a soft fade back to the start. The section is one screen tall
+    // (data-loop), the pie and the bagels held a moment, then a soft fade back to the start. The section is one screen tall
     // (.open.loop in site.css); motion off keeps the last frame as a still. The <video> itself is shown, never drawn
     // into the canvas, and paused when off screen.
     if (kind === 'm' && !still && film.dataset.loop) {
@@ -211,7 +211,7 @@
       raf = 0;
       var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight;
       p = still ? 1 : Math.min(1, Math.max(0, -r.top / Math.max(1, span)));
-      film.classList.toggle('c2', p >= .26); film.classList.toggle('c3', p >= .38);
+      film.classList.toggle('c2', p >= .18); film.classList.toggle('c3', p >= .40); film.classList.toggle('c4', p >= .77);
       draw();
     };
     addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(paint); }, { passive: true });

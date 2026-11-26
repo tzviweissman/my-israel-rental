@@ -243,4 +243,18 @@ Re-checked 2026-11-23: pickup bundle card under the two doughs on home: deal in 
 
 Re-checked 2026-11-23: film gets a fourth part, the pie (owner's request via Tzvi, 23 Nov): steps and object list approved before generating, clip checked at 8 fps, words still on their chapters (0.26, 0.38), laptop scroll 540vh, phone loop remade from the same frames, brief section C
 
+Re-checked 2026-11-24: Four-chapter film, 24 Nov 2026
+
+Re-checked 2026-11-25: fresh checkout wrote site.css after RULES.md; site.css unchanged since the four-chapter check; this change only re-encodes the phone loop as yuv420p
+
+Re-checked 2026-11-25: new Bake (tray into oven, speeded bake) and Brag (whole stack in frame) clips, chapter marks .18/.40/.77, opening 680vh
+
+R3aa.39 pass: the headline words are live page text beside the film on a laptop and under it on a phone, never in the film; the 390x844 recording of 25 Nov shows "Boil. Stretch. Bake. Brag." whole on one line through every chapter
+R3am.5 n/a: the site shows no reviews of our own
+R3am.6 n/a: the shop's order is sent to the dashboard (check-order-data passes); WhatsApp is only mentioned for the exact delivery address
+
 Re-checked 2026-11-25: only the phone loop video re-encoded to yuv420p; no page or style change
+
+Re-checked 2026-11-26: phone loop rebuilt at the film's own pace (28 s, 24 fps); rebuilt onto main
+
+Re-checked 2026-11-26: rebase onto main rewrote site.css after RULES.md; no site change since the 26 Nov publish
