@@ -149,3 +149,17 @@ regardless, per the brief.
 should read and extend this file rather than re-reading every report.
 treat it as used and do not repeat it.
 which is a different report type). Flagged as documentation drift, same as the
+2026-11-12 - information scent - "Back to businesses" pill on business sites (mir-back.js)
+2026-11-13 - choice visibility (options with prices shown, not in a drop-down) - L.A. Cholent order form meat choice
+2026-11-14 - recognition over recall - The Brown Box order form, delivery date (open days as taps)
+2026-11-15 - Zeigarnik effect (unfinished task shown) - Sales summary, each item panel cost prompt
+2026-11-15 - Zeigarnik effect (unfinished costs count) - Sales summary, Each item panel
+2026-11-16 - fresh start effect - Clean Plus booking, first-day field
+2026-11-17 - self-reference effect - sign-up card headline
+2026-11-18 - concreteness effect - American Crust pickup bundle card (shop.html)
+2026-11-19 - operational transparency (labour illusion) - order card, photo button while preparing (OrderCard.jsx)
+2026-11-20 - operant reinforcement (immediate, real feedback) - owner's order card photo button (OrderCard.jsx:308-311)
+2026-11-21 - marginal value theorem (information foraging: people leave a patch where it runs out) - end of each category row on /businesses (BrowseRows.jsx)
+2026-11-23 - zero-price effect - order page Pickup/Delivery switch with a free-delivery code (OrderPage.jsx:514)
+2026-11-25 - Zeigarnik effect (unfinished checklist shown again) - business dashboard, the sign-up's 'Make your page stronger' list (CreateGig.jsx wizard-live-todo)
+2026-11-26 - ambiguity aversion (how payment works, shown before commitment) - order page form above Send (OrderPage.jsx)
