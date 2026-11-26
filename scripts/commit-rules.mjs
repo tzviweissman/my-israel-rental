@@ -21,6 +21,8 @@
  *   2. check-rule-copies --sync, then check-rule-homes
  *   3. every line this change added (against HEAD) must still be there after the merge, contents lines aside; a
  *      missing one stops with the line shown
+ *      and every line main added since HEAD must still be there too (26 Nov 2026: a script saved from a checkout
+ *      behind main dropped another session's newer lines); extra paths merge against HEAD, never the last push
  *   4. one commit of only these files, made on origin/main with a separate index (the checkout's own index and branch
  *      are not touched), printed; --push sends it to main and checks main is that commit afterwards
  */
@@ -107,8 +109,19 @@ function mergeOne(f, rev) {
   });
   return { add, bad, out: out.replace(/\n/g, eol) };
 }
+// main's own new lines in each file, since this checkout's HEAD: none may go missing in the merge
+const mainAdded = {};
 for (const f of files) {
-  const first = since && show(since, f) !== null ? since : 'HEAD';
+  const h = show('HEAD', f); const o = show('origin/main', f);
+  if (h === null || o === null) { mainAdded[f] = []; continue; }
+  const hl = new Set(lf(h).split('\n'));
+  mainAdded[f] = lf(o).split('\n').filter((l) => l.trim() && !hl.has(l) && !isContents(l));
+}
+for (const f of files) {
+  // A script or other extra path merges against HEAD, the copy this checkout's file came from. Merged against the
+  // last push instead, a checkout behind main read main's newer lines as deleted here and dropped them (26 Nov 2026:
+  // check-ad-designs.mjs lost another session's holiday-props check). Rule files keep the recorded base.
+  const first = RULE_FILES.includes(f) && since && show(since, f) !== null ? since : 'HEAD';
   let m = mergeOne(f, first);
   if (m.bad?.length && first !== 'HEAD' && show('HEAD', f) !== null) {
     const again = mergeOne(f, 'HEAD');
@@ -126,6 +139,19 @@ for (const f of files) {
   for (const l of added[f]) if (!now.has(l)) lost.push(`${f}: ${l.slice(0, 110)}`);
 }
 if (lost.length) { console.error(`lines this change added are gone after the merge:\n  ${lost.join('\n  ')}`); process.exit(1); }
+// and main's: a line main added since this checkout's HEAD must still be there, unless this change edited that
+// very line (it then starts the same way, as in mergeOne)
+const dropped = [];
+for (const f of files) {
+  const nowText = lf(fs.readFileSync(path.join(ROOT, f), 'utf8'));
+  const now = new Set(nowText.split('\n'));
+  for (const l of mainAdded[f]) {
+    if (now.has(l)) continue;
+    const head = l.slice(0, Math.min(60, l.length));
+    if (!nowText.split('\n').some((x) => x.startsWith(head))) dropped.push(`${f}: ${l.slice(0, 110)}`);
+  }
+}
+if (dropped.length) { console.error(`lines main added since this checkout's last commit would be lost, nothing committed:\n  ${dropped.slice(0, 20).join('\n  ')}`); process.exit(1); }
 // these files, and the copies the sync rewrote from them (full-rules.md); only what differs from HEAD, so a file this
 // checkout merely has older than main is never sent back over main's
 const commitFiles = [...new Set([...files, ...git(['diff', 'HEAD', '--name-only', '--', ...RULE_FILES]).stdout.split('\n').filter(Boolean)])];

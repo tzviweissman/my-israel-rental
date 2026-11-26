@@ -101,13 +101,13 @@ A5.6 | Owner-facing wording does not address "owners"; rentals lead, the busines
 A8.1 | Square 1080x1080, feed 1080x1350, story 1080x1920: each one drawn and looked at, not resized. | 8 | auto:shapes
 A8.2 | No text under 30px at 1080 wide. | 8 | auto:text-size
 A8.3 | Nothing cut off: every line inside the picture. | 8 | auto:text-inside
-A8.4 | A story keeps the top 220px and bottom 230px clear. | 8 | auto:story-safe
+A8.4 | A story keeps the top 250px and bottom 230px clear: the top 220 under the account name in Status, raised to 250 on 26 Nov 2026 because a WhatsApp chat crops it (A8.10; the ad maker's words start at 256). | 8, Tzvi 26 Nov | auto:story-safe
 A8.5 | Words over a photo cover at most 40% of it, and never the subject. | 8 | decide
 A8.6 | The QR is at least 150px at 1080 wide, dark on white, with the short link printed whole on the ad (the business's name in it when it has a Latin one), beside it unless the owner moved them. No drag can shrink it below 150px, cut it off or put it where a story covers it. | 8, Tzvi 5 Nov | auto:qr
 A8.7 | Works in Hebrew and English: right-aligned, the QR moves to the left, letters in a font that has them. | 8 | auto:languages
 A8.8 | Words readable on their background: 3:1 for large text; the price circle stays visible. | 8, ad maker 4 Nov | decide
 A8.9 | The picture that leaves the site is drawn at double size (2160 wide) from the best copy of the photo, never the preview. | 8, Tzvi 5 Nov | auto:sharp
-A8.10 | Whole in a WhatsApp chat: a chat shows a tall picture only as its middle until someone taps it, and most never tap. On a 1080x1920 ad every word, the business's name, the link, the logo and the QR sit between y 250 and 1670 (the 1080x1420 a chat shows, measured on Tzvi's phone); only the picture may run past. Checked on the sheet from python scripts/ad-chat-view.py <ad.jpg> <sheet.jpg>, which the answer names. Applies to every hand-made story ad and new story design from 25 Nov 2026; designs the ad maker already draws keep A8.4. | 8, Tzvi 25 Nov | decide since:2026-11-25
+A8.10 | Whole in a WhatsApp chat: a chat shows a tall picture only as its middle until someone taps it, and most never tap. On a 1080x1920 ad every word, the business's name, the link, the logo and the QR sit between y 250 and 1670 (the 1080x1420 a chat shows, measured on Tzvi's phone); only the picture may run past. Checked on the sheet from python scripts/ad-chat-view.py <ad.jpg> <sheet.jpg>, which the answer names. Applies to every hand-made story ad and new story design from 25 Nov 2026; the ad maker's own designs meet it through A8.4 (top 250 since 26 Nov 2026) and its bottom 230, which ends the foot at row 1650. | 8, Tzvi 25 Nov | decide since:2026-11-25
 
 ## 7. Before it goes out
 

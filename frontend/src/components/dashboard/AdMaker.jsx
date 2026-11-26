@@ -33,6 +33,10 @@ import { logoLetterShare, logoReads, LOGO_LETTER_PX } from '../../utils/logoWord
 
 const SITE = 'https://myisraelrental.com';
 const FORMATS = { square: [1080, 1080], feed: [1080, 1350], story: [1080, 1920] };
+// A story's words start this far down: below the account name drawn over its top in Status (220px, rule A8.4), and
+// inside the rows a WhatsApp chat shows before anyone taps (250 to 1670, rule A8.10; Tzvi 26 Nov 2026: "do all 4",
+// after check-ad-designs found the name and logo cut in 111 story designs at 220).
+const STORY_TOP = 256;
 const INK = '#111827';
 const MUTED = '#666666';
 const ACCENT = '#167AB8';
@@ -46,7 +50,9 @@ const loadImage = (src) => new Promise((resolve) => {
   img.src = bestPhoto(src);
 });
 
-// Word-wrapped lines, the last one shortened with "…" if it does not fit.
+// Word-wrapped lines, the last one shortened with "…" if it does not fit. (wrapLines is the same, for drawShoot,
+// where `wrap` names the wrapped word's box.)
+const wrapLines = (...args) => wrap(...args);
 function wrap(ctx, text, width, maxLines) {
   const words = (text || '').split(/\s+/).filter(Boolean);
   const lines = [];
@@ -469,8 +475,8 @@ function begin(canvas, format, rtl) {
   ctx.direction = rtl ? 'rtl' : 'ltr';
   ctx.textAlign = rtl ? 'right' : 'left';
   const k = format === 'story' ? 1.3 : 1;
-  // A story keeps clear of the account name drawn over its top 220px.
-  return { ctx, W, H, body, head: (PARTS && PARTS.font) || headFont(rtl), px: (n) => Math.round(n * k), top: format === 'story' ? 220 : 64 };
+  // A story keeps clear of the account name drawn over its top, and of what a chat crops (STORY_TOP).
+  return { ctx, W, H, body, head: (PARTS && PARTS.font) || headFont(rtl), px: (n) => Math.round(n * k), top: format === 'story' ? STORY_TOP : 64 };
 }
 
 // The link and its code across the foot. No coloured band any more (Tzvi, 12 Nov 2026, from the library's 5/5 ads,
@@ -536,7 +542,7 @@ function drawReview(canvas, { format, review, eyebrow, price, cta, shortUrl, rtl
   const safe = format === 'story' ? 230 : 0; // a story's reply bar covers its bottom 230px (rules 8)
   const footH = QR + 48 + safe;
   const tailH = px(44) + (price ? px(64) + 20 : 0);
-  let y = format === 'story' ? 220 : PAD; // a story's account name covers its top 220px (rules 8)
+  let y = format === 'story' ? STORY_TOP : PAD; // below a story's account name and a chat's crop (STORY_TOP)
 
   // The comment card, with a small tail pointing down at the photo.
   const cardY = y;
@@ -763,7 +769,7 @@ function drawGrid(canvas, { format, words, eyebrow, price, cta, shortUrl, rtl, i
   ctx.fillStyle = rgb(col);
   paintGround(ctx, W, H);
   const story = format === 'story';
-  const gTop = story ? 220 : 0;
+  const gTop = story ? STORY_TOP : 0;
   const gBot = story ? H - 230 : H;
   const G = 10;
   const tw = (W - G) / 2;
@@ -1629,7 +1635,7 @@ function part(ctx, name, [x, y, w, h], draw, { later = false, minScale = 0.3 } =
     m = {
       s: sc,
       x: hold(cx + raw.x, (w * sc) / 2, 0, W) - cx,
-      y: hold(cy + raw.y, (h * sc) / 2, H === 1920 ? 220 : 0, H === 1920 ? H - 230 : H) - cy,
+      y: hold(cy + raw.y, (h * sc) / 2, H === 1920 ? STORY_TOP : 0, H === 1920 ? H - 250 : H) - cy,
     };
   }
   const paint = () => {
@@ -2975,6 +2981,36 @@ function drawShoot(canvas, a) {
   if (wrap && !wrap.own && !(PARTS && isMoved('words'))) {
     weaveFood(ctx, S.img, wrapAt, wrap, /^#[0-9a-f]{6}$/i.test(word) ? word : S.word, S.word, W);
   } else if (S.cut && !(PARTS && isMoved('words'))) cover(S.cut);
+  // A wrapped word's small print, set as a magazine would (Tzvi, 26 Nov 2026: "do all 4", from the "TWIST" poster in
+  // docs/inspo/pinterest-pasta-posters-2026-11-25; ad rule A9.9 question 7): a short rule in the word's ink, then the
+  // listing's own points in spaced small capitals, in the cream at the lower left that the diagonal food leaves
+  // empty. A point that does not fit whole is left out, never cut with "…" (A2.2).
+  if (wrap && !(PARTS && isMoved('words'))) {
+    const pts = (a.words.points || []).map((x) => (x || '').trim()).filter(Boolean).slice(0, 3);
+    const y0 = Math.round(wrap.foot + wrap.size * 0.3);
+    const yMax = H - (a.format === 'story' ? 230 : 0) - 40 - 150 - 10 - px(90);
+    const sz = 30;
+    const lh = Math.round(sz * 1.45);
+    const maxW = Math.round(W * 0.46);
+    const x = a.rtl ? W - PAD : PAD;
+    if (pts.length && yMax - y0 > lh * 2) {
+      part(ctx, 'points', [a.rtl ? W - PAD - maxW : PAD, y0, maxW, yMax - y0], () => {
+        ctx.fillStyle = word;
+        ctx.fillRect(a.rtl ? W - PAD - 56 : PAD, y0, 56, 3);
+        let y = y0 + px(18) + sz;
+        ctx.font = `700 ${sz}px ${body}`;
+        if (!a.rtl && 'letterSpacing' in ctx) ctx.letterSpacing = '0.16em';
+        for (const pt of pts) {
+          const text = a.rtl ? pt : pt.toUpperCase();
+          const lines = wrapLines(ctx, text, maxW, 3);
+          if (lines.some((l) => l.endsWith('…')) || y + (lines.length - 1) * lh > yMax) continue;
+          lines.forEach((l) => { say(ctx, l, x, y, { size: sz, weight: 700, colour: word, align: a.rtl ? 'right' : 'left', body, rtl: a.rtl }); y += lh; });
+          y += Math.round(lh * 0.4);
+        }
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+      });
+    }
+  }
   // The foot on its own shade, so the price and link read over any photo.
   const footTop = H - (a.format === 'story' ? 230 : 0) - 40 - 150 - 10;
   const base = ctx.createLinearGradient(0, footTop - px(150), 0, H);
@@ -3448,7 +3484,7 @@ function extras(canvas, a) {
     const solid = solidImage(img);
     const m = solid ? 0 : 12;
     const ratio = img.naturalWidth / img.naturalHeight;
-    const top = story ? 220 : 0;
+    const top = story ? STORY_TOP : 0;
     const foot = story ? H - 230 : H;
     const free = (bx, by, bw, bh, skipProduct) => bx >= 0 && bx + bw <= W && by >= top && by + bh <= foot
       && Object.entries(PARTS.boxes).every(([nm, b]) => nm === 'logo' || (skipProduct && nm.startsWith('product'))

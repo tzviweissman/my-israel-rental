@@ -49,7 +49,8 @@ async function ownServer() {
 if (pictures) fs.mkdirSync(pictures, { recursive: true });
 const fixture = (l) => JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts', 'fixtures', `ad-maker-${l}.json`), 'utf8'));
 const MIN_TEXT = 30;
-const SAFE_TOP = 220;
+// 250, not 220, from 26 Nov 2026: a WhatsApp chat crops a story's top 250 rows (A8.4, A8.10; the ad maker's STORY_TOP)
+const SAFE_TOP = 250;
 const SAFE_BOTTOM = 230;
 const MONEY = /[$₪€£]\s?\d[\d,.]*/g;
 

@@ -63,7 +63,15 @@ let webpackConfig = {
 webpackConfig.devServer = (devServerConfig) => {
   // NO_RELOAD=1: a page open for a long check is never reloaded by another session's edits
   // (scripts/check-ad-designs.mjs starts its own server this way; 19 Nov 2026).
-  if (process.env.NO_RELOAD === '1') { devServerConfig.hot = false; devServerConfig.liveReload = false; }
+  // Hot reloading stays built in and only the live connection is cut. With hot = false the private server shares
+  // webpack's build cache with a normal dev server, and stylesheets cached with hot reloading failed to compile
+  // ("No template for dependency: ModuleHotAcceptDependency"): the page never drew and check runs timed out
+  // (26 Nov 2026). With no client and no socket nothing can reach the page to reload it.
+  if (process.env.NO_RELOAD === '1') {
+    devServerConfig.liveReload = false;
+    devServerConfig.webSocketServer = false;
+    devServerConfig.client = false;
+  }
   // Add health check endpoints if enabled
   if (config.enableHealthCheck && setupHealthEndpoints && healthPluginInstance) {
     const originalSetupMiddlewares = devServerConfig.setupMiddlewares;
