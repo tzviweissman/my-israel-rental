@@ -242,3 +242,5 @@ Re-checked 2026-11-23: Only BRAND.md is new (22 Nov, for the Chanukah ad); the s
 Re-checked 2026-11-23: pickup bundle card under the two doughs on home: deal in money like for like (2x30+2x27=114 vs 105), shekels only, shown only while the listing sells a bundle, phone and laptop seen, no sideways scroll
 
 Re-checked 2026-11-23: film gets a fourth part, the pie (owner's request via Tzvi, 23 Nov): steps and object list approved before generating, clip checked at 8 fps, words still on their chapters (0.26, 0.38), laptop scroll 540vh, phone loop remade from the same frames, brief section C
+
+Re-checked 2026-11-25: only the phone loop video re-encoded to yuv420p; no page or style change

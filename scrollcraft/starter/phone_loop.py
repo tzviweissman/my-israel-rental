@@ -22,5 +22,7 @@ subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', str(fps), '-i', str
                 '-loop', '1', '-t', str(fade + 0.7), '-i', str(frames[0]), '-filter_complex',
                 f'[0:v]tpad=stop_mode=clone:stop_duration={hold},format=yuv420p,settb=1/{fps},fps={fps}[a];'
                 f'[1:v]format=yuv420p,settb=1/{fps},fps={fps}[b];[a][b]xfade=transition=fade:duration={fade}:offset={offset:.3f}[v]',
-                '-map', '[v]', '-an', '-c:v', 'libx264', '-crf', '28', '-preset', 'slow', '-movflags', '+faststart', out], check=True)
+                # yuv420p on the output too: xfade hands libx264 4:4:4, which phones do not play (the American Crust
+                # loop sat on its first frame on every phone, 25 Nov 2026)
+                '-map', '[v]', '-an', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-crf', '28', '-preset', 'slow', '-movflags', '+faststart', out], check=True)
 print('wrote', out, f'({len(frames)} frames, {offset + fade + 0.7:.1f} s)')
