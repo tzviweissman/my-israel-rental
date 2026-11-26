@@ -122,6 +122,17 @@ ${lp.stdout}${lp.stderr}`);
     // Tzvi's corrections each proved fixed (rules 3aj.6)
     if (!older.has('R3aj.6')) problems.push(...feedbackProblems(SRC).map((p) => `${p} (rules 3aj.6)`));
   }
+  // every video a phone can play: 8-bit 4:2:0 (yuv420p). Correctness, so every site, however old: American Crust's
+  // phone loop was 4:4:4 and sat on its first frame on every iPhone for a day (25 Nov 2026, phone_loop.py's xfade)
+  {
+    const vids = [];
+    const walk = (d) => { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk(p); else if (/\.(mp4|webm|mov)$/i.test(e.name)) vids.push(p); } };
+    if (fs.existsSync(path.join(SRC, 'assets'))) walk(path.join(SRC, 'assets'));
+    for (const v of vids) {
+      const fmt = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=pix_fmt', '-of', 'csv=p=0', v], { encoding: 'utf8' }).stdout.trim();
+      if (!/^yuvj?420p$/.test(fmt)) problems.push(`a video phones cannot play: ${path.relative(SRC, v)} is ${fmt || 'unreadable'}, re-encode with -pix_fmt yuv420p`);
+    }
+  }
   if (rules.status !== 0) problems.push(`rules not all answered (check-rules):\n${rules.stdout.split('\n').filter((l) => /FAIL|problem/.test(l)).join('\n')}`);
   // and every page of it fits the screen, with no photo blown up past its size (rules 3c.12,
   // 3p.6; Tzvi, 20 Oct 2026: "make sure the rules will prevent this in the future"), has no
@@ -209,6 +220,8 @@ ${lp.stdout}${lp.stderr}`);
     // happen in the first place"). Fields that zoom or overlap on an iPhone; an order the dashboard would refuse or
     // save other than the customer saw (practice orders on the live server, nothing saved).
     ['check-form-fields.mjs', 'has form fields that overlap or make an iPhone zoom in'],
+    // a video that plays on an iPhone moves (American Crust's 4:4:4 loop stood still for a day, 25 Nov 2026)
+    ['check-film-plays.mjs', 'has a video that stands still or will not play on an iPhone'],
     ['check-order-data.mjs', 'sends orders the dashboard would refuse or save differently from what the customer saw']]) {
     if (rule && newer.has(rule)) { console.log(`${script}: not run, rule ${rule} was added after this site was made`); continue; }
     if (!pages.length && script !== 'check-order-data.mjs') continue;
