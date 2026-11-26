@@ -4897,6 +4897,8 @@ const he = {
         shotIdeaLabel: "התמונה",
         shotPlain: "צילום מוצר",
         shotTiny: "אנשים קטנטנים בעבודה",
+        shotWrap: "עטוף סביב המילה שלך",
+        shotWrapNoWord: "כתבו קודם מילה גדולה; האוכל נעטף סביבה.",
         deal: "מבצע אמיתי שאתם עושים (לא חובה)",
         dealHint: "2 + 1 מתנה",
         dealEnds: "מסתיים ב-",

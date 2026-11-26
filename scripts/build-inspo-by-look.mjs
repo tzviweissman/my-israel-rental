@@ -21,6 +21,7 @@ const tsv = path.join(dir, 'by-look.tsv');
 const SKIP_FOLDERS = {
   'ad-videos-2026-11-04': 'ads', 'ad-videos-2026-11-07': 'ads', 'pinterest-ads-2026-11-02': 'ads',
   'pinterest-business-ad-2026-11-24': 'ads', 'pro-references': 'ads',
+  'pinterest-restaurants-ad-2026-11-25': 'ads', 'pinterest-pasta-posters-2026-11-25': 'ads',
   'bar-breaking-2026-11-02': 'film stills', 'pinterest-burnt-2026-11-18': 'film stills',
   'pinterest-burnt-reveal-2026-11-23': 'film stills', 'product-films-2026-10-21': 'film stills',
   'product-shots-2026-10-22': 'product photos', 'videos-2026-11-01': 'food filming frames',

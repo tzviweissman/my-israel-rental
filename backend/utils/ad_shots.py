@@ -166,6 +166,46 @@ def prompt_for_scene(what: str, shape: str) -> str:
     )
 
 
+# "Wrapped round your word" (Tzvi, 26 Nov 2026: "Add all three", after the restaurants ad beside Pinterest's "PASTA"
+# and "TWIST" posters, docs/ads/gen/myisraelrental-restaurants-status): the owner's own dish wraps round the ad's big
+# word, shading it. The ad maker draws that word alone, in its final font, size and place on a warm ground (ad rules
+# A3.13, A3.14), and sends the picture; the model keeps those letters and puts the dish round them; the ad maker types
+# the crisp word back on top and lets the food pass in front of every other letter. Food businesses only.
+WRAP_KINDS = {"grill", "bakery", "cafe", "kitchen"}
+WRAP_GROUND = "#F3EBDD"
+# Food the kind guess has no word for (a pizzeria came out "studio", American Crust 26 Nov 2026); used for the wrap
+# only, so the other pictures keep the sets they had.
+_WRAP_FOOD = ("pizza", "pasta", "noodle", "burger", "sandwich", "sushi", "falafel", "hummus", "taco", "wrap", "pie",
+              "restaurant", "dish", "dinner", "lunch", "breakfast", "פיצה", "פסטה", "המבורגר", "מסעדה", "פלאפל", "חומוס")
+
+
+def wraps(kind: str, text: str) -> bool:
+    low = (text or "").lower()
+    return kind in WRAP_KINDS or any(w in low for w in _WRAP_FOOD)
+# The word's ink per kind: deep and warm on the cream (A3.14: the colour goes on the type, not the ground).
+WRAP_INK = {"grill": "#7A2E12", "bakery": "#8A3B12", "cafe": "#4A2C1A", "kitchen": "#2F5D2F"}
+
+
+def prompt_for_wrap(what: str, kind: str, shape: str) -> str:
+    """Image 1 the owner's product, image 2 the ad's own word on the ground (the plate)."""
+    return (
+        "A real editorial food photograph for a magazine poster, crisp, mouth-watering, fine texture. "
+        f"Image 1 is the real product: {what}. Image 2 is a flat sign: a big word in one solid colour on a plain warm "
+        "cream background. Keep that word EXACTLY as it is in image 2: the same letters, shapes, size, position and colour, "
+        "flat and matte, standing like solid painted letters; do not add, remove, move or restyle any letter, and add no "
+        "other text. Photograph the product from image 1 together with the word: the product is the same as in image 1, "
+        "its shape, colours, toppings and texture unchanged, and its own soft or long parts (noodles, ribbons of pasta, "
+        "melted cheese, sauce, dough, cream, chocolate, herbs, whatever this product really has) curl round the letters, "
+        "passing behind some and in front of others, casting soft real shadows on them. The product comes in from the "
+        "upper left corner, its strands or drips running diagonally through the word and trailing off towards the lower "
+        "right, caught in motion, while the rest of the product sits close beside the word. A few of the product's own small pieces (crumbs, herbs, seeds, flakes) float in the "
+        "air near it, only ones this product really has. Soft warm daylight from the upper left, the cream background "
+        f"plain and empty elsewhere, the top {'25' if shape == 'story' else '18'} percent and the bottom "
+        f"{'30' if shape == 'story' else '25'} percent empty cream for words. No hands, no people, no plate unless image "
+        "1 shows one, no other words or letters."
+    )
+
+
 def recent_count(rows: list[dict[str, Any]], now: datetime) -> int:
     since = (now - timedelta(days=1)).isoformat()
     return sum(1 for r in rows if r.get("created_at", "") >= since and r.get("status") != "failed")

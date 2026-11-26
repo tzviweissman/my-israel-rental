@@ -5025,6 +5025,8 @@ const en = {
         shotIdeaLabel: "The picture",
         shotPlain: "Product shoot",
         shotTiny: "Tiny people at work",
+        shotWrap: "Wrapped round your word",
+        shotWrapNoWord: "Write a big word first; the food wraps round it.",
         deal: "A real deal you are running (optional)",
         dealHint: "Buy 2, get 1 free",
         dealEnds: "Ends on",

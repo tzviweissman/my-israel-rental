@@ -990,10 +990,15 @@ class ShotIn(BaseModel):
     occasion: str = ""
     # One idea in the picture (utils/ad_shots.IDEAS, Tzvi 12 Nov 2026); "" is the plain product shoot.
     idea: str = ""
+    # "wrap" only: the ad's big word, and the ad maker's picture of it alone on the cream (a PNG data URL), which the
+    # model wraps the product round (utils/ad_shots.prompt_for_wrap, Tzvi 26 Nov 2026).
+    word: str = ""
+    plate: str = ""
+    ink: str = ""  # the word's colour in the plate, so the ad draws the same one
 
 
 def _shot_row(r: dict[str, Any]) -> dict[str, Any]:
-    return {k: r.get(k) for k in ("id", "item", "shape", "kind", "occasion", "idea", "status", "url", "cut_url", "word", "dark")}
+    return {k: r.get(k) for k in ("id", "item", "shape", "kind", "occasion", "idea", "status", "url", "cut_url", "word", "dark", "wrap_word")}
 
 
 @router.get("/ads/shots")
@@ -1014,20 +1019,39 @@ async def ad_shots(target_type: str, target_id: str, user=Depends(verify_token))
 @router.post("/ads/shots")
 async def make_ad_shot(body: ShotIn, request: Request, user=Depends(verify_token)):
     import asyncio
+    import base64
     import uuid
+    from pathlib import Path
 
-    from utils.ad_shots import (ASPECT, IDEAS, KINDS, OCCASIONS, SHOTS_PER_DAY, guess_kind, idea_layout, look_for, prompt_for,
-                                prompt_for_idea, recent_count, run_shot)
+    from utils.ad_shots import (ASPECT, IDEAS, KINDS, OCCASIONS, SHOTS_PER_DAY, WRAP_INK, guess_kind, idea_layout, wraps,
+                                look_for, prompt_for, prompt_for_idea, prompt_for_wrap, recent_count, run_shot)
     if body.target_type != "business" or body.shape not in ASPECT:
         raise HTTPException(status_code=400, detail="Product photos are for a business's own products.")
     await _assert_owns_target(body.target_type, body.target_id, user)
     occasion = body.occasion if body.occasion in OCCASIONS else ""
     facts, extra = await _ad_facts(body.target_type, body.target_id)
-    kind = body.kind if body.kind in KINDS else guess_kind(" ".join(
+    listing_text = " ".join(
         [str(facts.get("business_name") or ""), str(facts.get("description") or ""), body.item]
-        + [f"{o.get('title', '')} {' '.join(str(i) for i in o.get('items') or [])}" for o in facts.get("offers") or []]))
-    idea = body.idea if body.idea in IDEAS else ""
+        + [f"{o.get('title', '')} {' '.join(str(i) for i in o.get('items') or [])}" for o in facts.get("offers") or []])
+    kind = body.kind if body.kind in KINDS else guess_kind(listing_text)
+    idea = body.idea if body.idea in IDEAS or body.idea == "wrap" else ""
+    plate_png = None
+    wrap_word = ""
+    if idea == "wrap":
+        # Food only, and the word and its picture come with the request (the model is shown them, nothing else).
+        if not wraps(kind, listing_text):
+            raise HTTPException(status_code=400, detail="Wrapped round your word is for food businesses.")
+        wrap_word = " ".join(body.word.split())[:24]
+        m = re.match(r"^data:image/png;base64,([A-Za-z0-9+/=]+)$", body.plate or "")
+        if not wrap_word or not m or len(m.group(1)) > 2_000_000:
+            raise HTTPException(status_code=400, detail="The word's picture is missing.")
+        plate_png = base64.b64decode(m.group(1))
+        if not plate_png.startswith(b"\x89PNG"):
+            raise HTTPException(status_code=400, detail="The word's picture is missing.")
+        occasion = ""
     key = {"target_id": body.target_id, "item": body.item[:40], "shape": body.shape, "kind": kind, "occasion": occasion}
+    if wrap_word:
+        key["wrap_word"] = wrap_word  # a new word is a new picture
     # Plain shoots saved before ideas existed have no "idea" field: match those as the plain one.
     have = await db.ad_shots.find_one({**key, "idea": idea or {"$in": ["", None]}, "status": {"$in": ["ready", "making"]}}, {"_id": 0})
     if have:
@@ -1046,7 +1070,16 @@ async def make_ad_shot(body: ShotIn, request: Request, user=Depends(verify_token
     row = {**key, "idea": idea, "id": str(uuid.uuid4()), "status": "making", "by": user["user_id"], "created_at": now.isoformat(),
            "photo": item["photo"], "word": look["word"], "dark": bool(look["dark"])}
     await db.ad_shots.insert_one(dict(row))
-    if idea:
+    if idea == "wrap":
+        import tempfile
+        plate_file = Path(tempfile.gettempdir()) / f"ad-plate-{row['id']}.png"
+        plate_file.write_bytes(plate_png)
+        ink = body.ink if re.match(r"^#[0-9A-Fa-f]{6}$", body.ink or "") else WRAP_INK.get(kind, WRAP_INK["grill"])
+        await db.ad_shots.update_one({"id": row["id"]}, {"$set": {"word": ink, "dark": False}})
+        row.update(word=ink, dark=False)
+        # no set picture: the plate is the whole set
+        asyncio.create_task(run_shot(row["id"], item["photo"], prompt_for_wrap(what, kind, body.shape), body.shape, None, [plate_file]))
+    elif idea:
         asyncio.create_task(run_shot(row["id"], item["photo"], prompt_for_idea(idea, what, kind, occasion, body.shape), body.shape,
                                      look["set"], [idea_layout(idea, body.shape)]))
     else:

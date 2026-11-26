@@ -2678,6 +2678,194 @@ function cutTop(img) {
   return img.cutTop;
 }
 
+// "Wrapped round your word" (Tzvi, 26 Nov 2026: "Add all three", after the restaurants ad beside Pinterest's
+// "PASTA" and "TWIST" posters; blueprint docs/ads/blueprints/design-shoot-wrap.md, ad rules A3.13 to A3.15). The
+// word's place, the same in the picture sent to the model (wrapPlate) and in the ad drawn over it (drawShoot), so the
+// model's letters and ours line up.
+const WRAP_GROUND = '#F3EBDD';
+const WRAP_KINDS = ['grill', 'bakery', 'cafe', 'kitchen'];
+// the word's ink per kind, deep and warm on the cream (A3.14); sent with the request so the server keeps the same one
+const WRAP_INK = { grill: '#7A2E12', bakery: '#8A3B12', cafe: '#4A2C1A', kitchen: '#2F5D2F' };
+function wrapBox(ctx, W, H, format, word, rtl) {
+  const face = rtl ? '"Secular One"' : 'Anton';
+  const text = rtl ? word : word.toUpperCase();
+  let size = Math.round(H * (format === 'story' ? 0.2 : 0.22));
+  ctx.font = `400 ${size}px ${face}`;
+  while (size > 60 && ctx.measureText(text).width > W - 80) {
+    size -= 6;
+    ctx.font = `400 ${size}px ${face}`;
+  }
+  return { face, text, size, foot: Math.round(H * (format === 'story' ? 0.52 : 0.55)) };
+}
+// The word alone on the cream, as the model is shown it (a PNG data URL for POST /ads/shots, idea "wrap").
+// The model makes a feed picture 3:4 (it refuses 4:5, utils/ad_shots.ASPECT), and the ad lays it over the 4:5 feed
+// cropping the top and bottom: the plate is drawn 3:4 with the word moved down by that crop, so it lands in place.
+const PLATE_H = { square: 1080, feed: 1440, story: 1920 };
+async function wrapPlate(format, word, rtl, ink) {
+  const [W, H] = FORMATS[format];
+  const PH = PLATE_H[format] || H;
+  try { await Promise.all(['Anton', 'Secular One'].map((f) => document.fonts.load(`400 100px "${f}"`))); } catch { /* drawn with what loaded */ }
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = PH;
+  const g = c.getContext('2d');
+  g.fillStyle = WRAP_GROUND;
+  g.fillRect(0, 0, W, PH);
+  const b = wrapBox(g, W, H, format, word, rtl);
+  g.font = `400 ${b.size}px ${b.face}`;
+  g.fillStyle = ink;
+  g.textAlign = 'center';
+  g.direction = rtl ? 'rtl' : 'ltr';
+  g.fillText(b.text, W / 2, b.foot + (PH - H) / 2);
+  return c.toDataURL('image/png');
+}
+// Our word fitted to the model's letters: the picture is laid to cover the ad as made, and our word is moved and
+// sized to the box of the model's letters (pixels of the word's ink). The model keeps the word near where it was
+// shown but not exactly (American Crust test, 26 Nov 2026: its letters came out a little larger and higher, and
+// showed as ghost outlines round ours); shrinking the picture to fit instead left cream borders at its edges.
+// Returns { place, box } (box: wrapBox's word with its size, centre and foot fitted; box.own when the model's letters
+// are true to ours, so the photo's own letters are kept, food really round them). Kept on the picture, per shape.
+function wrapPlace(S, W, H, b, ctx) {
+  const key = `${W}x${H}:${b.text}:${b.size}`;
+  if (S.img.wrapFit && S.img.wrapFit.key === key) return S.img.wrapFit.fit;
+  const k = Math.max(W / S.img.naturalWidth, H / S.img.naturalHeight);
+  const base = [(W - S.img.naturalWidth * k) / 2, (H - S.img.naturalHeight * k) / 2, S.img.naturalWidth * k, S.img.naturalHeight * k];
+  let box = { ...b, cx: W / 2 };
+  try {
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(S.img, ...base);
+    const y0 = Math.max(0, Math.round(b.foot - b.size * 1.5));
+    const y1 = Math.min(H, Math.round(b.foot + b.size * 0.5));
+    const d = g.getImageData(0, y0, W, y1 - y0).data;
+    const [r, gg, bl] = [1, 3, 5].map((i) => parseInt(S.word.slice(i, i + 2), 16));
+    // the letters' box from columns and rows that are largely the ink: dark seeds and crumbs scattered over the
+    // picture are the ink's colour too, and alone they made the box the whole picture (American Crust, 26 Nov 2026)
+    const bh = y1 - y0;
+    const colN = new Uint32Array(W);
+    const rowN = new Uint32Array(bh);
+    for (let y = 0; y < bh; y += 1) {
+      for (let x = 0; x < W; x += 1) {
+        const i = (y * W + x) * 4;
+        if (Math.abs(d[i] - r) + Math.abs(d[i + 1] - gg) + Math.abs(d[i + 2] - bl) < 60) { colN[x] += 1; rowN[y] += 1; }
+      }
+    }
+    let x0 = W; let x1 = -1; let t0 = H; let t1 = -1;
+    for (let x = 0; x < W; x += 1) if (colN[x] > bh * 0.12) { if (x < x0) x0 = x; x1 = x; }
+    for (let y = 0; y < bh; y += 1) if (rowN[y] > W * 0.06) { if (y + y0 < t0) t0 = y + y0; t1 = y + y0; }
+    // measured as it is drawn: centred (the ad's text was still aligned left here, which put "ours" half a width
+    // to the right and slid the picture after it)
+    ctx.save();
+    ctx.font = `400 ${b.size}px ${b.face}`;
+    ctx.textAlign = 'center';
+    const m = ctx.measureText(b.text);
+    ctx.restore();
+    const o0 = W / 2 - m.actualBoundingBoxLeft; const o1 = W / 2 + m.actualBoundingBoxRight;
+    const p0 = b.foot - m.actualBoundingBoxAscent; const p1 = b.foot + m.actualBoundingBoxDescent;
+    if (x1 > x0 && t1 > t0) {
+      const sx = (o1 - o0) / (x1 - x0); const sy = (p1 - p0) / (t1 - t0);
+      const sc = (sx + sy) / 2;
+      // only a small correction; letters far off are left where we drew them
+      if (sc > 0.8 && sc < 1.25 && Math.abs(sx - sy) < 0.12) {
+        const k = 1 / sc;
+        box = { ...b, size: Math.round(b.size * k), cx: (x0 + x1) / 2 + (m.actualBoundingBoxLeft - m.actualBoundingBoxRight) * k / 2,
+          foot: Math.round(t1 - m.actualBoundingBoxDescent * k) };
+        // True to ours: nearly all of the model's ink inside our letters drawn at that fitted place (a misspelt or
+        // extra letter puts ink outside them). The food covering some of the letters does not count against it.
+        const t = document.createElement('canvas');
+        t.width = W;
+        t.height = bh;
+        const tg = t.getContext('2d');
+        tg.font = `400 ${box.size}px ${box.face}`;
+        tg.textAlign = 'center';
+        tg.lineJoin = 'round';
+        tg.lineWidth = Math.max(8, box.size * 0.04);
+        tg.strokeText(box.text, box.cx, box.foot - y0);
+        tg.fillText(box.text, box.cx, box.foot - y0);
+        const ours = tg.getImageData(0, 0, W, bh).data;
+        let ink = 0; let inside = 0;
+        for (let y = 0; y < bh; y += 2) {
+          for (let x = 0; x < W; x += 2) {
+            const i = (y * W + x) * 4;
+            if (Math.abs(d[i] - r) + Math.abs(d[i + 1] - gg) + Math.abs(d[i + 2] - bl) < 60) {
+              ink += 1;
+              if (ours[i + 3] > 0) inside += 1;
+            }
+          }
+        }
+        box.own = ink > 200 && inside / ink > 0.9;
+      }
+    }
+  } catch { /* another origin: drawn where we planned it */ }
+  const fit = { place: base, box };
+  S.img.wrapFit = { key, fit };
+  return fit;
+}
+// The weave: our crisp word is drawn over the picture, then the food is put back wherever the picture shows it over
+// a letter, so it stays in front just where the model put it in front and behind where the model hid it (forcing every
+// other letter to the front fought the model's own weave, American Crust 26 Nov 2026). Only well inside our letters
+// (an edge of the model's own letter there reads as a dashed line), and only where the picture is not the ink.
+function weaveFood(ctx, img, place, b, ink, picInk, W) {
+  const top = Math.max(0, Math.round(b.foot - b.size * 1.05));
+  const h = Math.min(Math.round(b.size * 1.25), ctx.canvas.height - top);
+  let ours;
+  try { ours = ctx.getImageData(0, top, W, h); } catch { return; } // a picture from another origin: no weave
+  const pic = document.createElement('canvas');
+  pic.width = W;
+  pic.height = h;
+  const pg = pic.getContext('2d', { willReadFrequently: true });
+  pg.drawImage(img, place[0], place[1] - top, place[2], place[3]);
+  const p = pg.getImageData(0, 0, W, h).data;
+  const o = ours.data;
+  // our ink (the owner may recolour the word) and the ink the picture was made with
+  const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const nearTo = ([r, g, bl]) => (d, i, t) => Math.abs(d[i] - r) + Math.abs(d[i + 1] - g) + Math.abs(d[i + 2] - bl) < t;
+  const near = nearTo(rgb(ink));
+  const nearPic = nearTo(rgb(picInk));
+  const nearGround = nearTo(rgb(WRAP_GROUND));
+  // our letters, then shrunk by R pixels so only their inside is touched
+  const R = 6;
+  const letter = new Uint8Array(W * h);
+  for (let i = 0; i < W * h; i += 1) letter[i] = near(o, i * 4, 24) ? 1 : 0;
+  const inner = new Uint8Array(W * h);
+  for (let y = R; y < h - R; y += 1) {
+    for (let x = R; x < W - R; x += 1) {
+      const i = y * W + x;
+      inner[i] = letter[i] && letter[i - R] && letter[i + R] && letter[i - R * W] && letter[i + R * W] ? 1 : 0;
+    }
+  }
+  // Food is warm (crust, sauce, pasta, crumbs) or dark (pepper, seeds); the blend at the edge of the model's own
+  // letters is neither, and came back as thin pale lines inside ours. Grown 5px so a white sesame seed or a pale
+  // fleck inside the food stays with it.
+  const food = new Uint8Array(W * h);
+  for (let i = 0; i < W * h; i += 1) {
+    const k = i * 4;
+    const warm = p[k] - p[k + 2] > 20 && p[k] > 90;
+    const darkBit = p[k] + p[k + 1] + p[k + 2] < 200;
+    food[i] = p[k + 3] > 200 && (warm || darkBit) && !nearPic(p, k, 90) ? 1 : 0;
+  }
+  const G = 5;
+  const grown = new Uint8Array(W * h);
+  for (let y = 0; y < h; y += 1) {
+    for (let x = 0; x < W; x += 1) {
+      let on = 0;
+      for (let d = -G; d <= G && !on; d += 1) { const xx = x + d; if (xx >= 0 && xx < W && food[y * W + xx]) on = 1; }
+      grown[y * W + x] = on;
+    }
+  }
+  for (let y = 0; y < h; y += 1) {
+    for (let x = 0; x < W; x += 1) {
+      const i = y * W + x;
+      let on = 0;
+      for (let d = -G; d <= G && !on; d += 1) { const yy = y + d; if (yy >= 0 && yy < h && grown[yy * W + x]) on = 1; }
+      if (inner[i] && on && p[i * 4 + 3] > 200 && !nearPic(p, i * 4, 90) && !nearGround(p, i * 4, 70)) { o[i * 4] = p[i * 4]; o[i * 4 + 1] = p[i * 4 + 1]; o[i * 4 + 2] = p[i * 4 + 2]; }
+    }
+  }
+  ctx.putImageData(ours, 0, top);
+}
+
 // "Product photo" (Tzvi, 8 Nov 2026, from the American Crust and Blazin' Boards tests): the owner's own product,
 // photographed again by an image model on a set that fits the business (utils/ad_shots.py), the whole ad. One big
 // word, led in by a short line in another voice; the product stands in front of the word when its cut-out came out.
@@ -2686,7 +2874,8 @@ function drawShoot(canvas, a) {
   if (!a.shot) { drawFullPhoto(canvas, a); return; }
   const { ctx, W, H, body, px, top } = begin(canvas, a.format, a.rtl);
   const S = a.shot;
-  const zoom = PARTS?.anim ? 1 + (1 - easeOut(progress(PARTS.anim.t, 0, MOVE_ENDS))) * 0.1 : 1;
+  // A wrapped word's picture never zooms: the model's letters must stay under ours.
+  const zoom = PARTS?.anim && S.idea !== 'wrap' ? 1 + (1 - easeOut(progress(PARTS.anim.t, 0, MOVE_ENDS))) * 0.1 : 1;
   // Made in this shape, so it covers the ad whole; a photo of another shape is centred and its edges kept.
   const cover = (img) => {
     const k = Math.max(W / img.naturalWidth, H / img.naturalHeight) * zoom;
@@ -2696,17 +2885,24 @@ function drawShoot(canvas, a) {
     return [(H - h) / 2, h];
   };
   ctx.imageSmoothingQuality = 'high';
-  cover(S.img);
+  // "Wrapped round your word": the picture was made round this word at this place (wrapBox), so it is drawn there,
+  // moved a little if the model's letters came out off ours (wrapPlace), on the cream where it then leaves an edge.
+  const planned = S.idea === 'wrap' && S.wrap_word ? wrapBox(ctx, W, H, a.format, S.wrap_word, a.rtl) : null;
+  const fitted = planned ? wrapPlace(S, W, H, planned, ctx) : null;
+  const wrap = fitted ? fitted.box : null;
+  const wrapAt = fitted ? fitted.place : null;
+  if (wrapAt) ctx.drawImage(S.img, ...wrapAt);
+  else cover(S.img);
   const dark = S.dark;
   const shade = ctx.createLinearGradient(0, 0, 0, H * 0.45);
   shade.addColorStop(0, dark ? 'rgba(0,0,0,.5)' : 'rgba(255,255,255,.45)');
   shade.addColorStop(1, dark ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)');
   ctx.fillStyle = shade;
-  ctx.fillRect(0, 0, W, H * 0.45);
+  if (!wrap) ctx.fillRect(0, 0, W, H * 0.45);
   const ink = (PARTS && PARTS.ink) || (dark ? '#F6E7C8' : '#1F2937');
   const word = (PARTS && PARTS.ink) || S.word;
   const PAD = 56;
-  const big = (a.words.big_word || a.words.key || '').trim();
+  const big = wrap ? S.wrap_word : (a.words.big_word || a.words.key || '').trim();
   const lead = (a.words.lead || (big ? '' : a.words.headline) || '').trim();
   const bigFace = a.rtl ? '"Secular One"' : 'Anton';
   const leadFace = a.rtl ? '"Frank Ruhl Libre"' : '"Playfair Display"';
@@ -2723,6 +2919,7 @@ function drawShoot(canvas, a) {
   // top part the picture was made to keep plain.
   const productTop = S.cut ? cutTop(S.cut) * H : H;
   let foot = Math.min(H * (a.format === 'story' ? 0.5 : 0.47), S.cut ? productTop + size * 0.18 : H * (a.format === 'story' ? 0.42 : 0.4));
+  if (wrap) { size = wrap.size; foot = wrap.foot; }
   let leadSize = px(64);
   ctx.font = `italic 600 ${leadSize}px ${leadFace}`;
   while (leadSize > 30 && ctx.measureText(lead).width > W - PAD * 2) {
@@ -2733,11 +2930,14 @@ function drawShoot(canvas, a) {
   // A tall product pushes the words up into the name at the top (sign-up test ad, 10 Nov 2026): never above
   // the name's own line. The words move down instead; the cut-out still stands in front of the big word.
   const clear = top + px(26) + px(24) - (leadY - (lead ? leadSize * 0.85 : -size * 0.08));
-  if (clear > 0) { leadY += clear; foot += clear; }
+  // a wrapped word never moves: the picture was made round it where it is
+  if (clear > 0 && !wrap) { leadY += clear; foot += clear; }
+  if (clear > 0 && wrap) leadY += clear;
   part(ctx, 'words', [PAD, leadY - leadSize, W - PAD * 2, foot - leadY + leadSize], () => {
     // The name spaced out, as a label (Hebrew letters are not spaced).
     if (!a.rtl && 'letterSpacing' in ctx) ctx.letterSpacing = '0.28em';
-    say(ctx, (a.eyebrow || '').toUpperCase(), W / 2, top + px(26), { size: Math.max(px(28), 32), weight: 700, colour: dark ? 'rgba(245,226,190,.9)' : 'rgba(31,41,55,.8)', align: 'center', body, rtl: a.rtl, max: W - PAD * 2 });
+    // a wrapped story's name a little lower, inside the part a WhatsApp chat shows (A8.10)
+    say(ctx, (a.eyebrow || '').toUpperCase(), W / 2, top + px(26) + (wrap && a.format === 'story' ? 34 : 0), { size: Math.max(px(28), 32), weight: 700, colour: dark ? 'rgba(245,226,190,.9)' : 'rgba(31,41,55,.8)', align: 'center', body, rtl: a.rtl, max: W - PAD * 2 });
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
     if (lead) {
       ctx.font = `italic 600 ${leadSize}px ${leadFace}`;
@@ -2751,14 +2951,30 @@ function drawShoot(canvas, a) {
       ctx.fillStyle = word;
       ctx.direction = dirOf(big, a.rtl);
       ctx.textAlign = 'center';
-      ctx.shadowColor = dark ? 'rgba(0,0,0,.35)' : 'rgba(255,255,255,.3)';
-      ctx.shadowBlur = 30;
-      ctx.fillText(a.rtl ? big : big.toUpperCase(), W / 2, foot);
-      ctx.shadowColor = 'transparent';
-      ctx.shadowBlur = 0;
+      if (wrap && wrap.own) {
+        // the photo's own letters, as photographed with the food round them; nothing drawn over them (the word is
+        // still the owner's, typed in the plate the model was shown)
+      } else if (wrap) {
+        // a 3px ring of the word's own ink covers the model's letters, a hair off ours (restaurants ad, 25 Nov 2026)
+        ctx.shadowColor = word;
+        ctx.shadowBlur = 0;
+        [[3, 0], [-3, 0], [0, 3], [0, -3]].forEach(([dx, dy]) => { ctx.shadowOffsetX = dx; ctx.shadowOffsetY = dy; ctx.fillText(wrap.text, wrap.cx, foot); });
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.shadowColor = 'transparent';
+        ctx.fillText(wrap.text, wrap.cx, foot);
+      } else {
+        ctx.shadowColor = dark ? 'rgba(0,0,0,.35)' : 'rgba(255,255,255,.3)';
+        ctx.shadowBlur = 30;
+        ctx.fillText(a.rtl ? big : big.toUpperCase(), W / 2, foot);
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+      }
     }
   });
-  if (S.cut && !(PARTS && isMoved('words'))) cover(S.cut);
+  if (wrap && !wrap.own && !(PARTS && isMoved('words'))) {
+    weaveFood(ctx, S.img, wrapAt, wrap, /^#[0-9a-f]{6}$/i.test(word) ? word : S.word, S.word, W);
+  } else if (S.cut && !(PARTS && isMoved('words'))) cover(S.cut);
   // The foot on its own shade, so the price and link read over any photo.
   const footTop = H - (a.format === 'story' ? 230 : 0) - 40 - 150 - 10;
   const base = ctx.createLinearGradient(0, footTop - px(150), 0, H);
@@ -3799,16 +4015,24 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     const twin = (x) => it.photo && pool.some((p) => p.name === x.item && p.photo === it.photo) && sameShot({ ...x, item: it.name }, it, shape);
     const ready = (x) => x.status === 'ready' && shotImgs[x.id];
     const s = shots.find((x) => ready(x) && sameShot(x, it, shape)) || shots.find((x) => ready(x) && twin(x));
-    return s ? { ...shotImgs[s.id], word: s.word, dark: !!s.dark } : null;
+    return s ? { ...shotImgs[s.id], word: s.word, dark: !!s.dark, idea: s.idea || '', wrap_word: s.wrap_word || '' } : null;
   };
   const askedShot = useRef('');
   const makeShot = async () => {
     const it = itemFor('shoot');
     if (!it) return;
     setShotError('');
+    // Wrapped round your word: the model is shown the ad's big word alone, drawn where the ad will draw it (wrapBox).
+    let wrapArgs = {};
+    if (shotIdea === 'wrap') {
+      const word = (words?.big_word || words?.key || '').trim();
+      if (!word) { setShotError(lt('ads.shotWrapNoWord', 'Write a big word first; the food wraps round it.')); return; }
+      const ink = WRAP_INK[shotKind] || WRAP_INK.kitchen;
+      wrapArgs = { word, ink, plate: await wrapPlate(format, word, rtl, ink) };
+    }
     try {
       const { data } = await axios.post(`${API}/ads/shots`, { target_type: targetType, target_id: target.id, item: it.name, shape: format,
-        kind: shotKind, occasion: shotOccasion, idea: shotIdea }, { headers: { Authorization: `Bearer ${token}` } });
+        kind: shotKind, occasion: shotOccasion, idea: shotIdea, ...wrapArgs }, { headers: { Authorization: `Bearer ${token}` } });
       askedShot.current = data.id;
       setShots((m) => [data, ...m.filter((x) => x.id !== data.id)]);
       if (data.status === 'making' && shotsLeft != null) setShotsLeft(Math.max(0, shotsLeft - 1));
@@ -4557,7 +4781,9 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                 </p>
                 {shotError && <p className="text-xs mt-1" role="alert" style={{ color: '#B42318' }}>{shotError}</p>}
                 <div className="flex flex-wrap gap-1.5 mt-2" role="group" aria-label={t('ads.shotIdeaLabel', 'The picture')} data-testid="ad-shot-ideas">
-                  {[['', t('ads.shotPlain', 'Product shoot')], ['tiny', t('ads.shotTiny', 'Tiny people at work')]].map(([k, label]) => (
+                  {[['', t('ads.shotPlain', 'Product shoot')], ['tiny', t('ads.shotTiny', 'Tiny people at work')],
+                    // food only: the server refuses it for other kinds; an unknown kind is left to the server to read
+                    ...(!shotKind || WRAP_KINDS.includes(shotKind) ? [['wrap', t('ads.shotWrap', 'Wrapped round your word')]] : [])].map(([k, label]) => (
                     <button key={k || 'plain'} type="button" onClick={() => setShotIdea(k)} aria-pressed={shotIdea === k}
                       className={chip(shotIdea === k)} style={chipStyle(shotIdea === k)} data-testid={`ad-shot-idea-${k || 'plain'}`}>{label}</button>
                   ))}
