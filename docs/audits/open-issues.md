@@ -604,3 +604,9 @@ Main moved on after PR #24 was opened (the sign-up work stream was rewritten), s
 - [Medium] Payment links: a page draft saved in Design your page holds the payment links of that moment, and publishing it later puts them back over links changed since on the new Texts and emails page, with no warning (`businesses.py:652` draft keys, `BusinessPageEditor.jsx:235`, `:365`, `:341`, `TextNotificationsPanel.jsx:118`). Customers then see the old link. First seen 25 Nov 2026 (2026-11-25-site-audit.md). Stored data: reported, not fixed.
 - Fixed 25 Nov: Hebrew pay line on the order-confirmed text read "לתשלום בBit"; now "לתשלום ב-Bit" (a Hebrew label still joins with no hyphen), in the text and its preview (ff35cb4e).
 - Still open: staff test texts (24 Nov); test-i18n-parity's 3 checks (fixed on the audit merge branches, not on main); audit sandbox still has no MongoDB or Playwright download.
+
+## UI audit of 26 Nov 2026 (claude/sweet-knuth-6y5wzi)
+- [Medium] Texts and emails, payment links: Save with a link we do not accept shows the server's English sentence and 19 domain names (Hebrew site too), and the texts and emails settings save while the links do not (`TextNotificationsPanel.jsx:118`, `:130-132`; from 7df5740). First seen 26 Nov 2026 (2026-11-26-ui-audit.md). Payment screen: reported, not fixed.
+- Fixed 26 Nov: payment links section inputs and buttons 40px to 44px (fb22bebb).
+- [Low] Ad maker: the new "My design, decorated" / "Holiday colours" chips and the holiday chips are 30px tall at 375 (shared `chip()` style). Joins the 25 Nov ad maker touch-target line. First seen 26 Nov 2026 (2026-11-26-ui-audit.md).
+- Needs a decision: the payment-link save error above; the 26 Nov idea (show how to pay above Send on the order page).
