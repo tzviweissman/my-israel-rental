@@ -39,7 +39,8 @@ def catalog_js(items: list[dict], cats: list[str], source: str) -> str:
     'from' for a from-price), desc, w, h (the card photo's size, assets/p/<id>.webp, 0 when there is no photo), colour
     (optional stripe), currency (optional, 'ILS' when absent; one currency per business), price_kind ('quote': "Ask for
     the price" on WhatsApp), sizes (optional: [{id: '<product id>::<option id>', name, price, out}], the listing's
-    options, each its own basket line and order option_id)."""
+    options, each its own basket line and order option_id); picks and flavours (optional: a product whose listing has
+    "picks", up to N of [{id, name}] chosen in the sheet, sent as option_ids; give it sizes: [] so its Add opens the sheet)."""
     global CUR
     need = {'id', 'name', 'price', 'cat', 'size', 'desc', 'w', 'h'}
     for it in items:
@@ -100,7 +101,7 @@ def card(it: dict, lazy: bool = True) -> str:
     return (f'<li class="pc"{stripe}><a class="pc-a" data-f="link" data-id="{it["id"]}" href="shop.html?p={it["id"]}">'
             f'<span class="pc-ph"><img data-f="img" src="assets/p/{it["id"]}.webp" alt="{escape(it["name"], True)}" width="{it["w"]}" height="{it["h"]}"{load}></span>'
             f'<span class="pc-t"><b data-f="name">{escape(it["name"])}</b>{price_row(it)}</span></a>'
-            f'<button class="btn btn-sm" type="button" data-add="{it["id"]}" aria-label="{'Choose a size of ' if it.get('sizes') else 'Add '}{escape(it["name"], True)}, {low(it):g}">{'Choose size' if it.get('sizes') else 'Add'}</button></li>')
+            f'<button class="btn btn-sm" type="button" data-add="{it["id"]}" aria-label="{'Choose flavours for ' if it.get('picks') else 'Choose a size of ' if it.get('sizes') else 'Add '}{escape(it["name"], True)}, {low(it):g}">{'Choose flavours' if it.get('picks') else 'Choose size' if it.get('sizes') else 'Add'}</button></li>')
 
 
 def shop_page(site, items: list[dict], cats: list[str], *, popular: str, wa: str, gig: str, lede: str, title_html: str,

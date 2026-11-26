@@ -245,7 +245,7 @@ for (const url of urls) {
   if (/\/(index\.html)?(\?.*)?$/.test(new URL(url).pathname + new URL(url).search)) {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await ctx.newPage(); await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(600);
-    const cover = await page.evaluate(() => {
+    const coverAt = () => page.evaluate(() => {
       // how much of the first screen is picture (video, canvas, image or a background image), sampled on a grid
       let hit = 0, n = 0;
       for (let x = 40; x < innerWidth; x += 80) for (let y = 90; y < innerHeight; y += 80) {
@@ -255,7 +255,11 @@ for (const url of urls) {
       }
       return hit / n;
     });
+    // measured at 0.6 s and again once the opening has settled, the larger kept: an opening whose photo turns or drops
+    // in (Bawk Bawk's platter lands at 1.7 s) read as 0% picture at 0.6 s (26 Nov 2026)
+    const cover0 = await coverAt();
     const a = await page.screenshot(); await page.waitForTimeout(2500); const b = await page.screenshot();
+    const cover = Math.max(cover0, await coverAt());
     await page.mouse.wheel(0, 500); await page.waitForTimeout(900); const c = await page.screenshot();
     const differ = (x, y) => { let d = 0; for (let i = 0; i < x.length && i < y.length; i += 997) d += x[i] !== y[i] ? 1 : 0; return d / (Math.min(x.length, y.length) / 997); };
     // every category (Tzvi, 22 Oct 2026, "why do i keep needing to tell you to make the wow moment": limiting this

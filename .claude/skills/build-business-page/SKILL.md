@@ -150,7 +150,10 @@ Prices are read with `get_cost` at the time, never from memory.
    sits whole, with grey where it will be extended. Show each as a laptop frame beside a phone frame (§3aa).
    Plan each picture that words will sit on around where they sit (a quiet area or their own panel, never a shade
    over the light), on CONCEPT.md's `- words on pictures:` line (§3aj.11).
-   Run `check-says-offer.mjs`, `check-five.mjs` and `readable.mjs` on each; fix or drop one that fails. Then two
+   Run `check-says-offer.mjs`, `check-five.mjs`, `readable.mjs` and `scripts/check-opening-photo.mjs` on each; fix or drop one that fails.
+   The last measures how much of the settled first screen is photo (3h.1 asks 70%): a screen under it is changed
+   before the board, or shown on the board with its share written beside it, so Tzvi picks knowing (Bawk Bawk, 26 Nov
+   2026: all three were 27 to 42% and it was found only after the build). Then two
    fresh Sonnet judges score each screen with `judges.mjs --brief` beside the two top sites; fix any under 4 and
    judge again before Tzvi sees them, the lines in `gen/board/judged.md` (§3aj.10). They are part B of the board. On the next new site (Tzvi, 22 Nov 2026), one of the three tries the split
    opening and one the panel wipe (§3al.7), both free code, set beside Ruben Stom's frames
