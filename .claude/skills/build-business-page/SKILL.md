@@ -153,7 +153,7 @@ Prices are read with `get_cost` at the time, never from memory.
    Run `check-says-offer.mjs`, `check-five.mjs`, `readable.mjs` and `scripts/check-opening-photo.mjs` on each; fix or drop one that fails.
    The last measures how much of the settled first screen is photo (3h.1 asks 70%): a screen under it is changed
    before the board, or shown on the board with its share written beside it, so Tzvi picks knowing (Bawk Bawk, 26 Nov
-   2026: all three were 27 to 42% and it was found only after the build). Then two
+   2026: all three were 27 to 42% and it was found only after the build). Measure each screen's photo with `python scripts/check-light-pool.py <photo> [--soft]` beside the two top sites' first screens (`gen/compare/`); one more than 8 under them is re-lit or replaced, or shown on the board with both numbers, and CONCEPT.md's `- light:` line keeps them (3aj.14). Then two
    fresh Sonnet judges score each screen with `judges.mjs --brief` beside the two top sites; fix any under 4 and
    judge again before Tzvi sees them, the lines in `gen/board/judged.md` (§3aj.10). They are part B of the board. On the next new site (Tzvi, 22 Nov 2026), one of the three tries the split
    opening and one the panel wipe (§3al.7), both free code, set beside Ruben Stom's frames
@@ -182,7 +182,7 @@ Prices are read with `get_cost` at the time, never from memory.
    where in the scroll it starts and ends, what moves, and when its words come and go (§3ak); and the
    question of how phones get the film (3aa.26). The grey-box page and the sketch sheet are part C of the board.
    Two fresh judges score the grey-box page (told which part is the showpiece) before Tzvi sees it; under 4 is
-   fixed and judged again (§3aj.10, `gen/board/judged.md`, its newest judging 4 or more).
+   fixed and judged again (§3aj.10, `gen/board/judged.md`, its newest judging 4 or more). Every structure note (two things fighting for the eye, small or alike cards, an empty area, a hard cut, a showpiece too small) is fixed here, in grey boxes, and listed as `- fixed: <note>: <change>`; only finish notes wait for the pictures (3aj.16). Write CONCEPT.md's `- thread:` line: the signature idea and at least two places it comes back small, a divider, the steps line, a footer rule (3aj.15). A site whose order goes out on WhatsApp uses the kit's WhatsApp phone (`.waphone`, `waPhone(el).set(lines)`), never a lone bubble.
    **Gate, yes 2:** CONCEPT.md has `- page plan: Tzvi: "<his words>"` (§3aj.8). With a film, the brief quotes
    his picked row and its "Phones asked:" line. `node scripts/check-concept.mjs <build>` and
    `node scripts/blueprint.mjs --check <build> 6` pass, `check-compared.mjs` prints no SHOWPIECE, TREATMENTS or MOTION

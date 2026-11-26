@@ -128,6 +128,16 @@ export function checkConcept(dir) {
     const w = (/^\s*[-*]\s*words on pictures\s*:(.*)$/im.exec(s) || [])[1] || '';
     if (w.trim().split(/\s+/).length < 6) problems.push('Words on pictures: no "- words on pictures: <picture>: <where the words sit, and on what>" line, or "none" with why; a shade over a picture is the last resort (3aj.11)');
   }
+  if (!newer.has('R3aj.14')) {
+    // the first screen's photo measured beside the references' before the pick (rules 3aj.14, 26 Nov 2026)
+    const l = (/^\s*[-*]\s*light\s*:(.*)$/im.exec(s) || [])[1] || '';
+    if ((l.match(/\d+(?:\.\d+)?/g) || []).length < 3) problems.push('Light: no "- light: A 41, B 38, C 52; references 55 and 60 (check-light-pool.py product means)" line: each first screen\'s photo beside the two top sites\' (3aj.14)');
+  }
+  if (!newer.has('R3aj.15')) {
+    // the signature returns through the page (rules 3aj.15, 26 Nov 2026)
+    const t = (/^\s*[-*]\s*thread\s*:(.*)$/im.exec(s) || [])[1] || '';
+    if (t.split(/[,;]/).filter((x) => x.trim()).length < 3) problems.push('Thread: no "- thread: <the idea>; returns as <place 1>, <place 2>" line: the signature comes back at least twice in a small form (3aj.15)');
+  }
   return problems;
 }
 

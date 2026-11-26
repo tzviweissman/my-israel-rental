@@ -3612,6 +3612,37 @@
    "status": "built"
   },
   {
+   "id": "R3aj.14",
+   "rule": "The first screen's photo is as bright as the references' before it is picked",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Phase 4: check-light-pool.py on each first screen's photo and the two top sites', CONCEPT.md - light:",
+   "confirmed_by": "node scripts/check-concept.mjs <build> (Light)",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.15",
+   "rule": "The signature idea returns at least twice through the page in a small form",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "Phase 5: CONCEPT.md - thread: line, built in phase 7",
+   "confirmed_by": "node scripts/check-concept.mjs <build> (Thread)",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.16",
+   "rule": "The judges' structure notes are fixed on the grey-box page, each listed with its fix",
+   "how": [
+    "EYE"
+   ],
+   "built_by": "Phase 5: gen/board/judged.md - fixed: lines",
+   "confirmed_by": "LOOK",
+   "status": "built"
+  },
+  {
    "id": "R3ak.1",
    "rule": "A choice (3ai.2): live art drawn in code behind the words, seeded from the business's name, quieter on phones, still under reduced motion",
    "how": [

@@ -41,14 +41,14 @@ Sections (line each starts on; read with that offset):
 - 1298: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
 - 1314: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
 - 1328: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
-- 1365: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
-- 1378: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 1400: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026)
-- 1422: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1430: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1463: 5a. Design and story (from rules 5a, 5b and 8)
-- 1493: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
-- 1516: 3a. (cont.) Look through it, fix it, then show it
+- 1372: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
+- 1385: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 1407: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026)
+- 1429: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1437: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1470: 5a. Design and story (from rules 5a, 5b and 8)
+- 1500: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
+- 1523: 3a. (cont.) Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section and item numbers match the full rulebook (since 22 Nov 2026), so "3g.13", "3h.11", "3b.2" and the like
@@ -1361,6 +1361,13 @@ Full text: reference/full-rules.md section 3aj. Not asked of a site published be
 12. The showpiece is drawn full size, with its motion, in the grey-box page the judges score.
 13. The reviewer is given Tzvi's quoted yeses and the every-site parts; repeating one is "PASS (Tzvi chose: ...)".
    (10 to 13: Tzvi, 23 Nov 2026; sites started after.)
+14. Each first screen's photo is measured with check-light-pool.py beside the two top sites' before the board; a dimmer
+    one is re-lit, replaced or shown with both numbers (CONCEPT.md `- light:`, check-concept, Light).
+15. The signature idea returns at least twice through the page in a small form: a divider, the steps line, a footer
+    rule (CONCEPT.md `- thread:`, check-concept, Thread).
+16. Every structure note from the page-plan judging is fixed in the grey-box page, listed as `- fixed: <note>: <change>`
+    in gen/board/judged.md; only finish notes wait for the real pictures.
+    (14 to 16: Tzvi, 26 Nov 2026, from Clean Plus's nine rounds at 3.5; sites started after.)
 
 ## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
 

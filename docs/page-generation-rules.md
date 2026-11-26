@@ -43,20 +43,20 @@ Sections (line each starts on; read with that offset):
 - 2941: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
 - 3025: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
 - 3071: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3217: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3257: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3352: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
-- 3427: 4. What is reported to the owner instead (content gaps)
-- 3436: 5. How to write
-- 3485: 5a. Lessons from the practice pages
-- 3516: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3565: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3582: 6. Playbooks for the most common businesses
-- 3709: 7. Choosing the three options (automatic page builder only)
-- 3733: 8. Photos, video and the tools
-- 3964: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 4034: 9. The scroll sections: what the practice pages become
-- 4070: 10. Open decisions (need Tzvi)
+- 3248: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3288: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3383: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
+- 3458: 4. What is reported to the owner instead (content gaps)
+- 3467: 5. How to write
+- 3516: 5a. Lessons from the practice pages
+- 3547: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3596: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3613: 6. Playbooks for the most common businesses
+- 3740: 7. Choosing the three options (automatic page builder only)
+- 3764: 8. Photos, video and the tools
+- 3995: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 4065: 9. The scroll sections: what the practice pages become
+- 4101: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -3213,6 +3213,37 @@ is asked of a site published before 22 Nov 2026.
    - Why: Clean Plus's reviewer failed the varied tiles Tzvi had chosen that day and the three facts and full footer
      every site must have, which would have undone his choice or broken the rules.
    - Checked by the review brief in SKILL.md phase 9.
+
+14. **The first screen's photo is as bright as the references' before it is picked** (Tzvi, 26 Nov 2026: "not only faster and right the first time but how we can make features the site has better or how builds can produce better more beautiful unique website designs", then "do all 4").
+   - When: phase 4, each of the three first screens with a photo, before the board goes to Tzvi; a cleaning service,
+     bakery, clinic or other bright brand always; a dark, dramatic brand (grill, bar) measures with its own aim.
+   - Run `python scripts/check-light-pool.py <the screen's photo> [--soft]` and the same on the two top sites'
+     first-screen pictures (`gen/compare/`). A photo whose product mean is more than 8 under the references' is
+     re-lit or replaced before the board, or shown on the board with both numbers, so Tzvi picks knowing.
+   - Why: Clean Plus's chosen room was a golden-hour photo in browns; nine rounds of code (shades, panels, filters)
+     never lifted "light" above 3, and all three judges finally named the photo itself as dim and muddy.
+   - Checked by `scripts/check-concept.mjs` (Light): CONCEPT.md's `- light:` line gives each first screen's measured
+     product mean beside the references'.
+
+15. **The signature returns through the page** (Tzvi, 26 Nov 2026: "not only faster and right the first time but how we can make features the site has better or how builds can produce better more beautiful unique website designs", then "do all 4").
+   - When: every new site, written with the page plan (phase 5).
+   - The `- showpiece:` idea (a route, a shape, a material, a colour line) comes back at least twice before or after
+     its own section, in a small form: a section divider, the line joining the steps, a footer rule, the loader. One
+     idea seen three times is remembered; seen once it is a nice section.
+   - Why: every Clean Plus judge called its gold route over Jerusalem the one memorable thing, and two asked for it to
+     run through the page, because it appeared only in the close.
+   - Checked by `scripts/check-concept.mjs` (Thread): CONCEPT.md's `- thread:` line names the idea and at least two
+     places it returns.
+
+16. **The judges' structure notes are fixed on the grey-box page, not after the build** (Tzvi, 26 Nov 2026: "not only faster and right the first time but how we can make features the site has better or how builds can produce better more beautiful unique website designs", then "do all 4").
+   - When: the page-plan judging of 3aj.10 (phase 5), before Tzvi's yes 2.
+   - Every note about a section's structure (two things fighting for the eye, small or alike cards, an empty area,
+     a hard cut between sections, a showpiece too small) is fixed in the grey-box page and judged again; only notes
+     on finish (colour, light, type size) may wait for the real pictures. gen/board/judged.md lists each structure
+     note with how it was fixed (`- fixed: <note>: <change>`).
+   - Why: Clean Plus's two boxes in the opening, small option cards and hard navy-to-white cut came back in five built
+     rounds; each was a structure change that costs minutes in grey boxes and hours in the finished site.
+   - Checked by eye at the page-plan judging; the `- fixed:` lines in gen/board/judged.md.
 
 ## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
 

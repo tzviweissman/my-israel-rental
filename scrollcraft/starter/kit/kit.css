@@ -137,3 +137,26 @@ html.arriving .curtain > i { transform-origin: top; animation: slab-out 520ms cu
   .fan > img, .roll > span, .iris > img + img, .swap > img { transition: none; }
   html.leaving .curtain > i, html.arriving .curtain > i, .statement .drift { animation: none; }
 }
+
+/* WhatsApp phone (26 Nov 2026, from Clean Plus: judges called a one-bubble phone "mostly empty"). The order as it
+   will arrive: the business's avatar and name, a dotted chat ground, each choice its own bubble that lands with typing
+   dots before it, the send button at the foot. Markup:
+   <div class="waphone" data-waphone aria-live="polite"><p class="waphone-top"><span class="waphone-av">LOGO</span><b>Name</b><span>WhatsApp</span></p>
+     <ol class="waphone-chat"><li class="waphone-msg">Hi Name, here is my order:</li></ol><a class="btn waphone-go" href="...">Send on WhatsApp</a></div>
+   kit.js: window.waPhone(el).set(['line', 'line', ...]) adds, removes and animates bubbles to match the list. */
+.waphone { --wa-ink: #111B21; display: flex; flex-direction: column; min-height: 30rem; border: 10px solid #111B21; border-radius: 40px; overflow: hidden;
+  background: #EFE7DE radial-gradient(rgba(17, 27, 33, .07) 1px, transparent 1.4px) 0 0 / 18px 18px; box-shadow: 0 50px 90px -40px rgba(17, 27, 33, .55); }
+.waphone-top { display: flex; align-items: center; gap: 10px; margin: 0; padding: 16px 18px; background: #fff; color: var(--wa-ink); border-bottom: 1px solid rgba(17, 27, 33, .08); }
+.waphone-top > span:last-child { color: #54656F; font-size: .85em; }
+.waphone-av { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #F0F2F5; overflow: hidden; }
+.waphone-chat { list-style: none; margin: auto 0 0; padding: 18px 14px 6px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.waphone-msg { max-width: 85%; padding: 8px 12px; border-radius: 12px 12px 4px 12px; background: #D9FDD3; color: var(--wa-ink); box-shadow: 0 1px 1px rgba(17, 27, 33, .13); transform-origin: 100% 100%; }
+.waphone-msg.in { animation: waphone-in 320ms cubic-bezier(.2, .8, .2, 1.2); }
+.waphone-msg.out { opacity: 0; transform: scale(.8); transition: opacity 160ms, transform 160ms; }
+.waphone-typing { display: inline-flex; gap: 4px; padding: 10px 12px; border-radius: 12px; background: #fff; align-self: flex-end; }
+.waphone-typing i { width: 6px; height: 6px; border-radius: 50%; background: #8696A0; animation: waphone-dot 900ms infinite; }
+.waphone-typing i:nth-child(2) { animation-delay: 150ms; } .waphone-typing i:nth-child(3) { animation-delay: 300ms; }
+.waphone-go { margin: 10px 14px 16px; justify-content: center; }
+@keyframes waphone-in { from { opacity: 0; transform: translateY(10px) scale(.92); } }
+@keyframes waphone-dot { 50% { opacity: .3; transform: translateY(-2px); } }
+@media (prefers-reduced-motion: reduce) { .waphone-msg.in, .waphone-typing i { animation: none; } .waphone-msg.out { transition: none; } }

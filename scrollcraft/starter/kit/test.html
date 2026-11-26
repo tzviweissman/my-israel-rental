@@ -79,12 +79,20 @@
   <h2 style="margin-top:3rem">A row that shows there are more</h2>
   <div class="peek-row"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-1.webp" alt="" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-2.webp" alt="" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-3.webp" alt="" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-4.webp" alt="" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-5.webp" alt="" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px"></div>
 </section>
+<section id="waphone-demo" style="max-width:420px"><h2>WhatsApp phone</h2>
+  <p><label><input type="checkbox" data-wa="The same cleaner each visit, please."> Same cleaner</label> <label><input type="checkbox" data-wa="Please bring the supplies."> Supplies</label></p>
+  <div class="waphone" data-waphone aria-live="polite"><p class="waphone-top"><span class="waphone-av">B</span><b>Business</b><span>WhatsApp</span></p>
+    <ol class="waphone-chat"><li class="waphone-msg">Hi Business, here is my order:</li><li class="waphone-msg">Every Tuesday, 4 hours.</li></ol><a class="btn waphone-go" href="#">Send on WhatsApp</a></div>
+</section>
 <section><h2>3v.12 The curtain between pages</h2><p><a href="test.html?page=2">Go to another page</a> (the slabs sweep up, the page opens behind them).</p></section>
 <div class="controls">
   <button id="replay">Replay arrival</button>
   <button id="toggle">Open/close questions</button>
 </div>
 <script src="kit.js"></script>
+<script>{ const ph = waPhone(document.querySelector('[data-waphone]')), boxes = [...document.querySelectorAll('[data-wa]')];
+  const sync = () => ph.set(['Every Tuesday, 4 hours.', ...boxes.filter((b) => b.checked).map((b) => b.dataset.wa)]);
+  boxes.forEach((b) => b.addEventListener('change', sync)); }</script>
 <script>
   replay.onclick = () => { const h = document.documentElement; h.classList.remove('arrive-go'); void h.offsetWidth; h.classList.add('arrive-go'); };
   toggle.onclick = () => document.querySelectorAll('.faq-q').forEach((d) => { d.open = !d.open; });

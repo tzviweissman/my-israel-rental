@@ -98,4 +98,23 @@
     }));
   }
 
+  // WhatsApp phone: waPhone(el).set(lines) makes the chat match the list, new lines landing one at a time after
+  // typing dots, removed ones shrinking away; the first bubble (the greeting) is kept. Reduced motion: no dots, no motion.
+  window.waPhone = (el) => {
+    const chat = el.querySelector('.waphone-chat'); let queue = Promise.resolve();
+    const wait = (ms) => new Promise((r) => setTimeout(r, still ? 0 : ms));
+    return { set(lines) {
+      queue = queue.then(async () => {
+        const have = [...chat.querySelectorAll('.waphone-msg:not(:first-child)')];
+        for (const m of have) if (!lines.includes(m.textContent)) { m.classList.add('out'); await wait(170); m.remove(); }
+        for (const line of lines) {
+          if ([...chat.children].some((m) => m.textContent === line)) continue;
+          let dots; if (!still) { dots = document.createElement('li'); dots.className = 'waphone-typing'; dots.setAttribute('aria-hidden', 'true'); dots.innerHTML = '<i></i><i></i><i></i>'; chat.append(dots); await wait(380); dots.remove(); }
+          const m = document.createElement('li'); m.className = 'waphone-msg' + (still ? '' : ' in'); m.textContent = line; chat.append(m);
+        }
+      });
+      return queue;
+    } };
+  };
+
 })();

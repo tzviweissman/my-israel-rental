@@ -143,6 +143,7 @@ arriving in order (`data-arrive`), laptop-only depth (`data-depth`), one rotatin
 (`.rot`), a tilted label (`.tilt`) and question cards (`details.faq-q`). Copy the parts a site uses
 into its own site.css and site.js. `kit/test.html` has buttons that replay each piece; a new moving
 piece is tried there first (3u.12), then added to the kit.
+The kit also has a WhatsApp phone (26 Nov 2026): the order as it will arrive, each choice its own message landing after typing dots (`.waphone` in kit.css, `waPhone(el).set(lines)` in kit.js, tried in test.html). Use it on any site whose order goes out on WhatsApp, in place of a single bubble.
 
 ## The tweaks panel (rules 3am.3, 25 Nov 2026)
 
