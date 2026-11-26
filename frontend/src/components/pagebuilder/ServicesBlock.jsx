@@ -71,6 +71,7 @@ const Card = ({ gig, listLayout, ctx }) => (
   <ServiceCard
     gig={gig}
     variant={listLayout ? 'list' : 'grid'}
+    bizFirst={false}
     i18n={ctx.i18n}
     t={ctx.t}
     onClick={() => ctx.openService(gig)}

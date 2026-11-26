@@ -32,10 +32,10 @@ const GOLD = 'var(--gold)';
  * nothing looks arbitrary. 96px rather than the 72 a WhatsApp catalog
  * uses: 72px of a sourdough loaf is a brown blob.
  */
-export default function ServiceCard({ gig, onClick, variant = 'grid', i18n, t, action = null, heart = null }) {
+export default function ServiceCard({ gig, onClick, variant = 'grid', i18n, t, action = null, heart = null, bizFirst = true }) {
   const card = variant === 'list'
     ? <ServiceRow gig={gig} onClick={onClick} i18n={i18n} t={t} />
-    : <ServiceGridCard gig={gig} onClick={onClick} i18n={i18n} t={t} />;
+    : <ServiceGridCard gig={gig} onClick={onClick} i18n={i18n} t={t} bizFirst={bizFirst} />;
   if (!action && !heart) return card;
   /* A card with its own action (the storefront's Book / Message / Add to
      order). The action cannot live inside the card's button, so the card
@@ -52,7 +52,7 @@ export default function ServiceCard({ gig, onClick, variant = 'grid', i18n, t, a
 }
 
 // --- grid: the original card, unchanged ---
-const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
+const ServiceGridCard = ({ gig, onClick, i18n, t, bizFirst }) => {
   const cover = getGigCover(gig);
   const price = gigPriceParts(gig);
   const bucket = gig.provider?.response_bucket;
@@ -136,15 +136,19 @@ const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
           </span>
         )}
       </div>
+      {/* On boards that mix businesses the business name leads and the
+          service is the small line (Tzvi, 26 Nov 2026: "Boxed Israel" was
+          small under "Baked goods and food boxes"). On a business's own
+          page every card is the same business, so the title leads there. */}
       <p className="font-semibold text-sm text-gray-900 truncate mt-2">
-        {localizedTitle(gig, i18n)}
+        {bizFirst && gig.provider?.name ? gig.provider.name : localizedTitle(gig, i18n)}
       </p>
       <p className="text-xs text-[var(--brand-muted)] truncate">
         {/* areaLabel, not the raw field: `area` is a stored slug, so this
             line printed "· tel-aviv" at the reader — lower-case, hyphen
             and all — on a page meant to look considered. The helper also
             returns the Hebrew name under RTL. */}
-        {gig.provider?.name}{gig.area ? ` · ${prettyArea(gig.area, t)}` : ''}
+        {bizFirst && gig.provider?.name ? localizedTitle(gig, i18n) : gig.provider?.name}{gig.area ? ` · ${prettyArea(gig.area, t)}` : ''}
         {typeof gig.distance_km === 'number' && (
           <span className="ms-1 inline-flex items-center gap-0.5 text-[10px] text-[var(--brand-primary)] font-semibold">
             · {gig.distance_km < 1
