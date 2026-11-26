@@ -20,10 +20,11 @@ await p.goto(url, { waitUntil: 'load', timeout: 60000 });
 await p.waitForTimeout(1200);
 // the first screen is taken once its arrival has finished, not part way through it (25 Nov 2026: judges scored a
 // half-arrived opening as dim); endless animations are skipped, and the wait never runs past 8 s
-await p.evaluate(() => Promise.race([
+const settle = (ms) => p.evaluate((ms) => Promise.race([
   Promise.all(document.getAnimations().filter((a) => { const t = a.effect?.getComputedTiming?.(); return t && Number.isFinite(t.endTime); }).map((a) => a.finished.catch(() => {}))),
-  new Promise((r) => setTimeout(r, 8000)),
-])).catch(() => {});
+  new Promise((r) => setTimeout(r, ms)),
+]), ms).catch(() => {});
+await settle(8000);
 // each screen starts where a section starts, just under the fixed menu bar, as a visitor stops there (20 Nov 2026: cut
 // at even steps, a judge read "headings clipped under the menu bar" that were only the sheet's cuts); a section taller
 // than the screen gets a further stop every screen. Too many stops: an even sample of them.
@@ -43,7 +44,9 @@ const pick = stops.length <= MAX ? stops : Array.from({ length: n }, (_, i) => s
 const shots = [];
 for (const y of pick) {
   await p.evaluate((y) => window.scrollTo(0, y), y);
-  await p.waitForTimeout(600);
+  // and every later screen once what its scroll started has finished (26 Nov 2026: Clean Plus's map was taken before its
+  // route had drawn, and two judges called it "small and dim"); 600 ms first so scroll-started animations exist
+  await p.waitForTimeout(600); await settle(7000);
   shots.push((await p.screenshot({ type: 'jpeg', quality: 70 })).toString('base64'));
 }
 // lay them out on a plain page and photograph that: no image library needed
