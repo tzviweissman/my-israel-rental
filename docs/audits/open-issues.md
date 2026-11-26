@@ -610,3 +610,11 @@ Main moved on after PR #24 was opened (the sign-up work stream was rewritten), s
 - Fixed 26 Nov: payment links section inputs and buttons 40px to 44px (fb22bebb).
 - [Low] Ad maker: the new "My design, decorated" / "Holiday colours" chips and the holiday chips are 30px tall at 375 (shared `chip()` style). Joins the 25 Nov ad maker touch-target line. First seen 26 Nov 2026 (2026-11-26-ui-audit.md).
 - Needs a decision: the payment-link save error above; the 26 Nov idea (show how to pay above Send on the order page).
+
+## Audit follow-up of 26 Nov 2026 (claude/audit-merge-24qyiy)
+- Carries all 42 commits of PR #31 (claude/audit-merge-qpzk6y), rebuilt on today's main (cf1c0b50) with no conflicts, plus the new commits of claude/exciting-bell-u0xv17 (code review 25 Nov) and claude/sweet-knuth-6y5wzi (UI audit 26 Nov). Conflicts only where two runs appended to `open-issues.md` and `mechanisms-used.md`; every line of both kept.
+- Kept: Hebrew pay line "לתשלום ב-Bit" in the order-confirmed text and its preview (a979290c, was ff35cb4e); payment links section inputs and buttons 44px (6e1aa22c, was fb22bebb).
+- Dropped: nothing new.
+- Checked: test-i18n-parity all passed, check-pages-scripts 97 checked 0 broken, both locale files import (214 keys each), pytest test_order_texts 25 passed. Not run: frontend build, renders (no node_modules or browser deps installed for the app in this sandbox).
+- No zen-euler run since 22 Nov was found on the remote.
+- Needs a decision: payment-link save error in English with 19 domains while the other settings save (26 Nov); a saved page draft puts back old payment links on publish (25 Nov); staff test texts (24 Nov); ad maker chips and tabs under 44px (25 and 26 Nov, AdMaker.jsx needs a full check-ad-designs pass); the 26 Nov idea (show how to pay above Send on the order page).
