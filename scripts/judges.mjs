@@ -42,6 +42,8 @@ website sources and Pinterest picks). Judge only how our site LOOKS and MOVES: i
 with eye-catching effects a visitor would remember, as good as those references?
 Do NOT mark it down for missing reviews, ratings, testimonials, press logos, team photos, FAQs or for how much content
 it has: those come from the owner later. Judge the design of what is there.
+The pictures are stills taken after each screen has finished arriving; a still cannot show motion, so judge motion
+from the contact sheet of the recorded preview and the motion notes you are given, never from a still alone.
 Score seven areas from 1 to 5 (half points allowed):
   layout (composition, rhythm, variety between sections), light (depth, photography, light and shadow),
   colour, type, detail (finish, craft, small touches), motion (effects and how things move and react),

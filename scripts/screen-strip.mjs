@@ -18,6 +18,12 @@ const browser = await chromium.launch();
 const p = await browser.newPage({ viewport: { width: W, height: H } });
 await p.goto(url, { waitUntil: 'load', timeout: 60000 });
 await p.waitForTimeout(1200);
+// the first screen is taken once its arrival has finished, not part way through it (25 Nov 2026: judges scored a
+// half-arrived opening as dim); endless animations are skipped, and the wait never runs past 8 s
+await p.evaluate(() => Promise.race([
+  Promise.all(document.getAnimations().filter((a) => { const t = a.effect?.getComputedTiming?.(); return t && Number.isFinite(t.endTime); }).map((a) => a.finished.catch(() => {}))),
+  new Promise((r) => setTimeout(r, 8000)),
+])).catch(() => {});
 // each screen starts where a section starts, just under the fixed menu bar, as a visitor stops there (20 Nov 2026: cut
 // at even steps, a judge read "headings clipped under the menu bar" that were only the sheet's cuts); a section taller
 // than the screen gets a further stop every screen. Too many stops: an even sample of them.
