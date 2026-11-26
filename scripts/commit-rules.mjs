@@ -8,6 +8,8 @@
  *
  *   node scripts/commit-rules.mjs "<message>" [more paths to commit with it]
  *   node scripts/commit-rules.mjs --onto-main [--push] [--base <commit>] "<message>" [more paths]
+ *   add --only to either: commit just the paths named (plus the skill's copy of the page rules when they are named),
+ *   when another session has rules files changed on disk that are not ready
  *
  * --onto-main (Tzvi, 19 Nov 2026, Burnt: "do all 3 improvemnets"): for a checkout whose main is behind origin and
  * carries other sessions' work. Another session had changed the same rule files on main; a plain three-way merge
@@ -34,9 +36,16 @@ const argv = process.argv.slice(2);
 const onto = argv.includes('--onto-main'), push = argv.includes('--push');
 const baseRev = argv.includes('--base') ? argv[argv.indexOf('--base') + 1] : null;
 const [msg, ...extra] = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--base');
-if (!msg) { console.error('usage: node scripts/commit-rules.mjs [--onto-main [--push]] "<message>" [more paths]'); process.exit(2); }
-const RULE_FILES = [...CONTENTS_FILES, 'docs/rules-as-blueprint/rules.json', 'docs/rules-as-blueprint/ad-rules.json',
-  'docs/ad-rules-checklist.md', '.claude/skills/build-business-page/SKILL.md', '.claude/skills/build-business-page/reference/full-rules.md'];
+if (!msg) { console.error('usage: node scripts/commit-rules.mjs [--onto-main [--push]] [--only] "<message>" [more paths]'); process.exit(2); }
+const FULL_COPY = '.claude/skills/build-business-page/reference/full-rules.md';
+// --only: commit just the paths named (and the skill's copy of the page rules when they are named), never another
+// rules file that changed on disk. 25 Nov 2026: another session's unfinished ad rule A28.2 sat in
+// docs/ad-rules-checklist.md and would have been pushed with rules 3am.
+const only = argv.includes('--only');
+const RULE_FILES = only ? [...extra, ...(extra.includes('docs/page-generation-rules.md') ? [FULL_COPY] : [])]
+  : [...CONTENTS_FILES, 'docs/rules-as-blueprint/rules.json', 'docs/rules-as-blueprint/ad-rules.json',
+    'docs/ad-rules-checklist.md', '.claude/skills/build-business-page/SKILL.md', FULL_COPY];
+if (only && !extra.length) { console.error('--only needs the paths to commit'); process.exit(2); }
 const run = (cmd, args, opt = {}) => { const r = spawnSync(cmd, args, { cwd: ROOT, stdio: 'inherit', ...opt }); if (r.status !== 0) process.exit(r.status || 1); };
 const git = (args, opt = {}) => spawnSync('git', args, { cwd: ROOT, encoding: 'utf8', ...opt });
 const lf = (s) => s.replace(/\r\n/g, '\n');
@@ -62,19 +71,21 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'rules-merge-'));
 // the base of the merge: --base <commit>, or the last commit this script pushed from here (kept in .git), when main
 // still holds it; else HEAD. A checkout behind main that pushed its own rule change is merged against what it pushed,
 // so its own earlier change is never read as a clash with main (19 Nov 2026)
-// in a worktree .git is a file, not a folder: the record lives in that worktree's own git folder (26 Nov 2026, Bawk Bawk)
+// in a worktree .git is a file, so ask git where its folder is (25 Nov 2026: the write after a push crashed there)
 const RECORD = path.resolve(ROOT, git(['rev-parse', '--git-dir']).stdout.trim(), 'rules-last-push');
 let since = baseRev || (fs.existsSync(RECORD) ? fs.readFileSync(RECORD, 'utf8').trim() : null);
 if (since && git(['merge-base', '--is-ancestor', since, 'origin/main']).status !== 0) since = null;
 if (since) console.log(`merging against ${since.slice(0, 8)}, the rules last pushed from here`);
 const added = {};                                                          // the lines this change added, per file
-for (const f of files) {
+// A clash against the recorded base is tried again against HEAD before stopping: the record can be older than what
+// this checkout holds, so main's later lines read as clashes (25 Nov 2026: ad rule A9g.11, main 30 commits ahead).
+function mergeOne(f, rev) {
   const disk = fs.readFileSync(path.join(ROOT, f), 'utf8'), eol = disk.includes('\r\n') ? '\r\n' : '\n';
-  const mine = lf(disk), base = show(since && show(since, f) !== null ? since : 'HEAD', f), theirs = show('origin/main', f);
+  const mine = lf(disk), base = show(rev, f), theirs = show('origin/main', f);
   const baseLines = new Set(lf(base ?? '').split('\n'));
-  added[f] = mine.split('\n').filter((l) => l.trim() && !baseLines.has(l) && !isContents(l));
-  if (theirs === null || base === null || lf(theirs) === lf(base)) continue;      // main has not changed it
-  if (lf(theirs) === mine) continue;                                              // already the same as main
+  const add = mine.split('\n').filter((l) => l.trim() && !baseLines.has(l) && !isContents(l));
+  if (theirs === null || base === null || lf(theirs) === lf(base)) return { add };   // main has not changed it
+  if (lf(theirs) === mine) return { add };                                           // already the same as main
   // this checkout is often behind main yet already holds main's change (an earlier push made from here): then main's
   // copy is the base, so that change is not mistaken for a clash (19 Nov 2026: the digest line pushed an hour before)
   const mineLines = new Set(mine.split('\n'));
@@ -94,9 +105,18 @@ for (const f of files) {
     if (both.length && both.every(isContents)) return b;                   // a contents list: main's, rebuilt next
     bad.push(a.split('\n')[0]); return m;
   });
-  if (bad.length) { console.error(`${f}: a clash to settle by hand, nothing written:\n  ${bad.join('\n  ')}`); process.exit(1); }
-  fs.writeFileSync(path.join(ROOT, f), out.replace(/\n/g, eol));
-  console.log(`merged ${f} with main`);
+  return { add, bad, out: out.replace(/\n/g, eol) };
+}
+for (const f of files) {
+  const first = since && show(since, f) !== null ? since : 'HEAD';
+  let m = mergeOne(f, first);
+  if (m.bad?.length && first !== 'HEAD' && show('HEAD', f) !== null) {
+    const again = mergeOne(f, 'HEAD');
+    if (!again.bad?.length) { console.log(`${f}: clashed against ${first.slice(0, 8)}, merged against HEAD instead`); m = again; }
+  }
+  added[f] = m.add;
+  if (m.bad?.length) { console.error(`${f}: a clash to settle by hand, nothing written:\n  ${m.bad.join('\n  ')}`); process.exit(1); }
+  if (m.out !== undefined) { fs.writeFileSync(path.join(ROOT, f), m.out); console.log(`merged ${f} with main`); }
 }
 run(process.execPath, [path.join(ROOT, 'scripts', 'check-rule-copies.mjs'), '--sync']);
 run(process.execPath, [path.join(ROOT, 'scripts', 'check-rule-homes.mjs')]);
