@@ -23,22 +23,22 @@ Sections (line each starts on; read with that offset):
 - 637: Sources
 - 672: 11. Moving ads (Tzvi, 6 Nov 2026)
 - 686: 12. Never bland (Tzvi, 8 Nov 2026)
-- 700: 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
-- 713: 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
-- 729: 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
-- 741: 16. The headline says the offer (Tzvi, 10 Nov 2026)
-- 751: 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
-- 767: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
-- 779: 19. A 5 every time (Tzvi, 10 Nov 2026)
-- 790: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
-- 814: 21. The drawing is kept (Tzvi, 16 Nov 2026)
-- 821: 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
-- 829: 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
-- 846: 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
-- 856: 25. Every listing photo in an ad is clean (Tzvi, 17 Nov 2026)
-- 865: 26. Memorable, not one template (Tzvi, 18 Nov 2026: "All ten")
-- 886: 27. The site's brand in its ads (Tzvi, 22 Nov 2026)
-- 897: 28. The look is chosen first, and a rebuilt product keeps its own label (Tzvi, 22 Nov 2026)
+- 702: 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
+- 715: 14. Every copy of the product matches the real one (Tzvi, 9 Nov 2026)
+- 731: 15. Edge to edge, and styled like a shoot (Tzvi, 10 Nov 2026)
+- 743: 16. The headline says the offer (Tzvi, 10 Nov 2026)
+- 753: 17. Layout first, and real screens (Tzvi, 10 Nov 2026)
+- 769: 18. Five headlines, then cut (Tzvi, 10 Nov 2026)
+- 781: 19. A 5 every time (Tzvi, 10 Nov 2026)
+- 792: 20. Their logo on every ad (Tzvi, 11 Nov 2026)
+- 816: 21. The drawing is kept (Tzvi, 16 Nov 2026)
+- 823: 22. Committed when sent, with its score (Tzvi, 16 Nov 2026)
+- 831: 23. Better moving ads (Tzvi, 16 Nov 2026: "how can we make moving ads better")
+- 848: 24. The moving-ad rulebook (Tzvi, 16 Nov 2026)
+- 858: 25. Every listing photo in an ad is clean (Tzvi, 17 Nov 2026)
+- 867: 26. Memorable, not one template (Tzvi, 18 Nov 2026: "All ten")
+- 888: 27. The site's brand in its ads (Tzvi, 22 Nov 2026)
+- 899: 28. The look is chosen first, and a rebuilt product keeps its own label (Tzvi, 22 Nov 2026)
 <!-- /contents -->
 
 The rules for every still advert MyIsraelRental makes: the ad maker on the
@@ -696,6 +696,8 @@ Exciting beside its own kind (Tzvi, 25 Nov 2026: "Do you see what makes ours bla
 Like a photograph, not a banner (Tzvi, 25 Nov 2026, beside two Pinterest pasta posters: "something about ours just looks bland"; "fix it and add the rules"). Even woven, the blue version read as a banner: flat white digits pasted over a photo with no touch or shadow between them, thin straight strands like cables, a cold blue ground, a centred twist crossed by straight lines, and two same-size text blocks. The posters were photographs of a moment: ribbons knotted round the letters and shading them, herbs and pepper in the air, a warm cream ground with one ink colour, a diagonal from the fork, and small print set like a magazine. The remake gave the model our own typed number to wrap (A3.12), on cream with the digits in our deep blue, tagliatelle with parsley, pepper and cheese from a fork at the top left, and typed the crisp digits back on top. So: words the picture is made around (A3.12), food on a warm ground (A3.13), food with its texture and life (A3.14), and two more questions in A9.9: the eye travels on a diagonal or curve, and the small words are set like a magazine.
 
 Whole in a WhatsApp chat (Tzvi, 25 Nov 2026: "When I send the ad on WhatsApp some of it is cut off unless people press on it which they don't do"). A chat shows a tall picture as its middle only: on his phone the 1080x1920 restaurants ad showed rows 250 to 1670, so the note at the top and the name, link and QR at the bottom were cut. So every word, the name, the link, the logo and the QR of a story ad sit in that band, checked on the sheet from scripts/ad-chat-view.py before it is sent. One picture then works in a chat and in Status, whose own bars cover the same top and bottom. Step A8.10 in docs/ad-rules-checklist.md.
+
+The bar is set before paying (Tzvi, 26 Nov 2026: "Add all three", after the restaurants ad took four paid pictures). Its posters were only looked at after it was built, so each look at them sent it back for another paid picture: 8 credits where one or two would have done. So the layout sketch now sits beside three or more posters of the ad's own subject before anything is paid for, and the prompt says what it takes from them. Step A3.16; the same posters answer A9.9 at the end.
 
 ## 13. The pro look, for every ad (Tzvi, 8 Nov 2026)
 

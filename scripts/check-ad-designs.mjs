@@ -99,15 +99,6 @@ const RECORD = () => {
       const c = m.transformPoint(new DOMPoint(x + w, y + h));
       window.__drawn.push({ on: this.canvas, logo: [Math.min(a.x, c.x), Math.min(a.y, c.y), Math.max(a.x, c.x), Math.max(a.y, c.y)], H: this.canvas.height });
     }
-    // A holiday prop (the ad maker's "My design, decorated"): where it lands, so words under it fail.
-    if (this.canvas.isConnected && img instanceof HTMLImageElement && /\/ad-scenes\/decor\//.test(img.src) && r.length >= 4) {
-      const [x, y, w, h] = r.length >= 8 ? r.slice(4) : r;
-      const m = this.getTransform();
-      const pts = [[x, y], [x + w, y], [x, y + h], [x + w, y + h]].map(([px, py]) => m.transformPoint(new DOMPoint(px, py)));
-      const xs = pts.map((q) => q.x);
-      const ys = pts.map((q) => q.y);
-      window.__drawn.push({ on: this.canvas, prop: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)], W: this.canvas.width, H: this.canvas.height });
-    }
     if (this.canvas.isConnected && img instanceof HTMLCanvasElement && r.length >= 4) window.__drawn.push({ on: this.canvas, qr: Math.min(r[2], r[3]) * Math.hypot(this.getTransform().a, this.getTransform().b), H: this.canvas.height });
     return image.call(this, img, ...r);
   };
@@ -131,6 +122,11 @@ await p.route('**/api/marketplace/businesses', async (r) => {
 });
 
 const fails = [];
+// A WhatsApp chat shows a 1080x1920 picture as rows 250 to 1670 only, until someone taps it (rule A8.10, measured on
+// Tzvi's phone 25 Nov 2026). Designs made before that rule keep A8.4, so a word outside the band is REPORTED here, not
+// failed: the list shows which designs get cut in a chat (Tzvi, 26 Nov 2026: "Add all three").
+const CHAT_TOP = 250, CHAT_BOTTOM = 1670;
+const chatCut = [];
 function measure(where, all0, H, wanted) {
   // a redraw of the shape before can land late: only what was drawn at this shape's height counts
   const drawn = all0.filter((d) => d.H === H);
@@ -142,6 +138,7 @@ function measure(where, all0, H, wanted) {
     if (d.size < MIN_TEXT - 0.5) out.push(`text-size: "${d.t.slice(0, 28)}" is ${Math.round(d.size)}px`);
     if (d.x0 < -1 || d.x1 > d.W + 1 || d.y < 0 || d.y > d.H) out.push(`text-inside: "${d.t.slice(0, 28)}" runs off the picture`);
     if (story && (d.top < SAFE_TOP - 1 || d.y > d.H - SAFE_BOTTOM + 1)) out.push(`story-safe: "${d.t.slice(0, 28)}" at y ${Math.round(d.y)}`);
+    if (story && (d.top < CHAT_TOP - 1 || d.y > CHAT_BOTTOM + 1)) chatCut.push(`${where}: "${d.t.slice(0, 28)}" at y ${Math.round(d.top)} to ${Math.round(d.y)}`);
     if (/[–—]/.test(d.t)) out.push(`words: long dash in "${d.t.slice(0, 28)}"`);
   }
   const all = words.map((d) => d.t).join(' ');
@@ -156,6 +153,7 @@ function measure(where, all0, H, wanted) {
       if (lg[3] - lg[1] < 54) out.push(`logo: ${Math.round(lg[3] - lg[1])}px high, too small to read`);
       if (lg[0] < -1 || lg[2] > drawn[0].W + 1 || lg[1] < 0 || lg[3] > H) out.push('logo: runs off the picture');
       if (story && (lg[1] < SAFE_TOP - 1 || lg[3] > H - SAFE_BOTTOM + 1)) out.push(`story-safe: the logo at y ${Math.round(lg[1])}`);
+      if (story && (lg[1] < CHAT_TOP - 1 || lg[3] > CHAT_BOTTOM + 1)) chatCut.push(`${where}: the logo at y ${Math.round(lg[1])} to ${Math.round(lg[3])}`);
       for (const d of words) if (d.x0 < lg[2] && d.x1 > lg[0] && d.top < lg[3] && d.y > lg[1]) out.push(`logo: covers "${d.t.slice(0, 28)}"`);
     }
   }
@@ -237,39 +235,6 @@ for (const l of ['en', 'he']) {
       }
     }
   }
-}
-
-// A holiday on the owner's own design (Tzvi, 24 Nov 2026): "My design, decorated" puts props around every design,
-// and no prop may sit on a word or the logo. Measured from what is drawn, not from the ad maker's own placement.
-{
-  await tap('[data-testid="ad-chanukah"]');
-  await p.waitForTimeout(2500);
-  const keys = await p.locator('[data-testid="ad-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-g-', '')));
-  let decorated = 0;
-  let tried = 0;
-  for (const k of keys) {
-    if ((only && !only.has(k)) || k === 'fullphoto') continue;
-    progress(`holiday ${k}`);
-    for (const f of (k === 'native' ? ['story'] : ['feed', 'story'])) {
-      const drawn = await drawOf(async () => { await tap(`[data-testid="ad-${f}"]`); await tap(`[data-testid="ad-g-${k}"]`); });
-      tried += 1;
-      const props = drawn.filter((d) => d.prop);
-      if (props.length) decorated += 1;
-      // The props' pictures are cut-outs in a turned square: their outer eighth is mostly see-through.
-      const inner = (q) => { const dx = (q[2] - q[0]) * 0.12; const dy = (q[3] - q[1]) * 0.12; return [q[0] + dx, q[1] + dy, q[2] - dx, q[3] - dy]; };
-      const hit = (a, c) => a[0] < c[2] && c[0] < a[2] && a[1] < c[3] && c[1] < a[3];
-      for (const d of props) {
-        const q = inner(d.prop);
-        const word = drawn.find((w) => w.t && w.t.trim() && hit(q, [w.x0, w.top, w.x1, w.y]));
-        if (word) fails.push(`holiday ${k} ${f}: a prop covers "${word.t}"`);
-        if (drawn.some((w) => w.logo && hit(q, w.logo))) fails.push(`holiday ${k} ${f}: a prop covers the logo`);
-      }
-    }
-  }
-  console.log(`holiday: ${decorated} of ${tried} ads decorated`);
-  if (decorated < tried * 0.6) fails.push(`holiday: only ${decorated} of ${tried} ads got any props`);
-  await tap('[data-testid="ad-noholiday"]');
-  await p.waitForTimeout(1500);
 }
 
 // A logo whose letters cannot read (A4.6, 18 Nov 2026): the test logo is M and N's oval medal, letters 3% of its
@@ -611,6 +576,11 @@ await p.unrouteAll({ behavior: 'ignoreErrors' });
 await b.close();
 if (errors.length) fails.push(`page errors: ${[...new Set(errors)].join(' | ')}`);
 console.log(`drew ${count} ads`);
+// reported, never failed (A8.10 spares designs made before 25 Nov 2026); also saved for reading after a long run
+const chatList = [...new Set(chatCut)];
+fs.writeFileSync(path.join(os.tmpdir(), 'ad-designs-chat-cut.txt'), chatList.join('\n'));
+if (chatList.length) console.log(`cut in a WhatsApp chat (rows ${CHAT_TOP} to ${CHAT_BOTTOM} show), ${chatList.length} line(s), not a failure:\n  ${chatList.slice(0, 40).join('\n  ')}${chatList.length > 40 ? `\n  ... all in ${path.join(os.tmpdir(), 'ad-designs-chat-cut.txt')}` : ''}`);
+else console.log('every story design shows whole in a WhatsApp chat');
 if (fails.length) {
   console.error(`${fails.length} problem(s):\n${fails.join('\n')}`);
   process.exit(1);

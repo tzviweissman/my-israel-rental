@@ -56,6 +56,7 @@ const INSPO_RULES = new Set(['A9g.11']);   // references opened, and a Pinterest
 const KIND_RULES = new Set(['A9.9']);      // beside top posters of its own subject, seven numbered yes/no (Tzvi, 25 Nov 2026)
 const PLATE_RULES = new Set(['A3.13']);    // the picture made around our own typed word: the plate picture exists (Tzvi, 25 Nov 2026)
 const CHAT_RULES = new Set(['A8.10']);     // whole in a WhatsApp chat: the chat-view sheet exists (Tzvi, 25 Nov 2026)
+const BAR_RULES = new Set(['A3.16']);      // the layout beside same-subject posters before paying: that sheet exists (Tzvi, 26 Nov 2026)
 const LIB = path.join(ROOT, 'docs', 'inspo', 'pinterest-ads-2026-11-02');
 let libCodes = null;
 function libraryCodes() {
@@ -125,6 +126,12 @@ function problems(name, upTo, finished) {
         const n = new Set([...g.plan.matchAll(/(?:^|\s)([1-7])\)/g)].map((x) => x[1])).size;
         if (n < 7) out.push(`stage ${s.n}, ${it.id}: answer the seven questions as 1) to 7) (found ${n})`);
         if (/(?:^|\s)[1-7]\)\s*no\b/i.test(g.plan) && !/remade/i.test(g.plan) && !SENT_ANYWAY.test(g.plan)) out.push(`stage ${s.n}, ${it.id}: a "no" goes back to be remade; say what changed ("remade: ...")`);
+      }
+      // A3.16: the layout was set beside same-subject posters before paying, so that sheet exists. Stage 3 must pass
+      // before the ad gate lets a paid picture through, so this always comes first.
+      if (BAR_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {
+        const sheets = [...g.plan.matchAll(/([\w./-]+\.(?:jpg|jpeg|png))/gi)].map((x) => x[1]).filter((f) => !/layout[\w.-]*\.png$/i.test(f));
+        if (!sheets.some((f) => fs.existsSync(path.resolve(ROOT, f)))) out.push(`stage ${s.n}, ${it.id}: name the sheet from python scripts/ad_vs_pros.py <sheet.jpg> <layout.png> --refs <pin>,<pin>,<pin> (the layout beside the posters), or n/a: nothing generated`);
       }
       // A8.10: the story was looked at as a WhatsApp chat shows it, so the sheet from ad-chat-view.py exists.
       if (CHAT_RULES.has(it.id) && !/^n\/a:/i.test(g.plan)) {

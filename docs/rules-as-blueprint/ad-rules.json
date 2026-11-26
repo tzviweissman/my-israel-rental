@@ -382,6 +382,18 @@
    "status": "planned"
   },
   {
+   "id": "A3.16",
+   "rule": "The bar is set before paying: the layout sketch beside three or more same-subject posters before any paid picture",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "scripts/ad_vs_pros.py --refs makes the sheet; scripts/ad-blueprint.mjs --check refuses the answer without it, so the ad gate refuses the paid picture",
+   "confirmed_by": "ad-blueprint.mjs --check",
+   "retried": false,
+   "status": "planned"
+  },
+  {
    "id": "A3.11",
    "rule": "Layout drawn first and given to the reference-image model",
    "how": [
