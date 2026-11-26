@@ -162,3 +162,4 @@ which is a different report type). Flagged as documentation drift, same as the
 2026-11-21 - marginal value theorem (information foraging: people leave a patch where it runs out) - end of each category row on /businesses (BrowseRows.jsx)
 2026-11-23 - zero-price effect - order page Pickup/Delivery switch with a free-delivery code (OrderPage.jsx:514)
 2026-11-25 - Zeigarnik effect (unfinished checklist shown again) - business dashboard, the sign-up's 'Make your page stronger' list (CreateGig.jsx wizard-live-todo)
+2026-11-26 - ambiguity aversion (how payment works, shown before commitment) - order page form above Send (OrderPage.jsx)
