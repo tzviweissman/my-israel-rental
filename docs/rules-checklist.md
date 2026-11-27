@@ -6,15 +6,15 @@ Sections (line each starts on; read with that offset):
 - 76: 1. Facts and words
 - 107: 2. Opening
 - 191: 3. Sections and worlds
-- 309: 4. Photos and media
-- 340: 5. Prices and savings
-- 363: 6. Order and booking flow
-- 389: 7. Motion
-- 421: 8. Phone
-- 436: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
-- 443: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 454: 9. Finish
-- 459: Retired
+- 312: 4. Photos and media
+- 343: 5. Prices and savings
+- 366: 6. Order and booking flow
+- 392: 7. Motion
+- 424: 8. Phone
+- 439: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
+- 446: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 457: 9. Finish
+- 462: Retired
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -286,6 +286,9 @@ R3aj.19 | The owner's flat main photo, in every first screen, was upgraded once 
 R3aj.20 | The three first screens each declare layout, ground, photo, type and event, and every pair differs on at least three | 3aj.20 | script: `node scripts/check-three-apart.mjs <build>`
 R3aj.21 | No judged first screen holds a stand-in: a clip's key frame is a still, a code event is built as it runs | 3aj.21 | script: `node scripts/check-three-apart.mjs <build>` (PLACEHOLDER)
 R3aj.22 | The strongest ideas were scored on paper by a fresh judge before they were built | 3aj.22 | script: `node scripts/check-concept.mjs <build>` (Paper)
+R3aj.23 | CONCEPT.md names the product's weakest-looking item and how the ideas keep it from leading | 3aj.23 | script: `node scripts/check-concept.mjs <build>` (Weakest)
+R3aj.24 | Judging stopped on a split only with every screen 3.5 or more, a - split: line and the split shown to Tzvi | 3aj.24 | script: `node scripts/check-concept.mjs <build>` (Judged)
+R3aj.25 | The owner was asked for a short phone video of their hand giving the product over or using it | 3aj.25 | look: message-to-owner.md
 R3ak.1 | A choice (3ai.2): when picked, live art drawn in code behind the words is seeded from the business's name, uses only the site's colours, bends round the pointer on mouse devices only, has fewer lines on a phone, holds still under reduced motion, is aria-hidden and is never on the product photo, prices or order form; n/a when not picked | 3ak.1, 3ai | LOOK: laptop and phone, reduced motion on, plus script: readable for the words over it
 R3al.1 | Each clip's end still (made first: R3aa.27) names in its prompt the room for the words; a clip where only light, smoke or steam moves says "static locked-off camera, nothing moves except the light" | 3al.1 | LOOK: each clip's end still and its prompt in the brief; n/a with no film when:film
 R3al.2 | The scroll film lands softly: the playback rate eases down onto a sharp resting frame with no motion blur, never a hard stop or a pause that reads as a freeze | 3al.2 | LOOK: the opening scrolled to its end, laptop and phone, the frame it holds; n/a with no film when:film

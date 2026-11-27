@@ -120,7 +120,17 @@ export function checkConcept(dir) {
     // the mock-ups are judged before Tzvi sees them (rules 3aj.10, 23 Nov 2026): the newest judging in
     // gen/board/judged.md rates 4 or more
     const jf = path.join(dir, 'gen', 'board', 'judged.md');
-    const why = fs.existsSync(jf) ? judgeReview(fs.readFileSync(jf, 'utf8')).why : 'no gen/board/judged.md';
+    const jt = fs.existsSync(jf) ? fs.readFileSync(jf, 'utf8') : '';
+    let why = jt ? judgeReview(jt).why : 'no gen/board/judged.md';
+    // when the judges split, Tzvi decides (rules 3aj.24, 27 Nov 2026): the newest part has a "- split:" line and a
+    // "Rating:" line whose every rating is 3.5 or more
+    const newest = jt.slice(jt.lastIndexOf('\n## ') + 1);
+    if (why && !newer.has('R3aj.24') && /^\s*-\s*split\s*:/im.test(newest)) {
+      const r = (/^Rating:(.*)$/im.exec(newest) || [])[1] || '';
+      const vals = [...r.matchAll(/(\d(?:\.\d+)?)\s*\/\s*5/g)].map((m) => Number(m[1]));
+      why = !vals.length ? 'a "- split:" part needs a "Rating:" line with each screen\'s rating (3aj.24)'
+        : vals.some((v) => v < 3.5) ? `a split stops judging only with every screen 3.5 or more; one is ${Math.min(...vals)} (3aj.24)` : '';
+    }
     if (why) problems.push(`Judged: ${why}. Two fresh judges (judges.mjs --brief) score each first screen and the grey-box page before Tzvi sees them, one "## <what, date>" heading each in gen/board/judged.md with its Judge lines and "Rating: N/5" (3aj.10)`);
   }
   if (!newer.has('R3aj.11')) {
@@ -146,6 +156,17 @@ export function checkConcept(dir) {
     const part = (/^##\s*Ideas on paper\b[^\n]*\n([\s\S]*?)(?=^##\s|(?![\s\S]))/im.exec(j) || [])[1];
     if (part === undefined) problems.push('Paper: gen/board/judged.md has no "## Ideas on paper, <date>" part: one fresh judge scores each strongest idea from a coded layout sketch and its motion steps before it is built (3aj.22)');
     else if ((part.match(/Judge\s*:/g) || []).length < 3) problems.push('Paper: "## Ideas on paper" has fewer than three "Judge:" lines, one per idea (3aj.22)');
+    else {
+      // the round's best idea under 4 is scored again on paper before building (27 Nov 2026)
+      const parts = [...j.matchAll(/^##\s*Ideas on paper\b[^\n]*\n([\s\S]*?)(?=^##\s|(?![\s\S]))/gim)].map((m) => m[1]);
+      const best = Math.max(...[...parts[0].matchAll(/\bwow\s*(\d(?:\.\d+)?)/gi)].map((m) => Number(m[1])));
+      if (best < 4 && parts.length < 2) problems.push(`Paper: the best idea scored wow ${best} on paper; change the ideas and score them on paper again, a second "## Ideas on paper" part, before building (3aj.22)`);
+    }
+  }
+  if (!newer.has('R3aj.23')) {
+    // the product's weakest-looking item named before the ideas (rules 3aj.23, 27 Nov 2026)
+    const w = (/^\s*[-*]\s*weakest\s*:(.*)$/im.exec(s) || [])[1] || '';
+    if (w.trim().split(/\s+/).length < 6) problems.push('Weakest: no "- weakest: <the dullest-looking item in their photos>: <how the ideas keep it from leading>" line in CONCEPT.md (3aj.23)');
   }
   if (!newer.has('R3aj.15')) {
     // the signature returns through the page (rules 3aj.15, 26 Nov 2026)

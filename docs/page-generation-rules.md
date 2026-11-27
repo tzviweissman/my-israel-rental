@@ -43,20 +43,20 @@ Sections (line each starts on; read with that offset):
 - 2941: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
 - 3025: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
 - 3071: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3320: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3360: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3458: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
-- 3533: 4. What is reported to the owner instead (content gaps)
-- 3542: 5. How to write
-- 3591: 5a. Lessons from the practice pages
-- 3622: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3671: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3688: 6. Playbooks for the most common businesses
-- 3815: 7. Choosing the three options (automatic page builder only)
-- 3839: 8. Photos, video and the tools
-- 4070: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 4140: 9. The scroll sections: what the practice pages become
-- 4176: 10. Open decisions (need Tzvi)
+- 3353: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3393: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3491: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
+- 3566: 4. What is reported to the owner instead (content gaps)
+- 3575: 5. How to write
+- 3624: 5a. Lessons from the practice pages
+- 3655: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3704: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3721: 6. Playbooks for the most common businesses
+- 3848: 7. Choosing the three options (automatic page builder only)
+- 3872: 8. Photos, video and the tools
+- 4103: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 4173: 9. The scroll sections: what the practice pages become
+- 4209: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -3313,9 +3313,42 @@ is asked of a site published before 22 Nov 2026.
    - One fresh Sonnet judge, given the brief `node scripts/judges.mjs --brief` prints, the two top sites, and for each
      idea a rough layout picture (boxes for the photo, the headline and the button, coded, as the ads' layout sketch)
      with its motion steps, scores each one. An idea under 4 on paper is changed or replaced before it is built.
+     When the best idea of the round scores under 4, the changed ideas are scored again on paper, a second
+     `## Ideas on paper` part, before anything is built (27 Nov 2026: on Boxed Israel the paper scores came within half
+     a point of the built ones, so paper is the cheap place to find the ceiling).
      gen/board/judged.md holds it under a `## Ideas on paper, <date>` heading with one `Judge:` line per idea.
    - Why: Boxed Israel's ideas were judged only after they were built, so their ceiling was found two rounds late.
    - Checked by `scripts/check-concept.mjs` (Paper): the heading and its lines in gen/board/judged.md.
+
+23. **The product's weakest-looking item is named before the ideas** (Tzvi, 27 Nov 2026: "Do all 4", from Boxed Israel's four rounds of first-screen judging).
+   - When: phase 1, looking at the photos, for every product business; the line goes to the ideas writer with the
+     photo sheet. A service with no product names the dullest part of its photos the same way.
+   - CONCEPT.md's `- weakest:` line names the item that looks dullest in the owner's photos (the largest grey, brown
+     or clear mass, a plastic tub, a flat tray) and how the ideas keep it from leading: a crop or angle that puts the
+     best item in front, a styled shot of the hero box, or another box as the hero. It never hides what is sold.
+   - Why: Boxed Israel's grey onion soup tub was the largest dull area of the Classic Box and came back in three rounds
+     of judging, found only after the screens were built.
+   - Checked by `scripts/check-concept.mjs` (Weakest).
+
+24. **When the judges split, Tzvi decides** (Tzvi, 27 Nov 2026: "Do all 4", from Boxed Israel's four rounds of first-screen judging).
+   - When: the judging of the three first screens or the grey-box page (3aj.10), after a round in which every screen
+     is 3.5 or more, the two judges name different winners, and the newest round moved each screen's rating by half a
+     point or less. It sits beside 3aj.10 (fix under 4 and judge again): in that situation more rounds of code are
+     stopped, because the notes left are choices or paid steps, not faults.
+   - The newest part of gen/board/judged.md gets a `- split: <judge 1's pick> / <judge 2's pick>; <what is left and why
+     code cannot answer it>` line and a `Rating:` line with each screen's rating, and the board shows the split so Tzvi
+     picks knowing.
+   - Why: Boxed Israel's rounds three and four each took about twenty minutes and moved the screens half a point; the
+     judges then picked different winners.
+   - Checked by `scripts/check-concept.mjs` (Judged): a split part with every rating 3.5 or more passes.
+
+25. **The owner is asked for a short phone video of the real hand-over** (Tzvi, 27 Nov 2026: "Do all 4", from Boxed Israel's four rounds of first-screen judging).
+   - When: phase 1, the one message to the owner, every business whose product is handed over or used (a box at a
+     door, a cake on a table, a tool in use); a service asks for the job being done.
+   - Ten to twenty seconds, filmed on their phone in daylight: their hand giving the product over or using it. A real
+     hand from their own footage beats a generated one, and it can lead an opening (3aj.21's key frame) at no cost.
+   - Why: on Boxed Israel both judges, in every round, pointed to Milk Bar's real hands as what the screens lacked.
+   - Checked by eye: message-to-owner.md asks for it.
 
 ## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
 

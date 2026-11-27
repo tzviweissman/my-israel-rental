@@ -3693,6 +3693,36 @@
    "status": "built"
   },
   {
+   "id": "R3aj.23",
+   "rule": "CONCEPT.md names the product's weakest-looking item and how the ideas keep it from leading",
+   "how": [
+    "ASK"
+   ],
+   "built_by": "Phase 1: CONCEPT.md - weakest: line, given to the ideas writer",
+   "confirmed_by": "node scripts/check-concept.mjs <build> (Weakest)",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.24",
+   "rule": "When the judges split and every screen is 3.5 or more, judging stops and Tzvi decides",
+   "how": [
+    "EYE"
+   ],
+   "built_by": "Phase 4: gen/board/judged.md - split: and Rating: lines, the board",
+   "confirmed_by": "node scripts/check-concept.mjs <build> (Judged)",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.25",
+   "rule": "The owner is asked for a short phone video of their hand giving the product over or using it",
+   "how": [
+    "OWNER"
+   ],
+   "built_by": "Phase 1: message-to-owner.md",
+   "confirmed_by": "LOOK",
+   "status": "built"
+  },
+  {
    "id": "R3aj.17",
    "rule": "Each first screen's photo on a plain ground is checked for a direction of light (ground spread); an EVEN one is re-lit or kept even with the reason",
    "how": [

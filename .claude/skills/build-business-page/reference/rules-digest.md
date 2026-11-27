@@ -41,14 +41,14 @@ Sections (line each starts on; read with that offset):
 - 1298: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
 - 1314: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
 - 1328: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
-- 1388: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
-- 1401: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 1423: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026)
-- 1445: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1453: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1486: 5a. Design and story (from rules 5a, 5b and 8)
-- 1516: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
-- 1539: 3a. (cont.) Look through it, fix it, then show it
+- 1395: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
+- 1408: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 1430: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026)
+- 1452: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1460: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1493: 5a. Design and story (from rules 5a, 5b and 8)
+- 1523: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
+- 1546: 3a. (cont.) Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section and item numbers match the full rulebook (since 22 Nov 2026), so "3g.13", "3h.11", "3b.2" and the like
@@ -1382,8 +1382,15 @@ Full text: reference/full-rules.md section 3aj. Not asked of a site published be
 21. A judged first screen shows its event: a still of a clip's key frame, a code event built as it runs, never grey
     with a caption (check-three-apart: PLACEHOLDER).
 22. The strongest ideas are scored on paper (a coded layout sketch and the motion steps) by one fresh judge before they
-    are built; under 4 is changed first (gen/board/judged.md `## Ideas on paper`, check-concept, Paper).
+    are built; under 4 is changed first (gen/board/judged.md `## Ideas on paper`, check-concept, Paper). When the
+    round's best idea is under 4, the changed ideas are scored again on paper before building.
     (19 to 22: Tzvi, 27 Nov 2026, Boxed Israel's first screens at 3.5.)
+23. CONCEPT.md `- weakest:` names the product's dullest-looking item in the owner's photos and how the ideas keep it
+    from leading (a crop, a styled hero shot, another box as hero), given to the ideas writer (check-concept, Weakest).
+24. When every screen is 3.5 or more, the two judges pick different winners and the last round moved each by half a
+    point or less, stop: `- split:` and `Rating:` lines in judged.md, the split on the board, Tzvi decides (Judged).
+25. The owner message asks for a 10 to 20 second phone video of their hand giving the product over or using it.
+    (23 to 25: Tzvi, 27 Nov 2026, from Boxed Israel's four rounds.)
 
 ## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
 

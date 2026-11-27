@@ -39,7 +39,7 @@ generate what looks significantly better than code, spend in the report (§0,
 
 - **Ideas on Fable.** Phase 3's ideas (opening ideas, the "Own:" idea,
   film stories, headlines) are written by one subagent with `model: "fable"`,
-  given the record, the photo sheet, `REFERENCES.md` and the digest's §3g, §3h,
+  given the record, the photo sheet, CONCEPT.md's `- weakest:` line (§3aj.23), `REFERENCES.md` and the digest's §3g, §3h,
   §3n, §3t, §3ag and §3ah, with REFERENCES.md's `## Why they are a 5`, plus the section rules a plan most often breaks (3b.3 one
   solid button a screen, 3z.1 a card over an edge, 3u.3 the price a piece,
   check-fits' one screen a section). It writes them; you check them with the step's scripts as usual.
@@ -101,12 +101,12 @@ Prices are read with `get_cost` at the time, never from memory.
    **Gate:** the record, the photo sheet, FEEDBACK.md and BLUEPRINT.md exist.
 1. **Look, ask once, start the working parts (free).** Look at every photo: duplicates, screenshots, small
    sizes, kinds (§3o.6, §3o.7). Mark each one shop-ready, re-light or styled shot (§3ag.1), and note any big
-   photo of the wrong shape (§0b.2b). These are decisions only. Nothing is paid for yet. Send the owner one
+   photo of the wrong shape (§0b.2b). Name the product's weakest-looking item and how the ideas keep it from leading on CONCEPT.md's `- weakest:` line (§3aj.23). These are decisions only. Nothing is paid for yet. Send the owner one
    message, only about their business: missing facts, more photos, guarantee (§3j.1), FAQ with 5 to 8 example
    questions (§3 (cont.) 4), per-item choices for similar products (§3l.1), which number takes WhatsApp (§3o.4),
    prices against their menu (§0b.3), the worry questions (§3c), reviews and the name each may show (3ab.3), servings
    per size (3u.3), every length, size or package a service sells and its price, beyond the one the listing shows (Clean Plus, 26 Nov 2026: the site showed only the listing's 4-hour visit and the owner wrote back that they sell 2-hour visits too), lead time, closed days and the usual choice (3k.8), which size each photo shows (rules 8), the
-   originals of any screenshot (§3o.7) and a photo of themselves (3e.22); only what the record does not already
+   originals of any screenshot (§3o.7), a photo of themselves (3e.22) and a 10 to 20 second phone video of their hand giving the product over or using it (§3aj.25); only what the record does not already
    answer. List every live-site write the build needs (loading products, delivery settings) and ask Tzvi for all of
    them in one go before the first one (§0b.3). Then build what never changes
    with the design: load the products, the order form, the basket, and run
@@ -144,7 +144,7 @@ Prices are read with `get_cost` at the time, never from memory.
 4. **Three first screens (free, except one shared photo upgrade, then Tzvi).** Read the blueprint's Opening stage
    first. Score the strongest three ideas on paper before building them: for each, a coded layout sketch (boxes for
    the photo, the headline and the button) and its motion steps, given with `judges.mjs --brief` and the two top
-   sites to one fresh Sonnet judge; change any under 4 first (`## Ideas on paper` in `gen/board/judged.md`, §3aj.22).
+   sites to one fresh Sonnet judge; change any under 4 first, and when the best is under 4 score the changed ones on paper again before building (`## Ideas on paper` in `gen/board/judged.md`, §3aj.22).
    When the owner's main photo is flat and in every screen, re-light it once through `scripts/hf.py` (price first,
    a few credits, checked beside the original) and use it in all three (§3aj.19). Build the first screen
    three times as plain HTML in `gen/board/` (`first-a.html`, `first-b.html`, `first-c.html`), one per
@@ -163,7 +163,7 @@ Prices are read with `get_cost` at the time, never from memory.
    before the board, or shown on the board with its share written beside it, so Tzvi picks knowing (Bawk Bawk, 26 Nov
    2026: all three were 27 to 42% and it was found only after the build). Measure each screen's photo with `python scripts/check-light-pool.py <photo> [--soft]` beside the two top sites' first screens (`gen/compare/`); one more than 8 under them is re-lit or replaced, or shown on the board with both numbers, and CONCEPT.md's `- light:` line keeps them (3aj.14). Once the words and their shade sit on it, `node scripts/check-screen-light.mjs <screen url> <ref> <ref>` measures the finished screen too; DIM or FLAT is fixed before judging. The same run prints a photo's ground spread; one EVEN (no direction of light) is re-lit or kept even with the reason, written on that line before the board (3aj.17). Then two
    fresh Sonnet judges score each screen with `judges.mjs --brief` beside the two top sites; fix any under 4 and
-   judge again before Tzvi sees them, the lines in `gen/board/judged.md` (§3aj.10). They are part B of the board. On the next new site (Tzvi, 22 Nov 2026), one of the three tries the split
+   judge again before Tzvi sees them (when every screen is 3.5 or more, the judges pick different winners and a round moved each by half a point or less, stop and show him the split, §3aj.24), the lines in `gen/board/judged.md` (§3aj.10). They are part B of the board. On the next new site (Tzvi, 22 Nov 2026), one of the three tries the split
    opening and one the panel wipe (§3al.7), both free code, set beside Ruben Stom's frames
    (`docs/inspo/videos-ruben-stom-2026-11-22/Op5kncXOL-A-split-intro-halves-opening.png`,
    `MJojygFwGjA-panel-rises-wipes-over-image-labels-up.png`), to see whether they stop our openings looking alike.
