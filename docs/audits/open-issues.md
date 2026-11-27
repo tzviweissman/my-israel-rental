@@ -618,3 +618,15 @@ Main moved on after PR #24 was opened (the sign-up work stream was rewritten), s
 - Checked: test-i18n-parity all passed, check-pages-scripts 97 checked 0 broken, both locale files import (214 keys each), pytest test_order_texts 25 passed. Not run: frontend build, renders (no node_modules or browser deps installed for the app in this sandbox).
 - No zen-euler run since 22 Nov was found on the remote.
 - Needs a decision: payment-link save error in English with 19 domains while the other settings save (26 Nov); a saved page draft puts back old payment links on publish (25 Nov); staff test texts (24 Nov); ad maker chips and tabs under 44px (25 and 26 Nov, AdMaker.jsx needs a full check-ad-designs pass); the 26 Nov idea (show how to pay above Send on the order page).
+
+## Code review of 26 Nov 2026
+- [Medium] Business sites (starter shop, flavour picks): a flavour the owner marks out of stock in the dashboard still shows as a choice in the site's "Choose up to N flavours" sheet; the server refuses that order, so it is never saved to the dashboard and WhatsApp opens anyway with no tracking link (`scrollcraft/starter/shop.js:50`, `catalog.js:49`, `orders.py:2800`). No live site uses picks yet; the first will be Bawk Bawk. First seen 26 Nov 2026 (2026-11-26-site-audit.md). Report only (orders).
+- (info, audit tooling) The backend tests need `JWT_SECRET`, `MONGO_URL` and `DB_NAME` set in this sandbox (no `backend/.env`); with throwaway values the price parity test passes. 26 Nov 2026.
+## UI audit of 27 Nov 2026
+- [Low] Service cards on mixed boards (845f8db6): a listing with no business now leads in bold with the owner's personal account name, or "Provider" when there is none (`ServiceCard.jsx:144`, name from `gigs.py:93-94`); seen on the local copy's demo listings. Proposed: lead with the business only when `gig.business_id` is set. First seen 27 Nov (2026-11-27-ui-audit.md). Needs Tzvi.
+
+## Audit follow-up of 27 Nov 2026 (claude/audit-merge-iztdkz)
+- Carries all 49 commits of PR #32 (claude/audit-merge-24qyiy), rebuilt on today's main (845f8db6) with no conflicts, plus the new commits of claude/exciting-bell-hlhyhv (code review 26 Nov) and claude/sweet-knuth-2temi5 (UI audit 27 Nov). Neither run made a fix; both reports copied in, every open-issues line kept.
+- Confirmed by reading the code: flavour picks draw every flavour as a free checkbox with no stock check (`shop.js:50-51`) and `save()` returning null still opens WhatsApp (`shop.js:193`); service cards lead with `gig.provider.name`, which falls back to the account name or "Provider" (`ServiceCard.jsx:144`, `gigs.py:96`).
+- Dropped: nothing.
+- Needs a decision: flavour picks out-of-stock (orders, before Bawk Bawk goes live); service cards with no business (27 Nov); plus every item still listed under 26 Nov.

@@ -163,3 +163,4 @@ which is a different report type). Flagged as documentation drift, same as the
 2026-11-23 - zero-price effect - order page Pickup/Delivery switch with a free-delivery code (OrderPage.jsx:514)
 2026-11-25 - Zeigarnik effect (unfinished checklist shown again) - business dashboard, the sign-up's 'Make your page stronger' list (CreateGig.jsx wizard-live-todo)
 2026-11-26 - ambiguity aversion (how payment works, shown before commitment) - order page form above Send (OrderPage.jsx)
+2026-11-27 - recognition heuristic - service cards on the Services board and home (`ServiceCard.jsx`, `Services.jsx:435`)
