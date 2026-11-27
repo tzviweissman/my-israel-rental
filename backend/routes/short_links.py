@@ -1045,7 +1045,10 @@ async def make_ad_shot(body: ShotIn, request: Request, user=Depends(verify_token
         m = re.match(r"^data:image/png;base64,([A-Za-z0-9+/=]+)$", body.plate or "")
         if not wrap_word or not m or len(m.group(1)) > 2_000_000:
             raise HTTPException(status_code=400, detail="The word's picture is missing.")
-        plate_png = base64.b64decode(m.group(1))
+        try:
+            plate_png = base64.b64decode(m.group(1), validate=True)
+        except ValueError:  # binascii.Error: bad padding or length was a 500 (site audit 27 Nov 2026)
+            plate_png = b""
         if not plate_png.startswith(b"\x89PNG"):
             raise HTTPException(status_code=400, detail="The word's picture is missing.")
         occasion = ""
