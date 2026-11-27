@@ -13,6 +13,14 @@ import Highlights from './Highlights';
 
 const GOLD = 'var(--gold)';
 
+/* The card picture: the business logo when the owner chose it
+   (`logo_cover`, set in the listing editor), else the first photo, else
+   the logo rather than a stock picture (Tzvi, 27 Nov 2026). */
+const cardCover = (gig) => {
+  const logo = gig.provider?.logo_url;
+  return (gig.logo_cover && logo) || getGigCover(gig) || logo || null;
+};
+
 /**
  * One service, in one of two shapes (spec B8 + C2).
  *
@@ -53,7 +61,7 @@ export default function ServiceCard({ gig, onClick, variant = 'grid', i18n, t, a
 
 // --- grid: the original card, unchanged ---
 const ServiceGridCard = ({ gig, onClick, i18n, t, bizFirst }) => {
-  const cover = getGigCover(gig);
+  const cover = cardCover(gig);
   const price = gigPriceParts(gig);
   const bucket = gig.provider?.response_bucket;
   const availableNow = isAvailableNow(gig);
@@ -185,7 +193,7 @@ const ServiceGridCard = ({ gig, onClick, i18n, t, bizFirst }) => {
 
 // --- list: the compact row ---
 const ServiceRow = ({ gig, onClick, i18n, t }) => {
-  const cover = getGigCover(gig);
+  const cover = cardCover(gig);
   const price = gigPriceParts(gig);
   const desc = (localizedDescription(gig, i18n) || '').trim();
   // What a customer needs before they will ask: how long, and what is in

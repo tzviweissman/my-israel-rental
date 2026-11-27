@@ -572,6 +572,8 @@ const en = {
         availability: 'Availability',
         dateBooking: 'Let customers pick a date',
         dateBookingHint: 'Customers choose the day they want the job done when they book.',
+        logoCover: 'Use my logo as the card picture',
+        logoCoverHint: "Customers see your logo on this listing's card instead of your first photo.",
         contact: 'Contact',
         hebrew: 'Hebrew',
         hebrewHint: 'Write the Hebrew yourself, or leave it empty and we translate it for you.',

@@ -837,6 +837,9 @@ class GigPatch(BaseModel):
     quotes_on: Optional[bool] = None
     enable_date_booking: Optional[bool] = None
     gallery: Optional[list[str]] = None
+    # The owner's choice to show the business logo as this listing's card
+    # picture instead of its first photo (ServiceCard.jsx; Tzvi, 27 Nov 2026).
+    logo_cover: Optional[bool] = None
     booking_mode: Optional[str] = None
     whatsapp: Optional[str] = None
     area: Optional[str] = None

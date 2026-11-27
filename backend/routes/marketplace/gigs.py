@@ -976,6 +976,12 @@ async def delete_gig(gig_id: str, user=Depends(verify_token)):
 async def my_gigs(user=Depends(verify_token)):
     cursor = db.marketplace_gigs.find({"provider_user_id": user["user_id"]}).sort("created_at", -1)
     out = [_clean_gig(g) async for g in cursor]
+    # Each listing's business logo, so the editor can offer "use my logo as
+    # the card picture" only where there is a logo to use.
+    logos = {b["_id"]: b.get("logo_url") async for b in db.businesses.find(
+        {"_id": {"$in": list({g.get("business_id") for g in out if g.get("business_id")})}}, {"logo_url": 1})}
+    for g in out:
+        g["business_logo_url"] = logos.get(g.get("business_id")) or None
     prov = await db.marketplace_providers.find_one({"user_id": user["user_id"]})
     return {
         "gigs": out,

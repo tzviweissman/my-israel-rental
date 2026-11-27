@@ -105,6 +105,8 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
   const quotesDefault = gig.quotes_on === true || gig.quotes_on === false ? gig.quotes_on : (gig.gig_type || 'deliverable') === 'deliverable';
   const [quotesOn, setQuotesOn] = useState(quotesDefault);
   const [dateBooking, setDateBooking] = useState(Boolean(gig.enable_date_booking));
+  // Show the business logo as this listing's card picture (ServiceCard.jsx).
+  const [logoCover, setLogoCover] = useState(Boolean(gig.logo_cover));
   useEffect(() => {
     let live = true;
     axios.get(`${API}/marketplace/categories`).then((r) => { if (live) setCategories(r.data || []); }).catch(() => {});
@@ -400,6 +402,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
         if ((depositNote || '').trim() !== (gig.deposit_note || '')) payload.deposit_note = depositNote.trim();
       }
       if (isDeliverable && dateBooking !== Boolean(gig.enable_date_booking)) payload.enable_date_booking = dateBooking;
+      if (logoCover !== Boolean(gig.logo_cover)) payload.logo_cover = logoCover;
       if (!isStore) {
         if (JSON.stringify(cleanSessions(sessions)) !== JSON.stringify(cleanSessions(gig.sessions || []))) payload.sessions = cleanSessions(sessions);
         if (quotesOn !== quotesDefault) payload.quotes_on = quotesOn;
@@ -744,6 +747,22 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                 <span>
                   <span className="block font-semibold text-gray-900">{t('editListing.dateBooking', 'Let customers pick a date')}</span>
                   <span className="block text-[11px] text-gray-500">{t('editListing.dateBookingHint', 'Customers choose the day they want the job done when they book.')}</span>
+                </span>
+              </label>
+            )}
+            {gig.business_logo_url && (
+              <label className="flex items-start gap-2 min-h-[44px] cursor-pointer text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={logoCover}
+                  onChange={() => setLogoCover((v) => !v)}
+                  data-testid="edit-listing-logo-cover"
+                />
+                <img src={gig.business_logo_url} alt="" className="w-10 h-10 rounded-lg object-contain border border-gray-200 bg-white shrink-0" />
+                <span>
+                  <span className="block font-semibold text-gray-900">{t('editListing.logoCover', 'Use my logo as the card picture')}</span>
+                  <span className="block text-[11px] text-gray-500">{t('editListing.logoCoverHint', 'Customers see your logo on this listing\'s card instead of your first photo.')}</span>
                 </span>
               </label>
             )}
