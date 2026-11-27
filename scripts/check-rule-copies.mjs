@@ -25,6 +25,11 @@ const sync = process.argv.includes('--sync');
 const text = (f) => fs.readFileSync(f, 'utf8').replace(/\r\n/g, '\n');
 const walk = (d, base = d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(path.join(d, e.name), base) : [path.relative(base, path.join(d, e.name))]);
 
+// a file this checkout only holds older than main (unchanged since its last commit, while main has moved on) is never
+// copied to ~/.claude: a stale worktree's --sync put an old SKILL.md and record.mjs there (Bawk Bawk, 27 Nov 2026)
+const show = (rev, f) => { const r = spawnSync('git', ['show', `${rev}:${path.relative(ROOT, f).replace(/\\/g, '/')}`], { cwd: ROOT, encoding: 'utf8' }); return r.status === 0 ? r.stdout.replace(/\r\n/g, '\n') : null; };
+const behind = (f) => { const head = show('HEAD', f), main = show('origin/main', f); return head !== null && main !== null && text(f) === head && head !== main; };
+const skipped = [];
 if (!fs.existsSync(HOME)) { console.log('no ~/.claude on this machine: nothing to compare'); process.exit(0); }
 const differ = [];
 // the full rulebook has one home, docs/page-generation-rules.md; the skill's full-rules.md is only its copy
@@ -41,6 +46,7 @@ for (const [repo, home] of PAIRS) {
   for (const rel of walk(repo).filter((f) => /\.(md|mjs|js|py|html|css)$/.test(f) && f !== 'README.md')) {
     const a = path.join(repo, rel), b = path.join(home, rel);
     if (fs.existsSync(b) && text(a) === text(b)) continue;
+    if (sync && behind(a)) { skipped.push(path.relative(ROOT, a)); continue; }
     if (sync) { fs.mkdirSync(path.dirname(b), { recursive: true }); fs.copyFileSync(a, b); console.log(`synced ${b}`); continue; }
     differ.push(`${path.relative(ROOT, a)} ${fs.existsSync(b) ? 'differs from' : 'is missing from'} ${b}`);
   }
@@ -49,4 +55,5 @@ if (differ.length) {
   console.log(`The rules are not the same in both places:\n  ${differ.join('\n  ')}\nChange the repo copy, then run: node scripts/check-rule-copies.mjs --sync`);
   process.exit(1);
 }
+if (skipped.length) console.log(`not synced, older here than main (take main's copy first):\n  ${skipped.join('\n  ')}`);
 if (!sync) console.log('rule copies: the repo and ~/.claude agree');

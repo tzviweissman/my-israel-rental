@@ -65,6 +65,14 @@ if (!onto) {
 
 // --onto-main
 run('git', ['fetch', '-q', 'origin']);
+// this script, run from a checkout behind main, lacks main's newer guards (27 Nov 2026: a stale worktree copy without
+// the lost-lines check of a6a47a05e pushed rules that dropped about 100 of main's lines); it runs only as main has it
+for (const s of ['scripts/commit-rules.mjs', 'scripts/check-rule-copies.mjs']) {
+  const m = show('origin/main', s);
+  if (m !== null && lf(m) !== lf(fs.readFileSync(path.join(ROOT, s), 'utf8')) && !extra.includes(s)) {
+    console.error(`${s} here is not main's: run git show origin/main:${s} > ${s}, then again`); process.exit(1);
+  }
+}
 const untracked = git(['ls-files', '--others', '--exclude-standard', '--', ...RULE_FILES, ...extra]).stdout.split('\n').filter(Boolean);
 const files = [...new Set([...git(['diff', 'HEAD', '--name-only', '--', ...RULE_FILES, ...extra]).stdout.split('\n').filter(Boolean), ...untracked, ...extra])]
   .filter((f) => fs.existsSync(path.join(ROOT, f)));
