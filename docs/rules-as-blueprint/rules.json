@@ -3979,6 +3979,36 @@
    "status": "planned"
   },
   {
+   "id": "R3an.5",
+   "rule": "A film opening arrives in steps within 2 s before any scroll: picture fades in and settles, headline rises in",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "scrollcraft/starter/site.css .film .stage arrival",
+   "confirmed_by": "check-film-arrival STILL, LATE",
+   "status": "built"
+  },
+  {
+   "id": "R3an.6",
+   "rule": "The section after the scroll film slides up over its last picture on a laptop (data-over), never a plain cut",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "scrollcraft/starter/site.css .film + [data-over], film.js ends the film a screen early",
+   "confirmed_by": "check-film-arrival CUT",
+   "status": "built"
+  },
+  {
+   "id": "R3an.7",
+   "rule": "When picked, the page lifts off a fixed footer holding the closing name (.foot data-lift), laptop only",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "scrollcraft/starter/site.css .foot[data-lift]",
+   "confirmed_by": "LOOK",
+   "status": "built"
+  },
+  {
    "id": "R3e.26",
    "rule": "Controls answer in 300 ms or less, ease out, never from scale(0), no bounce, pressed buttons shrink to 0.97",
    "how": [

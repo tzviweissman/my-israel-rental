@@ -45,11 +45,11 @@ Sections (line each starts on; read with that offset):
 - 1409: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
 - 1431: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026)
 - 1453: 3an. From 37 Awwwards Sites of the Day (Tzvi, 27 Nov 2026)
-- 1465: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1473: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1506: 5a. Design and story (from rules 5a, 5b and 8)
-- 1536: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
-- 1559: 3a. (cont.) Look through it, fix it, then show it
+- 1470: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1478: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1511: 5a. Design and story (from rules 5a, 5b and 8)
+- 1541: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
+- 1564: 3a. (cont.) Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section and item numbers match the full rulebook (since 22 Nov 2026), so "3g.13", "3h.11", "3b.2" and the like
@@ -1461,6 +1461,11 @@ Checked by `scripts/check-award-body.mjs` (run by publish-page).
    product panels; a plain stack on a phone.
 4. At most one strip that moves by itself (`data-strip`): real facts only, slow, paused on hover, still with reduced
    motion, one of the three treatments (STRIP). Loaders, percent counters and "enter" gates are not copied.
+5. A film opening arrives in steps within 2 s before any scroll: the picture fades in and settles, the headline rises in
+   (starter site.css; check-film-arrival STILL, LATE).
+6. The section after the scroll film is `data-over`: on a laptop it slides up over the film's last picture, never a
+   plain cut; a plain stack on a phone (starter site.css and film.js; check-film-arrival CUT).
+7. On the menu of 3ai: the page lifts off its footer (`.foot data-lift` after `main`) holding the closing name, laptop only.
 
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
 

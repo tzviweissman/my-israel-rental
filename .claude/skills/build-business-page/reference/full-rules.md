@@ -42,22 +42,22 @@ Sections (line each starts on; read with that offset):
 - 2893: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026: "see why ours doesnt look as good")
 - 2942: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
 - 3026: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
-- 3073: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3355: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3395: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3493: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
-- 3568: 3an. From 37 Awwwards Sites of the Day (Tzvi, 27 Nov 2026: "Add all 4")
-- 3602: 4. What is reported to the owner instead (content gaps)
-- 3611: 5. How to write
-- 3660: 5a. Lessons from the practice pages
-- 3691: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3740: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3757: 6. Playbooks for the most common businesses
-- 3884: 7. Choosing the three options (automatic page builder only)
-- 3908: 8. Photos, video and the tools
-- 4139: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 4209: 9. The scroll sections: what the practice pages become
-- 4245: 10. Open decisions (need Tzvi)
+- 3074: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
+- 3356: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3396: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3494: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
+- 3569: 3an. From 37 Awwwards Sites of the Day (Tzvi, 27 Nov 2026: "Add all 4")
+- 3624: 4. What is reported to the owner instead (content gaps)
+- 3633: 5. How to write
+- 3682: 5a. Lessons from the practice pages
+- 3713: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3762: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3779: 6. Playbooks for the most common businesses
+- 3906: 7. Choosing the three options (automatic page builder only)
+- 3930: 8. Photos, video and the tools
+- 4161: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 4231: 9. The scroll sections: what the practice pages become
+- 4267: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -3052,7 +3052,8 @@ together they made the page busy.
    - the labelled exploded view, the card that grows into the next film and the paper-cut scene drawn in code
      (3am.4), each by the category fit of 3t;
    - any small touch of 3bb that is there for looks;
-   - the next section sliding over the last, and the one moving strip of real facts (3an.3, 3an.4);
+   - the next section sliding over the last, the one moving strip of real facts and the page lifting off its footer
+     (3an.3, 3an.4, 3an.7);
    - any other effect added for looks counts the same way (3u.6 to 3u.8, 3v.8, 3x.5, 3x.6, 3x.12, 3g.7).
    The one small touch of 3p.5 is the first of the three (decided 22 Nov 2026): when it is something the visitor sees
    (a pointer, a sweep, a mark), it is written first on the `- treatments:` line as `touch: <what>`, so a site has
@@ -3598,6 +3599,27 @@ studios and showcases) are a wait before the product that a shop should not copy
    it, still under reduced motion, marked `data-strip`, and named on the `- treatments:` line as one of the three.
    This replaces 8a.4's ban on auto-playing marquees for this one strip. Checked by `scripts/check-award-body.mjs`
    (STRIP: more than one, unmarked, or moving with reduced motion).
+
+5. **A film opening arrives in steps within 2 s, before any scroll** (from the motion study of the same sites,
+   `docs/inspo/awwwards-2026-11-27/motion/`; Tzvi, 27 Nov 2026: "All 3"). The fast winners arrive in beats: the name on
+   a plain ground, the picture fading in, the headline writing in (about 13 of 37); ours stood still for 8 s on a
+   laptop until the wheel moved. So the film's first picture fades in and settles (it moves a little by itself), and
+   the headline and line rise in after it, all done by 2 s, once; still with reduced motion. The starter's
+   `site.css` does this for `.film .stage` (canvas or video, then `.over` line by line). Loaders and percent counters
+   are still not copied: this is under 2 s and the page can be scrolled at once. Checked by
+   `scripts/check-film-arrival.mjs` (STILL: the first screen is the same at 0.1 s and 2 s; LATE: the headline is not
+   all there at 2.5 s on a laptop; on a phone the film plays by itself and its words wait for its end, 3ac.1 and
+   3h.25). A home page with no film keeps 3u.5 and `check-arrival.mjs`.
+6. **When the scroll film ends, the next section slides up over it, never a plain cut** (about 9 of 37 winners; ours
+   cut). The section right after `.film` is marked `data-over`: on a laptop it rises as a sheet with a rounded top
+   over the film's last picture, which stays still under it (the starter's `film.js` finishes the film one screen
+   early for it; give the film one more screen of height). On a phone, where the film plays in one screen (3ac.1), and
+   with reduced motion, it is a plain stack. Not counted as one of the three decorations of 3ai.2: it is how the film
+   ends. Checked by `scripts/check-film-arrival.mjs` (CUT: on a laptop the film scrolls away with the next section).
+7. **A choice (3ai.2): the page lifts off its footer** (5 of 37). The closing giant name (3ai) sits in the footer
+   (`.foot` marked `data-lift`, right after `main`), which stays put while the page above it rises away, so the end
+   is revealed rather than scrolled to. Laptop only, the footer shorter than the screen; a plain footer on a phone.
+   Counts as one of the three decorations. Checked by LOOK: scrolled to the end on a laptop and a phone.
 
 ## 4. What is reported to the owner instead (content gaps)
 

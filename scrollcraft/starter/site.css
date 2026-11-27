@@ -448,3 +448,26 @@ body:not(.no-js) #order.is-empty .osteps, body:not(.no-js) #order.is-empty .form
   .feat-ph img { height: 44svh; }
 }
 @media (prefers-reduced-motion: reduce) { .feat-ph img { transition: none; } }
+
+/* rules 3an.5 to 3an.7 (Tzvi, 27 Nov 2026, from the Awwwards motion study). A film opening arrives in steps within 2 s:
+   the name on the plain ground, the first picture fading in and settling, then the words line by line. */
+@media (prefers-reduced-motion: no-preference) {
+  .film .stage canvas { animation: film-in 1.6s var(--out) .2s both; }
+  .film .stage .over > * { animation: words-in .8s var(--out) both; }
+  .film .stage .over > :nth-child(1) { animation-delay: .8s; } .film .stage .over > :nth-child(2) { animation-delay: 1s; }
+  .film .stage .over > :nth-child(3) { animation-delay: 1.15s; } .film .stage .over > :nth-child(n+4) { animation-delay: 1.3s; }
+}
+@keyframes film-in { from { opacity: 0; transform: scale(1.07); } }
+@keyframes words-in { from { opacity: 0; transform: translateY(.5em); clip-path: inset(0 0 100% 0); } }
+/* the section after the film slides up over its last picture (data-over; film.js ends the film a screen early for it,
+   so give the film one more screen of height). A plain stack on a phone, where the film plays in one screen. */
+@media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
+  .film + [data-over] { position: relative; z-index: 3; margin-top: -100svh; background: var(--ground, Canvas); border-radius: 28px 28px 0 0; box-shadow: 0 -24px 60px rgb(0 0 0 / .18); }
+  /* what follows rises with it, never under the stuck film; :where keeps a fixed bar fixed */
+  :where(.film + [data-over] ~ :is(section, div, main, footer)) { position: relative; z-index: 3; }
+}
+/* a choice: the page lifts off its footer (.foot data-lift right after main), which holds the closing name */
+@media (min-width: 861px) and (min-height: 600px) {
+  main:has(+ .foot[data-lift]) { position: relative; z-index: 1; background: var(--ground, Canvas); }
+  .foot[data-lift] { position: sticky; bottom: 0; z-index: 0; }
+}

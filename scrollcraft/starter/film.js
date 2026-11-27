@@ -27,6 +27,8 @@
 (function () {
   [].forEach.call(document.querySelectorAll('.film[data-frames]'), function (film) {
     var cv = film.querySelector('canvas'); if (!cv) return;
+    // a next section marked data-over slides up over the last screen of the film (rules 3an.6): the film ends a screen early
+    var over = film.nextElementSibling && film.nextElementSibling.hasAttribute('data-over') && innerWidth > 760 && !matchMedia('(prefers-reduced-motion: reduce)').matches ? 2 : 1;
     var cx = cv.getContext('2d'), N = +film.dataset.frames, src = film.dataset.src || 'assets/film';
     var marks = (film.dataset.marks || '').split(',').filter(Boolean).map(Number);
     var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -83,7 +85,7 @@
     function size() { if (fw && (cv.width !== fw || cv.height !== fh)) { cv.width = fw; cv.height = fh; } shown = -1; last = ''; draw(); }
     function paint() {
       raf = 0;
-      var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight;
+      var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight * over;
       p = still ? 1 : auto ? Math.min(1, (performance.now() - t0) / T) : Math.min(1, Math.max(0, -r.top / Math.max(1, span)));
       chapters(p);
       draw();
@@ -126,7 +128,7 @@
       v.addEventListener('error', function () { v.remove(); });
       function wake() { rest = 0; if (!on) { on = 1; requestAnimationFrame(follow); } }
       function follow() {
-        var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight, dur = v.duration || 1;
+        var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight * over, dur = v.duration || 1;
         var want = Math.min(1, Math.max(0, -r.top / Math.max(1, span))) * (dur - 0.05);
         shownT = shownT < 0 ? want : shownT + (want - shownT) * 0.2;          // ease toward the scroll: no jolts from a wheel
         if (Math.abs(want - shownT) < 0.004) shownT = want;

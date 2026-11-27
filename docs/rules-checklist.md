@@ -6,15 +6,15 @@ Sections (line each starts on; read with that offset):
 - 76: 1. Facts and words
 - 107: 2. Opening
 - 191: 3. Sections and worlds
-- 316: 4. Photos and media
-- 347: 5. Prices and savings
-- 370: 6. Order and booking flow
-- 396: 7. Motion
-- 428: 8. Phone
-- 443: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
-- 450: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 461: 9. Finish
-- 466: Retired
+- 319: 4. Photos and media
+- 350: 5. Prices and savings
+- 373: 6. Order and booking flow
+- 399: 7. Motion
+- 431: 8. Phone
+- 446: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
+- 453: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 464: 9. Finish
+- 469: Retired
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -309,6 +309,9 @@ R3an.1 | The wheel scrolls with weight on a laptop: the starter's site.js block 
 R3an.2 | No row of three or more equal boxes for facts or steps, and no grid of six or more equal photo tiles; facts and steps are ruled rows, a band or one per screen, past work a collage; product cards with a price or Add stay equal | 3an.2 | script: `node scripts/check-award-body.mjs <urls>` (BOXES)
 R3an.3 | When picked (treatments line), the next section slides over the last (data-over): a sheet with a rounded top or stacked full-screen product panels; a plain stack on a phone | 3an.3, 3ai.2 | LOOK: scrolled slowly on a laptop and a phone; n/a: not picked (treatments)
 R3an.4 | At most one strip moves by itself, marked data-strip, of real facts only, slow, paused on hover or focus, still with reduced motion, named on the treatments line | 3an.4, 8a.4 | script: `node scripts/check-award-body.mjs <urls>` (STRIP)
+R3an.5 | A home page opening on a film arrives in steps within 2 s before any scroll: the film's first picture fades in and settles, then on a laptop the headline and line rise in (on a phone the words wait for the film, 3h.25), once, still with reduced motion; no loader or counter | 3an.5 | script: `node scripts/check-film-arrival.mjs <urls>` (STILL, LATE); n/a if the home page opens without a film (check-arrival)
+R3an.6 | The section after the scroll film (data-over) slides up over the film's last picture on a laptop, never a plain cut; a plain stack on a phone and with reduced motion | 3an.6 | script: `node scripts/check-film-arrival.mjs <urls>` (CUT); n/a if the home page has no scroll film
+R3an.7 | When picked (treatments line), the page lifts off its footer (.foot data-lift after main) holding the closing name, laptop only | 3an.7, 3ai.2 | LOOK: scrolled to the end on a laptop and a phone; n/a: not picked (treatments)
 R3u.8 | A tilted label over headings, if used, is this site's own shape from its world and in fingerprints.json, never another site's | 3u.8 | LOOK: its "label" in fingerprints.json differs from every other site's; n/a if none
 R3u.9 | Questions are rounded cards on `<details>`, "+" in an accent circle turning into "x", the answer opening smoothly inside the card | 3u.9 | LOOK: open two on a phone; n/a if no questions section
 R3u.10 | A business with two or more places has its list beside a map in the site's colours with numbered pins, the map held on a laptop and above the list on a phone | 3u.10 | LOOK; n/a with one place or none

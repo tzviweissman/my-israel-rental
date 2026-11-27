@@ -181,6 +181,8 @@ ${lp.stdout}${lp.stderr}`);
     ['check-blank.mjs', 'shows a blank screen', 'R3s.28'], ['check-prefill.mjs', 'has an order form that is not filled in', 'R3k.10'],
     // the rest of the seven videos (29 Oct 2026, rules 3u.5): a home page with no film arrives in order
     ['check-arrival.mjs', 'has a first screen that does not arrive', 'R3u.5'],
+    // a film opening arrives in steps too, and the section after the film slides over it (Tzvi, 27 Nov 2026, rules 3an.5, 3an.6)
+    ['check-film-arrival.mjs', 'has a film opening that stands still or cuts to the next section', 'R3an.5'],
     // the ten videos and five real sites (Tzvi, 1 Nov 2026, rules 3v): a full footer, a menu of pages, three facts, varied heights
     ['check-footer.mjs', 'has no full footer', 'R3v.1'], ['check-menu.mjs', 'has a menu bar that does not list its pages', 'R3v.2'],
     ['check-facts.mjs', 'has no three facts under the main button', 'R3v.14'], ['check-heights.mjs', 'has sections all of one height', 'R3v.6'],
