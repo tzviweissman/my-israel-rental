@@ -14,24 +14,26 @@ not here.
 
 | Family | Pictures | What it looks like | Suits most |
 |---|---|---|---|
-| [Warm editorial](#warm-editorial) | 76 | Cream or paper ground, serif or elegant type, magazine layout, photo-led and calm. | place, food-shop, rental |
-| [Dark studio](#dark-studio) | 117 | Black or near-black ground, a lit product or subject, cinematic and premium. | service, fashion-shop, food-shop |
-| [Quiet minimal](#quiet-minimal) | 88 | White or pale ground, lots of empty space, small calm type, few colours. | service, fashion-shop, events |
-| [Bold colour](#bold-colour) | 69 | Whole screens of saturated flat colour, loud and poster-like, colour per product or section. | food-shop, events, service |
-| [Playful hand-drawn](#playful-hand-drawn) | 30 | Illustration, doodles, stickers, hand lettering, paper-cut; friendly and fun. | events, food-shop, place |
-| [Giant type](#giant-type) | 53 | The type is the picture: huge or cropped wordmarks, letters filling the screen, raw type-first grids. | events, service, fashion-shop |
-| [Full-bleed film](#full-bleed-film) | 76 | A full-screen photo, video or 3D scene carries the page, type on top; immersive. | rental, place, events |
-| [Tech and data](#tech-data) | 18 | Readouts, wireframes, number grids, tiny mono labels, maps; engineering or futuristic. | service, rental, food-shop |
-| [Soft gradient](#soft-gradient) | 29 | Pastel or glowing gradients, frosted glass, soft 3D shapes; the modern AI or SaaS look. | service, fashion-shop, events |
-| [App interface](#app-interface) | 19 | Product screens, card grids, directories, forms and dashboards from software. | service, fashion-shop, trainer |
+| [Warm editorial](#warm-editorial) | 78 | Cream or paper ground, serif or elegant type, magazine layout, photo-led and calm. | place, food-shop, rental |
+| [Dark studio](#dark-studio) | 123 | Black or near-black ground, a lit product or subject, cinematic and premium. | service, fashion-shop, food-shop |
+| [Quiet minimal](#quiet-minimal) | 92 | White or pale ground, lots of empty space, small calm type, few colours. | service, fashion-shop, events |
+| [Bold colour](#bold-colour) | 74 | Whole screens of saturated flat colour, loud and poster-like, colour per product or section. | food-shop, events, service |
+| [Playful hand-drawn](#playful-hand-drawn) | 33 | Illustration, doodles, stickers, hand lettering, paper-cut; friendly and fun. | events, food-shop, place |
+| [Giant type](#giant-type) | 58 | The type is the picture: huge or cropped wordmarks, letters filling the screen, raw type-first grids. | events, service, fashion-shop |
+| [Full-bleed film](#full-bleed-film) | 81 | A full-screen photo, video or 3D scene carries the page, type on top; immersive. | rental, place, events |
+| [Tech and data](#tech-data) | 21 | Readouts, wireframes, number grids, tiny mono labels, maps; engineering or futuristic. | service, rental, food-shop |
+| [Soft gradient](#soft-gradient) | 32 | Pastel or glowing gradients, frosted glass, soft 3D shapes; the modern AI or SaaS look. | service, fashion-shop, events |
+| [App interface](#app-interface) | 20 | Product screens, card grids, directories, forms and dashboards from software. | service, fashion-shop, trainer |
 
 <a id="warm-editorial"></a>
-## Warm editorial (76)
+## Warm editorial (78)
 
 Cream or paper ground, serif or elegant type, magazine layout, photo-led and calm.
 
 | Picture | Site | Look | Suits |
 |---|---|---|---|
+| [awwwards-2026-11-27/sheets/spyker-cars-desktop.webp](awwwards-2026-11-27/sheets/spyker-cars-desktop.webp) | Spyker | white ground, car collage, small labels, big text menu | service |
+| [awwwards-2026-11-27/sheets/the-vineyard-hotel-desktop.webp](awwwards-2026-11-27/sheets/the-vineyard-hotel-desktop.webp) | Vineyard Hotel | full-bleed hotel film, cream and sage bands, booking bar, Sleep Eat Meet Play slider | place, rental |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/era-sheet.webp](awwwards-anatomy-2026-10-22/events-sports-homes/era-sheet.webp) | ERA Residence | cream and sky blue grounds, tall condensed serif caps, pink flower cut-outs, floor plan grid | rental |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/monarque-sheet.webp](awwwards-anatomy-2026-10-22/events-sports-homes/monarque-sheet.webp) | Monarque | burgundy and navy grounds, stone grey, serif caps, small floating photos, giant name footer | events, place |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/single-era-apartments-list.webp](awwwards-anatomy-2026-10-22/events-sports-homes/single-era-apartments-list.webp) | ERA Residence | cream ground, huge condensed serif caps, floor plan cards, thin filter bar, flower corner | rental |
@@ -110,7 +112,7 @@ Cream or paper ground, serif or elegant type, magazine layout, photo-led and cal
 | [videos-ruben-stom-2026-11-22/vQm2DcpFjaM-floor-plan-section-text-left-video-right.png](videos-ruben-stom-2026-11-22/vQm2DcpFjaM-floor-plan-section-text-left-video-right.png) | Linden | off-white ground, small eyebrow, serif heading, framed floor plan card right | rental, service |
 
 <a id="dark-studio"></a>
-## Dark studio (117)
+## Dark studio (123)
 
 Black or near-black ground, a lit product or subject, cinematic and premium.
 
@@ -118,6 +120,12 @@ Black or near-black ground, a lit product or subject, cinematic and premium.
 |---|---|---|---|
 | [awwwards-2026-10-18/united-1-globe-routes.webp](awwwards-2026-10-18/united-1-globe-routes.webp) | United Carriers | black ground, glowing globe rim, mono city labels, stacked caps headline | service |
 | [awwwards-2026-10-18/usav-1-diagonal-wipe.webp](awwwards-2026-10-18/usav-1-diagonal-wipe.webp) | USAvionix | near black ground, diagonal slash reveal, aerial terrain, tiny status word | service |
+| [awwwards-2026-11-27/sheets/forge-automotive-desktop.webp](awwwards-2026-11-27/sheets/forge-automotive-desktop.webp) | Forge Automotive | black enter gate, condensed caps, car photography | service |
+| [awwwards-2026-11-27/sheets/grail-desktop.webp](awwwards-2026-11-27/sheets/grail-desktop.webp) | Grail | black ground, 3D quest scenes, numbered chapters, giant email field | events |
+| [awwwards-2026-11-27/sheets/huxley-saga-desktop.webp](awwwards-2026-11-27/sheets/huxley-saga-desktop.webp) | Huxley | black ground, 3D figure, tiny numbered labels, giant wordmark close | fashion-shop |
+| [awwwards-2026-11-27/sheets/overworld-audio-desktop.webp](awwwards-2026-11-27/sheets/overworld-audio-desktop.webp) | Overworld Audio | enter with sound gate, dark 3D scene, tiny labels | events |
+| [awwwards-2026-11-27/sheets/pragen-hatlen-desktop.webp](awwwards-2026-11-27/sheets/pragen-hatlen-desktop.webp) | Pragen Hatlen | wireframe watch intro, dark product shots, bracketed numbered menu, bottom interest bar | fashion-shop |
+| [awwwards-2026-11-27/sheets/twks-1-desktop.webp](awwwards-2026-11-27/sheets/twks-1-desktop.webp) | twks | black ground, full-bleed campaign photos, tiny caps menu | service |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/belgradearbor-sheet.webp](awwwards-anatomy-2026-10-22/events-sports-homes/belgradearbor-sheet.webp) | Belgrade Arbor | deep forest green ground, tall condensed serif, cut-out photo shapes, lime accent tab | rental |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/loamhouse-sheet.webp](awwwards-anatomy-2026-10-22/events-sports-homes/loamhouse-sheet.webp) | Loam House | dark moody room photos, light serif with italics, numbered sections, site plan | rental |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/sobha-sheet.webp](awwwards-anatomy-2026-10-22/events-sports-homes/sobha-sheet.webp) | Sobha Privy Collection | black film opening, thin serif caps with script, white gallery of three photos | rental |
@@ -235,7 +243,7 @@ Black or near-black ground, a lit product or subject, cinematic and premium.
 | [videos-ruben-stom-2026-11-22/WficN4HcfKw-northmill-hero-frosted-card.png](videos-ruben-stom-2026-11-22/WficN4HcfKw-northmill-hero-frosted-card.png) | Northmill | dim gym photo, wide light caps wordmark, frosted dark card lower right, vertical nav | trainer, service |
 
 <a id="quiet-minimal"></a>
-## Quiet minimal (88)
+## Quiet minimal (92)
 
 White or pale ground, lots of empty space, small calm type, few colours.
 
@@ -249,6 +257,10 @@ White or pale ground, lots of empty space, small calm type, few colours.
 | [awwwards-2026-10-18/drone-5-follows-mouse.webp](awwwards-2026-10-18/drone-5-follows-mouse.webp) | Aevion | pale grey fade ground, ghost wordmark behind, product cut-out centred, small caption | fashion-shop, service |
 | [awwwards-2026-10-18/united-2-crane-lift.webp](awwwards-2026-10-18/united-2-crane-lift.webp) | United Carriers | plain white ground, cut-out machine and containers, black base strip | service |
 | [awwwards-2026-10-18/united-4-road-path.webp](awwwards-2026-10-18/united-4-road-path.webp) | United Carriers | white ground, black drawn road path, truck seen from above, bold caps line | service |
+| [awwwards-2026-11-27/sheets/lpas-desktop.webp](awwwards-2026-11-27/sheets/lpas-desktop.webp) | LPAS | white ground, five coloured service panels, menu pill, page transitions | service |
+| [awwwards-2026-11-27/sheets/odyssee-desktop.webp](awwwards-2026-11-27/sheets/odyssee-desktop.webp) | Odyssee clinic | portrait film opening, off-white ground, collage of different-sized photos, pearl wordmark close | beauty |
+| [awwwards-2026-11-27/sheets/santal-desktop.webp](awwwards-2026-11-27/sheets/santal-desktop.webp) | Santal | architecture photos, text tunnel, black and white, counter loader | place |
+| [awwwards-2026-11-27/sheets/signal-a-studio-desktop.webp](awwwards-2026-11-27/sheets/signal-a-studio-desktop.webp) | Signal-A | white ground, ruled project rows with hover pictures, footer word strip | service |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/noart-sheet.webp](awwwards-anatomy-2026-10-22/events-sports-homes/noart-sheet.webp) | No Art | white ground, tiny mono caps labels, row of tall product photos, globe line drawing | fashion-shop, events |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/single-noart-shop-first-screen.webp](awwwards-anatomy-2026-10-22/events-sports-homes/single-noart-shop-first-screen.webp) | No Art | white ground, five tall lifestyle product photos, tiny mono labels and prices | fashion-shop |
 | [awwwards-anatomy-2026-10-22/services/dado-d-sheet.webp](awwwards-anatomy-2026-10-22/services/dado-d-sheet.webp) | Studio Dado | white ground, huge sans studio name, small photo cards, warm brown footer block | service |
@@ -331,7 +343,7 @@ White or pale ground, lots of empty space, small calm type, few colours.
 | [videos-ruben-stom-2026-11-22/vQm2DcpFjaM-linden-line-drawing-start-frame.png](videos-ruben-stom-2026-11-22/vQm2DcpFjaM-linden-line-drawing-start-frame.png) | Linden | black and white line drawing of villa on white, mountains, calm | rental, place |
 
 <a id="bold-colour"></a>
-## Bold colour (69)
+## Bold colour (74)
 
 Whole screens of saturated flat colour, loud and poster-like, colour per product or section.
 
@@ -339,6 +351,11 @@ Whole screens of saturated flat colour, loud and poster-like, colour per product
 |---|---|---|---|
 | [awwwards-2026-10-18/seasats-3-switcher-colour.webp](awwwards-2026-10-18/seasats-3-switcher-colour.webp) | Seasats | full orange gradient ground, big white serif name, product tab switcher | fashion-shop, food-shop |
 | [awwwards-2026-10-18/seasats-4-hotspots.webp](awwwards-2026-10-18/seasats-4-hotspots.webp) | Seasats | orange ground, product with plus hotspots, mono spec list, white download bar | fashion-shop, food-shop |
+| [awwwards-2026-11-27/sheets/la-boite-a-slide-desktop.webp](awwwards-2026-11-27/sheets/la-boite-a-slide-desktop.webp) | La Boite a Slides | huge type, colour per section, sliding shapes, quote pill button | service |
+| [awwwards-2026-11-27/sheets/myfrida-the-sweet-world-desktop.webp](awwwards-2026-11-27/sheets/myfrida-the-sweet-world-desktop.webp) | MyFrida | whole-screen colour panel per product line, stacked panels, torn edges, flavour word strip | food-shop |
+| [awwwards-2026-11-27/sheets/neutomni-desktop.webp](awwwards-2026-11-27/sheets/neutomni-desktop.webp) | Neutomni | red accent, wheel rolling over steps, ticket-shaped prices, mixed-type headline | service |
+| [awwwards-2026-11-27/sheets/psp-production-desktop.webp](awwwards-2026-11-27/sheets/psp-production-desktop.webp) | PSP Production | pink then dark film then white, condensed type with italic serif, tap to roll | events |
+| [awwwards-2026-11-27/sheets/sweet-tape-desktop.webp](awwwards-2026-11-27/sheets/sweet-tape-desktop.webp) | Sweet Tape | lime and green brand colour, 3D tape rolls, giant slogan words | fashion-shop |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/boomball-sheet.webp](awwwards-anatomy-2026-10-22/events-sports-homes/boomball-sheet.webp) | Boom Ball | cream paper ground, hot pink condensed words, navy and mustard blocks, giant logo footer | events, trainer |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/kortrijkxpo-sheet.webp](awwwards-anatomy-2026-10-22/events-sports-homes/kortrijkxpo-sheet.webp) | Kortrijk Xpo | flat red hero, red slanted shapes on white, rounded lowercase sans, one colour | events, service |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/single-sixes-booking-card-hero.webp](awwwards-anatomy-2026-10-22/events-sports-homes/single-sixes-booking-card-hero.webp) | Sixes Social Cricket | maroon ground, cream booking card, pink button, blue stripes, heavy condensed caps | events, trainer, place |
@@ -408,12 +425,15 @@ Whole screens of saturated flat colour, loud and poster-like, colour per product
 | [videos-2026-11-08/bramble-top-ours-bottom.jpg](videos-2026-11-08/bramble-top-ours-bottom.jpg) | Bramble | deep purple ground, lime green accent, fruit cut-out hero, italic serif accent word | food-shop, place |
 
 <a id="playful-hand-drawn"></a>
-## Playful hand-drawn (30)
+## Playful hand-drawn (33)
 
 Illustration, doodles, stickers, hand lettering, paper-cut; friendly and fun.
 
 | Picture | Site | Look | Suits |
 |---|---|---|---|
+| [awwwards-2026-11-27/sheets/extrafazant-desktop.webp](awwwards-2026-11-27/sheets/extrafazant-desktop.webp) | Extrafazant | illustrated hero, coloured picture frames, client logo strip, script logo footer | service |
+| [awwwards-2026-11-27/sheets/house-of-giants-desktop.webp](awwwards-2026-11-27/sheets/house-of-giants-desktop.webp) | House of Giants | mascot illustration, colour bands, ghost blackletter wordmark, pricing | service |
+| [awwwards-2026-11-27/sheets/two26-studio-desktop.webp](awwwards-2026-11-27/sheets/two26-studio-desktop.webp) | Two26 | illustrated hero, orange and cream, drawn path through services, paper testimonial cards | service |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/coquelicots-sheet.webp](awwwards-anatomy-2026-10-22/events-sports-homes/coquelicots-sheet.webp) | Coquelicots | blob shaped colour panels, round portrait cut-outs, rounded friendly sans, calendar on page | rental, place |
 | [awwwards-anatomy-2026-10-22/shops/aardvark-1-books-shelf.webp](awwwards-anatomy-2026-10-22/shops/aardvark-1-books-shelf.webp) | Aardvark Book Club | tilted rounded book cards, bright yellow lime and blue grounds, chunky rounded sans, script note, pill tags | fashion-shop |
 | [awwwards-anatomy-2026-10-22/shops/aardvark-2-how-it-works.webp](awwwards-anatomy-2026-10-22/shops/aardvark-2-how-it-works.webp) | Aardvark Book Club | tilted colour step cards, line illustrations, hand lettering, big blob panels | fashion-shop, events |
@@ -446,7 +466,7 @@ Illustration, doodles, stickers, hand lettering, paper-cut; friendly and fun.
 | [videos-ruben-stom-2026-11-22/wbVWftxYNzY-scroll-line-starts-drawing.png](videos-ruben-stom-2026-11-22/wbVWftxYNzY-scroll-line-starts-drawing.png) | Journey site | cream ground, doodles, headline scrolling away, pinned card and drawn line | service, events, trainer |
 
 <a id="giant-type"></a>
-## Giant type (53)
+## Giant type (58)
 
 The type is the picture: huge or cropped wordmarks, letters filling the screen, raw type-first grids.
 
@@ -455,6 +475,11 @@ The type is the picture: huge or cropped wordmarks, letters filling the screen, 
 | [awwwards-2026-10-18/butter-5-glow-wordmark.webp](awwwards-2026-10-18/butter-5-glow-wordmark.webp) | Butter | giant bubbly wordmark, rainbow glow shadow, pale grey ground | fashion-shop, events |
 | [awwwards-2026-10-18/seasats-5-footer-readouts.webp](awwwards-2026-10-18/seasats-5-footer-readouts.webp) | Seasats | giant white wordmark across bottom, orange dusk ground, tiny mono readouts, link columns | place, rental |
 | [awwwards-2026-10-18/united-3-outline-text-behind.webp](awwwards-2026-10-18/united-3-outline-text-behind.webp) | United Carriers | giant ghost word behind truck, white then black split, bold caps headline | service |
+| [awwwards-2026-11-27/sheets/auge-experience-desktop.webp](awwwards-2026-11-27/sheets/auge-experience-desktop.webp) | Auge | percent loader, huge condensed wordmark, drifting filmstrip | service |
+| [awwwards-2026-11-27/sheets/bulletproof-desktop.webp](awwwards-2026-11-27/sheets/bulletproof-desktop.webp) | Bulletproof | huge mixed-type headlines, pink accent, ruled work rows, giant name footer | service |
+| [awwwards-2026-11-27/sheets/format-desktop.webp](awwwards-2026-11-27/sheets/format-desktop.webp) | Format | poster layouts morphing on scroll, black and white, desktop only | service |
+| [awwwards-2026-11-27/sheets/unbelievably-crap-desktop.webp](awwwards-2026-11-27/sheets/unbelievably-crap-desktop.webp) | Unbelievably Crap | black white red, ink splashes, giant type, desktop only | events |
+| [awwwards-2026-11-27/sheets/viv-desktop.webp](awwwards-2026-11-27/sheets/viv-desktop.webp) | ViV | photo reshuffle, huge logo, white ground, artist grid | events |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/nickho-sheet.webp](awwwards-anatomy-2026-10-22/events-sports-homes/nickho-sheet.webp) | Nick Ho | black and white with yellow, heavy condensed caps, cloud of logos, race list | trainer, service |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/offforum-sheet.webp](awwwards-anatomy-2026-10-22/events-sports-homes/offforum-sheet.webp) | OFFF Forum | giant black logo footer, serif caps over dark event photo, plain white strip | events |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/perflab-sheet.webp](awwwards-anatomy-2026-10-22/events-sports-homes/perflab-sheet.webp) | The Performance Lab | huge grotesque caps, black and white alternate, small orange red accent, big numbers | trainer, service |
@@ -507,7 +532,7 @@ The type is the picture: huge or cropped wordmarks, letters filling the screen, 
 | [videos-2026-11-22/tae-moodboard-take-and-skip-notes.png](videos-2026-11-22/tae-moodboard-take-and-skip-notes.png) | Fiasco, Instrument | full width heavy caps headline, photos floating around edges, flat yellow ground, sticky notes | fashion-shop, events |
 
 <a id="full-bleed-film"></a>
-## Full-bleed film (76)
+## Full-bleed film (81)
 
 A full-screen photo, video or 3D scene carries the page, type on top; immersive.
 
@@ -517,6 +542,11 @@ A full-screen photo, video or 3D scene carries the page, type on top; immersive.
 | [awwwards-2026-10-18/seasats-2-line-by-line-insets.webp](awwwards-2026-10-18/seasats-2-line-by-line-insets.webp) | Seasats | dusk sea photo, stacked fading lines, small captioned photo insets, mono tags | rental, service |
 | [awwwards-2026-10-18/united-5-from-above-clouds.webp](awwwards-2026-10-18/united-5-from-above-clouds.webp) | United Carriers | full-screen sky and clouds, ship seen from above, deep blue | service, rental |
 | [awwwards-2026-10-18/usav-2-speed-dive.webp](awwwards-2026-10-18/usav-2-speed-dive.webp) | USAvionix | full-screen radial blur aerial, dark overlay, white logo and pill button, mono readout | service |
+| [awwwards-2026-11-27/sheets/esr-bespoke-desktop.webp](awwwards-2026-11-27/sheets/esr-bespoke-desktop.webp) | ESR Bespoke | car film opening, dark and white sections, active list item, giant name footer | service |
+| [awwwards-2026-11-27/sheets/justin-jefferson-desktop.webp](awwwards-2026-11-27/sheets/justin-jefferson-desktop.webp) | Justin Jefferson | light-streak intro, navy and purple sections, logo ribbon, huge condensed type | events |
+| [awwwards-2026-11-27/sheets/milledollars-desktop.webp](awwwards-2026-11-27/sheets/milledollars-desktop.webp) | MilleDollars | logo splash, full-screen video reel, tiny labels | events |
+| [awwwards-2026-11-27/sheets/preymaker-desktop.webp](awwwards-2026-11-27/sheets/preymaker-desktop.webp) | Preymaker | showreel opening, big two-across work videos, partner list | events |
+| [awwwards-2026-11-27/sheets/realevate-desktop.webp](awwwards-2026-11-27/sheets/realevate-desktop.webp) | Realevate | single-screen counter loader, swapping property photos, huge word marquee | rental |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/single-loamhouse-one-room-per-screen.webp](awwwards-anatomy-2026-10-22/events-sports-homes/single-loamhouse-one-room-per-screen.webp) | Loam House | full-screen room photo, light serif headline, big numbers, pill buttons | rental |
 | [awwwards-anatomy-2026-10-22/food/whitedesert.webp](awwwards-anatomy-2026-10-22/food/whitedesert.webp) | White Desert | giant photo and ice film screens, light serif over snow, orange side tab, white airy sections | rental, place |
 | [awwwards-anatomy-2026-10-22/services/lpas-d-sheet.webp](awwwards-anatomy-2026-10-22/services/lpas-d-sheet.webp) | LPAS | full-screen studio film, white sans headline over photo, narrow strip of building | service |
@@ -591,7 +621,7 @@ A full-screen photo, video or 3D scene carries the page, type on top; immersive.
 | [videos-ruben-stom-2026-11-22/vQm2DcpFjaM-linden-drawing-becomes-photo-wordmark.png](videos-ruben-stom-2026-11-22/vQm2DcpFjaM-linden-drawing-becomes-photo-wordmark.png) | Linden | full-bleed desert photo, sun flare, small spaced caps wordmark | rental, place |
 
 <a id="tech-data"></a>
-## Tech and data (18)
+## Tech and data (21)
 
 Readouts, wireframes, number grids, tiny mono labels, maps; engineering or futuristic.
 
@@ -601,6 +631,9 @@ Readouts, wireframes, number grids, tiny mono labels, maps; engineering or futur
 | [awwwards-2026-10-18/drone-4-terrain-wireframe.webp](awwwards-2026-10-18/drone-4-terrain-wireframe.webp) | Aevion | white frame, glowing wireframe terrain photo, hairline top bar | service, rental |
 | [awwwards-2026-10-18/usav-3-hud-boxes.webp](awwwards-2026-10-18/usav-3-hud-boxes.webp) | USAvionix | full-bleed aerial terrain, yellow detection boxes, mono coordinate readout, big white headline | service, trainer |
 | [awwwards-2026-10-18/usav-4-photo-to-map.webp](awwwards-2026-10-18/usav-4-photo-to-map.webp) | USAvionix | black grid map outline, glowing yellow dots, white headline, mono labels | service, rental |
+| [awwwards-2026-11-27/sheets/cyera-ai-guardian-desktop.webp](awwwards-2026-11-27/sheets/cyera-ai-guardian-desktop.webp) | Cyera | purple game-like campaign, 3D canvas, demo pill | service |
+| [awwwards-2026-11-27/sheets/edolus-desktop.webp](awwwards-2026-11-27/sheets/edolus-desktop.webp) | Edolus | headphones gate, dark dithered clouds, initiate button | service |
+| [awwwards-2026-11-27/sheets/mecha-desktop.webp](awwwards-2026-11-27/sheets/mecha-desktop.webp) | Mecha | huge MECHA wordmark, index list tracking the scroll, raspberry accent, robotics renders | service |
 | [awwwards-anatomy-2026-10-22/services/aspen-clients-list.webp](awwwards-anatomy-2026-10-22/services/aspen-clients-list.webp) | Aspen Search | white and black grid boxes, giant grotesque word, tiny mono labels, halftone dither photo | service |
 | [awwwards-anatomy-2026-10-22/services/aspen-d-sheet.webp](awwwards-anatomy-2026-10-22/services/aspen-d-sheet.webp) | Aspen Search | hairline grid boxes in grey, black and mint green, huge grotesque caps, tiny mono labels, halftone image | service |
 | [awwwards-anatomy-2026-10-22/services/aspen-m-sheet.webp](awwwards-anatomy-2026-10-22/services/aspen-m-sheet.webp) | Aspen Search | stacked boxes in black, mint green and grey, big numbers, mono labels, line drawings | service |
@@ -617,7 +650,7 @@ Readouts, wireframes, number grids, tiny mono labels, maps; engineering or futur
 | [awwwards-food-2026-10-18/morpho-water-2-globe-locations.webp](awwwards-food-2026-10-18/morpho-water-2-globe-locations.webp) | Morpho Water | dark navy ground, glowing globe, location dots, thin serif headline, small caps labels | food-shop, rental |
 
 <a id="soft-gradient"></a>
-## Soft gradient (29)
+## Soft gradient (32)
 
 Pastel or glowing gradients, frosted glass, soft 3D shapes; the modern AI or SaaS look.
 
@@ -625,6 +658,9 @@ Pastel or glowing gradients, frosted glass, soft 3D shapes; the modern AI or Saa
 |---|---|---|---|
 | [awwwards-2026-10-18/butter-1-keychain-hero.webp](awwwards-2026-10-18/butter-1-keychain-hero.webp) | Butter | grey fade ground, 3D charm keyring, big plain headline, pill buttons | fashion-shop, events |
 | [awwwards-2026-10-18/butter-6-keys-jingle.webp](awwwards-2026-10-18/butter-6-keys-jingle.webp) | Butter | grey fade ground, strip of keyring frames, big plain headline | fashion-shop |
+| [awwwards-2026-11-27/sheets/emotion-agency-1-desktop.webp](awwwards-2026-11-27/sheets/emotion-agency-1-desktop.webp) | Emotion | sound gate, lilac ground, 3D scene, rounded type | service |
+| [awwwards-2026-11-27/sheets/polpharma-biologics-desktop.webp](awwwards-2026-11-27/sheets/polpharma-biologics-desktop.webp) | Polpharma | 3D molecule, coloured sections, shapes sliding over sections, pinned pillars | service |
+| [awwwards-2026-11-27/sheets/the-way-meditation-desktop.webp](awwwards-2026-11-27/sheets/the-way-meditation-desktop.webp) | The Way | calm 3D scene, chapter dots, line-by-line text, store badges | trainer |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/reelmotion-sheet.webp](awwwards-anatomy-2026-10-22/events-sports-homes/reelmotion-sheet.webp) | Reel Motion | pale lilac blue gradient ground, white rounded cards, black pill buttons, three price cards | trainer, service |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/single-reelmotion-three-prices.webp](awwwards-anatomy-2026-10-22/events-sports-homes/single-reelmotion-three-prices.webp) | Reel Motion | pale blue gradient ground, three white price cards, black pill buttons, best value tag | service, trainer |
 | [awwwards-anatomy-2026-10-22/services/townhouse-d-sheet.webp](awwwards-anatomy-2026-10-22/services/townhouse-d-sheet.webp) | Townhouse | warm off white ground fading into painted isometric town scenes, big sans headlines, white floating cards | service |
@@ -654,12 +690,13 @@ Pastel or glowing gradients, frosted glass, soft 3D shapes; the modern AI or Saa
 | [videos-2026-11-10/sites/motionsites-hero-programs.jpg](videos-2026-11-10/sites/motionsites-hero-programs.jpg) | Remote Dev Collective and AURA/WELL | glowing purple orb hero, glass cards, thin large headline, four photo program cards | service, trainer |
 
 <a id="app-interface"></a>
-## App interface (19)
+## App interface (20)
 
 Product screens, card grids, directories, forms and dashboards from software.
 
 | Picture | Site | Look | Suits |
 |---|---|---|---|
+| [awwwards-2026-11-27/sheets/a24-desktop.webp](awwwards-2026-11-27/sheets/a24-desktop.webp) | A24 concept | film library as discs, off-white ground, pill nav, rolling counter | events |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/single-boomball-dated-ticket-rows.webp](awwwards-anatomy-2026-10-22/events-sports-homes/single-boomball-dated-ticket-rows.webp) | Boom Ball | cream paper ground, dated rows with pink pill buttons, greyed sold out rows | events, trainer |
 | [awwwards-anatomy-2026-10-22/events-sports-homes/single-coquelicots-calendar-in-page.webp](awwwards-anatomy-2026-10-22/events-sports-homes/single-coquelicots-calendar-in-page.webp) | Coquelicots | mint green ground, booking calendar card, dark green summary box, rounded sans | rental, place |
 | [awwwards-categories-2026-10-18/dontmatter-2-contact-panel-over-blur.webp](awwwards-categories-2026-10-18/dontmatter-2-contact-panel-over-blur.webp) | Dont Matter | blurred pale ground, white form panel, underlined fields, chip choices, black send bar | service |
@@ -680,11 +717,62 @@ Product screens, card grids, directories, forms and dashboards from software.
 | [videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-a.png](videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-a.png) | Lumiere Studio | dark ground, wall of small page thumbnails, draggable tile grid | service, fashion-shop |
 | [videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-b-after-inertia.png](videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-b-after-inertia.png) | Lumiere Studio | dark ground, wall of small page thumbnails, draggable tile grid | service, fashion-shop |
 
-## Looked at and left out (37)
+## Looked at and left out (88)
 
 Pictures in site folders that are not someone else's website. Whole folders of ads and film stills
-are left out too: `ad-videos-2026-11-04`, `ad-videos-2026-11-07`, `pinterest-ads-2026-11-02`, `pinterest-business-ad-2026-11-24`, `pro-references`, `bar-breaking-2026-11-02`, `pinterest-burnt-2026-11-18`, `pinterest-burnt-reveal-2026-11-23`, `product-films-2026-10-21`, `product-shots-2026-10-22`, `videos-2026-11-01`, `sameness-2026-11-17`.
+are left out too: `ad-videos-2026-11-04`, `ad-videos-2026-11-07`, `pinterest-ads-2026-11-02`, `pinterest-business-ad-2026-11-24`, `pro-references`, `pinterest-restaurants-ad-2026-11-25`, `pinterest-pasta-posters-2026-11-25`, `bar-breaking-2026-11-02`, `pinterest-burnt-2026-11-18`, `pinterest-burnt-reveal-2026-11-23`, `product-films-2026-10-21`, `product-shots-2026-10-22`, `videos-2026-11-01`, `sameness-2026-11-17`.
 
+- `awwwards-2026-11-27/sheets/a24-phone.webp`: phone view of A24 concept; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/auge-experience-phone.webp`: phone view of Auge; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/bulletproof-phone.webp`: phone view of Bulletproof; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/cartier-le-choeur-des-pierres-desktop.webp`: not seen (bot check, access denied or never drew)
+- `awwwards-2026-11-27/sheets/cartier-le-choeur-des-pierres-phone.webp`: not seen (bot check, access denied or never drew)
+- `awwwards-2026-11-27/sheets/colonia-zacamil-desktop.webp`: not seen (bot check, access denied or never drew)
+- `awwwards-2026-11-27/sheets/colonia-zacamil-phone.webp`: not seen (bot check, access denied or never drew)
+- `awwwards-2026-11-27/sheets/cominvi-desktop.webp`: not seen (bot check, access denied or never drew)
+- `awwwards-2026-11-27/sheets/cominvi-phone.webp`: not seen (bot check, access denied or never drew)
+- `awwwards-2026-11-27/sheets/cyera-ai-guardian-phone.webp`: phone view of Cyera; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/edolus-phone.webp`: phone view of Edolus; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/emotion-agency-1-phone.webp`: phone view of Emotion; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/esr-bespoke-phone.webp`: phone view of ESR Bespoke; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/extrafazant-phone.webp`: phone view of Extrafazant; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/forge-automotive-phone.webp`: phone view of Forge Automotive; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/format-phone.webp`: phone view of Format; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/grail-phone.webp`: phone view of Grail; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/heron-ai-desktop.webp`: not seen (bot check, access denied or never drew)
+- `awwwards-2026-11-27/sheets/heron-ai-phone.webp`: not seen (bot check, access denied or never drew)
+- `awwwards-2026-11-27/sheets/house-of-giants-phone.webp`: phone view of House of Giants; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/huxley-saga-phone.webp`: phone view of Huxley; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/justin-jefferson-phone.webp`: phone view of Justin Jefferson; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/la-boite-a-slide-phone.webp`: phone view of La Boite a Slides; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/lpas-phone.webp`: phone view of LPAS; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/mecha-phone.webp`: phone view of Mecha; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/milledollars-phone.webp`: phone view of MilleDollars; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/myfrida-the-sweet-world-phone.webp`: phone view of MyFrida; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/neutomni-phone.webp`: phone view of Neutomni; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/odyssee-phone.webp`: phone view of Odyssee clinic; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/ours-american-crust-desktop.webp`: our own site, captured for comparison
+- `awwwards-2026-11-27/sheets/ours-american-crust-phone.webp`: our own site, captured for comparison
+- `awwwards-2026-11-27/sheets/ours-the-brown-box-desktop.webp`: our own site, captured for comparison
+- `awwwards-2026-11-27/sheets/ours-the-brown-box-phone.webp`: our own site, captured for comparison
+- `awwwards-2026-11-27/sheets/ours-the-gift-boutique-desktop.webp`: our own site, captured for comparison
+- `awwwards-2026-11-27/sheets/ours-the-gift-boutique-phone.webp`: our own site, captured for comparison
+- `awwwards-2026-11-27/sheets/overworld-audio-phone.webp`: phone view of Overworld Audio; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/polpharma-biologics-phone.webp`: phone view of Polpharma; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/pragen-hatlen-phone.webp`: phone view of Pragen Hatlen; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/preymaker-phone.webp`: phone view of Preymaker; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/psp-production-phone.webp`: phone view of PSP Production; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/realevate-phone.webp`: phone view of Realevate; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/santal-phone.webp`: phone view of Santal; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/signal-a-studio-phone.webp`: phone view of Signal-A; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/spyker-cars-phone.webp`: phone view of Spyker; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/sweet-tape-phone.webp`: phone view of Sweet Tape; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/the-vineyard-hotel-phone.webp`: phone view of Vineyard Hotel; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/the-way-meditation-phone.webp`: phone view of The Way; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/twks-1-phone.webp`: phone view of twks; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/two26-studio-phone.webp`: phone view of Two26; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/unbelievably-crap-phone.webp`: phone view of Unbelievably Crap; tagged on its desktop sheet
+- `awwwards-2026-11-27/sheets/viv-phone.webp`: phone view of ViV; tagged on its desktop sheet
 - `awwwards-categories-2026-10-18/rialto-1-blue-logo-loader.webp`: loader screen only
 - `directory-2026-11-20/ours-before.jpg`: our own MyIsraelRental page
 - `directory-2026-11-20/preview-l-all2.jpg`: our own preview build

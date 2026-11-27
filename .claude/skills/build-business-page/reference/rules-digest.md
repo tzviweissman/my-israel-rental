@@ -2,53 +2,54 @@
 
 <!-- contents: made by scripts/contents.mjs, do not edit by hand -->
 Sections (line each starts on; read with that offset):
-- 69: 0. Use the same tools (this is what gives the full capability)
-- 162: 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
-- 240: 2. Facts: only theirs
-- 309: 5. How to write
-- 354: 3b. The category checklist (what the best real sites share)
-- 381: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
-- 404: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
-- 447: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
-- 486: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
-- 516: 3g. From the six design videos (Tzvi, 14 Oct 2026)
-- 577: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
-- 647: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
-- 669: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
-- 764: 3k. A website, not a page (Tzvi, 19 Oct 2026)
-- 827: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
-- 859: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
-- 886: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
-- 929: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
-- 962: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
-- 1020: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
-- 1044: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
-- 1072: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
-- 1151: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
-- 1155: 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
-- 1167: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
-- 1177: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
-- 1192: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
-- 1204: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
-- 1211: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
-- 1223: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
-- 1234: 3bb. Small touches (Tzvi, 12 Nov 2026)
-- 1246: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026)
-- 1253: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026)
-- 1266: 3ae. One part leads into the next (Tzvi, 18 Nov 2026)
-- 1275: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
-- 1286: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026)
-- 1298: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
-- 1314: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
-- 1328: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
-- 1395: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
-- 1408: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 1430: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026)
-- 1452: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1460: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1493: 5a. Design and story (from rules 5a, 5b and 8)
-- 1523: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
-- 1546: 3a. (cont.) Look through it, fix it, then show it
+- 70: 0. Use the same tools (this is what gives the full capability)
+- 163: 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
+- 241: 2. Facts: only theirs
+- 310: 5. How to write
+- 355: 3b. The category checklist (what the best real sites share)
+- 382: 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
+- 405: 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+- 448: 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+- 487: 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+- 517: 3g. From the six design videos (Tzvi, 14 Oct 2026)
+- 578: 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
+- 648: 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+- 670: 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+- 765: 3k. A website, not a page (Tzvi, 19 Oct 2026)
+- 828: 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+- 860: 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+- 887: 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+- 930: 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+- 963: 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+- 1021: 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+- 1045: 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+- 1073: 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+- 1152: 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
+- 1156: 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
+- 1168: 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+- 1178: 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+- 1193: 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+- 1205: 3y. From the five videos of 6 Nov 2026 (Tzvi: "yes do all three")
+- 1212: 3z. From the three site videos of 10 Nov 2026 (Tzvi: "all but 3")
+- 1224: 3aa. One story (Tzvi, 11 and 12 Nov 2026)
+- 1235: 3bb. Small touches (Tzvi, 12 Nov 2026)
+- 1247: 3ac. On a phone the opening plays by itself (Tzvi, 16 Nov 2026)
+- 1254: 3ad. The body is the business's own, not only the opening (Tzvi, 17 Nov 2026)
+- 1267: 3ae. One part leads into the next (Tzvi, 18 Nov 2026)
+- 1276: 3af. Remembered, not only well made (Tzvi, 18 Nov 2026)
+- 1287: 3ag. Beside the best of its kind (Tzvi, 19 Nov 2026)
+- 1299: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
+- 1315: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
+- 1329: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
+- 1396: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
+- 1409: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 1431: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026)
+- 1453: 3an. From 37 Awwwards Sites of the Day (Tzvi, 27 Nov 2026)
+- 1465: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1473: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1506: 5a. Design and story (from rules 5a, 5b and 8)
+- 1536: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
+- 1559: 3a. (cont.) Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section and item numbers match the full rulebook (since 22 Nov 2026), so "3g.13", "3h.11", "3b.2" and the like
@@ -1448,6 +1449,18 @@ proposed rule (3aj.6).
    site order shows "Ordered:" (names only, from the API) and "Order this" fills the basket; hidden with no review.
 6. Every new WhatsApp order page loads `scrollcraft/starter/qr.js` before `shop.js`: after Send, laptops only, a QR of
    the same message for the phone (none over 1,500 characters).
+
+## 3an. From 37 Awwwards Sites of the Day (Tzvi, 27 Nov 2026)
+
+Full text: reference/full-rules.md section 3an; study and sheets in docs/inspo/awwwards-2026-11-27. New sites only.
+Checked by `scripts/check-award-body.mjs` (run by publish-page).
+1. Keep the starter `site.js` smooth-scroll block: the wheel eases on a laptop, off on touch and reduced motion (SMOOTH).
+2. No row of three or more equal boxes for facts or steps, no grid of six or more equal photo tiles: facts and steps as
+   ruled rows, a band or one per screen; past work as a collage. Product cards with a price or Add stay equal (BOXES).
+3. On the menu of 3ai: the next section slides over the last (`data-over`), a rounded sheet or stacked full-screen
+   product panels; a plain stack on a phone.
+4. At most one strip that moves by itself (`data-strip`): real facts only, slow, paused on hover, still with reduced
+   motion, one of the three treatments (STRIP). Loaders, percent counters and "enter" gates are not copied.
 
 ## 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
 

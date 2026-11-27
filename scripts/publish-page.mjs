@@ -214,6 +214,8 @@ ${lp.stdout}${lp.stderr}`);
     ['check-keyboard.mjs', 'hides focused controls under a bar, draws fake toggles or misaligns prices', 'R3aj.7'],
     // one part leads into the next: something crosses a section line, one object travels down with you (Tzvi, 18 Nov 2026, rules 3ae)
     ['check-seams.mjs', 'has a home page where nothing crosses a section line or travels with the visitor', 'R3ae.1'],
+    // what 37 Awwwards Sites of the Day share: an eased wheel, no rows of equal boxes, one moving strip at most (Tzvi, 27 Nov 2026, rules 3an)
+    ['check-award-body.mjs', 'has rows of equal boxes, an uneased wheel or more than one moving strip', 'R3an.2'],
     // the page as an iPhone shows it: Safari's engine, where a film led only by seeking stands still (Tzvi, 14 Nov 2026, rules 3aa.30)
     ['check-iphone.mjs', 'breaks or stands still on an iPhone', 'R3aa.30'],
     // Correctness, so no rule date: they run on every site, however old (Tzvi, 12 Nov 2026: "these issues shouldnt

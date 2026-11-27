@@ -6,15 +6,15 @@ Sections (line each starts on; read with that offset):
 - 76: 1. Facts and words
 - 107: 2. Opening
 - 191: 3. Sections and worlds
-- 312: 4. Photos and media
-- 343: 5. Prices and savings
-- 366: 6. Order and booking flow
-- 392: 7. Motion
-- 424: 8. Phone
-- 439: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
-- 446: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 457: 9. Finish
-- 462: Retired
+- 316: 4. Photos and media
+- 347: 5. Prices and savings
+- 370: 6. Order and booking flow
+- 396: 7. Motion
+- 428: 8. Phone
+- 443: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
+- 450: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 461: 9. Finish
+- 466: Retired
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -305,6 +305,10 @@ R3am.3 | The picked first screen and the part C home page loaded the tweaks pane
 R3am.4 | A labelled exploded view, a card that grows into the next film, a paper-cut scene in code or a two-axis chooser is used only when picked (treatments line, or a signature line for the chooser), with every label and map place from the owner's own words, never on prices, order controls or the shop and menu pages; n/a when none is used | 3am.4, 3ai, 3ak.4, 3al.8 | LOOK: CONCEPT.md treatments and signature lines against the site + script: `node scripts/check-compared.mjs <build>` (TREATMENTS)
 R3am.5 | When the site shows our own reviews (an option), reviews.js fills #our-reviews from the API; a review after a real site order shows "Ordered:" with item names only and "Order this" fills the basket; nothing guessed for other reviews; the section stays hidden with no review | 3am.5, 3 (cont.) 5 | LOOK: the section with the API on and off, laptop and phone; n/a when the site shows no reviews of ours
 R3am.6 | A shop or order page that ends in WhatsApp loads qr.js before shop.js; after Send, a laptop sees a scannable QR of the same message, a phone never does, none over 1,500 characters | 3am.6 | LOOK: a test order sent on a laptop, the code scanned with a phone; n/a with no WhatsApp order page
+R3an.1 | The wheel scrolls with weight on a laptop: the starter's site.js block is kept (html data-smooth="on"), off on touch and reduced motion, and the scroll film still passes | 3an.1 | script: `node scripts/check-award-body.mjs <urls>` (SMOOTH)
+R3an.2 | No row of three or more equal boxes for facts or steps, and no grid of six or more equal photo tiles; facts and steps are ruled rows, a band or one per screen, past work a collage; product cards with a price or Add stay equal | 3an.2 | script: `node scripts/check-award-body.mjs <urls>` (BOXES)
+R3an.3 | When picked (treatments line), the next section slides over the last (data-over): a sheet with a rounded top or stacked full-screen product panels; a plain stack on a phone | 3an.3, 3ai.2 | LOOK: scrolled slowly on a laptop and a phone; n/a: not picked (treatments)
+R3an.4 | At most one strip moves by itself, marked data-strip, of real facts only, slow, paused on hover or focus, still with reduced motion, named on the treatments line | 3an.4, 8a.4 | script: `node scripts/check-award-body.mjs <urls>` (STRIP)
 R3u.8 | A tilted label over headings, if used, is this site's own shape from its world and in fingerprints.json, never another site's | 3u.8 | LOOK: its "label" in fingerprints.json differs from every other site's; n/a if none
 R3u.9 | Questions are rounded cards on `<details>`, "+" in an accent circle turning into "x", the answer opening smoothly inside the card | 3u.9 | LOOK: open two on a phone; n/a if no questions section
 R3u.10 | A business with two or more places has its list beside a map in the site's colours with numbered pins, the map held on a laptop and above the list on a phone | 3u.10 | LOOK; n/a with one place or none

@@ -3938,6 +3938,47 @@
    "status": "built"
   },
   {
+   "id": "R3an.1",
+   "rule": "The wheel scrolls with weight on a laptop (off on touch and reduced motion)",
+   "how": [
+    "KIT"
+   ],
+   "built_by": "scrollcraft/starter/site.js smooth-scroll block, kept in every build",
+   "confirmed_by": "check-award-body SMOOTH",
+   "status": "built"
+  },
+  {
+   "id": "R3an.2",
+   "rule": "No row of equal boxes for facts or steps, no grid of equal photo tiles; product cards stay equal",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Section plan writes facts and steps as ruled rows, a band or one per screen, and past work as a collage",
+   "confirmed_by": "check-award-body BOXES",
+   "status": "planned"
+  },
+  {
+   "id": "R3an.3",
+   "rule": "A choice: the next section slides over the last (data-over), a plain stack on a phone",
+   "how": [
+    "GEN",
+    "EYE"
+   ],
+   "built_by": "Picked on the treatments line; built per site",
+   "confirmed_by": "LOOK: scrolled slowly on a laptop and a phone",
+   "status": "planned"
+  },
+  {
+   "id": "R3an.4",
+   "rule": "At most one self-moving strip of real facts, data-strip, paused on hover, still with reduced motion",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Picked on the treatments line; built per site",
+   "confirmed_by": "check-award-body STRIP",
+   "status": "planned"
+  },
+  {
    "id": "R3e.26",
    "rule": "Controls answer in 300 ms or less, ease out, never from scale(0), no bounce, pressed buttons shrink to 0.97",
    "how": [

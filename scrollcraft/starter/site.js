@@ -45,6 +45,46 @@ document.body.classList.remove('no-js');
       var b = window.siteBasket.get(); if (!b[a.dataset.add]) b[a.dataset.add] = 1; window.siteBasket.set(b); });
   });
 })();
+// Weighted smooth scrolling on a laptop (rules 3an.1; 30 of 40 Awwwards Sites of the Day use Lenis for this,
+// docs/inspo/awwwards-2026-11-27). The wheel sets a target and the page eases to it, moving the real scroll
+// position, so film.js and every scroll listener read it as usual. Off on touch screens and with reduced motion;
+// the keyboard, the scrollbar, links and pinch zoom stay the browser's own; a wheel over a box that scrolls itself
+// (the basket, a menu) is left alone.
+(function () {
+  if (!matchMedia('(pointer: fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // cur is kept as a fraction: the browser rounds scrollY to whole pixels, and easing from the rounded value
+  // stalled 4 px short of the target and never stopped (27 Nov 2026)
+  var target = scrollY, cur = scrollY, moving = false, EASE = 0.12;
+  var max = function () { return document.documentElement.scrollHeight - innerHeight; };
+  function scrollsItself(el) {
+    for (; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+      var o = getComputedStyle(el).overflowY;
+      if ((o === 'auto' || o === 'scroll') && el.scrollHeight > el.clientHeight + 1) return true;
+    }
+    return false;
+  }
+  function step() {
+    if (!moving) return;
+    // something else moved the page while gliding (a key, the scrollbar, a link): stop and let it be
+    if (Math.abs(scrollY - cur) > 2) { moving = false; target = cur = scrollY; return; }
+    cur += (target - cur) * EASE;
+    if (Math.abs(target - cur) < 0.5) { cur = target; moving = false; }
+    window.scrollTo({ top: cur, behavior: 'instant' });
+    if (moving) requestAnimationFrame(step);
+  }
+  addEventListener('wheel', function (e) {
+    if (e.ctrlKey || e.defaultPrevented || scrollsItself(e.target) || document.body.style.overflow === 'hidden') return;
+    e.preventDefault();
+    var d = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaMode === 2 ? e.deltaY * innerHeight : e.deltaY;
+    if (!moving) cur = target = scrollY;
+    target = Math.max(0, Math.min(max(), target + d));
+    if (!moving) { moving = true; requestAnimationFrame(step); }
+  }, { passive: false });
+  // a key or a press on the scrollbar hands the page back at once (Home during a glide stopped at 296 px, not 0)
+  var stop = function () { moving = false; };
+  addEventListener('keydown', stop); addEventListener('mousedown', stop);
+  document.documentElement.dataset.smooth = 'on';
+})();
 // a short confirmation after an Add ("Added: <name>"), used by catalog.js. It never floats over the page (a toast
 // covered the cards' prices and Add buttons, review 12 Nov): screen readers hear it, and catalog.js shows it in the
 // menu bar's basket button on a laptop and in the phone bar.
