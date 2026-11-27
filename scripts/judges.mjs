@@ -21,6 +21,7 @@
  * A build with an open item, or a done item whose proof file is missing, is not shown or published.
  *
  *   node scripts/judges.mjs --brief             prints the brief every judge is given, word for word
+ *   node scripts/judges.mjs --brief-variants    the brief for ranking versions of one screen (scripts/variants-sheet.mjs, 3aj.18)
  *   node scripts/judges.mjs <build-folder>      prints the rating and the feedback state; exit 1 on a problem.
  *   node scripts/judges.mjs <file.md>           rates one judging file, such as gen/board/judged.md (rules 3aj.10).
  */
@@ -53,6 +54,17 @@ references; 3 a decent but forgettable small-business site. Be strict; compare d
 Answer with one line first, exactly:
 Judge: layout N, light N, colour N, type N, detail N, motion N, wow N
 then up to 5 short bullets: what would most make the site more striking, naming the screen.`;
+// Versions of one screen side by side (rules 3aj.18, 27 Nov 2026): the judges rank them before one is chosen, so a
+// fix is chosen with everything that sits on it, never judged alone after the build
+export const VARIANTS_BRIEF = `You are a design judge. You did not build this site and have no stake in it.
+You are shown versions A, B and maybe C of ONE screen of a site, side by side (scripts/variants-sheet.mjs), and the
+best sites of its kind. Judge only how each LOOKS: light (depth, photography, light and shadow), layout, colour, type
+and wow (would someone remember it tomorrow). Do not judge missing reviews or content.
+Answer with one line per version first, exactly:
+A: layout N, light N, colour N, type N, wow N
+B: layout N, light N, colour N, type N, wow N
+then one line "Best: <letter>" and up to 3 short bullets: what the best one still needs, and what the others do
+better that it should take.`;
 const median = (v) => { const s = [...v].sort((a, b) => a - b), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
 
 export function calibration() {
@@ -100,6 +112,7 @@ export function feedbackProblems(dir) {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'))) {
   if (process.argv[2] === '--brief') { console.log(JUDGE_BRIEF); process.exit(0); }
+  if (process.argv[2] === '--brief-variants') { console.log(VARIANTS_BRIEF); process.exit(0); }
   const dir = process.argv[2] && (fs.existsSync(process.argv[2]) ? process.argv[2] : path.join(ROOT, 'scrollcraft', 'builds', process.argv[2]));
   if (!dir) { console.error('usage: node scripts/judges.mjs <build-folder>'); process.exit(2); }
   // a judging file on its own, such as a build's gen/board/judged.md (rules 3aj.10): only the rating, no feedback check

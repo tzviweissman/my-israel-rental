@@ -41,14 +41,14 @@ Sections (line each starts on; read with that offset):
 - 1298: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
 - 1314: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
 - 1328: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
-- 1375: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
-- 1388: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 1410: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026)
-- 1432: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1440: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1473: 5a. Design and story (from rules 5a, 5b and 8)
-- 1503: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
-- 1526: 3a. (cont.) Look through it, fix it, then show it
+- 1379: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
+- 1392: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 1414: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026)
+- 1436: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1444: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1477: 5a. Design and story (from rules 5a, 5b and 8)
+- 1507: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
+- 1530: 3a. (cont.) Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section and item numbers match the full rulebook (since 22 Nov 2026), so "3g.13", "3h.11", "3b.2" and the like
@@ -1367,10 +1367,14 @@ Full text: reference/full-rules.md section 3aj. Not asked of a site published be
     rule (CONCEPT.md `- thread:`, check-concept, Thread).
 16. Every structure note from the page-plan judging is fixed in the grey-box page, listed as `- fixed: <note>: <change>`
     in gen/board/judged.md; only finish notes wait for the real pictures.
+    Then the finished first screen too: check-screen-light.mjs <url> <ref> <ref>, not DIM or FLAT (a wash flattens).
     (14 to 16: Tzvi, 26 Nov 2026, from Clean Plus's nine rounds at 3.5; sites started after.)
 17. Each first screen's photo on a plain ground also gets check-light-pool's ground spread; EVEN (under 6, no direction
     of light) is decided before the board: "re-lit" or "kept even: <why>" on CONCEPT.md's `- light:` line, never a
     failure for a flat look chosen on purpose (Tzvi, 27 Nov 2026, Boxed Israel; check-concept, Light).
+18. A fix to the first screen or a section under 3.5 is chosen from 2 or 3 versions side by side:
+    variants-sheet.mjs, then two judges with judges.mjs --brief-variants; "## Versions" + "Best:" in judged.md.
+    (Tzvi, 27 Nov 2026.)
 
 ## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
 

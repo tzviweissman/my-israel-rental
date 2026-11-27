@@ -3618,7 +3618,7 @@
     "GEN"
    ],
    "built_by": "Phase 4: check-light-pool.py on each first screen's photo and the two top sites', CONCEPT.md - light:",
-   "confirmed_by": "node scripts/check-concept.mjs <build> (Light)",
+   "confirmed_by": "node scripts/check-concept.mjs <build> (Light) + node scripts/check-screen-light.mjs <url> <ref> <ref>",
    "status": "built"
   },
   {
@@ -3650,6 +3650,16 @@
    ],
    "built_by": "Phase 4: python scripts/check-light-pool.py <photo> prints the ground spread; CONCEPT.md - light: line",
    "confirmed_by": "node scripts/check-concept.mjs <build> (Light)",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.18",
+   "rule": "A fix to one screen is chosen from versions judged side by side",
+   "how": [
+    "EYE"
+   ],
+   "built_by": "scripts/variants-sheet.mjs, then two judges with judges.mjs --brief-variants",
+   "confirmed_by": "LOOK: gen/board/judged.md ## Versions with Best:",
    "status": "built"
   },
   {

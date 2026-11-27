@@ -6,15 +6,15 @@ Sections (line each starts on; read with that offset):
 - 76: 1. Facts and words
 - 107: 2. Opening
 - 191: 3. Sections and worlds
-- 304: 4. Photos and media
-- 335: 5. Prices and savings
-- 358: 6. Order and booking flow
-- 384: 7. Motion
-- 416: 8. Phone
-- 431: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
-- 438: 8c. From the ten design videos and five real sites (1 Nov 2026)
-- 449: 9. Finish
-- 454: Retired
+- 305: 4. Photos and media
+- 336: 5. Prices and savings
+- 359: 6. Order and booking flow
+- 385: 7. Motion
+- 417: 8. Phone
+- 432: 8b. Build habits and report (from the seven videos, part two, 29 Oct 2026)
+- 439: 8c. From the ten design videos and five real sites (1 Nov 2026)
+- 450: 9. Finish
+- 455: Retired
 <!-- /contents -->
 
 Written 22 Oct 2026, brought in line with the cleaned rules the same day (Tzvi's decisions: percentage savings, generated food only in the opening film, headline says the result, accent for the main button only). Cause: rules in `docs/page-generation-rules.md` (the rules doc) kept being
@@ -277,10 +277,11 @@ R3aj.10 | The three first screens and the grey-box page were each judged by two 
 R3aj.11 | Each picture with words on it was planned around where the words sit (a quiet area or their own panel), named on CONCEPT.md's - words on pictures: line; no shade hides its light | 3aj.11 | script: `node scripts/check-concept.mjs <build>` (Words on pictures)
 R3aj.12 | The showpiece was drawn full size, with its motion, in the grey-box page the judges scored | 3aj.12 | look: gen/board/judged.md names the showpiece
 R3aj.13 | The reviewer was given Tzvi's quoted yeses and the every-site parts; nothing he chose is failed for being chosen | 3aj.13 | look: review.md writes "PASS (Tzvi chose: ...)" where it applies
-R3aj.14 | Each first screen's photo was measured for light beside the two top sites' before Tzvi picked, and a dimmer one re-lit, replaced or shown with both numbers | 3aj.14 | script: `node scripts/check-concept.mjs <build>` (Light)
+R3aj.14 | Each first screen's photo was measured for light beside the two top sites' before Tzvi picked, and the finished first screen (words and shade on it) passes check-screen-light, not DIM or FLAT | 3aj.14 | script: `node scripts/check-concept.mjs <build>` (Light) + `node scripts/check-screen-light.mjs <url> <ref> <ref>`
 R3aj.15 | The signature idea returns at least twice through the page in a small form (divider, steps line, footer rule) | 3aj.15 | script: `node scripts/check-concept.mjs <build>` (Thread)
 R3aj.16 | Every structure note from the page-plan judging was fixed in the grey-box page, each listed with its fix | 3aj.16 | look: gen/board/judged.md "- fixed:" lines
 R3aj.17 | Each first screen's photo on a plain ground was checked for a direction of light (ground spread), and an EVEN one re-lit or kept even with the reason | 3aj.17 | script: `node scripts/check-concept.mjs <build>` (Light)
+R3aj.18 | Each fix to the first screen or a section judged under 3.5 was chosen from two or three versions ranked side by side | 3aj.18 | look: gen/board/judged.md "## Versions" with "Best:"
 R3ak.1 | A choice (3ai.2): when picked, live art drawn in code behind the words is seeded from the business's name, uses only the site's colours, bends round the pointer on mouse devices only, has fewer lines on a phone, holds still under reduced motion, is aria-hidden and is never on the product photo, prices or order form; n/a when not picked | 3ak.1, 3ai | LOOK: laptop and phone, reduced motion on, plus script: readable for the words over it
 R3al.1 | Each clip's end still (made first: R3aa.27) names in its prompt the room for the words; a clip where only light, smoke or steam moves says "static locked-off camera, nothing moves except the light" | 3al.1 | LOOK: each clip's end still and its prompt in the brief; n/a with no film when:film
 R3al.2 | The scroll film lands softly: the playback rate eases down onto a sharp resting frame with no motion blur, never a hard stop or a pause that reads as a freeze | 3al.2 | LOOK: the opening scrolled to its end, laptop and phone, the frame it holds; n/a with no film when:film

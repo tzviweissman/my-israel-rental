@@ -43,20 +43,20 @@ Sections (line each starts on; read with that offset):
 - 2941: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
 - 3025: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
 - 3071: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3265: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3305: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3400: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
-- 3475: 4. What is reported to the owner instead (content gaps)
-- 3484: 5. How to write
-- 3533: 5a. Lessons from the practice pages
-- 3564: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3613: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3630: 6. Playbooks for the most common businesses
-- 3757: 7. Choosing the three options (automatic page builder only)
-- 3781: 8. Photos, video and the tools
-- 4012: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 4082: 9. The scroll sections: what the practice pages become
-- 4118: 10. Open decisions (need Tzvi)
+- 3281: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3321: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3416: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
+- 3491: 4. What is reported to the owner instead (content gaps)
+- 3500: 5. How to write
+- 3549: 5a. Lessons from the practice pages
+- 3580: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3629: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3646: 6. Playbooks for the most common businesses
+- 3773: 7. Choosing the three options (automatic page builder only)
+- 3797: 8. Photos, video and the tools
+- 4028: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 4098: 9. The scroll sections: what the practice pages become
+- 4134: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -3222,6 +3222,11 @@ is asked of a site published before 22 Nov 2026.
      re-lit or replaced before the board, or shown on the board with both numbers, so Tzvi picks knowing.
    - Why: Clean Plus's chosen room was a golden-hour photo in browns; nine rounds of code (shades, panels, filters)
      never lifted "light" above 3, and all three judges finally named the photo itself as dim and muddy.
+   - And again on the finished screen (Tzvi, 27 Nov 2026: "Do 1 and 2"): once the words, their shade or panel and the board sit on the photo,
+     `node scripts/check-screen-light.mjs <url> <reference 1> <reference 2>` measures the settled first screen's
+     brightness and depth (the spread of light and shadow) beside the references'. DIM or FLAT is fixed before judging:
+     Clean Plus's daylight room passed alone, then a white wash under the headline made the screen "washed out and flat"
+     (depth 15 against the references' 29 and 31) and light stayed at 3. The `- light:` line gives both measurements.
    - Checked by `scripts/check-concept.mjs` (Light): CONCEPT.md's `- light:` line gives each first screen's measured
      product mean beside the references'.
 
@@ -3261,6 +3266,17 @@ is asked of a site published before 22 Nov 2026.
      measures 4.3; the same box with a warm light falling across it, 12.
    - Checked by `scripts/check-concept.mjs` (Light): on a new site the `- light:` line carries the spreads, and an
      EVEN screen's "re-lit" or "kept even:".
+
+18. **A fix to one screen is chosen from versions judged side by side** (Tzvi, 27 Nov 2026: "Do 1 and 2").
+   - When: any change to the first screen, or to a section the judges marked under 3.5, once the site is built (and
+     the three first screens of 3aj.2 before it is).
+   - Build two or three versions of that screen (its own pages gen/board/v-a.html..., or `?v=b` read by the page),
+     each with everything that sits on it, and `node scripts/variants-sheet.mjs <out.jpg> <url A> <url B> [url C]`.
+     Two fresh judges rank them with `node scripts/judges.mjs --brief-variants`; the best goes in, taking what the
+     others did better. One change at a time, judged after each, is not used.
+   - Why: Clean Plus changed one thing a round for nine rounds; the daylight photo was undone by a white wash chosen
+     without being judged beside a darker panel or a quiet part of the photo.
+   - Checked by `gen/board/judged.md`: a "## Versions <screen>, <date>" heading with each version's line and "Best:".
 
 ## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
 
