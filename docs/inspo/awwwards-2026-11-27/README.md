@@ -79,3 +79,44 @@ winners. The gap is the body after the opening:
 5. **Do not copy** (no rule needed; listed so nobody adds them): loaders, percent counters and "enter" gates (about
    24 of 37, all studios and showcases; for a shop they are a wait before the product, and on a phone 3ac already plays the
    opening by itself); "desktop only" pages; hiding prices, hours and ordering.
+
+## Openings and what moves (27 Nov 2026, second pass: "take a closer look ... how they show the opening screen and
+## what happens throughout the screen if things follow along")
+
+Recorded with `scripts/watch-site.mjs` (8 s of untouched opening, a mouse circle, a slow scroll) and measured;
+sheets and notes in `motion/` (`<site>-opening.webp` two frames a second, `-mouse`, `-scroll`; `notes.md` per site;
+`motion-summary.json` what follows, moves at its own speed, slides, fades, grows). 37 winners, our 3 beside them.
+Counts are by eye on the sheets, with the measurements as hints.
+
+**Openings.**
+- **Wait before it can be used:** about 18 of 37 make the visitor wait. Loaders, counters and gates take 5 to 13 s
+  (Sweet Tape 8 s of flat green, La Boite 13 s, Emotion 12 s or more, Forge never without a click).
+- **The fast ones open in 0 to 4 s and arrive in beats:** a plain ground with only the name and a line for about
+  1 s, then the film or photo fades or grows in under it, then the headline writes in letter by letter or line by
+  line (Odyssée, ESR, Huxley, LPAS, Polpharma, Mecha, Two26, Neutomni, Viv, PSP).
+- **Headlines that write in** (letters, lines, from blur or blocks): about 13 of 37.
+- **Ours:** they open fast (American Crust at 0 s, the other two by 0.5 s), faster than half the winners. But on a
+  laptop nothing more arrives: all 16 frames of American Crust's and Gift Boutique's first 8 s are the same,
+  because the scroll film waits for the scroll and nothing else moves. `check-arrival.mjs` skips film openings, so
+  it never saw this.
+
+**While scrolling.**
+- **A pinned full-screen scene whose content swaps with the scroll:** about 12 of 37. Ours have this already, as the
+  scroll film. It is our strongest part, and ours shows the product itself.
+- **The next section slides over the pinned opening:** about 9 of 37 (Huxley, Odyssée, Polpharma, ESR, LPAS,
+  Preymaker, Bulletproof, Twks, PSP). Ours cut from the film to a flat section.
+- **Hand-overs between sections:** a colour change at a hard edge is the most common; curved, torn, slanted or
+  block-step wipes appear on about 8.
+- **Something travels with you or crosses a section:** about 6 of 37 (Justin Jefferson's card, House of Giants'
+  footprints, Vineyard's rating bar). Measured on ours: nothing follows and nothing slides.
+- **A sticky list whose active line swaps a picture:** about 7 of 37 (ESR, Polpharma, LPAS, Bulletproof, Neutomni,
+  Mecha). Not proposed: Tzvi ruled on 20 Oct 2026 that steps lighting up as you scroll are overused.
+
+**Mouse.** About 9 of 37 react to the pointer in a visible way: a label chip such as "See more", a picture card
+following the pointer, a glow, a dot. None of our 3 does. Not a majority, so it stays a choice (a custom cursor is
+already on the 3ai menu).
+
+**Endings.**
+- **The page lifts off to show a fixed footer:** 5 (Huxley, Neutomni, Twks, LPAS, Mecha).
+- **A giant name or object at the close:** about 13 (Odyssée's pearl, ESR, Bulletproof, Viv, House of Giants...).
+  Two of our three already have the giant name.

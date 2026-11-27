@@ -1,0 +1,1316 @@
+{
+ "a24": {
+  "url": "https://a24.raviklaassens.com/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "div.transition",
+   "div.grain",
+   "div.trailer-lightbox"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "auge-experience": {
+  "url": "https://auge-xp.com/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "div.fixed",
+   "canvas.pointer-events-none"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "bulletproof": {
+  "url": "https://www.wearebulletproof.com/",
+  "scrolledPx": 640,
+  "steps": 2,
+  "fixedBig": [
+   "div.home-work__list-poster"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [
+   "div.home-work__list-poster",
+   "div.home-work__list-item",
+   "div.home-work__list-item",
+   "a.list-item__inner",
+   "a.list-item__inner"
+  ],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 5,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "cartier-le-choeur-des-pierres": {
+  "url": "https://www.cartier.com/en-fr/lechoeurdespierres",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "colonia-zacamil": {
+  "url": "https://coloniazacamil.com/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "div.webgl",
+   "div"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "cyera-ai-guardian": {
+  "url": "https://secure-the-unknown.cyera.com/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "div.uiviews",
+   "div.progress-tap-layer"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "edolus": {
+  "url": "https://edolus.com/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "div.bands-open",
+   "div.tcf-1",
+   "div"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "emotion-agency-1": {
+  "url": "https://emotion-agency.com/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "div.loader",
+   "div",
+   "div.smooth-scroll",
+   "button.ai-btn \"AI assistant\""
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "esr-bespoke": {
+  "url": "https://www.esrbespoke.au/",
+  "scrolledPx": 630,
+  "steps": 3,
+  "fixedBig": [
+   "div.fixed",
+   "div.w-auto"
+  ],
+  "follows": [
+   "FULL-SCREEN div.w-auto (fixed, stays 3 of 3 steps, 1280x800)",
+   "div.w-auto (static, stays 3 of 3 steps, 1216x310)",
+   "div.col-span-3 (static, stays 3 of 3 steps, 292x310)",
+   "div.col-span-3 (static, stays 3 of 3 steps, 497x310)",
+   "div.col-span-full (static, stays 3 of 3 steps, 189x310)",
+   "div.md:max-w-[32vw] (static, stays 3 of 3 steps, 410x123)",
+   "a.flex \"Home\" (static, stays 3 of 3 steps, 410x123)",
+   "svg (static, stays 3 of 3 steps, 410x123)"
+  ],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [
+   "a.transition-opacity \"Services\"",
+   "div.opacity-100",
+   "a.transition-opacity \"Services\"",
+   "a.transition-opacity \"Services\"",
+   "span.transition-opacity"
+  ],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 10,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 5,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "extrafazant": {
+  "url": "https://www.extrafazant.nl/",
+  "scrolledPx": 5090,
+  "steps": 11,
+  "fixedBig": [
+   "div.rd-cookie-banner_component",
+   "div.transition",
+   "div.featured_pin"
+  ],
+  "follows": [
+   "div.rd-cookie-banner_component (fixed, stays 11 of 11 steps, 320x155)",
+   "div.rd-cookie-banner_content (static, stays 11 of 11 steps, 320x155)",
+   "FULL-SCREEN div.transition (fixed, stays 11 of 11 steps, 1280x800)",
+   "FULL-SCREEN div.transition__shape (absolute, stays 11 of 11 steps, 1280x800)",
+   "FULL-SCREEN svg (absolute, stays 11 of 11 steps, 1664x1040)",
+   "path (static, stays 11 of 11 steps, 1484x879)"
+  ],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 6,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "forge-automotive": {
+  "url": "https://forgeautomotive.co.uk/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "div.sc-337305d3-0 \"Welcome to Forge Automotive\"",
+   "div.sc-60e682e4-2",
+   "div.sc-2b3d2147-2",
+   "div.sc-337305d3-0",
+   "nav.sc-337305d3-0 \"Menu\""
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "format": {
+  "url": "https://format.obys.agency/",
+  "scrolledPx": 2940,
+  "steps": 8,
+  "fixedBig": [
+   "div.logo-fixed"
+  ],
+  "follows": [
+   "svg \"FORMAT\" (static, stays 8 of 8 steps, 1244x191)",
+   "FULL-SCREEN span.clock__ball (absolute, stays 6 of 6 steps, 1510x1510)",
+   "FULL-SCREEN span.clock__ball (absolute, stays 6 of 6 steps, 1510x1510)",
+   "FULL-SCREEN span.clock__ball (absolute, stays 6 of 6 steps, 1510x1510)"
+  ],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 4,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "grail": {
+  "url": "https://grail-app.com/",
+  "scrolledPx": 850,
+  "steps": 3,
+  "fixedBig": [
+   "div._clock_bwga5_60",
+   "img._phone_bwga5_131",
+   "div._scene_bwga5_154",
+   "div._acceptOverlay_bwga5_66",
+   "button._waitPill_bwga5_520 \"Join Waitlist\"",
+   "div._cursor_1pamk_25"
+  ],
+  "follows": [
+   "FULL-SCREEN canvas._acceptBg_bwga5_31 (fixed, stays 3 of 3 steps, 1280x800)",
+   "span._clockNum_bwga5_93 (static, stays 3 of 3 steps, 1280x307)",
+   "span._clockGroup_bwga5_113 (static, stays 3 of 3 steps, 344x307)",
+   "span._clockDigit_bwga5_116 (static, stays 3 of 3 steps, 172x307)",
+   "span._clockDigit_bwga5_116 (static, stays 3 of 3 steps, 172x307)",
+   "span._clockGroup_bwga5_113 (static, stays 3 of 3 steps, 344x307)",
+   "span._clockDigit_bwga5_116 (static, stays 3 of 3 steps, 172x307)",
+   "span._clockDigit_bwga5_116 (static, stays 3 of 3 steps, 172x307)"
+  ],
+  "ownSpeed": [],
+  "sideways": [
+   "button._waitPill_bwga5_520 \"Join Waitlist\" (103 px sideways)"
+  ],
+  "fades": [
+   "div._s5left_bwga5_780",
+   "p._s5desc_bwga5_813",
+   "div._s5left_bwga5_780",
+   "p._s5desc_bwga5_813",
+   "p._blurbBody_194d4_244",
+   "canvas._rays_jyv7u_69",
+   "input._emailInput_jyv7u_165 \"Your email\""
+  ],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 14,
+   "ownSpeed": 0,
+   "sideways": 1,
+   "fades": 7,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "house-of-giants": {
+  "url": "https://houseofgiants.com/",
+  "scrolledPx": 4860,
+  "steps": 13,
+  "fixedBig": [],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [
+   "img.footprint-trail__print",
+   "img.footprint-trail__print",
+   "img.footprint-trail__print",
+   "img.footprint-trail__print",
+   "img.footprint-trail__print",
+   "img.footprint-trail__print"
+  ],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 6,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "huxley-saga": {
+  "url": "https://www.huxleysaga.com/",
+  "scrolledPx": 5990,
+  "steps": 15,
+  "fixedBig": [
+   "div",
+   "footer.e-footer"
+  ],
+  "follows": [
+   "section.s-banner-hero (sticky, stays 14 of 15 steps, 1280x800)",
+   "FULL-SCREEN div.s-banner-hero__media (absolute, stays 14 of 15 steps, 1280x800)",
+   "div.three-media (relative, stays 14 of 15 steps, 1280x800)",
+   "video (relative, stays 14 of 15 steps, 1280x800)",
+   "div.s-banner-hero__content (relative, stays 14 of 15 steps, 1280x800)",
+   "footer.e-footer (fixed, stays 15 of 15 steps, 1256x307)",
+   "div.e-footer__logo (relative, stays 15 of 15 steps, 1256x129)",
+   "div.a-logo (relative, stays 15 of 15 steps, 1256x129)"
+  ],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [
+   "picture.common-media"
+  ],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 12,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 1,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "justin-jefferson": {
+  "url": "https://jjettas.com/",
+  "scrolledPx": 3090,
+  "steps": 14,
+  "fixedBig": [
+   "div.bg-layers",
+   "div.jj-tone-light",
+   "div.fixed",
+   "div.jj-menu-grain",
+   "div.pointer-events-none",
+   "div.jj-home-tail-field"
+  ],
+  "follows": [
+   "FULL-SCREEN div.bg-layers (fixed, stays 14 of 14 steps, 1280x800)",
+   "FULL-SCREEN div.bg-layers__base (absolute, stays 14 of 14 steps, 1280x800)",
+   "FULL-SCREEN div.bg-layers__texture (absolute, stays 14 of 14 steps, 1280x800)",
+   "FULL-SCREEN div.jj-menu-grain (fixed, stays 14 of 14 steps, 1280x800)",
+   "div.jj-menu-layout (relative, stays 14 of 14 steps, 1280x749)",
+   "nav.jj-menu-links \"Main navigation\" (relative, stays 14 of 14 steps, 879x277)",
+   "div.jj-menu-row (static, stays 14 of 14 steps, 879x74)",
+   "div.jj-menu-row (static, stays 14 of 14 steps, 772x74)"
+  ],
+  "ownSpeed": [],
+  "sideways": [
+   "div.bg-layers__track (312 px sideways)",
+   "span.bg-layers__word (312 px sideways)",
+   "div.jj-partner-marquee (-409 px sideways)",
+   "div.flex (-409 px sideways)",
+   "img.h-full \"Under Armour\" (-408 px sideways)",
+   "img.h-full \"Gatorade\" (-409 px sideways)",
+   "img.h-full \"Pepsi\" (-409 px sideways)",
+   "img.h-full \"General Mills\" (-409 px sideways)"
+  ],
+  "fades": [
+   "div.bg-layers__texture",
+   "div.jj-footer-light",
+   "img.object-cover \"Justin Jefferson\"",
+   "img.object-cover \"Justin Jefferson\"",
+   "img.object-cover \"Justin Jefferson\"",
+   "div.bg-layers__texture",
+   "img.object-cover \"Justin with campers on the fie\"",
+   "img.object-cover \"Young athletes at the camp\""
+  ],
+  "grows": [
+   "div.relative (scale 1.00 to 1.00)"
+  ],
+  "unmask": [],
+  "counts": {
+   "follows": 17,
+   "ownSpeed": 0,
+   "sideways": 50,
+   "fades": 12,
+   "grows": 1,
+   "unmask": 0
+  }
+ },
+ "la-boite-a-slide": {
+  "url": "https://laboiteaslides.fr/",
+  "scrolledPx": 19810,
+  "steps": 50,
+  "fixedBig": [
+   "app-loader._loader_1pdyi_59",
+   "canvas",
+   "h1._header__subtitle_14zfk_70 \"La boite à slides® :seule agen\"",
+   "app-widgets._widgets_x70fq_61",
+   "app-modal._modal_1um5d_59"
+  ],
+  "follows": [
+   "FULL-SCREEN app-loader._loader_1pdyi_59 (fixed, stays 50 of 50 steps, 1280x800)",
+   "FULL-SCREEN loader-panel._loader__panel_1pdyi_71 (absolute, stays 50 of 50 steps, 1280x800)",
+   "FULL-SCREEN section._menu_11l1n_59 (absolute, stays 50 of 50 steps, 1268x788)",
+   "FULL-SCREEN app-background._menu__background_11l1n_67 (absolute, stays 50 of 50 steps, 1268x788)",
+   "app-container.container (relative, stays 50 of 50 steps, 1268x788)",
+   "ul._list_th2bz_59 (static, stays 50 of 50 steps, 505x673)",
+   "app-container.container (static, stays 50 of 50 steps, 298x673)",
+   "nav.router (static, stays 50 of 50 steps, 298x251)"
+  ],
+  "ownSpeed": [],
+  "sideways": [
+   "marquee-track._marquee__clipper-track_1n7rl_63 (-708 px sideways)",
+   "marquee-driver._track__driver_1n7rl_75 (-708 px sideways)",
+   "h2._method__marquee-title_4uqlv_63 \"Depuis 2002 ● ISO 9001 ● 5/5 N\" (-708 px sideways)",
+   "app-title._title_1x590_59 (-708 px sideways)",
+   "div.word (-708 px sideways)",
+   "div.word (-708 px sideways)",
+   "div.word (-708 px sideways)"
+  ],
+  "fades": [
+   "div.line"
+  ],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 24,
+   "ownSpeed": 0,
+   "sideways": 7,
+   "fades": 1,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "lpas": {
+  "url": "https://lpas.com/",
+  "scrolledPx": 2540,
+  "steps": 7,
+  "fixedBig": [
+   "div.preloader",
+   "section.homeHero"
+  ],
+  "follows": [
+   "div.preloader__wordWrapper (absolute, stays 7 of 7 steps, 295x246)",
+   "div.preloader__imageWrapper (relative, stays 7 of 7 steps, 1280x800)",
+   "video.preloader__image \"Background video\" (static, stays 7 of 7 steps, 1280x800)"
+  ],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [
+   "img.image",
+   "img.image",
+   "img.image",
+   "img.image",
+   "img.image",
+   "img.image"
+  ],
+  "grows": [],
+  "unmask": [
+   "img.image",
+   "img.image",
+   "img.image"
+  ],
+  "counts": {
+   "follows": 3,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 6,
+   "grows": 0,
+   "unmask": 3
+  }
+ },
+ "mecha": {
+  "url": "https://mecha-xyz.webflow.io/",
+  "scrolledPx": 8850,
+  "steps": 23,
+  "fixedBig": [
+   "div.page-fader",
+   "div.cursor-wrap",
+   "div.preloader-wrap",
+   "div.action-wrap",
+   "div.footer-logo",
+   "div.change-bg-element"
+  ],
+  "follows": [
+   "FULL-SCREEN div.cursor-wrap (fixed, stays 23 of 23 steps, 1265x800)",
+   "FULL-SCREEN div.cursor-wrap (fixed, stays 23 of 23 steps, 1265x800)",
+   "FULL-SCREEN div.preloader-wrap (fixed, stays 23 of 23 steps, 1265x800)",
+   "div.preloader-bottom (absolute, stays 23 of 23 steps, 1265x56)",
+   "div.footer-logo (fixed, stays 23 of 23 steps, 1265x310)",
+   "div.is-svg (static, stays 23 of 23 steps, 1215x260)",
+   "svg (static, stays 23 of 23 steps, 1215x260)",
+   "g (static, stays 23 of 23 steps, 1215x260)"
+  ],
+  "ownSpeed": [
+   "div.navi-list (moves 0.45x the scroll)",
+   "div.overflow-clip (moves 0.45x the scroll)",
+   "div.navi-section (moves 0.45x the scroll)"
+  ],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 15,
+   "ownSpeed": 3,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "milledollars": {
+  "url": "https://milledollars.fr/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "div.c-page-transition",
+   "a.c-cat",
+   "nav.color-nav",
+   "div.c-home-project"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "myfrida-the-sweet-world": {
+  "url": "https://myfrida.com/",
+  "scrolledPx": 3830,
+  "steps": 12,
+  "fixedBig": [
+   "div.offcanvas \"Glavni meni\"",
+   "section.tf-piskotki__obvestilo"
+  ],
+  "follows": [
+   "div.offcanvas \"Glavni meni\" (fixed, stays 12 of 12 steps, 440x800)",
+   "section.tf-piskotki__obvestilo (fixed, stays 12 of 12 steps, 540x339)",
+   "div.tf-piskotki__vsebina (static, stays 12 of 12 steps, 432x287)",
+   "div.tf-piskotki__dejanja (static, stays 12 of 12 steps, 432x96)"
+  ],
+  "ownSpeed": [],
+  "sideways": [
+   "div.tf-uvod__avioni (1356 px sideways)",
+   "div.tf-marquee__sled (-275 px sideways)",
+   "div.tf-marquee__sled (-275 px sideways)"
+  ],
+  "fades": [
+   "figure.tf-nature__photo",
+   "figure.tf-nature__photo",
+   "figure.tf-nature__photo",
+   "figure.tf-nature__photo"
+  ],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 4,
+   "ownSpeed": 0,
+   "sideways": 3,
+   "fades": 4,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "neutomni": {
+  "url": "https://neutomni.com/",
+  "scrolledPx": 3470,
+  "steps": 12,
+  "fixedBig": [
+   "div.h1_wrap",
+   "div.timezone",
+   "div.case_wrapper"
+  ],
+  "follows": [
+   "div.footer (sticky, stays 12 of 12 steps, 1280x458)",
+   "div.footer_container (relative, stays 12 of 12 steps, 1280x458)",
+   "div.footer_navigation_wrap (static, stays 12 of 12 steps, 1240x112)",
+   "div.footer_logo_wrap (relative, stays 12 of 12 steps, 1240x196)",
+   "div.code-embed-2 (static, stays 12 of 12 steps, 1240x196)",
+   "svg (static, stays 12 of 12 steps, 1240x190)",
+   "path (static, stays 12 of 12 steps, 283x181)",
+   "path (static, stays 12 of 12 steps, 309x181)"
+  ],
+  "ownSpeed": [
+   "main.main-wrap (moves 2.85x the scroll)"
+  ],
+  "sideways": [],
+  "fades": [
+   "img.about_image \"Neutomni team\"",
+   "div.footer_shadow",
+   "div.about-line"
+  ],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 9,
+   "ownSpeed": 1,
+   "sideways": 0,
+   "fades": 3,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "odyssee": {
+  "url": "https://www.odysseeclinic.com.au/",
+  "scrolledPx": 3920,
+  "steps": 10,
+  "fixedBig": [
+   "div.pointer-events-none",
+   "div.fixed",
+   "div.flex"
+  ],
+  "follows": [
+   "FULL-SCREEN div.absolute (absolute, stays 10 of 10 steps, 1280x800)",
+   "div.h-full (relative, stays 10 of 10 steps, 1280x800)",
+   "FULL-SCREEN img.opacity-0 (absolute, stays 10 of 10 steps, 1280x800)",
+   "FULL-SCREEN div.absolute (absolute, stays 10 of 10 steps, 1280x800)"
+  ],
+  "ownSpeed": [],
+  "sideways": [
+   "div (225 px sideways)",
+   "div.relative (225 px sideways)",
+   "video.absolute (225 px sideways)"
+  ],
+  "fades": [
+   "div.col-span-3",
+   "div",
+   "div.bg-ebony",
+   "div.bg-blue",
+   "div.lg:h-[110%]",
+   "div.absolute",
+   "div.bg-ebony",
+   "div.bg-blue"
+  ],
+  "grows": [
+   "div (scale 1.29 to 1.06)"
+  ],
+  "unmask": [],
+  "counts": {
+   "follows": 4,
+   "ownSpeed": 0,
+   "sideways": 3,
+   "fades": 9,
+   "grows": 1,
+   "unmask": 0
+  }
+ },
+ "ours-american-crust": {
+  "url": "https://www.myisraelrental.com/pages/american-crust/index.html",
+  "scrolledPx": 2780,
+  "steps": 8,
+  "fixedBig": [],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [
+   "div.tiles"
+  ],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 1,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "ours-the-brown-box": {
+  "url": "https://www.myisraelrental.com/pages/the-brown-box/index.html",
+  "scrolledPx": 3170,
+  "steps": 9,
+  "fixedBig": [],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "ours-the-gift-boutique": {
+  "url": "https://www.myisraelrental.com/pages/the-gift-boutique/index.html",
+  "scrolledPx": 5130,
+  "steps": 14,
+  "fixedBig": [],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [
+   "div.act",
+   "div.in",
+   "div.in"
+  ],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 3,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "overworld-audio": {
+  "url": "https://overworldaudio.com/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "div.loader",
+   "div",
+   "div.hero-anchor",
+   "div.page-bottom",
+   "div.cta",
+   "div.project-blob"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "polpharma-biologics": {
+  "url": "https://www.polpharmabiologics.com/",
+  "scrolledPx": 10030,
+  "steps": 25,
+  "fixedBig": [
+   "div.transition"
+  ],
+  "follows": [
+   "FULL-SCREEN div.transition (fixed, stays 25 of 25 steps, 1265x800)"
+  ],
+  "ownSpeed": [
+   "div.page-wrapper (moves 7.48x the scroll)",
+   "main.main-wrapper (moves 7.48x the scroll)",
+   "section.section (moves 9.27x the scroll)",
+   "div.w-layout-blockcontainer (moves 9.27x the scroll)"
+  ],
+  "sideways": [],
+  "fades": [
+   "div.home-we-know_shape",
+   "div.feature-shape_bottles",
+   "div.feature-shape_bottles",
+   "div.we-know_overlay",
+   "div.home-key-pillars_progress-block",
+   "div.home-key-pillars_right",
+   "div.pipeline_table_header",
+   "div.pipeline_table_row_wrapper"
+  ],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 1,
+   "ownSpeed": 4,
+   "sideways": 0,
+   "fades": 14,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "pragen-hatlen": {
+  "url": "https://www.pragenhatlen.com/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "div.RotateScreen-module__root__m8vUV",
+   "div.Loader-module__root__8SxjQ",
+   "div.Header-module__bottom__av2kA",
+   "div.ModalPanel-module__root__rUdno",
+   "div.HeroVideo-module__wrapper__iKXLk",
+   "div.VideoPlayer-module__root__jS2w7"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "preymaker": {
+  "url": "https://preymaker.com/",
+  "scrolledPx": 9870,
+  "steps": 34,
+  "fixedBig": [
+   "div.cursor_cursor__APDHc"
+  ],
+  "follows": [
+   "div.lenis (relative, stays 34 of 34 steps, 1280x800)"
+  ],
+  "ownSpeed": [
+   "video (moves 0.71x the scroll)",
+   "img (moves 0.71x the scroll)",
+   "video (moves 0.71x the scroll)",
+   "img (moves 0.71x the scroll)",
+   "video (moves 0.72x the scroll)",
+   "img (moves 0.72x the scroll)",
+   "video (moves 0.72x the scroll)",
+   "img (moves 0.72x the scroll)"
+  ],
+  "sideways": [
+   "video (192 px sideways)"
+  ],
+  "fades": [
+   "img.partners_active__v3RdA \"Meta\""
+  ],
+  "grows": [
+   "video (scale 1.30 to 1.00)"
+  ],
+  "unmask": [],
+  "counts": {
+   "follows": 1,
+   "ownSpeed": 14,
+   "sideways": 1,
+   "fades": 1,
+   "grows": 1,
+   "unmask": 0
+  }
+ },
+ "psp-production": {
+  "url": "https://productionportugal.com/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "div.menu",
+   "div.master-pin-wrap",
+   "div.d-container"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "realevate": {
+  "url": "https://realevate.agency/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "nav \"Our selection\"",
+   "div",
+   "div.nav-menu__overlay",
+   "div.nav-menu__panel \"Navigation menu\""
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "santal": {
+  "url": "https://santalarch.com/",
+  "scrolledPx": 2320,
+  "steps": 11,
+  "fixedBig": [
+   "aside.cookies \"Cookie consent\""
+  ],
+  "follows": [
+   "header.header (sticky, stays 11 of 11 steps, 1280x400)",
+   "div.lines (sticky, stays 11 of 11 steps, 1280x800)",
+   "div.hero-grid (sticky, stays 4 of 5 steps, 1280x800)",
+   "FULL-SCREEN div.hero-grid-line (absolute, stays 4 of 5 steps, 1280x800)",
+   "div.tagline-wrap (sticky, stays 4 of 5 steps, 1280x800)",
+   "div.cubes-bg (sticky, stays 11 of 11 steps, 1280x800)",
+   "div (sticky, stays 6 of 11 steps, 1280x800)",
+   "canvas (static, stays 6 of 11 steps, 1280x800)"
+  ],
+  "ownSpeed": [
+   "div (moves 4.03x the scroll)",
+   "main.main-page (moves 4.03x the scroll)",
+   "div.bg-wrap (moves 4.03x the scroll)"
+  ],
+  "sideways": [
+   "span.word-item (-577 px sideways)",
+   "span.word-item (-395 px sideways)",
+   "span.word-item (-292 px sideways)",
+   "span.word-item (-491 px sideways)"
+  ],
+  "fades": [
+   "section.approach"
+  ],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 10,
+   "ownSpeed": 3,
+   "sideways": 4,
+   "fades": 1,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "signal-a-studio": {
+  "url": "https://signal-a.studio/",
+  "scrolledPx": 4800,
+  "steps": 10,
+  "fixedBig": [
+   "img.s-a-image-cursor"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "spyker-cars": {
+  "url": "https://www.spykercars.com/",
+  "scrolledPx": 7000,
+  "steps": 18,
+  "fixedBig": [
+   "div.fixed",
+   "div.pointer-events-none"
+  ],
+  "follows": [
+   "div.fixed (fixed, stays 18 of 18 steps, 400x250)",
+   "div.rounded-[2px] (static, stays 18 of 18 steps, 400x250)",
+   "div.pt-4 (static, stays 18 of 18 steps, 358x156)",
+   "div.pointer-events-none (static, stays 18 of 18 steps, 800x600)",
+   "div.h-full (static, stays 18 of 18 steps, 800x600)",
+   "svg (static, stays 18 of 18 steps, 800x600)"
+  ],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [
+   "div.relative",
+   "div.relative",
+   "div.relative",
+   "li",
+   "li.-mt-px",
+   "div.pointer-events-none"
+  ],
+  "grows": [],
+  "unmask": [
+   "section.relative"
+  ],
+  "counts": {
+   "follows": 6,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 6,
+   "grows": 0,
+   "unmask": 1
+  }
+ },
+ "sweet-tape": {
+  "url": "https://sweet-tape.com/",
+  "scrolledPx": 5500,
+  "steps": 19,
+  "fixedBig": [
+   "div.site-preloader",
+   "button.menu-sound \"Sound\"",
+   "div",
+   "div.wrapper"
+  ],
+  "follows": [
+   "FULL-SCREEN div.site-preloader (fixed, stays 19 of 19 steps, 1268x800)",
+   "FULL-SCREEN div.preloader-layer (absolute, stays 17 of 19 steps, 1268x932)",
+   "FULL-SCREEN div.preloader-layer (absolute, stays 17 of 19 steps, 1268x932)",
+   "FULL-SCREEN div.preloader-layer (absolute, stays 17 of 19 steps, 1268x932)",
+   "FULL-SCREEN div.preloader-layer (absolute, stays 17 of 19 steps, 1268x932)",
+   "FULL-SCREEN div.preloader-layer (absolute, stays 17 of 19 steps, 1268x932)",
+   "FULL-SCREEN div.preloader-layer (absolute, stays 18 of 19 steps, 1268x932)",
+   "FULL-SCREEN div.preloader-sheet (absolute, stays 17 of 19 steps, 1268x932)"
+  ],
+  "ownSpeed": [
+   "main (moves 4.39x the scroll)",
+   "section.giant-pinning (moves 4.39x the scroll)",
+   "div.pin-spacer (moves 4.39x the scroll)"
+  ],
+  "sideways": [
+   "text (51 px sideways)",
+   "textpath (51 px sideways)",
+   "div.giant-row (-1167 px sideways)",
+   "h2.giant \"TOCREATE\" (-1167 px sideways)",
+   "span (-1167 px sideways)",
+   "span.clip (-745 px sideways)",
+   "span.char (-745 px sideways)",
+   "span.clip (-745 px sideways)"
+  ],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 10,
+   "ownSpeed": 3,
+   "sideways": 29,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "the-vineyard-hotel": {
+  "url": "https://www.vineyard.co.za/",
+  "scrolledPx": 790,
+  "steps": 2,
+  "fixedBig": [
+   "div.cursor",
+   "div.drawer",
+   "div.nav-overlay",
+   "div.page-loader",
+   "div.book-wrapper",
+   "div.s-media-first"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "the-way-meditation": {
+  "url": "https://thewayapp.com/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "div",
+   "div.Preloader_preloader__8Pnbh",
+   "div.AppStoreBar_bar__5jclN"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "twks-1": {
+  "url": "https://twks.ch/en",
+  "scrolledPx": 3470,
+  "steps": 9,
+  "fixedBig": [
+   "div.fixed",
+   "footer.bg-black"
+  ],
+  "follows": [
+   "FULL-SCREEN div.fixed (fixed, stays 9 of 9 steps, 1261x796)",
+   "FULL-SCREEN footer.bg-black (fixed, stays 6 of 9 steps, 1265x800)",
+   "div.grid (static, stays 6 of 9 steps, 1245x278)",
+   "div.fixed (fixed, stays 9 of 9 steps, 360x219)"
+  ],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 4,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "two26-studio": {
+  "url": "https://two26.studio/",
+  "scrolledPx": 8470,
+  "steps": 26,
+  "fixedBig": [],
+  "follows": [
+   "div.page (relative, stays 26 of 26 steps, 1280x800)"
+  ],
+  "ownSpeed": [],
+  "sideways": [
+   "div.showcase-slider (-202 px sideways)",
+   "div.showcase-slide (-202 px sideways)",
+   "img.showcase-slide-img (-202 px sideways)",
+   "div.showcase-slide (-205 px sideways)",
+   "img.showcase-slide-img (-205 px sideways)",
+   "div.showcase-slide (-197 px sideways)",
+   "img.showcase-slide-img (-197 px sideways)",
+   "div.showcase-slide (-202 px sideways)"
+  ],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 1,
+   "ownSpeed": 0,
+   "sideways": 10,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "unbelievably-crap": {
+  "url": "https://www.unbelievablycrap.com/",
+  "scrolledPx": 0,
+  "steps": 0,
+  "fixedBig": [
+   "div.grain",
+   "div.transition",
+   "div.hud",
+   "div.ts",
+   "div.b2",
+   "div.ftr"
+  ],
+  "follows": [],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 0,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 0,
+   "grows": 0,
+   "unmask": 0
+  }
+ },
+ "viv": {
+  "url": "https://vivmgmt.com/",
+  "scrolledPx": 1400,
+  "steps": 3,
+  "fixedBig": [
+   "div.hover-reveal"
+  ],
+  "follows": [
+   "main.lenis (static, stays 3 of 3 steps, 1280x800)",
+   "div.hover-reveal__inner (static, stays 3 of 3 steps, 240x320)",
+   "div.hover-reveal__img (static, stays 3 of 3 steps, 240x320)",
+   "div.hover-reveal__inner (static, stays 3 of 3 steps, 240x320)",
+   "div.hover-reveal__img (static, stays 3 of 3 steps, 240x320)",
+   "div.hover-reveal__inner (static, stays 3 of 3 steps, 240x320)",
+   "div.hover-reveal__img (static, stays 3 of 3 steps, 240x320)",
+   "div.hover-reveal__inner (static, stays 3 of 3 steps, 240x320)"
+  ],
+  "ownSpeed": [],
+  "sideways": [],
+  "fades": [
+   "img.c-home__news-item-media",
+   "img.c-home__news-item-media",
+   "mux-video.c-home__news-item-media",
+   "img.c-home__news-item-media",
+   "img.c-home__news-item-media",
+   "img.c-home__news-item-media"
+  ],
+  "grows": [],
+  "unmask": [],
+  "counts": {
+   "follows": 19,
+   "ownSpeed": 0,
+   "sideways": 0,
+   "fades": 6,
+   "grows": 0,
+   "unmask": 0
+  }
+ }
+}

@@ -717,11 +717,131 @@ Product screens, card grids, directories, forms and dashboards from software.
 | [videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-a.png](videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-a.png) | Lumiere Studio | dark ground, wall of small page thumbnails, draggable tile grid | service, fashion-shop |
 | [videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-b-after-inertia.png](videos-ruben-stom-2026-11-22/5EABQy-8uwo-grid-drag-b-after-inertia.png) | Lumiere Studio | dark ground, wall of small page thumbnails, draggable tile grid | service, fashion-shop |
 
-## Looked at and left out (88)
+## Looked at and left out (208)
 
 Pictures in site folders that are not someone else's website. Whole folders of ads and film stills
 are left out too: `ad-videos-2026-11-04`, `ad-videos-2026-11-07`, `pinterest-ads-2026-11-02`, `pinterest-business-ad-2026-11-24`, `pro-references`, `pinterest-restaurants-ad-2026-11-25`, `pinterest-pasta-posters-2026-11-25`, `bar-breaking-2026-11-02`, `pinterest-burnt-2026-11-18`, `pinterest-burnt-reveal-2026-11-23`, `product-films-2026-10-21`, `product-shots-2026-10-22`, `videos-2026-11-01`, `sameness-2026-11-17`.
 
+- `awwwards-2026-11-27/motion/a24-mouse.webp`: mouse frames (video) of a24 from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/a24-opening.webp`: opening frames (video) of a24 from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/a24-scroll.webp`: scroll frames (video) of a24 from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/auge-experience-mouse.webp`: mouse frames (video) of auge-experience from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/auge-experience-opening.webp`: opening frames (video) of auge-experience from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/auge-experience-scroll.webp`: scroll frames (video) of auge-experience from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/bulletproof-mouse.webp`: mouse frames (video) of bulletproof from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/bulletproof-opening.webp`: opening frames (video) of bulletproof from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/bulletproof-scroll.webp`: scroll frames (video) of bulletproof from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/cyera-ai-guardian-mouse.webp`: mouse frames (video) of cyera-ai-guardian from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/cyera-ai-guardian-opening.webp`: opening frames (video) of cyera-ai-guardian from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/cyera-ai-guardian-scroll.webp`: scroll frames (video) of cyera-ai-guardian from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/edolus-mouse.webp`: mouse frames (video) of edolus from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/edolus-opening.webp`: opening frames (video) of edolus from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/edolus-scroll.webp`: scroll frames (video) of edolus from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/emotion-agency-1-mouse.webp`: mouse frames (video) of emotion-agency-1 from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/emotion-agency-1-opening.webp`: opening frames (video) of emotion-agency-1 from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/emotion-agency-1-scroll.webp`: scroll frames (video) of emotion-agency-1 from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/esr-bespoke-mouse.webp`: mouse frames (video) of esr-bespoke from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/esr-bespoke-opening.webp`: opening frames (video) of esr-bespoke from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/esr-bespoke-scroll.webp`: scroll frames (video) of esr-bespoke from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/extrafazant-mouse.webp`: mouse frames (video) of extrafazant from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/extrafazant-opening.webp`: opening frames (video) of extrafazant from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/extrafazant-scroll.webp`: scroll frames (video) of extrafazant from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/forge-automotive-mouse.webp`: mouse frames (video) of forge-automotive from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/forge-automotive-opening.webp`: opening frames (video) of forge-automotive from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/forge-automotive-scroll.webp`: scroll frames (video) of forge-automotive from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/format-mouse.webp`: mouse frames (video) of format from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/format-opening.webp`: opening frames (video) of format from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/format-scroll.webp`: scroll frames (video) of format from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/grail-mouse.webp`: mouse frames (video) of grail from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/grail-opening.webp`: opening frames (video) of grail from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/grail-scroll.webp`: scroll frames (video) of grail from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/house-of-giants-mouse.webp`: mouse frames (video) of house-of-giants from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/house-of-giants-opening.webp`: opening frames (video) of house-of-giants from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/house-of-giants-scroll.webp`: scroll frames (video) of house-of-giants from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/huxley-saga-mouse.webp`: mouse frames (video) of huxley-saga from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/huxley-saga-opening.webp`: opening frames (video) of huxley-saga from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/huxley-saga-scroll.webp`: scroll frames (video) of huxley-saga from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/justin-jefferson-mouse.webp`: mouse frames (video) of justin-jefferson from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/justin-jefferson-opening.webp`: opening frames (video) of justin-jefferson from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/justin-jefferson-scroll.webp`: scroll frames (video) of justin-jefferson from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/la-boite-a-slide-mouse.webp`: mouse frames (video) of la-boite-a-slide from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/la-boite-a-slide-opening.webp`: opening frames (video) of la-boite-a-slide from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/la-boite-a-slide-scroll.webp`: scroll frames (video) of la-boite-a-slide from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/lpas-mouse.webp`: mouse frames (video) of lpas from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/lpas-opening.webp`: opening frames (video) of lpas from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/lpas-scroll.webp`: scroll frames (video) of lpas from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/mecha-mouse.webp`: mouse frames (video) of mecha from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/mecha-opening.webp`: opening frames (video) of mecha from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/mecha-scroll.webp`: scroll frames (video) of mecha from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/milledollars-mouse.webp`: mouse frames (video) of milledollars from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/milledollars-opening.webp`: opening frames (video) of milledollars from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/milledollars-scroll.webp`: scroll frames (video) of milledollars from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/myfrida-the-sweet-world-mouse.webp`: mouse frames (video) of myfrida-the-sweet-world from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/myfrida-the-sweet-world-opening.webp`: opening frames (video) of myfrida-the-sweet-world from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/myfrida-the-sweet-world-scroll.webp`: scroll frames (video) of myfrida-the-sweet-world from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/neutomni-mouse.webp`: mouse frames (video) of neutomni from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/neutomni-opening.webp`: opening frames (video) of neutomni from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/neutomni-scroll.webp`: scroll frames (video) of neutomni from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/odyssee-mouse.webp`: mouse frames (video) of odyssee from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/odyssee-opening.webp`: opening frames (video) of odyssee from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/odyssee-scroll.webp`: scroll frames (video) of odyssee from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/ours-american-crust-mouse.webp`: mouse frames (video) of ours-american-crust from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/ours-american-crust-opening.webp`: opening frames (video) of ours-american-crust from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/ours-american-crust-scroll.webp`: scroll frames (video) of ours-american-crust from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/ours-the-brown-box-mouse.webp`: mouse frames (video) of ours-the-brown-box from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/ours-the-brown-box-opening.webp`: opening frames (video) of ours-the-brown-box from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/ours-the-brown-box-scroll.webp`: scroll frames (video) of ours-the-brown-box from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/ours-the-gift-boutique-mouse.webp`: mouse frames (video) of ours-the-gift-boutique from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/ours-the-gift-boutique-opening.webp`: opening frames (video) of ours-the-gift-boutique from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/ours-the-gift-boutique-scroll.webp`: scroll frames (video) of ours-the-gift-boutique from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/overworld-audio-mouse.webp`: mouse frames (video) of overworld-audio from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/overworld-audio-opening.webp`: opening frames (video) of overworld-audio from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/overworld-audio-scroll.webp`: scroll frames (video) of overworld-audio from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/polpharma-biologics-mouse.webp`: mouse frames (video) of polpharma-biologics from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/polpharma-biologics-opening.webp`: opening frames (video) of polpharma-biologics from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/polpharma-biologics-scroll.webp`: scroll frames (video) of polpharma-biologics from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/pragen-hatlen-mouse.webp`: mouse frames (video) of pragen-hatlen from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/pragen-hatlen-opening.webp`: opening frames (video) of pragen-hatlen from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/pragen-hatlen-scroll.webp`: scroll frames (video) of pragen-hatlen from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/preymaker-mouse.webp`: mouse frames (video) of preymaker from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/preymaker-opening.webp`: opening frames (video) of preymaker from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/preymaker-scroll.webp`: scroll frames (video) of preymaker from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/psp-production-mouse.webp`: mouse frames (video) of psp-production from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/psp-production-opening.webp`: opening frames (video) of psp-production from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/psp-production-scroll.webp`: scroll frames (video) of psp-production from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/realevate-mouse.webp`: mouse frames (video) of realevate from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/realevate-opening.webp`: opening frames (video) of realevate from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/realevate-scroll.webp`: scroll frames (video) of realevate from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/santal-mouse.webp`: mouse frames (video) of santal from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/santal-opening.webp`: opening frames (video) of santal from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/santal-scroll.webp`: scroll frames (video) of santal from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/signal-a-studio-mouse.webp`: mouse frames (video) of signal-a-studio from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/signal-a-studio-opening.webp`: opening frames (video) of signal-a-studio from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/signal-a-studio-scroll.webp`: scroll frames (video) of signal-a-studio from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/spyker-cars-mouse.webp`: mouse frames (video) of spyker-cars from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/spyker-cars-opening.webp`: opening frames (video) of spyker-cars from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/spyker-cars-scroll.webp`: scroll frames (video) of spyker-cars from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/sweet-tape-mouse.webp`: mouse frames (video) of sweet-tape from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/sweet-tape-opening.webp`: opening frames (video) of sweet-tape from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/sweet-tape-scroll.webp`: scroll frames (video) of sweet-tape from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/the-vineyard-hotel-mouse.webp`: mouse frames (video) of the-vineyard-hotel from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/the-vineyard-hotel-opening.webp`: opening frames (video) of the-vineyard-hotel from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/the-vineyard-hotel-scroll.webp`: scroll frames (video) of the-vineyard-hotel from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/the-way-meditation-mouse.webp`: mouse frames (video) of the-way-meditation from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/the-way-meditation-opening.webp`: opening frames (video) of the-way-meditation from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/the-way-meditation-scroll.webp`: scroll frames (video) of the-way-meditation from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/twks-1-mouse.webp`: mouse frames (video) of twks-1 from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/twks-1-opening.webp`: opening frames (video) of twks-1 from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/twks-1-scroll.webp`: scroll frames (video) of twks-1 from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/two26-studio-mouse.webp`: mouse frames (video) of two26-studio from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/two26-studio-opening.webp`: opening frames (video) of two26-studio from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/two26-studio-scroll.webp`: scroll frames (video) of two26-studio from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/unbelievably-crap-mouse.webp`: mouse frames (video) of unbelievably-crap from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/unbelievably-crap-opening.webp`: opening frames (video) of unbelievably-crap from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/unbelievably-crap-scroll.webp`: scroll frames (video) of unbelievably-crap from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/viv-mouse.webp`: mouse frames (video) of viv from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/viv-opening.webp`: opening frames (video) of viv from the motion study; its look is tagged on its desktop sheet
+- `awwwards-2026-11-27/motion/viv-scroll.webp`: scroll frames (video) of viv from the motion study; its look is tagged on its desktop sheet
 - `awwwards-2026-11-27/sheets/a24-phone.webp`: phone view of A24 concept; tagged on its desktop sheet
 - `awwwards-2026-11-27/sheets/auge-experience-phone.webp`: phone view of Auge; tagged on its desktop sheet
 - `awwwards-2026-11-27/sheets/bulletproof-phone.webp`: phone view of Bulletproof; tagged on its desktop sheet
