@@ -630,3 +630,11 @@ Main moved on after PR #24 was opened (the sign-up work stream was rewritten), s
 - Confirmed by reading the code: flavour picks draw every flavour as a free checkbox with no stock check (`shop.js:50-51`) and `save()` returning null still opens WhatsApp (`shop.js:193`); service cards lead with `gig.provider.name`, which falls back to the account name or "Provider" (`ServiceCard.jsx:144`, `gigs.py:96`).
 - Dropped: nothing.
 - Needs a decision: flavour picks out-of-stock (orders, before Bawk Bawk goes live); service cards with no business (27 Nov); plus every item still listed under 26 Nov.
+
+## Code review of 27 Nov 2026 (claude/exciting-bell-ubf66l)
+- [Low] Ad photos (wrapped word): a damaged word picture gave a 500 instead of 400 (`short_links.py:1048`). First seen 27 Nov (2026-11-27-site-audit.md). Fixed 27 Nov, d0909710 (on this branch b3535cd1).
+- [Low] Ad photos (wrapped word): the food test matches parts of words, so "gift wrapping", "piercing", "dishwasher" count as food (`ad_shots.py:183`, `wraps`). First seen 27 Nov (2026-11-27-site-audit.md). Report only (who can make a paid picture).
+- [Low] Ad photos (wrapped word): the word picture `ad-plate-<id>.png` is written to the temp folder and never deleted (`short_links.py:1075`). First seen 27 Nov (2026-11-27-site-audit.md).
+- [Data] Live price check: 8 rentals with no price and 7 nightly prices that read like a monthly rent; links in 2026-11-27-price-check.md. First seen 27 Nov. Worth a call to the owners.
+- (info, audit tooling) `audit-setup.sh` does not save the API's throwaway `JWT_SECRET`, so backend tests run in another shell get 401 (52 failed, 22 errors). 27 Nov.
+- (info) The live price check reached myisraelrental.com tonight; the nightly prompt forbids fetching it while the site-audit skill asks for it. Needs Tzvi to pick one. 27 Nov.
