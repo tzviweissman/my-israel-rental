@@ -139,6 +139,14 @@ export function checkConcept(dir) {
     if (!/spread/i.test(l)) problems.push('Light: the "- light:" line gives no ground spread (check-light-pool.py prints it for a photo on a plain ground; write "spread: none, scene" for a scene) (3aj.17)');
     else if (/\beven\b/i.test(l) && !/re-?lit|kept even\s*:/i.test(l)) problems.push('Light: an EVEN first screen (no direction of light) says neither "re-lit" nor "kept even: <why>" on the "- light:" line (3aj.17)');
   }
+  if (!newer.has('R3aj.22')) {
+    // the strongest ideas scored on paper before they were built (rules 3aj.22, 27 Nov 2026)
+    const jf = path.join(dir, 'gen', 'board', 'judged.md');
+    const j = fs.existsSync(jf) ? fs.readFileSync(jf, 'utf8') : '';
+    const part = (/^##\s*Ideas on paper\b[^\n]*\n([\s\S]*?)(?=^##\s|(?![\s\S]))/im.exec(j) || [])[1];
+    if (part === undefined) problems.push('Paper: gen/board/judged.md has no "## Ideas on paper, <date>" part: one fresh judge scores each strongest idea from a coded layout sketch and its motion steps before it is built (3aj.22)');
+    else if ((part.match(/Judge\s*:/g) || []).length < 3) problems.push('Paper: "## Ideas on paper" has fewer than three "Judge:" lines, one per idea (3aj.22)');
+  }
   if (!newer.has('R3aj.15')) {
     // the signature returns through the page (rules 3aj.15, 26 Nov 2026)
     const t = (/^\s*[-*]\s*thread\s*:(.*)$/im.exec(s) || [])[1] || '';

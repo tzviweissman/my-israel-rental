@@ -3643,16 +3643,6 @@
    "status": "built"
   },
   {
-   "id": "R3aj.17",
-   "rule": "Each first screen's photo on a plain ground is checked for a direction of light (ground spread); an EVEN one is re-lit or kept even with the reason",
-   "how": [
-    "GEN"
-   ],
-   "built_by": "Phase 4: python scripts/check-light-pool.py <photo> prints the ground spread; CONCEPT.md - light: line",
-   "confirmed_by": "node scripts/check-concept.mjs <build> (Light)",
-   "status": "built"
-  },
-  {
    "id": "R3aj.18",
    "rule": "A fix to one screen is chosen from versions judged side by side",
    "how": [
@@ -3660,6 +3650,56 @@
    ],
    "built_by": "scripts/variants-sheet.mjs, then two judges with judges.mjs --brief-variants",
    "confirmed_by": "LOOK: gen/board/judged.md ## Versions with Best:",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.19",
+   "rule": "One shared photo upgrade before the board: the owner's flat main photo re-lit once and used by all three first screens",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Phase 4: scripts/hf.py, the re-lit photo in gen/board/img",
+   "confirmed_by": "LOOK",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.20",
+   "rule": "The three first screens declare layout, ground, photo, type and event; every pair differs on at least three",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Phase 4: <meta name=\"first-screen\"> on each gen/board/first-*.html",
+   "confirmed_by": "node scripts/check-three-apart.mjs <build>",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.21",
+   "rule": "A judged first screen shows its event: a still of the key frame, never a grey stand-in",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Phase 4: a key-frame still in gen/board/img",
+   "confirmed_by": "node scripts/check-three-apart.mjs <build> (PLACEHOLDER)",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.22",
+   "rule": "The strongest ideas are scored on paper by a fresh judge before they are built",
+   "how": [
+    "EYE"
+   ],
+   "built_by": "Phase 4: gen/board/judged.md ## Ideas on paper",
+   "confirmed_by": "node scripts/check-concept.mjs <build> (Paper)",
+   "status": "built"
+  },
+  {
+   "id": "R3aj.17",
+   "rule": "Each first screen's photo on a plain ground is checked for a direction of light (ground spread); an EVEN one is re-lit or kept even with the reason",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Phase 4: python scripts/check-light-pool.py <photo> prints the ground spread; CONCEPT.md - light: line",
+   "confirmed_by": "node scripts/check-concept.mjs <build> (Light)",
    "status": "built"
   },
   {

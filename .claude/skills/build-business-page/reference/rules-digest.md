@@ -41,14 +41,14 @@ Sections (line each starts on; read with that offset):
 - 1298: 3ah. A 5 the first time (Tzvi, 20 Nov 2026)
 - 1314: 3ai. Three decorations at most (Tzvi, 20 Nov 2026)
 - 1328: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026)
-- 1379: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
-- 1392: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 1414: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026)
-- 1436: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
-- 1444: 3d. The page builder's design rules (v3, the other half of this skill)
-- 1477: 5a. Design and story (from rules 5a, 5b and 8)
-- 1507: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
-- 1530: 3a. (cont.) Look through it, fix it, then show it
+- 1388: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
+- 1401: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 1423: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026)
+- 1445: 3ab. Proof that is seen and checkable (Tzvi, 12 Nov 2026)
+- 1453: 3d. The page builder's design rules (v3, the other half of this skill)
+- 1486: 5a. Design and story (from rules 5a, 5b and 8)
+- 1516: 3a. Build rules (each one shipped as a defect once; the table in rules 3a)
+- 1539: 3a. (cont.) Look through it, fix it, then show it
 <!-- /contents -->
 
 Moved here from SKILL.md on 9 Nov 2026 so the skill file holds only the steps. Section and item numbers match the full rulebook (since 22 Nov 2026), so "3g.13", "3h.11", "3b.2" and the like
@@ -1375,6 +1375,15 @@ Full text: reference/full-rules.md section 3aj. Not asked of a site published be
 18. A fix to the first screen or a section under 3.5 is chosen from 2 or 3 versions side by side:
     variants-sheet.mjs, then two judges with judges.mjs --brief-variants; "## Versions" + "Best:" in judged.md.
     (Tzvi, 27 Nov 2026.)
+19. One shared photo upgrade before the board: the owner's flat main photo, in every first screen, is re-lit once
+    through scripts/hf.py (price first, a few credits) and used by all three; every other paid picture still waits for the pick.
+20. The three first screens declare `<meta name="first-screen" content="layout; ground; photo; type; event">` and each
+    pair differs on at least three; each has one bold move (check-three-apart: APART, UNDECLARED, SAMEPHOTO).
+21. A judged first screen shows its event: a still of a clip's key frame, a code event built as it runs, never grey
+    with a caption (check-three-apart: PLACEHOLDER).
+22. The strongest ideas are scored on paper (a coded layout sketch and the motion steps) by one fresh judge before they
+    are built; under 4 is changed first (gen/board/judged.md `## Ideas on paper`, check-concept, Paper).
+    (19 to 22: Tzvi, 27 Nov 2026, Boxed Israel's first screens at 3.5.)
 
 ## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026)
 

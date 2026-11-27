@@ -43,20 +43,20 @@ Sections (line each starts on; read with that offset):
 - 2941: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
 - 3025: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
 - 3071: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3281: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3321: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3419: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
-- 3494: 4. What is reported to the owner instead (content gaps)
-- 3503: 5. How to write
-- 3552: 5a. Lessons from the practice pages
-- 3583: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3632: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3649: 6. Playbooks for the most common businesses
-- 3776: 7. Choosing the three options (automatic page builder only)
-- 3800: 8. Photos, video and the tools
-- 4031: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 4101: 9. The scroll sections: what the practice pages become
-- 4137: 10. Open decisions (need Tzvi)
+- 3320: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3360: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3458: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
+- 3533: 4. What is reported to the owner instead (content gaps)
+- 3542: 5. How to write
+- 3591: 5a. Lessons from the practice pages
+- 3622: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3671: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3688: 6. Playbooks for the most common businesses
+- 3815: 7. Choosing the three options (automatic page builder only)
+- 3839: 8. Photos, video and the tools
+- 4070: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 4140: 9. The scroll sections: what the practice pages become
+- 4176: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -3277,6 +3277,45 @@ is asked of a site published before 22 Nov 2026.
    - Why: Clean Plus changed one thing a round for nine rounds; the daylight photo was undone by a white wash chosen
      without being judged beside a darker panel or a quiet part of the photo.
    - Checked by `gen/board/judged.md`: a "## Versions <screen>, <date>" heading with each version's line and "Best:".
+
+19. **One shared photo upgrade before the board** (Tzvi, 27 Nov 2026: "Do all 4 and rebuild the three screens", after Boxed Israel's three first screens stopped at wow 3.5).
+   - When: phase 4, when the owner's main product photo is in every first screen and is flat (EVEN under 3aj.17, or a
+     record shot with no light of its own). It sits beside 3aj.2 and 3aj.8, which keep every other paid picture until
+     after Tzvi's pick: this one is spent whichever screen he picks, so it is never money on a rejected option.
+   - The photo is re-lit (or one styled shot made from it) through `scripts/hf.py`, the price read from the API first,
+     at most a few credits, checked piece by piece beside the original (`scripts/product-match-sheet.py`), and the same
+     upgraded photo goes into all three screens. A set of photos shot the same way (one box, several fillings) is
+     re-lit together with one prompt so they still match.
+   - Why: every judge in both rounds called Boxed Israel's overhead box "a documentation photo" beside Levain's and
+     Milk Bar's lit food; two rounds of code lifted light from 2.5 to 3 and no further.
+   - Checked by: CONCEPT.md's `- light:` line names the re-lit file; docs/higgsfield-log.jsonl has the request.
+
+20. **The three first screens are three real choices** (Tzvi, 27 Nov 2026: "Do all 4 and rebuild the three screens", after Boxed Israel's three first screens stopped at wow 3.5).
+   - When: phase 4, every new site's three first screens.
+   - Each screen declares `<meta name="first-screen" content="layout=...; ground=...; photo=...; type=...; event=...">`
+     and every pair differs on at least three of the five: the layout (split, centred, full-bleed, stage), the ground,
+     the photo or its cut, the type's scale move (a giant word, a huge centred line), and the event (IDEAS.md's kind).
+     Each screen has one bold move a visitor would remember, such as a giant word or a jump in scale.
+   - Why: Boxed Israel's three shared one photo, one blue and one words-left, box-right layout; both judges read them
+     as three quiet versions of one page, and their brand's calm look gave no one loud thing.
+   - Checked by `node scripts/check-three-apart.mjs <build>` (APART, UNDECLARED, SAMEPHOTO).
+
+21. **A judged first screen shows its event, never a stand-in** (Tzvi, 27 Nov 2026: "Do all 4 and rebuild the three screens", after Boxed Israel's three first screens stopped at wow 3.5).
+   - When: phase 4, before any judge or Tzvi sees the three screens.
+   - A screen whose event is a clip still to be made shows a still of its key frame (the moment the clip lands on, made
+     with the shared upgrade of 3aj.19 or one generated still, priced first), never a grey box with a caption. A code
+     event is built as it will run (a box that slides out and the next that slides in, not a hard cut).
+   - Why: Boxed Israel's doorstep screen, the strongest idea, was judged from a grey box and a sentence.
+   - Checked by `node scripts/check-three-apart.mjs <build>` (PLACEHOLDER).
+
+22. **The ideas are scored on paper before they are built** (Tzvi, 27 Nov 2026: "Do all 4 and rebuild the three screens", after Boxed Israel's three first screens stopped at wow 3.5).
+   - When: phase 4, between IDEAS.md's strongest three and building the three screens.
+   - One fresh Sonnet judge, given the brief `node scripts/judges.mjs --brief` prints, the two top sites, and for each
+     idea a rough layout picture (boxes for the photo, the headline and the button, coded, as the ads' layout sketch)
+     with its motion steps, scores each one. An idea under 4 on paper is changed or replaced before it is built.
+     gen/board/judged.md holds it under a `## Ideas on paper, <date>` heading with one `Judge:` line per idea.
+   - Why: Boxed Israel's ideas were judged only after they were built, so their ceiling was found two rounds late.
+   - Checked by `scripts/check-concept.mjs` (Paper): the heading and its lines in gen/board/judged.md.
 
 ## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
 

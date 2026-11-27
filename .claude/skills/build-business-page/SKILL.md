@@ -141,13 +141,21 @@ Prices are read with `get_cost` at the time, never from memory.
    **Gate:** `node scripts/check-ideas.mjs <build>` passes and `node scripts/check-fingerprints.mjs <build>` shows no
    font or colour clash (its EFFECTS lines wait for the page plan).
    The hooks block any paid generation until check-ideas does (§0b.4).
-4. **Three first screens (free, then Tzvi).** Read the blueprint's Opening stage first. Build the first screen
+4. **Three first screens (free, except one shared photo upgrade, then Tzvi).** Read the blueprint's Opening stage
+   first. Score the strongest three ideas on paper before building them: for each, a coded layout sketch (boxes for
+   the photo, the headline and the button) and its motion steps, given with `judges.mjs --brief` and the two top
+   sites to one fresh Sonnet judge; change any under 4 first (`## Ideas on paper` in `gen/board/judged.md`, §3aj.22).
+   When the owner's main photo is flat and in every screen, re-light it once through `scripts/hf.py` (price first,
+   a few credits, checked beside the original) and use it in all three (§3aj.19). Build the first screen
    three times as plain HTML in `gen/board/` (`first-a.html`, `first-b.html`, `first-c.html`), one per
-   reference. Same fonts from BRAND.md, same words, the owner's photos as they are. Each is a different opening
+   reference. Same fonts from BRAND.md, same words. Each is a different opening
    type that fits the business (§3ah.8: a staged side-lit product, a light reveal, a split opening, a film,
-   layered parallax...), each as dramatic and premium as Tova's, so Tzvi picks between real alternatives. A picture still to be made is a plain grey picture
-   of its final shape. A photo of the wrong shape
-   sits whole, with grey where it will be extended. Show each as a laptop frame beside a phone frame (§3aa).
+   layered parallax...), each as dramatic and premium as Tova's, so Tzvi picks between real alternatives: each
+   declares `<meta name="first-screen" content="layout=...; ground=...; photo=...; type=...; event=...">`, every pair
+   differs on at least three, each has one bold move (a giant word, a jump in scale), and
+   `node scripts/check-three-apart.mjs <build>` passes (§3aj.20). No stand-in on a judged screen: a clip still to be
+   made shows a still of its key frame, a code event is built as it runs (§3aj.21). A photo of the wrong shape
+   sits whole, extended by its own ground. Show each as a laptop frame beside a phone frame (§3aa).
    Plan each picture that words will sit on around where they sit (a quiet area or their own panel, never a shade
    over the light), on CONCEPT.md's `- words on pictures:` line (§3aj.11).
    Run `check-says-offer.mjs`, `check-five.mjs`, `readable.mjs <url> --first-screen` (the settled first screen at a laptop and a phone; the full run takes over ten minutes on these one-screen pages) and `scripts/check-opening-photo.mjs` on each; fix or drop one that fails.
