@@ -8,11 +8,17 @@
 // under 4.5:1 (3:1 for text 24px and up, or 19px bold).
 //   Run from the project folder (it uses that project's Playwright):
 //   node ~/.claude/skills/build-business-page/scripts/readable.mjs http://localhost:3000/
+//   ... readable.mjs <url> --first-screen    the settled first screen only, laptop and phone (design board, step 4)
 import { createRequire } from 'node:module';
 const { chromium } = createRequire(process.cwd() + '/')('playwright');
-const url = process.argv[2] || 'http://localhost:3000/';
-const sizes = [[1440, 900], [1536, 753], [1280, 650], [1920, 1080], [390, 844], [360, 640]];
-const stops = 18;
+// --first-screen: only the settled first screen at a laptop and a phone, for the three first screens on the design board
+// (build step 4). The full run, six sizes by 19 scroll points with a wait at each, ran past ten minutes on those
+// one-screen pages and was skipped (Boxed Israel, 26 Nov 2026).
+const args = process.argv.slice(2);
+const firstScreen = args.includes('--first-screen');
+const url = args.find((a) => !a.startsWith('--')) || 'http://localhost:3000/';
+const sizes = firstScreen ? [[1440, 900], [390, 844]] : [[1440, 900], [1536, 753], [1280, 650], [1920, 1080], [390, 844], [360, 640]];
+const stops = firstScreen ? 0 : 18;
 // the preview server must answer before any browser starts (26 Nov 2026: a stopped server crashed three runs in ways
 // that looked like faults in the tools)
 if (/^https?:/i.test(url)) { try { await fetch(url, { signal: AbortSignal.timeout(8000) }); } catch { console.error(`${url} does not answer: start the preview server first (node scripts/serve-builds.mjs 8991)`); process.exit(2); } }
@@ -25,8 +31,9 @@ for (const [w, h] of sizes) {
   await p.goto(url, { waitUntil: 'load' }); await p.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
   await p.evaluate(() => document.fonts.ready);
   const max = await p.evaluate(() => document.documentElement.scrollHeight - innerHeight);
+  if (firstScreen) await p.waitForTimeout(4500); // the opening plays itself and settles before the first screen is read
   for (let i = 0; i <= stops; i++) {
-    await p.evaluate((y) => scrollTo(0, y), Math.round((max * i) / stops));
+    await p.evaluate((y) => scrollTo(0, y), stops ? Math.round((max * i) / stops) : 0);
     await p.waitForTimeout(700);
     // let entrance animations and fades finish first (up to 3 s, endless loops ignored): measuring mid fade-in called
     // Chicken Munch's MUNCH letters, its Kosher sticker and its menu lines faint when they were not (26 Oct 2026)

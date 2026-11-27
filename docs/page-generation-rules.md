@@ -43,20 +43,20 @@ Sections (line each starts on; read with that offset):
 - 2941: 3ah. A 5 the first time (Tzvi, 20 Nov 2026: "the rules should create a site well enough that it creates a 5/5 the first time")
 - 3025: 3ai. Three decorations at most (Tzvi, 20 Nov 2026: "Do 2 and 3", after "calm the site")
 - 3071: 3aj. From three videos on AI-built sites (Tzvi, 22 Nov 2026: "All 7")
-- 3248: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
-- 3288: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
-- 3383: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
-- 3458: 4. What is reported to the owner instead (content gaps)
-- 3467: 5. How to write
-- 3516: 5a. Lessons from the practice pages
-- 3547: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
-- 3596: 5c. Persuasion, and only the honest kind (page-conversion-review)
-- 3613: 6. Playbooks for the most common businesses
-- 3740: 7. Choosing the three options (automatic page builder only)
-- 3764: 8. Photos, video and the tools
-- 3995: 8a. Ready-made components (21st.dev), added 7 Oct 2026
-- 4065: 9. The scroll sections: what the practice pages become
-- 4101: 10. Open decisions (need Tzvi)
+- 3265: 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
+- 3305: 3al. From Ruben Stom's channel (27 videos, 22 Nov 2026)
+- 3400: 3am. From eight videos on AI-built sites (Tzvi, 25 Nov 2026: "add all ideas that would help our build be better, quicker or more consistent with less mistakes")
+- 3475: 4. What is reported to the owner instead (content gaps)
+- 3484: 5. How to write
+- 3533: 5a. Lessons from the practice pages
+- 3564: 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+- 3613: 5c. Persuasion, and only the honest kind (page-conversion-review)
+- 3630: 6. Playbooks for the most common businesses
+- 3757: 7. Choosing the three options (automatic page builder only)
+- 3781: 8. Photos, video and the tools
+- 4012: 8a. Ready-made components (21st.dev), added 7 Oct 2026
+- 4082: 9. The scroll sections: what the practice pages become
+- 4118: 10. Open decisions (need Tzvi)
 <!-- /contents -->
 
 Written 23 Sep 2026 (Tzvi: "create rules so we can get the best output for users").
@@ -3244,6 +3244,23 @@ is asked of a site published before 22 Nov 2026.
    - Why: Clean Plus's two boxes in the opening, small option cards and hard navy-to-white cut came back in five built
      rounds; each was a structure change that costs minutes in grey boxes and hours in the finished site.
    - Checked by eye at the page-plan judging; the `- fixed:` lines in gen/board/judged.md.
+
+17. **The first screen's photo is checked for a direction of light before the board** (Tzvi, 27 Nov 2026: "Do all 4", on Boxed Israel's lessons).
+   - When: phase 4, each first screen whose photo is a product on a plain ground (check-light-pool prints a ground
+     spread only where a quarter or more of the picture is that ground; a scene has none). It sits beside 3aj.14:
+     3aj.14 asks whether the photo is as bright as the references', this asks whether its light comes from
+     somewhere. Universal for new sites; a site made before it is spared (rules 3a "How a rule is added").
+   - `python scripts/check-light-pool.py <the screen's photo> [--soft]` prints the ground's spread (the brightness
+     range across the ground's own colour) and EVEN under 6: an evenly lit studio ground, no direction of light.
+     For an EVEN photo the build decides before the board, and CONCEPT.md's `- light:` line says it: "re-lit" (before
+     the board, or planned for phase 6 when the pick decides which photo) or "kept even: <why>" (a flat colour-block
+     studio look chosen on purpose, as Milk Bar's pie on red, which measures 1.0). Never a failure: a deliberate flat
+     look the owner or Tzvi chose is not a defect.
+   - Why: Boxed Israel's overhead box on its blue measured 63, level with Levain (68) and Milk Bar (62), so 3aj.14
+     passed; both judges still called it flat in two rounds, and two rounds of code could not answer it. Its ground
+     measures 4.3; the same box with a warm light falling across it, 12.
+   - Checked by `scripts/check-concept.mjs` (Light): on a new site the `- light:` line carries the spreads, and an
+     EVEN screen's "re-lit" or "kept even:".
 
 ## 3ak. From the Create With AI videos (Tzvi, 22 Nov 2026: approved all four)
 

@@ -133,6 +133,12 @@ export function checkConcept(dir) {
     const l = (/^\s*[-*]\s*light\s*:(.*)$/im.exec(s) || [])[1] || '';
     if ((l.match(/\d+(?:\.\d+)?/g) || []).length < 3) problems.push('Light: no "- light: A 41, B 38, C 52; references 55 and 60 (check-light-pool.py product means)" line: each first screen\'s photo beside the two top sites\' (3aj.14)');
   }
+  if (!newer.has('R3aj.17')) {
+    // the light on a plain-ground photo has a direction, or flat light was kept on purpose (rules 3aj.17, 27 Nov 2026)
+    const l = (/^\s*[-*]\s*light\s*:(.*)$/im.exec(s) || [])[1] || '';
+    if (!/spread/i.test(l)) problems.push('Light: the "- light:" line gives no ground spread (check-light-pool.py prints it for a photo on a plain ground; write "spread: none, scene" for a scene) (3aj.17)');
+    else if (/\beven\b/i.test(l) && !/re-?lit|kept even\s*:/i.test(l)) problems.push('Light: an EVEN first screen (no direction of light) says neither "re-lit" nor "kept even: <why>" on the "- light:" line (3aj.17)');
+  }
   if (!newer.has('R3aj.15')) {
     // the signature returns through the page (rules 3aj.15, 26 Nov 2026)
     const t = (/^\s*[-*]\s*thread\s*:(.*)$/im.exec(s) || [])[1] || '';

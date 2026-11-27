@@ -24,7 +24,14 @@ Measured on Burnt, 19 Nov 2026: the flat top-down master, product 39 and ring 40
 A still whose product sits off-centre names its own box in product-boxes.json beside it ({"<file>": [x0, y0, x1, y1]},
 shares of the frame). Inside a named box the product reads the mean of its brighter three quarters, so a design cut
 into it as black recesses is not read as a dark product (20 Nov 2026: Burnt's close iron read 29 from its black flame
-and letters while its steel face was bright)."""
+and letters while its steel face was bright).
+Light with a direction (rules 3aj.17; 27 Nov 2026, Boxed Israel): a product photo on a plain ground also gets its
+ground's spread, the brightness range (95th less 5th percentile, 0 to 100) across the pixels of the ground's own
+colour. An evenly lit studio ground has no direction of light: their overhead box on blue measured 4.3, and both
+judges called it flat in two rounds although its product mean (63) was level with the references' (62, 68); the same
+box with a warm light falling across it measured 12. Under 6 prints EVEN, a note and never a failure: a colour-block
+studio look on purpose (Milk Bar's pie on flat red, 1.0) stays allowed. CONCEPT.md's `- light:` line then says
+"re-lit" or "kept even: <why>" for that screen, decided before the board."""
 import sys
 from pathlib import Path
 
@@ -45,6 +52,20 @@ for a in args:
     p = Path(a)
     files += sorted(f for f in p.iterdir() if f.suffix.lower() in ('.png', '.jpg', '.jpeg', '.webp')) if p.is_dir() else [p]
 luma = lambda im: ImageStat.Stat(im).mean[0] / 2.55
+
+
+def ground_spread(path):
+    """The brightness range across the plain ground (pixels of the outer ring's own colour), or None when the
+    picture has too little plain ground to judge (a scene, not a product on a ground)."""
+    rgb = np.asarray(Image.open(path).convert('RGB').resize((300, max(1, round(300 * Image.open(path).height / Image.open(path).width)))), np.float32)
+    h, w, _ = rgb.shape
+    ring = np.zeros((h, w), bool); ring[:h // 8] = ring[-(h // 8):] = True; ring[:, :w // 10] = ring[:, -(w // 10):] = True
+    chroma = lambda c: c / (c.sum(-1, keepdims=True) + 1e-3)
+    near = np.abs(chroma(rgb) - chroma(np.median(rgb[ring], 0))).sum(-1) < 0.04
+    if near.mean() < 0.25:
+        return None
+    g = rgb[near].mean(-1) / 2.55
+    return float(np.percentile(g, 95) - np.percentile(g, 5))
 bright = lambda im: (lambda a: a[a >= np.percentile(a, 25)].mean() / 2.55)(np.asarray(im, np.float32))
 boxes = lambda f: (lambda j: json.loads(j.read_text(encoding='utf-8')).get(f.name) if j.exists() else None)(f.parent / 'product-boxes.json')
 dark = flat = 0
@@ -66,7 +87,9 @@ for f in files:
     ok_f = ring <= prod * (0.9 if soft else 0.75) or (not soft and ring < 25)
     dark += not ok_p; flat += not ok_f
     word = 'pool' if ok_p and ok_f else 'DARK' if not ok_p else 'FLAT'
-    print(f"{word}  {f.name}: product {prod:.0f}, edges {ring:.0f}")
+    sp = ground_spread(f)
+    spread = '' if sp is None else f", ground spread {sp:.1f}" + (' EVEN (no direction of light: re-light it, or write "kept even: <why>" on the CONCEPT.md light line, 3aj.17)' if sp < 6 else '')
+    print(f"{word}  {f.name}: product {prod:.0f}, edges {ring:.0f}{spread}")
 if dark or flat:
     sys.exit(f'\n{dark} dark product(s), {flat} flat picture(s): light the product itself (never the ground round it), '
              'and let the edges fall off toward dark (rule 3aa.33), or --soft for a bright brand')

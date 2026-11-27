@@ -3643,6 +3643,16 @@
    "status": "built"
   },
   {
+   "id": "R3aj.17",
+   "rule": "Each first screen's photo on a plain ground is checked for a direction of light (ground spread); an EVEN one is re-lit or kept even with the reason",
+   "how": [
+    "GEN"
+   ],
+   "built_by": "Phase 4: python scripts/check-light-pool.py <photo> prints the ground spread; CONCEPT.md - light: line",
+   "confirmed_by": "node scripts/check-concept.mjs <build> (Light)",
+   "status": "built"
+  },
+  {
    "id": "R3ak.1",
    "rule": "A choice (3ai.2): live art drawn in code behind the words, seeded from the business's name, quieter on phones, still under reduced motion",
    "how": [
