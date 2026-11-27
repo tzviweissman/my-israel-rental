@@ -61,13 +61,14 @@ import SessionsEditor, { cleanSessions } from './SessionsEditor';
 import { SUBCATEGORIES, subcategoryLabel } from '../../lib/categories';
 import AvailabilityStep, { DAYS } from '../marketplace/AvailabilityStep';
 import CategoryPicker from '../marketplace/CategoryPicker';
+import ServiceCard from '../marketplace/ServiceCard';
 import PhoneInput from '../common/PhoneInput';
 import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../../utils/whatsappLink';
 
 const MAX_PHOTOS = 6;
 
 export default function EditListingModal({ gig, API, token, onClose, onSaved }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isStore = gig.gig_type === 'store';
   const originals = (isStore ? gig.products : gig.tiers) || [];
 
@@ -717,6 +718,39 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
             </div>
           </div>
 
+          {/* How the listing's card looks on the boards, beside the switch
+              that changes it, so the owner sees the result before saving
+              (Tzvi, 27 Nov 2026). Only when the business has a logo. */}
+          {gig.business_logo_url && (
+            <div className="rounded-xl border p-3 space-y-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="edit-listing-card-look">
+              <p className="text-xs font-semibold text-gray-700">{t('editListing.cardLook', 'How your card looks')}</p>
+              <div className="flex items-start gap-3">
+                <div className="w-36 shrink-0 pointer-events-none" aria-hidden="true">
+                  <ServiceCard
+                    gig={{ ...gig, title: title || gig.title, logo_cover: logoCover,
+                      provider: { ...(gig.provider || {}), name: gig.business_name || gig.provider?.name, logo_url: gig.business_logo_url } }}
+                    i18n={i18n}
+                    t={t}
+                    onClick={() => {}}
+                  />
+                </div>
+                <label className="flex items-start gap-2 min-h-[44px] cursor-pointer text-sm">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={logoCover}
+                    onChange={() => setLogoCover((v) => !v)}
+                    data-testid="edit-listing-logo-cover"
+                  />
+                  <span>
+                    <span className="block font-semibold text-gray-900">{t('editListing.logoCover', 'Use my logo as the card picture')}</span>
+                    <span className="block text-[11px] text-gray-500">{t('editListing.logoCoverHint', 'Customers see your logo on this listing\'s card instead of your first photo.')}</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+          )}
+
           {/* Availability. Weekly hours only mean something for an
               appointment listing, date booking only for a deliverable one,
               so each shows for its own type, as in the wizard. */}
@@ -747,22 +781,6 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                 <span>
                   <span className="block font-semibold text-gray-900">{t('editListing.dateBooking', 'Let customers pick a date')}</span>
                   <span className="block text-[11px] text-gray-500">{t('editListing.dateBookingHint', 'Customers choose the day they want the job done when they book.')}</span>
-                </span>
-              </label>
-            )}
-            {gig.business_logo_url && (
-              <label className="flex items-start gap-2 min-h-[44px] cursor-pointer text-sm">
-                <input
-                  type="checkbox"
-                  className="mt-1"
-                  checked={logoCover}
-                  onChange={() => setLogoCover((v) => !v)}
-                  data-testid="edit-listing-logo-cover"
-                />
-                <img src={gig.business_logo_url} alt="" className="w-10 h-10 rounded-lg object-contain border border-gray-200 bg-white shrink-0" />
-                <span>
-                  <span className="block font-semibold text-gray-900">{t('editListing.logoCover', 'Use my logo as the card picture')}</span>
-                  <span className="block text-[11px] text-gray-500">{t('editListing.logoCoverHint', 'Customers see your logo on this listing\'s card instead of your first photo.')}</span>
                 </span>
               </label>
             )}

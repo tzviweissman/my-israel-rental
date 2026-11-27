@@ -978,10 +978,13 @@ async def my_gigs(user=Depends(verify_token)):
     out = [_clean_gig(g) async for g in cursor]
     # Each listing's business logo, so the editor can offer "use my logo as
     # the card picture" only where there is a logo to use.
-    logos = {b["_id"]: b.get("logo_url") async for b in db.businesses.find(
-        {"_id": {"$in": list({g.get("business_id") for g in out if g.get("business_id")})}}, {"logo_url": 1})}
+    # Its name too, for the editor's preview of the card.
+    bizs = {b["_id"]: b async for b in db.businesses.find(
+        {"_id": {"$in": list({g.get("business_id") for g in out if g.get("business_id")})}}, {"logo_url": 1, "name": 1})}
     for g in out:
-        g["business_logo_url"] = logos.get(g.get("business_id")) or None
+        b = bizs.get(g.get("business_id")) or {}
+        g["business_logo_url"] = b.get("logo_url") or None
+        g["business_name"] = b.get("name") or None
     prov = await db.marketplace_providers.find_one({"user_id": user["user_id"]})
     return {
         "gigs": out,
