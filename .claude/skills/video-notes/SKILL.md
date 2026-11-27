@@ -1,6 +1,6 @@
 ---
 name: video-notes
-description: Pull the transcript of a YouTube (or other web) video and turn it into usable notes - what is worth acting on, what to discount, and what it means for the current project. Use whenever asked to watch, summarise, or extract from a video, or when a video URL is shared.
+description: Watch a YouTube (or other web) video properly - its words AND its pictures (every cut on one timestamped sheet, the pace, bursts for motion, words lined up with shots) - and any website it shows, recorded live with what pins, follows or moves measured; then turn it into usable notes - what is worth acting on, what to discount, and what it means for the current project. Use whenever asked to watch, summarise, study or learn from a video or a set of websites, or when a video URL is shared.
 ---
 
 # video-notes
@@ -18,6 +18,81 @@ Search the project's notes for each video's ID before opening anything
 On 25 Nov 2026 two of eight videos had been studied three days earlier,
 and watching them again cost about 10 minutes. For one already studied,
 read the old notes and only look for what they missed.
+
+## The watching method (27 Nov 2026): words, then every picture, then the live thing
+
+Learned on the Awwwards study (`docs/inspo/awwwards-2026-11-27`): stills taken every screen missed what mattered
+most - how each site's opening arrives beat by beat, and what stays pinned or travels while the page scrolls.
+Watching means three passes, each with its own tool. A browser seek-and-screenshot (below) is the fallback, not the
+method.
+
+**1. The words.** The transcript (sections below). Keep its timestamps: `yt-dlp --write-auto-subs` gives a `.vtt`.
+
+**2. Every picture, on sheets.** For any video where the value is in what it shows (design, UI, websites, ads,
+films, before and after), get the file and let ffmpeg do the looking:
+
+- Ask the user once per batch before downloading ("I'll download these N videos, about X MB each, to the
+  scratchpad to read their frames - OK?"), then
+  `yt-dlp -f "bv*[height<=720]+ba/b[height<=720]" -o <scratchpad>/<id>.mp4 <url>`. Never into the repo.
+- `node scripts/video-frames.mjs <video> <outdir> --subs <id>.en.vtt` gives:
+  - `cuts.jpg`: one frame at every cut, stamped with its time. The whole edit on one sheet, so nothing between your
+    samples is missed.
+  - `cuts.txt`: the number of shots and the average shot length. An ad's pace, measured, not guessed.
+  - `beats.md`: each shot beside the words said during it. Read the narration and the picture together: the value
+    is usually where they disagree or where the words go vague.
+- **Motion needs a burst, never one frame:** `--burst 12.5,40` gives 12 frames at 12 a second from each time, in
+  one row. That is how to tell a fade from a wipe, a pin from a slide, a word-by-word reveal from a cut.
+- For a screen recording with few cuts, add `--every 2` (a frame every 2 s).
+
+**3. The live thing.** When a video shows a website (a redesign, an award site, a competitor), a recording of it
+hides how it is built. Record it yourself:
+`node scripts/watch-site.mjs <outdir> <url> [more]` (or `--list <file of "name url">`). For each site it records 8 s
+of the untouched opening, a slow mouse circle, then a slow scroll, and writes:
+- `<name>-opening.jpg`: the opening, two frames a second, stamped.
+- `<name>-mouse.jpg`: did anything follow the pointer?
+- `<name>-scroll.jpg`: the scroll, one frame a second.
+- `summary.json`: what FOLLOWS (stays on screen while the page moves), what moves at its OWN SPEED (parallax), and
+  what slides SIDEWAYS, FADES, GROWS or UNMASKS. Measured against where most of the page went, so it works on
+  smooth-scroll sites too.
+
+The counts are hints. Cookie bars, menus and loaders also "follow", so confirm each one on the scroll sheet before
+reporting it. To look at one moment of a recorded site, run `video-frames.mjs` on its `run.webm` with `--burst`.
+
+**What to write down while looking**, by kind:
+- **A website or UI:**
+  - the opening as a timeline ("0-1 s plain ground, name only; 1.5 s film fades in under it; 3 s menu slides up"),
+    and how long until it is usable;
+  - what the first screen finally holds;
+  - what follows along or pins while scrolling;
+  - how each section hands over to the next (hard edge, overlap, wipe, colour change, a shared object);
+  - what reacts to the mouse;
+  - how the page ends.
+- **An ad or a film:**
+  - what is on screen in the first second (the hook);
+  - shots and pace (`cuts.txt`);
+  - when the product first appears and how big;
+  - when each line of text appears and for how long;
+  - the last frame and its call to action.
+- **A talking head:** check one frame. If there is no screen content, the transcript is the video.
+
+**Across many videos or sites, count.** Say "17 of 20" with the names, not "most". Measure what can be measured (cut
+rate, heading sizes, what pins) before turning a pattern into a rule: on 27 Nov a gap that looked obvious by eye
+(our headings too small) was wrong once measured. Put our own work through the same tools beside them, so the
+comparison is like for like.
+
+**Mark every claim** as measured, frame-verified (name the sheet and time) or narration only.
+
+**Keep it:** frames worth keeping go to `docs/inspo/<topic-date>/` under descriptive names, with a README of the
+notes. Site pictures under `docs/inspo` must be tagged in `docs/inspo/by-look.tsv` (or their folder skipped in
+`build-inspo-by-look.mjs`), or the commit check refuses them.
+
+**Traps learned on 27 Nov 2026:**
+- A site that scrolls itself (it moves the page by transform, so `scrollY` stays 0) fooled a "stop when the scroll
+  stops" loop into quitting after four frames. Stop when the *picture* stops changing.
+- A port you start a server on may already be taken by another session's server. Read its first line before
+  trusting what it serves.
+- ffmpeg's `drawtext` crashes without a fontconfig file on Windows. Run it from `C:/Windows/Fonts` with
+  `fontfile=arial.ttf`, as both scripts do.
 
 ## Before anything else: check tab visibility
 
@@ -177,6 +252,9 @@ Mark quotes obtained this way as caption-derived when precision matters.
 Network Access and hangs until timeout.)
 
 ## Frames — when to spend them
+
+(In the browser, for when the file cannot be downloaded. With the file, use the watching method at the top:
+every cut on one sheet beats any number of seeks.)
 
 Once the tab is visible, seeking and screenshotting works and is often
 the difference between a good note and a wrong one. On this backlog,
