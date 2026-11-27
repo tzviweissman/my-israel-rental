@@ -149,3 +149,4 @@ regardless, per the brief.
 should read and extend this file rather than re-reading every report.
 treat it as used and do not repeat it.
 which is a different report type). Flagged as documentation drift, same as the
+2026-11-27 - recognition heuristic - service cards on the Services board and home (`ServiceCard.jsx`, `Services.jsx:435`)
