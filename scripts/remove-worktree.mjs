@@ -4,6 +4,8 @@
  *   node scripts/remove-worktree.mjs <path-to-worktree>     remove that one
  *   node scripts/remove-worktree.mjs --stale                list the copies whose work is already on main (deletes nothing)
  *   node scripts/remove-worktree.mjs --stale --yes          remove all of those
+ *   node scripts/remove-worktree.mjs --report               every copy, biggest first: size, last commit, unsaved changes (27 Nov 2026)
+ *   node scripts/remove-worktree.mjs <path> --discard       remove a copy even with unsaved changes (they are lost; its commits stay on its branch)
  *
  * setup-worktree.mjs links node_modules, frontend/node_modules and backend/.venv to the main checkout's own folders,
  * and older copies were linked by hand. Deleting a worktree the ordinary way can follow such a link and empty the
@@ -96,14 +98,64 @@ if (args.includes('--stale')) {
   process.exit(failed ? 1 : 0);
 }
 
+// Bytes on disk, not following links (a linked node_modules belongs to the main checkout).
+function size(dir) {
+  let total = 0;
+  const stack = [dir];
+  while (stack.length) {
+    const d = stack.pop();
+    let names;
+    try { names = readdirSync(d); } catch { continue; }
+    for (const n of names) {
+      const p = join(d, n);
+      let st;
+      try { st = lstatSync(p); } catch { continue; }
+      if (st.isSymbolicLink()) continue;
+      if (st.isDirectory()) stack.push(p);
+      else total += st.size;
+    }
+  }
+  return total;
+}
+
+if (args.includes('--report')) {
+  // Every copy, biggest first: its size, when it was last touched, and what would be lost by deleting it.
+  const rows = [];
+  for (const w of worktrees().filter((x) => x.path !== main)) {
+    if (!existsSync(w.path)) continue;
+    const changed = git('status --porcelain', w.path).split('\n').filter(Boolean);
+    let ahead = 0;
+    try { ahead = Number(git('rev-list --count origin/main..HEAD', w.path)); } catch { /* no main to compare */ }
+    let last = '';
+    try { last = git('log -1 --format=%cs', w.path); } catch { /* no commits */ }
+    rows.push({ ...w, gb: size(w.path) / 1e9, changed, ahead, last });
+  }
+  rows.sort((a, b) => b.gb - a.gb);
+  for (const r of rows) {
+    console.log(`\n${r.gb.toFixed(1).padStart(5)} GB  ${r.path}${r.branch ? ` [${r.branch}]` : ''}  last commit ${r.last || '-'}`);
+    if (r.ahead) console.log(`          ${r.ahead} commit(s) not on main (kept on the branch if the copy is deleted)`);
+    if (r.changed.length) {
+      console.log(`          ${r.changed.length} unsaved change(s), lost if deleted:`);
+      for (const c of r.changed.slice(0, 5)) console.log(`            ${c}`);
+      if (r.changed.length > 5) console.log(`            ... and ${r.changed.length - 5} more`);
+    }
+  }
+  const total = rows.reduce((s, r) => s + r.gb, 0);
+  console.log(`\n${rows.length} copies, ${total.toFixed(1)} GB. Delete one, unsaved changes and all: node scripts/remove-worktree.mjs <path> --discard`);
+  process.exit(0);
+}
+
 const target = args[0] && resolve(args[0]);
 if (!target) {
-  console.log('Usage: node scripts/remove-worktree.mjs <path> | --stale [--yes]');
+  console.log('Usage: node scripts/remove-worktree.mjs <path> [--discard] | --stale [--yes] | --report');
   process.exit(2);
 }
 const info = worktrees().find((w) => w.path === target);
 if (!info) { console.log(`Not a worktree of this repo: ${target}`); process.exit(1); }
 const no = why_not(target, info);
-// A single named copy may have commits not on main (its branch is kept by git); only uncommitted work blocks it.
-if (no && no !== 'has commits that are not on main') { console.log(`Not removed: ${no}.`); process.exit(1); }
+// A single named copy may have commits not on main (its branch is kept by git); only uncommitted work blocks it,
+// unless --discard says to throw that work away (asked for by Tzvi after seeing --report).
+const discard = args.includes('--discard') && no === 'has changes that are not committed';
+if (discard) console.log(`Discarding ${git('status --porcelain', target).split('\n').filter(Boolean).length} unsaved change(s) in ${target}`);
+if (no && !discard && no !== 'has commits that are not on main') { console.log(`Not removed: ${no}.`); process.exit(1); }
 process.exit(remove(target) ? 0 : 1);
