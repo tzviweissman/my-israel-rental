@@ -638,3 +638,7 @@ Main moved on after PR #24 was opened (the sign-up work stream was rewritten), s
 - [Data] Live price check: 8 rentals with no price and 7 nightly prices that read like a monthly rent; links in 2026-11-27-price-check.md. First seen 27 Nov. Worth a call to the owners.
 - (info, audit tooling) `audit-setup.sh` does not save the API's throwaway `JWT_SECRET`, so backend tests run in another shell get 401 (52 failed, 22 errors). 27 Nov.
 - (info) The live price check reached myisraelrental.com tonight; the nightly prompt forbids fetching it while the site-audit skill asks for it. Needs Tzvi to pick one. 27 Nov.
+
+## UI audit of 28 Nov 2026
+- [Low] Listing editor, "How your card looks": the preview card was a hidden button keyboard users could still Tab onto (`EditListingModal.jsx:728`, from 62d53df). First seen 28 Nov (2026-11-28-ui-audit.md). Fixed 28 Nov, 42c872a8 (branch claude/sweet-knuth-02cnf9; on this branch 9c70119f).
+- Still open: service cards with no business lead with "Provider" (27 Nov, seen again today on the demo listings); test-i18n-parity's 3 checks fail on main (`browse.*`, `wizard.pickCategory`, fixes on the audit merge branches).
