@@ -149,3 +149,4 @@ regardless, per the brief.
 should read and extend this file rather than re-reading every report.
 treat it as used and do not repeat it.
 which is a different report type). Flagged as documentation drift, same as the
+2026-11-28 - picture superiority effect (proposal) - listing editor's logo-as-card-picture switch (EditListingModal.jsx)
