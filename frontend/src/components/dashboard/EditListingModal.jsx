@@ -725,7 +725,9 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
             <div className="rounded-xl border p-3 space-y-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="edit-listing-card-look">
               <p className="text-xs font-semibold text-gray-700">{t('editListing.cardLook', 'How your card looks')}</p>
               <div className="flex items-start gap-3">
-                <div className="w-36 shrink-0 pointer-events-none" aria-hidden="true">
+                {/* inert, not aria-hidden: the card is a <button>, and
+                    aria-hidden left it in the Tab order unannounced. */}
+                <div className="w-36 shrink-0 pointer-events-none" inert>
                   <ServiceCard
                     gig={{ ...gig, title: title || gig.title, logo_cover: logoCover,
                       provider: { ...(gig.provider || {}), name: gig.business_name || gig.provider?.name, logo_url: gig.business_logo_url } }}
