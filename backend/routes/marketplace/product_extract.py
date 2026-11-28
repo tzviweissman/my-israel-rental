@@ -691,29 +691,38 @@ async def lookup_business_details(request: Request, place_id: str, lang: str = "
 # so what comes back is whatever is public; the owner checks it either way.
 # ---------------------------------------------------------------------------
 _PAGE_BYTES = 1_500_000
+_JSON_BYTES = 5_000_000  # a shop's published product list (250 Shopify products with descriptions run to a few MB)
 
 
 async def _fetch(url: str) -> tuple[str, str]:
     """One public page: (its HTML, the address it ended on). Every hop is checked to be a public host before it
     is fetched, so nothing on our own network can be reached through this. ("", url) when it cannot be read."""
+    import asyncio
+
     import httpx
 
     from utils.helpers import _is_public_ical_url
     headers = {"User-Agent": "Mozilla/5.0 (compatible; MyIsraelRentalBot/1.0)", "Accept-Language": "he,en;q=0.8"}
     async with httpx.AsyncClient(timeout=10, follow_redirects=False, headers=headers) as http:
         for _ in range(4):
-            if not _is_public_ical_url(url):
+            # The check resolves the host with a blocking DNS lookup: off the event loop, or one slow domain stalls
+            # every request on the server (11 and 13 Nov 2026 code reviews).
+            if not await asyncio.to_thread(_is_public_ical_url, url):
                 return "", url
-            r = await http.get(url)
-            if r.is_redirect and r.headers.get("location"):
-                url = str(r.url.join(r.headers["location"]))
-                continue
-            break
-        else:
-            return "", url
-    if r.status_code >= 400 or "html" not in r.headers.get("content-type", ""):
+            async with http.stream("GET", url) as r:
+                if r.is_redirect and r.headers.get("location"):
+                    url = str(r.url.join(r.headers["location"]))
+                    continue
+                if r.status_code >= 400 or "html" not in r.headers.get("content-type", ""):
+                    return "", url
+                # At most _PAGE_BYTES is read: a huge or endless page must not fill the server's memory.
+                buf = bytearray()
+                async for chunk in r.aiter_bytes():
+                    buf += chunk
+                    if len(buf) >= _PAGE_BYTES:
+                        break
+                return bytes(buf[:_PAGE_BYTES]).decode(r.encoding or "utf-8", errors="replace"), str(r.url)
         return "", url
-    return r.text[:_PAGE_BYTES], str(r.url)
 
 
 def _meta(page: str, name: str) -> str:
@@ -876,18 +885,28 @@ def _ld_products(page: str, base: str) -> list[dict[str, Any]]:
 
 async def _fetch_json(url: str) -> Any:
     """A public JSON address (a shop's own product list), or None. Same public-host check as _fetch."""
+    import asyncio
+
     import httpx
 
     from utils.helpers import _is_public_ical_url
-    if not _is_public_ical_url(url):
+    # The check resolves the host with a blocking DNS lookup: off the event loop, or one slow domain stalls every
+    # request on the server (the same fix as _fetch, 12 Nov 2026 code review; found again here 15 Nov).
+    if not await asyncio.to_thread(_is_public_ical_url, url):
         return None
     try:
         async with httpx.AsyncClient(timeout=10, follow_redirects=False,
                                      headers={"User-Agent": "Mozilla/5.0 (compatible; MyIsraelRentalBot/1.0)"}) as http:
-            r = await http.get(url)
-        if r.status_code != 200:
-            return None
-        return r.json()
+            async with http.stream("GET", url) as r:
+                if r.status_code != 200:
+                    return None
+                # At most _JSON_BYTES is read: a huge or endless reply must not fill the server's memory.
+                buf = bytearray()
+                async for chunk in r.aiter_bytes():
+                    buf += chunk
+                    if len(buf) > _JSON_BYTES:
+                        return None
+        return json.loads(bytes(buf))
     except Exception:  # noqa: BLE001 - not a shop that publishes one
         return None
 
@@ -1067,7 +1086,9 @@ def _shop_facts(fields: dict, meta: dict) -> None:
 def _clean_catalog(rows: list[dict[str, Any]], base: str) -> list[dict[str, Any]]:
     """A shop's own list as form rows: the same row rules as the readers, each with its own photos."""
     import html as html_mod
-    rows = [r for r in rows if isinstance(r.get("name"), str) and r["name"].strip()]
+    # the same test _rows drops a row by (the name as read, stripped), or _rows drops one this keeps and every later
+    # product gets the photos of the one before it (15 Nov 2026 code review)
+    rows = [r for r in rows if isinstance(r.get("name"), str) and html_mod.unescape(r["name"]).strip()]
     out = _rows(json.dumps({"products": [{
         **r, "name": html_mod.unescape(r["name"]), "description": "",  # the whole text is set below
     } for r in rows]}), limit=SHOP_PRODUCTS)

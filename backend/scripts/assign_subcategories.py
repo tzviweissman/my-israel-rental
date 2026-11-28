@@ -16,8 +16,10 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 
 if "--live" in sys.argv:  # the production database, read from Railway like scripts/live-overview.py (run where the CLI is linked)
+    import shutil
     import subprocess
-    _kv = subprocess.run(["railway", "variables", "--service", "my-israel-rental Backend", "--kv"], capture_output=True, text=True, shell=True).stdout
+    # shutil.which finds railway.cmd on Windows; shell=True with a list runs only "railway" on Mac and Linux (code review 20 Nov 2026).
+    _kv = subprocess.run([shutil.which("railway") or "railway", "variables", "--service", "my-israel-rental Backend", "--kv"], capture_output=True, text=True).stdout
     for _k in ("MONGO_URL", "DB_NAME"):
         os.environ[_k] = next((ln.split("=", 1)[1] for ln in _kv.splitlines() if ln.startswith(_k + "=")), "")
         if not os.environ[_k]:

@@ -186,6 +186,20 @@ def test_a_picture_too_big_for_cloudinary_is_shrunk_and_sent():
     assert res["url"].endswith("/a.jpg")
 
 
+def test_a_picture_with_too_many_pixels_is_not_decoded():
+    """A small file can hold a huge picture: 12000x12000 took 772 MB to shrink."""
+    import io
+
+    import pytest
+    from PIL import Image
+
+    import utils.cloud_storage as cs
+    png = io.BytesIO()
+    Image.new("1", (8000, 6000)).save(png, "PNG")
+    with pytest.raises(ValueError):
+        cs.shrink_picture(png.getvalue())
+
+
 def test_what_the_reader_returns_is_tidied():
     """A shop that also caters is still a shop; a long title ends on a whole word; "1:00–3:00" is "1:00 to 3:00"."""
     import asyncio
@@ -286,3 +300,13 @@ def test_woocommerce_variations_are_sizes():
                                        {"name": "Large", "price": 90.0, "in_stock": True}]
     assert rows["Cake"]["price"] == 90 and rows["Cake"]["in_stock"] is True
     assert rows["Card"]["options"] == [] and rows["Card"]["price"] == 10
+
+
+def test_shop_list_photos_stay_on_their_product():
+    """A product with no real name (an entity like &nbsp;) is dropped without moving the next product's photos."""
+    from routes.marketplace.product_extract import _clean_catalog
+    rows = [{"name": "&nbsp;", "price": "1", "photos": ["https://c.com/a.jpg"]},
+            {"name": "Cheese Board", "price": "180", "photos": ["https://c.com/x1.jpg"]},
+            {"name": "Fruit Board", "price": "150", "photos": ["https://c.com/x2.jpg"]}]
+    assert [(r["name"], r["photos"]) for r in _clean_catalog(rows, "https://s.com/")] == [
+        ("Cheese Board", ["https://c.com/x1.jpg"]), ("Fruit Board", ["https://c.com/x2.jpg"])]

@@ -126,7 +126,7 @@ export default function ItemSales({ API, auth, businessId, params, periodKey, t,
 
       <div className="inline-flex rounded-full border p-0.5 mb-3" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('items.order', 'Order')}>
         {['best', 'slow'].map((k) => (
-          <button key={k} type="button" onClick={() => setOrder(k)} aria-pressed={order === k} className="px-3 min-h-[40px] rounded-full text-xs font-semibold"
+          <button key={k} type="button" onClick={() => setOrder(k)} aria-pressed={order === k} className="px-3 min-h-[44px] rounded-full text-xs font-semibold"
             style={order === k ? { background: 'var(--ink)', color: 'var(--action-ink, #fff)' } : { color: 'var(--brand-muted)' }} data-testid={`items-order-${k}`}>
             {k === 'best' ? t('items.best', 'Best sellers first') : t('items.slow', 'Slowest first')}
           </button>
@@ -151,9 +151,9 @@ export default function ItemSales({ API, auth, businessId, params, periodKey, t,
                 <Stat label={t('items.orders', 'Orders')} value={r.orders} />
                 <Stat label={t('items.sales', 'Sales')} value={money(r.revenue, r.currency)} />
                 <Stat label={t('items.margin', 'Margin each')}
-                  value={r.margin == null ? '–' : `${r.margin < 0 ? '-' : ''}${money(Math.abs(r.margin), r.currency)} (${r.margin_pct}%)`}
+                  value={r.margin == null ? '-' : `${r.margin < 0 ? '-' : ''}${money(Math.abs(r.margin), r.currency)} (${r.margin_pct}%)`}
                   tone={r.margin != null && r.margin < 0 ? 'var(--error-text)' : undefined} />
-                <Stat label={t('items.profit', 'Profit')} value={r.profit == null ? '–' : `${r.profit < 0 ? '-' : ''}${money(Math.abs(r.profit), r.currency)}`}
+                <Stat label={t('items.profit', 'Profit')} value={r.profit == null ? '-' : `${r.profit < 0 ? '-' : ''}${money(Math.abs(r.profit), r.currency)}`}
                   tone={r.profit != null && r.profit < 0 ? 'var(--error-text)' : undefined} />
               </div>
               {r.listed && r.price ? <CostInput r={r} onSave={save} t={t} /> : <span />}

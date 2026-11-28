@@ -44,7 +44,7 @@ export default function MessagePreview({ loaded, templates, note, msgKey = 'orde
   const line = WITH_LINE.has(msgKey) ? (note || '').trim() : '';
   // The first payment link rides on the order-confirmed text (order_texts._pay_line).
   const pay = msgKey === 'order_confirmed' && loaded.payment_links?.[0];
-  const payLine = pay ? `${he ? 'לתשלום ב' : 'Pay with '}${pay.label}: ${pay.url}` : '';
+  const payLine = pay ? `${he ? `לתשלום ב${/^[\u0590-\u05FF]/.test(pay.label || '') ? '' : '-'}` : 'Pay with '}${pay.label}: ${pay.url}` : '';
   const customerText = NO_LINK.has(msgKey) ? words : `${words} myisraelrental.com/orders/track/a1B2c3`;
   const ownerText = he
     ? `הזמנה חדשה #1042 מדנה, 050-123-4567\n1x ${item}\nמשלוח לרחוב הרצל 5 · מחר 12:00\nאישור או דחייה: myisraelrental.com/orders/owner/…`

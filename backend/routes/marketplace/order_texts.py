@@ -294,7 +294,9 @@ def _pay_line(o: dict[str, Any], biz: dict[str, Any], lang: str) -> str:
     if not links:
         return ""
     label = links[0].get("label") or ""
-    return "\n" + ("לתשלום ב" if lang == "he" else "Pay with ") + f"{label}: {links[0]['url']}"
+    # Hebrew joins the prefix to a Latin name with a hyphen ("ב-Bit"), as the rest of the site writes it.
+    lead = ("לתשלום ב" + ("" if label[:1] and "\u0590" <= label[0] <= "\u05ff" else "-")) if lang == "he" else "Pay with "
+    return "\n" + lead + f"{label}: {links[0]['url']}"
 
 
 def _biz_name(biz: dict[str, Any], lang: str) -> str:

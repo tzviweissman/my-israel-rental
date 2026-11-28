@@ -147,3 +147,14 @@ def test_email_look_is_the_businesss_own_only_when_turned_on():
     html = email_mod._wrap("<p>x</p>", brand=dark)
     assert "Blazin Boards" in html and "via myisraelrental" in html and "logo.png" in html
     assert oe.clean_look({"accent": "javascript:1", "logo": "huge"})["accent"] == oe.DEFAULT_ACCENT
+
+
+def test_email_drops_the_texts_pointer_at_a_link():
+    # The texts end "Your tracking link:" because the link follows; an email's link is its button.
+    vals = {"order": "#1042", "business": "Bakery", "service": "Haircut"}
+    assert oe.email_line({}, "order_confirmed", "en", vals) == "Your order #1042 from Bakery is confirmed."
+    assert oe.email_line({}, "order_confirmed", "he", {**vals, "business": "מאפייה"}) == "ההזמנה שלך #1042 ממאפייה אושרה."
+    assert oe.email_line({}, "booking_declined", "en", vals) == "Sorry, your booking for Haircut could not be accepted this time."
+    assert oe.email_line({}, "order_declined", "en", vals) == "Sorry, Bakery can't take your order #1042 this time."
+    own = {"order_settings": {"text_templates": {"order_confirmed": {"en": "Track it:"}}}}
+    assert oe.email_line(own, "order_confirmed", "en", vals) == "Track it:"   # nothing else to keep: left alone

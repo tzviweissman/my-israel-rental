@@ -170,7 +170,8 @@
     var a = document.createElement('a');
     a.href = 'https://wa.me/' + m[1]; a.target = '_blank'; a.rel = 'noopener';
     a.textContent = he() ? 'כתבו לנו בוואטסאפ' : 'Message us on WhatsApp';
-    a.style.cssText = 'color:inherit;text-decoration:underline;font:inherit;font-size:inherit !important;letter-spacing:inherit';
+    // a 44px tap target on a phone (padding) without moving the line (the same negative margin)
+    a.style.cssText = 'color:inherit;text-decoration:underline;font:inherit;font-size:inherit !important;letter-spacing:inherit;display:inline-block;padding:14px 0;margin:-14px 0';
     p.appendChild(a);
     send.parentNode.insertBefore(p, send.nextSibling);
   }
